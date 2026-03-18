@@ -6,6 +6,9 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { resolveWorkspaceForUser } from '@/lib/portal'
 
+const UNLINKED_ACCOUNT_MESSAGE =
+  'This email is not linked to a Renovo workspace yet. Ask an administrator to set up your access.'
+
 export default function LoginPage() {
   const router = useRouter()
 
@@ -24,7 +27,14 @@ export default function LoginPage() {
       if (!session?.user) return
 
       const workspace = await resolveWorkspaceForUser(session.user.id)
-      router.replace(workspace.destination || '/')
+
+      if (!workspace.destination) {
+        await supabase.auth.signOut()
+        setMessage(UNLINKED_ACCOUNT_MESSAGE)
+        return
+      }
+
+      router.replace(workspace.destination)
     }
 
     void checkSession()
@@ -59,7 +69,15 @@ export default function LoginPage() {
     }
 
     const workspace = await resolveWorkspaceForUser(userId)
-    router.replace(workspace.destination || '/')
+
+    if (!workspace.destination) {
+      await supabase.auth.signOut()
+      setMessage(UNLINKED_ACCOUNT_MESSAGE)
+      setLoadingPassword(false)
+      return
+    }
+
+    router.replace(workspace.destination)
     router.refresh()
   }
 
@@ -76,11 +94,23 @@ export default function LoginPage() {
       email: email.trim(),
       options: {
         emailRedirectTo: typeof window === 'undefined' ? undefined : `${window.location.origin}/`,
+        shouldCreateUser: false,
       },
     })
 
     if (error) {
-      setMessage(`Error: ${error.message}`)
+      const normalizedMessage = error.message.toLowerCase()
+
+      if (
+        normalizedMessage.includes('signups not allowed') ||
+        normalizedMessage.includes('user not found') ||
+        normalizedMessage.includes('otp')
+      ) {
+        setMessage(UNLINKED_ACCOUNT_MESSAGE)
+      } else {
+        setMessage(`Error: ${error.message}`)
+      }
+
       setLoadingMagicLink(false)
       return
     }
