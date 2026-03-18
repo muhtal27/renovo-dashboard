@@ -1181,6 +1181,10 @@ export default function HomePage() {
     router.prefetch(`/cases/${selectedCaseId}`)
   }, [router, selectedCaseId])
 
+  if (authLoading && !operator?.authUser) {
+    return <PublicHome />
+  }
+
   if (authLoading) {
     return (
       <main className="app-grid min-h-screen px-5 py-6 text-stone-900 md:px-8 md:py-8">

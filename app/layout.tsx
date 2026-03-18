@@ -10,10 +10,19 @@ const siteUrl =
 
 export const metadata: Metadata = {
   metadataBase: siteUrl ? new URL(siteUrl) : undefined,
-  title: 'Renovo Dashboard',
-  description: 'Operations dashboard for Renovo',
+  title: 'Renovo AI | Lettings Operations Platform',
+  description:
+    'Renovo AI unifies operator workflows, landlord visibility, tenant communication, and contractor coordination in one lettings operations platform.',
   alternates: {
     canonical: '/',
+  },
+  openGraph: {
+    title: 'Renovo AI | Lettings Operations Platform',
+    description:
+      'A practical operating system for residential lettings teams handling communication, maintenance, rent, and reporting in one place.',
+    url: siteUrl,
+    siteName: 'Renovo AI',
+    type: 'website',
   },
 }
 
