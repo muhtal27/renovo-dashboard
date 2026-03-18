@@ -141,6 +141,7 @@ export default function ContractorPortalPage() {
   const [cases, setCases] = useState<CaseRow[]>([])
   const [maintenance, setMaintenance] = useState<MaintenanceRow[]>([])
   const [quotes, setQuotes] = useState<QuoteRow[]>([])
+  const [signingOut, setSigningOut] = useState(false)
   const [caseActionId, setCaseActionId] = useState('')
   const [messageDraft, setMessageDraft] = useState('')
   const [actionLoading, setActionLoading] = useState(false)
@@ -382,6 +383,22 @@ export default function ContractorPortalPage() {
     setActionLoading(false)
   }
 
+  async function handleSignOut() {
+    setSigningOut(true)
+    setActionMessage(null)
+
+    const { error: signOutError } = await supabase.auth.signOut()
+
+    if (signOutError) {
+      setActionMessage(signOutError.message)
+      setSigningOut(false)
+      return
+    }
+
+    router.replace('/login')
+    router.refresh()
+  }
+
   useEffect(() => {
     let cancelled = false
 
@@ -489,9 +506,18 @@ export default function ContractorPortalPage() {
                     Stay on top of assigned jobs, access notes, and quote work in one place
                   </h1>
                 </div>
-                <span className="app-live-pill rounded-full px-3 py-1 text-xs font-medium">
-                  {liveMessage}
-                </span>
+                <div className="flex items-center gap-3">
+                  <span className="app-live-pill rounded-full px-3 py-1 text-xs font-medium">
+                    {liveMessage}
+                  </span>
+                  <button
+                    onClick={() => void handleSignOut()}
+                    disabled={signingOut}
+                    className="app-secondary-button rounded-full px-3.5 py-2 text-sm font-medium disabled:opacity-60"
+                  >
+                    {signingOut ? 'Signing out...' : 'Sign out'}
+                  </button>
+                </div>
               </div>
 
               <p className="mt-4 max-w-3xl text-base leading-7 text-stone-600">

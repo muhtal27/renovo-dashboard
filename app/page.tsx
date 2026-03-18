@@ -266,6 +266,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true)
   const [messagesLoading, setMessagesLoading] = useState(false)
   const [actionLoading, setActionLoading] = useState(false)
+  const [signingOut, setSigningOut] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [actionMessage, setActionMessage] = useState<string | null>(null)
 
@@ -1029,6 +1030,21 @@ export default function HomePage() {
     await patchSelectedCase({ status: 'resolved' }, 'Case marked as resolved.')
   }
 
+  async function handleSignOut() {
+    setSigningOut(true)
+    setActionMessage(null)
+
+    const { error: signOutError } = await supabase.auth.signOut()
+
+    if (signOutError) {
+      setActionMessage(`Error: ${signOutError.message}`)
+      setSigningOut(false)
+      return
+    }
+
+    router.replace('/login')
+    router.refresh()
+  }
 
   useEffect(() => {
     if (!selectedCaseId) return
@@ -1230,6 +1246,13 @@ export default function HomePage() {
                 </p>
               </div>
 
+              <button
+                onClick={handleSignOut}
+                disabled={signingOut}
+                className="app-secondary-button rounded-full px-3.5 py-2 text-sm font-medium disabled:opacity-60"
+              >
+                {signingOut ? 'Signing out...' : 'Sign out'}
+              </button>
             </div>
 
             <Link

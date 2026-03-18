@@ -145,6 +145,7 @@ export default function TenantPortalPage() {
   const [cases, setCases] = useState<CaseRow[]>([])
   const [messages, setMessages] = useState<MessageRow[]>([])
   const [maintenance, setMaintenance] = useState<MaintenanceRow[]>([])
+  const [signingOut, setSigningOut] = useState(false)
   const [actionCaseId, setActionCaseId] = useState('')
   const [updateDraft, setUpdateDraft] = useState('')
   const [actionLoading, setActionLoading] = useState<'update' | 'still_waiting' | 'issue_resolved' | null>(null)
@@ -450,6 +451,22 @@ export default function TenantPortalPage() {
     }
   }, [loadPortalData, router])
 
+  async function handleSignOut() {
+    setSigningOut(true)
+    setActionMessage(null)
+
+    const { error: signOutError } = await supabase.auth.signOut()
+
+    if (signOutError) {
+      setActionMessage(signOutError.message)
+      setSigningOut(false)
+      return
+    }
+
+    router.replace('/login')
+    router.refresh()
+  }
+
   useEffect(() => {
     return () => {
       if (liveMessageTimer.current) {
@@ -520,9 +537,18 @@ export default function TenantPortalPage() {
                     Keep up with your property updates without chasing
                   </h1>
                 </div>
-                <span className="app-live-pill rounded-full px-3 py-1 text-xs font-medium">
-                  {liveMessage}
-                </span>
+                <div className="flex items-center gap-3">
+                  <span className="app-live-pill rounded-full px-3 py-1 text-xs font-medium">
+                    {liveMessage}
+                  </span>
+                  <button
+                    onClick={() => void handleSignOut()}
+                    disabled={signingOut}
+                    className="app-secondary-button rounded-full px-3.5 py-2 text-sm font-medium disabled:opacity-60"
+                  >
+                    {signingOut ? 'Signing out...' : 'Sign out'}
+                  </button>
+                </div>
               </div>
 
               <p className="mt-4 max-w-3xl text-base leading-7 text-stone-600">
