@@ -5,10 +5,10 @@ import { useEffect, useEffectEvent, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   getOperatorLabel,
-  getOperatorProfile,
   getSessionUser,
   type CurrentOperator,
 } from '@/lib/operator'
+import { resolveWorkspaceForUser } from '@/lib/portal'
 import { supabase } from '@/lib/supabase'
 
 type CaseRow = {
@@ -52,6 +52,32 @@ type FollowUpRow = {
   next_action_at: string | null
   waiting_on: WaitingOn | null
   waiting_reason: string | null
+}
+type MaintenancePulseRow = {
+  status: string
+  landlord_approval_required: boolean
+  scheduled_for: string | null
+}
+type CompliancePulseRow = {
+  status: string
+}
+type ViewingPulseRow = {
+  status: string
+  booked_slot: string | null
+}
+type DepositPulseRow = {
+  claim_status: string
+}
+type OperationsPulseState = {
+  maintenanceLive: number
+  maintenanceApproval: number
+  maintenanceScheduled: number
+  complianceRisk: number
+  complianceSoon: number
+  viewingRequested: number
+  viewingBooked: number
+  depositActive: number
+  depositDisputed: number
 }
 type QueueTab =
   | 'all'
@@ -250,6 +276,17 @@ export default function HomePage() {
   const [tab, setTab] = useState<QueueTab>('all')
   const [liveMessage, setLiveMessage] = useState<string | null>(null)
   const [followUpAvailable, setFollowUpAvailable] = useState(true)
+  const [operationsPulse, setOperationsPulse] = useState<OperationsPulseState>({
+    maintenanceLive: 0,
+    maintenanceApproval: 0,
+    maintenanceScheduled: 0,
+    complianceRisk: 0,
+    complianceSoon: 0,
+    viewingRequested: 0,
+    viewingBooked: 0,
+    depositActive: 0,
+    depositDisputed: 0,
+  })
   const operatorUserId = operator?.authUser?.id ?? null
 
   const loadCasesAndUsers = useEffectEvent(async (options?: { preserveLoading?: boolean }) => {
@@ -344,9 +381,74 @@ export default function HomePage() {
     setMessagesLoading(false)
   })
 
+  const loadOperationsPulse = useEffectEvent(async () => {
+    const [
+      maintenanceResponse,
+      complianceResponse,
+      viewingsResponse,
+      depositsResponse,
+    ] = await Promise.all([
+      supabase
+        .from('maintenance_requests')
+        .select('status, landlord_approval_required, scheduled_for')
+        .limit(1000),
+      supabase.from('compliance_records').select('status').limit(1000),
+      supabase.from('viewing_requests').select('status, booked_slot').limit(1000),
+      supabase.from('deposit_claims').select('claim_status').limit(1000),
+    ])
+
+    if (
+      maintenanceResponse.error ||
+      complianceResponse.error ||
+      viewingsResponse.error ||
+      depositsResponse.error
+    ) {
+      return
+    }
+
+    const maintenanceRows = (maintenanceResponse.data || []) as MaintenancePulseRow[]
+    const complianceRows = (complianceResponse.data || []) as CompliancePulseRow[]
+    const viewingRows = (viewingsResponse.data || []) as ViewingPulseRow[]
+    const depositRows = (depositsResponse.data || []) as DepositPulseRow[]
+
+    setOperationsPulse({
+      maintenanceLive: maintenanceRows.filter(
+        (request) => !['completed', 'cancelled'].includes(request.status)
+      ).length,
+      maintenanceApproval: maintenanceRows.filter(
+        (request) =>
+          request.status === 'awaiting_approval' || request.landlord_approval_required
+      ).length,
+      maintenanceScheduled: maintenanceRows.filter(
+        (request) =>
+          ['approved', 'scheduled', 'in_progress'].includes(request.status) &&
+          !!request.scheduled_for
+      ).length,
+      complianceRisk: complianceRows.filter((record) =>
+        ['expired', 'missing'].includes(record.status)
+      ).length,
+      complianceSoon: complianceRows.filter((record) =>
+        ['expiring', 'pending'].includes(record.status)
+      ).length,
+      viewingRequested: viewingRows.filter((request) => request.status === 'requested').length,
+      viewingBooked: viewingRows.filter((request) => !!request.booked_slot).length,
+      depositActive: depositRows.filter((claim) =>
+        !['draft', 'resolved', 'cancelled'].includes(claim.claim_status)
+      ).length,
+      depositDisputed: depositRows.filter((claim) => claim.claim_status === 'disputed').length,
+    })
+  })
+
   const hydrateOperatorProfile = useEffectEvent(async (userId: string) => {
     try {
-      const profile = await getOperatorProfile(userId)
+      const workspace = await resolveWorkspaceForUser(userId)
+
+      if (workspace.destination && workspace.destination !== '/') {
+        router.replace(workspace.destination)
+        return
+      }
+
+      const profile = workspace.operatorProfile
 
       setOperator((current) => {
         if (!current?.authUser || current.authUser.id !== userId) return current
@@ -356,7 +458,12 @@ export default function HomePage() {
         }
       })
 
-      if (profile?.is_active === false) {
+      if (!profile) {
+        setError('Your account is not linked to the operator workspace.')
+        return
+      }
+
+      if (profile.is_active === false) {
         setError('Your operator profile is inactive. Please contact an administrator.')
       }
     } catch (profileError) {
@@ -445,6 +552,11 @@ export default function HomePage() {
     }
 
     loadCases()
+  }, [operatorUserId])
+
+  useEffect(() => {
+    if (!operatorUserId) return
+    void loadOperationsPulse()
   }, [operatorUserId])
 
   useEffect(() => {
@@ -571,6 +683,215 @@ export default function HomePage() {
       unassigned: cases.filter((item) => !item.assigned_user_name).length,
     }
   }, [cases])
+
+  const postureSummary = useMemo(() => {
+    const points: string[] = []
+
+    if (kpis.urgent > 0) {
+      points.push(`${kpis.urgent} urgent case${kpis.urgent === 1 ? '' : 's'} need close attention.`)
+    }
+
+    if (kpis.unassigned > 0) {
+      points.push(
+        `${kpis.unassigned} case${kpis.unassigned === 1 ? ' is' : 's are'} still unassigned.`
+      )
+    }
+
+    if (operationsPulse.maintenanceApproval > 0) {
+      points.push(
+        `${operationsPulse.maintenanceApproval} maintenance job${operationsPulse.maintenanceApproval === 1 ? ' is' : 's are'} waiting on approval.`
+      )
+    }
+
+    if (operationsPulse.complianceRisk > 0) {
+      points.push(
+        `${operationsPulse.complianceRisk} compliance record${operationsPulse.complianceRisk === 1 ? '' : 's'} are already expired or missing.`
+      )
+    }
+
+    if (operationsPulse.depositDisputed > 0) {
+      points.push(
+        `${operationsPulse.depositDisputed} deposit claim${operationsPulse.depositDisputed === 1 ? ' is' : 's are'} disputed.`
+      )
+    }
+
+    if (!points.length) {
+      return 'The queue is calm right now. There are no urgent cases, approvals waiting, or active compliance risks in the visible ops layers.'
+    }
+
+    return points.join(' ')
+  }, [kpis, operationsPulse])
+
+  const todayDeskColumns = useMemo(() => {
+    const followUps = cases
+      .filter((item) => {
+        const bucket = getFollowUpState(item).bucket
+        return bucket === 'overdue' || bucket === 'today'
+      })
+      .sort((left, right) => {
+        const leftTime = new Date(left.next_action_at ?? left.created_at ?? 0).getTime()
+        const rightTime = new Date(right.next_action_at ?? right.created_at ?? 0).getTime()
+        return leftTime - rightTime
+      })
+      .slice(0, 4)
+
+    const freshInbound = cases
+      .filter((item) => !!item.last_customer_message_at)
+      .sort((left, right) => {
+        const leftTime = new Date(left.last_customer_message_at ?? 0).getTime()
+        const rightTime = new Date(right.last_customer_message_at ?? 0).getTime()
+        return rightTime - leftTime
+      })
+      .slice(0, 4)
+
+    const needsPickup = cases
+      .filter((item) => !item.assigned_user_name || item.needs_human_handoff || item.priority === 'urgent')
+      .sort(compareCasesForQueue)
+      .slice(0, 4)
+
+    return [
+      {
+        label: 'Today diary',
+        helper: 'Follow-ups that should not slip today',
+        empty: 'Nothing is due today or overdue right now.',
+        tone: 'border-amber-200 bg-amber-50/80',
+        items: followUps.map((item) => {
+          const followUp = getFollowUpState(item)
+          return {
+            id: item.id,
+            caseNumber: item.case_number,
+            title: item.contact_name || item.contact_phone || 'Unknown contact',
+            detail: followUp.label,
+            meta: followUp.detail,
+          }
+        }),
+      },
+      {
+        label: 'Fresh inbound',
+        helper: 'Recent customer activity worth checking first',
+        empty: 'No recent inbound activity is standing out right now.',
+        tone: 'border-sky-200 bg-sky-50/80',
+        items: freshInbound.map((item) => ({
+          id: item.id,
+          caseNumber: item.case_number,
+          title: item.summary || item.contact_name || 'Recent customer activity',
+          detail: item.contact_name || item.contact_phone || item.case_type || 'Case activity',
+          meta: `Last customer activity ${formatRelativeTime(item.last_customer_message_at)}`,
+        })),
+      },
+      {
+        label: 'Pickup next',
+        helper: 'Unowned or handoff work needing a human decision',
+        empty: 'Everything visible already has an owner and no flagged handoff.',
+        tone: 'border-rose-200 bg-rose-50/80',
+        items: needsPickup.map((item) => ({
+          id: item.id,
+          caseNumber: item.case_number,
+          title: item.summary || item.contact_name || 'Case needs pickup',
+          detail:
+            item.needs_human_handoff
+              ? item.handoff_reason || 'Needs operator review'
+              : item.assigned_user_name || 'Unassigned',
+          meta: `${item.priority || 'unknown'} priority • ${item.case_type || 'general'}`,
+        })),
+      },
+    ]
+  }, [cases])
+
+  const deskFocusCards = useMemo(() => {
+    const dueNow = cases.filter((item) => {
+      const bucket = getFollowUpState(item).bucket
+      return bucket === 'overdue' || bucket === 'today'
+    }).length
+
+    const freshInbound = cases.filter((item) => !!item.last_customer_message_at).length
+
+    const pickupNext = cases.filter(
+      (item) => !item.assigned_user_name || item.needs_human_handoff || item.priority === 'urgent'
+    ).length
+
+    return [
+      {
+        label: 'Due now',
+        value: dueNow,
+        helper: dueNow > 0 ? 'Follow-ups that should be touched today' : 'No follow-ups are slipping right now',
+        tone: 'border-amber-200 bg-amber-50/90 text-amber-900',
+      },
+      {
+        label: 'Fresh inbound',
+        value: freshInbound,
+        helper:
+          freshInbound > 0
+            ? 'Recent customer updates are waiting in the queue'
+            : 'No recent customer replies are stacking up',
+        tone: 'border-sky-200 bg-sky-50/90 text-sky-900',
+      },
+      {
+        label: 'Pickup next',
+        value: pickupNext,
+        helper:
+          pickupNext > 0
+            ? 'Unassigned or handoff work needs a human owner'
+            : 'Everything visible already has a clear owner',
+        tone: 'border-rose-200 bg-rose-50/90 text-rose-900',
+      },
+    ]
+  }, [cases])
+
+  const operationsPulseCards = useMemo(
+    () => [
+      {
+        href: '/records/maintenance',
+        label: 'Maintenance',
+        value: operationsPulse.maintenanceLive,
+        helper:
+          operationsPulse.maintenanceApproval > 0
+            ? `${operationsPulse.maintenanceApproval} waiting approval`
+            : `${operationsPulse.maintenanceScheduled} scheduled`,
+        tone:
+          operationsPulse.maintenanceApproval > 0
+            ? 'border-amber-200 bg-amber-50 text-amber-900'
+            : 'border-sky-200 bg-sky-50 text-sky-900',
+      },
+      {
+        href: '/records/compliance',
+        label: 'Compliance',
+        value: operationsPulse.complianceRisk,
+        helper:
+          operationsPulse.complianceSoon > 0
+            ? `${operationsPulse.complianceSoon} expiring soon`
+            : 'No pending pressure',
+        tone:
+          operationsPulse.complianceRisk > 0
+            ? 'border-red-200 bg-red-50 text-red-900'
+            : 'border-emerald-200 bg-emerald-50 text-emerald-900',
+      },
+      {
+        href: '/records/viewings',
+        label: 'Viewings',
+        value: operationsPulse.viewingRequested,
+        helper:
+          operationsPulse.viewingBooked > 0
+            ? `${operationsPulse.viewingBooked} already booked`
+            : 'No booked slots visible',
+        tone: 'border-sky-200 bg-sky-50 text-sky-900',
+      },
+      {
+        href: '/records/deposits',
+        label: 'Deposits',
+        value: operationsPulse.depositActive,
+        helper:
+          operationsPulse.depositDisputed > 0
+            ? `${operationsPulse.depositDisputed} disputed`
+            : 'No disputes flagged',
+        tone:
+          operationsPulse.depositDisputed > 0
+            ? 'border-rose-200 bg-rose-50 text-rose-900'
+            : 'border-stone-200 bg-stone-50 text-stone-900',
+      },
+    ],
+    [operationsPulse]
+  )
 
   const filteredCases = useMemo(() => {
     return cases
@@ -757,25 +1078,62 @@ export default function HomePage() {
   return (
     <main className="app-grid min-h-screen px-5 py-6 text-stone-900 md:px-8 md:py-8">
       <div className="mx-auto max-w-[1520px]">
-        <section className="app-surface-strong overflow-hidden rounded-[2rem] p-6 md:p-8">
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_380px]">
-            <div>
-              <p className="app-kicker">Renovo Lettings Ops</p>
-              <div className="mt-4 flex flex-wrap items-center gap-3">
-                <h1 className="text-4xl font-semibold tracking-tight md:text-5xl">
-                  Work the queue with less friction
-                </h1>
-                <span className="app-live-pill rounded-full px-3 py-1 text-xs font-medium">
-                  {liveMessage || 'Live updates connected'}
-                </span>
-              </div>
-              <p className="mt-4 max-w-3xl text-base leading-7 text-stone-600">
-                Prioritise what needs a human, keep replies moving, and open the full case only
-                when you need deeper context. This screen is designed to help an operator decide
-                quickly and act confidently.
-              </p>
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px] xl:items-start">
+          <div className="space-y-6">
+            <section className="app-surface-strong overflow-hidden rounded-[2rem] p-5 md:p-6">
+              <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
+                <div>
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <p className="app-kicker">Renovo Lettings Ops</p>
+                    <span className="app-live-pill rounded-full px-3 py-1 text-xs font-medium">
+                      {liveMessage || 'Live updates connected'}
+                    </span>
+                  </div>
 
-              <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                  <h1 className="mt-4 max-w-5xl text-3xl font-semibold tracking-tight md:text-[3.3rem] md:leading-[1.02]">
+                    Work the queue with less friction
+                  </h1>
+                  <p className="mt-4 max-w-3xl text-base leading-7 text-stone-600">
+                    Prioritise what needs a human, keep replies moving, and use the wider ops
+                    workspaces only when the queue is not the right lens.
+                  </p>
+                </div>
+
+                <section className="rounded-[1.6rem] border border-stone-200 bg-white/78 p-4 backdrop-blur">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="app-kicker">Shift focus</p>
+                      <p className="mt-2 text-sm leading-6 text-stone-600">
+                        The quickest signals to act on before you settle into the queue.
+                      </p>
+                    </div>
+                    <span className="rounded-full bg-stone-100 px-2.5 py-1 text-xs font-medium text-stone-600">
+                      Live
+                    </span>
+                  </div>
+
+                  <div className="mt-4 space-y-3">
+                    {deskFocusCards.map((card) => (
+                      <article
+                        key={card.label}
+                        className={`rounded-[1.2rem] border px-3.5 py-3 ${card.tone}`}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p className="text-xs font-semibold uppercase tracking-[0.18em] opacity-80">
+                              {card.label}
+                            </p>
+                            <p className="mt-1 text-sm leading-6 opacity-80">{card.helper}</p>
+                          </div>
+                          <span className="text-2xl font-semibold leading-none">{card.value}</span>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                </section>
+              </div>
+
+              <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 {[
                   {
                     label: 'Queue size',
@@ -804,166 +1162,160 @@ export default function HomePage() {
                 ].map((card) => (
                   <article
                     key={card.label}
-                    className={`rounded-[1.6rem] border p-4 shadow-sm ${card.tone}`}
+                    className={`rounded-[1.4rem] border px-4 py-3 shadow-sm ${card.tone}`}
                   >
-                    <div className="text-xs font-semibold uppercase tracking-[0.2em] opacity-80">
+                    <div className="text-[11px] font-semibold uppercase tracking-[0.2em] opacity-80">
                       {card.label}
                     </div>
-                    <div className="mt-3 text-3xl font-semibold">{card.value}</div>
+                    <div className="mt-2 text-[2rem] font-semibold leading-none">{card.value}</div>
                     <p className="mt-2 text-sm opacity-80">{card.helper}</p>
                   </article>
                 ))}
               </div>
-            </div>
 
-            <aside className="app-surface rounded-[1.8rem] p-5">
-              <div className="flex items-start justify-between gap-4">
-                <div className="min-w-0">
-                  <p className="app-kicker">Signed In</p>
-                  <h2 className="mt-2 truncate text-xl font-semibold">
-                    {getOperatorLabel(operator)}
-                  </h2>
-                  <p className="mt-1 truncate text-sm text-stone-600">
-                    {operator.authUser.email || 'No email on account'}
-                  </p>
+              <section className="mt-5 rounded-[1.6rem] border border-stone-200 bg-white/82 p-4 backdrop-blur">
+                <div className="flex flex-col gap-3 border-b app-divider pb-4 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <p className="app-kicker">Today Desk</p>
+                    <h2 className="mt-2 text-lg font-semibold">Use the open space as a working diary</h2>
+                  </div>
+                  <div className="text-sm text-stone-500">
+                    Live from queue state, follow-up dates, and customer activity
+                  </div>
                 </div>
 
-                <button
-                  onClick={handleSignOut}
-                  disabled={signingOut}
-                  className="app-secondary-button rounded-full px-3.5 py-2 text-sm font-medium disabled:opacity-60"
-                >
-                  {signingOut ? 'Signing out...' : 'Sign out'}
-                </button>
+                <div className="mt-4 grid gap-4 xl:grid-cols-3">
+                  {todayDeskColumns.map((column) => (
+                    <section
+                      key={column.label}
+                      className={`rounded-[1.35rem] border p-4 ${column.tone}`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-semibold text-stone-900">{column.label}</p>
+                          <p className="mt-1 text-xs leading-5 text-stone-600">{column.helper}</p>
+                        </div>
+                        <span className="rounded-full bg-white/85 px-2.5 py-1 text-xs font-medium text-stone-600">
+                          {column.items.length}
+                        </span>
+                      </div>
+
+                      <div className="mt-4 space-y-3">
+                        {column.items.length === 0 && (
+                          <div className="rounded-[1rem] border border-stone-200 bg-white/85 p-3 text-sm text-stone-600">
+                            {column.empty}
+                          </div>
+                        )}
+
+                        {column.items.map((item) => (
+                          <Link
+                            key={item.id}
+                            href={`/cases/${item.id}`}
+                            onMouseEnter={() => prefetchCaseDetail(item.id)}
+                            className="block rounded-[1rem] border border-stone-200 bg-white/92 p-3 transition hover:border-stone-400 hover:bg-white"
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0">
+                                <p className="text-sm font-semibold text-stone-900">{item.caseNumber}</p>
+                                <p className="mt-1 text-sm leading-6 text-stone-700">{item.title}</p>
+                              </div>
+                            </div>
+                            <p className="mt-2 text-[11px] font-medium uppercase tracking-[0.16em] text-stone-500">
+                              {item.detail}
+                            </p>
+                            <p className="mt-2 text-xs leading-5 text-stone-500">{item.meta}</p>
+                          </Link>
+                        ))}
+                      </div>
+                    </section>
+                  ))}
+                </div>
+              </section>
+            </section>
+          </div>
+
+          <aside className="app-surface-strong rounded-[2rem] p-5 xl:sticky xl:top-6">
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <p className="app-kicker">Signed In</p>
+                <h2 className="mt-2 truncate text-xl font-semibold">
+                  {getOperatorLabel(operator)}
+                </h2>
+                <p className="mt-1 truncate text-sm text-stone-600">
+                  {operator.authUser.email || 'No email on account'}
+                </p>
               </div>
 
-              <Link
-                href="/calls"
-                className="app-primary-button mt-5 inline-flex w-full items-center justify-center rounded-[1.4rem] px-4 py-3 text-sm font-medium"
+              <button
+                onClick={handleSignOut}
+                disabled={signingOut}
+                className="app-secondary-button rounded-full px-3.5 py-2 text-sm font-medium disabled:opacity-60"
               >
-                Open calls inbox
+                {signingOut ? 'Signing out...' : 'Sign out'}
+              </button>
+            </div>
+
+            <Link
+              href="/calls"
+              className="app-primary-button mt-5 inline-flex w-full items-center justify-center rounded-[1.4rem] px-4 py-3 text-sm font-medium"
+            >
+              Open calls inbox
+            </Link>
+
+            <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-2">
+              <Link
+                href="/knowledge"
+                className="app-secondary-button inline-flex w-full items-center justify-center rounded-[1.3rem] px-4 py-3 text-sm font-medium"
+              >
+                Open Scotland knowledge
               </Link>
 
-              <div className="mt-5 rounded-[1.4rem] border border-sky-200 bg-sky-50 p-4 text-sm text-sky-900">
-                <p className="font-medium">Today’s posture</p>
-                <p className="mt-2 leading-6 text-sky-900/80">
-                  {kpis.urgent > 0
-                    ? `${kpis.urgent} urgent case${kpis.urgent === 1 ? '' : 's'} need close attention.`
-                    : 'No urgent cases are currently flagged.'}{' '}
-                  {kpis.unassigned > 0
-                    ? `${kpis.unassigned} case${kpis.unassigned === 1 ? ' is' : 's are'} still unassigned.`
-                    : 'Everything in the current queue has an owner.'}
-                </p>
+              <Link
+                href="/records"
+                className="app-secondary-button inline-flex w-full items-center justify-center rounded-[1.3rem] px-4 py-3 text-sm font-medium"
+              >
+                Open records workspace
+              </Link>
+            </div>
+
+            <div className="mt-5 rounded-[1.4rem] border border-sky-200 bg-sky-50 p-4 text-sm text-sky-900">
+              <p className="font-medium">Today’s posture</p>
+              <p className="mt-2 leading-6 text-sky-900/80">{postureSummary}</p>
+            </div>
+
+            <div className="app-card-muted mt-4 rounded-[1.4rem] p-4">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-sm font-medium text-stone-900">Operations pulse</p>
+                <span className="text-xs text-stone-500">Jump straight in</span>
               </div>
 
-              <div className="app-card-muted mt-4 rounded-[1.4rem] p-4">
-                <p className="text-sm font-medium text-stone-900">Useful defaults</p>
-                <ul className="mt-3 space-y-2 text-sm text-stone-600">
-                  <li>Keep the selected case open here while triaging similar inbound work.</li>
-                  <li>Use “Assign to me” when you intend to own the follow-through.</li>
-                  <li>Open the full case when you need notes, drafts, or contact context.</li>
-                </ul>
-              </div>
-            </aside>
-          </div>
-        </section>
-
-        <section className="app-surface mt-6 rounded-[2rem] p-5 md:p-6">
-          <div className="flex flex-col gap-5">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-              <div>
-                <p className="app-kicker">Queue Controls</p>
-                <h2 className="mt-2 text-2xl font-semibold">Filter to the next best piece of work</h2>
-                <p className="mt-2 text-sm leading-6 text-stone-600">
-                  Keep filters visible and explicit so operators know exactly why a case is on
-                  screen.
-                </p>
-              </div>
-
-              <div className="app-card-muted rounded-full px-4 py-2 text-sm text-stone-600">
-                {filteredCases.length} shown of {cases.length} total
+              <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-2">
+                {operationsPulseCards.map((card) => (
+                  <Link
+                    key={card.label}
+                    href={card.href}
+                    className={`rounded-[1.25rem] border p-3 transition hover:-translate-y-0.5 ${card.tone}`}
+                  >
+                    <div className="text-[11px] font-semibold uppercase tracking-[0.18em] opacity-80">
+                      {card.label}
+                    </div>
+                    <div className="mt-2 text-2xl font-semibold">{card.value}</div>
+                    <p className="mt-1 text-xs opacity-80">{card.helper}</p>
+                  </Link>
+                ))}
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-2" aria-label="Queue tabs">
-              {[
-                ['all', 'All queue'],
-                ...(followUpAvailable
-                  ? [
-                      ['overdue', 'Overdue'],
-                      ['due_today', 'Due today'],
-                      ['waiting', 'Waiting'],
-                    ]
-                  : []),
-                ['urgent', 'Urgent first'],
-                ['complaints', 'Complaints'],
-                ['unassigned', 'Unassigned'],
-                ['recent', 'Recent activity'],
-                ...(followUpAvailable ? [['no_next_step', 'No next step']] : []),
-              ].map(([value, label]) => (
-                <button
-                  key={value}
-                  onClick={() => setTab(value as QueueTab)}
-                  aria-pressed={tab === value}
-                  className={`rounded-full px-4 py-2.5 text-sm font-medium ${
-                    tab === value ? 'app-pill-active' : 'app-pill'
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
+            <div className="app-card-muted mt-4 rounded-[1.4rem] p-4">
+              <p className="text-sm font-medium text-stone-900">Useful defaults</p>
+              <ul className="mt-3 space-y-2 text-sm text-stone-600">
+                <li>Keep the selected case open here while triaging similar inbound work.</li>
+                <li>Use “Assign to me” when you intend to own the follow-through.</li>
+                <li>Use the pulse cards when the work is really maintenance, compliance, viewings, or deposit ops.</li>
+              </ul>
             </div>
-
-            <div className="grid gap-4 lg:grid-cols-[minmax(0,1.5fr)_repeat(2,minmax(0,0.7fr))]">
-              <label className="block">
-                <span className="mb-2 block text-sm font-medium text-stone-700">Search queue</span>
-                <input
-                  type="text"
-                  placeholder="Search by case, summary, contact, phone, or postcode"
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                  className="app-field text-sm outline-none"
-                />
-              </label>
-
-              <label className="block">
-                <span className="mb-2 block text-sm font-medium text-stone-700">Status</span>
-                <select
-                  value={statusFilter}
-                  onChange={(event) => setStatusFilter(event.target.value)}
-                  className="app-select text-sm"
-                >
-                  <option value="all">All statuses</option>
-                  <option value="open">Open</option>
-                  <option value="triaged">Triaged</option>
-                  <option value="awaiting_info">Awaiting info</option>
-                  <option value="awaiting_landlord">Awaiting landlord</option>
-                  <option value="awaiting_contractor">Awaiting contractor</option>
-                  <option value="scheduled">Scheduled</option>
-                  <option value="in_progress">In progress</option>
-                  <option value="resolved">Resolved</option>
-                  <option value="closed">Closed</option>
-                  <option value="cancelled">Cancelled</option>
-                </select>
-              </label>
-
-              <label className="block">
-                <span className="mb-2 block text-sm font-medium text-stone-700">Priority</span>
-                <select
-                  value={priorityFilter}
-                  onChange={(event) => setPriorityFilter(event.target.value)}
-                  className="app-select text-sm"
-                >
-                  <option value="all">All priorities</option>
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
-                  <option value="urgent">Urgent</option>
-                </select>
-              </label>
-            </div>
-          </div>
-        </section>
+          </aside>
+        </div>
 
         {loading && (
           <div className="app-surface mt-6 rounded-[1.8rem] p-6 text-sm text-stone-600">
@@ -997,6 +1349,84 @@ export default function HomePage() {
                     {filteredCases.length}
                   </span>
                 </div>
+
+                <div className="mt-4 flex flex-wrap gap-2" aria-label="Queue tabs">
+                  {[
+                    ['all', 'All queue'],
+                    ...(followUpAvailable
+                      ? [
+                          ['overdue', 'Overdue'],
+                          ['due_today', 'Due today'],
+                          ['waiting', 'Waiting'],
+                        ]
+                      : []),
+                    ['urgent', 'Urgent first'],
+                    ['complaints', 'Complaints'],
+                    ['unassigned', 'Unassigned'],
+                    ['recent', 'Recent activity'],
+                    ...(followUpAvailable ? [['no_next_step', 'No next step']] : []),
+                  ].map(([value, label]) => (
+                    <button
+                      key={value}
+                      onClick={() => setTab(value as QueueTab)}
+                      aria-pressed={tab === value}
+                      className={`rounded-full px-4 py-2.5 text-sm font-medium ${
+                        tab === value ? 'app-pill-active' : 'app-pill'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1.5fr)_repeat(2,minmax(0,0.7fr))]">
+                  <label className="block">
+                    <span className="mb-2 block text-sm font-medium text-stone-700">Search queue</span>
+                    <input
+                      type="text"
+                      placeholder="Search by case, summary, contact, phone, or postcode"
+                      value={search}
+                      onChange={(event) => setSearch(event.target.value)}
+                      className="app-field text-sm outline-none"
+                    />
+                  </label>
+
+                  <label className="block">
+                    <span className="mb-2 block text-sm font-medium text-stone-700">Status</span>
+                    <select
+                      value={statusFilter}
+                      onChange={(event) => setStatusFilter(event.target.value)}
+                      className="app-select text-sm"
+                    >
+                      <option value="all">All statuses</option>
+                      <option value="open">Open</option>
+                      <option value="triaged">Triaged</option>
+                      <option value="awaiting_info">Awaiting info</option>
+                      <option value="awaiting_landlord">Awaiting landlord</option>
+                      <option value="awaiting_contractor">Awaiting contractor</option>
+                      <option value="scheduled">Scheduled</option>
+                      <option value="in_progress">In progress</option>
+                      <option value="resolved">Resolved</option>
+                      <option value="closed">Closed</option>
+                      <option value="cancelled">Cancelled</option>
+                    </select>
+                  </label>
+
+                  <label className="block">
+                    <span className="mb-2 block text-sm font-medium text-stone-700">Priority</span>
+                    <select
+                      value={priorityFilter}
+                      onChange={(event) => setPriorityFilter(event.target.value)}
+                      className="app-select text-sm"
+                    >
+                      <option value="all">All priorities</option>
+                      <option value="low">Low</option>
+                      <option value="medium">Medium</option>
+                      <option value="high">High</option>
+                      <option value="urgent">Urgent</option>
+                    </select>
+                  </label>
+                </div>
               </div>
 
               <div className="max-h-[74vh] space-y-3 overflow-y-auto pr-1 pb-6 md:pb-4 xl:max-h-none xl:min-h-0 xl:flex-1 xl:pb-2">
@@ -1012,85 +1442,101 @@ export default function HomePage() {
                       onMouseEnter={() => prefetchCaseDetail(item.id)}
                       onFocus={() => prefetchCaseDetail(item.id)}
                       aria-pressed={selected}
-                      className={`w-full rounded-[1.6rem] border p-4 text-left ${
+                      className={`w-full rounded-[1.45rem] border p-3.5 text-left transition ${
                         selected
                           ? 'app-selected-card'
                           : 'border-stone-200 bg-white hover:border-stone-400 hover:bg-stone-50'
                       }`}
                     >
-                      <div className="flex items-start justify-between gap-3">
+                      <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_168px] sm:items-start">
                         <div className="min-w-0">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span className="text-base font-semibold">{item.case_number}</span>
-                            <span
-                              className={`rounded-full border px-2.5 py-1 text-[11px] font-medium ${
-                              selected ? 'app-selected-chip' : badgeClass(item.priority, 'priority')
-                            }`}
-                            >
-                              {item.priority || 'unknown'}
+                          <div className="flex items-start justify-between gap-3 sm:block">
+                            <div className="min-w-0">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span className="text-sm font-semibold md:text-[15px]">{item.case_number}</span>
+                                <span
+                                  className={`rounded-full border px-2.5 py-1 text-[11px] font-medium ${
+                                    selected ? 'app-selected-chip' : badgeClass(item.priority, 'priority')
+                                  }`}
+                                >
+                                  {item.priority || 'unknown'}
+                                </span>
+                                <span
+                                  className={`rounded-full border px-2.5 py-1 text-[11px] font-medium ${
+                                    selected ? 'app-selected-chip' : badgeClass(item.status, 'status')
+                                  }`}
+                                >
+                                  {item.status || 'unknown'}
+                                </span>
+                              </div>
+                              <p
+                                className={`mt-2 line-clamp-2 text-sm leading-6 ${
+                                  selected ? 'text-stone-700' : 'text-stone-600'
+                                }`}
+                              >
+                                {item.summary || 'No summary yet'}
+                              </p>
+                            </div>
+
+                            <div className={`text-right text-[11px] sm:hidden ${selected ? 'text-stone-600' : 'text-stone-500'}`}>
+                              <div>Last activity</div>
+                              <div className="mt-1 font-medium text-stone-700">
+                                {formatRelativeTime(item.last_customer_message_at ?? item.created_at)}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className={`mt-3 flex flex-wrap gap-2 text-xs ${selected ? 'text-stone-700' : 'text-stone-600'}`}>
+                            <span className="rounded-full border border-current/15 px-2.5 py-1">
+                              {item.case_type || 'General'}
+                            </span>
+                            <span className="rounded-full border border-current/15 px-2.5 py-1">
+                              {item.contact_name || item.contact_phone || 'Unknown contact'}
+                            </span>
+                            <span className="rounded-full border border-current/15 px-2.5 py-1">
+                              {item.postcode || 'No postcode'}
                             </span>
                           </div>
-                          <p className={`mt-2 text-sm leading-6 ${selected ? 'text-stone-700' : 'text-stone-600'}`}>
-                            {item.summary || 'No summary yet'}
-                          </p>
-                        </div>
 
-                        <div className={`text-right text-xs ${selected ? 'text-stone-600' : 'text-stone-500'}`}>
-                          <div>Last activity</div>
-                          <div className="mt-1 font-medium text-stone-700">
-                            {formatRelativeTime(item.last_customer_message_at ?? item.created_at)}
+                          <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px]">
+                            {item.needs_human_handoff && (
+                              <span
+                                className={`rounded-full border px-2.5 py-1 font-medium ${
+                                  selected ? 'app-selected-chip' : badgeClass(item.handoff_reason, 'handoff')
+                                }`}
+                              >
+                                {item.handoff_reason || 'handoff'}
+                              </span>
+                            )}
+
+                            <span className={`${selected ? 'text-stone-600' : 'text-stone-500'}`}>
+                              Owner: {item.assigned_user_name || 'Unassigned'}
+                            </span>
                           </div>
                         </div>
-                      </div>
 
-                      <div className={`mt-3 flex flex-wrap gap-2 text-xs ${selected ? 'text-stone-700' : 'text-stone-600'}`}>
-                        <span className="rounded-full border border-current/15 px-2.5 py-1">
-                          {item.case_type || 'General'}
-                        </span>
-                        <span className="rounded-full border border-current/15 px-2.5 py-1">
-                          {item.contact_name || item.contact_phone || 'Unknown contact'}
-                        </span>
-                        <span className="rounded-full border border-current/15 px-2.5 py-1">
-                          {item.postcode || 'No postcode'}
-                        </span>
-                      </div>
+                        <div className="space-y-2 sm:border-l sm:border-stone-200 sm:pl-4">
+                          <div className={`hidden text-right text-[11px] sm:block ${selected ? 'text-stone-600' : 'text-stone-500'}`}>
+                            <div>Last activity</div>
+                            <div className="mt-1 font-medium text-stone-700">
+                              {formatRelativeTime(item.last_customer_message_at ?? item.created_at)}
+                            </div>
+                          </div>
 
-                      <div className="mt-4 flex flex-wrap items-center gap-2">
-                        <span
-                          className={`rounded-full border px-2.5 py-1 text-[11px] font-medium ${
-                            selected ? 'app-selected-chip' : badgeClass(item.status, 'status')
-                          }`}
-                        >
-                          {item.status || 'unknown'}
-                        </span>
-
-                        {item.needs_human_handoff && (
-                          <span
-                            className={`rounded-full border px-2.5 py-1 text-[11px] font-medium ${
-                              selected ? 'app-selected-chip' : badgeClass(item.handoff_reason, 'handoff')
+                          <div
+                            className={`rounded-[1rem] border px-3 py-2 text-xs ${
+                              selected ? 'app-selected-chip' : responseHealth.className
                             }`}
                           >
-                            {item.handoff_reason || 'handoff'}
-                          </span>
-                        )}
-
-                        <span className={`text-[11px] ${selected ? 'text-stone-600' : 'text-stone-500'}`}>
-                          {item.assigned_user_name || 'Unassigned'}
-                        </span>
-                      </div>
-
-                      <div className="mt-4 grid gap-2">
-                        <div className={`rounded-2xl border px-3 py-2 text-xs ${
-                          selected ? 'app-selected-chip' : responseHealth.className
-                        }`}>
-                          {responseHealth.label}
-                        </div>
-                        {followUpAvailable && (
-                          <div className={`rounded-2xl border px-3 py-2 text-xs ${followUp.className}`}>
-                            <div className="font-medium">{followUp.label}</div>
-                            <div className="mt-1 opacity-80">{followUp.detail}</div>
+                            <div className="font-medium">{responseHealth.label}</div>
                           </div>
-                        )}
+                          {followUpAvailable && (
+                            <div className={`rounded-[1rem] border px-3 py-2 text-xs ${followUp.className}`}>
+                              <div className="font-medium">{followUp.label}</div>
+                              <div className="mt-1 opacity-80">{followUp.detail}</div>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </button>
                   )

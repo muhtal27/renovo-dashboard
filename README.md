@@ -1,36 +1,109 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Renovo Dashboard
 
-## Getting Started
+Renovo is a Next.js operator dashboard backed by Supabase. It now includes:
 
-First, run the development server:
+- Operator workspace for calls, cases, knowledge, and records
+- Role-based login routing
+- Tenant portal
+- Landlord portal
+- Contractor portal
+
+## Stack
+
+- Next.js 16
+- React 19
+- Supabase client auth + realtime
+- SQL migrations in `supabase/migrations`
+
+## Local Setup
+
+1. Install dependencies:
+
+```bash
+npm install
+```
+
+2. Create `.env.local` from `.env.example`.
+
+3. Add the required public app variables:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+NEXT_PUBLIC_OPERATOR_OUTBOUND_WEBHOOK_URL=
+```
+
+4. Start the app:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## SQL And Migrations
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Portal and knowledge changes are tracked in `supabase/migrations`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Important recent migrations include:
 
-## Learn More
+- `20260318_add_portal_profiles.sql`
+- `20260318_add_portal_rls.sql`
+- `20260318_add_tenant_portal_actions.sql`
+- `20260318_add_landlord_portal_actions.sql`
+- `20260318_add_scotland_knowledge_base.sql`
 
-To learn more about Next.js, take a look at the following resources:
+If you are deploying a fresh environment, make sure those migrations have been run in Supabase before testing the portals.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Vercel Deployment
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+This repo is ready to deploy on Vercel as a standard Next.js app.
 
-## Deploy on Vercel
+### Build settings
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Framework preset: `Next.js`
+- Install command: `npm install`
+- Build command: `npm run build`
+- Output setting: default Next.js output
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Required Vercel environment variables
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `NEXT_PUBLIC_OPERATOR_OUTBOUND_WEBHOOK_URL`
+
+### Deployment checklist
+
+1. Import the GitHub repo into Vercel.
+2. Add the three required environment variables in Vercel Project Settings.
+3. Confirm the Supabase SQL migrations have already been applied in the target project.
+4. Deploy.
+5. Smoke test:
+   - operator login
+   - portal login routing
+   - tenant self-service actions
+   - landlord self-service actions
+   - outbound operator sending
+
+## Handy Commands
+
+```bash
+npm run dev
+npm run lint
+npm run build
+```
+
+Optional local SQL runner:
+
+```bash
+npm run sql -- "select now();"
+```
+
+The SQL runner expects one of:
+
+- `SUPABASE_DB_URL`
+- `DATABASE_URL`
+- `POSTGRES_URL`
+
+## Notes
+
+- Public env vars are required at runtime. The app now fails fast with a clear error if Supabase env vars are missing.
+- Outbound operator sending is disabled unless `NEXT_PUBLIC_OPERATOR_OUTBOUND_WEBHOOK_URL` is configured.

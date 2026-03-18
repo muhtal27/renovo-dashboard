@@ -6,11 +6,13 @@
     "dev": "next dev",
     "build": "next build --webpack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "sql": "node scripts/run-sql.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.99.2",
     "next": "16.1.7",
+    "pg": "^8.20.0",
     "react": "19.2.3",
     "react-dom": "19.2.3"
   },

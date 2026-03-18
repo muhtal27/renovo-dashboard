@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { resolveWorkspaceForUser } from '@/lib/portal'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -20,12 +21,13 @@ export default function LoginPage() {
         data: { session },
       } = await supabase.auth.getSession()
 
-      if (session) {
-        router.replace('/')
-      }
+      if (!session?.user) return
+
+      const workspace = await resolveWorkspaceForUser(session.user.id)
+      router.replace(workspace.destination || '/')
     }
 
-    checkSession()
+    void checkSession()
   }, [router])
 
   async function handlePasswordSignIn() {
@@ -37,7 +39,7 @@ export default function LoginPage() {
     setLoadingPassword(true)
     setMessage(null)
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email: email.trim(),
       password,
     })
@@ -48,7 +50,16 @@ export default function LoginPage() {
       return
     }
 
-    router.replace('/')
+    const userId = data.user?.id || data.session?.user.id
+
+    if (!userId) {
+      setMessage('Signed in, but no matching workspace was found yet.')
+      setLoadingPassword(false)
+      return
+    }
+
+    const workspace = await resolveWorkspaceForUser(userId)
+    router.replace(workspace.destination || '/')
     router.refresh()
   }
 
@@ -82,29 +93,29 @@ export default function LoginPage() {
     <main className="app-grid min-h-screen px-6 py-8 text-stone-900 md:px-8 md:py-10">
       <div className="mx-auto grid max-w-6xl gap-6 xl:grid-cols-[minmax(0,1fr)_460px]">
         <section className="app-surface-strong rounded-[2rem] p-8 md:p-10">
-          <p className="app-kicker">Renovo Operator Access</p>
+          <p className="app-kicker">Renovo Access</p>
           <h1 className="mt-4 max-w-2xl text-4xl font-semibold tracking-tight md:text-5xl">
-            Start your shift with a calmer front door
+            One calmer front door for operators, tenants, landlords, and contractors
           </h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-stone-600">
-            Sign in with the method that suits you, then head straight into the queue. The
-            operator workspace is built for fast triage, clear ownership, and simple customer
-            follow-through.
+            Sign in once, then land in the workspace that matches your role. Operators keep the
+            queue moving, and customers or contractors can follow live updates without needing to
+            chase by phone or email.
           </p>
 
           <div className="mt-8 grid gap-4 md:grid-cols-3">
             {[
               {
-                title: 'Claim work quickly',
-                body: 'Assign cases, move statuses forward, and keep the queue from stalling.',
+                title: 'Operator workspace',
+                body: 'Run the live queue, Annabelle calls, records, maintenance, and compliance from one place.',
               },
               {
-                title: 'Keep context close',
-                body: 'Review messages, notes, and customer details without hopping around.',
+                title: 'Customer portals',
+                body: 'Tenants and landlords can track live updates and current issues without waiting for a reply.',
               },
               {
-                title: 'Reply with confidence',
-                body: 'Draft safely first, then send through the existing outbound workflow.',
+                title: 'Contractor access',
+                body: 'Give contractors a direct view of assigned jobs, quotes, and access notes when the portal role is ready.',
               },
             ].map((item) => (
               <div key={item.title} className="rounded-[1.5rem] border border-stone-200 bg-white p-5 shadow-sm">
@@ -117,8 +128,8 @@ export default function LoginPage() {
           <div className="mt-8 rounded-[1.6rem] border border-emerald-200 bg-emerald-50/90 p-5">
             <p className="text-sm font-semibold text-emerald-900">Friendly reminder</p>
             <p className="mt-2 text-sm leading-6 text-emerald-900/80">
-              Use the same email as your `users_profiles` record in Supabase so the dashboard can
-              attach your operator identity correctly after sign-in.
+              Use the same email as the profile linked to your Supabase account so Renovo can send
+              you to the correct workspace after sign-in.
             </p>
           </div>
         </section>
@@ -127,7 +138,7 @@ export default function LoginPage() {
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="app-kicker">Sign In</p>
-              <h2 className="mt-2 text-3xl font-semibold tracking-tight">Work the queue</h2>
+              <h2 className="mt-2 text-3xl font-semibold tracking-tight">Enter your workspace</h2>
             </div>
             <Link
               href="/"
@@ -138,8 +149,7 @@ export default function LoginPage() {
           </div>
 
           <p className="mt-4 text-sm leading-6 text-stone-600">
-            Password is fastest if you already have one. Magic link is useful when you’re logging in
-            on a new device.
+            Password is fastest if you already have one. Magic link is useful on a new device.
           </p>
 
           <div className="mt-6 space-y-4">
@@ -150,7 +160,7 @@ export default function LoginPage() {
                 autoComplete="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                placeholder="operator@renovo.co.uk"
+                placeholder="name@renovo.co.uk"
                 className="app-field text-sm outline-none"
               />
             </label>

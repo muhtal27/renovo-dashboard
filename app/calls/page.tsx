@@ -21,7 +21,8 @@ type CallStatus =
   | 'abandoned'
 type CallDirection = 'inbound' | 'outbound'
 type CallUrgency = 'low' | 'medium' | 'high' | 'urgent'
-type CallTab = 'all' | 'active' | 'review' | 'unlinked' | 'missed'
+type CallTab = 'all' | 'active' | 'completed' | 'review' | 'unlinked' | 'missed'
+type WaitingOn = 'none' | 'tenant' | 'landlord' | 'contractor' | 'internal'
 
 type CallSessionRow = {
   id: string
@@ -74,6 +75,18 @@ type CaseOption = {
   id: string
   case_number: string | null
   summary: string | null
+  next_action_at: string | null
+  waiting_on: WaitingOn | null
+  waiting_reason: string | null
+  status: string | null
+}
+
+const WAITING_ON_LABELS: Record<WaitingOn, string> = {
+  none: 'No wait',
+  tenant: 'Waiting on tenant',
+  landlord: 'Waiting on landlord',
+  contractor: 'Waiting on contractor',
+  internal: 'Waiting internally',
 }
 
 function formatRelativeTime(value: string | null) {
@@ -100,6 +113,31 @@ function formatShortDateTime(value: string | null) {
     hour: '2-digit',
     minute: '2-digit',
   })
+}
+
+function isActiveCall(status: CallStatus | null) {
+  return status === 'in_progress' || status === 'ringing' || status === 'initiated'
+}
+
+function isCompletedCall(status: CallStatus | null) {
+  return status === 'completed'
+}
+
+function isMissedCall(status: CallStatus | null) {
+  return status === 'failed' || status === 'voicemail' || status === 'abandoned'
+}
+
+function isToday(value: string | null) {
+  if (!value) return false
+
+  const date = new Date(value)
+  const start = new Date()
+  start.setHours(0, 0, 0, 0)
+
+  const end = new Date(start)
+  end.setDate(end.getDate() + 1)
+
+  return date >= start && date < end
 }
 
 function getCallStatusClass(status: CallStatus | null) {
@@ -146,6 +184,23 @@ function getReviewState(call: Pick<CallSessionRow, 'needs_operator_review' | 're
 function formatIntentConfidence(value: number | null) {
   if (value === null || value === undefined) return 'Unknown confidence'
   return `${Math.round(value * 100)}% confidence`
+}
+
+function getCaseNextStepSummary(item: Pick<CaseOption, 'next_action_at' | 'waiting_on' | 'waiting_reason'> | null) {
+  if (!item) return 'No linked case'
+
+  const waitingOn = item.waiting_on && item.waiting_on !== 'none' ? WAITING_ON_LABELS[item.waiting_on] : null
+  const waitingReason = item.waiting_reason?.trim() || null
+
+  if (item.next_action_at) {
+    return `Next step ${formatShortDateTime(item.next_action_at)}${waitingOn ? ` • ${waitingOn.toLowerCase()}` : ''}`
+  }
+
+  if (waitingOn) {
+    return waitingReason ? `${waitingOn} • ${waitingReason}` : waitingOn
+  }
+
+  return 'No next step set'
 }
 
 function normalizeCallSessionRows(rows: SupabaseCallSessionRow[]) {
@@ -231,9 +286,9 @@ export default function CallsPage() {
         .eq('is_active', true)
         .order('full_name', { ascending: true }),
       supabase
-        .from('v_cases_list')
-        .select('id, case_number, summary')
-        .order('created_at', { ascending: false })
+        .from('cases')
+        .select('id, case_number, summary, next_action_at, waiting_on, waiting_reason, status')
+        .order('last_activity_at', { ascending: false })
         .limit(200),
     ])
 
@@ -431,10 +486,13 @@ export default function CallsPage() {
     }
   }, [operatorUserId, selectedCallId])
 
+  const caseById = useMemo(() => new Map(cases.map((item) => [item.id, item])), [cases])
+
   const filteredCalls = useMemo(() => {
     const query = search.trim().toLowerCase()
 
     return calls.filter((call) => {
+      const linkedCase = call.case_id ? caseById.get(call.case_id) ?? null : null
       const matchesSearch =
         query === '' ||
         call.contact?.full_name?.toLowerCase().includes(query) ||
@@ -442,28 +500,31 @@ export default function CallsPage() {
         call.intent?.toLowerCase().includes(query) ||
         call.ai_summary?.toLowerCase().includes(query) ||
         call.review_reason?.toLowerCase().includes(query) ||
-        call.external_call_id?.toLowerCase().includes(query)
+        call.external_call_id?.toLowerCase().includes(query) ||
+        linkedCase?.case_number?.toLowerCase().includes(query) ||
+        linkedCase?.summary?.toLowerCase().includes(query) ||
+        linkedCase?.waiting_reason?.toLowerCase().includes(query)
 
       const matchesTab =
         tab === 'all' ||
-        (tab === 'active' &&
-          (call.status === 'in_progress' ||
-            call.status === 'ringing' ||
-            call.status === 'initiated')) ||
+        (tab === 'active' && isActiveCall(call.status)) ||
+        (tab === 'completed' && isCompletedCall(call.status)) ||
         (tab === 'review' && !!call.needs_operator_review) ||
         (tab === 'unlinked' && !call.case_id) ||
-        (tab === 'missed' &&
-          (call.status === 'failed' ||
-            call.status === 'voicemail' ||
-            call.status === 'abandoned'))
+        (tab === 'missed' && isMissedCall(call.status))
 
       return matchesSearch && matchesTab
     })
-  }, [calls, search, tab])
+  }, [calls, caseById, search, tab])
 
   const selectedCall = useMemo(
     () => calls.find((item) => item.id === selectedCallId) || null,
     [calls, selectedCallId]
+  )
+
+  const selectedLinkedCase = useMemo(
+    () => (selectedCall?.case_id ? caseById.get(selectedCall.case_id) ?? null : null),
+    [caseById, selectedCall?.case_id]
   )
 
   const selectedCallReviewState = useMemo(
@@ -479,11 +540,9 @@ export default function CallsPage() {
   const callKpis = useMemo(
     () => ({
       total: calls.length,
-      active: calls.filter(
-        (call) =>
-          call.status === 'in_progress' ||
-          call.status === 'ringing' ||
-          call.status === 'initiated'
+      active: calls.filter((call) => isActiveCall(call.status)).length,
+      completedToday: calls.filter(
+        (call) => isCompletedCall(call.status) && isToday(call.ended_at ?? call.last_event_at ?? call.updated_at)
       ).length,
       review: calls.filter((call) => call.needs_operator_review).length,
       unlinked: calls.filter((call) => !call.case_id).length,
@@ -619,6 +678,18 @@ export default function CallsPage() {
                 >
                   Back to queue
                 </Link>
+                <Link
+                  href="/knowledge"
+                  className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium"
+                >
+                  Scotland knowledge
+                </Link>
+                <Link
+                  href="/records"
+                  className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium"
+                >
+                  Records
+                </Link>
                 <span className="app-live-pill rounded-full px-3 py-1 text-xs font-medium">
                   {liveMessage || 'Live updates connected'}
                 </span>
@@ -632,10 +703,11 @@ export default function CallsPage() {
                 low-confidence summaries, and unlinked sessions that still need structure.
               </p>
 
-              <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
                 {[
                   { label: 'Total calls', value: callKpis.total, tone: 'border-stone-200 bg-stone-50 text-stone-900' },
                   { label: 'Active now', value: callKpis.active, tone: 'border-emerald-200 bg-emerald-50 text-emerald-900' },
+                  { label: 'Completed today', value: callKpis.completedToday, tone: 'border-sky-200 bg-sky-50 text-sky-900' },
                   { label: 'Need review', value: callKpis.review, tone: 'border-red-200 bg-red-50 text-red-800' },
                   { label: 'Unlinked', value: callKpis.unlinked, tone: 'border-amber-200 bg-amber-50 text-amber-900' },
                 ].map((card) => (
@@ -684,6 +756,7 @@ export default function CallsPage() {
               {[
                 ['all', 'All calls'],
                 ['active', 'Active'],
+                ['completed', 'Completed'],
                 ['review', 'Needs review'],
                 ['unlinked', 'Unlinked'],
                 ['missed', 'Voicemail / failed'],
@@ -727,9 +800,9 @@ export default function CallsPage() {
         )}
 
         {!loading && !error && (
-          <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(360px,440px)_minmax(0,1fr)]">
-            <section className="app-surface rounded-[2rem] p-4 md:p-5">
-              <div className="sticky top-4 z-10 mb-4 rounded-[1.5rem] border border-stone-200 bg-white/90 p-4 backdrop-blur">
+          <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(360px,440px)_minmax(0,1fr)] xl:items-start">
+            <section className="app-surface rounded-[2rem] p-4 md:p-5 xl:sticky xl:top-6 xl:flex xl:h-[calc(100vh-3rem)] xl:flex-col">
+              <div className="mb-4 rounded-[1.5rem] border border-stone-200 bg-white/90 p-4 backdrop-blur">
                 <p className="app-kicker">Recent Sessions</p>
                 <h2 className="mt-2 text-xl font-semibold">Choose a call</h2>
                 <p className="mt-1 text-sm text-stone-600">
@@ -737,11 +810,11 @@ export default function CallsPage() {
                 </p>
               </div>
 
-              <div className="max-h-[74vh] space-y-3 overflow-y-auto pr-1">
+              <div className="space-y-3 pr-1 xl:min-h-0 xl:flex-1 xl:overflow-y-auto xl:pb-6">
                 {filteredCalls.map((call) => {
                   const selected = call.id === selectedCallId
                   const reviewState = getReviewState(call)
-                  const linkedCase = cases.find((item) => item.id === call.case_id)
+                  const linkedCase = call.case_id ? caseById.get(call.case_id) ?? null : null
 
                   return (
                     <button
@@ -793,6 +866,13 @@ export default function CallsPage() {
                         <span className="rounded-full border border-current/15 px-2.5 py-1">
                           {call.caller_phone || 'No phone'}
                         </span>
+                      </div>
+
+                      <div className={`mt-3 rounded-2xl border border-stone-200/80 px-3 py-2 text-xs ${selected ? 'bg-white/75 text-stone-700' : 'bg-stone-50/80 text-stone-600'}`}>
+                        <div className="font-medium text-stone-800">
+                          {linkedCase?.case_number || 'No linked case yet'}
+                        </div>
+                        <div className="mt-1 opacity-80">{getCaseNextStepSummary(linkedCase)}</div>
                       </div>
 
                       <div className={`mt-4 rounded-2xl border px-3 py-2 text-xs ${reviewState.className}`}>
@@ -873,10 +953,27 @@ export default function CallsPage() {
                       </div>
                     </div>
 
-                    <div className="space-y-4">
-                      <div className={`rounded-[1.5rem] border p-4 ${selectedCallReviewState.className}`}>
-                        <p className="text-xs font-semibold uppercase tracking-[0.18em]">Review state</p>
-                        <p className="mt-2 text-lg font-semibold">{selectedCallReviewState.label}</p>
+                      <div className="space-y-4">
+                        {selectedLinkedCase && (
+                          <div className="rounded-[1.5rem] border border-stone-200 bg-stone-50/90 p-4">
+                            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">
+                              Linked case
+                            </p>
+                            <p className="mt-2 text-lg font-semibold text-stone-900">
+                              {selectedLinkedCase.case_number || selectedCall.case_id}
+                            </p>
+                            <p className="mt-2 text-sm leading-6 text-stone-600">
+                              {selectedLinkedCase.summary || 'No case summary yet.'}
+                            </p>
+                            <div className="mt-3 rounded-2xl border border-stone-200 bg-white/85 px-3 py-2 text-xs text-stone-700">
+                              {getCaseNextStepSummary(selectedLinkedCase)}
+                            </div>
+                          </div>
+                        )}
+
+                        <div className={`rounded-[1.5rem] border p-4 ${selectedCallReviewState.className}`}>
+                          <p className="text-xs font-semibold uppercase tracking-[0.18em]">Review state</p>
+                          <p className="mt-2 text-lg font-semibold">{selectedCallReviewState.label}</p>
                         <p className="mt-2 text-sm leading-6 opacity-85">
                           {selectedCallReviewState.detail}
                         </p>

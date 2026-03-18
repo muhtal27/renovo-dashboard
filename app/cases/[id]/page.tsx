@@ -110,7 +110,7 @@ const OUTBOUND_TEMPLATES = [
 ]
 
 const OPERATOR_OUTBOUND_WEBHOOK_URL =
-  'https://renovo.app.n8n.cloud/webhook/lettings-operator-outbound'
+  process.env.NEXT_PUBLIC_OPERATOR_OUTBOUND_WEBHOOK_URL || null
 
 const OUTBOUND_CHANNEL_OPTIONS: Array<{ value: OutboundChannel; label: string; hint: string }> = [
   { value: 'sms', label: 'SMS', hint: 'Fast default for tenancy updates' },
@@ -1260,6 +1260,13 @@ export default function CaseDetailPage({
   async function handleSendOutbound() {
     if (!caseItem || !draftText.trim()) return
 
+    if (!OPERATOR_OUTBOUND_WEBHOOK_URL) {
+      setDraftMessage(
+        'Outbound sending is not configured yet. Add NEXT_PUBLIC_OPERATOR_OUTBOUND_WEBHOOK_URL before sending live messages.'
+      )
+      return
+    }
+
     const trimmedDraft = draftText.trim()
     const sendFingerprint = buildOutboundFingerprint(caseItem.id, outboundChannel, trimmedDraft)
 
@@ -1959,8 +1966,13 @@ export default function CaseDetailPage({
                   />
                   <div className="mt-3 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <p className="text-xs text-amber-800">
-                      Save a draft for later, or send it now via n8n on the selected channel.
+                      Save a draft for later, or send it now on the selected channel.
                     </p>
+                    {!OPERATOR_OUTBOUND_WEBHOOK_URL && (
+                      <p className="text-xs text-rose-700">
+                        Sending is disabled until `NEXT_PUBLIC_OPERATOR_OUTBOUND_WEBHOOK_URL` is set.
+                      </p>
+                    )}
                     <div className="flex flex-col gap-2 sm:flex-row">
                       <button
                         onClick={handleSaveDraft}
@@ -1971,7 +1983,13 @@ export default function CaseDetailPage({
                       </button>
                       <button
                         onClick={handleSendOutbound}
-                        disabled={sendingOutbound || confirmingOutbound || savingDraft || !draftText.trim()}
+                        disabled={
+                          sendingOutbound ||
+                          confirmingOutbound ||
+                          savingDraft ||
+                          !draftText.trim() ||
+                          !OPERATOR_OUTBOUND_WEBHOOK_URL
+                        }
                         className="app-primary-button rounded-2xl px-4 py-3 text-sm font-medium disabled:opacity-50"
                       >
                         {sendingOutbound
@@ -1980,7 +1998,7 @@ export default function CaseDetailPage({
                             ? 'Confirming sent log...'
                             : duplicateSendGuard && currentOutboundFingerprint === duplicateSendGuard
                               ? 'Confirm send again'
-                              : 'Send via n8n'}
+                              : 'Send message'}
                       </button>
                     </div>
                   </div>
