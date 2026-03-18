@@ -85,7 +85,7 @@ const practicalProof = [
 ]
 
 const workingAreas = [
-  'Calls, messages, and email linked back to the same live case context.',
+  'Calls, messages, email, tenancy activity, maintenance, and reporting linked back to the same live case context.',
   'Maintenance, rent, lease lifecycle, and compliance living in the same operational story.',
   'Scotland-specific knowledge to ground answers before widening scope.',
   'Portal routing that sends each signed-in user to the right destination automatically.',
@@ -94,9 +94,9 @@ const workingAreas = [
 const actions = [
   {
     title: 'Speak to Annabelle',
-    body: 'Pick up the phone and hear how she handles the conversation. This is the fastest way to feel the difference between a generic demo and a believable experience.',
+    body: 'Start a conversation with Annabelle and hear how she handles real property questions in a way that feels calm, informed, and useful.',
     href: 'tel:01313812887',
-    cta: 'Call 0131 381 2887',
+    cta: 'Start a conversation',
     tone: 'primary',
   },
   {
@@ -150,7 +150,7 @@ export function PublicHome() {
               <div>
                 <p className="app-kicker">Annabelle By Renovo</p>
                 <p className="mt-2 max-w-xl text-sm leading-6 text-stone-600">
-                  The always-on operational story for modern letting agencies.
+                  The all-in-one CRM and always-on operational story for modern letting agencies.
                 </p>
               </div>
 
@@ -173,12 +173,12 @@ export function PublicHome() {
                   Annabelle keeps the agency moving when the work does not politely wait.
                 </h1>
                 <p className="mt-6 max-w-3xl text-base leading-8 text-stone-700 md:text-lg">
-                  She does not clock off, call in sick, or lose the thread. Annabelle is the living operational reality that helps a letting agency stay responsive across calls, messages, maintenance, rent, compliance, and landlord updates while the human team protects its time and energy for judgement, reassurance, and decisions.
+                  She does not clock off, call in sick, or lose the thread. Annabelle is the living operational reality that helps a letting agency stay responsive across calls, messages, maintenance, rent, compliance, landlord updates, and day-to-day coordination while the human team protects its time and energy for judgement, reassurance, and decisions. It means no juggling six different systems just to complete one task.
                 </p>
 
                 <div className="mt-8 flex flex-wrap gap-3">
                   <a href="tel:01313812887" className="app-primary-button rounded-2xl px-5 py-3 text-sm font-medium">
-                    Call Annabelle on 0131 381 2887
+                    Start with Annabelle
                   </a>
                   <Link href="/login" className="app-secondary-button rounded-2xl px-5 py-3 text-sm font-medium">
                     Enter the live workspace
@@ -190,7 +190,7 @@ export function PublicHome() {
                 <p className="app-kicker">Why Agencies Give Her A Chance</p>
                 <div className="mt-4 space-y-3">
                   {[
-                    'She keeps the communication trail intact.',
+                    'She keeps the communication trail intact inside one joined-up CRM.',
                     'She reduces overnight and out-of-hours drift.',
                     'She gives operators a calmer start to the day.',
                     'She makes leadership visibility less dependent on heroic effort.',
@@ -252,7 +252,7 @@ export function PublicHome() {
               </h2>
             </div>
             <div className="rounded-full border border-stone-200 bg-white px-4 py-2 text-sm text-stone-600">
-              Main line: 0131 381 2887
+              One joined-up place to work, respond, and stay in control
             </div>
           </div>
 
@@ -298,9 +298,9 @@ export function PublicHome() {
 
         <section className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)]">
           <div className="app-surface rounded-[2rem] p-6 md:p-7">
-            <p className="app-kicker">What Makes Her Useful</p>
+            <p className="app-kicker">Why The CRM Matters</p>
             <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
-              Annabelle brings relief because she is tied to real work, not theatre
+              Annabelle brings relief because everything sits in one place, not across six disconnected tools
             </h2>
             <div className="mt-6 grid gap-3 md:grid-cols-2">
               {practicalProof.map((item) => (
@@ -340,7 +340,7 @@ export function PublicHome() {
                 The showcase is connected to a working reality that already has operational depth
               </h2>
               <p className="mt-4 max-w-3xl text-base leading-8 text-stone-700">
-                This is not a blank marketing shell. The world behind Annabelle already includes operator queue handling, linked records, maintenance, rent, lease lifecycle, reporting, portals, and a Scotland knowledge layer. That matters because the story on this page is supported by a real structure underneath it.
+                This is not a blank marketing shell. The world behind Annabelle already includes operator queue handling, linked records, maintenance, rent, lease lifecycle, reporting, portals, and a Scotland knowledge layer inside one joined-up CRM That matters because the story on this page is supported by a real structure underneath it.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <Link href="/login" className="app-primary-button rounded-2xl px-5 py-3 text-sm font-medium">
