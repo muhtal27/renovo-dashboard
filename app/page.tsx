@@ -10,6 +10,7 @@ import {
 } from '@/lib/operator'
 import { resolveWorkspaceForUser } from '@/lib/portal'
 import { supabase } from '@/lib/supabase'
+import { PublicHome } from '@/app/public-home'
 
 type CaseRow = {
   id: string
@@ -532,7 +533,7 @@ export default function HomePage() {
         if (cancelled) return
 
         if (!user) {
-          router.replace('/login')
+          setOperator(null)
           setAuthLoading(false)
           return
         }
@@ -559,7 +560,7 @@ export default function HomePage() {
       if (!session) {
         setOperator(null)
         setAuthLoading(false)
-        router.replace('/login')
+        router.replace('/')
         return
       }
 
@@ -1171,7 +1172,7 @@ export default function HomePage() {
       return
     }
 
-    router.replace('/login')
+    router.replace('/')
     router.refresh()
   }
 
@@ -1193,15 +1194,7 @@ export default function HomePage() {
   }
 
   if (!operator?.authUser) {
-    return (
-      <main className="app-grid min-h-screen px-5 py-6 text-stone-900 md:px-8 md:py-8">
-        <div className="mx-auto max-w-4xl">
-          <div className="app-surface rounded-[2rem] px-6 py-10 text-sm text-stone-600">
-            Redirecting to sign in...
-          </div>
-        </div>
-      </main>
-    )
+    return <PublicHome />
   }
 
   return (
