@@ -103,9 +103,16 @@ button:disabled {
 }
 
 .app-pill {
+  align-items: center;
   background: rgba(255, 255, 255, 0.86);
   border: 1px solid rgba(84, 67, 47, 0.16);
   color: #4f483f;
+  display: inline-flex;
+  justify-content: center;
+  line-height: 1.15;
+  min-height: 2.5rem;
+  text-align: center;
+  vertical-align: middle;
 }
 
 .app-pill:hover {
@@ -114,17 +121,31 @@ button:disabled {
 }
 
 .app-pill-active {
+  align-items: center;
   background: var(--accent-soft);
   border: 1px solid rgba(71, 111, 99, 0.34);
-  color: var(--accent-strong);
   box-shadow: 0 8px 20px rgba(71, 111, 99, 0.12);
+  color: var(--accent-strong);
+  display: inline-flex;
+  justify-content: center;
+  line-height: 1.15;
+  min-height: 2.5rem;
+  text-align: center;
+  vertical-align: middle;
 }
 
 .app-primary-button {
+  align-items: center;
   background: var(--accent);
   border: 1px solid rgba(47, 87, 75, 0.2);
-  color: #f8fcfa;
   box-shadow: 0 12px 24px rgba(47, 87, 75, 0.14);
+  color: #f8fcfa;
+  display: inline-flex;
+  justify-content: center;
+  line-height: 1.15;
+  min-height: 2.75rem;
+  text-align: center;
+  vertical-align: middle;
 }
 
 .app-primary-button:hover {
@@ -137,9 +158,16 @@ button:disabled {
 }
 
 .app-secondary-button {
+  align-items: center;
   background: rgba(255, 255, 255, 0.92);
   border: 1px solid rgba(84, 67, 47, 0.18);
   color: #4d463d;
+  display: inline-flex;
+  justify-content: center;
+  line-height: 1.15;
+  min-height: 2.75rem;
+  text-align: center;
+  vertical-align: middle;
 }
 
 .app-secondary-button:hover {
@@ -148,9 +176,16 @@ button:disabled {
 }
 
 .app-tertiary-button {
+  align-items: center;
   background: rgba(248, 244, 238, 0.92);
   border: 1px solid rgba(84, 67, 47, 0.14);
   color: #5c5448;
+  display: inline-flex;
+  justify-content: center;
+  line-height: 1.15;
+  min-height: 2.75rem;
+  text-align: center;
+  vertical-align: middle;
 }
 
 .app-tertiary-button:hover {

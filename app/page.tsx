@@ -1400,7 +1400,7 @@ export default function HomePage() {
               href="/calls"
               className="app-primary-button mt-5 inline-flex w-full items-center justify-center rounded-[1.4rem] px-4 py-3 text-sm font-medium"
             >
-              Open calls inbox
+              Calls inbox
             </Link>
 
             <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-2">
@@ -1408,14 +1408,14 @@ export default function HomePage() {
                 href="/knowledge"
                 className="app-secondary-button inline-flex w-full items-center justify-center rounded-[1.3rem] px-4 py-3 text-sm font-medium"
               >
-                Open Scotland knowledge
+                Knowledge
               </Link>
 
               <Link
                 href="/records"
                 className="app-secondary-button inline-flex w-full items-center justify-center rounded-[1.3rem] px-4 py-3 text-sm font-medium"
               >
-                Open records workspace
+                CRM
               </Link>
             </div>
 
