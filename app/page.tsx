@@ -143,6 +143,10 @@ function formatRelativeTime(value: string | null) {
   return `${diffDays}d ago`
 }
 
+function formatLabel(value: string) {
+  return value.replace(/_/g, ' ')
+}
+
 function formatShortDateTime(value: string | null) {
   if (!value) return 'Not set'
 
@@ -771,142 +775,71 @@ export default function HomePage() {
     return points.join(' ')
   }, [kpis, operationsPulse])
 
-  const todayDeskColumns = useMemo(() => {
-    const followUps = cases
+  const todayAgenda = useMemo(() => {
+    const items = cases
       .filter((item) => {
-        const bucket = getFollowUpState(item).bucket
-        return bucket === 'overdue' || bucket === 'today'
+        const followUp = getFollowUpState(item)
+        return (
+          followUp.bucket === 'overdue' ||
+          followUp.bucket === 'today' ||
+          item.status === 'scheduled' ||
+          item.priority === 'urgent' ||
+          !!item.last_customer_message_at
+        )
       })
       .sort((left, right) => {
-        const leftTime = new Date(left.next_action_at ?? left.created_at ?? 0).getTime()
-        const rightTime = new Date(right.next_action_at ?? right.created_at ?? 0).getTime()
+        const leftFollowUp = getFollowUpState(left)
+        const rightFollowUp = getFollowUpState(right)
+        const leftRank = leftFollowUp.bucket === 'overdue' ? 0 : leftFollowUp.bucket === 'today' ? 1 : left.priority === 'urgent' ? 2 : left.status === 'scheduled' ? 3 : 4
+        const rightRank = rightFollowUp.bucket === 'overdue' ? 0 : rightFollowUp.bucket === 'today' ? 1 : right.priority === 'urgent' ? 2 : right.status === 'scheduled' ? 3 : 4
+        if (leftRank !== rightRank) return leftRank - rightRank
+
+        const leftTime = new Date(left.next_action_at ?? left.last_customer_message_at ?? left.created_at ?? 0).getTime()
+        const rightTime = new Date(right.next_action_at ?? right.last_customer_message_at ?? right.created_at ?? 0).getTime()
         return leftTime - rightTime
       })
-      .slice(0, 4)
+      .slice(0, 8)
 
-    const freshInbound = cases
-      .filter((item) => !!item.last_customer_message_at)
-      .sort((left, right) => {
-        const leftTime = new Date(left.last_customer_message_at ?? 0).getTime()
-        const rightTime = new Date(right.last_customer_message_at ?? 0).getTime()
-        return rightTime - leftTime
-      })
-      .slice(0, 4)
-
-    const needsPickup = cases
-      .filter((item) => !item.assigned_user_name || item.needs_human_handoff || item.priority === 'urgent')
-      .sort(compareCasesForQueue)
-      .slice(0, 4)
-
-    return [
-      {
-        label: 'Today diary',
-        helper: 'Follow-ups that should not slip today',
-        empty: 'Nothing is due today or overdue right now.',
-        tone: 'border-amber-200 bg-amber-50/80',
-        items: followUps.map((item) => {
-          const followUp = getFollowUpState(item)
-          return {
-            id: item.id,
-            caseNumber: item.case_number,
-            title: item.contact_name || item.contact_phone || 'Unknown contact',
-            detail: followUp.label,
-            meta: followUp.detail,
-          }
-        }),
-      },
-      {
-        label: 'Fresh inbound',
-        helper: 'Recent customer activity worth checking first',
-        empty: 'No recent inbound activity is standing out right now.',
-        tone: 'border-sky-200 bg-sky-50/80',
-        items: freshInbound.map((item) => ({
-          id: item.id,
-          caseNumber: item.case_number,
-          title: item.summary || item.contact_name || 'Recent customer activity',
-          detail: item.contact_name || item.contact_phone || item.case_type || 'Case activity',
-          meta: `Last customer activity ${formatRelativeTime(item.last_customer_message_at)}`,
-        })),
-      },
-      {
-        label: 'Pickup next',
-        helper: 'Unowned or handoff work needing a human decision',
-        empty: 'Everything visible already has an owner and no flagged handoff.',
-        tone: 'border-rose-200 bg-rose-50/80',
-        items: needsPickup.map((item) => ({
-          id: item.id,
-          caseNumber: item.case_number,
-          title: item.summary || item.contact_name || 'Case needs pickup',
-          detail:
-            item.needs_human_handoff
-              ? item.handoff_reason || 'Needs operator review'
-              : item.assigned_user_name || 'Unassigned',
-          meta: `${item.priority || 'unknown'} priority • ${item.case_type || 'general'}`,
-        })),
-      },
-    ]
-  }, [cases])
-
-  const deskFocusCards = useMemo(() => {
-    const dueNow = cases.filter((item) => {
+    const dueNowCount = cases.filter((item) => {
       const bucket = getFollowUpState(item).bucket
       return bucket === 'overdue' || bucket === 'today'
     }).length
 
-    const freshInbound = cases.filter((item) => !!item.last_customer_message_at).length
+    const scheduledCount = cases.filter((item) => item.status === 'scheduled').length
+    const awaitingOwnerCount = cases.filter((item) => !item.assigned_user_name || item.needs_human_handoff).length
 
-    const pickupNext = cases.filter(
-      (item) => !item.assigned_user_name || item.needs_human_handoff || item.priority === 'urgent'
-    ).length
+    return {
+      dueNowCount,
+      scheduledCount,
+      awaitingOwnerCount,
+      items: items.map((item) => {
+        const followUp = getFollowUpState(item)
+        const timing = item.next_action_at
+          ? formatShortDateTime(item.next_action_at)
+          : item.last_customer_message_at
+            ? `Latest reply ${formatRelativeTime(item.last_customer_message_at)}`
+            : formatRelativeTime(item.created_at)
 
-    return [
-      {
-        label: 'Due now',
-        value: dueNow,
-        helper: dueNow > 0 ? 'Follow-ups that should be touched today' : 'No follow-ups are slipping right now',
-        tone: 'border-amber-200 bg-amber-50/90 text-amber-900',
-        actionLabel: dueNow > 0 ? 'Open due now queue' : 'Review whole queue',
-        filters: {
-          search: '',
-          statusFilter: 'all',
-          priorityFilter: 'all',
-          tab: dueNow > 0 && followUpAvailable ? 'due_now' : 'all',
-        } satisfies QueueFilterState,
-      },
-      {
-        label: 'Fresh inbound',
-        value: freshInbound,
-        helper:
-          freshInbound > 0
-            ? 'Recent customer updates are waiting in the queue'
-            : 'No recent customer replies are stacking up',
-        tone: 'border-sky-200 bg-sky-50/90 text-sky-900',
-        actionLabel: freshInbound > 0 ? 'Open recent activity' : 'Review whole queue',
-        filters: {
-          search: '',
-          statusFilter: 'all',
-          priorityFilter: 'all',
-          tab: freshInbound > 0 ? 'recent' : 'all',
-        } satisfies QueueFilterState,
-      },
-      {
-        label: 'Pickup next',
-        value: pickupNext,
-        helper:
-          pickupNext > 0
-            ? 'Unassigned or handoff work needs a human owner'
-            : 'Everything visible already has a clear owner',
-        tone: 'border-rose-200 bg-rose-50/90 text-rose-900',
-        actionLabel: pickupNext > 0 ? 'Open needs pickup queue' : 'Review whole queue',
-        filters: {
-          search: '',
-          statusFilter: 'all',
-          priorityFilter: 'all',
-          tab: pickupNext > 0 ? 'pickup' : 'all',
-        } satisfies QueueFilterState,
-      },
-    ]
-  }, [cases, followUpAvailable])
+        const lane = followUp.bucket === 'overdue' || followUp.bucket === 'today'
+          ? followUp.label
+          : item.status === 'scheduled'
+            ? 'Scheduled work'
+            : item.priority === 'urgent'
+              ? 'Urgent review'
+              : 'Fresh inbound'
+
+        return {
+          id: item.id,
+          caseNumber: item.case_number,
+          title: item.summary || item.contact_name || item.contact_phone || 'Case activity',
+          lane,
+          timing,
+          owner: item.assigned_user_name || 'Unassigned',
+          meta: `${item.case_type || 'general'} • ${item.postcode || 'no postcode'}`,
+        }
+      }),
+    }
+  }, [cases])
 
   const operationsPulseCards = useMemo(
     () => [
@@ -1207,7 +1140,7 @@ export default function HomePage() {
       <div className="mx-auto max-w-[1520px] space-y-6">
         <OperatorNav current="queue" />
 
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px] xl:items-start">
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
           <div className="space-y-6">
             <section className="app-surface-strong overflow-hidden rounded-[2rem] p-5 md:p-6">
               <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
@@ -1228,45 +1161,53 @@ export default function HomePage() {
                   </p>
                 </div>
 
-                <section className="rounded-[1.6rem] border border-stone-200 bg-white/78 p-4 backdrop-blur">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="app-kicker">Shift focus</p>
-                      <p className="mt-2 text-sm leading-6 text-stone-600">
-                        The quickest signals to act on before you settle into the queue.
-                      </p>
-                    </div>
-                    <span className="rounded-full bg-stone-100 px-2.5 py-1 text-xs font-medium text-stone-600">
-                      Live
-                    </span>
-                  </div>
+                <aside className="rounded-[1.6rem] border border-stone-200 bg-white/78 p-4 backdrop-blur">
+                  <p className="app-kicker">Today posture</p>
+                  <h2 className="mt-2 text-lg font-semibold">Know where the pressure really is before you open the queue</h2>
+                  <p className="mt-3 text-sm leading-6 text-stone-600">{postureSummary}</p>
 
-                  <div className="mt-4 space-y-3">
-                    {deskFocusCards.map((card) => (
-                      <button
-                        key={card.label}
-                        type="button"
-                        onClick={() => focusQueue(card.filters)}
-                        className={`w-full rounded-[1.2rem] border px-3.5 py-3 text-left transition hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 ${card.tone}`}
-                      >
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <p className="text-xs font-semibold uppercase tracking-[0.18em] opacity-80">
-                              {card.label}
-                            </p>
-                            <p className="mt-1 text-sm leading-6 opacity-80">{card.helper}</p>
-                          </div>
-                          <span className="text-2xl font-semibold leading-none">{card.value}</span>
-                        </div>
-                        <div className="mt-3 flex items-center justify-between text-xs font-medium opacity-80">
-                          <span>{card.actionLabel}</span>
-                          <span aria-hidden="true">Open queue</span>
-                        </div>
-                      </button>
+                  <div className="mt-4 grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
+                    {[
+                      { label: 'Due now', value: todayAgenda.dueNowCount, tone: 'border-amber-200 bg-amber-50 text-amber-900' },
+                      { label: 'Scheduled', value: todayAgenda.scheduledCount, tone: 'border-sky-200 bg-sky-50 text-sky-900' },
+                      { label: 'Awaiting owner', value: todayAgenda.awaitingOwnerCount, tone: 'border-rose-200 bg-rose-50 text-rose-900' },
+                    ].map((item) => (
+                      <article key={item.label} className={`rounded-[1.2rem] border px-4 py-3 ${item.tone}`}>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] opacity-80">{item.label}</p>
+                        <p className="mt-2 text-2xl font-semibold">{item.value}</p>
+                      </article>
                     ))}
                   </div>
-                </section>
+                </aside>
               </div>
+
+              <section className="mt-5 rounded-[1.6rem] border border-stone-200 bg-white/82 p-4 backdrop-blur">
+                <div className="flex flex-col gap-3 border-b app-divider pb-4 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <p className="app-kicker">Operations pulse</p>
+                    <h2 className="mt-2 text-lg font-semibold">Jump into the live operational layers without leaving the main desk</h2>
+                  </div>
+                  <div className="text-sm text-stone-500">Maintenance, compliance, viewings, and deposits in one glance</div>
+                </div>
+
+                <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                  {operationsPulseCards.map((card) => (
+                    <Link
+                      key={card.label}
+                      href={card.href}
+                      className={`rounded-[1.25rem] border p-4 transition hover:-translate-y-0.5 hover:shadow-sm ${card.tone}`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] opacity-80">{card.label}</p>
+                          <p className="mt-2 text-sm leading-6 opacity-80">{card.helper}</p>
+                        </div>
+                        <span className="text-2xl font-semibold leading-none">{card.value}</span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </section>
 
               <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 {kpiCards.map((card) => (
@@ -1289,88 +1230,61 @@ export default function HomePage() {
               <section className="mt-5 rounded-[1.6rem] border border-stone-200 bg-white/82 p-4 backdrop-blur">
                 <div className="flex flex-col gap-3 border-b app-divider pb-4 sm:flex-row sm:items-end sm:justify-between">
                   <div>
-                    <p className="app-kicker">Workspace Lanes</p>
-                    <h2 className="mt-2 text-lg font-semibold">Keep the main routes visible while you work</h2>
+                    <p className="app-kicker">Today diary</p>
+                    <h2 className="mt-2 text-lg font-semibold">See the appointments, follow-ups, and fresh replies in one working agenda</h2>
                   </div>
-                  <div className="text-sm text-stone-500">Built so the CRM, calls, knowledge, and reporting are never hidden</div>
+                  <div className="text-sm text-stone-500">Built from follow-up dates, scheduled cases, and live inbound activity</div>
                 </div>
 
-                <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                  {[
-                    { label: 'Calls inbox', href: '/calls', body: 'Review active sessions, voicemail outcomes, and flagged call summaries.' },
-                    { label: 'Tenancy CRM', href: '/records', body: 'Run the tenancy lifecycle, rent pressure, lease events, and live cases together.' },
-                    { label: 'Knowledge', href: '/knowledge', body: 'Ground Annabelle in approved Scotland-specific answers before wider handling.' },
-                    { label: 'Reporting', href: '/records/reporting', body: 'Read portfolio pressure, approvals, risk, and leadership visibility in one place.' },
-                  ].map((lane) => (
-                    <Link
-                      key={lane.label}
-                      href={lane.href}
-                      className="rounded-[1.25rem] border border-stone-200 bg-stone-50/90 p-4 transition hover:-translate-y-0.5 hover:border-stone-400 hover:bg-white"
-                    >
-                      <p className="text-sm font-semibold text-stone-900">{lane.label}</p>
-                      <p className="mt-2 text-sm leading-6 text-stone-600">{lane.body}</p>
-                    </Link>
-                  ))}
-                </div>
-              </section>
-
-              <section className="mt-5 rounded-[1.6rem] border border-stone-200 bg-white/82 p-4 backdrop-blur">
-                <div className="flex flex-col gap-3 border-b app-divider pb-4 sm:flex-row sm:items-end sm:justify-between">
-                  <div>
-                    <p className="app-kicker">Today Desk</p>
-                    <h2 className="mt-2 text-lg font-semibold">Use the open space as a working diary</h2>
-                  </div>
-                  <div className="text-sm text-stone-500">
-                    Live from queue state, follow-up dates, and customer activity
-                  </div>
+                <div className="mt-4 grid gap-3 md:grid-cols-3">
+                  <article className="rounded-[1.2rem] border border-amber-200 bg-amber-50 px-4 py-3 text-amber-900">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] opacity-80">Due now</p>
+                    <p className="mt-2 text-2xl font-semibold">{todayAgenda.dueNowCount}</p>
+                    <p className="mt-1 text-xs opacity-80">Follow-ups that should not slip today</p>
+                  </article>
+                  <article className="rounded-[1.2rem] border border-sky-200 bg-sky-50 px-4 py-3 text-sky-900">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] opacity-80">Scheduled</p>
+                    <p className="mt-2 text-2xl font-semibold">{todayAgenda.scheduledCount}</p>
+                    <p className="mt-1 text-xs opacity-80">Booked work that needs coordination and follow-through</p>
+                  </article>
+                  <article className="rounded-[1.2rem] border border-rose-200 bg-rose-50 px-4 py-3 text-rose-900">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] opacity-80">Awaiting owner</p>
+                    <p className="mt-2 text-2xl font-semibold">{todayAgenda.awaitingOwnerCount}</p>
+                    <p className="mt-1 text-xs opacity-80">Items that still need a human owner or handoff decision</p>
+                  </article>
                 </div>
 
-                <div className="mt-4 grid gap-4 xl:grid-cols-3">
-                  {todayDeskColumns.map((column) => (
-                    <section
-                      key={column.label}
-                      className={`rounded-[1.35rem] border p-4 ${column.tone}`}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className="text-sm font-semibold text-stone-900">{column.label}</p>
-                          <p className="mt-1 text-xs leading-5 text-stone-600">{column.helper}</p>
-                        </div>
-                        <span className="rounded-full bg-white/85 px-2.5 py-1 text-xs font-medium text-stone-600">
-                          {column.items.length}
-                        </span>
-                      </div>
-
-                      <div className="mt-4 space-y-3">
-                        {column.items.length === 0 && (
-                          <div className="rounded-[1rem] border border-stone-200 bg-white/85 p-3 text-sm text-stone-600">
-                            {column.empty}
+                {todayAgenda.items.length === 0 ? (
+                  <div className="app-empty-state mt-4 rounded-[1.4rem] p-6 text-sm">
+                    Nothing needs diary attention right now. The queue is calm enough to work straight from the live list below.
+                  </div>
+                ) : (
+                  <div className="mt-4 grid gap-3 xl:grid-cols-2">
+                    {todayAgenda.items.map((item) => (
+                      <Link
+                        key={item.id}
+                        href={`/cases/${item.id}`}
+                        onMouseEnter={() => prefetchCaseDetail(item.id)}
+                        className="rounded-[1.2rem] border border-stone-200 bg-stone-50/90 p-4 transition hover:-translate-y-0.5 hover:border-stone-400 hover:bg-white"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold text-stone-900">{item.caseNumber}</p>
+                            <p className="mt-1 text-sm leading-6 text-stone-700">{item.title}</p>
                           </div>
-                        )}
-
-                        {column.items.map((item) => (
-                          <Link
-                            key={item.id}
-                            href={`/cases/${item.id}`}
-                            onMouseEnter={() => prefetchCaseDetail(item.id)}
-                            className="block rounded-[1rem] border border-stone-200 bg-white/92 p-3 transition hover:border-stone-400 hover:bg-white"
-                          >
-                            <div className="flex items-start justify-between gap-3">
-                              <div className="min-w-0">
-                                <p className="text-sm font-semibold text-stone-900">{item.caseNumber}</p>
-                                <p className="mt-1 text-sm leading-6 text-stone-700">{item.title}</p>
-                              </div>
-                            </div>
-                            <p className="mt-2 text-[11px] font-medium uppercase tracking-[0.16em] text-stone-500">
-                              {item.detail}
-                            </p>
-                            <p className="mt-2 text-xs leading-5 text-stone-500">{item.meta}</p>
-                          </Link>
-                        ))}
-                      </div>
-                    </section>
-                  ))}
-                </div>
+                          <span className="rounded-full border border-stone-200 bg-white px-2.5 py-1 text-[11px] font-medium text-stone-700">
+                            {item.lane}
+                          </span>
+                        </div>
+                        <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] font-medium uppercase tracking-[0.16em] text-stone-500">
+                          <span>{item.timing}</span>
+                          <span>Owner {item.owner}</span>
+                        </div>
+                        <p className="mt-2 text-xs leading-5 text-stone-500">{item.meta}</p>
+                      </Link>
+                    ))}
+                  </div>
+                )}
               </section>
             </section>
           </div>
@@ -1396,68 +1310,51 @@ export default function HomePage() {
               </button>
             </div>
 
-            <Link
-              href="/calls"
-              className="app-primary-button mt-5 inline-flex w-full items-center justify-center rounded-[1.4rem] px-4 py-3 text-sm font-medium"
-            >
-              Calls inbox
-            </Link>
-
-            <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-2">
-              <Link
-                href="/knowledge"
-                className="app-secondary-button inline-flex w-full items-center justify-center rounded-[1.3rem] px-4 py-3 text-sm font-medium"
-              >
-                Knowledge
-              </Link>
-
-              <Link
-                href="/records"
-                className="app-secondary-button inline-flex w-full items-center justify-center rounded-[1.3rem] px-4 py-3 text-sm font-medium"
-              >
-                CRM
-              </Link>
+            <div className="mt-5 rounded-[1.4rem] border border-stone-200 bg-white/88 p-4 text-sm text-stone-700">
+              <p className="font-medium text-stone-900">Queue lens</p>
+              <div className="mt-3 flex flex-wrap gap-2 text-xs">
+                <span className="rounded-full border border-stone-200 bg-stone-50 px-2.5 py-1">Tab {({ all: 'All', due_now: 'Due now', overdue: 'Overdue', due_today: 'Due today', waiting: 'Waiting', pickup: 'Pickup next', urgent: 'Urgent', complaints: 'Complaints', unassigned: 'Unassigned', recent: 'Recent', no_next_step: 'No next step' } as Record<string, string>)[tab] ?? tab}</span>
+                <span className="rounded-full border border-stone-200 bg-stone-50 px-2.5 py-1">Status {statusFilter === 'all' ? 'All' : formatLabel(statusFilter)}</span>
+                <span className="rounded-full border border-stone-200 bg-stone-50 px-2.5 py-1">Priority {priorityFilter === 'all' ? 'All' : formatLabel(priorityFilter)}</span>
+              </div>
+              {search && <p className="mt-3 text-xs leading-5 text-stone-500">Search filter active: “{search}”</p>}
             </div>
 
-            <div className="mt-5 rounded-[1.4rem] border border-sky-200 bg-sky-50 p-4 text-sm text-sky-900">
-              <p className="font-medium">Today’s posture</p>
+            <div className="mt-4 rounded-[1.4rem] border border-sky-200 bg-sky-50 p-4 text-sm text-sky-900">
+              <p className="font-medium">Operator brief</p>
               <p className="mt-2 leading-6 text-sky-900/80">{postureSummary}</p>
             </div>
 
             <div className="app-card-muted mt-4 rounded-[1.4rem] p-4">
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-sm font-medium text-stone-900">Operations pulse</p>
-                <span className="text-xs text-stone-500">Jump straight in</span>
-              </div>
-
-              <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-2">
-                {operationsPulseCards.map((card) => (
+              <p className="text-sm font-medium text-stone-900">Case in hand</p>
+              {!selectedCase ? (
+                <p className="mt-3 text-sm leading-6 text-stone-600">Choose a case from the queue and the working summary will stay open alongside the live list.</p>
+              ) : (
+                <div className="mt-3 space-y-3">
+                  <div className="rounded-[1.2rem] border border-stone-200 bg-white/90 p-3">
+                    <p className="text-sm font-semibold text-stone-900">{selectedCase.case_number}</p>
+                    <p className="mt-1 text-sm leading-6 text-stone-600">{selectedCase.summary || 'No summary yet for this case.'}</p>
+                  </div>
                   <Link
-                    key={card.label}
-                    href={card.href}
-                    className={`rounded-[1.25rem] border p-3 transition hover:-translate-y-0.5 ${card.tone}`}
+                    href={`/cases/${selectedCase.id}`}
+                    className="app-primary-button inline-flex w-full items-center justify-center rounded-[1.2rem] px-4 py-3 text-sm font-medium"
                   >
-                    <div className="text-[11px] font-semibold uppercase tracking-[0.18em] opacity-80">
-                      {card.label}
-                    </div>
-                    <div className="mt-2 text-2xl font-semibold">{card.value}</div>
-                    <p className="mt-1 text-xs opacity-80">{card.helper}</p>
+                    Open selected case
                   </Link>
-                ))}
-              </div>
+                </div>
+              )}
             </div>
 
             <div className="app-card-muted mt-4 rounded-[1.4rem] p-4">
-              <p className="text-sm font-medium text-stone-900">Useful defaults</p>
+              <p className="text-sm font-medium text-stone-900">Operator notes</p>
               <ul className="mt-3 space-y-2 text-sm text-stone-600">
-                <li>Keep the selected case open here while triaging similar inbound work.</li>
-                <li>Use “Assign to me” when you intend to own the follow-through.</li>
-                <li>Use the pulse cards when the work is really maintenance, compliance, viewings, or deposit ops.</li>
+                <li>Keep the diary for anything time-bound, scheduled, or waiting on a promised follow-up.</li>
+                <li>Use the pulse cards when the work is really maintenance, compliance, viewings, or deposits.</li>
+                <li>Keep the selected case open while you compare similar inbound work in the live queue.</li>
               </ul>
             </div>
           </aside>
         </div>
-
         {loading && (
           <div className="app-surface mt-6 rounded-[1.8rem] p-6 text-sm text-stone-600">
             Loading the queue...
