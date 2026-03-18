@@ -1,5 +1,6 @@
 import './globals.css'
 import type { Metadata } from 'next'
+import SessionFab from './session-fab'
 
 const defaultSiteUrl = 'https://renovoai.co.uk'
 const siteUrl =
@@ -24,7 +25,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <SessionFab />
+        {children}
+      </body>
     </html>
   )
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSessionUser } from '@/lib/operator'
 import { getPortalProfile, getPortalRoute, type PortalProfile } from '@/lib/portal'
@@ -141,6 +141,10 @@ export default function ContractorPortalPage() {
   const [cases, setCases] = useState<CaseRow[]>([])
   const [maintenance, setMaintenance] = useState<MaintenanceRow[]>([])
   const [quotes, setQuotes] = useState<QuoteRow[]>([])
+  const [caseActionId, setCaseActionId] = useState('')
+  const [messageDraft, setMessageDraft] = useState('')
+  const [actionLoading, setActionLoading] = useState(false)
+  const [actionMessage, setActionMessage] = useState<string | null>(null)
   const liveMessageTimer = useRef<number | null>(null)
 
   const activeJobs = useMemo(
@@ -151,6 +155,21 @@ export default function ContractorPortalPage() {
   const scheduledJobs = useMemo(
     () => maintenance.filter((item) => item.status === 'scheduled'),
     [maintenance]
+  )
+
+  const openCases = useMemo(
+    () => cases.filter((item) => !['resolved', 'closed', 'cancelled'].includes(item.status || '')),
+    [cases]
+  )
+
+  const selectedCaseActionId =
+    caseActionId && openCases.some((item) => item.id === caseActionId)
+      ? caseActionId
+      : openCases[0]?.id || ''
+
+  const actionCase = useMemo(
+    () => openCases.find((item) => item.id === selectedCaseActionId) || openCases[0] || null,
+    [openCases, selectedCaseActionId]
   )
 
   const liveFeed = useMemo<FeedItem[]>(() => {
@@ -194,7 +213,7 @@ export default function ContractorPortalPage() {
       .slice(0, 14)
   }, [cases, maintenance, quotes])
 
-  const showLiveMessage = useEffectEvent((message: string) => {
+  const showLiveMessage = useCallback((message: string) => {
     setLiveMessage(message)
     if (liveMessageTimer.current) {
       window.clearTimeout(liveMessageTimer.current)
@@ -202,9 +221,9 @@ export default function ContractorPortalPage() {
     liveMessageTimer.current = window.setTimeout(() => {
       setLiveMessage('Live job updates connected')
     }, 2400)
-  })
+  }, [])
 
-  const loadPortalData = useEffectEvent(async (profile: PortalProfile) => {
+  const loadPortalData = useCallback(async (profile: PortalProfile) => {
     setError(null)
 
     const { data: contactData, error: contactError } = await supabase
@@ -327,7 +346,41 @@ export default function ContractorPortalPage() {
     setCases((caseResponse.data || []) as CaseRow[])
     setQuotes((quoteResponse.data || []) as QuoteRow[])
     setLoading(false)
-  })
+  }, [])
+
+  async function submitContractorMessage() {
+    if (!portalProfile?.contact_id) return
+
+    if (!actionCase) {
+      setActionMessage('No open linked case is available to message right now.')
+      return
+    }
+
+    if (!messageDraft.trim()) {
+      setActionMessage('Add a short message before sending it to the team.')
+      return
+    }
+
+    setActionLoading(true)
+    setActionMessage(null)
+
+    const response = await supabase.rpc('contractor_add_case_update', {
+      target_case_id: actionCase.id,
+      update_text: messageDraft.trim(),
+    })
+
+    if (response.error) {
+      setActionMessage(response.error.message)
+      setActionLoading(false)
+      return
+    }
+
+    setMessageDraft('')
+    setActionMessage('Your message has been sent to the team.')
+    await loadPortalData(portalProfile)
+    showLiveMessage('Your message has been sent live.')
+    setActionLoading(false)
+  }
 
   useEffect(() => {
     let cancelled = false
@@ -384,7 +437,7 @@ export default function ContractorPortalPage() {
     return () => {
       cancelled = true
     }
-  }, [router])
+  }, [loadPortalData, router])
 
   useEffect(() => {
     if (!portalProfile) return
@@ -409,7 +462,7 @@ export default function ContractorPortalPage() {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [portalProfile])
+  }, [loadPortalData, portalProfile, showLiveMessage])
 
   if (authLoading) {
     return (
@@ -612,6 +665,62 @@ export default function ContractorPortalPage() {
                   <span className="text-sm text-stone-600">No trades stored yet</span>
                 )}
               </div>
+            </div>
+
+            <div className="mt-4 rounded-[1.5rem] border border-stone-200 bg-white p-4">
+              <p className="text-sm font-medium text-stone-900">Message the team</p>
+              <p className="mt-2 text-sm leading-6 text-stone-600">
+                Send a custom update against the linked case so the operations team keeps the full job history in one place.
+              </p>
+
+              <label className="mt-4 block text-sm">
+                <span className="mb-2 block font-medium text-stone-700">Linked case</span>
+                <select
+                  value={selectedCaseActionId}
+                  onChange={(event) => setCaseActionId(event.target.value)}
+                  disabled={!openCases.length || actionLoading}
+                  className="app-field text-sm outline-none disabled:opacity-60"
+                >
+                  {openCases.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.case_number || 'Case'}{item.summary ? ` • ${item.summary}` : ''}
+                    </option>
+                  ))}
+                  {!openCases.length && <option value="">No open linked case available</option>}
+                </select>
+              </label>
+
+              <label className="mt-4 block text-sm">
+                <span className="mb-2 block font-medium text-stone-700">Your message</span>
+                <textarea
+                  value={messageDraft}
+                  onChange={(event) => setMessageDraft(event.target.value)}
+                  rows={4}
+                  disabled={!actionCase || actionLoading}
+                  placeholder="Write a message for the team"
+                  className="app-field min-h-[112px] resize-none text-sm outline-none disabled:opacity-60"
+                />
+              </label>
+
+              <button
+                onClick={() => void submitContractorMessage()}
+                disabled={!actionCase || actionLoading}
+                className="app-primary-button mt-4 w-full rounded-2xl px-4 py-3 text-sm font-medium disabled:opacity-60"
+              >
+                {actionLoading ? 'Sending message...' : 'Send message'}
+              </button>
+
+              {actionCase && (
+                <p className="mt-3 text-xs leading-5 text-stone-500">
+                  Updating {actionCase.case_number || 'the selected case'}
+                </p>
+              )}
+
+              {actionMessage && (
+                <div className="app-card-muted mt-3 rounded-2xl px-4 py-3 text-sm text-stone-700">
+                  {actionMessage}
+                </div>
+              )}
             </div>
 
             <div className="mt-4 rounded-[1.5rem] border border-sky-200 bg-sky-50 p-4 text-sm text-sky-900">

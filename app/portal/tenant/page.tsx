@@ -379,8 +379,8 @@ export default function TenantPortalPage() {
 
     if (action === 'update') {
       setUpdateDraft('')
-      setActionMessage('Your update has been sent to the team.')
-      showLiveMessage('Your update has been sent live.')
+      setActionMessage('Your message has been sent to the team.')
+      showLiveMessage('Your message has been sent live.')
     } else if (action === 'still_waiting') {
       setActionMessage('The team has been nudged that you are still waiting.')
       showLiveMessage('Still waiting signal sent.')
@@ -693,9 +693,9 @@ export default function TenantPortalPage() {
             </div>
 
             <div className="mt-4 rounded-[1.5rem] border border-stone-200 bg-white p-4">
-              <p className="text-sm font-medium text-stone-900">Update this request</p>
+              <p className="text-sm font-medium text-stone-900">Message the team</p>
               <p className="mt-2 text-sm leading-6 text-stone-600">
-                Send a fresh note to the team or quickly tell them if you are still waiting or the issue now looks resolved.
+                Send a custom message to the team or quickly tell them if you are still waiting or the issue now looks resolved.
               </p>
 
               <label className="mt-4 block text-sm">
@@ -716,13 +716,13 @@ export default function TenantPortalPage() {
               </label>
 
               <label className="mt-4 block text-sm">
-                <span className="mb-2 block font-medium text-stone-700">Your update</span>
+                <span className="mb-2 block font-medium text-stone-700">Your message</span>
                 <textarea
                   value={updateDraft}
                   onChange={(event) => setUpdateDraft(event.target.value)}
                   rows={4}
                   disabled={!actionCase || actionLoading !== null}
-                  placeholder="Add a short update for the team"
+                  placeholder="Write a message for the team"
                   className="app-field min-h-[120px] resize-none text-sm outline-none disabled:opacity-60"
                 />
               </label>
@@ -733,7 +733,7 @@ export default function TenantPortalPage() {
                   disabled={!actionCase || actionLoading !== null}
                   className="app-primary-button rounded-2xl px-4 py-3 text-sm font-medium disabled:opacity-60"
                 >
-                  {actionLoading === 'update' ? 'Sending update...' : 'Send update'}
+                  {actionLoading === 'update' ? 'Sending message...' : 'Send message'}
                 </button>
 
                 <div className="grid gap-3 sm:grid-cols-2">

@@ -183,7 +183,7 @@ export default function LandlordPortalPage() {
   const [approvalNote, setApprovalNote] = useState('')
   const [caseActionId, setCaseActionId] = useState('')
   const [signalNote, setSignalNote] = useState('')
-  const [actionLoading, setActionLoading] = useState<'approve_quote' | 'need_more_detail' | 'request_callback' | null>(null)
+  const [actionLoading, setActionLoading] = useState<'approve_quote' | 'send_message' | 'need_more_detail' | 'request_callback' | null>(null)
   const [actionMessage, setActionMessage] = useState<string | null>(null)
   const liveMessageTimer = useRef<number | null>(null)
 
@@ -537,6 +537,40 @@ export default function LandlordPortalPage() {
     setViewings((viewingResponse.data || []) as ViewingRow[])
     setLoading(false)
   }, [])
+
+  async function submitLandlordMessage() {
+    if (!portalProfile?.contact_id) return
+
+    if (!actionCase) {
+      setActionMessage('No open case is available to message right now.')
+      return
+    }
+
+    if (!signalNote.trim()) {
+      setActionMessage('Add a short message before sending it to the team.')
+      return
+    }
+
+    setActionLoading('send_message')
+    setActionMessage(null)
+
+    const response = await supabase.rpc('landlord_add_case_update', {
+      target_case_id: actionCase.id,
+      update_text: signalNote.trim(),
+    })
+
+    if (response.error) {
+      setActionMessage(response.error.message)
+      setActionLoading(null)
+      return
+    }
+
+    setSignalNote('')
+    setActionMessage('Your message has been sent to the team.')
+    showLiveMessage('Your message has been sent live.')
+    await loadPortalData(portalProfile.contact_id)
+    setActionLoading(null)
+  }
 
   async function submitLandlordQuoteApproval() {
     if (!portalProfile?.contact_id) return
@@ -1010,7 +1044,7 @@ export default function LandlordPortalPage() {
               </div>
 
               <div className="mt-4 rounded-[1.25rem] border border-stone-200 bg-stone-50/70 p-4">
-                <p className="text-sm font-medium text-stone-900">Case request</p>
+                <p className="text-sm font-medium text-stone-900">Message the team</p>
 
                 <label className="mt-3 block text-sm">
                   <span className="mb-2 block font-medium text-stone-700">Case</span>
@@ -1030,16 +1064,24 @@ export default function LandlordPortalPage() {
                 </label>
 
                 <label className="mt-3 block text-sm">
-                  <span className="mb-2 block font-medium text-stone-700">Message for the team</span>
+                  <span className="mb-2 block font-medium text-stone-700">Your message</span>
                   <textarea
                     value={signalNote}
                     onChange={(event) => setSignalNote(event.target.value)}
                     rows={3}
                     disabled={!actionCase || actionLoading !== null}
-                    placeholder="What detail do you need, or what should they know before calling?"
+                    placeholder="Write a message for the team"
                     className="app-field min-h-[96px] resize-none text-sm outline-none disabled:opacity-60"
                   />
                 </label>
+
+                <button
+                  onClick={() => void submitLandlordMessage()}
+                  disabled={!actionCase || actionLoading !== null}
+                  className="app-primary-button mt-4 w-full rounded-2xl px-4 py-3 text-sm font-medium disabled:opacity-60"
+                >
+                  {actionLoading === 'send_message' ? 'Sending message...' : 'Send message'}
+                </button>
 
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   <button
