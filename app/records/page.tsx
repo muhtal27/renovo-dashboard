@@ -11,7 +11,7 @@ import {
 } from '@/lib/operator'
 import { supabase } from '@/lib/supabase'
 
-type RecordTab = 'all' | 'tenant' | 'landlord' | 'contractor' | 'applicant'
+type LifecycleTab = 'all' | 'at_risk' | 'arrears' | 'ending_soon' | 'deposits'
 type WaitingOn = 'none' | 'tenant' | 'landlord' | 'contractor' | 'internal'
 
 type ContactRow = {
@@ -19,43 +19,7 @@ type ContactRow = {
   full_name: string | null
   phone: string | null
   email: string | null
-  role: string | null
   company_name: string | null
-  contact_type: string | null
-  notes: string | null
-  is_active: boolean
-  created_at: string | null
-  updated_at: string | null
-}
-
-type CaseRow = {
-  id: string
-  case_number: string | null
-  summary: string | null
-  status: string | null
-  priority: string | null
-  contact_id: string | null
-  property_id: string | null
-  next_action_at: string | null
-  waiting_on: WaitingOn | null
-  waiting_reason: string | null
-  created_at: string | null
-  updated_at: string | null
-  last_activity_at: string | null
-}
-
-type CallRow = {
-  id: string
-  contact_id: string | null
-  case_id: string | null
-  status: string | null
-  intent: string | null
-  ai_summary: string | null
-  caller_phone: string | null
-  last_event_at: string | null
-  started_at: string | null
-  ended_at: string | null
-  needs_operator_review: boolean | null
 }
 
 type PropertyRow = {
@@ -64,8 +28,6 @@ type PropertyRow = {
   address_line_2: string | null
   city: string | null
   postcode: string | null
-  landlord_contact_id: string | null
-  updated_at: string | null
 }
 
 type TenancyRow = {
@@ -77,116 +39,135 @@ type TenancyRow = {
   tenancy_status: string | null
   start_date: string | null
   end_date: string | null
-  rent_amount: number | null
-  deposit_amount: number | null
+  rent_amount: number | string | null
+  deposit_amount: number | string | null
   updated_at: string | null
 }
 
-type ContractorRow = {
+type CaseRow = {
   id: string
-  contact_id: string
-  company_name: string | null
-  primary_trade: string
-  coverage_area: string | null
-  emergency_callout: boolean
-  is_active: boolean
+  case_number: string | null
+  tenancy_id: string | null
+  property_id: string | null
+  case_type: string | null
+  summary: string | null
+  status: string | null
+  priority: string | null
+  next_action_at: string | null
+  waiting_on: WaitingOn | null
   updated_at: string | null
 }
 
-type ContactMethodRow = {
+type RentEntryRow = {
   id: string
-  contact_id: string
-  method_type: string
-  method_value: string
-  is_primary: boolean
-  created_at: string | null
+  tenancy_id: string
+  entry_type: 'charge' | 'payment' | 'credit' | 'adjustment'
+  status: 'open' | 'cleared' | 'void'
+  amount: number | string
+  due_date: string | null
+  posted_at: string | null
+  category: string | null
+  reference: string | null
 }
 
-type ContactStats = {
-  cases: number
-  calls: number
-  properties: number
-  tenancies: number
+type LeaseEventRow = {
+  id: string
+  tenancy_id: string
+  event_type: string
+  status: 'planned' | 'due' | 'completed' | 'cancelled'
+  scheduled_for: string | null
+  completed_at: string | null
+  note: string | null
 }
 
-const WAITING_ON_LABELS: Record<WaitingOn, string> = {
-  none: 'No wait',
-  tenant: 'Waiting on tenant',
-  landlord: 'Waiting on landlord',
-  contractor: 'Waiting on contractor',
-  internal: 'Waiting internally',
+type DepositClaimRow = {
+  id: string
+  tenancy_id: string
+  claim_status: string
+  disputed_amount: number | string | null
+  total_claim_amount: number | string | null
+  updated_at: string | null
 }
 
-function formatRelativeTime(value: string | null) {
-  if (!value) return 'No recent activity'
-
-  const diffMs = Date.now() - new Date(value).getTime()
-  const diffMinutes = Math.max(1, Math.floor(diffMs / 60000))
-
-  if (diffMinutes < 60) return `${diffMinutes}m ago`
-
-  const diffHours = Math.floor(diffMinutes / 60)
-  if (diffHours < 24) return `${diffHours}h ago`
-
-  const diffDays = Math.floor(diffHours / 24)
-  return `${diffDays}d ago`
+type TenancyHealth = {
+  balance: number
+  overdue: number
+  dueEvents: number
+  openCases: number
+  urgentCases: number
+  disputedClaims: number
+  endingSoon: boolean
 }
 
-function formatShortDate(value: string | null) {
+function toNumber(value: number | string | null | undefined) {
+  if (typeof value === 'number') return value
+  if (typeof value === 'string' && value.trim() !== '') return Number(value)
+  return 0
+}
+
+function formatMoney(value: number | string | null | undefined) {
+  return new Intl.NumberFormat('en-GB', {
+    style: 'currency',
+    currency: 'GBP',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(toNumber(value))
+}
+
+function formatDate(value: string | null) {
   if (!value) return '-'
-
-  return new Date(value).toLocaleDateString([], {
+  return new Date(value).toLocaleDateString('en-GB', {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
   })
 }
 
-function formatDateTime(value: string | null) {
-  if (!value) return '-'
-
-  return new Date(value).toLocaleString([], {
-    day: 'numeric',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+function formatRelativeTime(value: string | null) {
+  if (!value) return 'No recent activity'
+  const diffMs = Date.now() - new Date(value).getTime()
+  const diffMinutes = Math.max(1, Math.floor(diffMs / 60000))
+  if (diffMinutes < 60) return `${diffMinutes}m ago`
+  const diffHours = Math.floor(diffMinutes / 60)
+  if (diffHours < 24) return `${diffHours}h ago`
+  return `${Math.floor(diffHours / 24)}d ago`
 }
 
-function formatMoney(value: number | null) {
-  if (value === null || value === undefined) return '-'
-
-  return new Intl.NumberFormat('en-GB', {
-    style: 'currency',
-    currency: 'GBP',
-    maximumFractionDigits: 0,
-  }).format(value)
-}
-
-function formatCategoryLabel(value: string | null) {
-  if (!value) return 'General contact'
+function formatLabel(value: string | null) {
+  if (!value) return 'Unknown'
   return value.replace(/_/g, ' ')
 }
 
-function buildAddress(property: Pick<PropertyRow, 'address_line_1' | 'address_line_2' | 'city' | 'postcode'>) {
+function getContactName(contact: ContactRow | null) {
+  if (!contact) return 'Unknown'
+  return contact.full_name?.trim() || contact.company_name?.trim() || contact.email || contact.phone || 'Unknown'
+}
+
+function buildAddress(property: PropertyRow | null) {
+  if (!property) return 'Unknown property'
   return [property.address_line_1, property.address_line_2, property.city, property.postcode]
     .filter(Boolean)
     .join(', ')
 }
 
-function getCaseNextStepSummary(item: Pick<CaseRow, 'next_action_at' | 'waiting_on' | 'waiting_reason'>) {
-  const waitingOn = item.waiting_on && item.waiting_on !== 'none' ? WAITING_ON_LABELS[item.waiting_on] : null
-  const waitingReason = item.waiting_reason?.trim() || null
+function isActiveTenancy(tenancy: TenancyRow) {
+  return tenancy.tenancy_status === 'active' || tenancy.status === 'active'
+}
 
-  if (item.next_action_at) {
-    return `Next step ${formatDateTime(item.next_action_at)}${waitingOn ? ` • ${waitingOn.toLowerCase()}` : ''}`
-  }
+function isEndingSoon(endDate: string | null) {
+  if (!endDate) return false
+  const today = new Date()
+  const end = new Date(endDate)
+  const inFortyFiveDays = new Date()
+  inFortyFiveDays.setDate(today.getDate() + 45)
+  return end >= today && end <= inFortyFiveDays
+}
 
-  if (waitingOn) {
-    return waitingReason ? `${waitingOn} • ${waitingReason}` : waitingOn
-  }
-
-  return 'No next step set'
+function getStageLabel(tenancy: TenancyRow) {
+  if (tenancy.tenancy_status === 'ended' || tenancy.status === 'ended') return 'Ended tenancy'
+  if (isEndingSoon(tenancy.end_date)) return 'Renewal window'
+  if (isActiveTenancy(tenancy)) return 'Active tenancy'
+  return formatLabel(tenancy.tenancy_status || tenancy.status)
 }
 
 function getPriorityTone(value: string | null) {
@@ -196,65 +177,33 @@ function getPriorityTone(value: string | null) {
   return 'border-stone-200 bg-stone-50 text-stone-700'
 }
 
-function getCallStatusTone(value: string | null) {
-  if (value === 'in_progress' || value === 'ringing' || value === 'initiated') {
-    return 'border-emerald-200 bg-emerald-50 text-emerald-700'
-  }
-  if (value === 'completed') return 'border-sky-200 bg-sky-50 text-sky-700'
-  if (value === 'failed' || value === 'abandoned') return 'border-red-200 bg-red-50 text-red-700'
-  if (value === 'voicemail') return 'border-amber-200 bg-amber-50 text-amber-800'
-  return 'border-stone-200 bg-stone-50 text-stone-700'
+function getLifecycleTone(status: LeaseEventRow['status']) {
+  if (status === 'due') return 'border-red-200 bg-red-50 text-red-700'
+  if (status === 'completed') return 'border-emerald-200 bg-emerald-50 text-emerald-700'
+  if (status === 'planned') return 'border-sky-200 bg-sky-50 text-sky-700'
+  return 'border-stone-200 bg-stone-100 text-stone-600'
 }
 
-function getContactName(contact: ContactRow) {
-  return contact.full_name?.trim() || contact.company_name?.trim() || contact.phone || 'Unknown contact'
+function getClaimTone(status: string) {
+  if (status === 'disputed') return 'border-red-200 bg-red-50 text-red-700'
+  if (status === 'resolved') return 'border-emerald-200 bg-emerald-50 text-emerald-700'
+  return 'border-amber-200 bg-amber-50 text-amber-800'
 }
 
-function getRoleSignals(contact: ContactRow) {
-  return `${contact.role || ''} ${contact.contact_type || ''} ${contact.company_name || ''}`.toLowerCase()
+function getTenancyHealthLabel(health: TenancyHealth) {
+  if (health.overdue > 0 || health.urgentCases > 0 || health.disputedClaims > 0) return 'Needs intervention'
+  if (health.dueEvents > 0 || health.endingSoon || health.openCases > 0) return 'Needs attention'
+  return 'On track'
 }
 
-function getContactBuckets(
-  contact: ContactRow,
-  context: {
-    contractorIds: Set<string>
-    tenantIds: Set<string>
-    landlordIds: Set<string>
+function getTenancyHealthTone(health: TenancyHealth) {
+  if (health.overdue > 0 || health.urgentCases > 0 || health.disputedClaims > 0) {
+    return 'border-red-200 bg-red-50 text-red-700'
   }
-) {
-  const signals = getRoleSignals(contact)
-  const buckets = new Set<RecordTab>(['all'])
-
-  if (
-    context.tenantIds.has(contact.id) ||
-    signals.includes('tenant') ||
-    signals.includes('resident')
-  ) {
-    buckets.add('tenant')
+  if (health.dueEvents > 0 || health.endingSoon || health.openCases > 0) {
+    return 'border-amber-200 bg-amber-50 text-amber-800'
   }
-
-  if (
-    context.landlordIds.has(contact.id) ||
-    signals.includes('landlord') ||
-    signals.includes('owner')
-  ) {
-    buckets.add('landlord')
-  }
-
-  if (
-    context.contractorIds.has(contact.id) ||
-    signals.includes('contractor') ||
-    signals.includes('trade') ||
-    signals.includes('engineer')
-  ) {
-    buckets.add('contractor')
-  }
-
-  if (signals.includes('applicant') || signals.includes('viewer') || signals.includes('prospect')) {
-    buckets.add('applicant')
-  }
-
-  return Array.from(buckets)
+  return 'border-emerald-200 bg-emerald-50 text-emerald-700'
 }
 
 export default function RecordsPage() {
@@ -264,110 +213,68 @@ export default function RecordsPage() {
   const [authLoading, setAuthLoading] = useState(true)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [signingOut, setSigningOut] = useState(false)
 
   const [contacts, setContacts] = useState<ContactRow[]>([])
-  const [cases, setCases] = useState<CaseRow[]>([])
-  const [calls, setCalls] = useState<CallRow[]>([])
   const [properties, setProperties] = useState<PropertyRow[]>([])
   const [tenancies, setTenancies] = useState<TenancyRow[]>([])
-  const [contractors, setContractors] = useState<ContractorRow[]>([])
-  const [contactMethods, setContactMethods] = useState<ContactMethodRow[]>([])
+  const [cases, setCases] = useState<CaseRow[]>([])
+  const [entries, setEntries] = useState<RentEntryRow[]>([])
+  const [events, setEvents] = useState<LeaseEventRow[]>([])
+  const [claims, setClaims] = useState<DepositClaimRow[]>([])
 
-  const [tab, setTab] = useState<RecordTab>('all')
+  const [tab, setTab] = useState<LifecycleTab>('all')
   const [search, setSearch] = useState('')
-  const [selectedContactId, setSelectedContactId] = useState<string | null>(null)
+  const [selectedTenancyId, setSelectedTenancyId] = useState<string | null>(null)
 
   const operatorUserId = operator?.authUser?.id ?? null
 
   const hydrateOperatorProfile = useEffectEvent(async (userId: string) => {
     try {
       const profile = await getOperatorProfile(userId)
-
       setOperator((current) => {
         if (!current?.authUser || current.authUser.id !== userId) return current
-        return {
-          ...current,
-          profile,
-        }
+        return { ...current, profile }
       })
-
       if (profile?.is_active === false) {
         setError('Your operator profile is inactive. Please contact an administrator.')
       }
     } catch (profileError) {
-      setError(
-        profileError instanceof Error
-          ? profileError.message
-          : 'Unable to load operator profile.'
-      )
+      setError(profileError instanceof Error ? profileError.message : 'Unable to load operator profile.')
     }
   })
 
-  const loadRecords = useEffectEvent(async () => {
+  const loadWorkspace = useEffectEvent(async () => {
     if (!operatorUserId) return
-
     setLoading(true)
     setError(null)
 
     const [
       contactsResponse,
-      casesResponse,
-      callsResponse,
       propertiesResponse,
       tenanciesResponse,
-      contractorsResponse,
-      contactMethodsResponse,
+      casesResponse,
+      entriesResponse,
+      eventsResponse,
+      claimsResponse,
     ] = await Promise.all([
-      supabase
-        .from('contacts')
-        .select(
-          'id, full_name, phone, email, role, company_name, contact_type, notes, is_active, created_at, updated_at'
-        )
-        .order('updated_at', { ascending: false }),
-      supabase
-        .from('cases')
-        .select(
-          'id, case_number, summary, status, priority, contact_id, property_id, next_action_at, waiting_on, waiting_reason, created_at, updated_at, last_activity_at'
-        )
-        .order('updated_at', { ascending: false })
-        .limit(500),
-      supabase
-        .from('call_sessions')
-        .select(
-          'id, contact_id, case_id, status, intent, ai_summary, caller_phone, last_event_at, started_at, ended_at, needs_operator_review'
-        )
-        .order('last_event_at', { ascending: false })
-        .limit(500),
-      supabase
-        .from('properties')
-        .select('id, address_line_1, address_line_2, city, postcode, landlord_contact_id, updated_at')
-        .order('updated_at', { ascending: false }),
-      supabase
-        .from('tenancies')
-        .select(
-          'id, property_id, tenant_contact_id, landlord_contact_id, status, tenancy_status, start_date, end_date, rent_amount, deposit_amount, updated_at'
-        )
-        .order('updated_at', { ascending: false }),
-      supabase
-        .from('contractors')
-        .select(
-          'id, contact_id, company_name, primary_trade, coverage_area, emergency_callout, is_active, updated_at'
-        )
-        .order('updated_at', { ascending: false }),
-      supabase
-        .from('contact_methods')
-        .select('id, contact_id, method_type, method_value, is_primary, created_at')
-        .order('created_at', { ascending: false }),
+      supabase.from('contacts').select('id, full_name, phone, email, company_name').order('updated_at', { ascending: false }),
+      supabase.from('properties').select('id, address_line_1, address_line_2, city, postcode').order('updated_at', { ascending: false }),
+      supabase.from('tenancies').select('id, property_id, tenant_contact_id, landlord_contact_id, status, tenancy_status, start_date, end_date, rent_amount, deposit_amount, updated_at').order('updated_at', { ascending: false }).limit(1200),
+      supabase.from('cases').select('id, case_number, tenancy_id, property_id, case_type, summary, status, priority, next_action_at, waiting_on, updated_at').order('updated_at', { ascending: false }).limit(1500),
+      supabase.from('rent_ledger_entries').select('id, tenancy_id, entry_type, status, amount, due_date, posted_at, category, reference').order('posted_at', { ascending: false }).limit(2000),
+      supabase.from('lease_lifecycle_events').select('id, tenancy_id, event_type, status, scheduled_for, completed_at, note').order('scheduled_for', { ascending: true }).limit(2000),
+      supabase.from('deposit_claims').select('id, tenancy_id, claim_status, disputed_amount, total_claim_amount, updated_at').order('updated_at', { ascending: false }).limit(1200),
     ])
 
     const firstError = [
       contactsResponse.error,
-      casesResponse.error,
-      callsResponse.error,
       propertiesResponse.error,
       tenanciesResponse.error,
-      contractorsResponse.error,
-      contactMethodsResponse.error,
+      casesResponse.error,
+      entriesResponse.error,
+      eventsResponse.error,
+      claimsResponse.error,
     ].find(Boolean)
 
     if (firstError) {
@@ -377,12 +284,12 @@ export default function RecordsPage() {
     }
 
     setContacts((contactsResponse.data || []) as ContactRow[])
-    setCases((casesResponse.data || []) as CaseRow[])
-    setCalls((callsResponse.data || []) as CallRow[])
     setProperties((propertiesResponse.data || []) as PropertyRow[])
     setTenancies((tenanciesResponse.data || []) as TenancyRow[])
-    setContractors((contractorsResponse.data || []) as ContractorRow[])
-    setContactMethods((contactMethodsResponse.data || []) as ContactMethodRow[])
+    setCases((casesResponse.data || []) as CaseRow[])
+    setEntries((entriesResponse.data || []) as RentEntryRow[])
+    setEvents((eventsResponse.data || []) as LeaseEventRow[])
+    setClaims((claimsResponse.data || []) as DepositClaimRow[])
     setLoading(false)
   })
 
@@ -392,19 +299,13 @@ export default function RecordsPage() {
     async function bootstrapAuth() {
       try {
         const user = await getSessionUser()
-
         if (cancelled) return
-
         if (!user) {
           router.replace('/login')
           setAuthLoading(false)
           return
         }
-
-        setOperator({
-          authUser: user,
-          profile: null,
-        })
+        setOperator({ authUser: user, profile: null })
         setAuthLoading(false)
         void hydrateOperatorProfile(user.id)
       } catch (authError) {
@@ -415,7 +316,7 @@ export default function RecordsPage() {
       }
     }
 
-    bootstrapAuth()
+    void bootstrapAuth()
 
     const {
       data: { subscription },
@@ -427,24 +328,10 @@ export default function RecordsPage() {
         return
       }
 
-      try {
-        const user = session.user
-        if (!cancelled) {
-          setOperator({
-            authUser: user,
-            profile: null,
-          })
-        }
+      if (!cancelled) {
+        setOperator({ authUser: session.user, profile: null })
         setAuthLoading(false)
-        void hydrateOperatorProfile(user.id)
-      } catch (authError) {
-        if (!cancelled) {
-          setError(authError instanceof Error ? authError.message : 'Unable to refresh operator session.')
-        }
-      } finally {
-        if (!cancelled) {
-          setAuthLoading(false)
-        }
+        void hydrateOperatorProfile(session.user.id)
       }
     })
 
@@ -456,892 +343,605 @@ export default function RecordsPage() {
 
   useEffect(() => {
     if (!operatorUserId) return
-    void loadRecords()
+    void loadWorkspace()
   }, [operatorUserId])
 
-  const contractorByContactId = useMemo(
-    () => new Map(contractors.map((contractor) => [contractor.contact_id, contractor])),
-    [contractors]
-  )
+  const contactById = useMemo(() => new Map(contacts.map((contact) => [contact.id, contact])), [contacts])
+  const propertyById = useMemo(() => new Map(properties.map((property) => [property.id, property])), [properties])
 
-  const tenantIds = useMemo(
-    () => new Set(tenancies.map((tenancy) => tenancy.tenant_contact_id).filter(Boolean) as string[]),
-    [tenancies]
-  )
-
-  const landlordIds = useMemo(() => {
-    const ids = new Set<string>()
-
-    for (const property of properties) {
-      if (property.landlord_contact_id) ids.add(property.landlord_contact_id)
+  const casesByTenancyId = useMemo(() => {
+    const map = new Map<string, CaseRow[]>()
+    for (const item of cases) {
+      if (!item.tenancy_id) continue
+      const existing = map.get(item.tenancy_id) ?? []
+      existing.push(item)
+      map.set(item.tenancy_id, existing)
     }
+    return map
+  }, [cases])
+
+  const entriesByTenancyId = useMemo(() => {
+    const map = new Map<string, RentEntryRow[]>()
+    for (const item of entries) {
+      const existing = map.get(item.tenancy_id) ?? []
+      existing.push(item)
+      map.set(item.tenancy_id, existing)
+    }
+    return map
+  }, [entries])
+
+  const eventsByTenancyId = useMemo(() => {
+    const map = new Map<string, LeaseEventRow[]>()
+    for (const item of events) {
+      const existing = map.get(item.tenancy_id) ?? []
+      existing.push(item)
+      map.set(item.tenancy_id, existing)
+    }
+    return map
+  }, [events])
+
+  const claimsByTenancyId = useMemo(() => {
+    const map = new Map<string, DepositClaimRow[]>()
+    for (const item of claims) {
+      const existing = map.get(item.tenancy_id) ?? []
+      existing.push(item)
+      map.set(item.tenancy_id, existing)
+    }
+    return map
+  }, [claims])
+
+  const healthByTenancyId = useMemo(() => {
+    const map = new Map<string, TenancyHealth>()
 
     for (const tenancy of tenancies) {
-      if (tenancy.landlord_contact_id) ids.add(tenancy.landlord_contact_id)
-    }
+      const tenancyEntries = entriesByTenancyId.get(tenancy.id) ?? []
+      const tenancyEvents = eventsByTenancyId.get(tenancy.id) ?? []
+      const tenancyCases = casesByTenancyId.get(tenancy.id) ?? []
+      const tenancyClaims = claimsByTenancyId.get(tenancy.id) ?? []
 
-    return ids
-  }, [properties, tenancies])
+      const stats = tenancyEntries.reduce(
+        (acc, entry) => {
+          const amount = toNumber(entry.amount)
+          const isDebit = entry.entry_type === 'charge' || entry.entry_type === 'adjustment'
+          const isCredit = entry.entry_type === 'payment' || entry.entry_type === 'credit'
+          const dueInPast = entry.due_date ? new Date(entry.due_date) < new Date() : false
 
-  const contactBucketsById = useMemo(() => {
-    const buckets = new Map<string, RecordTab[]>()
+          if (entry.status !== 'void') {
+            if (isDebit) acc.balance += amount
+            if (isCredit) acc.balance -= amount
+          }
 
-    for (const contact of contacts) {
-      buckets.set(
-        contact.id,
-        getContactBuckets(contact, {
-          contractorIds: new Set(contractors.map((contractor) => contractor.contact_id)),
-          tenantIds,
-          landlordIds,
-        })
+          if (entry.status === 'open' && isDebit && dueInPast) {
+            acc.overdue += amount
+          }
+
+          return acc
+        },
+        { balance: 0, overdue: 0 }
       )
-    }
 
-    return buckets
-  }, [contacts, contractors, landlordIds, tenantIds])
-
-  const propertyIdsByContactId = useMemo(() => {
-    const map = new Map<string, Set<string>>()
-
-    const add = (contactId: string | null, propertyId: string | null) => {
-      if (!contactId || !propertyId) return
-      const existing = map.get(contactId) ?? new Set<string>()
-      existing.add(propertyId)
-      map.set(contactId, existing)
-    }
-
-    for (const property of properties) add(property.landlord_contact_id, property.id)
-    for (const tenancy of tenancies) {
-      add(tenancy.tenant_contact_id, tenancy.property_id)
-      add(tenancy.landlord_contact_id, tenancy.property_id)
+      map.set(tenancy.id, {
+        balance: stats.balance,
+        overdue: stats.overdue,
+        dueEvents: tenancyEvents.filter((item) => item.status === 'due').length,
+        openCases: tenancyCases.filter((item) => item.status !== 'resolved' && item.status !== 'closed').length,
+        urgentCases: tenancyCases.filter((item) => item.priority === 'urgent').length,
+        disputedClaims: tenancyClaims.filter((item) => item.claim_status === 'disputed').length,
+        endingSoon: isEndingSoon(tenancy.end_date),
+      })
     }
 
     return map
-  }, [properties, tenancies])
+  }, [casesByTenancyId, claimsByTenancyId, entriesByTenancyId, eventsByTenancyId, tenancies])
 
-  const contactStatsById = useMemo(() => {
-    const stats = new Map<string, ContactStats>()
-
-    const getStats = (contactId: string) =>
-      stats.get(contactId) || {
-        cases: 0,
-        calls: 0,
-        properties: 0,
-        tenancies: 0,
-      }
-
-    for (const contact of contacts) {
-      stats.set(contact.id, getStats(contact.id))
-    }
-
-    for (const call of calls) {
-      if (!call.contact_id) continue
-      const next = getStats(call.contact_id)
-      next.calls += 1
-      stats.set(call.contact_id, next)
-    }
-
-    for (const tenancy of tenancies) {
-      if (tenancy.tenant_contact_id) {
-        const next = getStats(tenancy.tenant_contact_id)
-        next.tenancies += 1
-        stats.set(tenancy.tenant_contact_id, next)
-      }
-      if (tenancy.landlord_contact_id) {
-        const next = getStats(tenancy.landlord_contact_id)
-        next.tenancies += 1
-        stats.set(tenancy.landlord_contact_id, next)
-      }
-    }
-
-    for (const property of properties) {
-      if (!property.landlord_contact_id) continue
-      const next = getStats(property.landlord_contact_id)
-      next.properties += 1
-      stats.set(property.landlord_contact_id, next)
-    }
-
-    for (const caseItem of cases) {
-      const touched = new Set<string>()
-
-      if (caseItem.contact_id) touched.add(caseItem.contact_id)
-
-      if (caseItem.property_id) {
-        for (const [contactId, propertyIds] of propertyIdsByContactId.entries()) {
-          if (propertyIds.has(caseItem.property_id)) touched.add(contactId)
-        }
-      }
-
-      for (const contactId of touched) {
-        const next = getStats(contactId)
-        next.cases += 1
-        stats.set(contactId, next)
-      }
-    }
-
-    return stats
-  }, [calls, cases, contacts, properties, propertyIdsByContactId, tenancies])
-
-  const filteredContacts = useMemo(() => {
+  const filteredTenancies = useMemo(() => {
     const query = search.trim().toLowerCase()
 
-    return contacts
-      .filter((contact) => {
-        const buckets = contactBucketsById.get(contact.id) || ['all']
-        const matchesTab = tab === 'all' || buckets.includes(tab)
-        const matchesSearch =
-          query === '' ||
-          getContactName(contact).toLowerCase().includes(query) ||
-          contact.phone?.toLowerCase().includes(query) ||
-          contact.email?.toLowerCase().includes(query) ||
-          contact.company_name?.toLowerCase().includes(query) ||
-          contact.role?.toLowerCase().includes(query) ||
-          contact.contact_type?.toLowerCase().includes(query)
+    return tenancies.filter((tenancy) => {
+      const tenant = tenancy.tenant_contact_id ? contactById.get(tenancy.tenant_contact_id) ?? null : null
+      const landlord = tenancy.landlord_contact_id ? contactById.get(tenancy.landlord_contact_id) ?? null : null
+      const property = tenancy.property_id ? propertyById.get(tenancy.property_id) ?? null : null
+      const health = healthByTenancyId.get(tenancy.id) ?? {
+        balance: 0,
+        overdue: 0,
+        dueEvents: 0,
+        openCases: 0,
+        urgentCases: 0,
+        disputedClaims: 0,
+        endingSoon: false,
+      }
 
-        return matchesTab && matchesSearch
-      })
-      .sort((left, right) => {
-        const leftUpdated = new Date(left.updated_at ?? left.created_at ?? 0).getTime()
-        const rightUpdated = new Date(right.updated_at ?? right.created_at ?? 0).getTime()
-        return rightUpdated - leftUpdated
-      })
-  }, [contactBucketsById, contacts, search, tab])
+      const matchesSearch =
+        query === '' ||
+        getContactName(tenant).toLowerCase().includes(query) ||
+        getContactName(landlord).toLowerCase().includes(query) ||
+        buildAddress(property).toLowerCase().includes(query)
 
-  useEffect(() => {
-    if (!filteredContacts.length) {
-      setSelectedContactId(null)
+      const atRisk = health.overdue > 0 || health.dueEvents > 0 || health.urgentCases > 0 || health.disputedClaims > 0
+      const matchesTab =
+        tab === 'all' ||
+        (tab === 'at_risk' && atRisk) ||
+        (tab === 'arrears' && health.overdue > 0) ||
+        (tab === 'ending_soon' && health.endingSoon) ||
+        (tab === 'deposits' && health.disputedClaims > 0)
+
+      return matchesSearch && matchesTab
+    })
+  }, [contactById, healthByTenancyId, propertyById, search, tab, tenancies])
+
+  const resolvedSelectedTenancyId =
+    selectedTenancyId && filteredTenancies.some((tenancy) => tenancy.id === selectedTenancyId)
+      ? selectedTenancyId
+      : filteredTenancies[0]?.id ?? null
+
+  const selectedTenancy = useMemo(
+    () => tenancies.find((tenancy) => tenancy.id === resolvedSelectedTenancyId) ?? null,
+    [resolvedSelectedTenancyId, tenancies]
+  )
+
+  const selectedTenant = selectedTenancy?.tenant_contact_id
+    ? contactById.get(selectedTenancy.tenant_contact_id) ?? null
+    : null
+  const selectedLandlord = selectedTenancy?.landlord_contact_id
+    ? contactById.get(selectedTenancy.landlord_contact_id) ?? null
+    : null
+  const selectedProperty = selectedTenancy?.property_id
+    ? propertyById.get(selectedTenancy.property_id) ?? null
+    : null
+  const selectedCases = useMemo(
+    () => (selectedTenancy ? (casesByTenancyId.get(selectedTenancy.id) ?? []) : []),
+    [casesByTenancyId, selectedTenancy]
+  )
+  const selectedEntries = useMemo(
+    () =>
+      selectedTenancy
+        ? [...(entriesByTenancyId.get(selectedTenancy.id) ?? [])].sort((left, right) => {
+            const leftTime = new Date(left.due_date || left.posted_at || 0).getTime()
+            const rightTime = new Date(right.due_date || right.posted_at || 0).getTime()
+            return rightTime - leftTime
+          })
+        : [],
+    [entriesByTenancyId, selectedTenancy]
+  )
+  const selectedEvents = useMemo(
+    () =>
+      selectedTenancy
+        ? [...(eventsByTenancyId.get(selectedTenancy.id) ?? [])].sort((left, right) => {
+            const leftTime = new Date(left.scheduled_for || left.completed_at || 0).getTime()
+            const rightTime = new Date(right.scheduled_for || right.completed_at || 0).getTime()
+            return leftTime - rightTime
+          })
+        : [],
+    [eventsByTenancyId, selectedTenancy]
+  )
+  const selectedClaims = useMemo(
+    () => (selectedTenancy ? claimsByTenancyId.get(selectedTenancy.id) ?? [] : []),
+    [claimsByTenancyId, selectedTenancy]
+  )
+  const selectedHealth = useMemo(
+    () =>
+      (selectedTenancy && healthByTenancyId.get(selectedTenancy.id)) || {
+        balance: 0,
+        overdue: 0,
+        dueEvents: 0,
+        openCases: 0,
+        urgentCases: 0,
+        disputedClaims: 0,
+        endingSoon: false,
+      },
+    [healthByTenancyId, selectedTenancy]
+  )
+
+  const overallStats = useMemo(() => {
+    const active = tenancies.filter((tenancy) => isActiveTenancy(tenancy)).length
+    const endingSoon = tenancies.filter((tenancy) => isEndingSoon(tenancy.end_date)).length
+    const arrears = Array.from(healthByTenancyId.values()).reduce((sum, item) => sum + item.overdue, 0)
+    const dueEvents = Array.from(healthByTenancyId.values()).reduce((sum, item) => sum + item.dueEvents, 0)
+    const openCases = cases.filter((item) => item.status !== 'resolved' && item.status !== 'closed').length
+    const disputedClaims = claims.filter((item) => item.claim_status === 'disputed').length
+
+    return { active, endingSoon, arrears, dueEvents, openCases, disputedClaims }
+  }, [cases, claims, healthByTenancyId, tenancies])
+
+  async function handleSignOut() {
+    setSigningOut(true)
+    const { error: signOutError } = await supabase.auth.signOut()
+    if (signOutError) {
+      setError(signOutError.message)
+      setSigningOut(false)
       return
     }
-
-    if (!selectedContactId || !filteredContacts.some((contact) => contact.id === selectedContactId)) {
-      setSelectedContactId(filteredContacts[0].id)
-    }
-  }, [filteredContacts, selectedContactId])
-
-  const selectedContact = useMemo(
-    () => contacts.find((contact) => contact.id === selectedContactId) || null,
-    [contacts, selectedContactId]
-  )
-
-  const selectedBuckets = useMemo(
-    () => (selectedContact ? contactBucketsById.get(selectedContact.id) || ['all'] : []),
-    [contactBucketsById, selectedContact]
-  )
-
-  const selectedPropertyIds = useMemo(
-    () =>
-      selectedContact ? Array.from(propertyIdsByContactId.get(selectedContact.id) ?? new Set<string>()) : [],
-    [propertyIdsByContactId, selectedContact]
-  )
-
-  const selectedProperties = useMemo(
-    () =>
-      selectedPropertyIds
-        .map((propertyId) => properties.find((property) => property.id === propertyId) || null)
-        .filter((property): property is PropertyRow => Boolean(property)),
-    [properties, selectedPropertyIds]
-  )
-
-  const selectedTenancies = useMemo(
-    () =>
-      selectedContact
-        ? tenancies.filter(
-            (tenancy) =>
-              tenancy.tenant_contact_id === selectedContact.id ||
-              tenancy.landlord_contact_id === selectedContact.id
-          )
-        : [],
-    [selectedContact, tenancies]
-  )
-
-  const selectedCases = useMemo(() => {
-    if (!selectedContact) return []
-
-    const selectedPropertyIdSet = new Set(selectedPropertyIds)
-
-    return cases.filter(
-      (caseItem) =>
-        caseItem.contact_id === selectedContact.id ||
-        (caseItem.property_id ? selectedPropertyIdSet.has(caseItem.property_id) : false)
-    )
-  }, [cases, selectedContact, selectedPropertyIds])
-
-  const selectedCalls = useMemo(() => {
-    if (!selectedContact) return []
-
-    return calls.filter((call) => call.contact_id === selectedContact.id)
-  }, [calls, selectedContact])
-
-  const selectedContractor = useMemo(
-    () => (selectedContact ? contractorByContactId.get(selectedContact.id) ?? null : null),
-    [contractorByContactId, selectedContact]
-  )
-
-  const selectedContactMethods = useMemo(
-    () =>
-      selectedContact
-        ? contactMethods.filter((method) => method.contact_id === selectedContact.id)
-        : [],
-    [contactMethods, selectedContact]
-  )
-
-  const contactKpis = useMemo(
-    () => ({
-      total: contacts.length,
-      tenants: contacts.filter((contact) => (contactBucketsById.get(contact.id) || []).includes('tenant')).length,
-      landlords: contacts.filter((contact) =>
-        (contactBucketsById.get(contact.id) || []).includes('landlord')
-      ).length,
-      contractors: contacts.filter((contact) =>
-        (contactBucketsById.get(contact.id) || []).includes('contractor')
-      ).length,
-      applicants: contacts.filter((contact) =>
-        (contactBucketsById.get(contact.id) || []).includes('applicant')
-      ).length,
-    }),
-    [contactBucketsById, contacts]
-  )
+    router.replace('/')
+    router.refresh()
+  }
 
   if (authLoading) {
     return (
-      <main className="app-grid min-h-screen px-5 py-6 text-stone-900 md:px-8 md:py-8">
-        <div className="mx-auto max-w-4xl">
-          <div className="app-surface rounded-[2rem] px-6 py-10 text-sm text-stone-600">
-            Loading operator session...
-          </div>
-        </div>
-      </main>
-    )
-  }
-
-  if (!operator?.authUser) {
-    return (
-      <main className="app-grid min-h-screen px-5 py-6 text-stone-900 md:px-8 md:py-8">
-        <div className="mx-auto max-w-4xl">
-          <div className="app-surface rounded-[2rem] px-6 py-10 text-sm text-stone-600">
-            Redirecting to sign in...
-          </div>
+      <main className="app-grid min-h-screen px-6 py-8 md:px-8 md:py-10">
+        <div className="mx-auto max-w-6xl rounded-[2rem] app-surface p-8 text-sm text-stone-600">
+          Loading tenancy control centre...
         </div>
       </main>
     )
   }
 
   return (
-    <main className="app-grid min-h-screen px-5 py-6 text-stone-900 md:px-8 md:py-8">
-      <div className="mx-auto max-w-[1520px]">
-        <section className="app-surface-strong rounded-[2rem] p-6 md:p-8">
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_380px]">
+    <main className="app-grid min-h-screen px-6 py-8 text-stone-900 md:px-8 md:py-10">
+      <div className="mx-auto max-w-[1440px] space-y-6">
+        <section className="app-surface-strong rounded-[2rem] p-6 md:p-7">
+          <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
             <div>
-              <div className="flex flex-wrap items-center gap-3">
-                <Link
-                  href="/"
-                  className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium"
-                >
-                  Back to queue
-                </Link>
-                <Link
-                  href="/calls"
-                  className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium"
-                >
-                  Open calls inbox
-                </Link>
-                <Link
-                  href="/knowledge"
-                  className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium"
-                >
-                  Scotland knowledge
-                </Link>
-                <Link
-                  href="/records/properties"
-                  className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium"
-                >
-                  Property workspace
-                </Link>
-                <Link
-                  href="/records/maintenance"
-                  className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium"
-                >
-                  Maintenance workspace
-                </Link>
-                <Link
-                  href="/records/compliance"
-                  className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium"
-                >
-                  Compliance workspace
-                </Link>
-                <Link
-                  href="/records/tenancies"
-                  className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium"
-                >
-                  Tenancy workspace
-                </Link>
-                <Link
-                  href="/records/rent"
-                  className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium"
-                >
-                  Rent workspace
-                </Link>
-                <Link
-                  href="/records/lease-lifecycle"
-                  className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium"
-                >
-                  Lease lifecycle
-                </Link>
-                <Link
-                  href="/records/reporting"
-                  className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium"
-                >
-                  Reporting workspace
-                </Link>
-                <Link
-                  href="/records/contractors"
-                  className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium"
-                >
-                  Contractor workspace
-                </Link>
-                <Link
-                  href="/records/viewings"
-                  className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium"
-                >
-                  Viewings workspace
-                </Link>
-                <Link
-                  href="/records/deposits"
-                  className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium"
-                >
-                  Deposit workspace
-                </Link>
-                <Link
-                  href="/records/operations"
-                  className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium"
-                >
-                  Operations workspace
-                </Link>
+              <p className="app-kicker">Tenancy Control Centre</p>
+              <h1 className="mt-3 max-w-4xl text-4xl font-semibold tracking-tight md:text-5xl">
+                One CRM screen for the full tenancy lifecycle
+              </h1>
+              <p className="mt-4 max-w-3xl text-base leading-8 text-stone-700">
+                Track the tenancy, the money, the lease milestones, the deposit risk, and the live work around it without bouncing between six different tools. This is the joined-up control layer the CRM story is supposed to promise.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <Link href="/" className="app-secondary-button rounded-full px-4 py-2 text-sm font-medium">
+                Back to queue
+              </Link>
+              <Link href="/records/rent" className="app-secondary-button rounded-full px-4 py-2 text-sm font-medium">
+                Rent workspace
+              </Link>
+              <Link href="/records/lease-lifecycle" className="app-secondary-button rounded-full px-4 py-2 text-sm font-medium">
+                Lease lifecycle
+              </Link>
+              <button
+                onClick={handleSignOut}
+                disabled={signingOut}
+                className="app-secondary-button rounded-full px-4 py-2 text-sm font-medium disabled:opacity-60"
+              >
+                {signingOut ? 'Signing out...' : 'Sign out'}
+              </button>
+            </div>
+          </div>
+
+          <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-6">
+            {[
+              { label: 'Active tenancies', value: overallStats.active, tone: 'border-stone-200 bg-white' },
+              { label: 'Renewal window', value: overallStats.endingSoon, tone: 'border-amber-200 bg-amber-50' },
+              { label: 'Arrears pressure', value: formatMoney(overallStats.arrears), tone: 'border-red-200 bg-red-50' },
+              { label: 'Lease actions due', value: overallStats.dueEvents, tone: 'border-sky-200 bg-sky-50' },
+              { label: 'Open tenancy cases', value: overallStats.openCases, tone: 'border-stone-200 bg-white' },
+              { label: 'Deposit disputes', value: overallStats.disputedClaims, tone: 'border-rose-200 bg-rose-50' },
+            ].map((item) => (
+              <article key={item.label} className={`rounded-[1.4rem] border p-4 ${item.tone}`}>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-stone-500">{item.label}</p>
+                <p className="mt-3 text-3xl font-semibold text-stone-900">{item.value}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        {error && (
+          <div className="rounded-[1.8rem] border border-red-200 bg-red-50/95 p-6 text-sm text-red-700">
+            {error}
+          </div>
+        )}
+
+        <section className="grid gap-6 xl:grid-cols-[340px_minmax(0,1fr)_320px]">
+          <aside className="app-surface rounded-[2rem] p-5">
+            <div className="flex flex-col gap-3 border-b app-divider pb-4">
+              <div>
+                <p className="app-kicker">Lifecycle Filter</p>
+                <h2 className="mt-2 text-2xl font-semibold">Choose the tenancy to run</h2>
               </div>
 
-              <p className="app-kicker mt-6">Records Workspace</p>
-              <h1 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">
-                Open the people records behind the cases
-              </h1>
-              <p className="mt-4 max-w-3xl text-base leading-7 text-stone-600">
-                This is the first records layer for operators: tenants, landlords, contractors,
-                applicants, and general contacts, with linked cases, calls, properties, and
-                tenancies in one place.
-              </p>
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium text-stone-700">Search by tenant, landlord, or address</span>
+                <input
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder="Search the CRM"
+                  className="app-field text-sm outline-none"
+                />
+              </label>
 
-              <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+              <div className="flex flex-wrap gap-2">
                 {[
-                  {
-                    label: 'All contacts',
-                    value: contactKpis.total,
-                    tone: 'border-stone-200 bg-stone-50 text-stone-900',
-                  },
-                  {
-                    label: 'Tenants',
-                    value: contactKpis.tenants,
-                    tone: 'border-emerald-200 bg-emerald-50 text-emerald-900',
-                  },
-                  {
-                    label: 'Landlords',
-                    value: contactKpis.landlords,
-                    tone: 'border-sky-200 bg-sky-50 text-sky-900',
-                  },
-                  {
-                    label: 'Contractors',
-                    value: contactKpis.contractors,
-                    tone: 'border-amber-200 bg-amber-50 text-amber-900',
-                  },
-                  {
-                    label: 'Applicants',
-                    value: contactKpis.applicants,
-                    tone: 'border-violet-200 bg-violet-50 text-violet-900',
-                  },
-                ].map((card) => (
-                  <article key={card.label} className={`rounded-[1.6rem] border p-4 shadow-sm ${card.tone}`}>
-                    <div className="text-xs font-semibold uppercase tracking-[0.2em] opacity-80">
-                      {card.label}
-                    </div>
-                    <div className="mt-3 text-3xl font-semibold">{card.value}</div>
-                  </article>
+                  { id: 'all', label: 'All' },
+                  { id: 'at_risk', label: 'At risk' },
+                  { id: 'arrears', label: 'Arrears' },
+                  { id: 'ending_soon', label: 'Ending soon' },
+                  { id: 'deposits', label: 'Deposits' },
+                ].map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => setTab(item.id as LifecycleTab)}
+                    className={`rounded-full px-4 py-2 text-sm font-medium ${
+                      tab === item.id ? 'app-pill-active' : 'app-pill'
+                    }`}
+                  >
+                    {item.label}
+                  </button>
                 ))}
               </div>
             </div>
 
-            <aside className="app-surface rounded-[1.8rem] p-5">
-              <p className="app-kicker">Operator</p>
-              <h2 className="mt-2 text-xl font-semibold">{getOperatorLabel(operator)}</h2>
-              <p className="mt-1 text-sm text-stone-600">
-                Use the records view when the operator starts from a person, not from a case.
-              </p>
-
-              <div className="app-card-muted mt-5 rounded-[1.4rem] p-4">
-                <p className="text-sm font-medium text-stone-900">Practical use</p>
-                <ul className="mt-3 space-y-2 text-sm text-stone-600">
-                  <li>Search the person first if the caller already exists.</li>
-                  <li>Check active tenancies and linked properties before replying.</li>
-                  <li>Use the related cases list to avoid opening duplicate work.</li>
-                </ul>
-              </div>
-            </aside>
-          </div>
-        </section>
-
-        <section className="app-surface mt-6 rounded-[2rem] p-5 md:p-6">
-          <div className="flex flex-col gap-5">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-              <div>
-                <p className="app-kicker">Record tabs</p>
-                <h2 className="mt-2 text-2xl font-semibold">
-                  Filter the records by the operator role that matters
-                </h2>
-              </div>
-              <div className="app-card-muted rounded-full px-4 py-2 text-sm text-stone-600">
-                {filteredContacts.length} shown of {contacts.length} contacts
-              </div>
-            </div>
-
-            <div className="flex flex-wrap gap-2" aria-label="Record tabs">
-              {[
-                ['all', 'All contacts'],
-                ['tenant', 'Tenants'],
-                ['landlord', 'Landlords'],
-                ['contractor', 'Contractors'],
-                ['applicant', 'Applicants'],
-              ].map(([value, label]) => (
-                <button
-                  key={value}
-                  onClick={() => setTab(value as RecordTab)}
-                  aria-pressed={tab === value}
-                  className={`rounded-full px-4 py-2.5 text-sm font-medium ${
-                    tab === value ? 'app-pill-active' : 'app-pill'
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-
-            <label className="block max-w-xl">
-              <span className="mb-2 block text-sm font-medium text-stone-700">Search contacts</span>
-              <input
-                type="text"
-                placeholder="Search by name, phone, email, company, role, or contact type"
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                className="app-field text-sm outline-none"
-              />
-            </label>
-          </div>
-        </section>
-
-        {loading && (
-          <div className="app-surface mt-6 rounded-[1.8rem] p-6 text-sm text-stone-600">
-            Loading records workspace...
-          </div>
-        )}
-
-        {error && (
-          <div className="mt-6 rounded-[1.8rem] border border-red-200 bg-red-50/95 p-6 text-sm text-red-700">
-            Error: {error}
-          </div>
-        )}
-
-        {!loading && !error && (
-          <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(360px,440px)_minmax(0,1fr)] xl:items-start">
-            <section className="app-surface rounded-[2rem] p-4 md:p-5 xl:sticky xl:top-6 xl:flex xl:h-[calc(100vh-3rem)] xl:flex-col">
-              <div className="mb-4 rounded-[1.5rem] border border-stone-200 bg-white/90 p-4 backdrop-blur">
-                <p className="app-kicker">Contact records</p>
-                <h2 className="mt-2 text-xl font-semibold">Choose a person or company</h2>
-                <p className="mt-1 text-sm text-stone-600">
-                  Operators can start here when the job begins with a tenant, landlord, contractor,
-                  or applicant instead of a case number.
-                </p>
-              </div>
-
-              <div className="space-y-3 pr-1 xl:min-h-0 xl:flex-1 xl:overflow-y-auto xl:pb-6">
-                {filteredContacts.map((contact) => {
-                  const selected = contact.id === selectedContactId
-                  const buckets = contactBucketsById.get(contact.id) || ['all']
-                  const stats = contactStatsById.get(contact.id) || {
-                    cases: 0,
-                    calls: 0,
-                    properties: 0,
-                    tenancies: 0,
+            <div className="mt-4 space-y-3">
+              {loading ? (
+                <div className="app-empty-state rounded-[1.5rem] p-4 text-sm">Loading tenancies...</div>
+              ) : filteredTenancies.length === 0 ? (
+                <div className="app-empty-state rounded-[1.5rem] p-4 text-sm">No tenancies match this filter.</div>
+              ) : (
+                filteredTenancies.map((tenancy) => {
+                  const selected = tenancy.id === selectedTenancyId
+                  const tenant = tenancy.tenant_contact_id ? contactById.get(tenancy.tenant_contact_id) ?? null : null
+                  const property = tenancy.property_id ? propertyById.get(tenancy.property_id) ?? null : null
+                  const health = healthByTenancyId.get(tenancy.id) ?? {
+                    balance: 0,
+                    overdue: 0,
+                    dueEvents: 0,
+                    openCases: 0,
+                    urgentCases: 0,
+                    disputedClaims: 0,
+                    endingSoon: false,
                   }
 
                   return (
                     <button
-                      key={contact.id}
-                      onClick={() => setSelectedContactId(contact.id)}
-                      aria-pressed={selected}
-                      className={`w-full rounded-[1.6rem] border p-4 text-left ${
-                        selected
-                          ? 'app-selected-card'
-                          : 'border-stone-200 bg-white hover:border-stone-400 hover:bg-stone-50'
+                      key={tenancy.id}
+                      onClick={() => setSelectedTenancyId(tenancy.id)}
+                      className={`w-full rounded-[1.5rem] border p-4 text-left ${
+                        selected ? 'app-selected-card' : 'border-stone-200 bg-white hover:border-stone-400 hover:bg-stone-50'
                       }`}
                     >
                       <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span className="text-base font-semibold">{getContactName(contact)}</span>
-                            {!contact.is_active && (
-                              <span className="rounded-full border border-stone-300 bg-stone-100 px-2.5 py-1 text-[11px] font-medium text-stone-700">
-                                inactive
-                              </span>
-                            )}
-                          </div>
-                          <p className={`mt-2 text-sm leading-6 ${selected ? 'text-stone-700' : 'text-stone-600'}`}>
-                            {contact.company_name || contact.email || contact.phone || formatCategoryLabel(contact.contact_type)}
-                          </p>
+                        <div>
+                          <p className="text-sm font-semibold text-stone-900">{getContactName(tenant)}</p>
+                          <p className="mt-1 text-sm text-stone-600">{buildAddress(property)}</p>
                         </div>
-
-                        <div className={`text-right text-xs ${selected ? 'text-stone-600' : 'text-stone-500'}`}>
-                          <div>Updated</div>
-                          <div className="mt-1 font-medium text-stone-700">
-                            {formatRelativeTime(contact.updated_at ?? contact.created_at)}
-                          </div>
-                        </div>
+                        <span className={`rounded-full border px-2.5 py-1 text-[11px] font-medium ${getTenancyHealthTone(health)}`}>
+                          {getTenancyHealthLabel(health)}
+                        </span>
                       </div>
 
-                      <div className={`mt-3 flex flex-wrap gap-2 text-xs ${selected ? 'text-stone-700' : 'text-stone-600'}`}>
-                        {buckets
-                          .filter((bucket) => bucket !== 'all')
-                          .map((bucket) => (
-                            <span
-                              key={`${contact.id}-${bucket}`}
-                              className="rounded-full border border-current/15 px-2.5 py-1"
-                            >
-                              {bucket}
-                            </span>
-                          ))}
-                        {contact.phone && (
-                          <span className="rounded-full border border-current/15 px-2.5 py-1">
-                            {contact.phone}
-                          </span>
-                        )}
-                      </div>
-
-                      <div className={`mt-3 rounded-2xl border border-stone-200/80 px-3 py-2 text-xs ${selected ? 'bg-white/75 text-stone-700' : 'bg-stone-50/80 text-stone-600'}`}>
-                        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                          <span>{stats.cases} cases</span>
-                          <span>{stats.calls} calls</span>
-                          <span>{stats.properties} properties</span>
-                          <span>{stats.tenancies} tenancies</span>
-                        </div>
+                      <div className="mt-3 flex flex-wrap gap-2 text-xs text-stone-600">
+                        <span className="rounded-full border border-current/15 px-2.5 py-1">{getStageLabel(tenancy)}</span>
+                        {health.overdue > 0 && <span className="rounded-full border border-current/15 px-2.5 py-1">Arrears {formatMoney(health.overdue)}</span>}
+                        {health.dueEvents > 0 && <span className="rounded-full border border-current/15 px-2.5 py-1">{health.dueEvents} due</span>}
+                        {health.disputedClaims > 0 && <span className="rounded-full border border-current/15 px-2.5 py-1">Deposit dispute</span>}
                       </div>
                     </button>
                   )
-                })}
+                })
+              )}
+            </div>
+          </aside>
 
-                {filteredContacts.length === 0 && (
-                  <div className="app-empty-state rounded-[1.6rem] p-6 text-sm">
-                    No records match the current filters yet. Try widening the search or changing
-                    tabs.
-                  </div>
-                )}
+          <section className="app-surface rounded-[2rem] p-6">
+            {!selectedTenancy ? (
+              <div className="app-empty-state rounded-[1.7rem] p-8 text-sm">
+                Pick a tenancy to see the full lifecycle control view.
               </div>
-            </section>
-
-            <section className="app-surface self-start rounded-[2rem] p-5 md:p-6 xl:sticky xl:top-6">
-              {!selectedContact ? (
-                <div className="app-empty-state flex min-h-[60vh] items-center justify-center rounded-[1.6rem] p-10 text-center">
-                  Choose a contact from the left to inspect linked cases, calls, properties, and
-                  tenancy context.
-                </div>
-              ) : (
-                <div>
-                  <div className="grid gap-4 border-b app-divider pb-6 xl:grid-cols-[minmax(0,1fr)_300px]">
-                    <div>
-                      <p className="app-kicker">Selected record</p>
-                      <div className="mt-3 flex flex-wrap items-center gap-2">
-                        <h2 className="text-3xl font-semibold">{getContactName(selectedContact)}</h2>
-                        {!selectedContact.is_active && (
-                          <span className="rounded-full border border-stone-300 bg-stone-100 px-2.5 py-1 text-xs font-medium text-stone-700">
-                            inactive
-                          </span>
-                        )}
-                        {selectedBuckets
-                          .filter((bucket) => bucket !== 'all')
-                          .map((bucket) => (
-                            <span
-                              key={`${selectedContact.id}-${bucket}`}
-                              className="rounded-full border border-stone-200 bg-stone-50 px-2.5 py-1 text-xs font-medium text-stone-700"
-                            >
-                              {bucket}
-                            </span>
-                          ))}
+            ) : (
+              <div className="space-y-6">
+                <div className="grid gap-4 border-b app-divider pb-6 xl:grid-cols-[minmax(0,1fr)_280px]">
+                  <div>
+                    <p className="app-kicker">Tenancy Overview</p>
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                      <h2 className="text-3xl font-semibold">{getContactName(selectedTenant)}</h2>
+                      <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${getTenancyHealthTone(selectedHealth)}`}>
+                        {getTenancyHealthLabel(selectedHealth)}
+                      </span>
+                    </div>
+                    <p className="mt-3 text-base leading-7 text-stone-700">{buildAddress(selectedProperty)}</p>
+                    <div className="mt-4 grid gap-3 md:grid-cols-3">
+                      <div className="rounded-[1.3rem] border border-stone-200 bg-stone-50/90 p-4">
+                        <p className="app-kicker">Stage</p>
+                        <p className="mt-2 text-lg font-semibold text-stone-900">{getStageLabel(selectedTenancy)}</p>
+                        <p className="mt-2 text-sm text-stone-600">{formatDate(selectedTenancy.start_date)} to {formatDate(selectedTenancy.end_date)}</p>
                       </div>
-                      <p className="mt-4 max-w-3xl text-base leading-7 text-stone-600">
-                        {selectedContact.notes?.trim() ||
-                          'No operator notes are stored on this contact yet. The linked records below show the current working context.'}
-                      </p>
-
-                      <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                        <div className="app-card-muted rounded-[1.4rem] p-4">
-                          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">
-                            Phone
-                          </p>
-                          <p className="mt-2 text-sm text-stone-800">{selectedContact.phone || '-'}</p>
-                        </div>
-                        <div className="app-card-muted rounded-[1.4rem] p-4">
-                          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">
-                            Email
-                          </p>
-                          <p className="mt-2 text-sm text-stone-800">{selectedContact.email || '-'}</p>
-                        </div>
-                        <div className="app-card-muted rounded-[1.4rem] p-4">
-                          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">
-                            Company / type
-                          </p>
-                          <p className="mt-2 text-sm text-stone-800">
-                            {selectedContact.company_name || formatCategoryLabel(selectedContact.contact_type)}
-                          </p>
-                        </div>
+                      <div className="rounded-[1.3rem] border border-stone-200 bg-stone-50/90 p-4">
+                        <p className="app-kicker">Rent position</p>
+                        <p className="mt-2 text-lg font-semibold text-stone-900">{formatMoney(selectedHealth.balance)}</p>
+                        <p className="mt-2 text-sm text-stone-600">Overdue now {formatMoney(selectedHealth.overdue)}</p>
+                      </div>
+                      <div className="rounded-[1.3rem] border border-stone-200 bg-stone-50/90 p-4">
+                        <p className="app-kicker">Live work</p>
+                        <p className="mt-2 text-lg font-semibold text-stone-900">{selectedHealth.openCases} open cases</p>
+                        <p className="mt-2 text-sm text-stone-600">{selectedHealth.dueEvents} lifecycle actions due</p>
                       </div>
                     </div>
+                  </div>
 
-                    <div className="space-y-4">
-                      <div className="rounded-[1.5rem] border border-stone-200 bg-stone-50/90 p-4">
-                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">
-                          Record health
-                        </p>
-                        <p className="mt-2 text-lg font-semibold text-stone-900">
-                          {selectedCases.length ? 'Linked to active work' : 'No cases linked yet'}
-                        </p>
-                        <p className="mt-2 text-sm leading-6 text-stone-600">
-                          {selectedCases.length
-                            ? `${selectedCases.length} related case${selectedCases.length === 1 ? '' : 's'}, ${selectedCalls.length} call session${selectedCalls.length === 1 ? '' : 's'}, and ${selectedProperties.length} linked propert${selectedProperties.length === 1 ? 'y' : 'ies'}.`
-                            : 'This contact has no related case yet. New voice or inbound work can still start here.'}
-                        </p>
+                  <div className="rounded-[1.5rem] border border-stone-200 bg-white/92 p-4">
+                    <p className="app-kicker">Relationship Map</p>
+                    <dl className="mt-4 space-y-3 text-sm text-stone-600">
+                      <div className="flex items-start justify-between gap-4">
+                        <dt>Tenant</dt>
+                        <dd className="text-right font-medium text-stone-900">{getContactName(selectedTenant)}</dd>
                       </div>
+                      <div className="flex items-start justify-between gap-4">
+                        <dt>Landlord</dt>
+                        <dd className="text-right font-medium text-stone-900">{getContactName(selectedLandlord)}</dd>
+                      </div>
+                      <div className="flex items-start justify-between gap-4">
+                        <dt>Rent</dt>
+                        <dd className="text-right font-medium text-stone-900">{formatMoney(selectedTenancy.rent_amount)}</dd>
+                      </div>
+                      <div className="flex items-start justify-between gap-4">
+                        <dt>Deposit</dt>
+                        <dd className="text-right font-medium text-stone-900">{formatMoney(selectedTenancy.deposit_amount)}</dd>
+                      </div>
+                      <div className="flex items-start justify-between gap-4">
+                        <dt>Last update</dt>
+                        <dd className="text-right font-medium text-stone-900">{formatRelativeTime(selectedTenancy.updated_at)}</dd>
+                      </div>
+                    </dl>
+                  </div>
+                </div>
 
-                      {selectedContractor && (
-                        <div className="rounded-[1.5rem] border border-amber-200 bg-amber-50/90 p-4 text-amber-900">
-                          <p className="text-xs font-semibold uppercase tracking-[0.18em]">
-                            Contractor profile
-                          </p>
-                          <p className="mt-2 text-lg font-semibold">
-                            {selectedContractor.company_name || selectedContractor.primary_trade}
-                          </p>
-                          <p className="mt-2 text-sm leading-6">
-                            {selectedContractor.primary_trade}
-                            {selectedContractor.coverage_area
-                              ? ` • ${selectedContractor.coverage_area}`
-                              : ''}
-                            {selectedContractor.emergency_callout ? ' • emergency callout enabled' : ''}
-                          </p>
-                        </div>
+                <div className="grid gap-4 xl:grid-cols-2">
+                  <article className="rounded-[1.6rem] border border-stone-200 bg-white/92 p-5">
+                    <div className="flex items-end justify-between gap-4 border-b app-divider pb-4">
+                      <div>
+                        <p className="app-kicker">Lifecycle Timeline</p>
+                        <h3 className="mt-2 text-xl font-semibold">What is due across the tenancy</h3>
+                      </div>
+                      <Link href="/records/lease-lifecycle" className="app-secondary-button rounded-full px-3 py-2 text-sm font-medium">
+                        Open lifecycle workspace
+                      </Link>
+                    </div>
+                    <div className="mt-4 space-y-3">
+                      {selectedEvents.length === 0 ? (
+                        <div className="app-empty-state rounded-[1.3rem] p-4 text-sm">No lifecycle events are linked yet.</div>
+                      ) : (
+                        selectedEvents.slice(0, 6).map((item) => (
+                          <div key={item.id} className="rounded-[1.25rem] border border-stone-200 bg-stone-50/90 p-4">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className={`rounded-full border px-2.5 py-1 text-[11px] font-medium ${getLifecycleTone(item.status)}`}>
+                                {formatLabel(item.status)}
+                              </span>
+                              <span className="rounded-full border border-stone-200 bg-white px-2.5 py-1 text-[11px] font-medium text-stone-700">
+                                {formatLabel(item.event_type)}
+                              </span>
+                            </div>
+                            <p className="mt-3 text-sm text-stone-700">
+                              {item.status === 'completed' ? `Completed ${formatDate(item.completed_at)}` : `Scheduled ${formatDate(item.scheduled_for)}`}
+                            </p>
+                            {item.note && <p className="mt-2 text-sm text-stone-600">{item.note}</p>}
+                          </div>
+                        ))
                       )}
                     </div>
-                  </div>
+                  </article>
 
-                  <div className="mt-6 grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
-                    <div className="space-y-4">
-                      <section className="app-card-muted rounded-[1.6rem] p-5">
-                        <p className="app-kicker">Record snapshot</p>
-                        <dl className="mt-4 space-y-3 text-sm text-stone-700">
-                          <div className="flex items-start justify-between gap-4">
-                            <dt>Role</dt>
-                            <dd className="text-right font-medium text-stone-900">
-                              {formatCategoryLabel(selectedContact.role || selectedContact.contact_type)}
-                            </dd>
-                          </div>
-                          <div className="flex items-start justify-between gap-4">
-                            <dt>Created</dt>
-                            <dd className="text-right font-medium text-stone-900">
-                              {formatDateTime(selectedContact.created_at)}
-                            </dd>
-                          </div>
-                          <div className="flex items-start justify-between gap-4">
-                            <dt>Updated</dt>
-                            <dd className="text-right font-medium text-stone-900">
-                              {formatDateTime(selectedContact.updated_at)}
-                            </dd>
-                          </div>
-                          <div className="flex items-start justify-between gap-4">
-                            <dt>Cases</dt>
-                            <dd className="text-right font-medium text-stone-900">{selectedCases.length}</dd>
-                          </div>
-                          <div className="flex items-start justify-between gap-4">
-                            <dt>Calls</dt>
-                            <dd className="text-right font-medium text-stone-900">{selectedCalls.length}</dd>
-                          </div>
-                        </dl>
-                      </section>
-
-                      <section className="app-card-muted rounded-[1.6rem] p-5">
-                        <p className="app-kicker">Contact methods</p>
-                        <div className="mt-4 space-y-3">
-                          {selectedContactMethods.length === 0 && (
-                            <div className="app-empty-state rounded-[1.4rem] p-4 text-sm">
-                              No extra contact methods are stored for this record.
-                            </div>
-                          )}
-
-                          {selectedContactMethods.map((method) => (
-                            <article key={method.id} className="rounded-[1.4rem] border border-stone-200 bg-white/80 p-4">
-                              <div className="flex flex-wrap items-center gap-2 text-xs text-stone-500">
-                                <span className="rounded-full border border-stone-200 bg-stone-50 px-2.5 py-1">
-                                  {formatCategoryLabel(method.method_type)}
-                                </span>
-                                {method.is_primary && (
-                                  <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-emerald-700">
-                                    primary
-                                  </span>
-                                )}
-                              </div>
-                              <p className="mt-3 text-sm font-medium text-stone-900">{method.method_value}</p>
-                            </article>
-                          ))}
-                        </div>
-                      </section>
-
-                      <section className="app-card-muted rounded-[1.6rem] p-5">
-                        <p className="app-kicker">Linked tenancies</p>
-                        <div className="mt-4 space-y-3">
-                          {selectedTenancies.length === 0 && (
-                            <div className="app-empty-state rounded-[1.4rem] p-4 text-sm">
-                              No tenancies link to this record yet.
-                            </div>
-                          )}
-
-                          {selectedTenancies.slice(0, 4).map((tenancy) => (
-                            <article key={tenancy.id} className="rounded-[1.4rem] border border-stone-200 bg-white/80 p-4">
-                              <div className="flex flex-wrap items-center gap-2 text-xs text-stone-500">
-                                <span className="rounded-full border border-stone-200 bg-stone-50 px-2.5 py-1">
-                                  {tenancy.tenancy_status || tenancy.status || 'tenancy'}
-                                </span>
-                                <span>{formatShortDate(tenancy.start_date)}</span>
-                              </div>
-                              <p className="mt-3 text-sm font-medium text-stone-900">
-                                Rent {formatMoney(tenancy.rent_amount)} • Deposit {formatMoney(tenancy.deposit_amount)}
-                              </p>
-                            </article>
-                          ))}
-                        </div>
-                      </section>
+                  <article className="rounded-[1.6rem] border border-stone-200 bg-white/92 p-5">
+                    <div className="flex items-end justify-between gap-4 border-b app-divider pb-4">
+                      <div>
+                        <p className="app-kicker">Rent And Ledger</p>
+                        <h3 className="mt-2 text-xl font-semibold">Money pressure without leaving the screen</h3>
+                      </div>
+                      <Link href="/records/rent" className="app-secondary-button rounded-full px-3 py-2 text-sm font-medium">
+                        Open rent workspace
+                      </Link>
                     </div>
-
-                    <div className="space-y-6">
-                      <section className="app-card-muted rounded-[1.6rem] p-5">
-                        <div className="flex flex-col gap-2 border-b app-divider pb-4 sm:flex-row sm:items-end sm:justify-between">
-                          <div>
-                            <p className="app-kicker">Related cases</p>
-                            <h3 className="mt-2 text-xl font-semibold">Cases tied to this record</h3>
-                          </div>
-                        </div>
-
-                        <div className="mt-5 space-y-4">
-                          {selectedCases.length === 0 && (
-                            <div className="app-empty-state rounded-[1.4rem] p-5 text-sm">
-                              No linked cases yet for this contact.
-                            </div>
-                          )}
-
-                          {selectedCases.slice(0, 6).map((caseItem) => (
-                            <article key={caseItem.id} className="rounded-[1.4rem] border border-stone-200 bg-white/90 p-4">
-                              <div className="flex flex-wrap items-center justify-between gap-3">
-                                <div className="flex flex-wrap items-center gap-2">
-                                  <Link
-                                    href={`/cases/${caseItem.id}`}
-                                    className="text-sm font-semibold text-stone-900 underline-offset-4 hover:underline"
-                                  >
-                                    {caseItem.case_number || caseItem.id}
-                                  </Link>
-                                  <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${getPriorityTone(caseItem.priority)}`}>
-                                    {caseItem.priority || 'unknown'}
-                                  </span>
-                                </div>
-                                <span className="text-xs text-stone-500">
-                                  {formatRelativeTime(caseItem.last_activity_at ?? caseItem.updated_at ?? caseItem.created_at)}
-                                </span>
-                              </div>
-                              <p className="mt-3 text-sm leading-7 text-stone-700">
-                                {caseItem.summary || 'No case summary yet.'}
-                              </p>
-                              <div className="mt-3 rounded-2xl border border-stone-200 bg-stone-50/80 px-3 py-2 text-xs text-stone-700">
-                                {getCaseNextStepSummary(caseItem)}
-                              </div>
-                            </article>
-                          ))}
-                        </div>
-                      </section>
-
-                      <section className="app-card-muted rounded-[1.6rem] p-5">
-                        <div className="flex flex-col gap-2 border-b app-divider pb-4 sm:flex-row sm:items-end sm:justify-between">
-                          <div>
-                            <p className="app-kicker">Recent calls</p>
-                            <h3 className="mt-2 text-xl font-semibold">Annabelle sessions on this record</h3>
-                          </div>
-                        </div>
-
-                        <div className="mt-5 space-y-4">
-                          {selectedCalls.length === 0 && (
-                            <div className="app-empty-state rounded-[1.4rem] p-5 text-sm">
-                              No call sessions are linked to this contact yet.
-                            </div>
-                          )}
-
-                          {selectedCalls.slice(0, 5).map((call) => (
-                            <article key={call.id} className="rounded-[1.4rem] border border-stone-200 bg-white/90 p-4">
-                              <div className="flex flex-wrap items-center justify-between gap-3">
-                                <div className="flex flex-wrap items-center gap-2">
-                                  <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${getCallStatusTone(call.status)}`}>
-                                    {call.status || 'unknown'}
-                                  </span>
-                                  {call.case_id && (
-                                    <Link
-                                      href={`/cases/${call.case_id}`}
-                                      className="text-xs font-medium text-stone-700 underline-offset-4 hover:underline"
-                                    >
-                                      linked case
-                                    </Link>
-                                  )}
-                                </div>
-                                <span className="text-xs text-stone-500">
-                                  {formatRelativeTime(call.last_event_at ?? call.started_at)}
-                                </span>
-                              </div>
-                              <p className="mt-3 text-sm leading-7 text-stone-700">
-                                {call.ai_summary || call.intent || 'No summary yet from the call workflow.'}
-                              </p>
-                            </article>
-                          ))}
-                        </div>
-                      </section>
-
-                      <section className="app-card-muted rounded-[1.6rem] p-5">
-                        <div className="flex flex-col gap-2 border-b app-divider pb-4 sm:flex-row sm:items-end sm:justify-between">
-                          <div>
-                            <p className="app-kicker">Properties</p>
-                            <h3 className="mt-2 text-xl font-semibold">Addresses linked to this record</h3>
-                          </div>
-                        </div>
-
-                        <div className="mt-5 space-y-4">
-                          {selectedProperties.length === 0 && (
-                            <div className="app-empty-state rounded-[1.4rem] p-5 text-sm">
-                              No properties are linked yet through ownership or tenancy.
-                            </div>
-                          )}
-
-                          {selectedProperties.slice(0, 6).map((property) => (
-                            <article key={property.id} className="rounded-[1.4rem] border border-stone-200 bg-white/90 p-4">
-                              <p className="text-sm font-medium text-stone-900">{buildAddress(property)}</p>
-                              <p className="mt-2 text-xs text-stone-500">
-                                Updated {formatRelativeTime(property.updated_at)}
-                              </p>
-                            </article>
-                          ))}
-                        </div>
-                      </section>
+                    <div className="mt-4 grid gap-3 md:grid-cols-3">
+                      <div className="rounded-[1.25rem] border border-stone-200 bg-stone-50/90 p-4">
+                        <p className="app-kicker">Live balance</p>
+                        <p className="mt-2 text-xl font-semibold text-stone-900">{formatMoney(selectedHealth.balance)}</p>
+                      </div>
+                      <div className="rounded-[1.25rem] border border-red-200 bg-red-50/90 p-4">
+                        <p className="app-kicker">Overdue</p>
+                        <p className="mt-2 text-xl font-semibold text-red-700">{formatMoney(selectedHealth.overdue)}</p>
+                      </div>
+                      <div className="rounded-[1.25rem] border border-stone-200 bg-stone-50/90 p-4">
+                        <p className="app-kicker">Recent items</p>
+                        <p className="mt-2 text-xl font-semibold text-stone-900">{selectedEntries.length}</p>
+                      </div>
                     </div>
-                  </div>
+                    <div className="mt-4 space-y-3">
+                      {selectedEntries.length === 0 ? (
+                        <div className="app-empty-state rounded-[1.3rem] p-4 text-sm">No ledger items are linked yet.</div>
+                      ) : (
+                        selectedEntries.slice(0, 5).map((item) => (
+                          <div key={item.id} className="rounded-[1.25rem] border border-stone-200 bg-stone-50/90 p-4">
+                            <div className="flex flex-wrap items-center justify-between gap-3">
+                              <div>
+                                <p className="text-sm font-semibold text-stone-900">{formatLabel(item.entry_type)} • {formatLabel(item.category)}</p>
+                                <p className="mt-1 text-sm text-stone-600">Due {formatDate(item.due_date)} • {item.reference || 'No reference'}</p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-sm font-semibold text-stone-900">{formatMoney(item.amount)}</p>
+                                <p className="mt-1 text-xs uppercase tracking-[0.16em] text-stone-500">{item.status}</p>
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </article>
                 </div>
-              )}
-            </section>
-          </div>
-        )}
+
+                <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
+                  <article className="rounded-[1.6rem] border border-stone-200 bg-white/92 p-5">
+                    <div className="flex items-end justify-between gap-4 border-b app-divider pb-4">
+                      <div>
+                        <p className="app-kicker">Live Cases</p>
+                        <h3 className="mt-2 text-xl font-semibold">Every issue already tied to this tenancy</h3>
+                      </div>
+                      <Link href="/calls" className="app-secondary-button rounded-full px-3 py-2 text-sm font-medium">
+                        Go to queue
+                      </Link>
+                    </div>
+                    <div className="mt-4 space-y-3">
+                      {selectedCases.length === 0 ? (
+                        <div className="app-empty-state rounded-[1.3rem] p-4 text-sm">No cases are linked to this tenancy yet.</div>
+                      ) : (
+                        selectedCases.slice(0, 6).map((item) => (
+                          <Link key={item.id} href={`/cases/${item.id}`} className="block rounded-[1.25rem] border border-stone-200 bg-stone-50/90 p-4 hover:border-stone-400 hover:bg-white">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="text-sm font-semibold text-stone-900">{item.case_number || item.id.slice(0, 8)}</span>
+                              <span className={`rounded-full border px-2.5 py-1 text-[11px] font-medium ${getPriorityTone(item.priority)}`}>
+                                {formatLabel(item.priority)}
+                              </span>
+                              <span className="rounded-full border border-stone-200 bg-white px-2.5 py-1 text-[11px] font-medium text-stone-700">
+                                {formatLabel(item.case_type)}
+                              </span>
+                            </div>
+                            <p className="mt-3 text-sm text-stone-700">{item.summary || 'No summary yet'}</p>
+                            <p className="mt-2 text-xs uppercase tracking-[0.16em] text-stone-500">Updated {formatRelativeTime(item.updated_at)}</p>
+                          </Link>
+                        ))
+                      )}
+                    </div>
+                  </article>
+
+                  <article className="rounded-[1.6rem] border border-stone-200 bg-white/92 p-5">
+                    <p className="app-kicker">Deposit And Control</p>
+                    <h3 className="mt-2 text-xl font-semibold">The final pressure points</h3>
+                    <div className="mt-4 space-y-3">
+                      {selectedClaims.length === 0 ? (
+                        <div className="app-empty-state rounded-[1.3rem] p-4 text-sm">No deposit claims are linked right now.</div>
+                      ) : (
+                        selectedClaims.map((item) => (
+                          <div key={item.id} className="rounded-[1.25rem] border border-stone-200 bg-stone-50/90 p-4">
+                            <span className={`rounded-full border px-2.5 py-1 text-[11px] font-medium ${getClaimTone(item.claim_status)}`}>
+                              {formatLabel(item.claim_status)}
+                            </span>
+                            <p className="mt-3 text-sm text-stone-700">Claim total {formatMoney(item.total_claim_amount)} • Disputed {formatMoney(item.disputed_amount)}</p>
+                            <p className="mt-2 text-xs uppercase tracking-[0.16em] text-stone-500">Updated {formatRelativeTime(item.updated_at)}</p>
+                          </div>
+                        ))
+                      )}
+                    </div>
+
+                    <div className="mt-5 rounded-[1.3rem] border border-emerald-200 bg-emerald-50/90 p-4 text-sm leading-7 text-emerald-950/85">
+                      This view is meant to let the team run the tenancy from one place: people, dates, money, issues, and end-of-tenancy risk together.
+                    </div>
+                  </article>
+                </div>
+              </div>
+            )}
+          </section>
+
+          <aside className="app-surface rounded-[2rem] p-5">
+            <p className="app-kicker">Operator Context</p>
+            <h2 className="mt-2 text-2xl font-semibold">{getOperatorLabel(operator)}</h2>
+            <p className="mt-3 text-sm leading-7 text-stone-600">
+              Work from one joined-up tenancy view, then step into the detailed workspace only when you need a deeper action.
+            </p>
+
+            <div className="mt-5 space-y-3">
+              {[
+                { label: 'Records', href: '/records/tenancies', body: 'Drill into the tenancy workspace.' },
+                { label: 'Rent', href: '/records/rent', body: 'Post payments, charges, and credits.' },
+                { label: 'Lease', href: '/records/lease-lifecycle', body: 'Manage renewal and move-out actions.' },
+                { label: 'Reporting', href: '/records/reporting', body: 'Read portfolio pressure and leadership view.' },
+              ].map((item) => (
+                <Link key={item.label} href={item.href} className="block rounded-[1.3rem] border border-stone-200 bg-white/92 p-4 hover:border-stone-400 hover:bg-stone-50">
+                  <p className="text-sm font-semibold text-stone-900">{item.label}</p>
+                  <p className="mt-2 text-sm leading-6 text-stone-600">{item.body}</p>
+                </Link>
+              ))}
+            </div>
+          </aside>
+        </section>
       </div>
     </main>
   )
