@@ -454,6 +454,15 @@ export default function TenancyRecordsPage() {
                 <Link href="/records/deposits" className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium">
                   Deposit workspace
                 </Link>
+                <Link href="/records/rent" className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium">
+                  Rent workspace
+                </Link>
+                <Link href="/records/lease-lifecycle" className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium">
+                  Lease lifecycle
+                </Link>
+                <Link href="/records/reporting" className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium">
+                  Reporting workspace
+                </Link>
               </div>
 
               <p className="app-kicker mt-6">Tenancy Workspace</p>

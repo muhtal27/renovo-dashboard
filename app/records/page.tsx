@@ -776,6 +776,24 @@ export default function RecordsPage() {
                   Tenancy workspace
                 </Link>
                 <Link
+                  href="/records/rent"
+                  className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium"
+                >
+                  Rent workspace
+                </Link>
+                <Link
+                  href="/records/lease-lifecycle"
+                  className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium"
+                >
+                  Lease lifecycle
+                </Link>
+                <Link
+                  href="/records/reporting"
+                  className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium"
+                >
+                  Reporting workspace
+                </Link>
+                <Link
                   href="/records/contractors"
                   className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium"
                 >
