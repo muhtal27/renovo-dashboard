@@ -1494,7 +1494,7 @@ export default function HomePage() {
                   </span>
                 </div>
 
-                <div className="mt-4 flex flex-wrap gap-2" aria-label="Queue tabs">
+                <div className="mt-4 flex flex-wrap gap-2 md:gap-3" aria-label="Queue tabs">
                   {[
                     ['all', 'All queue'],
                     ...(followUpAvailable
@@ -1505,11 +1505,11 @@ export default function HomePage() {
                           ['waiting', 'Waiting'],
                         ]
                       : []),
-                    ['pickup', 'Needs pickup'],
-                    ['urgent', 'Urgent first'],
+                    ['pickup', 'Pickup next'],
+                    ['urgent', 'Urgent'],
                     ['complaints', 'Complaints'],
                     ['unassigned', 'Unassigned'],
-                    ['recent', 'Recent activity'],
+                    ['recent', 'Recent'],
                     ...(followUpAvailable ? [['no_next_step', 'No next step']] : []),
                   ].map(([value, label]) => (
                     <button

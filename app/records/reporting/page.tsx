@@ -1,6 +1,5 @@
 'use client'
 
-import Link from 'next/link'
 import { useEffect, useEffectEvent, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
@@ -10,6 +9,7 @@ import {
   type CurrentOperator,
 } from '@/lib/operator'
 import { supabase } from '@/lib/supabase'
+import { OperatorNav } from '@/app/operator-nav'
 
 type PropertyRow = {
   id: string
@@ -375,18 +375,13 @@ export default function ReportingWorkspacePage() {
 
   return (
     <main className="app-grid min-h-screen px-5 py-6 text-stone-900 md:px-8 md:py-8">
-      <div className="mx-auto max-w-[1520px]">
+      <div className="mx-auto max-w-[1520px] space-y-6">
+        <OperatorNav current="reporting" />
+
         <section className="app-surface-strong rounded-[2rem] p-6 md:p-8">
           <div className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_380px]">
             <div>
-              <div className="flex flex-wrap items-center gap-3">
-                <Link href="/" className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium">Back to queue</Link>
-                <Link href="/records" className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium">Records workspace</Link>
-                <Link href="/records/rent" className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium">Rent workspace</Link>
-                <Link href="/records/lease-lifecycle" className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium">Lease lifecycle</Link>
-              </div>
-
-              <p className="app-kicker mt-6">Reporting Workspace</p>
+              <p className="app-kicker">Reporting Workspace</p>
               <h1 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">See the portfolio in one operating report, not as scattered work queues</h1>
               <p className="mt-4 max-w-3xl text-base leading-7 text-stone-600">This brings rent, lease risk, maintenance, compliance, deposits, and open case pressure into one reporting layer so you can run the book, not just the inbox.</p>
 
@@ -410,6 +405,9 @@ export default function ReportingWorkspacePage() {
               <p className="app-kicker">Operator</p>
               <h2 className="mt-2 text-xl font-semibold">{getOperatorLabel(operator)}</h2>
               <p className="mt-1 text-sm text-stone-600">Use this when you need the portfolio view: where the pressure is, what is collecting, and what needs attention next.</p>
+              <div className="mt-4 rounded-full border border-stone-200 bg-white px-4 py-2 text-sm text-stone-600">
+                One reporting view for the whole book
+              </div>
             </aside>
           </div>
         </section>

@@ -10,6 +10,7 @@ import {
   type CurrentOperator,
 } from '@/lib/operator'
 import { supabase } from '@/lib/supabase'
+import { OperatorNav } from '@/app/operator-nav'
 
 type RentTab = 'all' | 'active' | 'overdue' | 'balance'
 
@@ -600,26 +601,13 @@ export default function RentWorkspacePage() {
 
   return (
     <main className="app-grid min-h-screen px-5 py-6 text-stone-900 md:px-8 md:py-8">
-      <div className="mx-auto max-w-[1520px]">
+      <div className="mx-auto max-w-[1520px] space-y-6">
+        <OperatorNav current="rent" />
+
         <section className="app-surface-strong rounded-[2rem] p-6 md:p-8">
           <div className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_380px]">
             <div>
-              <div className="flex flex-wrap items-center gap-3">
-                <Link href="/" className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium">
-                  Back to queue
-                </Link>
-                <Link href="/records" className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium">
-                  Records workspace
-                </Link>
-                <Link href="/records/tenancies" className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium">
-                  Tenancy workspace
-                </Link>
-                <Link href="/records/reporting" className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium">
-                  Reporting workspace
-                </Link>
-              </div>
-
-              <p className="app-kicker mt-6">Rent Workspace</p>
+              <p className="app-kicker">Rent Workspace</p>
               <h1 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">
                 Run rent, ledger, and arrears work against the tenancy itself
               </h1>
@@ -650,6 +638,9 @@ export default function RentWorkspacePage() {
               <p className="mt-1 text-sm text-stone-600">
                 Use this when the work is really money movement: rent booked, rent received, credits, or arrears.
               </p>
+              <div className="mt-4 rounded-full border border-stone-200 bg-white px-4 py-2 text-sm text-stone-600">
+                One rent picture from tenancy to arrears
+              </div>
 
               <div className="app-card-muted mt-5 rounded-[1.4rem] p-4">
                 <p className="text-sm font-medium text-stone-900">Practical workflow</p>
@@ -675,7 +666,7 @@ export default function RentWorkspacePage() {
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-2" aria-label="Rent workspace tabs">
+            <div className="flex flex-wrap gap-2 md:gap-3" aria-label="Rent workspace tabs">
               {[
                 ['all', 'All ledgers'],
                 ['active', 'Active'],
