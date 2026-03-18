@@ -3,7 +3,6 @@
 import { useEffect, useEffectEvent, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
-  getOperatorLabel,
   getOperatorProfile,
   getSessionUser,
   type CurrentOperator,
@@ -379,13 +378,12 @@ export default function ReportingWorkspacePage() {
         <OperatorNav current="reporting" />
 
         <section className="app-surface-strong rounded-[2rem] p-6 md:p-8">
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_380px]">
-            <div>
-              <p className="app-kicker">Reporting Workspace</p>
-              <h1 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">See the portfolio in one operating report, not as scattered work queues</h1>
-              <p className="mt-4 max-w-3xl text-base leading-7 text-stone-600">This brings rent, lease risk, maintenance, compliance, deposits, and open case pressure into one reporting layer so you can run the book, not just the inbox.</p>
+          <div>
+            <p className="app-kicker">Reporting workspace</p>
+            <h1 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">Portfolio reporting in one place</h1>
+            <p className="mt-4 max-w-4xl text-base leading-7 text-stone-600">See rent position, lease pressure, maintenance load, compliance risk, deposits, and live case volume without jumping between screens.</p>
 
-              <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+            <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
                 {[
                   ['Properties', portfolioKpis.properties, 'border-stone-200 bg-stone-50 text-stone-900'],
                   ['Active tenancies', portfolioKpis.activeTenancies, 'border-emerald-200 bg-emerald-50 text-emerald-900'],
@@ -399,16 +397,10 @@ export default function ReportingWorkspacePage() {
                   </article>
                 ))}
               </div>
-            </div>
 
-            <aside className="app-surface rounded-[1.8rem] p-5">
-              <p className="app-kicker">Operator</p>
-              <h2 className="mt-2 text-xl font-semibold">{getOperatorLabel(operator)}</h2>
-              <p className="mt-1 text-sm text-stone-600">Use this when you need the portfolio view: where the pressure is, what is collecting, and what needs attention next.</p>
-              <div className="mt-4 rounded-full border border-stone-200 bg-white px-4 py-2 text-sm text-stone-600">
-                One reporting view for the whole book
-              </div>
-            </aside>
+            <div className="mt-4 rounded-[1.25rem] border border-stone-200 bg-white/85 px-4 py-3 text-sm leading-6 text-stone-600">
+              Use this view to spot pressure quickly: what is overdue, what is collecting, what is expiring, and what needs action next.
+            </div>
           </div>
         </section>
 

@@ -1,15 +1,14 @@
 'use client'
 
-import Link from 'next/link'
 import { useEffect, useEffectEvent, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
-  getOperatorLabel,
   getOperatorProfile,
   getSessionUser,
   type CurrentOperator,
 } from '@/lib/operator'
 import { supabase } from '@/lib/supabase'
+import { OperatorNav } from '@/app/operator-nav'
 
 type LeaseTab = 'all' | 'due' | 'planned' | 'completed'
 
@@ -418,22 +417,16 @@ export default function LeaseLifecyclePage() {
 
   return (
     <main className="app-grid min-h-screen px-5 py-6 text-stone-900 md:px-8 md:py-8">
-      <div className="mx-auto max-w-[1520px]">
+      <div className="mx-auto max-w-[1520px] space-y-6">
+        <OperatorNav current="lease" />
+
         <section className="app-surface-strong rounded-[2rem] p-6 md:p-8">
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_380px]">
-            <div>
-              <div className="flex flex-wrap items-center gap-3">
-                <Link href="/" className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium">Back to queue</Link>
-                <Link href="/records" className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium">Records workspace</Link>
-                <Link href="/records/tenancies" className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium">Tenancy workspace</Link>
-                <Link href="/records/rent" className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium">Rent workspace</Link>
-              </div>
+          <div>
+            <p className="app-kicker">Lease lifecycle</p>
+            <h1 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">Track renewals, notice, and move-out work before it turns into inbox chaos</h1>
+            <p className="mt-4 max-w-4xl text-base leading-7 text-stone-600">Keep term dates, renewal actions, notice windows, and move-out follow-through attached to the tenancy itself.</p>
 
-              <p className="app-kicker mt-6">Lease Lifecycle</p>
-              <h1 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">Track renewal, notice, and move-out actions before they become case chaos</h1>
-              <p className="mt-4 max-w-3xl text-base leading-7 text-stone-600">This adds a proper tenancy lifecycle queue so renewals, notice windows, and end-of-term actions stay visible before the inbox catches fire.</p>
-
-              <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 {[
                   ['Due now', kpis.due, 'border-rose-200 bg-rose-50 text-rose-900'],
                   ['Planned', kpis.planned, 'border-sky-200 bg-sky-50 text-sky-900'],
@@ -448,36 +441,25 @@ export default function LeaseLifecyclePage() {
               </div>
             </div>
 
-            <aside className="app-surface rounded-[1.8rem] p-5">
-              <p className="app-kicker">Operator</p>
-              <h2 className="mt-2 text-xl font-semibold">{getOperatorLabel(operator)}</h2>
-              <p className="mt-1 text-sm text-stone-600">Use this when the next important move is about the tenancy term itself, not just the latest message.</p>
-              <div className="app-card-muted mt-5 rounded-[1.4rem] p-4">
-                <p className="text-sm font-medium text-stone-900">Practical workflow</p>
-                <ul className="mt-3 space-y-2 text-sm text-stone-600">
-                  <li>Review due renewal and notice tasks before the end date sneaks up.</li>
-                  <li>Link lifecycle actions back to a tenancy case when discussions are already active.</li>
-                  <li>Use completed items as the tenancy audit trail for move-out and follow-up work.</li>
-                </ul>
-              </div>
-            </aside>
-          </div>
+          <div className="mt-4 rounded-[1.25rem] border border-stone-200 bg-white/85 px-4 py-3 text-sm leading-6 text-stone-600">
+              Review due actions first, link them to the right case if discussions are already open, and use completed items as the tenancy audit trail.
+            </div>
         </section>
 
         <section className="app-surface mt-6 rounded-[2rem] p-5 md:p-6">
           <div className="flex flex-col gap-5">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div>
-                <p className="app-kicker">Lifecycle tabs</p>
-                <h2 className="mt-2 text-2xl font-semibold">Focus on due, planned, or completed lease actions</h2>
+                <p className="app-kicker">Filter</p>
+                <h2 className="mt-2 text-2xl font-semibold">Filter tenancies by lifecycle pressure</h2>
               </div>
               <div className="app-card-muted rounded-full px-4 py-2 text-sm text-stone-600">{filteredTenancies.length} shown of {tenancies.length} tenancies</div>
             </div>
 
-            <div className="flex flex-wrap gap-2" aria-label="Lease lifecycle tabs">
+            <div className="flex flex-wrap gap-2 md:gap-3" aria-label="Lease lifecycle tabs">
               {[
-                ['all', 'All'],
-                ['due', 'Due'],
+                ['all', 'All tenancies'],
+                ['due', 'Due actions'],
                 ['planned', 'Planned'],
                 ['completed', 'Completed'],
               ].map(([value, label]) => (

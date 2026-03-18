@@ -143,9 +143,6 @@ function formatRelativeTime(value: string | null) {
   return `${diffDays}d ago`
 }
 
-function formatLabel(value: string) {
-  return value.replace(/_/g, ' ')
-}
 
 function formatShortDateTime(value: string | null) {
   if (!value) return 'Not set'
@@ -737,44 +734,6 @@ export default function HomePage() {
     }
   }, [cases])
 
-  const postureSummary = useMemo(() => {
-    const points: string[] = []
-
-    if (kpis.urgent > 0) {
-      points.push(`${kpis.urgent} urgent case${kpis.urgent === 1 ? '' : 's'} need close attention.`)
-    }
-
-    if (kpis.unassigned > 0) {
-      points.push(
-        `${kpis.unassigned} case${kpis.unassigned === 1 ? ' is' : 's are'} still unassigned.`
-      )
-    }
-
-    if (operationsPulse.maintenanceApproval > 0) {
-      points.push(
-        `${operationsPulse.maintenanceApproval} maintenance job${operationsPulse.maintenanceApproval === 1 ? ' is' : 's are'} waiting on approval.`
-      )
-    }
-
-    if (operationsPulse.complianceRisk > 0) {
-      points.push(
-        `${operationsPulse.complianceRisk} compliance record${operationsPulse.complianceRisk === 1 ? '' : 's'} are already expired or missing.`
-      )
-    }
-
-    if (operationsPulse.depositDisputed > 0) {
-      points.push(
-        `${operationsPulse.depositDisputed} deposit claim${operationsPulse.depositDisputed === 1 ? ' is' : 's are'} disputed.`
-      )
-    }
-
-    if (!points.length) {
-      return 'The queue is calm right now. There are no urgent cases, approvals waiting, or active compliance risks in the visible ops layers.'
-    }
-
-    return points.join(' ')
-  }, [kpis, operationsPulse])
-
   const todayAgenda = useMemo(() => {
     const items = cases
       .filter((item) => {
@@ -900,10 +859,10 @@ export default function HomePage() {
   const kpiCards = useMemo(
     () => [
       {
-        label: 'Queue size',
+        label: 'Live cases',
         value: kpis.total,
         tone: 'border-stone-200 bg-stone-50 text-stone-900',
-        helper: 'All active cases in view',
+        helper: 'Everything visible right now',
         actionLabel: 'Open whole queue',
         filters: {
           search: '',
@@ -913,10 +872,10 @@ export default function HomePage() {
         } satisfies QueueFilterState,
       },
       {
-        label: 'Need replies',
+        label: 'Open cases',
         value: kpis.open,
         tone: 'border-emerald-200 bg-emerald-50 text-emerald-900',
-        helper: 'Open work still in motion',
+        helper: 'Cases still being worked',
         actionLabel: 'Show open cases',
         filters: {
           search: '',
@@ -926,10 +885,10 @@ export default function HomePage() {
         } satisfies QueueFilterState,
       },
       {
-        label: 'Urgent now',
+        label: 'Urgent',
         value: kpis.urgent,
         tone: 'border-red-200 bg-red-50 text-red-800',
-        helper: 'Highest priority items',
+        helper: 'Cases needing attention first',
         actionLabel: 'Show urgent queue',
         filters: {
           search: '',
@@ -939,10 +898,10 @@ export default function HomePage() {
         } satisfies QueueFilterState,
       },
       {
-        label: 'Unowned',
+        label: 'Unassigned',
         value: kpis.unassigned,
         tone: 'border-amber-200 bg-amber-50 text-amber-900',
-        helper: 'Cases needing an operator',
+        helper: 'No owner set yet',
         actionLabel: 'Show unassigned queue',
         filters: {
           search: '',
@@ -1140,221 +1099,139 @@ export default function HomePage() {
       <div className="mx-auto max-w-[1520px] space-y-6">
         <OperatorNav current="queue" />
 
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
-          <div className="space-y-6">
-            <section className="app-surface-strong overflow-hidden rounded-[2rem] p-5 md:p-6">
-              <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
-                <div>
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <p className="app-kicker">Renovo Lettings Ops</p>
-                    <span className="app-live-pill rounded-full px-3 py-1 text-xs font-medium">
-                      {liveMessage || 'Live updates connected'}
-                    </span>
-                  </div>
-
-                  <h1 className="mt-4 max-w-5xl text-3xl font-semibold tracking-tight md:text-[3.3rem] md:leading-[1.02]">
-                    Work the queue with less friction
-                  </h1>
-                  <p className="mt-4 max-w-3xl text-base leading-7 text-stone-600">
-                    Prioritise what needs a human, keep replies moving, and use the wider ops
-                    workspaces only when the queue is not the right lens.
-                  </p>
-                </div>
-
-                <aside className="rounded-[1.6rem] border border-stone-200 bg-white/78 p-4 backdrop-blur">
-                  <p className="app-kicker">Today posture</p>
-                  <h2 className="mt-2 text-lg font-semibold">Know where the pressure really is before you open the queue</h2>
-                  <p className="mt-3 text-sm leading-6 text-stone-600">{postureSummary}</p>
-
-                  <div className="mt-4 grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
-                    {[
-                      { label: 'Due now', value: todayAgenda.dueNowCount, tone: 'border-amber-200 bg-amber-50 text-amber-900' },
-                      { label: 'Scheduled', value: todayAgenda.scheduledCount, tone: 'border-sky-200 bg-sky-50 text-sky-900' },
-                      { label: 'Awaiting owner', value: todayAgenda.awaitingOwnerCount, tone: 'border-rose-200 bg-rose-50 text-rose-900' },
-                    ].map((item) => (
-                      <article key={item.label} className={`rounded-[1.2rem] border px-4 py-3 ${item.tone}`}>
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] opacity-80">{item.label}</p>
-                        <p className="mt-2 text-2xl font-semibold">{item.value}</p>
-                      </article>
-                    ))}
-                  </div>
-                </aside>
-              </div>
-
-              <section className="mt-5 rounded-[1.6rem] border border-stone-200 bg-white/82 p-4 backdrop-blur">
-                <div className="flex flex-col gap-3 border-b app-divider pb-4 sm:flex-row sm:items-end sm:justify-between">
-                  <div>
-                    <p className="app-kicker">Operations pulse</p>
-                    <h2 className="mt-2 text-lg font-semibold">Jump into the live operational layers without leaving the main desk</h2>
-                  </div>
-                  <div className="text-sm text-stone-500">Maintenance, compliance, viewings, and deposits in one glance</div>
-                </div>
-
-                <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                  {operationsPulseCards.map((card) => (
-                    <Link
-                      key={card.label}
-                      href={card.href}
-                      className={`rounded-[1.25rem] border p-4 transition hover:-translate-y-0.5 hover:shadow-sm ${card.tone}`}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] opacity-80">{card.label}</p>
-                          <p className="mt-2 text-sm leading-6 opacity-80">{card.helper}</p>
-                        </div>
-                        <span className="text-2xl font-semibold leading-none">{card.value}</span>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </section>
-
-              <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                {kpiCards.map((card) => (
-                  <button
-                    key={card.label}
-                    type="button"
-                    onClick={() => focusQueue(card.filters)}
-                    className={`rounded-[1.4rem] border px-4 py-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 ${card.tone}`}
-                  >
-                    <div className="text-[11px] font-semibold uppercase tracking-[0.2em] opacity-80">
-                      {card.label}
-                    </div>
-                    <div className="mt-2 text-[2rem] font-semibold leading-none">{card.value}</div>
-                    <p className="mt-2 text-sm opacity-80">{card.helper}</p>
-                    <p className="mt-3 text-xs font-medium opacity-80">{card.actionLabel}</p>
-                  </button>
-                ))}
-              </div>
-
-              <section className="mt-5 rounded-[1.6rem] border border-stone-200 bg-white/82 p-4 backdrop-blur">
-                <div className="flex flex-col gap-3 border-b app-divider pb-4 sm:flex-row sm:items-end sm:justify-between">
-                  <div>
-                    <p className="app-kicker">Today diary</p>
-                    <h2 className="mt-2 text-lg font-semibold">See the appointments, follow-ups, and fresh replies in one working agenda</h2>
-                  </div>
-                  <div className="text-sm text-stone-500">Built from follow-up dates, scheduled cases, and live inbound activity</div>
-                </div>
-
-                <div className="mt-4 grid gap-3 md:grid-cols-3">
-                  <article className="rounded-[1.2rem] border border-amber-200 bg-amber-50 px-4 py-3 text-amber-900">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] opacity-80">Due now</p>
-                    <p className="mt-2 text-2xl font-semibold">{todayAgenda.dueNowCount}</p>
-                    <p className="mt-1 text-xs opacity-80">Follow-ups that should not slip today</p>
-                  </article>
-                  <article className="rounded-[1.2rem] border border-sky-200 bg-sky-50 px-4 py-3 text-sky-900">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] opacity-80">Scheduled</p>
-                    <p className="mt-2 text-2xl font-semibold">{todayAgenda.scheduledCount}</p>
-                    <p className="mt-1 text-xs opacity-80">Booked work that needs coordination and follow-through</p>
-                  </article>
-                  <article className="rounded-[1.2rem] border border-rose-200 bg-rose-50 px-4 py-3 text-rose-900">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] opacity-80">Awaiting owner</p>
-                    <p className="mt-2 text-2xl font-semibold">{todayAgenda.awaitingOwnerCount}</p>
-                    <p className="mt-1 text-xs opacity-80">Items that still need a human owner or handoff decision</p>
-                  </article>
-                </div>
-
-                {todayAgenda.items.length === 0 ? (
-                  <div className="app-empty-state mt-4 rounded-[1.4rem] p-6 text-sm">
-                    Nothing needs diary attention right now. The queue is calm enough to work straight from the live list below.
-                  </div>
-                ) : (
-                  <div className="mt-4 grid gap-3 xl:grid-cols-2">
-                    {todayAgenda.items.map((item) => (
-                      <Link
-                        key={item.id}
-                        href={`/cases/${item.id}`}
-                        onMouseEnter={() => prefetchCaseDetail(item.id)}
-                        className="rounded-[1.2rem] border border-stone-200 bg-stone-50/90 p-4 transition hover:-translate-y-0.5 hover:border-stone-400 hover:bg-white"
-                      >
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="min-w-0">
-                            <p className="text-sm font-semibold text-stone-900">{item.caseNumber}</p>
-                            <p className="mt-1 text-sm leading-6 text-stone-700">{item.title}</p>
-                          </div>
-                          <span className="rounded-full border border-stone-200 bg-white px-2.5 py-1 text-[11px] font-medium text-stone-700">
-                            {item.lane}
-                          </span>
-                        </div>
-                        <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] font-medium uppercase tracking-[0.16em] text-stone-500">
-                          <span>{item.timing}</span>
-                          <span>Owner {item.owner}</span>
-                        </div>
-                        <p className="mt-2 text-xs leading-5 text-stone-500">{item.meta}</p>
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </section>
-            </section>
-          </div>
-
-          <aside className="app-surface-strong rounded-[2rem] p-5 xl:sticky xl:top-6">
-            <div className="flex items-start justify-between gap-4">
-              <div className="min-w-0">
-                <p className="app-kicker">Signed In</p>
-                <h2 className="mt-2 truncate text-xl font-semibold">
-                  {getOperatorLabel(operator)}
-                </h2>
-                <p className="mt-1 truncate text-sm text-stone-600">
-                  {operator.authUser.email || 'No email on account'}
-                </p>
+        <div className="space-y-6">
+          <section className="app-surface-strong overflow-hidden rounded-[2rem] p-5 md:p-6">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center gap-3">
+                <p className="app-kicker">Operations Desk</p>
+                <span className="app-live-pill rounded-full px-3 py-1 text-xs font-medium">
+                  {liveMessage || 'Live updates connected'}
+                </span>
               </div>
 
               <button
                 onClick={handleSignOut}
                 disabled={signingOut}
-                className="app-secondary-button rounded-full px-3.5 py-2 text-sm font-medium disabled:opacity-60"
+                className="app-secondary-button rounded-full px-4 py-2 text-sm font-medium disabled:opacity-60"
               >
                 {signingOut ? 'Signing out...' : 'Sign out'}
               </button>
             </div>
 
-            <div className="mt-5 rounded-[1.4rem] border border-stone-200 bg-white/88 p-4 text-sm text-stone-700">
-              <p className="font-medium text-stone-900">Queue lens</p>
-              <div className="mt-3 flex flex-wrap gap-2 text-xs">
-                <span className="rounded-full border border-stone-200 bg-stone-50 px-2.5 py-1">Tab {({ all: 'All', due_now: 'Due now', overdue: 'Overdue', due_today: 'Due today', waiting: 'Waiting', pickup: 'Pickup next', urgent: 'Urgent', complaints: 'Complaints', unassigned: 'Unassigned', recent: 'Recent', no_next_step: 'No next step' } as Record<string, string>)[tab] ?? tab}</span>
-                <span className="rounded-full border border-stone-200 bg-stone-50 px-2.5 py-1">Status {statusFilter === 'all' ? 'All' : formatLabel(statusFilter)}</span>
-                <span className="rounded-full border border-stone-200 bg-stone-50 px-2.5 py-1">Priority {priorityFilter === 'all' ? 'All' : formatLabel(priorityFilter)}</span>
+            <h1 className="mt-4 max-w-5xl text-3xl font-semibold tracking-tight md:text-[3.1rem] md:leading-[1.04]">
+              Run maintenance and live work from one desk
+            </h1>
+            <p className="mt-4 max-w-4xl text-base leading-7 text-stone-600">
+              See what is due, what is booked, and what still needs a human owner. Keep the screen practical: fewer repeated panels, less wasted space, and faster movement into real work.
+            </p>
+
+            <div className="mt-6 grid gap-3 md:grid-cols-3">
+              <article className="rounded-[1.2rem] border border-amber-200 bg-amber-50 px-4 py-3 text-amber-900">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] opacity-80">Due now</p>
+                <p className="mt-2 text-2xl font-semibold">{todayAgenda.dueNowCount}</p>
+                <p className="mt-1 text-xs opacity-80">Follow-ups that should be touched today</p>
+              </article>
+              <article className="rounded-[1.2rem] border border-sky-200 bg-sky-50 px-4 py-3 text-sky-900">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] opacity-80">Scheduled</p>
+                <p className="mt-2 text-2xl font-semibold">{todayAgenda.scheduledCount}</p>
+                <p className="mt-1 text-xs opacity-80">Booked work and planned visits</p>
+              </article>
+              <article className="rounded-[1.2rem] border border-rose-200 bg-rose-50 px-4 py-3 text-rose-900">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] opacity-80">Unowned</p>
+                <p className="mt-2 text-2xl font-semibold">{todayAgenda.awaitingOwnerCount}</p>
+                <p className="mt-1 text-xs opacity-80">Items still waiting on a human owner</p>
+              </article>
+            </div>
+
+            <section className="mt-5 rounded-[1.6rem] border border-stone-200 bg-white/82 p-4 backdrop-blur">
+              <div className="flex flex-col gap-3 border-b app-divider pb-4 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <p className="app-kicker">Operations pulse</p>
+                  <h2 className="mt-2 text-lg font-semibold">Maintenance, compliance, viewings, and deposits at a glance</h2>
+                </div>
+                <div className="text-sm text-stone-500">Use these only when the work belongs in a specialist workspace</div>
               </div>
-              {search && <p className="mt-3 text-xs leading-5 text-stone-500">Search filter active: “{search}”</p>}
-            </div>
 
-            <div className="mt-4 rounded-[1.4rem] border border-sky-200 bg-sky-50 p-4 text-sm text-sky-900">
-              <p className="font-medium">Operator brief</p>
-              <p className="mt-2 leading-6 text-sky-900/80">{postureSummary}</p>
-            </div>
-
-            <div className="app-card-muted mt-4 rounded-[1.4rem] p-4">
-              <p className="text-sm font-medium text-stone-900">Case in hand</p>
-              {!selectedCase ? (
-                <p className="mt-3 text-sm leading-6 text-stone-600">Choose a case from the queue and the working summary will stay open alongside the live list.</p>
-              ) : (
-                <div className="mt-3 space-y-3">
-                  <div className="rounded-[1.2rem] border border-stone-200 bg-white/90 p-3">
-                    <p className="text-sm font-semibold text-stone-900">{selectedCase.case_number}</p>
-                    <p className="mt-1 text-sm leading-6 text-stone-600">{selectedCase.summary || 'No summary yet for this case.'}</p>
-                  </div>
+              <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                {operationsPulseCards.map((card) => (
                   <Link
-                    href={`/cases/${selectedCase.id}`}
-                    className="app-primary-button inline-flex w-full items-center justify-center rounded-[1.2rem] px-4 py-3 text-sm font-medium"
+                    key={card.label}
+                    href={card.href}
+                    className={`rounded-[1.25rem] border p-4 transition hover:-translate-y-0.5 hover:shadow-sm ${card.tone}`}
                   >
-                    Open selected case
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] opacity-80">{card.label}</p>
+                        <p className="mt-2 text-sm leading-6 opacity-80">{card.helper}</p>
+                      </div>
+                      <span className="text-2xl font-semibold leading-none">{card.value}</span>
+                    </div>
                   </Link>
+                ))}
+              </div>
+            </section>
+
+            <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              {kpiCards.map((card) => (
+                <button
+                  key={card.label}
+                  type="button"
+                  onClick={() => focusQueue(card.filters)}
+                  className={`rounded-[1.4rem] border px-4 py-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 ${card.tone}`}
+                >
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.2em] opacity-80">
+                    {card.label}
+                  </div>
+                  <div className="mt-2 text-[2rem] font-semibold leading-none">{card.value}</div>
+                  <p className="mt-2 text-sm opacity-80">{card.helper}</p>
+                </button>
+              ))}
+            </div>
+
+            <section className="mt-5 rounded-[1.6rem] border border-stone-200 bg-white/82 p-4 backdrop-blur">
+              <div className="flex flex-col gap-3 border-b app-divider pb-4 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <p className="app-kicker">Today diary</p>
+                  <h2 className="mt-2 text-lg font-semibold">Appointments, follow-ups, and fresh replies in one list</h2>
+                </div>
+                <div className="text-sm text-stone-500">Built from follow-up dates, scheduled cases, and live inbound activity</div>
+              </div>
+
+              {todayAgenda.items.length === 0 ? (
+                <div className="app-empty-state mt-4 rounded-[1.4rem] p-6 text-sm">
+                  Nothing needs diary attention right now. Work straight from the live list below.
+                </div>
+              ) : (
+                <div className="mt-4 grid gap-3 xl:grid-cols-2">
+                  {todayAgenda.items.map((item) => (
+                    <Link
+                      key={item.id}
+                      href={`/cases/${item.id}`}
+                      onMouseEnter={() => prefetchCaseDetail(item.id)}
+                      className="rounded-[1.2rem] border border-stone-200 bg-stone-50/90 p-4 transition hover:-translate-y-0.5 hover:border-stone-400 hover:bg-white"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-stone-900">{item.caseNumber}</p>
+                          <p className="mt-1 text-sm leading-6 text-stone-700">{item.title}</p>
+                        </div>
+                        <span className="rounded-full border border-stone-200 bg-white px-2.5 py-1 text-[11px] font-medium text-stone-700">
+                          {item.lane}
+                        </span>
+                      </div>
+                      <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] font-medium uppercase tracking-[0.16em] text-stone-500">
+                        <span>{item.timing}</span>
+                        <span>Owner {item.owner}</span>
+                      </div>
+                      <p className="mt-2 text-xs leading-5 text-stone-500">{item.meta}</p>
+                    </Link>
+                  ))}
                 </div>
               )}
-            </div>
-
-            <div className="app-card-muted mt-4 rounded-[1.4rem] p-4">
-              <p className="text-sm font-medium text-stone-900">Operator notes</p>
-              <ul className="mt-3 space-y-2 text-sm text-stone-600">
-                <li>Keep the diary for anything time-bound, scheduled, or waiting on a promised follow-up.</li>
-                <li>Use the pulse cards when the work is really maintenance, compliance, viewings, or deposits.</li>
-                <li>Keep the selected case open while you compare similar inbound work in the live queue.</li>
-              </ul>
-            </div>
-          </aside>
+            </section>
+          </section>
         </div>
+
         {loading && (
           <div className="app-surface mt-6 rounded-[1.8rem] p-6 text-sm text-stone-600">
             Loading the queue...
@@ -1375,10 +1252,10 @@ export default function HomePage() {
               <div className="mb-4 rounded-[1.5rem] border border-stone-200 bg-white/90 p-4 backdrop-blur">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="app-kicker">Live Queue</p>
-                    <h2 className="mt-2 text-xl font-semibold">Choose the next case</h2>
+                    <p className="app-kicker">Live work list</p>
+                    <h2 className="mt-2 text-xl font-semibold">Choose the next job</h2>
                     <p className="mt-1 text-sm text-stone-600">
-                      Selected cases prefetch in the background for a faster open.
+                      Open the next item from here and keep the working summary beside it.
                     </p>
                     {!followUpAvailable && (
                       <p className="mt-2 text-xs text-stone-500">

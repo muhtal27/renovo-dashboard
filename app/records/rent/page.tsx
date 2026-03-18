@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { useEffect, useEffectEvent, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
-  getOperatorLabel,
   getOperatorProfile,
   getSessionUser,
   type CurrentOperator,
@@ -605,18 +604,16 @@ export default function RentWorkspacePage() {
         <OperatorNav current="rent" />
 
         <section className="app-surface-strong rounded-[2rem] p-6 md:p-8">
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_380px]">
-            <div>
-              <p className="app-kicker">Rent Workspace</p>
-              <h1 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">
-                Run rent, ledger, and arrears work against the tenancy itself
-              </h1>
-              <p className="mt-4 max-w-3xl text-base leading-7 text-stone-600">
-                This adds the accounting layer Renovo was missing: contracted rent, booked charges, payments,
-                credits, and outstanding balance by tenancy.
-              </p>
+          <div>
+            <p className="app-kicker">Rent workspace</p>
+            <h1 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">
+              Rent, ledger, and arrears in one place
+            </h1>
+            <p className="mt-4 max-w-4xl text-base leading-7 text-stone-600">
+              Book charges and payments against the tenancy, keep arrears visible, and tie money work back to the right case when needed.
+            </p>
 
-              <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+            <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
                 {[
                   ['Active tenancies', kpis.activeTenancies, 'border-emerald-200 bg-emerald-50 text-emerald-900'],
                   ['Contracted monthly', formatMoney(kpis.monthlyContractedRent), 'border-sky-200 bg-sky-50 text-sky-900'],
@@ -632,26 +629,9 @@ export default function RentWorkspacePage() {
               </div>
             </div>
 
-            <aside className="app-surface rounded-[1.8rem] p-5">
-              <p className="app-kicker">Operator</p>
-              <h2 className="mt-2 text-xl font-semibold">{getOperatorLabel(operator)}</h2>
-              <p className="mt-1 text-sm text-stone-600">
-                Use this when the work is really money movement: rent booked, rent received, credits, or arrears.
-              </p>
-              <div className="mt-4 rounded-full border border-stone-200 bg-white px-4 py-2 text-sm text-stone-600">
-                One rent picture from tenancy to arrears
-              </div>
-
-              <div className="app-card-muted mt-5 rounded-[1.4rem] p-4">
-                <p className="text-sm font-medium text-stone-900">Practical workflow</p>
-                <ul className="mt-3 space-y-2 text-sm text-stone-600">
-                  <li>Book charges and payments to the tenancy so the balance stays central.</li>
-                  <li>Link rent entries to a case when arrears or tenancy admin work is already open.</li>
-                  <li>Use overdue balance to decide whether to open or escalate a rent case.</li>
-                </ul>
-              </div>
-            </aside>
-          </div>
+          <div className="mt-4 rounded-[1.25rem] border border-stone-200 bg-white/85 px-4 py-3 text-sm leading-6 text-stone-600">
+              Book the money against the tenancy, link arrears to a live case when needed, and work overdue balances first.
+            </div>
         </section>
 
         <section className="app-surface mt-6 rounded-[2rem] p-5 md:p-6">
