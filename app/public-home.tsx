@@ -18,24 +18,24 @@ const pressurePoints = [
 const operatingLayers = [
   {
     label: 'Annabelle Desk',
-    title: 'A live operator layer for the hard days',
+    title: 'A live operator space for the hard days',
     body: 'The queue, cases, messages, calls, recordings, follow-ups, and operational pulse already live in one surface so the team can act from facts instead of scattered inboxes.',
     href: '/login',
-    cta: 'Open operator access',
+    cta: 'See the operator entrance',
   },
   {
     label: 'Linked Records',
     title: 'Property, tenancy, job, rent, and compliance stay connected',
-    body: 'The product is built so communication is not floating on its own. Annabelle keeps the operational record tied back to the property and the live work around it.',
+    body: 'This reality is built so communication is never left floating on its own. Annabelle keeps the operational record tied back to the property and the live work around it.',
     href: '/login',
-    cta: 'Enter records workspace',
+    cta: 'Go to the live workspace',
   },
   {
     label: 'Role Portals',
     title: 'Landlords, tenants, and contractors see the right slice',
     body: 'Instead of forwarding long email chains, each audience can be routed into a focused experience that reflects their role and the case state already held in the platform.',
     href: '/portal',
-    cta: 'View portal entry',
+    cta: 'Open the portal entrance',
   },
 ]
 
@@ -79,17 +79,62 @@ const roleCards = [
 const practicalProof = [
   'Runs against one shared operational record instead of isolated inboxes.',
   'Built around live case context, not just chatbot answers.',
-  'Supports operator, landlord, tenant, and contractor journeys from the same product foundation.',
+  'Supports operator, landlord, tenant, and contractor journeys from the same working foundation.',
   'Designed for 24/7 service continuity without pretending humans are replaceable.',
   'Useful for agency leadership because the work is visible, measurable, and traceable.',
 ]
 
-const productAreas = [
+const workingAreas = [
   'Calls, messages, and email linked back to the same live case context.',
-  'Maintenance, rent, lease lifecycle, and compliance living in the same operating layer.',
-  'Scotland-specific knowledge workspace to ground responses before widening scope.',
+  'Maintenance, rent, lease lifecycle, and compliance living in the same operational story.',
+  'Scotland-specific knowledge to ground answers before widening scope.',
   'Portal routing that sends each signed-in user to the right destination automatically.',
 ]
+
+const actions = [
+  {
+    title: 'Speak to Annabelle',
+    body: 'Pick up the phone and hear how she handles the conversation. This is the fastest way to feel the difference between a generic demo and a believable experience.',
+    href: 'tel:01313812887',
+    cta: 'Call 0131 381 2887',
+    tone: 'primary',
+  },
+  {
+    title: 'Try the live entry points',
+    body: 'Use the real login and portal routes already connected to the working system. That lets you explore the journey from the front door rather than from a slide deck.',
+    href: '/login',
+    cta: 'Open the live sign-in',
+    tone: 'secondary',
+  },
+  {
+    title: 'Start with the story',
+    body: 'If you want to understand why Annabelle matters, read the operating story first. The rest of the site will make more sense once the pressure behind it is clear.',
+    href: '#story',
+    cta: 'Read the agency story',
+    tone: 'secondary',
+  },
+]
+
+function ActionLink({ href, cta, tone }: { href: string; cta: string; tone: 'primary' | 'secondary' }) {
+  const className =
+    tone === 'primary'
+      ? 'app-primary-button inline-flex rounded-full px-4 py-2.5 text-sm font-medium'
+      : 'app-secondary-button inline-flex rounded-full px-4 py-2.5 text-sm font-medium'
+
+  if (href.startsWith('/')) {
+    return (
+      <Link href={href} className={className}>
+        {cta}
+      </Link>
+    )
+  }
+
+  return (
+    <a href={href} className={className}>
+      {cta}
+    </a>
+  )
+}
 
 export function PublicHome() {
   return (
@@ -105,17 +150,17 @@ export function PublicHome() {
               <div>
                 <p className="app-kicker">Annabelle By Renovo</p>
                 <p className="mt-2 max-w-xl text-sm leading-6 text-stone-600">
-                  The always-on operating layer for modern letting agencies.
+                  The always-on operational story for modern letting agencies.
                 </p>
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
                 <a href="#story" className="app-secondary-button rounded-full px-5 py-2.5 text-sm font-medium">
-                  Read the story
+                  Read the story first
                 </a>
-                <Link href="/login" className="app-primary-button rounded-full px-5 py-2.5 text-sm font-medium">
-                  Enter Annabelle
-                </Link>
+                <a href="tel:01313812887" className="app-primary-button rounded-full px-5 py-2.5 text-sm font-medium">
+                  Speak to Annabelle
+                </a>
               </div>
             </div>
 
@@ -128,16 +173,16 @@ export function PublicHome() {
                   Annabelle keeps the agency moving when the work does not politely wait.
                 </h1>
                 <p className="mt-6 max-w-3xl text-base leading-8 text-stone-700 md:text-lg">
-                  She does not clock off, call in sick, or lose the thread. Annabelle is the product layer that helps a letting agency stay responsive across calls, messages, maintenance, rent, compliance, and landlord updates while the human team protects its time and energy for judgement, reassurance, and decisions.
+                  She does not clock off, call in sick, or lose the thread. Annabelle is the living operational reality that helps a letting agency stay responsive across calls, messages, maintenance, rent, compliance, and landlord updates while the human team protects its time and energy for judgement, reassurance, and decisions.
                 </p>
 
                 <div className="mt-8 flex flex-wrap gap-3">
-                  <Link href="/login" className="app-primary-button rounded-2xl px-5 py-3 text-sm font-medium">
-                    Sign in to the workspace
-                  </Link>
-                  <a href="#platform" className="app-secondary-button rounded-2xl px-5 py-3 text-sm font-medium">
-                    Explore the product
+                  <a href="tel:01313812887" className="app-primary-button rounded-2xl px-5 py-3 text-sm font-medium">
+                    Call Annabelle on 0131 381 2887
                   </a>
+                  <Link href="/login" className="app-secondary-button rounded-2xl px-5 py-3 text-sm font-medium">
+                    Enter the live workspace
+                  </Link>
                 </div>
               </div>
 
@@ -181,7 +226,7 @@ export function PublicHome() {
 
           <div className="app-surface rounded-[2rem] p-6 md:p-7">
             <p className="app-kicker">Why Annabelle Exists</p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-tight">A product story told from the agency floor</h2>
+            <h2 className="mt-3 text-3xl font-semibold tracking-tight">A working story told from the agency floor</h2>
             <div className="mt-6 space-y-3">
               {storySteps.map((item) => (
                 <article key={item.step} className="rounded-[1.45rem] border border-stone-200 bg-white/88 p-5">
@@ -198,16 +243,42 @@ export function PublicHome() {
           </div>
         </section>
 
+        <section id="actions" className="app-surface rounded-[2rem] p-6 md:p-7">
+          <div className="flex flex-col gap-3 border-b app-divider pb-5 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="app-kicker">What To Do Next</p>
+              <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
+                If the story feels true, here is how to step into it
+              </h2>
+            </div>
+            <div className="rounded-full border border-stone-200 bg-white px-4 py-2 text-sm text-stone-600">
+              Main line: 0131 381 2887
+            </div>
+          </div>
+
+          <div className="mt-6 grid gap-4 xl:grid-cols-3">
+            {actions.map((item) => (
+              <article key={item.title} className="rounded-[1.55rem] border border-stone-200 bg-white/92 p-5">
+                <p className="app-kicker">{item.title}</p>
+                <p className="mt-3 text-sm leading-7 text-stone-700">{item.body}</p>
+                <div className="mt-5">
+                  <ActionLink href={item.href} cta={item.cta} tone={item.tone as 'primary' | 'secondary'} />
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
         <section id="platform" className="app-surface rounded-[2rem] p-6 md:p-7">
           <div className="flex flex-col gap-3 border-b app-divider pb-5 md:flex-row md:items-end md:justify-between">
             <div>
-              <p className="app-kicker">The Product In Practice</p>
+              <p className="app-kicker">How Annabelle Works In Practice</p>
               <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
-                Not a brochure promise. A working operating system.
+                Not a brochure promise. A working operational reality.
               </h2>
             </div>
             <Link href="/login" className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium">
-              Open live access
+              See the live entrances
             </Link>
           </div>
 
@@ -266,17 +337,17 @@ export function PublicHome() {
             <div>
               <p className="app-kicker">Already Inside Annabelle</p>
               <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
-                The showcase is connected to a product that already has operational depth
+                The showcase is connected to a working reality that already has operational depth
               </h2>
               <p className="mt-4 max-w-3xl text-base leading-8 text-stone-700">
-                This is not a blank marketing shell. The platform behind Annabelle already includes operator queue handling, linked records, maintenance, rent, lease lifecycle, reporting, portals, and a Scotland knowledge layer. That matters because the story on this page is supported by working product structure.
+                This is not a blank marketing shell. The world behind Annabelle already includes operator queue handling, linked records, maintenance, rent, lease lifecycle, reporting, portals, and a Scotland knowledge layer. That matters because the story on this page is supported by a real structure underneath it.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <Link href="/login" className="app-primary-button rounded-2xl px-5 py-3 text-sm font-medium">
-                  Access the platform
+                  Access the live sign-in
                 </Link>
                 <Link href="/portal" className="app-secondary-button rounded-2xl px-5 py-3 text-sm font-medium">
-                  Portal access
+                  Open the portal entrance
                 </Link>
               </div>
             </div>
@@ -284,7 +355,7 @@ export function PublicHome() {
             <div className="rounded-[1.7rem] border border-stone-200 bg-white/92 p-5">
               <p className="app-kicker">Working Areas</p>
               <div className="mt-4 space-y-3">
-                {productAreas.map((item) => (
+                {workingAreas.map((item) => (
                   <div key={item} className="rounded-[1.2rem] border border-stone-200 bg-stone-50/80 px-4 py-3 text-sm leading-6 text-stone-700">
                     {item}
                   </div>
@@ -304,12 +375,12 @@ export function PublicHome() {
               She brings value because she holds the operational thread together around the clock, helps the team recover breathing room, and turns messy letting agency work into a clearer system that can actually be managed.
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
-              <Link href="/login" className="app-primary-button rounded-2xl px-5 py-3 text-sm font-medium">
-                Sign in to Annabelle
-              </Link>
-              <a href="#story" className="app-secondary-button rounded-2xl px-5 py-3 text-sm font-medium">
-                Start with the story
+              <a href="tel:01313812887" className="app-primary-button rounded-2xl px-5 py-3 text-sm font-medium">
+                Speak to Annabelle now
               </a>
+              <Link href="/login" className="app-secondary-button rounded-2xl px-5 py-3 text-sm font-medium">
+                Try the live journey
+              </Link>
             </div>
           </div>
         </section>
