@@ -31,6 +31,7 @@ npm install
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 NEXT_PUBLIC_OPERATOR_OUTBOUND_WEBHOOK_URL=
+NEXT_PUBLIC_SITE_URL=
 ```
 
 4. Start the app:
@@ -69,6 +70,7 @@ This repo is ready to deploy on Vercel as a standard Next.js app.
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `NEXT_PUBLIC_OPERATOR_OUTBOUND_WEBHOOK_URL`
+- `NEXT_PUBLIC_SITE_URL` (optional override if you want metadata/canonical URLs pinned to a specific domain)
 
 ### Deployment checklist
 
