@@ -10,18 +10,18 @@ const siteUrl =
 
 export const metadata: Metadata = {
   metadataBase: siteUrl ? new URL(siteUrl) : undefined,
-  title: 'Renovo AI | Lettings Operations Platform',
+  title: 'Annabelle | 24/7 Lettings Operations For Agencies',
   description:
-    'Renovo AI unifies operator workflows, landlord visibility, tenant communication, and contractor coordination in one lettings operations platform.',
+    'Annabelle by Renovo helps letting agencies stay responsive across calls, maintenance, rent, compliance, landlord communication, and tenant updates without losing the operational thread.',
   alternates: {
     canonical: '/',
   },
   openGraph: {
-    title: 'Renovo AI | Lettings Operations Platform',
+    title: 'Annabelle | 24/7 Lettings Operations For Agencies',
     description:
-      'A practical operating system for residential lettings teams handling communication, maintenance, rent, and reporting in one place.',
+      'A practical always-on operating layer for letting agencies that need calmer service, clearer records, and stronger workflow continuity.',
     url: siteUrl,
-    siteName: 'Renovo AI',
+    siteName: 'Annabelle',
     type: 'website',
   },
 }
