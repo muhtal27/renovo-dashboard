@@ -10,6 +10,7 @@ import {
   type CurrentOperator,
 } from '@/lib/operator'
 import { supabase } from '@/lib/supabase'
+import { OperatorNav } from '@/app/operator-nav'
 
 type CallStatus =
   | 'initiated'
@@ -667,29 +668,13 @@ export default function CallsPage() {
 
   return (
     <main className="app-grid min-h-screen px-5 py-6 text-stone-900 md:px-8 md:py-8">
-      <div className="mx-auto max-w-[1520px]">
+      <div className="mx-auto max-w-[1520px] space-y-6">
+        <OperatorNav current="calls" />
+
         <section className="app-surface-strong rounded-[2rem] p-6 md:p-8">
           <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_380px]">
             <div>
               <div className="flex flex-wrap items-center gap-3">
-                <Link
-                  href="/"
-                  className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium"
-                >
-                  Back to queue
-                </Link>
-                <Link
-                  href="/knowledge"
-                  className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium"
-                >
-                  Scotland knowledge
-                </Link>
-                <Link
-                  href="/records"
-                  className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium"
-                >
-                  Records
-                </Link>
                 <span className="app-live-pill rounded-full px-3 py-1 text-xs font-medium">
                   {liveMessage || 'Live updates connected'}
                 </span>

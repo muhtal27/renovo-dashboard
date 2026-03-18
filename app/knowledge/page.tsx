@@ -1,6 +1,5 @@
 'use client'
 
-import Link from 'next/link'
 import { useEffect, useEffectEvent, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
@@ -10,6 +9,7 @@ import {
   type CurrentOperator,
 } from '@/lib/operator'
 import { supabase } from '@/lib/supabase'
+import { OperatorNav } from '@/app/operator-nav'
 
 type KnowledgeArticleRow = {
   id: string
@@ -336,32 +336,13 @@ export default function KnowledgePage() {
 
   return (
     <main className="app-grid min-h-screen px-5 py-6 text-stone-900 md:px-8 md:py-8">
-      <div className="mx-auto max-w-[1520px]">
+      <div className="mx-auto max-w-[1520px] space-y-6">
+        <OperatorNav current="knowledge" />
+
         <section className="app-surface-strong rounded-[2rem] p-6 md:p-8">
           <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_360px]">
             <div>
-              <div className="flex flex-wrap items-center gap-3">
-                <Link
-                  href="/"
-                  className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium"
-                >
-                  Back to queue
-                </Link>
-                <Link
-                  href="/calls"
-                  className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium"
-                >
-                  Open calls inbox
-                </Link>
-                <Link
-                  href="/records"
-                  className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium"
-                >
-                  Records workspace
-                </Link>
-              </div>
-
-              <p className="app-kicker mt-6">Scotland Knowledge Base</p>
+              <p className="app-kicker">Scotland Knowledge Base</p>
               <h1 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">
                 Give Annabelle approved Scotland-specific answers first
               </h1>

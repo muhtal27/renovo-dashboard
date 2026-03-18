@@ -11,6 +11,7 @@ import {
 import { resolveWorkspaceForUser } from '@/lib/portal'
 import { supabase } from '@/lib/supabase'
 import { PublicHome } from '@/app/public-home'
+import { OperatorNav } from '@/app/operator-nav'
 
 type CaseRow = {
   id: string
@@ -1203,7 +1204,9 @@ export default function HomePage() {
 
   return (
     <main className="app-grid min-h-screen px-5 py-6 text-stone-900 md:px-8 md:py-8">
-      <div className="mx-auto max-w-[1520px]">
+      <div className="mx-auto max-w-[1520px] space-y-6">
+        <OperatorNav current="queue" />
+
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px] xl:items-start">
           <div className="space-y-6">
             <section className="app-surface-strong overflow-hidden rounded-[2rem] p-5 md:p-6">
@@ -1282,6 +1285,34 @@ export default function HomePage() {
                   </button>
                 ))}
               </div>
+
+              <section className="mt-5 rounded-[1.6rem] border border-stone-200 bg-white/82 p-4 backdrop-blur">
+                <div className="flex flex-col gap-3 border-b app-divider pb-4 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <p className="app-kicker">Workspace Lanes</p>
+                    <h2 className="mt-2 text-lg font-semibold">Keep the main routes visible while you work</h2>
+                  </div>
+                  <div className="text-sm text-stone-500">Built so the CRM, calls, knowledge, and reporting are never hidden</div>
+                </div>
+
+                <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                  {[
+                    { label: 'Calls inbox', href: '/calls', body: 'Review active sessions, voicemail outcomes, and flagged call summaries.' },
+                    { label: 'Tenancy CRM', href: '/records', body: 'Run the tenancy lifecycle, rent pressure, lease events, and live cases together.' },
+                    { label: 'Knowledge', href: '/knowledge', body: 'Ground Annabelle in approved Scotland-specific answers before wider handling.' },
+                    { label: 'Reporting', href: '/records/reporting', body: 'Read portfolio pressure, approvals, risk, and leadership visibility in one place.' },
+                  ].map((lane) => (
+                    <Link
+                      key={lane.label}
+                      href={lane.href}
+                      className="rounded-[1.25rem] border border-stone-200 bg-stone-50/90 p-4 transition hover:-translate-y-0.5 hover:border-stone-400 hover:bg-white"
+                    >
+                      <p className="text-sm font-semibold text-stone-900">{lane.label}</p>
+                      <p className="mt-2 text-sm leading-6 text-stone-600">{lane.body}</p>
+                    </Link>
+                  ))}
+                </div>
+              </section>
 
               <section className="mt-5 rounded-[1.6rem] border border-stone-200 bg-white/82 p-4 backdrop-blur">
                 <div className="flex flex-col gap-3 border-b app-divider pb-4 sm:flex-row sm:items-end sm:justify-between">

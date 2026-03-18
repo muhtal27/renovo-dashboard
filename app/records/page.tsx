@@ -10,6 +10,7 @@ import {
   type CurrentOperator,
 } from '@/lib/operator'
 import { supabase } from '@/lib/supabase'
+import { OperatorNav } from '@/app/operator-nav'
 
 type LifecycleTab = 'all' | 'at_risk' | 'arrears' | 'ending_soon' | 'deposits'
 type WaitingOn = 'none' | 'tenant' | 'landlord' | 'contractor' | 'internal'
@@ -568,6 +569,8 @@ export default function RecordsPage() {
   return (
     <main className="app-grid min-h-screen px-6 py-8 text-stone-900 md:px-8 md:py-10">
       <div className="mx-auto max-w-[1440px] space-y-6">
+        <OperatorNav current="crm" />
+
         <section className="app-surface-strong rounded-[2rem] p-6 md:p-7">
           <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
             <div>
@@ -581,15 +584,6 @@ export default function RecordsPage() {
             </div>
 
             <div className="flex flex-wrap gap-2">
-              <Link href="/" className="app-secondary-button rounded-full px-4 py-2 text-sm font-medium">
-                Back to queue
-              </Link>
-              <Link href="/records/rent" className="app-secondary-button rounded-full px-4 py-2 text-sm font-medium">
-                Rent workspace
-              </Link>
-              <Link href="/records/lease-lifecycle" className="app-secondary-button rounded-full px-4 py-2 text-sm font-medium">
-                Lease lifecycle
-              </Link>
               <button
                 onClick={handleSignOut}
                 disabled={signingOut}
