@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useEffectEvent, useMemo, useState } from 'react'
+import { useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   getOperatorLabel,
@@ -81,14 +81,23 @@ type OperationsPulseState = {
 }
 type QueueTab =
   | 'all'
+  | 'due_now'
   | 'overdue'
   | 'due_today'
   | 'waiting'
+  | 'pickup'
   | 'urgent'
   | 'complaints'
   | 'unassigned'
   | 'recent'
   | 'no_next_step'
+
+type QueueFilterState = {
+  search: string
+  statusFilter: string
+  priorityFilter: string
+  tab: QueueTab
+}
 
 const WAITING_ON_LABELS: Record<WaitingOn, string> = {
   none: 'No one',
@@ -253,8 +262,46 @@ function getResponseHealth(priority: string | null, lastCustomerMessageAt: strin
   }
 }
 
+
+function matchesQueueFilters(item: CaseRow, filters: QueueFilterState) {
+  const q = filters.search.trim().toLowerCase()
+  const followUp = getFollowUpState(item)
+
+  const matchesSearch =
+    q === '' ||
+    item.case_number?.toLowerCase().includes(q) ||
+    item.summary?.toLowerCase().includes(q) ||
+    item.case_type?.toLowerCase().includes(q) ||
+    item.contact_name?.toLowerCase().includes(q) ||
+    item.contact_phone?.toLowerCase().includes(q) ||
+    item.postcode?.toLowerCase().includes(q) ||
+    item.waiting_reason?.toLowerCase().includes(q)
+
+  const matchesStatus = filters.statusFilter === 'all' || item.status === filters.statusFilter
+  const matchesPriority =
+    filters.priorityFilter === 'all' || item.priority === filters.priorityFilter
+
+  const matchesTab =
+    filters.tab === 'all' ||
+    (filters.tab === 'due_now' &&
+      (followUp.bucket === 'overdue' || followUp.bucket === 'today')) ||
+    (filters.tab === 'overdue' && followUp.bucket === 'overdue') ||
+    (filters.tab === 'due_today' && followUp.bucket === 'today') ||
+    (filters.tab === 'waiting' && followUp.bucket === 'waiting') ||
+    (filters.tab === 'pickup' &&
+      (!item.assigned_user_name || item.needs_human_handoff || item.priority === 'urgent')) ||
+    (filters.tab === 'urgent' && item.priority === 'urgent') ||
+    (filters.tab === 'complaints' && item.case_type === 'complaint') ||
+    (filters.tab === 'unassigned' && !item.assigned_user_name) ||
+    (filters.tab === 'recent' && !!item.last_customer_message_at) ||
+    (filters.tab === 'no_next_step' && followUp.bucket === 'none')
+
+  return matchesSearch && matchesStatus && matchesPriority && matchesTab
+}
+
 export default function HomePage() {
   const router = useRouter()
+  const queuePanelRef = useRef<HTMLElement | null>(null)
 
   const [operator, setOperator] = useState<CurrentOperator | null>(null)
   const [authLoading, setAuthLoading] = useState(true)
@@ -816,6 +863,13 @@ export default function HomePage() {
         value: dueNow,
         helper: dueNow > 0 ? 'Follow-ups that should be touched today' : 'No follow-ups are slipping right now',
         tone: 'border-amber-200 bg-amber-50/90 text-amber-900',
+        actionLabel: dueNow > 0 ? 'Open due now queue' : 'Review whole queue',
+        filters: {
+          search: '',
+          statusFilter: 'all',
+          priorityFilter: 'all',
+          tab: dueNow > 0 && followUpAvailable ? 'due_now' : 'all',
+        } satisfies QueueFilterState,
       },
       {
         label: 'Fresh inbound',
@@ -825,6 +879,13 @@ export default function HomePage() {
             ? 'Recent customer updates are waiting in the queue'
             : 'No recent customer replies are stacking up',
         tone: 'border-sky-200 bg-sky-50/90 text-sky-900',
+        actionLabel: freshInbound > 0 ? 'Open recent activity' : 'Review whole queue',
+        filters: {
+          search: '',
+          statusFilter: 'all',
+          priorityFilter: 'all',
+          tab: freshInbound > 0 ? 'recent' : 'all',
+        } satisfies QueueFilterState,
       },
       {
         label: 'Pickup next',
@@ -834,9 +895,16 @@ export default function HomePage() {
             ? 'Unassigned or handoff work needs a human owner'
             : 'Everything visible already has a clear owner',
         tone: 'border-rose-200 bg-rose-50/90 text-rose-900',
+        actionLabel: pickupNext > 0 ? 'Open needs pickup queue' : 'Review whole queue',
+        filters: {
+          search: '',
+          statusFilter: 'all',
+          priorityFilter: 'all',
+          tab: pickupNext > 0 ? 'pickup' : 'all',
+        } satisfies QueueFilterState,
       },
     ]
-  }, [cases])
+  }, [cases, followUpAvailable])
 
   const operationsPulseCards = useMemo(
     () => [
@@ -893,38 +961,68 @@ export default function HomePage() {
     [operationsPulse]
   )
 
+
+  const kpiCards = useMemo(
+    () => [
+      {
+        label: 'Queue size',
+        value: kpis.total,
+        tone: 'border-stone-200 bg-stone-50 text-stone-900',
+        helper: 'All active cases in view',
+        actionLabel: 'Open whole queue',
+        filters: {
+          search: '',
+          statusFilter: 'all',
+          priorityFilter: 'all',
+          tab: 'all',
+        } satisfies QueueFilterState,
+      },
+      {
+        label: 'Need replies',
+        value: kpis.open,
+        tone: 'border-emerald-200 bg-emerald-50 text-emerald-900',
+        helper: 'Open work still in motion',
+        actionLabel: 'Show open cases',
+        filters: {
+          search: '',
+          statusFilter: 'open',
+          priorityFilter: 'all',
+          tab: 'all',
+        } satisfies QueueFilterState,
+      },
+      {
+        label: 'Urgent now',
+        value: kpis.urgent,
+        tone: 'border-red-200 bg-red-50 text-red-800',
+        helper: 'Highest priority items',
+        actionLabel: 'Show urgent queue',
+        filters: {
+          search: '',
+          statusFilter: 'all',
+          priorityFilter: 'urgent',
+          tab: 'urgent',
+        } satisfies QueueFilterState,
+      },
+      {
+        label: 'Unowned',
+        value: kpis.unassigned,
+        tone: 'border-amber-200 bg-amber-50 text-amber-900',
+        helper: 'Cases needing an operator',
+        actionLabel: 'Show unassigned queue',
+        filters: {
+          search: '',
+          statusFilter: 'all',
+          priorityFilter: 'all',
+          tab: 'unassigned',
+        } satisfies QueueFilterState,
+      },
+    ],
+    [kpis]
+  )
+
   const filteredCases = useMemo(() => {
     return cases
-      .filter((item) => {
-        const q = search.trim().toLowerCase()
-        const followUp = getFollowUpState(item)
-
-        const matchesSearch =
-          q === '' ||
-          item.case_number?.toLowerCase().includes(q) ||
-          item.summary?.toLowerCase().includes(q) ||
-          item.case_type?.toLowerCase().includes(q) ||
-          item.contact_name?.toLowerCase().includes(q) ||
-          item.contact_phone?.toLowerCase().includes(q) ||
-          item.postcode?.toLowerCase().includes(q) ||
-          item.waiting_reason?.toLowerCase().includes(q)
-
-        const matchesStatus = statusFilter === 'all' || item.status === statusFilter
-        const matchesPriority = priorityFilter === 'all' || item.priority === priorityFilter
-
-        const matchesTab =
-          tab === 'all' ||
-          (tab === 'overdue' && followUp.bucket === 'overdue') ||
-          (tab === 'due_today' && followUp.bucket === 'today') ||
-          (tab === 'waiting' && followUp.bucket === 'waiting') ||
-          (tab === 'urgent' && item.priority === 'urgent') ||
-          (tab === 'complaints' && item.case_type === 'complaint') ||
-          (tab === 'unassigned' && !item.assigned_user_name) ||
-          (tab === 'recent' && !!item.last_customer_message_at) ||
-          (tab === 'no_next_step' && followUp.bucket === 'none')
-
-        return matchesSearch && matchesStatus && matchesPriority && matchesTab
-      })
+      .filter((item) => matchesQueueFilters(item, { search, statusFilter, priorityFilter, tab }))
       .sort(compareCasesForQueue)
   }, [cases, search, statusFilter, priorityFilter, tab])
 
@@ -962,6 +1060,37 @@ export default function HomePage() {
   function prefetchCaseDetail(caseId: string | null) {
     if (!caseId) return
     router.prefetch(`/cases/${caseId}`)
+  }
+
+  function focusQueue(nextFilters: Partial<QueueFilterState>) {
+    const filters: QueueFilterState = {
+      search: nextFilters.search ?? '',
+      statusFilter: nextFilters.statusFilter ?? 'all',
+      priorityFilter: nextFilters.priorityFilter ?? 'all',
+      tab: nextFilters.tab ?? 'all',
+    }
+
+    setSearch(filters.search)
+    setStatusFilter(filters.statusFilter)
+    setPriorityFilter(filters.priorityFilter)
+    setTab(filters.tab)
+
+    const nextQueue = cases
+      .filter((item) => matchesQueueFilters(item, filters))
+      .sort(compareCasesForQueue)
+
+    if (nextQueue[0]?.id) {
+      setSelectedCaseId(nextQueue[0].id)
+      prefetchCaseDetail(nextQueue[0].id)
+    } else {
+      setSelectedCaseId(null)
+    }
+
+    if (typeof window !== 'undefined') {
+      window.requestAnimationFrame(() => {
+        queuePanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      })
+    }
   }
 
   async function patchSelectedCase(updates: Partial<CaseRow> & Record<string, unknown>, success: string) {
@@ -1114,9 +1243,11 @@ export default function HomePage() {
 
                   <div className="mt-4 space-y-3">
                     {deskFocusCards.map((card) => (
-                      <article
+                      <button
                         key={card.label}
-                        className={`rounded-[1.2rem] border px-3.5 py-3 ${card.tone}`}
+                        type="button"
+                        onClick={() => focusQueue(card.filters)}
+                        className={`w-full rounded-[1.2rem] border px-3.5 py-3 text-left transition hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 ${card.tone}`}
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div>
@@ -1127,49 +1258,31 @@ export default function HomePage() {
                           </div>
                           <span className="text-2xl font-semibold leading-none">{card.value}</span>
                         </div>
-                      </article>
+                        <div className="mt-3 flex items-center justify-between text-xs font-medium opacity-80">
+                          <span>{card.actionLabel}</span>
+                          <span aria-hidden="true">Open queue</span>
+                        </div>
+                      </button>
                     ))}
                   </div>
                 </section>
               </div>
 
               <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                {[
-                  {
-                    label: 'Queue size',
-                    value: kpis.total,
-                    tone: 'border-stone-200 bg-stone-50 text-stone-900',
-                    helper: 'All active cases in view',
-                  },
-                  {
-                    label: 'Need replies',
-                    value: kpis.open,
-                    tone: 'border-emerald-200 bg-emerald-50 text-emerald-900',
-                    helper: 'Open work still in motion',
-                  },
-                  {
-                    label: 'Urgent now',
-                    value: kpis.urgent,
-                    tone: 'border-red-200 bg-red-50 text-red-800',
-                    helper: 'Highest priority items',
-                  },
-                  {
-                    label: 'Unowned',
-                    value: kpis.unassigned,
-                    tone: 'border-amber-200 bg-amber-50 text-amber-900',
-                    helper: 'Cases needing an operator',
-                  },
-                ].map((card) => (
-                  <article
+                {kpiCards.map((card) => (
+                  <button
                     key={card.label}
-                    className={`rounded-[1.4rem] border px-4 py-3 shadow-sm ${card.tone}`}
+                    type="button"
+                    onClick={() => focusQueue(card.filters)}
+                    className={`rounded-[1.4rem] border px-4 py-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-400 ${card.tone}`}
                   >
                     <div className="text-[11px] font-semibold uppercase tracking-[0.2em] opacity-80">
                       {card.label}
                     </div>
                     <div className="mt-2 text-[2rem] font-semibold leading-none">{card.value}</div>
                     <p className="mt-2 text-sm opacity-80">{card.helper}</p>
-                  </article>
+                    <p className="mt-3 text-xs font-medium opacity-80">{card.actionLabel}</p>
+                  </button>
                 ))}
               </div>
 
@@ -1330,7 +1443,10 @@ export default function HomePage() {
 
         {!loading && !error && (
           <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(360px,430px)_minmax(0,1fr)]">
-            <section className="app-surface rounded-[2rem] p-4 md:p-5 xl:sticky xl:top-6 xl:flex xl:max-h-[calc(100vh-3rem)] xl:flex-col">
+            <section
+              ref={queuePanelRef}
+              className="app-surface rounded-[2rem] p-4 md:p-5 xl:sticky xl:top-6 xl:flex xl:max-h-[calc(100vh-3rem)] xl:flex-col"
+            >
               <div className="mb-4 rounded-[1.5rem] border border-stone-200 bg-white/90 p-4 backdrop-blur">
                 <div className="flex items-start justify-between gap-3">
                   <div>
@@ -1355,11 +1471,13 @@ export default function HomePage() {
                     ['all', 'All queue'],
                     ...(followUpAvailable
                       ? [
+                          ['due_now', 'Due now'],
                           ['overdue', 'Overdue'],
                           ['due_today', 'Due today'],
                           ['waiting', 'Waiting'],
                         ]
                       : []),
+                    ['pickup', 'Needs pickup'],
                     ['urgent', 'Urgent first'],
                     ['complaints', 'Complaints'],
                     ['unassigned', 'Unassigned'],
