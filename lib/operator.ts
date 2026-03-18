@@ -16,7 +16,7 @@ export async function getOperatorProfile(userId: string) {
   const { data: profile, error: profileError } = await supabase
     .from('users_profiles')
     .select('id, full_name, is_active')
-    .eq('id', userId)
+    .eq('auth_user_id', userId)
     .maybeSingle()
 
   if (profileError) {
