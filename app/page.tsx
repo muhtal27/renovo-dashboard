@@ -114,6 +114,13 @@ type QueueActivityItem = {
   href?: string
 }
 
+type SelectedCaseContextRow = {
+  id: string
+  tenancy_id: string | null
+  property_id: string | null
+  contact_id: string | null
+}
+
 type UserRow = {
   id: string
   full_name: string
@@ -245,6 +252,28 @@ function formatShortDateTime(value: string | null) {
     hour: '2-digit',
     minute: '2-digit',
   })
+}
+
+function buildFollowUpIso(daysFromNow: number, hour = 9, minute = 0) {
+  const date = new Date()
+  date.setDate(date.getDate() + daysFromNow)
+  date.setHours(hour, minute, 0, 0)
+  return date.toISOString()
+}
+
+function toLocalDatetimeInputValue(value: string | null) {
+  if (!value) return ''
+
+  const date = new Date(value)
+  const offsetMs = date.getTimezoneOffset() * 60000
+  return new Date(date.getTime() - offsetMs).toISOString().slice(0, 16)
+}
+
+function fromLocalDatetimeInputValue(value: string) {
+  if (!value.trim()) return null
+
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? null : date.toISOString()
 }
 
 function isSameLocalDay(left: Date, right: Date) {
@@ -411,6 +440,7 @@ export default function HomePage() {
   const [selectedCaseRentEntries, setSelectedCaseRentEntries] = useState<QueueRentEntryRow[]>([])
   const [selectedCaseLeaseEvents, setSelectedCaseLeaseEvents] = useState<QueueLeaseEventRow[]>([])
   const [selectedCaseDepositClaims, setSelectedCaseDepositClaims] = useState<QueueDepositClaimRow[]>([])
+  const [selectedCaseContext, setSelectedCaseContext] = useState<SelectedCaseContextRow | null>(null)
 
   const [loading, setLoading] = useState(true)
   const [messagesLoading, setMessagesLoading] = useState(false)
@@ -426,6 +456,9 @@ export default function HomePage() {
   const [tab, setTab] = useState<QueueTab>('all')
   const [liveMessage, setLiveMessage] = useState<string | null>(null)
   const [followUpAvailable, setFollowUpAvailable] = useState(true)
+  const [creatingLedger, setCreatingLedger] = useState(false)
+  const [creatingRenewal, setCreatingRenewal] = useState(false)
+  const [creatingMaintenance, setCreatingMaintenance] = useState(false)
   const [operationsPulse, setOperationsPulse] = useState<OperationsPulseState>({
     maintenanceLive: 0,
     maintenanceApproval: 0,
@@ -537,7 +570,7 @@ export default function HomePage() {
 
     const { data: baseCase, error: baseCaseError } = await supabase
       .from('cases')
-      .select('id, tenancy_id, property_id')
+      .select('id, tenancy_id, property_id, contact_id')
       .eq('id', caseId)
       .maybeSingle()
 
@@ -546,6 +579,8 @@ export default function HomePage() {
       setCaseContextLoading(false)
       return
     }
+
+    setSelectedCaseContext((baseCase as SelectedCaseContextRow) ?? null)
 
     const tenancyResponse = baseCase?.tenancy_id
       ? supabase
@@ -1340,6 +1375,199 @@ export default function HomePage() {
     await patchSelectedCase({ status: 'resolved' }, 'Case marked as resolved.')
   }
 
+  async function handleSetNextStep(daysFromNow: number, successMessage: string) {
+    await patchSelectedCase(
+      {
+        next_action_at: buildFollowUpIso(daysFromNow),
+      },
+      successMessage
+    )
+  }
+
+  async function handleSetWaitingOn(waitingOn: WaitingOn, waitingReason: string, successMessage: string) {
+    await patchSelectedCase(
+      {
+        waiting_on: waitingOn,
+        waiting_reason: waitingReason,
+        next_action_at: buildFollowUpIso(2),
+      },
+      successMessage
+    )
+  }
+
+  async function handleClearNextStep() {
+    await patchSelectedCase(
+      {
+        next_action_at: null,
+        waiting_on: 'none',
+        waiting_reason: null,
+      },
+      'Next step cleared.'
+    )
+  }
+
+  async function handleAssigneeChange(nextAssignedUserId: string) {
+    const assignedUser = nextAssignedUserId.trim()
+
+    await patchSelectedCase(
+      { assigned_user_id: assignedUser || null },
+      assignedUser ? 'Case owner updated.' : 'Case unassigned.'
+    )
+  }
+
+  async function handleCustomFollowUpSubmit(formData: FormData) {
+    const nextActionAt = fromLocalDatetimeInputValue(String(formData.get('next_action_at') || ''))
+    const waitingOn = String(formData.get('waiting_on') || 'none') as WaitingOn
+    const waitingReason = String(formData.get('waiting_reason') || '').trim() || null
+
+    await patchSelectedCase(
+      {
+        next_action_at: nextActionAt,
+        waiting_on: waitingOn,
+        waiting_reason: waitingReason,
+      },
+      'Follow-up plan updated.'
+    )
+  }
+
+  async function handleCreateLedgerItem(formData: FormData) {
+    if (!selectedCase || !selectedCaseContext?.tenancy_id) {
+      setActionMessage('This case is not linked to a tenancy yet, so no accounts item can be created from the queue.')
+      return
+    }
+
+    const amount = Number(String(formData.get('amount') || ''))
+    if (!Number.isFinite(amount) || amount <= 0) {
+      setActionMessage('Enter a valid amount before creating an accounts item.')
+      return
+    }
+
+    setCreatingLedger(true)
+    setActionMessage(null)
+
+    const entryType = String(formData.get('entry_type') || 'charge')
+    const dueDate = String(formData.get('due_date') || '').trim() || null
+    const reference = String(formData.get('reference') || '').trim() || null
+
+    const { data, error } = await supabase
+      .from('rent_ledger_entries')
+      .insert({
+        tenancy_id: selectedCaseContext.tenancy_id,
+        case_id: selectedCase.id,
+        entry_type: entryType,
+        category: entryType === 'payment' ? 'payment' : 'rent',
+        status: entryType === 'payment' || entryType === 'credit' ? 'cleared' : 'open',
+        amount,
+        due_date: dueDate,
+        reference,
+        notes: `Created from queue for ${selectedCase.case_number}.`,
+        period_start: entryType === 'charge' ? dueDate : null,
+        period_end: entryType === 'charge' ? dueDate : null,
+      })
+      .select('id, tenancy_id, case_id, entry_type, status, amount, due_date, posted_at, category')
+      .single()
+
+    if (error) {
+      setActionMessage(`Error: ${error.message}`)
+      setCreatingLedger(false)
+      return
+    }
+
+    setSelectedCaseRentEntries((current) => [data as QueueRentEntryRow, ...current])
+    setActionMessage('Accounts item created.')
+    setCreatingLedger(false)
+  }
+
+  async function handleCreateRenewalEvent(formData: FormData) {
+    if (!selectedCase || !selectedCaseContext?.tenancy_id) {
+      setActionMessage('This case is not linked to a tenancy yet, so no renewal event can be created from the queue.')
+      return
+    }
+
+    const scheduledFor = String(formData.get('scheduled_for') || '').trim()
+    if (!scheduledFor) {
+      setActionMessage('Choose a target date before creating a renewals event.')
+      return
+    }
+
+    setCreatingRenewal(true)
+    setActionMessage(null)
+
+    const eventType = String(formData.get('event_type') || 'renewal_review')
+    const note = String(formData.get('note') || '').trim() || null
+    const status = scheduledFor <= new Date().toISOString().slice(0, 10) ? 'due' : 'planned'
+
+    const { data, error } = await supabase
+      .from('lease_lifecycle_events')
+      .insert({
+        tenancy_id: selectedCaseContext.tenancy_id,
+        case_id: selectedCase.id,
+        event_type: eventType,
+        status,
+        scheduled_for: scheduledFor,
+        source: 'manual',
+        note,
+      })
+      .select('id, tenancy_id, case_id, event_type, status, scheduled_for, completed_at')
+      .single()
+
+    if (error) {
+      setActionMessage(`Error: ${error.message}`)
+      setCreatingRenewal(false)
+      return
+    }
+
+    setSelectedCaseLeaseEvents((current) => [data as QueueLeaseEventRow, ...current])
+    setActionMessage('Renewals event created.')
+    setCreatingRenewal(false)
+  }
+
+  async function handleCreateMaintenanceRequest(formData: FormData) {
+    if (!selectedCase || !selectedCaseContext?.property_id) {
+      setActionMessage('This case is not linked to a property yet, so no maintenance request can be created from the queue.')
+      return
+    }
+
+    const issueType = String(formData.get('issue_type') || '').trim()
+    const description = String(formData.get('description') || '').trim()
+
+    if (!issueType || !description) {
+      setActionMessage('Add an issue type and short description before creating a maintenance request.')
+      return
+    }
+
+    setCreatingMaintenance(true)
+    setActionMessage(null)
+
+    const priority = String(formData.get('priority') || 'medium')
+
+    const { data, error } = await supabase
+      .from('maintenance_requests')
+      .insert({
+        case_id: selectedCase.id,
+        property_id: selectedCaseContext.property_id,
+        tenancy_id: selectedCaseContext.tenancy_id,
+        reported_by_contact_id: selectedCaseContext.contact_id,
+        issue_type: issueType,
+        description,
+        priority,
+        status: 'reported',
+        landlord_approval_required: false,
+      })
+      .select('id, case_id, tenancy_id, property_id, issue_type, priority, status, scheduled_for, updated_at')
+      .single()
+
+    if (error) {
+      setActionMessage(`Error: ${error.message}`)
+      setCreatingMaintenance(false)
+      return
+    }
+
+    setSelectedCaseMaintenance((current) => [data as QueueMaintenanceRow, ...current])
+    setActionMessage('Maintenance request created.')
+    setCreatingMaintenance(false)
+  }
+
   async function handleSignOut() {
     setSigningOut(true)
     setActionMessage(null)
@@ -1838,6 +2066,22 @@ export default function HomePage() {
                       <section className="app-card-muted rounded-[1.6rem] p-5">
                         <p className="app-kicker">Fast actions</p>
                         <div className="mt-4 flex flex-col gap-3">
+                          <label className="block">
+                            <span className="mb-2 block text-sm font-medium text-stone-700">Case owner</span>
+                            <select
+                              value={selectedCase.assigned_user_id || ''}
+                              onChange={(event) => void handleAssigneeChange(event.target.value)}
+                              disabled={actionLoading}
+                              className="app-select w-full text-sm"
+                            >
+                              <option value="">Unassigned</option>
+                              {users.map((user) => (
+                                <option key={user.id} value={user.id}>
+                                  {user.full_name}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
                           <button
                             onClick={handleAssignToMe}
                             disabled={actionLoading || !operator.profile}
@@ -1866,6 +2110,241 @@ export default function HomePage() {
                             {actionMessage}
                           </div>
                         )}
+                      </section>
+
+                      {followUpAvailable && (
+                        <section className="app-card-muted rounded-[1.6rem] p-5">
+                          <p className="app-kicker">Next-step shortcuts</p>
+                          <div className="mt-4 grid gap-3">
+                            <button
+                              onClick={() => handleSetNextStep(0, 'Follow-up set for later today.')}
+                              disabled={actionLoading}
+                              className="app-secondary-button rounded-2xl px-4 py-3 text-left text-sm font-medium disabled:opacity-50"
+                            >
+                              Set next step for today
+                            </button>
+                            <button
+                              onClick={() => handleSetNextStep(1, 'Follow-up set for tomorrow morning.')}
+                              disabled={actionLoading}
+                              className="app-secondary-button rounded-2xl px-4 py-3 text-left text-sm font-medium disabled:opacity-50"
+                            >
+                              Set next step for tomorrow
+                            </button>
+                            <button
+                              onClick={() =>
+                                handleSetWaitingOn(
+                                  'tenant',
+                                  'Awaiting tenant reply or access confirmation.',
+                                  'Queued as waiting on tenant.'
+                                )
+                              }
+                              disabled={actionLoading}
+                              className="app-secondary-button rounded-2xl px-4 py-3 text-left text-sm font-medium disabled:opacity-50"
+                            >
+                              Waiting on tenant
+                            </button>
+                            <button
+                              onClick={() =>
+                                handleSetWaitingOn(
+                                  'landlord',
+                                  'Awaiting landlord approval or instruction.',
+                                  'Queued as waiting on landlord.'
+                                )
+                              }
+                              disabled={actionLoading}
+                              className="app-secondary-button rounded-2xl px-4 py-3 text-left text-sm font-medium disabled:opacity-50"
+                            >
+                              Waiting on landlord
+                            </button>
+                            <button
+                              onClick={handleClearNextStep}
+                              disabled={actionLoading}
+                              className="app-secondary-button rounded-2xl px-4 py-3 text-left text-sm font-medium disabled:opacity-50"
+                            >
+                              Clear next step
+                            </button>
+                          </div>
+
+                          <form
+                            key={selectedCase.id}
+                            onSubmit={(event) => {
+                              event.preventDefault()
+                              void handleCustomFollowUpSubmit(new FormData(event.currentTarget))
+                            }}
+                            className="mt-4 space-y-3 rounded-[1.4rem] border border-stone-200 bg-white/80 p-4"
+                          >
+                            <div className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">
+                              Custom follow-up
+                            </div>
+                            <label className="block">
+                              <span className="mb-2 block text-sm font-medium text-stone-700">Next action at</span>
+                              <input
+                                type="datetime-local"
+                                name="next_action_at"
+                                defaultValue={toLocalDatetimeInputValue(selectedCase.next_action_at ?? null)}
+                                className="app-field w-full text-sm outline-none"
+                              />
+                            </label>
+                            <label className="block">
+                              <span className="mb-2 block text-sm font-medium text-stone-700">Waiting on</span>
+                              <select
+                                name="waiting_on"
+                                defaultValue={selectedCase.waiting_on ?? 'none'}
+                                className="app-select w-full text-sm"
+                              >
+                                <option value="none">No waiting status</option>
+                                <option value="tenant">Tenant</option>
+                                <option value="landlord">Landlord</option>
+                                <option value="contractor">Contractor</option>
+                                <option value="internal">Internal team</option>
+                              </select>
+                            </label>
+                            <label className="block">
+                              <span className="mb-2 block text-sm font-medium text-stone-700">Waiting reason</span>
+                              <input
+                                type="text"
+                                name="waiting_reason"
+                                defaultValue={selectedCase.waiting_reason ?? ''}
+                                placeholder="Why is this blocked?"
+                                className="app-field w-full text-sm outline-none"
+                              />
+                            </label>
+                            <button
+                              type="submit"
+                              disabled={actionLoading}
+                              className="app-primary-button inline-flex w-full items-center justify-center rounded-2xl px-4 py-3 text-sm font-medium disabled:opacity-50"
+                            >
+                              Save follow-up plan
+                            </button>
+                          </form>
+                        </section>
+                      )}
+
+                      <section className="app-card-muted rounded-[1.6rem] p-5">
+                        <p className="app-kicker">Linked desks</p>
+                        <div className="mt-4 grid gap-3">
+                          <Link
+                            href="/records"
+                            className="app-secondary-button rounded-2xl px-4 py-3 text-left text-sm font-medium"
+                          >
+                            Open tenancy CRM
+                          </Link>
+                          <Link
+                            href="/records/rent"
+                            className="app-secondary-button rounded-2xl px-4 py-3 text-left text-sm font-medium"
+                          >
+                            Open accounts
+                          </Link>
+                          <Link
+                            href="/records/lease-lifecycle"
+                            className="app-secondary-button rounded-2xl px-4 py-3 text-left text-sm font-medium"
+                          >
+                            Open renewals
+                          </Link>
+                          <Link
+                            href="/records/maintenance"
+                            className="app-secondary-button rounded-2xl px-4 py-3 text-left text-sm font-medium"
+                          >
+                            Open maintenance
+                          </Link>
+                        </div>
+                      </section>
+
+                      <section className="app-card-muted rounded-[1.6rem] p-5">
+                        <p className="app-kicker">Create from queue</p>
+                        <div className="mt-4 space-y-4">
+                          <form
+                            key={`${selectedCase.id}-ledger`}
+                            onSubmit={(event) => {
+                              event.preventDefault()
+                              void handleCreateLedgerItem(new FormData(event.currentTarget))
+                            }}
+                            className="rounded-[1.4rem] border border-stone-200 bg-white/80 p-4"
+                          >
+                            <div className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">
+                              Accounts item
+                            </div>
+                            <div className="mt-3 grid gap-3">
+                              <select name="entry_type" defaultValue="charge" className="app-select w-full text-sm">
+                                <option value="charge">Charge</option>
+                                <option value="payment">Payment</option>
+                                <option value="credit">Credit</option>
+                                <option value="adjustment">Adjustment</option>
+                              </select>
+                              <input name="amount" type="number" min="0" step="0.01" placeholder="Amount" className="app-field w-full text-sm outline-none" />
+                              <input name="due_date" type="date" className="app-field w-full text-sm outline-none" />
+                              <input name="reference" type="text" placeholder="Reference" className="app-field w-full text-sm outline-none" />
+                              <button
+                                type="submit"
+                                disabled={creatingLedger}
+                                className="app-secondary-button rounded-2xl px-4 py-3 text-left text-sm font-medium disabled:opacity-50"
+                              >
+                                {creatingLedger ? 'Creating accounts item...' : 'Create accounts item'}
+                              </button>
+                            </div>
+                          </form>
+
+                          <form
+                            key={`${selectedCase.id}-renewal`}
+                            onSubmit={(event) => {
+                              event.preventDefault()
+                              void handleCreateRenewalEvent(new FormData(event.currentTarget))
+                            }}
+                            className="rounded-[1.4rem] border border-stone-200 bg-white/80 p-4"
+                          >
+                            <div className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">
+                              Renewals event
+                            </div>
+                            <div className="mt-3 grid gap-3">
+                              <select name="event_type" defaultValue="renewal_review" className="app-select w-full text-sm">
+                                <option value="renewal_review">Renewal review</option>
+                                <option value="notice_served">Notice served</option>
+                                <option value="rent_review">Rent review</option>
+                                <option value="move_out">Move out</option>
+                                <option value="deposit_return">Deposit return</option>
+                              </select>
+                              <input name="scheduled_for" type="date" className="app-field w-full text-sm outline-none" />
+                              <input name="note" type="text" placeholder="Note" className="app-field w-full text-sm outline-none" />
+                              <button
+                                type="submit"
+                                disabled={creatingRenewal}
+                                className="app-secondary-button rounded-2xl px-4 py-3 text-left text-sm font-medium disabled:opacity-50"
+                              >
+                                {creatingRenewal ? 'Creating renewals event...' : 'Create renewals event'}
+                              </button>
+                            </div>
+                          </form>
+
+                          <form
+                            key={`${selectedCase.id}-maintenance`}
+                            onSubmit={(event) => {
+                              event.preventDefault()
+                              void handleCreateMaintenanceRequest(new FormData(event.currentTarget))
+                            }}
+                            className="rounded-[1.4rem] border border-stone-200 bg-white/80 p-4"
+                          >
+                            <div className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">
+                              Maintenance request
+                            </div>
+                            <div className="mt-3 grid gap-3">
+                              <input name="issue_type" type="text" placeholder="Issue type" className="app-field w-full text-sm outline-none" />
+                              <select name="priority" defaultValue="medium" className="app-select w-full text-sm">
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                                <option value="urgent">Urgent</option>
+                              </select>
+                              <textarea name="description" rows={3} placeholder="Short description" className="app-field w-full text-sm outline-none" />
+                              <button
+                                type="submit"
+                                disabled={creatingMaintenance}
+                                className="app-secondary-button rounded-2xl px-4 py-3 text-left text-sm font-medium disabled:opacity-50"
+                              >
+                                {creatingMaintenance ? 'Creating maintenance request...' : 'Create maintenance request'}
+                              </button>
+                            </div>
+                          </form>
+                        </div>
                       </section>
 
                       <section className="app-card-muted rounded-[1.6rem] p-5">
