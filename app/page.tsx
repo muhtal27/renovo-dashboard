@@ -1593,7 +1593,7 @@ export default function HomePage() {
           <section className="app-surface-strong overflow-hidden rounded-[2rem] p-5 md:p-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex flex-wrap items-center gap-3">
-                <p className="app-kicker">Operations Desk</p>
+                <p className="app-kicker">Maintenance Operations</p>
                 <span className="app-live-pill rounded-full px-3 py-1 text-xs font-medium">
                   {liveMessage || 'Live updates connected'}
                 </span>
@@ -1602,27 +1602,27 @@ export default function HomePage() {
             </div>
 
             <h1 className="mt-4 max-w-5xl text-3xl font-semibold tracking-tight md:text-[3.1rem] md:leading-[1.04]">
-              Run maintenance and live work from one desk
+              Run the maintenance inbox from one operating desk
             </h1>
             <p className="mt-4 max-w-4xl text-base leading-7 text-stone-600">
-              See what is due, what is booked, and what still needs a human owner. Keep the screen practical: fewer repeated panels, less wasted space, and faster movement into real work.
+              Triage repairs, approvals, booked visits, and blocked jobs without bouncing between screens. Keep the desk practical: less drift, faster assignment, and clearer next actions.
             </p>
 
             <div className="mt-6 grid gap-3 md:grid-cols-3">
               <article className="rounded-[1.2rem] border border-amber-200 bg-amber-50 px-4 py-3 text-amber-900">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] opacity-80">Due now</p>
                 <p className="mt-2 text-2xl font-semibold">{todayAgenda.dueNowCount}</p>
-                <p className="mt-1 text-xs opacity-80">Follow-ups that should be touched today</p>
+                <p className="mt-1 text-xs opacity-80">Jobs and callbacks that should be touched today</p>
               </article>
               <article className="rounded-[1.2rem] border border-sky-200 bg-sky-50 px-4 py-3 text-sky-900">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] opacity-80">Scheduled</p>
                 <p className="mt-2 text-2xl font-semibold">{todayAgenda.scheduledCount}</p>
-                <p className="mt-1 text-xs opacity-80">Booked work and planned visits</p>
+                <p className="mt-1 text-xs opacity-80">Booked repairs and planned visits</p>
               </article>
               <article className="rounded-[1.2rem] border border-rose-200 bg-rose-50 px-4 py-3 text-rose-900">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] opacity-80">Unowned</p>
                 <p className="mt-2 text-2xl font-semibold">{todayAgenda.awaitingOwnerCount}</p>
-                <p className="mt-1 text-xs opacity-80">Items still waiting on a human owner</p>
+                <p className="mt-1 text-xs opacity-80">Jobs still waiting on an accountable owner</p>
               </article>
             </div>
 
@@ -1675,14 +1675,14 @@ export default function HomePage() {
               <div className="flex flex-col gap-3 border-b app-divider pb-4 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                   <p className="app-kicker">Today diary</p>
-                  <h2 className="mt-2 text-lg font-semibold">Appointments, follow-ups, and fresh replies in one list</h2>
+                  <h2 className="mt-2 text-lg font-semibold">Appointments, booked work, and fresh replies in one list</h2>
                 </div>
-                <div className="text-sm text-stone-500">Built from follow-up dates, scheduled cases, and live inbound activity</div>
+                <div className="text-sm text-stone-500">Built from next-step dates, scheduled jobs, and live inbound activity</div>
               </div>
 
               {todayAgenda.items.length === 0 ? (
                 <div className="app-empty-state mt-4 rounded-[1.4rem] p-6 text-sm">
-                  Nothing needs diary attention right now. Work straight from the live list below.
+                  Nothing needs diary attention right now. Work straight from the live maintenance list below.
                 </div>
               ) : (
                 <div className="mt-4 grid gap-3 xl:grid-cols-2">
@@ -1736,9 +1736,9 @@ export default function HomePage() {
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="app-kicker">Live work list</p>
-                    <h2 className="mt-2 text-xl font-semibold">Choose the next job from the operator inbox</h2>
+                    <h2 className="mt-2 text-xl font-semibold">Choose the next job from the maintenance inbox</h2>
                     <p className="mt-1 text-sm text-stone-600">
-                      Keep triage on the left and the working context on the right so the queue behaves like a real operating desk.
+                      Keep job triage on the left and the working context on the right so the desk behaves like a real maintenance operation.
                     </p>
                     {!followUpAvailable && (
                       <p className="mt-2 text-xs text-stone-500">
@@ -1751,9 +1751,9 @@ export default function HomePage() {
                   </span>
                 </div>
 
-                <div className="mt-4 flex flex-wrap gap-2 md:gap-3" aria-label="Queue tabs">
+                <div className="mt-4 flex flex-wrap gap-2 md:gap-3" aria-label="Maintenance inbox tabs">
                   {[
-                    ['all', 'All queue'],
+                    ['all', 'All jobs'],
                     ...(followUpAvailable
                       ? [
                           ['due_now', 'Due now'],
@@ -1762,9 +1762,9 @@ export default function HomePage() {
                           ['waiting', 'Waiting'],
                         ]
                       : []),
-                    ['pickup', 'Pickup next'],
+                    ['pickup', 'Pick up next'],
                     ['urgent', 'Urgent'],
-                    ['complaints', 'Complaints'],
+                    ['complaints', 'Escalations'],
                     ['unassigned', 'Unassigned'],
                     ['recent', 'Recent'],
                     ...(followUpAvailable ? [['no_next_step', 'No next step']] : []),
@@ -1784,10 +1784,10 @@ export default function HomePage() {
 
                 <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1.5fr)_repeat(2,minmax(0,0.7fr))]">
                   <label className="block">
-                    <span className="mb-2 block text-sm font-medium text-stone-700">Search queue</span>
+                    <span className="mb-2 block text-sm font-medium text-stone-700">Search inbox</span>
                     <input
                       type="text"
-                      placeholder="Search by case, summary, contact, phone, or postcode"
+                      placeholder="Search by job, summary, contact, phone, or postcode"
                       value={search}
                       onChange={(event) => setSearch(event.target.value)}
                       className="app-field text-sm outline-none"
@@ -1947,7 +1947,7 @@ export default function HomePage() {
 
                 {filteredCases.length === 0 && (
                   <div className="app-empty-state rounded-[1.6rem] p-6 text-sm">
-                    No cases match the current filters. Try widening the search or clearing a
+                    No jobs match the current filters. Try widening the search or clearing a
                     filter.
                   </div>
                 )}
@@ -1957,13 +1957,13 @@ export default function HomePage() {
             <section className="app-surface self-start rounded-[2rem] p-5 md:p-6 xl:sticky xl:top-6">
               {!selectedCase ? (
                 <div className="app-empty-state flex min-h-[60vh] items-center justify-center rounded-[1.6rem] p-10 text-center">
-                  Choose a case from the left to see the working summary here.
+                  Choose a job from the left to see the working summary here.
                 </div>
               ) : (
                 <div>
                   <div className="grid gap-4 border-b app-divider pb-6 xl:grid-cols-[minmax(0,1fr)_280px]">
                     <div>
-                      <p className="app-kicker">Selected Case</p>
+                      <p className="app-kicker">Selected Job</p>
                       <div className="mt-3 flex flex-wrap items-center gap-2">
                         <h2 className="text-3xl font-semibold">{selectedCase.case_number}</h2>
                         <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${badgeClass(selectedCase.priority, 'priority')}`}>
@@ -1979,7 +1979,7 @@ export default function HomePage() {
                         )}
                       </div>
                       <p className="mt-4 max-w-3xl text-base leading-7 text-stone-600">
-                        {selectedCase.summary || 'No summary provided yet for this case.'}
+                        {selectedCase.summary || 'No summary provided yet for this job.'}
                       </p>
 
                       <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -2010,7 +2010,7 @@ export default function HomePage() {
 
                     <div className="space-y-4">
                       <div className={`rounded-[1.5rem] border p-4 ${selectedCaseResponseHealth.className}`}>
-                        <p className="text-xs font-semibold uppercase tracking-[0.18em]">Response health</p>
+                        <p className="text-xs font-semibold uppercase tracking-[0.18em]">Job health</p>
                         <p className="mt-2 text-lg font-semibold">{selectedCaseResponseHealth.label}</p>
                         <p className="mt-2 text-sm leading-6 opacity-85">
                           {selectedCaseResponseHealth.detail}
@@ -2032,7 +2032,7 @@ export default function HomePage() {
                         href={`/cases/${selectedCase.id}`}
                         className="app-primary-button inline-flex w-full items-center justify-center rounded-[1.4rem] px-4 py-3 text-sm font-medium"
                       >
-                        Open full case workspace
+                        Open full job workspace
                       </Link>
                     </div>
                   </div>
@@ -2063,21 +2063,21 @@ export default function HomePage() {
                             disabled={actionLoading || !operator.profile}
                             className="app-secondary-button rounded-2xl px-4 py-3 text-left text-sm font-medium disabled:opacity-50"
                           >
-                            Assign this case to me
+                            Assign this job to me
                           </button>
                           <button
                             onClick={handleMarkInProgress}
                             disabled={actionLoading}
                             className="app-secondary-button rounded-2xl px-4 py-3 text-left text-sm font-medium disabled:opacity-50"
                           >
-                            Mark as in progress
+                            Mark job in progress
                           </button>
                           <button
                             onClick={handleResolve}
                             disabled={actionLoading}
                             className="app-secondary-button rounded-2xl px-4 py-3 text-left text-sm font-medium disabled:opacity-50"
                           >
-                            Mark as resolved
+                            Mark job resolved
                           </button>
                         </div>
 
@@ -2090,21 +2090,21 @@ export default function HomePage() {
 
                       {followUpAvailable && (
                         <section className="app-card-muted rounded-[1.6rem] p-5">
-                          <p className="app-kicker">Next-step shortcuts</p>
+                          <p className="app-kicker">Job shortcuts</p>
                           <div className="mt-4 grid gap-3">
                             <button
                               onClick={() => handleSetNextStep(0, 'Follow-up set for later today.')}
                               disabled={actionLoading}
                               className="app-secondary-button rounded-2xl px-4 py-3 text-left text-sm font-medium disabled:opacity-50"
                             >
-                              Set next step for today
+                              Set today callback
                             </button>
                             <button
                               onClick={() => handleSetNextStep(1, 'Follow-up set for tomorrow morning.')}
                               disabled={actionLoading}
                               className="app-secondary-button rounded-2xl px-4 py-3 text-left text-sm font-medium disabled:opacity-50"
                             >
-                              Set next step for tomorrow
+                              Set tomorrow callback
                             </button>
                             <button
                               onClick={() =>
@@ -2150,7 +2150,7 @@ export default function HomePage() {
                             className="mt-4 space-y-3 rounded-[1.4rem] border border-stone-200 bg-white/80 p-4"
                           >
                             <div className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">
-                              Custom follow-up
+                              Custom job plan
                             </div>
                             <label className="block">
                               <span className="mb-2 block text-sm font-medium text-stone-700">Next action at</span>
@@ -2190,7 +2190,7 @@ export default function HomePage() {
                               disabled={actionLoading}
                               className="app-primary-button inline-flex w-full items-center justify-center rounded-2xl px-4 py-3 text-sm font-medium disabled:opacity-50"
                             >
-                              Save follow-up plan
+                              Save job plan
                             </button>
                           </form>
                         </section>
@@ -2203,7 +2203,7 @@ export default function HomePage() {
                             href="/records"
                             className="app-secondary-button rounded-2xl px-4 py-3 text-left text-sm font-medium"
                           >
-                            Open tenancy CRM
+                            Open lease sign
                           </Link>
                           <Link
                             href="/records/rent"
@@ -2324,7 +2324,7 @@ export default function HomePage() {
                       </section>
 
                       <section className="app-card-muted rounded-[1.6rem] p-5">
-                        <p className="app-kicker">Case snapshot</p>
+                        <p className="app-kicker">Job snapshot</p>
                         <dl className="mt-4 space-y-3 text-sm text-stone-700">
                           <div className="flex items-center justify-between gap-4">
                             <dt>Type</dt>
@@ -2371,10 +2371,10 @@ export default function HomePage() {
                     <section className="app-card-muted rounded-[1.6rem] p-5">
                       <div className="flex flex-col gap-3 border-b app-divider pb-4 sm:flex-row sm:items-end sm:justify-between">
                         <div>
-                          <p className="app-kicker">Customer support thread</p>
-                          <h3 className="mt-2 text-xl font-semibold">Joined-up case context</h3>
+                          <p className="app-kicker">Maintenance thread</p>
+                          <h3 className="mt-2 text-xl font-semibold">Joined-up job context</h3>
                           <p className="mt-2 max-w-2xl text-sm text-stone-600">
-                            Messages are now mixed with tenancy accounts, maintenance, end of tenancy, deposit, and phone support signals so the queue behaves more like a working CRM.
+                            Messages are now mixed with tenancy accounts, maintenance, end of tenancy, deposit, and phone support signals so the inbox behaves more like a real maintenance control desk.
                           </p>
                         </div>
                         <div className="flex flex-wrap gap-2">
@@ -2426,14 +2426,14 @@ export default function HomePage() {
                           </div>
 
                           <div className="rounded-[1.4rem] border border-stone-200 bg-white/80 p-4 text-sm text-stone-600">
-                            Open the full case for notes, outbound sending, and deeper timeline controls.
+                            Open the full job for notes, outbound sending, and deeper timeline controls.
                           </div>
                         </div>
 
                         <div className="space-y-4">
                           {!messagesLoading && !caseContextLoading && selectedCaseActivityFeed.length === 0 && (
                             <div className="app-empty-state rounded-[1.4rem] p-5 text-sm">
-                              No CRM activity has been recorded for this case yet.
+                              No CRM activity has been recorded for this job yet.
                             </div>
                           )}
 
