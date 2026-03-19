@@ -186,30 +186,19 @@ type MaintenancePulseRow = {
   landlord_approval_required: boolean
   scheduled_for: string | null
 }
-type CompliancePulseRow = {
-  status: string
-}
-type ViewingPulseRow = {
-  status: string
-  booked_slot: string | null
-}
-type DepositPulseRow = {
-  claim_status: string
-}
-type OperationsPulseState = {
-  maintenanceLive: number
-  maintenanceApproval: number
-  maintenanceScheduled: number
-  complianceRisk: number
-  complianceSoon: number
-  viewingRequested: number
-  viewingBooked: number
-  depositActive: number
-  depositDisputed: number
-}
-type QueueTab =
-  | 'jobs'
-  | 'all'
+	type CompliancePulseRow = {
+	  status: string
+	}
+	type OperationsPulseState = {
+	  maintenanceLive: number
+	  maintenanceApproval: number
+	  maintenanceScheduled: number
+	  complianceRisk: number
+	  complianceSoon: number
+	}
+	type QueueTab =
+	  | 'jobs'
+	  | 'all'
   | 'due_now'
   | 'overdue'
   | 'due_today'
@@ -556,17 +545,13 @@ export default function HomePage() {
   const [creatingLedger, setCreatingLedger] = useState(false)
   const [creatingRenewal, setCreatingRenewal] = useState(false)
   const [creatingMaintenance, setCreatingMaintenance] = useState(false)
-  const [operationsPulse, setOperationsPulse] = useState<OperationsPulseState>({
-    maintenanceLive: 0,
-    maintenanceApproval: 0,
-    maintenanceScheduled: 0,
-    complianceRisk: 0,
-    complianceSoon: 0,
-    viewingRequested: 0,
-    viewingBooked: 0,
-    depositActive: 0,
-    depositDisputed: 0,
-  })
+	  const [operationsPulse, setOperationsPulse] = useState<OperationsPulseState>({
+	    maintenanceLive: 0,
+	    maintenanceApproval: 0,
+	    maintenanceScheduled: 0,
+	    complianceRisk: 0,
+	    complianceSoon: 0,
+	  })
   const operatorUserId = operator?.authUser?.id ?? null
   const pageError = authError ?? error
 
@@ -828,40 +813,26 @@ export default function HomePage() {
     setCaseContextLoading(false)
   })
 
-  const loadOperationsPulse = useEffectEvent(async () => {
-    const [
-      maintenanceResponse,
-      complianceResponse,
-      viewingsResponse,
-      depositsResponse,
-    ] = await Promise.all([
-      supabase
-        .from('maintenance_requests')
-        .select('status, landlord_approval_required, scheduled_for')
-        .limit(1000),
-      supabase.from('compliance_records').select('status').limit(1000),
-      supabase.from('viewing_requests').select('status, booked_slot').limit(1000),
-      supabase.from('deposit_claims').select('claim_status').limit(1000),
-    ])
+	  const loadOperationsPulse = useEffectEvent(async () => {
+	    const [maintenanceResponse, complianceResponse] = await Promise.all([
+	      supabase
+	        .from('maintenance_requests')
+	        .select('status, landlord_approval_required, scheduled_for')
+	        .limit(1000),
+	      supabase.from('compliance_records').select('status').limit(1000),
+	    ])
 
-    if (
-      maintenanceResponse.error ||
-      complianceResponse.error ||
-      viewingsResponse.error ||
-      depositsResponse.error
-    ) {
-      return
-    }
+	    if (maintenanceResponse.error || complianceResponse.error) {
+	      return
+	    }
 
-    const maintenanceRows = (maintenanceResponse.data || []) as MaintenancePulseRow[]
-    const complianceRows = (complianceResponse.data || []) as CompliancePulseRow[]
-    const viewingRows = (viewingsResponse.data || []) as ViewingPulseRow[]
-    const depositRows = (depositsResponse.data || []) as DepositPulseRow[]
+	    const maintenanceRows = (maintenanceResponse.data || []) as MaintenancePulseRow[]
+	    const complianceRows = (complianceResponse.data || []) as CompliancePulseRow[]
 
-    setOperationsPulse({
-      maintenanceLive: maintenanceRows.filter(
-        (request) => !['completed', 'cancelled'].includes(request.status)
-      ).length,
+	    setOperationsPulse({
+	      maintenanceLive: maintenanceRows.filter(
+	        (request) => !['completed', 'cancelled'].includes(request.status)
+	      ).length,
       maintenanceApproval: maintenanceRows.filter(
         (request) =>
           request.status === 'awaiting_approval' || request.landlord_approval_required
@@ -874,17 +845,11 @@ export default function HomePage() {
       complianceRisk: complianceRows.filter((record) =>
         ['expired', 'missing'].includes(record.status)
       ).length,
-      complianceSoon: complianceRows.filter((record) =>
-        ['expiring', 'pending'].includes(record.status)
-      ).length,
-      viewingRequested: viewingRows.filter((request) => request.status === 'requested').length,
-      viewingBooked: viewingRows.filter((request) => !!request.booked_slot).length,
-      depositActive: depositRows.filter((claim) =>
-        !['draft', 'resolved', 'cancelled'].includes(claim.claim_status)
-      ).length,
-      depositDisputed: depositRows.filter((claim) => claim.claim_status === 'disputed').length,
-    })
-  })
+	      complianceSoon: complianceRows.filter((record) =>
+	        ['expiring', 'pending'].includes(record.status)
+	      ).length,
+	    })
+	  })
 
   useEffect(() => {
     if (authLoading || !operator?.authUser || operator.profile) return
@@ -1200,9 +1165,9 @@ export default function HomePage() {
     }
   }, [cases, contractorById, jobs, propertyById, tab])
 
-  const operationsPulseCards = useMemo(
-    () => [
-      {
+	  const operationsPulseCards = useMemo(
+	    () => [
+	      {
         href: '/records/maintenance',
         label: 'Maintenance',
         value: operationsPulse.maintenanceLive,
@@ -1227,33 +1192,10 @@ export default function HomePage() {
           operationsPulse.complianceRisk > 0
             ? 'border-red-200 bg-red-50 text-red-900'
             : 'border-emerald-200 bg-emerald-50 text-emerald-900',
-      },
-      {
-        href: '/records/viewings',
-        label: 'Viewings',
-        value: operationsPulse.viewingRequested,
-        helper:
-          operationsPulse.viewingBooked > 0
-            ? `${operationsPulse.viewingBooked} already booked`
-            : 'No booked slots visible',
-        tone: 'border-sky-200 bg-sky-50 text-sky-900',
-      },
-      {
-        href: '/records/deposits',
-        label: 'Deposits',
-        value: operationsPulse.depositActive,
-        helper:
-          operationsPulse.depositDisputed > 0
-            ? `${operationsPulse.depositDisputed} disputed`
-            : 'No disputes flagged',
-        tone:
-          operationsPulse.depositDisputed > 0
-            ? 'border-rose-200 bg-rose-50 text-rose-900'
-            : 'border-stone-200 bg-stone-50 text-stone-900',
-      },
-    ],
-    [operationsPulse]
-  )
+	      },
+	    ],
+	    [operationsPulse]
+	  )
 
 
   const kpiCards = useMemo(
@@ -1991,14 +1933,14 @@ export default function HomePage() {
               </article>
             </div>
 
-            <section className="mt-5 rounded-[1.6rem] border border-stone-200 bg-white/82 p-4 backdrop-blur">
-              <div className="flex flex-col gap-3 border-b app-divider pb-4 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                  <p className="app-kicker">Operations pulse</p>
-                  <h2 className="mt-2 text-lg font-semibold">Maintenance, compliance, viewings, and deposits at a glance</h2>
-                </div>
-                <div className="text-sm text-stone-500">Use these only when the work belongs in a specialist workspace</div>
-              </div>
+	            <section className="mt-5 rounded-[1.6rem] border border-stone-200 bg-white/82 p-4 backdrop-blur">
+	              <div className="flex flex-col gap-3 border-b app-divider pb-4 sm:flex-row sm:items-end sm:justify-between">
+	                <div>
+	                  <p className="app-kicker">Operations pulse</p>
+	                  <h2 className="mt-2 text-lg font-semibold">Maintenance and compliance at a glance</h2>
+	                </div>
+	                <div className="text-sm text-stone-500">Use these as health signals, then drive the work from the inbox below</div>
+	              </div>
 
               <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                 {operationsPulseCards.map((card) => (

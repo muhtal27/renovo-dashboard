@@ -75,6 +75,9 @@ export default function KnowledgePage() {
   const [categoryFilter, setCategoryFilter] = useState('all')
   const [searchResults, setSearchResults] = useState<KnowledgeSearchRow[] | null>(null)
   const pageError = authError ?? error
+  const trimmedSearch = search.trim()
+  const effectiveSearchResults = trimmedSearch ? searchResults : null
+  const effectiveSearchLoading = trimmedSearch ? searchLoading : false
 
   const loadArticles = useEffectEvent(async () => {
     setLoading(true)
@@ -150,20 +153,13 @@ export default function KnowledgePage() {
   useEffect(() => {
     if (!operator?.authUser?.id) return
 
-    const trimmedQuery = search.trim()
-
-    if (!trimmedQuery) {
-      setSearchResults(null)
-      setSearchLoading(false)
-      return
-    }
-
     const timeoutId = window.setTimeout(() => {
-      void loadSearchResults(trimmedQuery)
+      if (!trimmedSearch) return
+      void loadSearchResults(trimmedSearch)
     }, 220)
 
     return () => window.clearTimeout(timeoutId)
-  }, [operator?.authUser?.id, search])
+  }, [operator?.authUser?.id, trimmedSearch])
 
   const categories = useMemo(() => {
     return Array.from(new Set(articles.map((item) => item.category))).sort((left, right) =>
@@ -172,19 +168,19 @@ export default function KnowledgePage() {
   }, [articles])
 
   const rankedArticles = useMemo(() => {
-    if (!searchResults) return articles
+    if (!effectiveSearchResults) return articles
 
     const articleLookup = new Map(articles.map((article) => [article.id, article]))
     const seen = new Set<string>()
 
-    return searchResults
+    return effectiveSearchResults
       .map((result) => articleLookup.get(result.article_id))
       .filter((article): article is KnowledgeArticleRow => {
         if (!article || seen.has(article.id)) return false
         seen.add(article.id)
         return true
       })
-  }, [articles, searchResults])
+  }, [articles, effectiveSearchResults])
 
   const filteredArticles = useMemo(() => {
     return rankedArticles.filter((article) => {
@@ -195,16 +191,16 @@ export default function KnowledgePage() {
   const snippetsByArticleId = useMemo(() => {
     const snippets = new Map<string, string>()
 
-    if (!searchResults) return snippets
+    if (!effectiveSearchResults) return snippets
 
-    for (const result of searchResults) {
+    for (const result of effectiveSearchResults) {
       if (!snippets.has(result.article_id) && result.snippet) {
         snippets.set(result.article_id, result.snippet)
       }
     }
 
     return snippets
-  }, [searchResults])
+  }, [effectiveSearchResults])
 
   const approvedOfficialCount = useMemo(
     () => articles.filter((article) => article.source_authority === 'official').length,
@@ -330,18 +326,18 @@ export default function KnowledgePage() {
               />
             </label>
 
-            {search.trim() && (
+            {trimmedSearch && (
               <div className="flex flex-wrap items-center gap-2 text-sm text-stone-600">
                 <span className="rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-sky-700">
                   Database-ranked Scotland search
                 </span>
-                {searchLoading ? <span>Searching official Scotland guidance...</span> : null}
+                {effectiveSearchLoading ? <span>Searching official Scotland guidance...</span> : null}
               </div>
             )}
           </div>
         </section>
 
-        {(loading || searchLoading) && !articles.length && (
+        {(loading || effectiveSearchLoading) && !articles.length && (
           <div className="app-surface mt-6 rounded-[1.8rem] p-6 text-sm text-stone-600">
             Loading Scotland knowledge...
           </div>

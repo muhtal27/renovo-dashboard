@@ -334,36 +334,26 @@ export default function RentWorkspacePage() {
     })
   }, [contactById, propertyById, search, statsByTenancyId, tab, tenancies])
 
-  useEffect(() => {
-    if (!filteredTenancies.length) {
-      setSelectedTenancyId(null)
-      return
-    }
+  const activeTenancyId =
+    selectedTenancyId && filteredTenancies.some((tenancy) => tenancy.id === selectedTenancyId)
+      ? selectedTenancyId
+      : (filteredTenancies[0]?.id ?? null)
 
-    if (!selectedTenancyId || !filteredTenancies.some((tenancy) => tenancy.id === selectedTenancyId)) {
-      setSelectedTenancyId(filteredTenancies[0].id)
-    }
-  }, [filteredTenancies, selectedTenancyId])
+  const selectedTenancy = activeTenancyId
+    ? tenancies.find((tenancy) => tenancy.id === activeTenancyId) || null
+    : null
 
-  const selectedTenancy = useMemo(
-    () => tenancies.find((tenancy) => tenancy.id === selectedTenancyId) || null,
-    [selectedTenancyId, tenancies]
-  )
+  const selectedTenant = selectedTenancy?.tenant_contact_id
+    ? contactById.get(selectedTenancy.tenant_contact_id) ?? null
+    : null
 
-  const selectedTenant = useMemo(
-    () => (selectedTenancy?.tenant_contact_id ? contactById.get(selectedTenancy.tenant_contact_id) ?? null : null),
-    [contactById, selectedTenancy?.tenant_contact_id]
-  )
+  const selectedLandlord = selectedTenancy?.landlord_contact_id
+    ? contactById.get(selectedTenancy.landlord_contact_id) ?? null
+    : null
 
-  const selectedLandlord = useMemo(
-    () => (selectedTenancy?.landlord_contact_id ? contactById.get(selectedTenancy.landlord_contact_id) ?? null : null),
-    [contactById, selectedTenancy?.landlord_contact_id]
-  )
-
-  const selectedProperty = useMemo(
-    () => (selectedTenancy?.property_id ? propertyById.get(selectedTenancy.property_id) ?? null : null),
-    [propertyById, selectedTenancy?.property_id]
-  )
+  const selectedProperty = selectedTenancy?.property_id
+    ? propertyById.get(selectedTenancy.property_id) ?? null
+    : null
 
   const selectedEntries = useMemo(() => {
     if (!selectedTenancy) return []
@@ -381,21 +371,13 @@ export default function RentWorkspacePage() {
     )
   }, [cases, selectedTenancy])
 
-  useEffect(() => {
-    if (!selectedCases.length) {
-      setSelectedCaseId('')
-      return
-    }
-
-    if (selectedCaseId && selectedCases.some((caseItem) => caseItem.id === selectedCaseId)) {
-      return
-    }
-
-    const rentCase = selectedCases.find(
-      (caseItem) => caseItem.case_type === 'rent' || caseItem.case_type === 'tenancy_admin'
-    )
-    setSelectedCaseId(rentCase?.id || selectedCases[0]?.id || '')
-  }, [selectedCaseId, selectedCases])
+  const rentCaseForTenancy = selectedCases.find(
+    (caseItem) => caseItem.case_type === 'rent' || caseItem.case_type === 'tenancy_admin'
+  )
+  const activeCaseId =
+    selectedCaseId && selectedCases.some((caseItem) => caseItem.id === selectedCaseId)
+      ? selectedCaseId
+      : (rentCaseForTenancy?.id || selectedCases[0]?.id || '')
 
   const selectedStats = useMemo(
     () =>
@@ -444,13 +426,13 @@ export default function RentWorkspacePage() {
     setSavingEntry(true)
     setActionMessage(null)
 
-    const payload = {
-      tenancy_id: selectedTenancy.id,
-      case_id: selectedCaseId || null,
-      entry_type: entryType,
-      category,
-      status: entryType === 'payment' || entryType === 'credit' ? 'cleared' : 'open',
-      amount,
+	    const payload = {
+	      tenancy_id: selectedTenancy.id,
+	      case_id: activeCaseId || null,
+	      entry_type: entryType,
+	      category,
+	      status: entryType === 'payment' || entryType === 'credit' ? 'cleared' : 'open',
+	      amount,
       due_date: dueDateInput || null,
       reference: referenceInput.trim() || null,
       notes: notesInput.trim() || null,
@@ -599,11 +581,11 @@ export default function RentWorkspacePage() {
               </div>
 
               <div className="space-y-3 pr-1 xl:min-h-0 xl:flex-1 xl:overflow-y-auto xl:pb-6">
-                {filteredTenancies.map((tenancy) => {
-                  const selected = tenancy.id === selectedTenancyId
-                  const tenant = tenancy.tenant_contact_id ? contactById.get(tenancy.tenant_contact_id) ?? null : null
-                  const property = tenancy.property_id ? propertyById.get(tenancy.property_id) ?? null : null
-                  const stats = statsByTenancyId.get(tenancy.id) ?? {
+	                {filteredTenancies.map((tenancy) => {
+	                  const selected = tenancy.id === activeTenancyId
+	                  const tenant = tenancy.tenant_contact_id ? contactById.get(tenancy.tenant_contact_id) ?? null : null
+	                  const property = tenancy.property_id ? propertyById.get(tenancy.property_id) ?? null : null
+	                  const stats = statsByTenancyId.get(tenancy.id) ?? {
                     charges: 0,
                     credits: 0,
                     balance: 0,
@@ -703,11 +685,11 @@ export default function RentWorkspacePage() {
 
                       <div className="rounded-[1.5rem] border border-stone-200 bg-white/90 p-4">
                         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">Related case</p>
-                        <select
-                          value={selectedCaseId}
-                          onChange={(event) => setSelectedCaseId(event.target.value)}
-                          className="app-field mt-3 text-sm outline-none"
-                        >
+	                        <select
+	                          value={activeCaseId}
+	                          onChange={(event) => setSelectedCaseId(event.target.value)}
+	                          className="app-field mt-3 text-sm outline-none"
+	                        >
                           <option value="">No linked case</option>
                           {selectedCases.map((caseItem) => (
                             <option key={caseItem.id} value={caseItem.id}>

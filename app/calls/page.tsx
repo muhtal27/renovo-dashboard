@@ -309,9 +309,19 @@ export default function CallsPage() {
     setCalls(nextCalls)
     setUsers((userData || []) as UserRow[])
     setCases((caseData || []) as CaseOption[])
-    setSelectedCallId((current) =>
-      current && nextCalls.some((item) => item.id === current) ? current : (nextCalls[0]?.id ?? null)
-    )
+    const nextSelectedCallId =
+      selectedCallId && nextCalls.some((item) => item.id === selectedCallId)
+        ? selectedCallId
+        : (nextCalls[0]?.id ?? null)
+    const nextSelectedCall = nextSelectedCallId
+      ? nextCalls.find((item) => item.id === nextSelectedCallId) ?? null
+      : null
+
+    setSelectedCallId(nextSelectedCallId)
+    setLinkedCaseId(nextSelectedCall?.case_id || '')
+    setAssignedUserId(nextSelectedCall?.assigned_user_id || '')
+    setActionMessage(null)
+    setEvents([])
     setLoading(false)
   })
 
@@ -340,11 +350,7 @@ export default function CallsPage() {
   }, [authError, operatorUserId])
 
   useEffect(() => {
-    if (!selectedCallId || !operatorUserId) {
-      setEvents([])
-      return
-    }
-
+    if (!selectedCallId || !operatorUserId) return
     void loadEventsForCall(selectedCallId)
   }, [selectedCallId, operatorUserId])
 
@@ -425,10 +431,7 @@ export default function CallsPage() {
     [calls, selectedCallId]
   )
 
-  const selectedLinkedCase = useMemo(
-    () => (selectedCall?.case_id ? caseById.get(selectedCall.case_id) ?? null : null),
-    [caseById, selectedCall?.case_id]
-  )
+  const selectedLinkedCase = selectedCall?.case_id ? caseById.get(selectedCall.case_id) ?? null : null
 
   const selectedCallReviewState = useMemo(
     () =>
@@ -453,11 +456,13 @@ export default function CallsPage() {
     [calls]
   )
 
-  useEffect(() => {
-    setLinkedCaseId(selectedCall?.case_id || '')
-    setAssignedUserId(selectedCall?.assigned_user_id || '')
+  function handleSelectCall(call: CallSessionRow) {
+    setSelectedCallId(call.id)
+    setLinkedCaseId(call.case_id || '')
+    setAssignedUserId(call.assigned_user_id || '')
     setActionMessage(null)
-  }, [selectedCall?.assigned_user_id, selectedCall?.case_id, selectedCall?.id])
+    setEvents([])
+  }
 
   async function patchSelectedCall(
     updates: Partial<CallSessionRow> & Record<string, unknown>,
@@ -682,15 +687,15 @@ export default function CallsPage() {
                   const reviewState = getReviewState(call)
                   const linkedCase = call.case_id ? caseById.get(call.case_id) ?? null : null
 
-                  return (
-                    <button
-                      key={call.id}
-                      onClick={() => setSelectedCallId(call.id)}
-                      aria-pressed={selected}
-                      className={`w-full rounded-[1.6rem] border p-4 text-left ${
-                        selected
-                          ? 'app-selected-card'
-                          : 'border-stone-200 bg-white hover:border-stone-400 hover:bg-stone-50'
+	                  return (
+	                    <button
+	                      key={call.id}
+	                      onClick={() => handleSelectCall(call)}
+	                      aria-pressed={selected}
+	                      className={`w-full rounded-[1.6rem] border p-4 text-left ${
+	                        selected
+	                          ? 'app-selected-card'
+	                          : 'border-stone-200 bg-white hover:border-stone-400 hover:bg-stone-50'
                       }`}
                     >
                       <div className="flex items-start justify-between gap-3">
