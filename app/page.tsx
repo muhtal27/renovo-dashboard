@@ -95,6 +95,54 @@ type QueueMaintenanceRow = {
   updated_at: string | null
 }
 
+type ContactRow = {
+  id: string
+  full_name: string | null
+  phone: string | null
+  email: string | null
+  company_name: string | null
+}
+
+type PropertyRow = {
+  id: string
+  address_line_1: string
+  address_line_2: string | null
+  city: string | null
+  postcode: string | null
+}
+
+type ContractorRow = {
+  id: string
+  contact_id: string
+  company_name: string | null
+  primary_trade: string
+  coverage_area: string | null
+  emergency_callout: boolean
+  is_active: boolean
+}
+
+type MaintenanceJobRow = {
+  id: number
+  created_at: string | null
+  case_id: string | null
+  property_id: string | null
+  tenancy_id: string | null
+  reported_by_contact_id: string | null
+  issue_type: string | null
+  subcategory: string | null
+  description: string | null
+  access_notes: string | null
+  priority: string
+  status: string
+  contractor_id: string | null
+  scheduled_for: string | null
+  completed_at: string | null
+  landlord_approval_required: boolean
+  estimated_cost: number | null
+  final_cost: number | null
+  updated_at: string | null
+}
+
 type QueueCallRow = {
   id: string
   created_at: string | null
@@ -160,6 +208,7 @@ type OperationsPulseState = {
   depositDisputed: number
 }
 type QueueTab =
+  | 'jobs'
   | 'all'
   | 'due_now'
   | 'overdue'
@@ -171,6 +220,8 @@ type QueueTab =
   | 'unassigned'
   | 'recent'
   | 'no_next_step'
+
+type JobTab = 'all' | 'open' | 'approval' | 'scheduled' | 'unassigned' | 'urgent'
 
 type QueueFilterState = {
   search: string
@@ -242,6 +293,25 @@ function formatLabel(value: string | null) {
   return value.replace(/_/g, ' ')
 }
 
+function buildAddress(property: PropertyRow | null) {
+  if (!property) return 'Unknown property'
+  return [property.address_line_1, property.address_line_2, property.city, property.postcode]
+    .filter(Boolean)
+    .join(', ')
+}
+
+function getContactName(contact: ContactRow | null) {
+  if (!contact) return 'Unknown'
+  return contact.full_name?.trim() || contact.company_name?.trim() || contact.phone || contact.email || 'Unknown'
+}
+
+function isOpenMaintenance(status: string) {
+  return !['completed', 'cancelled'].includes(status)
+}
+
+function needsMaintenanceApproval(job: Pick<MaintenanceJobRow, 'status' | 'landlord_approval_required'>) {
+  return job.status === 'awaiting_approval' || job.landlord_approval_required
+}
 
 function formatShortDateTime(value: string | null) {
   if (!value) return 'Not set'
@@ -431,9 +501,14 @@ export default function HomePage() {
     unauthenticatedMode: 'allow-null',
   })
   const [cases, setCases] = useState<CaseRow[]>([])
+  const [jobs, setJobs] = useState<MaintenanceJobRow[]>([])
   const [messages, setMessages] = useState<MessageRow[]>([])
+  const [contacts, setContacts] = useState<ContactRow[]>([])
+  const [properties, setProperties] = useState<PropertyRow[]>([])
+  const [contractors, setContractors] = useState<ContractorRow[]>([])
   const [users, setUsers] = useState<UserRow[]>([])
   const [selectedCaseId, setSelectedCaseId] = useState<string | null>(null)
+  const [selectedJobId, setSelectedJobId] = useState<number | null>(null)
   const [selectedCaseTenancies, setSelectedCaseTenancies] = useState<QueueTenancyRow[]>([])
   const [selectedCaseCalls, setSelectedCaseCalls] = useState<QueueCallRow[]>([])
   const [selectedCaseMaintenance, setSelectedCaseMaintenance] = useState<QueueMaintenanceRow[]>([])
@@ -452,7 +527,8 @@ export default function HomePage() {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [priorityFilter, setPriorityFilter] = useState('all')
-  const [tab, setTab] = useState<QueueTab>('all')
+  const [tab, setTab] = useState<QueueTab>('jobs')
+  const [jobTab, setJobTab] = useState<JobTab>('all')
   const [liveMessage, setLiveMessage] = useState<string | null>(null)
   const [followUpAvailable, setFollowUpAvailable] = useState(true)
   const [creatingLedger, setCreatingLedger] = useState(false)
@@ -479,7 +555,14 @@ export default function HomePage() {
       setLoading(true)
     }
 
-    const [{ data: caseData, error: caseError }, { data: userData, error: userError }] =
+    const [
+      { data: caseData, error: caseError },
+      { data: userData, error: userError },
+      { data: contactsData, error: contactsError },
+      { data: propertiesData, error: propertiesError },
+      { data: contractorsData, error: contractorsError },
+      { data: jobsData, error: jobsError },
+    ] =
       await Promise.all([
         supabase
           .from('v_cases_list')
@@ -491,16 +574,33 @@ export default function HomePage() {
           .select('id, full_name')
           .eq('is_active', true)
           .order('full_name', { ascending: true }),
+        supabase
+          .from('contacts')
+          .select('id, full_name, phone, email, company_name')
+          .order('updated_at', { ascending: false })
+          .limit(1200),
+        supabase
+          .from('properties')
+          .select('id, address_line_1, address_line_2, city, postcode')
+          .order('updated_at', { ascending: false })
+          .limit(1200),
+        supabase
+          .from('contractors')
+          .select('id, contact_id, company_name, primary_trade, coverage_area, emergency_callout, is_active')
+          .order('updated_at', { ascending: false }),
+        supabase
+          .from('maintenance_requests')
+          .select(
+            'id, created_at, case_id, property_id, tenancy_id, reported_by_contact_id, issue_type, subcategory, description, access_notes, priority, status, contractor_id, scheduled_for, completed_at, landlord_approval_required, estimated_cost, final_cost, updated_at'
+          )
+          .order('updated_at', { ascending: false })
+          .limit(250),
       ])
 
-    if (caseError) {
-      setError(caseError.message)
-      setLoading(false)
-      return
-    }
+    const firstError = [caseError, userError, contactsError, propertiesError, contractorsError, jobsError].find(Boolean)
 
-    if (userError) {
-      setError(userError.message)
+    if (firstError) {
+      setError(firstError.message)
       setLoading(false)
       return
     }
@@ -537,11 +637,30 @@ export default function HomePage() {
       setFollowUpAvailable(true)
     }
 
+    const jobRows = (jobsData || []) as MaintenanceJobRow[]
+    const nextSelectedJobId =
+      selectedJobId !== null && jobRows.some((item) => item.id === selectedJobId)
+        ? selectedJobId
+        : (jobRows[0]?.id ?? null)
+    const nextSelectedJob = nextSelectedJobId !== null ? jobRows.find((item) => item.id === nextSelectedJobId) ?? null : null
+
     setCases(mergedRows)
+    setJobs(jobRows)
     setUsers((userData || []) as UserRow[])
-    setSelectedCaseId((current) =>
-      current && mergedRows.some((item) => item.id === current) ? current : (mergedRows[0]?.id ?? null)
-    )
+    setContacts((contactsData || []) as ContactRow[])
+    setProperties((propertiesData || []) as PropertyRow[])
+    setContractors((contractorsData || []) as ContractorRow[])
+
+    setSelectedJobId(nextSelectedJobId)
+
+    setSelectedCaseId((current) => {
+      const nextFromJobs = nextSelectedJob?.case_id ?? null
+      const nextFromCases = mergedRows[0]?.id ?? null
+
+      if (tab === 'jobs') return nextFromJobs ?? nextFromCases
+
+      return current && mergedRows.some((item) => item.id === current) ? current : nextFromCases
+    })
     setLoading(false)
   })
 
@@ -790,6 +909,18 @@ export default function HomePage() {
     loadCaseWorkspace()
   }, [selectedCaseId, operatorUserId])
 
+  const contactById = useMemo(() => new Map(contacts.map((contact) => [contact.id, contact])), [contacts])
+  const propertyById = useMemo(() => new Map(properties.map((property) => [property.id, property])), [properties])
+  const contractorById = useMemo(
+    () => new Map(contractors.map((contractor) => [contractor.id, contractor])),
+    [contractors]
+  )
+
+  const selectedJob = useMemo(
+    () => (selectedJobId !== null ? jobs.find((job) => job.id === selectedJobId) ?? null : null),
+    [jobs, selectedJobId]
+  )
+
   useEffect(() => {
     if (!operatorUserId) return
 
@@ -908,6 +1039,16 @@ export default function HomePage() {
   }, [selectedCaseId, operatorUserId])
 
   const kpis = useMemo(() => {
+    if (tab === 'jobs') {
+      return {
+        total: jobs.length,
+        open: jobs.filter((job) => isOpenMaintenance(job.status)).length,
+        urgent: jobs.filter((job) => job.priority === 'urgent').length,
+        handoff: jobs.filter((job) => needsMaintenanceApproval(job)).length,
+        unassigned: jobs.filter((job) => !job.contractor_id).length,
+      }
+    }
+
     return {
       total: cases.length,
       open: cases.filter((item) => item.status === 'open').length,
@@ -915,9 +1056,56 @@ export default function HomePage() {
       handoff: cases.filter((item) => item.needs_human_handoff).length,
       unassigned: cases.filter((item) => !item.assigned_user_name).length,
     }
-  }, [cases])
+  }, [cases, jobs, tab])
 
   const todayAgenda = useMemo(() => {
+    if (tab === 'jobs') {
+      const items = jobs
+        .filter((job) => {
+          if (!isOpenMaintenance(job.status)) return false
+          if (job.priority === 'urgent') return true
+          if (needsMaintenanceApproval(job)) return true
+          if (job.status === 'scheduled') return true
+          return false
+        })
+        .sort((left, right) => {
+          const leftRank = left.priority === 'urgent' ? 0 : needsMaintenanceApproval(left) ? 1 : left.status === 'scheduled' ? 2 : 3
+          const rightRank = right.priority === 'urgent' ? 0 : needsMaintenanceApproval(right) ? 1 : right.status === 'scheduled' ? 2 : 3
+          if (leftRank !== rightRank) return leftRank - rightRank
+
+          const leftTime = new Date(left.scheduled_for ?? left.updated_at ?? left.created_at ?? 0).getTime()
+          const rightTime = new Date(right.scheduled_for ?? right.updated_at ?? right.created_at ?? 0).getTime()
+          return leftTime - rightTime
+        })
+        .slice(0, 8)
+
+      const dueNowCount = jobs.filter((job) => needsMaintenanceApproval(job)).length
+      const scheduledCount = jobs.filter((job) => job.status === 'scheduled' || job.status === 'approved' || job.status === 'in_progress').length
+      const awaitingOwnerCount = jobs.filter((job) => !job.contractor_id).length
+
+      return {
+        dueNowCount,
+        scheduledCount,
+        awaitingOwnerCount,
+        items: items.map((job) => {
+          const property = job.property_id ? propertyById.get(job.property_id) ?? null : null
+          const contractor = job.contractor_id ? contractorById.get(job.contractor_id) ?? null : null
+          const lane = job.priority === 'urgent' ? 'Urgent repair' : needsMaintenanceApproval(job) ? 'Approval needed' : job.status === 'scheduled' ? 'Booked visit' : 'Live job'
+
+          return {
+            id: String(job.id),
+            caseNumber: `JOB-${job.id}`,
+            title: job.description?.trim() || `${formatLabel(job.issue_type)} maintenance`,
+            lane,
+            timing: job.scheduled_for ? formatShortDateTime(job.scheduled_for) : formatRelativeTime(job.updated_at ?? job.created_at),
+            owner: contractor?.company_name?.trim() || 'Unassigned',
+            meta: buildAddress(property),
+            href: job.case_id ? `/cases/${job.case_id}` : '/records/maintenance',
+          }
+        }),
+      }
+    }
+
     const items = cases
       .filter((item) => {
         const followUp = getFollowUpState(item)
@@ -981,7 +1169,7 @@ export default function HomePage() {
         }
       }),
     }
-  }, [cases])
+  }, [cases, contractorById, jobs, propertyById, tab])
 
   const operationsPulseCards = useMemo(
     () => [
@@ -1042,60 +1230,112 @@ export default function HomePage() {
   const kpiCards = useMemo(
     () => [
       {
-        label: 'Live cases',
+        label: tab === 'jobs' ? 'Live jobs' : 'Live cases',
         value: kpis.total,
         tone: 'border-stone-200 bg-stone-50 text-stone-900',
-        helper: 'Everything visible right now',
+        helper: tab === 'jobs' ? 'Everything visible right now' : 'Everything visible right now',
         actionLabel: 'Open whole queue',
         filters: {
           search: '',
           statusFilter: 'all',
           priorityFilter: 'all',
-          tab: 'all',
+          tab: tab === 'jobs' ? 'jobs' : 'all',
         } satisfies QueueFilterState,
       },
       {
-        label: 'Open cases',
+        label: tab === 'jobs' ? 'Open jobs' : 'Open cases',
         value: kpis.open,
         tone: 'border-emerald-200 bg-emerald-50 text-emerald-900',
-        helper: 'Cases still being worked',
-        actionLabel: 'Show open cases',
+        helper: tab === 'jobs' ? 'Jobs still being worked' : 'Cases still being worked',
+        actionLabel: tab === 'jobs' ? 'Show open jobs' : 'Show open cases',
         filters: {
           search: '',
           statusFilter: 'open',
           priorityFilter: 'all',
-          tab: 'all',
+          tab: tab === 'jobs' ? 'jobs' : 'all',
         } satisfies QueueFilterState,
       },
       {
         label: 'Urgent',
         value: kpis.urgent,
         tone: 'border-red-200 bg-red-50 text-red-800',
-        helper: 'Cases needing attention first',
-        actionLabel: 'Show urgent queue',
+        helper: tab === 'jobs' ? 'Jobs needing attention first' : 'Cases needing attention first',
+        actionLabel: tab === 'jobs' ? 'Show urgent jobs' : 'Show urgent queue',
         filters: {
           search: '',
           statusFilter: 'all',
           priorityFilter: 'urgent',
-          tab: 'urgent',
+          tab: tab === 'jobs' ? 'jobs' : 'urgent',
         } satisfies QueueFilterState,
       },
       {
-        label: 'Unassigned',
+        label: tab === 'jobs' ? 'Unassigned contractor' : 'Unassigned',
         value: kpis.unassigned,
         tone: 'border-amber-200 bg-amber-50 text-amber-900',
-        helper: 'No owner set yet',
-        actionLabel: 'Show unassigned queue',
+        helper: tab === 'jobs' ? 'No contractor set yet' : 'No owner set yet',
+        actionLabel: tab === 'jobs' ? 'Show unassigned jobs' : 'Show unassigned queue',
         filters: {
           search: '',
           statusFilter: 'all',
           priorityFilter: 'all',
-          tab: 'unassigned',
+          tab: tab === 'jobs' ? 'jobs' : 'unassigned',
         } satisfies QueueFilterState,
       },
     ],
-    [kpis]
+    [kpis, tab]
   )
+
+  const caseById = useMemo(() => new Map(cases.map((item) => [item.id, item])), [cases])
+
+  const filteredJobs = useMemo(() => {
+    const query = search.trim().toLowerCase()
+
+    return jobs
+      .filter((job) => {
+        if (jobTab === 'open' && !isOpenMaintenance(job.status)) return false
+        if (jobTab === 'approval' && !needsMaintenanceApproval(job)) return false
+        if (
+          jobTab === 'scheduled' &&
+          !(
+            job.status === 'scheduled' ||
+            job.status === 'approved' ||
+            job.status === 'in_progress'
+          )
+        ) {
+          return false
+        }
+        if (jobTab === 'unassigned' && !!job.contractor_id) return false
+        if (jobTab === 'urgent' && job.priority !== 'urgent') return false
+
+        if (priorityFilter !== 'all' && job.priority !== priorityFilter) return false
+        if (statusFilter !== 'all' && job.status !== statusFilter) return false
+
+        if (!query) return true
+
+        const property = job.property_id ? propertyById.get(job.property_id) ?? null : null
+        const reporter = job.reported_by_contact_id ? contactById.get(job.reported_by_contact_id) ?? null : null
+        const contractor = job.contractor_id ? contractorById.get(job.contractor_id) ?? null : null
+        const linkedCase = job.case_id ? caseById.get(job.case_id) ?? null : null
+
+        return (
+          String(job.id).includes(query) ||
+          formatLabel(job.issue_type).toLowerCase().includes(query) ||
+          job.subcategory?.toLowerCase().includes(query) ||
+          job.description?.toLowerCase().includes(query) ||
+          buildAddress(property).toLowerCase().includes(query) ||
+          getContactName(reporter).toLowerCase().includes(query) ||
+          contractor?.company_name?.toLowerCase().includes(query) ||
+          contractor?.primary_trade?.toLowerCase().includes(query) ||
+          linkedCase?.case_number?.toLowerCase().includes(query) ||
+          linkedCase?.postcode?.toLowerCase().includes(query)
+        )
+      })
+      .sort((left, right) => {
+        const leftTime = new Date(left.updated_at ?? left.created_at ?? 0).getTime()
+        const rightTime = new Date(right.updated_at ?? right.created_at ?? 0).getTime()
+        return rightTime - leftTime
+      })
+  }, [caseById, contactById, contractorById, jobTab, jobs, priorityFilter, propertyById, search, statusFilter])
 
   const filteredCases = useMemo(() => {
     return cases
@@ -1290,9 +1530,26 @@ export default function HomePage() {
     setPriorityFilter(filters.priorityFilter)
     setTab(filters.tab)
 
-    const nextQueue = cases
-      .filter((item) => matchesQueueFilters(item, filters))
-      .sort(compareCasesForQueue)
+    if (filters.tab === 'jobs') {
+      const nextJobs = jobs
+        .filter((job) => {
+          if (filters.priorityFilter !== 'all' && job.priority !== filters.priorityFilter) return false
+          if (filters.statusFilter !== 'all' && job.status !== filters.statusFilter) return false
+          return true
+        })
+        .sort((left, right) => {
+          const leftTime = new Date(left.updated_at ?? left.created_at ?? 0).getTime()
+          const rightTime = new Date(right.updated_at ?? right.created_at ?? 0).getTime()
+          return rightTime - leftTime
+        })
+
+      const first = nextJobs[0] ?? null
+      setSelectedJobId(first?.id ?? null)
+      setSelectedCaseId(first?.case_id ?? null)
+      return
+    }
+
+    const nextQueue = cases.filter((item) => matchesQueueFilters(item, filters)).sort(compareCasesForQueue)
 
     if (nextQueue[0]?.id) {
       setSelectedCaseId(nextQueue[0].id)
@@ -1354,6 +1611,44 @@ export default function HomePage() {
     setActionLoading(false)
   }
 
+  async function patchSelectedJob(
+    updates: Partial<MaintenanceJobRow> & Record<string, unknown>,
+    success: string
+  ) {
+    if (!selectedJob) return
+
+    setActionLoading(true)
+    setActionMessage(null)
+
+    const now = new Date().toISOString()
+    const payload = {
+      ...updates,
+      updated_at: now,
+    }
+
+    const { data, error: updateError } = await supabase
+      .from('maintenance_requests')
+      .update(payload)
+      .eq('id', selectedJob.id)
+      .select(
+        'id, created_at, case_id, property_id, tenancy_id, reported_by_contact_id, issue_type, subcategory, description, access_notes, priority, status, contractor_id, scheduled_for, completed_at, landlord_approval_required, estimated_cost, final_cost, updated_at'
+      )
+      .single()
+
+    if (updateError) {
+      setActionMessage(`Error: ${updateError.message}`)
+      setActionLoading(false)
+      return
+    }
+
+    setJobs((previous) =>
+      previous.map((item) => (item.id === selectedJob.id ? ({ ...item, ...(data as MaintenanceJobRow) } as MaintenanceJobRow) : item))
+    )
+
+    setActionMessage(success)
+    setActionLoading(false)
+  }
+
   async function handleAssignToMe() {
     if (!operator?.profile?.id) {
       setActionMessage('Your signed-in account is missing an active users_profiles record.')
@@ -1380,6 +1675,47 @@ export default function HomePage() {
         next_action_at: buildFollowUpIso(daysFromNow),
       },
       successMessage
+    )
+  }
+
+  async function handleAssignContractor(contractorId: string | null) {
+    await patchSelectedJob(
+      { contractor_id: contractorId },
+      contractorId ? 'Contractor assigned.' : 'Contractor cleared.'
+    )
+  }
+
+  async function handleRequestLandlordApproval() {
+    await patchSelectedJob(
+      { status: 'awaiting_approval', landlord_approval_required: true },
+      'Landlord approval requested.'
+    )
+  }
+
+  async function handleBookVisit(formData: FormData) {
+    const scheduledFor = String(formData.get('scheduled_for') || '').trim()
+    if (!scheduledFor) {
+      setActionMessage('Choose a visit date/time first.')
+      return
+    }
+
+    const iso = fromLocalDatetimeInputValue(scheduledFor)
+    if (!iso) {
+      setActionMessage('Invalid visit date/time.')
+      return
+    }
+
+    await patchSelectedJob(
+      { scheduled_for: iso, status: 'scheduled' },
+      'Visit booked.'
+    )
+  }
+
+  async function handleMarkJobComplete() {
+    const now = new Date().toISOString()
+    await patchSelectedJob(
+      { status: 'completed', completed_at: now },
+      'Job marked complete.'
     )
   }
 
@@ -1689,8 +2025,8 @@ export default function HomePage() {
                   {todayAgenda.items.map((item) => (
                     <Link
                       key={item.id}
-                      href={`/cases/${item.id}`}
-                      onMouseEnter={() => prefetchCaseDetail(item.id)}
+                      href={item.href ?? `/cases/${item.id}`}
+                      onMouseEnter={() => prefetchCaseDetail(item.href?.startsWith('/cases/') ? item.href.replace('/cases/', '') : item.id)}
                       className="rounded-[1.2rem] border border-stone-200 bg-stone-50/90 p-4 transition hover:-translate-y-0.5 hover:border-stone-400 hover:bg-white"
                     >
                       <div className="flex items-start justify-between gap-3">
@@ -1747,39 +2083,75 @@ export default function HomePage() {
                     )}
                   </div>
                   <span className="rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-600">
-                    {filteredCases.length}
+                    {tab === 'jobs' ? filteredJobs.length : filteredCases.length}
                   </span>
                 </div>
 
                 <div className="mt-4 flex flex-wrap gap-2 md:gap-3" aria-label="Maintenance inbox tabs">
-                  {[
-                    ['all', 'All jobs'],
-                    ...(followUpAvailable
-                      ? [
-                          ['due_now', 'Due now'],
-                          ['overdue', 'Overdue'],
-                          ['due_today', 'Due today'],
-                          ['waiting', 'Waiting'],
-                        ]
-                      : []),
-                    ['pickup', 'Pick up next'],
-                    ['urgent', 'Urgent'],
-                    ['complaints', 'Escalations'],
-                    ['unassigned', 'Unassigned'],
-                    ['recent', 'Recent'],
-                    ...(followUpAvailable ? [['no_next_step', 'No next step']] : []),
-                  ].map(([value, label]) => (
-                    <button
-                      key={value}
-                      onClick={() => setTab(value as QueueTab)}
-                      aria-pressed={tab === value}
-                      className={`rounded-full px-4 py-2.5 text-sm font-medium ${
-                        tab === value ? 'app-pill-active' : 'app-pill'
-                      }`}
-                    >
-                      {label}
-                    </button>
-                  ))}
+                  <button
+                    onClick={() => setTab('jobs')}
+                    aria-pressed={tab === 'jobs'}
+                    className={`rounded-full px-4 py-2.5 text-sm font-medium ${
+                      tab === 'jobs' ? 'app-pill-active' : 'app-pill'
+                    }`}
+                  >
+                    Jobs
+                  </button>
+
+                  {tab === 'jobs' ? (
+                    <>
+                      {[
+                        ['all', 'All'],
+                        ['open', 'Open'],
+                        ['approval', 'Approval'],
+                        ['scheduled', 'Scheduled'],
+                        ['unassigned', 'Unassigned'],
+                        ['urgent', 'Urgent'],
+                      ].map(([value, label]) => (
+                        <button
+                          key={value}
+                          onClick={() => setJobTab(value as JobTab)}
+                          aria-pressed={jobTab === value}
+                          className={`rounded-full px-4 py-2.5 text-sm font-medium ${
+                            jobTab === value ? 'app-pill-active' : 'app-pill'
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </>
+                  ) : (
+                    <>
+                      {[
+                        ['all', 'All queue'],
+                        ...(followUpAvailable
+                          ? [
+                              ['due_now', 'Due now'],
+                              ['overdue', 'Overdue'],
+                              ['due_today', 'Due today'],
+                              ['waiting', 'Waiting'],
+                            ]
+                          : []),
+                        ['pickup', 'Pick up next'],
+                        ['urgent', 'Urgent'],
+                        ['complaints', 'Escalations'],
+                        ['unassigned', 'Unassigned'],
+                        ['recent', 'Recent'],
+                        ...(followUpAvailable ? [['no_next_step', 'No next step']] : []),
+                      ].map(([value, label]) => (
+                        <button
+                          key={value}
+                          onClick={() => setTab(value as QueueTab)}
+                          aria-pressed={tab === value}
+                          className={`rounded-full px-4 py-2.5 text-sm font-medium ${
+                            tab === value ? 'app-pill-active' : 'app-pill'
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </>
+                  )}
                 </div>
 
                 <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1.5fr)_repeat(2,minmax(0,0.7fr))]">
@@ -1802,16 +2174,32 @@ export default function HomePage() {
                       className="app-select text-sm"
                     >
                       <option value="all">All statuses</option>
-                      <option value="open">Open</option>
-                      <option value="triaged">Triaged</option>
-                      <option value="awaiting_info">Awaiting info</option>
-                      <option value="awaiting_landlord">Awaiting landlord</option>
-                      <option value="awaiting_contractor">Awaiting contractor</option>
-                      <option value="scheduled">Scheduled</option>
-                      <option value="in_progress">In progress</option>
-                      <option value="resolved">Resolved</option>
-                      <option value="closed">Closed</option>
-                      <option value="cancelled">Cancelled</option>
+                      {tab === 'jobs' ? (
+                        <>
+                          <option value="reported">Reported</option>
+                          <option value="triaged">Triaged</option>
+                          <option value="quote_requested">Quote requested</option>
+                          <option value="awaiting_approval">Awaiting approval</option>
+                          <option value="approved">Approved</option>
+                          <option value="scheduled">Scheduled</option>
+                          <option value="in_progress">In progress</option>
+                          <option value="completed">Completed</option>
+                          <option value="cancelled">Cancelled</option>
+                        </>
+                      ) : (
+                        <>
+                          <option value="open">Open</option>
+                          <option value="triaged">Triaged</option>
+                          <option value="awaiting_info">Awaiting info</option>
+                          <option value="awaiting_landlord">Awaiting landlord</option>
+                          <option value="awaiting_contractor">Awaiting contractor</option>
+                          <option value="scheduled">Scheduled</option>
+                          <option value="in_progress">In progress</option>
+                          <option value="resolved">Resolved</option>
+                          <option value="closed">Closed</option>
+                          <option value="cancelled">Cancelled</option>
+                        </>
+                      )}
                     </select>
                   </label>
 
@@ -1833,7 +2221,81 @@ export default function HomePage() {
               </div>
 
               <div className="max-h-[74vh] space-y-3 overflow-y-auto pr-1 pb-6 md:pb-4 xl:max-h-none xl:min-h-0 xl:flex-1 xl:pb-2">
-                {filteredCases.map((item) => {
+                {tab === 'jobs' &&
+                  filteredJobs.map((job) => {
+                    const selected = job.id === selectedJobId
+                    const property = job.property_id ? propertyById.get(job.property_id) ?? null : null
+                    const contractor = job.contractor_id ? contractorById.get(job.contractor_id) ?? null : null
+                    const linkedCase = job.case_id ? caseById.get(job.case_id) ?? null : null
+                    const approvalNeeded = needsMaintenanceApproval(job)
+
+                    return (
+                      <button
+                        key={job.id}
+                        onClick={() => {
+                          setSelectedJobId(job.id)
+                          setSelectedCaseId(job.case_id ?? null)
+                        }}
+                        aria-pressed={selected}
+                        className={`w-full rounded-[1.45rem] border p-3.5 text-left transition ${
+                          selected
+                            ? 'app-selected-card'
+                            : 'border-stone-200 bg-white hover:border-stone-400 hover:bg-stone-50'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="text-sm font-semibold md:text-[15px]">{formatLabel(job.issue_type)} maintenance</span>
+                              <span className={`rounded-full border px-2.5 py-1 text-[11px] font-medium ${selected ? 'app-selected-chip' : badgeClass(job.priority, 'priority')}`}>
+                                {job.priority || 'unknown'}
+                              </span>
+                              <span className={`rounded-full border px-2.5 py-1 text-[11px] font-medium ${selected ? 'app-selected-chip' : badgeClass(job.status, 'status')}`}>
+                                {job.status || 'unknown'}
+                              </span>
+                              {approvalNeeded && (
+                                <span className={`rounded-full border px-2.5 py-1 text-[11px] font-medium ${selected ? 'app-selected-chip' : 'border-amber-200 bg-amber-50 text-amber-900'}`}>
+                                  approval
+                                </span>
+                              )}
+                              {job.scheduled_for && (
+                                <span className={`rounded-full border px-2.5 py-1 text-[11px] font-medium ${selected ? 'app-selected-chip' : 'border-sky-200 bg-sky-50 text-sky-900'}`}>
+                                  booked
+                                </span>
+                              )}
+                            </div>
+                            <p className={`mt-2 line-clamp-2 text-sm leading-6 ${selected ? 'text-stone-700' : 'text-stone-600'}`}>
+                              {job.description?.trim() || 'No description yet'}
+                            </p>
+                            <div className={`mt-3 flex flex-wrap gap-2 text-xs ${selected ? 'text-stone-700' : 'text-stone-600'}`}>
+                              <span className="rounded-full border border-current/15 px-2.5 py-1">{buildAddress(property)}</span>
+                              <span className="rounded-full border border-current/15 px-2.5 py-1">
+                                Contractor: {contractor?.company_name?.trim() || contractor?.primary_trade || 'Unassigned'}
+                              </span>
+                              {linkedCase?.case_number && (
+                                <span className="rounded-full border border-current/15 px-2.5 py-1">
+                                  {linkedCase.case_number}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div className={`text-right text-[11px] ${selected ? 'text-stone-600' : 'text-stone-500'}`}>
+                            <div>Updated</div>
+                            <div className="mt-1 font-medium text-stone-700">
+                              {formatRelativeTime(job.updated_at ?? job.created_at)}
+                            </div>
+                            <div className="mt-3">Visit</div>
+                            <div className="mt-1 font-medium text-stone-700">
+                              {job.scheduled_for ? formatShortDateTime(job.scheduled_for) : 'Not booked'}
+                            </div>
+                          </div>
+                        </div>
+                      </button>
+                    )
+                  })}
+
+                {tab !== 'jobs' &&
+                  filteredCases.map((item) => {
                   const selected = item.id === selectedCaseId
                   const responseHealth = getResponseHealth(item.priority, item.last_customer_message_at)
                   const followUp = getFollowUpState(item)
@@ -1945,7 +2407,13 @@ export default function HomePage() {
                   )
                 })}
 
-                {filteredCases.length === 0 && (
+                {tab === 'jobs' && filteredJobs.length === 0 && (
+                  <div className="app-empty-state rounded-[1.6rem] p-6 text-sm">
+                    No maintenance jobs match the current filters. Try widening the search or clearing a filter.
+                  </div>
+                )}
+
+                {tab !== 'jobs' && filteredCases.length === 0 && (
                   <div className="app-empty-state rounded-[1.6rem] p-6 text-sm">
                     No jobs match the current filters. Try widening the search or clearing a
                     filter.
@@ -1955,12 +2423,108 @@ export default function HomePage() {
             </section>
 
             <section className="app-surface self-start rounded-[2rem] p-5 md:p-6 xl:sticky xl:top-6">
-              {!selectedCase ? (
+              {!selectedCase && !selectedJob ? (
                 <div className="app-empty-state flex min-h-[60vh] items-center justify-center rounded-[1.6rem] p-10 text-center">
                   Choose a job from the left to see the working summary here.
                 </div>
               ) : (
                 <div>
+                  {tab === 'jobs' && selectedJob && (
+                    <section className="mb-6 rounded-[1.7rem] border border-stone-200 bg-white/80 p-5">
+                      <p className="app-kicker">Maintenance job actions</p>
+                      <div className="mt-3 flex flex-wrap items-center gap-2">
+                        <span className="text-sm font-semibold text-stone-900">
+                          {formatLabel(selectedJob.issue_type)} maintenance
+                        </span>
+                        <span className={`rounded-full border px-2.5 py-1 text-[11px] font-medium ${badgeClass(selectedJob.priority, 'priority')}`}>
+                          {selectedJob.priority}
+                        </span>
+                        <span className={`rounded-full border px-2.5 py-1 text-[11px] font-medium ${badgeClass(selectedJob.status, 'status')}`}>
+                          {selectedJob.status}
+                        </span>
+                      </div>
+
+                      <div className="mt-4 grid gap-3">
+                        <label className="block">
+                          <span className="mb-2 block text-sm font-medium text-stone-700">Assign contractor</span>
+                          <select
+                            value={selectedJob.contractor_id ?? ''}
+                            onChange={(event) => void handleAssignContractor(event.target.value || null)}
+                            disabled={actionLoading}
+                            className="app-select w-full text-sm"
+                          >
+                            <option value="">Unassigned</option>
+                            {contractors
+                              .filter((item) => item.is_active)
+                              .map((item) => (
+                                <option key={item.id} value={item.id}>
+                                  {item.company_name || item.primary_trade}
+                                </option>
+                              ))}
+                          </select>
+                        </label>
+
+                        <div className="grid gap-3 md:grid-cols-2">
+                          <button
+                            type="button"
+                            onClick={() => void handleRequestLandlordApproval()}
+                            disabled={actionLoading}
+                            className="app-secondary-button rounded-2xl px-4 py-3 text-left text-sm font-medium disabled:opacity-50"
+                          >
+                            Request approval
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => void handleMarkJobComplete()}
+                            disabled={actionLoading}
+                            className="app-primary-button rounded-2xl px-4 py-3 text-left text-sm font-medium disabled:opacity-50"
+                          >
+                            Mark complete
+                          </button>
+                        </div>
+
+                        <form
+                          onSubmit={(event) => {
+                            event.preventDefault()
+                            void handleBookVisit(new FormData(event.currentTarget))
+                          }}
+                          className="rounded-[1.4rem] border border-stone-200 bg-white/70 p-4"
+                        >
+                          <div className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">
+                            Book visit
+                          </div>
+                          <div className="mt-3 grid gap-3 md:grid-cols-[minmax(0,1fr)_200px]">
+                            <input
+                              type="datetime-local"
+                              name="scheduled_for"
+                              defaultValue={toLocalDatetimeInputValue(selectedJob.scheduled_for)}
+                              className="app-field w-full text-sm outline-none"
+                            />
+                            <button
+                              type="submit"
+                              disabled={actionLoading}
+                              className="app-secondary-button rounded-2xl px-4 py-3 text-sm font-medium disabled:opacity-50"
+                            >
+                              Save booking
+                            </button>
+                          </div>
+                        </form>
+
+                        {selectedJob.case_id ? (
+                          <div className="rounded-[1.4rem] border border-stone-200 bg-white/70 p-4 text-sm text-stone-600">
+                            This job is linked to a case. Use the case controls below for follow-ups and communication.
+                          </div>
+                        ) : (
+                          <div className="rounded-[1.4rem] border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+                            This job is not linked to a case yet. Create/link a case to enable messages and follow-up tracking.
+                          </div>
+                        )}
+                      </div>
+                    </section>
+                  )}
+
+                  {selectedCase ? (
+                    <>
                   <div className="grid gap-4 border-b app-divider pb-6 xl:grid-cols-[minmax(0,1fr)_280px]">
                     <div>
                       <p className="app-kicker">Selected Job</p>
@@ -2036,7 +2600,14 @@ export default function HomePage() {
                       </Link>
                     </div>
                   </div>
+                    </>
+                  ) : (
+                    <div className="app-empty-state flex min-h-[40vh] items-center justify-center rounded-[1.6rem] p-10 text-center">
+                      Select a job with a linked case to see messages, follow-ups, and tenancy context here.
+                    </div>
+                  )}
 
+                  {selectedCase && (
                   <div className="mt-6 grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
                     <div className="space-y-4">
                       <section className="app-card-muted rounded-[1.6rem] p-5">
@@ -2462,6 +3033,7 @@ export default function HomePage() {
                       </div>
                     </section>
                   </div>
+                  )}
                 </div>
               )}
             </section>
