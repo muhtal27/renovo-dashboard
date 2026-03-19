@@ -21,6 +21,13 @@ export type SessionWorkspace = {
   destination: string | null
 }
 
+export type PortalAccessResult = {
+  authUser: User | null
+  portalProfile: PortalProfile | null
+  destination: string | null
+  error: string | null
+}
+
 export function getPortalRoute(role: PortalRole) {
   return `/portal/${role}`
 }
@@ -77,5 +84,69 @@ export async function resolveWorkspaceForUser(userId: string): Promise<SessionWo
     operatorProfile,
     portalProfile,
     destination: null,
+  }
+}
+
+async function signOutSilently() {
+  await supabase.auth.signOut()
+}
+
+export async function requirePortalAccess(expectedRole: PortalRole): Promise<PortalAccessResult> {
+  const {
+    data: { session },
+    error: sessionError,
+  } = await supabase.auth.getSession()
+
+  if (sessionError) {
+    throw sessionError
+  }
+
+  const authUser = session?.user ?? null
+
+  if (!authUser) {
+    return {
+      authUser: null,
+      portalProfile: null,
+      destination: '/login',
+      error: null,
+    }
+  }
+
+  const portalProfile = await getPortalProfile(authUser.id)
+
+  if (!portalProfile) {
+    await signOutSilently()
+    return {
+      authUser,
+      portalProfile: null,
+      destination: '/login',
+      error: 'This account is not linked to a live portal. Please contact the agency.',
+    }
+  }
+
+  if (portalProfile.is_active === false) {
+    await signOutSilently()
+    return {
+      authUser,
+      portalProfile,
+      destination: '/login',
+      error: 'Your portal access is inactive. Please contact the agency.',
+    }
+  }
+
+  if (portalProfile.portal_role !== expectedRole) {
+    return {
+      authUser,
+      portalProfile,
+      destination: getPortalRoute(portalProfile.portal_role),
+      error: null,
+    }
+  }
+
+  return {
+    authUser,
+    portalProfile,
+    destination: null,
+    error: null,
   }
 }

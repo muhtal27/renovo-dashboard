@@ -3,8 +3,7 @@
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { getSessionUser } from '@/lib/operator'
-import { getPortalProfile, getPortalRoute, type PortalProfile } from '@/lib/portal'
+import { requirePortalAccess, type PortalProfile } from '@/lib/portal'
 import { supabase } from '@/lib/supabase'
 
 type ContactRow = {
@@ -404,41 +403,29 @@ export default function ContractorPortalPage() {
 
     async function bootstrapPortal() {
       try {
-        const user = await getSessionUser()
+        const access = await requirePortalAccess('contractor')
 
         if (cancelled) return
 
-        if (!user) {
+        if (access.error) {
+          setError(access.error)
+        }
+
+        if (access.destination) {
+          router.replace(access.destination)
+          setAuthLoading(false)
+          return
+        }
+
+        if (!access.portalProfile) {
           router.replace('/login')
           setAuthLoading(false)
           return
         }
 
-        const profile = await getPortalProfile(user.id)
-
-        if (cancelled) return
-
-        if (!profile) {
-          router.replace('/')
-          setAuthLoading(false)
-          return
-        }
-
-        if (profile.portal_role !== 'contractor') {
-          router.replace(getPortalRoute(profile.portal_role))
-          setAuthLoading(false)
-          return
-        }
-
-        if (profile.is_active === false) {
-          setError('Your portal access is inactive. Please contact the agency.')
-          setAuthLoading(false)
-          return
-        }
-
-        setPortalProfile(profile)
+        setPortalProfile(access.portalProfile)
         setAuthLoading(false)
-        void loadPortalData(profile)
+        void loadPortalData(access.portalProfile)
       } catch (portalError) {
         if (!cancelled) {
           setError(
