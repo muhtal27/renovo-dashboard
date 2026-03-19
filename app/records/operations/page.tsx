@@ -2,14 +2,10 @@
 
 import Link from 'next/link'
 import { useEffect, useEffectEvent, useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import {
-  getOperatorLabel,
-  getOperatorProfile,
-  getSessionUser,
-  type CurrentOperator,
-} from '@/lib/operator'
+import { getOperatorLabel } from '@/lib/operator'
 import { supabase } from '@/lib/supabase'
+import { useOperatorGate } from '@/lib/use-operator-gate'
+import { OperatorSessionState } from '@/app/operator-session-state'
 
 type AIRunRow = {
   id: string
@@ -129,9 +125,7 @@ function getContactName(contact: ContactRow | null) {
 }
 
 export default function OperationsRecordsPage() {
-  const router = useRouter()
-  const [operator, setOperator] = useState<CurrentOperator | null>(null)
-  const [authLoading, setAuthLoading] = useState(true)
+  const { operator, authLoading, authError } = useOperatorGate()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [search, setSearch] = useState('')
@@ -150,19 +144,7 @@ export default function OperationsRecordsPage() {
   const [attachments, setAttachments] = useState<MessageAttachmentRow[]>([])
 
   const operatorUserId = operator?.authUser?.id ?? null
-
-  const hydrateOperatorProfile = useEffectEvent(async (userId: string) => {
-    try {
-      const profile = await getOperatorProfile(userId)
-      setOperator((current) => {
-        if (!current?.authUser || current.authUser.id !== userId) return current
-        return { ...current, profile }
-      })
-      if (profile?.is_active === false) setError('Your operator profile is inactive. Please contact an administrator.')
-    } catch (profileError) {
-      setError(profileError instanceof Error ? profileError.message : 'Unable to load operator profile.')
-    }
-  })
+  const pageError = authError ?? error
 
   const loadRecords = useEffectEvent(async () => {
     if (!operatorUserId) return
@@ -260,55 +242,6 @@ export default function OperationsRecordsPage() {
     setAttachments((attachmentsResponse.data || []) as MessageAttachmentRow[])
     setLoading(false)
   })
-
-  useEffect(() => {
-    let cancelled = false
-    async function bootstrapAuth() {
-      try {
-        const user = await getSessionUser()
-        if (cancelled) return
-        if (!user) {
-          router.replace('/login')
-          setAuthLoading(false)
-          return
-        }
-        setOperator({ authUser: user, profile: null })
-        setAuthLoading(false)
-        void hydrateOperatorProfile(user.id)
-      } catch (authError) {
-        if (!cancelled) {
-          setError(authError instanceof Error ? authError.message : 'Unable to load operator session.')
-          setAuthLoading(false)
-        }
-      }
-    }
-    bootstrapAuth()
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (!session) {
-        setOperator(null)
-        setAuthLoading(false)
-        router.replace('/login')
-        return
-      }
-      try {
-        const user = session.user
-        if (!cancelled) setOperator({ authUser: user, profile: null })
-        setAuthLoading(false)
-        void hydrateOperatorProfile(user.id)
-      } catch (authError) {
-        if (!cancelled) setError(authError instanceof Error ? authError.message : 'Unable to refresh operator session.')
-      } finally {
-        if (!cancelled) setAuthLoading(false)
-      }
-    })
-    return () => {
-      cancelled = true
-      subscription.unsubscribe()
-    }
-  }, [router])
 
   useEffect(() => {
     if (!operatorUserId) return
@@ -443,24 +376,8 @@ export default function OperationsRecordsPage() {
     [aiRuns.length, attachments.length, caseAssignments, caseEvents.length, resolvedMessages.length, tags.length]
   )
 
-  if (authLoading) {
-    return (
-      <main className="app-grid min-h-screen px-5 py-6 text-stone-900 md:px-8 md:py-8">
-        <div className="mx-auto max-w-4xl">
-          <div className="app-surface rounded-[2rem] px-6 py-10 text-sm text-stone-600">Loading operator session...</div>
-        </div>
-      </main>
-    )
-  }
-
-  if (!operator?.authUser) {
-    return (
-      <main className="app-grid min-h-screen px-5 py-6 text-stone-900 md:px-8 md:py-8">
-        <div className="mx-auto max-w-4xl">
-          <div className="app-surface rounded-[2rem] px-6 py-10 text-sm text-stone-600">Redirecting to sign in...</div>
-        </div>
-      </main>
-    )
+  if (authLoading || !operator?.authUser) {
+    return <OperatorSessionState authLoading={authLoading} operator={operator} />
   }
 
   return (
@@ -535,7 +452,7 @@ export default function OperationsRecordsPage() {
         )}
 
         {error && (
-          <div className="mt-6 rounded-[1.8rem] border border-red-200 bg-red-50/95 p-6 text-sm text-red-700">Error: {error}</div>
+          <div className="mt-6 rounded-[1.8rem] border border-red-200 bg-red-50/95 p-6 text-sm text-red-700">Error: {pageError}</div>
         )}
 
         {!loading && !error && (

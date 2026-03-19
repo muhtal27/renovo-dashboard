@@ -23,6 +23,18 @@ export function useOperatorGate({
   const [operator, setOperator] = useState<CurrentOperator | null>(null)
   const [authLoading, setAuthLoading] = useState(true)
   const [authError, setAuthError] = useState<string | null>(null)
+  const strictOperatorAccess = unauthenticatedMode === 'redirect'
+
+  const failClosed = useEffectEvent(async (message: string) => {
+    setOperator(null)
+    setAuthError(message)
+    setAuthLoading(false)
+
+    if (strictOperatorAccess) {
+      await supabase.auth.signOut()
+      router.replace('/login')
+    }
+  })
 
   const hydrateOperator = useEffectEvent(async (user: User) => {
     setOperator({
@@ -38,13 +50,21 @@ export function useOperatorGate({
         profile,
       })
 
-      if (!profile && missingProfileMessage) {
-        setAuthError(missingProfileMessage)
+      if (!profile) {
+        const missingProfileError =
+          missingProfileMessage || 'Your account is not linked to the operator workspace.'
+
+        if (strictOperatorAccess) {
+          await failClosed(missingProfileError)
+          return
+        }
+
+        setAuthError(missingProfileError)
         return
       }
 
       if (profile?.is_active === false) {
-        setAuthError('Your operator profile is inactive. Please contact an administrator.')
+        await failClosed('Your operator profile is inactive. Please contact an administrator.')
         return
       }
 
