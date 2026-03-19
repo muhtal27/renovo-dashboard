@@ -2114,24 +2114,47 @@ export default function HomePage() {
                       </p>
                     )}
                   </div>
-                  <span className="rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-600">
-                    {tab === 'jobs' ? filteredJobs.length : filteredCases.length}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    {tab === 'jobs' && (
+                      <button
+                        type="button"
+                        onClick={() => setInboxDensityPersisted(inboxDensity === 'compact' ? 'comfortable' : 'compact')}
+                        className="rounded-full border border-stone-200 bg-white px-3 py-1 text-xs font-medium text-stone-700 hover:bg-stone-50"
+                        aria-pressed={inboxDensity === 'compact'}
+                      >
+                        {inboxDensity === 'compact' ? 'Compact' : 'Comfortable'}
+                      </button>
+                    )}
+                    <span className="rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-600">
+                      {tab === 'jobs' ? filteredJobs.length : filteredCases.length}
+                    </span>
+                  </div>
                 </div>
 
-                <div className="mt-4 flex flex-wrap gap-2 md:gap-3" aria-label="Maintenance inbox tabs">
-                  <button
-                    onClick={() => setTab('jobs')}
-                    aria-pressed={tab === 'jobs'}
-                    className={`rounded-full px-4 py-2.5 text-sm font-medium ${
-                      tab === 'jobs' ? 'app-pill-active' : 'app-pill'
-                    }`}
-                  >
-                    Jobs
-                  </button>
+                <div className="mt-4 grid gap-3">
+                  <div className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                    <button
+                      onClick={() => setTab('jobs')}
+                      aria-pressed={tab === 'jobs'}
+                      className={`shrink-0 rounded-full px-4 py-2.5 text-sm font-medium ${
+                        tab === 'jobs' ? 'app-pill-active' : 'app-pill'
+                      }`}
+                    >
+                      Jobs
+                    </button>
+                    <button
+                      onClick={() => setTab('all')}
+                      aria-pressed={tab !== 'jobs'}
+                      className={`shrink-0 rounded-full px-4 py-2.5 text-sm font-medium ${
+                        tab !== 'jobs' ? 'app-pill-active' : 'app-pill'
+                      }`}
+                    >
+                      Queue
+                    </button>
+                  </div>
 
                   {tab === 'jobs' ? (
-                    <>
+                    <div className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                       {[
                         ['all', `All (${jobSlaCounts.all})`],
                         ['approval_aging', `Approval aging (${jobSlaCounts.approval_aging})`],
@@ -2143,16 +2166,16 @@ export default function HomePage() {
                           key={value}
                           onClick={() => setJobSlaTab(value as JobSlaTab)}
                           aria-pressed={jobSlaTab === value}
-                          className={`rounded-full px-4 py-2.5 text-sm font-medium ${
+                          className={`shrink-0 rounded-full px-4 py-2.5 text-sm font-medium ${
                             jobSlaTab === value ? 'app-pill-active' : 'app-pill'
                           }`}
                         >
                           {label}
                         </button>
                       ))}
-                    </>
+                    </div>
                   ) : (
-                    <>
+                    <div className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                       {[
                         ['all', 'All queue'],
                         ...(followUpAvailable
@@ -2174,25 +2197,19 @@ export default function HomePage() {
                           key={value}
                           onClick={() => setTab(value as QueueTab)}
                           aria-pressed={tab === value}
-                          className={`rounded-full px-4 py-2.5 text-sm font-medium ${
+                          className={`shrink-0 rounded-full px-4 py-2.5 text-sm font-medium ${
                             tab === value ? 'app-pill-active' : 'app-pill'
                           }`}
                         >
                           {label}
                         </button>
                       ))}
-                    </>
+                    </div>
                   )}
                 </div>
 
-                <div
-                  className={`mt-4 grid gap-3 ${
-                    tab === 'jobs'
-                      ? 'lg:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)_repeat(2,minmax(0,0.7fr))]'
-                      : 'lg:grid-cols-[minmax(0,1.5fr)_repeat(2,minmax(0,0.7fr))]'
-                  }`}
-                >
-                  <label className="block">
+                <div className="mt-4 grid gap-3 lg:grid-cols-2">
+                  <label className="block lg:col-span-2">
                     <span className="mb-2 block text-sm font-medium text-stone-700">Search inbox</span>
                     <input
                       type="text"
@@ -2206,34 +2223,6 @@ export default function HomePage() {
                       className="app-field text-sm outline-none"
                     />
                   </label>
-
-                  {tab === 'jobs' && (
-                    <div className="block">
-                      <span className="mb-2 block text-sm font-medium text-stone-700">Density</span>
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setInboxDensityPersisted('comfortable')}
-                          aria-pressed={inboxDensity === 'comfortable'}
-                          className={`rounded-full px-4 py-2 text-sm font-medium ${
-                            inboxDensity === 'comfortable' ? 'app-pill-active' : 'app-pill'
-                          }`}
-                        >
-                          Comfortable
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setInboxDensityPersisted('compact')}
-                          aria-pressed={inboxDensity === 'compact'}
-                          className={`rounded-full px-4 py-2 text-sm font-medium ${
-                            inboxDensity === 'compact' ? 'app-pill-active' : 'app-pill'
-                          }`}
-                        >
-                          Compact
-                        </button>
-                      </div>
-                    </div>
-                  )}
 
                   <label className="block">
                     <span className="mb-2 block text-sm font-medium text-stone-700">Status</span>
