@@ -1,114 +1,100 @@
+import Image from 'next/image'
 import Link from 'next/link'
 
-const pressurePoints = [
+const whyNow = [
   {
-    title: 'The inbox never really sleeps',
-    body: 'Voicemails, maintenance chasers, rent pressure, compliance reminders, and viewing follow-ups tend to arrive in waves. Annabelle keeps the trail intact when the team cannot keep absorbing context-switching.',
+    title: 'Regulation is getting heavier, not lighter',
+    body: 'Evidence trails, response standards, safety duties, rent pressure, and compliance dates now take more time to manage properly. That weight lands on the agency first.',
   },
   {
-    title: 'Every answer needs the right property context',
-    body: 'A message only matters if it stays tied to the right tenancy, job, property, and case. Annabelle is designed around shared records so teams stop rebuilding the story from scratch.',
+    title: 'Teams are burning time just rebuilding context',
+    body: 'One issue can still mean a phone call, an inbox thread, a spreadsheet note, a contractor message, a landlord update, and a second system just to find the tenancy.',
   },
   {
-    title: 'Human energy should go on judgement, not chasing',
-    body: 'Lettings teams still need empathy, approvals, and decisions. Annabelle is there to hold the queue, capture updates, keep people informed, and prevent the important work from slipping overnight.',
-  },
-]
-
-const crmSnapshots = [
-  {
-    label: 'Tenancy control centre',
-    title: 'Run the tenancy from one screen',
-    body: 'Track the tenancy, the live cases, the next action, the people involved, and the current pressure from one CRM screen.',
-    href: '/login',
-    cta: 'See the CRM entrance',
-  },
-  {
-    label: 'Rent and arrears',
-    title: 'Keep money work tied to the tenancy',
-    body: 'Charges, payments, arrears, and case links stay with the tenancy so rent work is not split across spreadsheets and inboxes.',
-    href: '/login',
-    cta: 'Open rent workspace',
-  },
-  {
-    label: 'Lease and reporting',
-    title: 'Stay ahead of renewals and portfolio pressure',
-    body: 'Lease actions, reporting, maintenance, compliance, and deposits sit in the same CRM story so nothing important disappears between teams.',
-    href: '/records/reporting',
-    cta: 'See reporting workspace',
+    title: 'When service slips, everybody feels it',
+    body: 'Landlords lose confidence, tenants feel ignored, contractors waste visits, and operators start every morning already behind. Annabelle is designed to close those gaps.',
   },
 ]
 
 const storySteps = [
   {
     step: '01',
-    title: 'A real agency day starts before anyone is ready for it',
-    body: 'A boiler fails at 06:40. A landlord asks for an update at 07:10. A contractor replies while the team is already handling viewings, arrears, and inbox spillover. That is the operating reality Annabelle is built for.',
+    title: 'A real agency day starts before the team is even at the desk',
+    body: 'A boiler fails at 06:40. A tenant wants an answer before school run. A landlord asks for an update before the branch opens. That is the kind of day Annabelle is designed for.',
   },
   {
     step: '02',
-    title: 'Annabelle holds the line while the team catches breath',
-    body: 'She keeps conversations tagged, keeps the next step visible, and keeps the property story intact across calls, messages, maintenance, rent, and lease events so nothing gets lost between shifts.',
+    title: 'Annabelle keeps the story intact while the work moves',
+    body: 'She ties the issue to the right property, tenancy, people, job, and next step so the agency does not start the morning by piecing the situation together from memory.',
   },
   {
     step: '03',
-    title: 'People step in where people add the most value',
-    body: 'Operators still decide, reassure, approve, and escalate. Annabelle removes the repetitive drag so the team can sound calmer, move faster, and finish the day with less damage to their energy.',
+    title: 'People step in where judgement matters most',
+    body: 'The team still decides, reassures, approves, and escalates. Annabelle carries the repetitive weight so operators have more energy left for the moments that need a human voice.',
   },
 ]
 
-const roleCards = [
+const scenarioWins = [
   {
-    role: 'Lettings Operators',
-    body: 'See the queue, urgency, follow-ups, unowned work, and recent communication in one place. Annabelle is there so operators are not forced to remember everything manually.',
+    metric: '30 to 45 mins back',
+    title: 'Each time a maintenance issue changes hands',
+    body: 'When the tenant report, contractor updates, landlord view, and job notes already sit on one record, the branch stops losing time to retelling the same issue.',
   },
   {
-    role: 'Landlords',
-    body: 'Get clearer visibility on maintenance, rent pressure, approvals, and portfolio movement without chasing the team for a stitched-together answer.',
+    metric: '2 to 3 hours back a week',
+    title: 'Across rent chasing and arrears follow-up',
+    body: 'The money work stays with the tenancy, so the agency is not jumping between ledger notes, inbox threads, case updates, and separate reminder lists.',
   },
   {
-    role: 'Tenants',
-    body: 'Receive updates that stay connected to the real issue and the real property, rather than feeling like each message starts from zero again.',
-  },
-  {
-    role: 'Contractors',
-    body: 'Work from cleaner job context, notes, approvals, and message history so fewer site visits are wasted and fewer updates go missing.',
+    metric: 'Hours saved before renewals and move-outs',
+    title: 'When dates, people, and next actions already line up',
+    body: 'Lease work is easier when notice dates, compliance checkpoints, and communication history are visible together instead of buried across different tools.',
   },
 ]
 
-const practicalProof = [
-  'Runs against one shared operational record instead of isolated inboxes.',
-  'Built around live case context, not just chatbot answers.',
-  'Supports operator, landlord, tenant, and contractor journeys from the same working foundation.',
-  'Designed for 24/7 service continuity without pretending humans are replaceable.',
-  'Keeps the real work visible without making managers chase six different systems.',
+const crmNotes = [
+  'One tenancy screen with the people, live work, rent position, compliance dates, and next action already connected.',
+  'Built for letting agents, but the better experience is felt by landlords, tenants, and contractors as well.',
+  'This is how Annabelle gives the team a calmer start to the day instead of another hunt for missing context.',
 ]
 
-const workingAreas = [
-  'Tenancy CRM with people, property, case pressure, and next actions on one screen.',
-  'Rent, arrears, lease dates, maintenance, compliance, and reporting in one connected system.',
-  'Scotland-specific knowledge to ground answers before widening scope.',
-  'Landlord, tenant, and contractor portals that open the right view automatically.',
+const roleImpact = [
+  {
+    title: 'Agents get breathing room',
+    body: 'Less chasing, less retyping, less bouncing between six systems for one answer.',
+  },
+  {
+    title: 'Landlords get clearer updates',
+    body: 'The issue, cost pressure, next step, and current position are easier to understand without another round of chasing.',
+  },
+  {
+    title: 'Tenants get steadier communication',
+    body: 'Replies stay tied to the real property and the real issue instead of starting from zero every time.',
+  },
+  {
+    title: 'Contractors get cleaner job context',
+    body: 'Access notes, job history, and message trail stay in one place so fewer visits are wasted.',
+  },
 ]
 
 const actions = [
   {
     title: 'Join the waiting list',
-    body: 'Commercial licences are not open yet. We are rolling Annabelle out carefully with a small number of agencies first.',
+    body: 'Commercial licences are not open just yet. We are rolling Annabelle out carefully with a small number of letting agencies first.',
     href: '#waitlist',
     cta: 'Join the waiting list',
     tone: 'primary',
   },
   {
-    title: 'See the real CRM',
-    body: 'Start with the actual CRM entrance and see the product shape behind the story.',
+    title: 'See the live sign-in',
+    body: 'If you already have access, step into the working product from the real entrance.',
     href: '/login',
     cta: 'Open the live sign-in',
     tone: 'secondary',
   },
   {
     title: 'Read the agency story',
-    body: 'Start with the real letting-agency story if you want to understand why Annabelle matters.',
+    body: 'Start with the real day-to-day pressure if you want to understand why Annabelle matters now.',
     href: '#story',
     cta: 'Read the story',
     tone: 'secondary',
@@ -148,9 +134,9 @@ export function PublicHome() {
 
             <div className="relative flex flex-wrap items-center justify-between gap-4">
               <div>
-                <p className="app-kicker">Annabelle By Renovo</p>
+                <p className="app-kicker">Annabelle by Renovo</p>
                 <p className="mt-2 max-w-xl text-sm leading-6 text-stone-600">
-                  One CRM for the whole letting-agency workload.
+                  Built for letting agents who need the day to feel lighter, steadier, and easier to control.
                 </p>
               </div>
 
@@ -167,22 +153,22 @@ export function PublicHome() {
             <div className="relative mt-10 grid gap-8 xl:grid-cols-[minmax(0,1.18fr)_360px] xl:items-end">
               <div>
                 <div className="inline-flex rounded-full border border-emerald-200 bg-emerald-50/90 px-4 py-2 text-sm font-medium text-emerald-950/85">
-                  24/7 help for the work agencies actually deal with
+                  One CRM for the whole letting-agency workload
                 </div>
                 <h1 className="mt-6 max-w-5xl text-4xl font-semibold tracking-tight md:text-[5rem] md:leading-[0.94]">
                   Annabelle keeps the agency moving when the work does not stop.
                 </h1>
                 <p className="mt-6 max-w-3xl text-base leading-8 text-stone-700 md:text-lg">
-                  She does not clock off, call in sick, or lose the thread. Annabelle helps a letting agency stay responsive across calls, messages, maintenance, rent, compliance, landlord updates, and day-to-day coordination while the human team keeps its time for judgement, reassurance, and decisions. It means no juggling six different systems just to complete one task.
+                  Rules are tighter. Compliance takes longer. Money work is heavier. Landlords, tenants, and contractors still expect quick, clear answers. Annabelle helps a letting agency stay responsive across calls, messages, maintenance, rent, compliance, and landlord updates without asking the team to run on fumes or juggle six tools just to complete one task.
                 </p>
 
                 <div className="mt-8 flex flex-wrap gap-3">
-                  <a href="#waitlist" className="app-primary-button rounded-2xl px-5 py-3 text-sm font-medium">
+                  <a href="#platform" className="app-primary-button rounded-2xl px-5 py-3 text-sm font-medium">
+                    See the CRM proof
+                  </a>
+                  <a href="#waitlist" className="app-secondary-button rounded-2xl px-5 py-3 text-sm font-medium">
                     Join the waiting list
                   </a>
-                  <Link href="/login" className="app-secondary-button rounded-2xl px-5 py-3 text-sm font-medium">
-                    Enter the live workspace
-                  </Link>
                 </div>
               </div>
 
@@ -190,46 +176,43 @@ export function PublicHome() {
                 <p className="app-kicker">Why Agencies Give Her A Chance</p>
                 <div className="mt-4 space-y-3">
                   {[
-                    'She keeps the communication trail intact inside one CRM.',
-                    'She reduces overnight and out-of-hours drift.',
-                    'She gives operators a calmer start to the day.',
-                    'She makes daily oversight much easier.',
+                    'She keeps the communication trail inside one CRM instead of scattered across inboxes and memory.',
+                    'She works through the night so the agency does not start every morning blind.',
+                    'She helps landlords, tenants, contractors, and operators feel the same joined-up service.',
+                    'She gives good teams some energy back instead of asking for more from already stretched people.',
                   ].map((item) => (
                     <div key={item} className="rounded-[1.2rem] border border-stone-200 bg-white px-4 py-3 text-sm leading-6 text-stone-700">
                       {item}
                     </div>
                   ))}
                 </div>
-                <div className="mt-4 rounded-[1.35rem] border border-sky-200 bg-sky-50/90 px-4 py-4 text-sm leading-6 text-sky-950/80">
-                  Annabelle is not presented as a gimmick. She earns trust by holding operational context together so the agency can deliver a steadier service.
-                </div>
               </aside>
             </div>
           </div>
         </section>
 
+        <section className="grid gap-6 lg:grid-cols-3">
+          {whyNow.map((item) => (
+            <article key={item.title} className="app-surface rounded-[2rem] p-6 md:p-7">
+              <p className="app-kicker">Why now</p>
+              <h2 className="mt-3 text-2xl font-semibold tracking-tight">{item.title}</h2>
+              <p className="mt-4 text-sm leading-7 text-stone-600">{item.body}</p>
+            </article>
+          ))}
+        </section>
+
         <section id="story" className="grid gap-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
           <div className="app-surface rounded-[2rem] p-6 md:p-7">
-            <p className="app-kicker">The Real Story</p>
+            <p className="app-kicker">The real story</p>
             <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
               Built for the moments when a good team is already carrying too much
             </h2>
-            <div className="mt-6 space-y-4">
-              {pressurePoints.map((item) => (
-                <article key={item.title} className="rounded-[1.45rem] border border-stone-200 bg-white/92 p-5">
-                  <h3 className="text-lg font-semibold text-stone-900">{item.title}</h3>
-                  <p className="mt-2 text-sm leading-7 text-stone-600">{item.body}</p>
-                </article>
-              ))}
-            </div>
-          </div>
-
-          <div className="app-surface rounded-[2rem] p-6 md:p-7">
-            <p className="app-kicker">Why Annabelle Exists</p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-tight">A working story told from the agency floor</h2>
+            <p className="mt-4 max-w-2xl text-base leading-8 text-stone-700">
+              This is not a theory about property software. It is a response to the real pressure inside a letting agency day.
+            </p>
             <div className="mt-6 space-y-3">
               {storySteps.map((item) => (
-                <article key={item.step} className="rounded-[1.45rem] border border-stone-200 bg-white/88 p-5">
+                <article key={item.step} className="rounded-[1.45rem] border border-stone-200 bg-white/92 p-5">
                   <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-full border border-stone-200 bg-stone-50 text-sm font-semibold text-stone-700">
                       {item.step}
@@ -241,18 +224,84 @@ export function PublicHome() {
               ))}
             </div>
           </div>
+
+          <div className="app-surface rounded-[2rem] p-6 md:p-7">
+            <div className="flex flex-col gap-3 border-b app-divider pb-5 md:flex-row md:items-end md:justify-between">
+              <div>
+                <p className="app-kicker">Where hours come back</p>
+                <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
+                  Show what the day feels like when the work is joined up
+                </h2>
+              </div>
+              <div className="rounded-full border border-stone-200 bg-white px-4 py-2 text-sm text-stone-600">
+                Realistic time wins from less chasing and less retelling
+              </div>
+            </div>
+
+            <div className="mt-6 space-y-4">
+              {scenarioWins.map((item) => (
+                <article key={item.title} className="rounded-[1.45rem] border border-stone-200 bg-white/92 p-5">
+                  <p className="app-kicker">{item.metric}</p>
+                  <h3 className="mt-3 text-xl font-semibold text-stone-900">{item.title}</h3>
+                  <p className="mt-3 text-sm leading-7 text-stone-600">{item.body}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section id="platform" className="app-surface rounded-[2rem] p-6 md:p-7">
+          <div className="flex flex-col gap-3 border-b app-divider pb-5 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="app-kicker">Real CRM proof</p>
+              <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
+                A real Annabelle screen, shaped around one tenancy and one live day
+              </h2>
+            </div>
+            <Link href="/login" className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium">
+              Open the live sign-in
+            </Link>
+          </div>
+
+          <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.18fr)_360px] xl:items-start">
+            <div className="overflow-hidden rounded-[1.8rem] border border-stone-200 bg-white shadow-[0_18px_44px_rgba(55,43,27,0.1)]">
+              <Image
+                src="/annabelle-crm-snapshot.png"
+                alt="Annabelle tenancy CRM screen showing maintenance, rent, people, and next actions on one record"
+                width={1600}
+                height={1200}
+                className="h-auto w-full"
+                priority
+              />
+            </div>
+
+            <div className="space-y-4">
+              <div className="rounded-[1.55rem] border border-sky-200 bg-sky-50/85 p-5">
+                <p className="app-kicker text-sky-950">What you are looking at</p>
+                <p className="mt-3 text-sm leading-7 text-sky-950/85">
+                  This screen shows one Edinburgh tenancy where Annabelle has already tied together a heating issue, contractor booking, landlord update, rent position, compliance date, and next action.
+                </p>
+              </div>
+
+              {crmNotes.map((item) => (
+                <article key={item} className="rounded-[1.45rem] border border-stone-200 bg-white/92 p-5 text-sm leading-7 text-stone-700">
+                  {item}
+                </article>
+              ))}
+            </div>
+          </div>
         </section>
 
         <section id="actions" className="app-surface rounded-[2rem] p-6 md:p-7">
           <div className="flex flex-col gap-3 border-b app-divider pb-5 md:flex-row md:items-end md:justify-between">
             <div>
-              <p className="app-kicker">What To Do Next</p>
+              <p className="app-kicker">What to do next</p>
               <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
-                If the story feels true, here is how to step into it
+                If this feels like the right direction, here is the next step
               </h2>
             </div>
             <div className="rounded-full border border-stone-200 bg-white px-4 py-2 text-sm text-stone-600">
-              One place to work, reply, and stay in control
+              Built for letting agents, not another generic system
             </div>
           </div>
 
@@ -269,148 +318,31 @@ export function PublicHome() {
           </div>
         </section>
 
-        <section id="platform" className="app-surface rounded-[2rem] p-6 md:p-7">
-          <div className="flex flex-col gap-3 border-b app-divider pb-5 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="app-kicker">Best CRM Snapshots</p>
-              <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
-                Not a brochure promise. A real working system.
-              </h2>
-            </div>
-            <Link href="/login" className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium">
-              See the real screens
-            </Link>
-          </div>
-
-          <div className="mt-6 grid gap-4 xl:grid-cols-3">
-            {crmSnapshots.map((item) => (
-              <article key={item.title} className="rounded-[1.55rem] border border-stone-200 bg-white/92 p-5">
-                <p className="app-kicker">{item.label}</p>
-                <h3 className="mt-3 text-xl font-semibold text-stone-900">{item.title}</h3>
-                <p className="mt-3 text-sm leading-7 text-stone-700">{item.body}</p>
-                <Link href={item.href} className="app-primary-button mt-5 inline-flex rounded-full px-4 py-2.5 text-sm font-medium">
-                  {item.cta}
-                </Link>
-              </article>
-            ))}
-          </div>
+        <section className="grid gap-6 xl:grid-cols-4">
+          {roleImpact.map((item) => (
+            <article key={item.title} className="app-surface rounded-[2rem] p-6">
+              <p className="app-kicker">Who feels it</p>
+              <h2 className="mt-3 text-xl font-semibold tracking-tight">{item.title}</h2>
+              <p className="mt-4 text-sm leading-7 text-stone-600">{item.body}</p>
+            </article>
+          ))}
         </section>
 
-        <section id="waitlist" className="app-surface rounded-[2rem] p-6 md:p-7">
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-            <div>
-              <p className="app-kicker">Waiting list</p>
-              <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">Commercial licences are not open just yet</h2>
-              <p className="mt-4 max-w-3xl text-base leading-8 text-stone-700">
-                We are still shaping Annabelle with care. If you want early access when agency slots open, join the waiting list now and we will keep you close to the rollout.
-              </p>
-              <div className="mt-6 flex flex-wrap gap-3">
-                <a href="mailto:hello@renovoai.co.uk?subject=Annabelle%20waiting%20list" className="app-primary-button rounded-2xl px-5 py-3 text-sm font-medium">
-                  Join the waiting list
-                </a>
-                <Link href="/login" className="app-secondary-button rounded-2xl px-5 py-3 text-sm font-medium">
-                  See the live sign-in
-                </Link>
-              </div>
-            </div>
-
-            <div className="rounded-[1.7rem] border border-stone-200 bg-white/92 p-5">
-              <p className="app-kicker">What happens next</p>
-              <div className="mt-4 space-y-3">
-                {['We review agencies carefully before opening access.', 'You hear from us when early slots open.', 'You get the real product story, not a sales deck.'].map((item) => (
-                  <div key={item} className="rounded-[1.2rem] border border-stone-200 bg-stone-50/80 px-4 py-3 text-sm leading-6 text-stone-700">
-                    {item}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)]">
-          <div className="app-surface rounded-[2rem] p-6 md:p-7">
-            <p className="app-kicker">Why The CRM Matters</p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
-              Annabelle brings relief because everything sits in one place, not across six disconnected tools
-            </h2>
-            <div className="mt-6 grid gap-3 md:grid-cols-2">
-              {practicalProof.map((item) => (
-                <article key={item} className="rounded-[1.3rem] border border-stone-200 bg-white/90 p-4 text-sm leading-7 text-stone-700">
-                  {item}
-                </article>
-              ))}
-            </div>
-
-            <div className="mt-6 rounded-[1.55rem] border border-emerald-200 bg-emerald-50/90 p-5">
-              <p className="app-kicker text-emerald-900">The Value To The Team</p>
-              <p className="mt-3 text-base leading-8 text-emerald-950/85">
-                Annabelle gives the agency a better chance of staying organised, responsive, and humane. The value is not only speed. It is the ability to keep service quality up without draining the people carrying the business.
-              </p>
-            </div>
-          </div>
-
-          <div className="app-surface rounded-[2rem] p-6 md:p-7">
-            <p className="app-kicker">Who Feels The Benefit</p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-tight">Every role gets a clearer experience</h2>
-            <div className="mt-6 space-y-3">
-              {roleCards.map((item) => (
-                <article key={item.role} className="rounded-[1.35rem] border border-stone-200 bg-white/90 p-4">
-                  <h3 className="text-base font-semibold text-stone-900">{item.role}</h3>
-                  <p className="mt-2 text-sm leading-7 text-stone-600">{item.body}</p>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="app-surface rounded-[2rem] p-6 md:p-7">
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(320px,0.85fr)]">
-            <div>
-              <p className="app-kicker">Already Inside Annabelle</p>
-              <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
-                The showcase is connected to a working reality that already has operational depth
-              </h2>
-              <p className="mt-4 max-w-3xl text-base leading-8 text-stone-700">
-                This is not a blank marketing shell. Behind Annabelle there is already a real CRM with queue handling, linked records, maintenance, rent, lease dates, reporting, portals, and Scotland knowledge.
-              </p>
-              <div className="mt-6 flex flex-wrap gap-3">
-                <Link href="/login" className="app-primary-button rounded-2xl px-5 py-3 text-sm font-medium">
-                  Access the live sign-in
-                </Link>
-                <Link href="/portal" className="app-secondary-button rounded-2xl px-5 py-3 text-sm font-medium">
-                  Open the portal entrance
-                </Link>
-              </div>
-            </div>
-
-            <div className="rounded-[1.7rem] border border-stone-200 bg-white/92 p-5">
-              <p className="app-kicker">Working Areas</p>
-              <div className="mt-4 space-y-3">
-                {workingAreas.map((item) => (
-                  <div key={item} className="rounded-[1.2rem] border border-stone-200 bg-stone-50/80 px-4 py-3 text-sm leading-6 text-stone-700">
-                    {item}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="app-surface-strong rounded-[2.2rem] p-6 md:p-8">
+        <section id="waitlist" className="app-surface-strong rounded-[2.2rem] p-6 md:p-8">
           <div className="rounded-[1.8rem] border border-stone-200 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(241,248,244,0.92))] px-6 py-7 md:px-8 md:py-9">
-            <p className="app-kicker">Final Thought</p>
+            <p className="app-kicker">Waiting list</p>
             <h2 className="mt-3 max-w-4xl text-3xl font-semibold tracking-tight md:text-4xl">
-              Give Annabelle a chance if your agency needs steadier service without asking your people to run on fumes.
+              Commercial licences are not open just yet. The waiting list is.
             </h2>
             <p className="mt-4 max-w-3xl text-base leading-8 text-stone-700">
-              She brings value because she holds the operational thread together around the clock, helps the team recover breathing room, and turns messy letting agency work into a clearer system that can actually be managed.
+              We are shaping Annabelle carefully with real operational pressure in mind. If you want early access when more agency slots open, join the waiting list now and we will keep you close to the rollout.
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
-              <a href="#waitlist" className="app-primary-button rounded-2xl px-5 py-3 text-sm font-medium">
+              <a href="mailto:hello@renovoai.co.uk?subject=Annabelle%20waiting%20list" className="app-primary-button rounded-2xl px-5 py-3 text-sm font-medium">
                 Join the waiting list
               </a>
               <Link href="/login" className="app-secondary-button rounded-2xl px-5 py-3 text-sm font-medium">
-                Try the live journey
+                Existing users sign in here
               </Link>
             </div>
           </div>
