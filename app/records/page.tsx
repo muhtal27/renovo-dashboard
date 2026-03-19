@@ -653,12 +653,12 @@ export default function RecordsPage() {
         <section className="app-surface-strong rounded-[2rem] p-6 md:p-7">
           <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
             <div>
-              <p className="app-kicker">Tenancy Control Centre</p>
+              <p className="app-kicker">Tenancy CRM</p>
               <h1 className="mt-3 max-w-4xl text-4xl font-semibold tracking-tight md:text-5xl">
-                One CRM screen for the full tenancy lifecycle
+                One tenancy CRM for the full customer lifecycle
               </h1>
               <p className="mt-4 max-w-3xl text-base leading-8 text-stone-700">
-                Track the tenancy, the money, the lease milestones, the deposit risk, and the live work around it without bouncing between six different tools. This is the joined-up control layer the CRM story is supposed to promise.
+                Track the tenancy, the accounts position, the renewal milestones, the deposit risk, and the live work around it without bouncing between six different tools. This is the joined-up control layer the CRM story is supposed to promise.
               </p>
             </div>
 
@@ -700,8 +700,8 @@ export default function RecordsPage() {
           <aside className="app-surface rounded-[2rem] p-5">
             <div className="flex flex-col gap-3 border-b app-divider pb-4">
               <div>
-                <p className="app-kicker">Lifecycle Filter</p>
-                <h2 className="mt-2 text-2xl font-semibold">Choose the tenancy to run</h2>
+              <p className="app-kicker">CRM filter</p>
+              <h2 className="mt-2 text-2xl font-semibold">Choose the tenancy to run</h2>
               </div>
 
               <label className="block">
@@ -709,7 +709,7 @@ export default function RecordsPage() {
                 <input
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
-                  placeholder="Search the CRM"
+                  placeholder="Search tenancy CRM"
                   className="app-field text-sm outline-none"
                 />
               </label>
@@ -852,9 +852,9 @@ export default function RecordsPage() {
                 <div className="flex flex-wrap gap-2">
                   {[
                     { id: 'overview', label: 'Overview' },
-                    { id: 'money', label: 'Money Console' },
-                    { id: 'lease', label: 'Lease Console' },
-                    { id: 'casework', label: 'Casework' },
+                    { id: 'money', label: 'Accounts' },
+                    { id: 'lease', label: 'Renewals' },
+                    { id: 'casework', label: 'Case Management' },
                   ].map((item) => (
                     <button
                       key={item.id}

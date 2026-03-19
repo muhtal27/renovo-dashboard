@@ -512,9 +512,9 @@ export default function RentWorkspacePage() {
 
         <section className="app-surface-strong rounded-[2rem] p-6 md:p-8">
           <div>
-            <p className="app-kicker">Rent workspace</p>
+            <p className="app-kicker">Accounts</p>
             <h1 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">
-              Rent, ledger, and arrears in one place
+              Accounts, ledger, and arrears in one place
             </h1>
             <p className="mt-4 max-w-4xl text-base leading-7 text-stone-600">
               Book charges and payments against the tenancy, keep arrears visible, and tie money work back to the right case when needed.
@@ -545,7 +545,7 @@ export default function RentWorkspacePage() {
           <div className="flex flex-col gap-5">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div>
-                <p className="app-kicker">Rent tabs</p>
+                <p className="app-kicker">Accounts tabs</p>
                 <h2 className="mt-2 text-2xl font-semibold">Focus on active ledgers, overdue rent, or positive balances</h2>
               </div>
               <div className="app-card-muted rounded-full px-4 py-2 text-sm text-stone-600">
@@ -553,7 +553,7 @@ export default function RentWorkspacePage() {
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-2 md:gap-3" aria-label="Rent workspace tabs">
+            <div className="flex flex-wrap gap-2 md:gap-3" aria-label="Accounts workspace tabs">
               {[
                 ['all', 'All ledgers'],
                 ['active', 'Active'],
@@ -572,7 +572,7 @@ export default function RentWorkspacePage() {
             </div>
 
             <label className="block max-w-xl">
-              <span className="mb-2 block text-sm font-medium text-stone-700">Search rent ledgers</span>
+              <span className="mb-2 block text-sm font-medium text-stone-700">Search accounts ledger</span>
               <input
                 type="text"
                 placeholder="Search by tenant, landlord, property, or postcode"
@@ -584,7 +584,7 @@ export default function RentWorkspacePage() {
           </div>
         </section>
 
-        {loading && <div className="app-surface mt-6 rounded-[1.8rem] p-6 text-sm text-stone-600">Loading rent workspace...</div>}
+        {loading && <div className="app-surface mt-6 rounded-[1.8rem] p-6 text-sm text-stone-600">Loading accounts workspace...</div>}
 
         {pageError && <div className="mt-6 rounded-[1.8rem] border border-red-200 bg-red-50/95 p-6 text-sm text-red-700">Error: {pageError}</div>}
         {actionMessage && <div className="mt-6 rounded-[1.8rem] border border-sky-200 bg-sky-50/95 p-6 text-sm text-sky-800">{actionMessage}</div>}

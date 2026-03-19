@@ -27,6 +27,8 @@ type CaseRow = {
   assigned_user_id?: string | null
   created_at: string | null
   last_customer_message_at: string | null
+  tenancy_id?: string | null
+  property_id?: string | null
   next_action_at?: string | null
   waiting_on?: WaitingOn | null
   waiting_reason?: string | null
@@ -39,6 +41,77 @@ type MessageRow = {
   direction: string | null
   channel: string | null
   created_at: string | null
+}
+
+type QueueTenancyRow = {
+  id: string
+  property_id: string | null
+  status: string | null
+  tenancy_status: string | null
+  end_date: string | null
+}
+
+type QueueRentEntryRow = {
+  id: string
+  tenancy_id: string | null
+  case_id: string | null
+  entry_type: string | null
+  status: string | null
+  amount: number | string | null
+  due_date: string | null
+  posted_at: string | null
+  category: string | null
+}
+
+type QueueLeaseEventRow = {
+  id: string
+  tenancy_id: string | null
+  case_id: string | null
+  event_type: string | null
+  status: string | null
+  scheduled_for: string | null
+  completed_at: string | null
+}
+
+type QueueDepositClaimRow = {
+  id: string
+  tenancy_id: string | null
+  case_id: string | null
+  claim_status: string | null
+  disputed_amount: number | string | null
+  total_claim_amount: number | string | null
+  updated_at: string | null
+}
+
+type QueueMaintenanceRow = {
+  id: number
+  case_id: string | null
+  tenancy_id: string | null
+  property_id: string | null
+  issue_type: string | null
+  priority: string | null
+  status: string | null
+  scheduled_for: string | null
+  updated_at: string | null
+}
+
+type QueueCallRow = {
+  id: string
+  created_at: string | null
+  last_event_at: string | null
+  direction: string | null
+  status: string | null
+  outcome: string | null
+}
+
+type QueueActivityItem = {
+  id: string
+  sortAt: string | null
+  label: string
+  meta: string
+  body: string
+  tone: string
+  href?: string
 }
 
 type UserRow = {
@@ -139,6 +212,27 @@ function formatRelativeTime(value: string | null) {
 
   const diffDays = Math.floor(diffHours / 24)
   return `${diffDays}d ago`
+}
+
+function formatMoney(value: number | string | null | undefined) {
+  const amount =
+    typeof value === 'number'
+      ? value
+      : typeof value === 'string' && value.trim() !== ''
+        ? Number(value)
+        : 0
+
+  return new Intl.NumberFormat('en-GB', {
+    style: 'currency',
+    currency: 'GBP',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(Number.isFinite(amount) ? amount : 0)
+}
+
+function formatLabel(value: string | null) {
+  if (!value) return 'Unknown'
+  return value.replace(/_/g, ' ')
 }
 
 
@@ -311,9 +405,16 @@ export default function HomePage() {
   const [messages, setMessages] = useState<MessageRow[]>([])
   const [users, setUsers] = useState<UserRow[]>([])
   const [selectedCaseId, setSelectedCaseId] = useState<string | null>(null)
+  const [selectedCaseTenancies, setSelectedCaseTenancies] = useState<QueueTenancyRow[]>([])
+  const [selectedCaseCalls, setSelectedCaseCalls] = useState<QueueCallRow[]>([])
+  const [selectedCaseMaintenance, setSelectedCaseMaintenance] = useState<QueueMaintenanceRow[]>([])
+  const [selectedCaseRentEntries, setSelectedCaseRentEntries] = useState<QueueRentEntryRow[]>([])
+  const [selectedCaseLeaseEvents, setSelectedCaseLeaseEvents] = useState<QueueLeaseEventRow[]>([])
+  const [selectedCaseDepositClaims, setSelectedCaseDepositClaims] = useState<QueueDepositClaimRow[]>([])
 
   const [loading, setLoading] = useState(true)
   const [messagesLoading, setMessagesLoading] = useState(false)
+  const [caseContextLoading, setCaseContextLoading] = useState(false)
   const [actionLoading, setActionLoading] = useState(false)
   const [signingOut, setSigningOut] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -431,6 +532,121 @@ export default function HomePage() {
     setMessagesLoading(false)
   })
 
+  const loadSelectedCaseContext = useEffectEvent(async (caseId: string) => {
+    setCaseContextLoading(true)
+
+    const { data: baseCase, error: baseCaseError } = await supabase
+      .from('cases')
+      .select('id, tenancy_id, property_id')
+      .eq('id', caseId)
+      .maybeSingle()
+
+    if (baseCaseError) {
+      setActionMessage(`Error loading CRM context: ${baseCaseError.message}`)
+      setCaseContextLoading(false)
+      return
+    }
+
+    const tenancyResponse = baseCase?.tenancy_id
+      ? supabase
+          .from('tenancies')
+          .select('id, property_id, status, tenancy_status, end_date')
+          .eq('id', baseCase.tenancy_id)
+      : baseCase?.property_id
+        ? supabase
+            .from('tenancies')
+            .select('id, property_id, status, tenancy_status, end_date')
+            .eq('property_id', baseCase.property_id)
+            .order('updated_at', { ascending: false })
+            .limit(4)
+        : Promise.resolve({ data: [], error: null })
+
+    const { data: tenancyData, error: tenancyError } = await tenancyResponse
+
+    if (tenancyError) {
+      setActionMessage(`Error loading tenancy context: ${tenancyError.message}`)
+      setCaseContextLoading(false)
+      return
+    }
+
+    const safeTenancies = (tenancyData || []) as QueueTenancyRow[]
+    const tenancyIds = Array.from(new Set(safeTenancies.map((item) => item.id).filter(Boolean)))
+
+    const rentEntriesResponse = tenancyIds.length
+      ? supabase
+          .from('rent_ledger_entries')
+          .select('id, tenancy_id, case_id, entry_type, status, amount, due_date, posted_at, category')
+          .in('tenancy_id', tenancyIds)
+          .order('posted_at', { ascending: false })
+          .limit(8)
+      : Promise.resolve({ data: [], error: null })
+
+    const leaseEventsResponse = tenancyIds.length
+      ? supabase
+          .from('lease_lifecycle_events')
+          .select('id, tenancy_id, case_id, event_type, status, scheduled_for, completed_at')
+          .in('tenancy_id', tenancyIds)
+          .order('scheduled_for', { ascending: false })
+          .limit(8)
+      : Promise.resolve({ data: [], error: null })
+
+    const depositClaimsResponse = tenancyIds.length
+      ? supabase
+          .from('deposit_claims')
+          .select('id, tenancy_id, case_id, claim_status, disputed_amount, total_claim_amount, updated_at')
+          .in('tenancy_id', tenancyIds)
+          .order('updated_at', { ascending: false })
+          .limit(6)
+      : Promise.resolve({ data: [], error: null })
+
+    const [
+      { data: callData, error: callError },
+      { data: maintenanceData, error: maintenanceError },
+      { data: rentEntriesData, error: rentEntriesError },
+      { data: leaseEventsData, error: leaseEventsError },
+      { data: depositClaimsData, error: depositClaimsError },
+    ] = await Promise.all([
+      supabase
+        .from('call_sessions')
+        .select('id, created_at, last_event_at, direction, status, outcome')
+        .eq('case_id', caseId)
+        .order('last_event_at', { ascending: false })
+        .limit(6),
+      supabase
+        .from('maintenance_requests')
+        .select('id, case_id, tenancy_id, property_id, issue_type, priority, status, scheduled_for, updated_at')
+        .eq('case_id', caseId)
+        .order('updated_at', { ascending: false })
+        .limit(6),
+      rentEntriesResponse,
+      leaseEventsResponse,
+      depositClaimsResponse,
+    ])
+
+    if (callError || maintenanceError || rentEntriesError || leaseEventsError || depositClaimsError) {
+      setActionMessage(
+        `Error loading CRM context: ${
+          callError?.message ||
+          maintenanceError?.message ||
+          rentEntriesError?.message ||
+          leaseEventsError?.message ||
+          depositClaimsError?.message ||
+          'Unknown error'
+        }`
+      )
+      setCaseContextLoading(false)
+      return
+    }
+
+    setSelectedCaseTenancies(safeTenancies)
+    setSelectedCaseCalls((callData || []) as QueueCallRow[])
+    setSelectedCaseMaintenance((maintenanceData || []) as QueueMaintenanceRow[])
+    setSelectedCaseRentEntries((rentEntriesData || []) as QueueRentEntryRow[])
+    setSelectedCaseLeaseEvents((leaseEventsData || []) as QueueLeaseEventRow[])
+    setSelectedCaseDepositClaims((depositClaimsData || []) as QueueDepositClaimRow[])
+    setCaseContextLoading(false)
+  })
+
   const loadOperationsPulse = useEffectEvent(async () => {
     const [
       maintenanceResponse,
@@ -528,17 +744,16 @@ export default function HomePage() {
 
   useEffect(() => {
     if (!selectedCaseId || !operatorUserId) {
-      setMessages([])
       return
     }
 
-    async function loadMessages() {
+    async function loadCaseWorkspace() {
       const caseId = selectedCaseId
       if (!caseId) return
-      await loadMessagesForCase(caseId)
+      await Promise.all([loadMessagesForCase(caseId), loadSelectedCaseContext(caseId)])
     }
 
-    loadMessages()
+    loadCaseWorkspace()
   }, [selectedCaseId, operatorUserId])
 
   useEffect(() => {
@@ -625,8 +840,25 @@ export default function HomePage() {
         },
         async () => {
           await loadMessagesForCase(selectedCaseId)
+          await loadSelectedCaseContext(selectedCaseId)
           await loadCasesAndUsers({ preserveLoading: true })
           showLiveMessage('Timeline refreshed live.')
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'call_sessions', filter: `case_id=eq.${selectedCaseId}` },
+        async () => {
+          await loadSelectedCaseContext(selectedCaseId)
+          showLiveMessage('Call context refreshed live.')
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'maintenance_requests', filter: `case_id=eq.${selectedCaseId}` },
+        async () => {
+          await loadSelectedCaseContext(selectedCaseId)
+          showLiveMessage('Maintenance context refreshed live.')
         }
       )
 
@@ -867,6 +1099,144 @@ export default function HomePage() {
   )
 
   const selectedTimelinePreview = useMemo(() => messages.slice(-4).reverse(), [messages])
+
+  const selectedCaseContextSummary = useMemo(
+    () => ({
+      openCharges: selectedCaseRentEntries.filter(
+        (entry) => entry.status === 'open' && entry.entry_type === 'charge'
+      ).length,
+      dueLeaseEvents: selectedCaseLeaseEvents.filter((event) => event.status === 'due').length,
+      maintenanceLive: selectedCaseMaintenance.filter(
+        (item) => !['completed', 'cancelled'].includes(item.status || '')
+      ).length,
+      disputedDeposits: selectedCaseDepositClaims.filter(
+        (claim) => claim.claim_status === 'disputed'
+      ).length,
+    }),
+    [selectedCaseDepositClaims, selectedCaseLeaseEvents, selectedCaseMaintenance, selectedCaseRentEntries]
+  )
+
+  const selectedCaseActivityFeed = useMemo<QueueActivityItem[]>(() => {
+    const items: QueueActivityItem[] = []
+
+    for (const message of selectedTimelinePreview) {
+      items.push({
+        id: `message-${message.id}`,
+        sortAt: message.created_at,
+        label: `${formatLabel(message.direction)} message`,
+        meta: [message.channel || 'message', message.sender_type || 'unknown sender'].join(' • '),
+        body: message.message_text || '-',
+        tone:
+          message.direction === 'outbound'
+            ? 'border-sky-200 bg-sky-50'
+            : message.direction === 'internal'
+              ? 'border-stone-200 bg-stone-50'
+              : 'border-emerald-200 bg-emerald-50',
+        href: selectedCase ? `/cases/${selectedCase.id}` : undefined,
+      })
+    }
+
+    for (const call of selectedCaseCalls) {
+      items.push({
+        id: `call-${call.id}`,
+        sortAt: call.last_event_at || call.created_at,
+        label: `${formatLabel(call.direction)} call`,
+        meta: [formatLabel(call.status), call.outcome ? formatLabel(call.outcome) : null].filter(Boolean).join(' • '),
+        body: 'Call activity linked to this case.',
+        tone:
+          call.status === 'completed'
+            ? 'border-sky-200 bg-sky-50'
+            : call.status === 'failed' || call.status === 'abandoned'
+              ? 'border-red-200 bg-red-50'
+              : 'border-emerald-200 bg-emerald-50',
+        href: '/calls',
+      })
+    }
+
+    for (const item of selectedCaseMaintenance) {
+      items.push({
+        id: `maintenance-${item.id}`,
+        sortAt: item.updated_at || item.scheduled_for,
+        label: `${formatLabel(item.issue_type)} maintenance`,
+        meta: [formatLabel(item.status), item.priority ? `${formatLabel(item.priority)} priority` : null].filter(Boolean).join(' • '),
+        body: 'Maintenance workflow is linked to this case.',
+        tone:
+          item.status === 'completed'
+            ? 'border-emerald-200 bg-emerald-50'
+            : item.status === 'awaiting_approval'
+              ? 'border-amber-200 bg-amber-50'
+              : 'border-sky-200 bg-sky-50',
+        href: '/records/maintenance',
+      })
+    }
+
+    for (const entry of selectedCaseRentEntries.slice(0, 3)) {
+      items.push({
+        id: `rent-${entry.id}`,
+        sortAt: entry.posted_at || entry.due_date,
+        label: `${formatLabel(entry.entry_type)} ledger item`,
+        meta: [formatMoney(entry.amount), formatLabel(entry.status), entry.category ? formatLabel(entry.category) : null].filter(Boolean).join(' • '),
+        body: 'Tenancy ledger movement visible from the queue.',
+        tone:
+          entry.status === 'open' && entry.entry_type === 'charge'
+            ? 'border-red-200 bg-red-50'
+            : entry.status === 'cleared'
+              ? 'border-emerald-200 bg-emerald-50'
+              : 'border-amber-200 bg-amber-50',
+        href: '/records',
+      })
+    }
+
+    for (const event of selectedCaseLeaseEvents.slice(0, 3)) {
+      items.push({
+        id: `lease-${event.id}`,
+        sortAt: event.completed_at || event.scheduled_for,
+        label: `${formatLabel(event.event_type)} lease event`,
+        meta: [formatLabel(event.status), event.scheduled_for ? formatShortDateTime(event.scheduled_for) : null].filter(Boolean).join(' • '),
+        body: 'Lease lifecycle activity tied to this tenancy.',
+        tone:
+          event.status === 'due'
+            ? 'border-red-200 bg-red-50'
+            : event.status === 'completed'
+              ? 'border-emerald-200 bg-emerald-50'
+              : 'border-sky-200 bg-sky-50',
+        href: '/records',
+      })
+    }
+
+    for (const claim of selectedCaseDepositClaims.slice(0, 2)) {
+      items.push({
+        id: `deposit-${claim.id}`,
+        sortAt: claim.updated_at,
+        label: 'Deposit claim',
+        meta: [formatLabel(claim.claim_status), formatMoney(claim.disputed_amount || claim.total_claim_amount)].join(' • '),
+        body: claim.claim_status === 'disputed' ? 'Deposit issue needs review.' : 'Deposit activity recorded.',
+        tone:
+          claim.claim_status === 'disputed'
+            ? 'border-red-200 bg-red-50'
+            : claim.claim_status === 'resolved'
+              ? 'border-emerald-200 bg-emerald-50'
+              : 'border-amber-200 bg-amber-50',
+        href: '/records/deposits',
+      })
+    }
+
+    return items
+      .sort((left, right) => {
+        const leftTime = left.sortAt ? new Date(left.sortAt).getTime() : 0
+        const rightTime = right.sortAt ? new Date(right.sortAt).getTime() : 0
+        return rightTime - leftTime
+      })
+      .slice(0, 8)
+  }, [
+    selectedCase,
+    selectedCaseCalls,
+    selectedCaseDepositClaims,
+    selectedCaseLeaseEvents,
+    selectedCaseMaintenance,
+    selectedCaseRentEntries,
+    selectedTimelinePreview,
+  ])
 
   function prefetchCaseDetail(caseId: string | null) {
     if (!caseId) return
@@ -1544,47 +1914,96 @@ export default function HomePage() {
                     </div>
 
                     <section className="app-card-muted rounded-[1.6rem] p-5">
-                      <div className="flex flex-col gap-2 border-b app-divider pb-4 sm:flex-row sm:items-end sm:justify-between">
+                      <div className="flex flex-col gap-3 border-b app-divider pb-4 sm:flex-row sm:items-end sm:justify-between">
                         <div>
-                          <p className="app-kicker">Latest conversation</p>
-                          <h3 className="mt-2 text-xl font-semibold">Recent messages on this case</h3>
+                          <p className="app-kicker">Customer support thread</p>
+                          <h3 className="mt-2 text-xl font-semibold">Joined-up case context</h3>
+                          <p className="mt-2 max-w-2xl text-sm text-stone-600">
+                            Messages are now mixed with tenancy accounts, maintenance, renewals, deposit, and phone support signals so the queue behaves more like a working CRM.
+                          </p>
                         </div>
-                        {messagesLoading && (
-                          <div className="text-sm text-stone-500">Refreshing timeline...</div>
-                        )}
+                        <div className="flex flex-wrap gap-2">
+                          <div className="rounded-2xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+                            {selectedCaseContextSummary.openCharges} open charges
+                          </div>
+                          <div className="rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+                            {selectedCaseContextSummary.maintenanceLive} live maintenance
+                          </div>
+                          <div className="rounded-2xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-900">
+                            {selectedCaseContextSummary.dueLeaseEvents} renewals due
+                          </div>
+                          <div className="rounded-2xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-900">
+                            {selectedCaseContextSummary.disputedDeposits} deposit disputes
+                          </div>
+                        </div>
                       </div>
 
-                      <div className="mt-5 space-y-4">
-                        {!messagesLoading && messages.length === 0 && (
-                          <div className="app-empty-state rounded-[1.4rem] p-5 text-sm">
-                            No messages yet for this case.
-                          </div>
-                        )}
+                      {(messagesLoading || caseContextLoading) && (
+                        <div className="mt-5 text-sm text-stone-500">Refreshing CRM thread...</div>
+                      )}
 
-                        {selectedTimelinePreview.map((message) => (
-                          <article key={message.id} className="rounded-[1.4rem] border border-stone-200 bg-stone-50/90 p-4">
-                            <div className="flex flex-wrap items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-stone-500">
-                              <span>{message.direction || 'activity'}</span>
-                              <span>{message.channel || 'unknown channel'}</span>
-                              <span>{message.sender_type || 'unknown sender'}</span>
+                      <div className="mt-5 grid gap-4 lg:grid-cols-[0.95fr_1.4fr]">
+                        <div className="space-y-3">
+                          <div className="rounded-[1.4rem] border border-stone-200 bg-white/80 p-4">
+                            <div className="text-xs font-medium uppercase tracking-[0.18em] text-stone-500">
+                              Linked tenancy context
                             </div>
-                            <p className="mt-3 text-sm leading-7 text-stone-800">
-                              {message.message_text || '-'}
-                            </p>
-                            <p className="mt-3 text-xs text-stone-400">
-                              {message.created_at
-                                ? new Date(message.created_at).toLocaleString()
-                                : '-'}
-                            </p>
-                          </article>
-                        ))}
-
-                        {messages.length > 4 && (
-                          <div className="app-card-muted rounded-[1.4rem] px-4 py-3 text-sm text-stone-600">
-                            Showing the latest 4 messages here. Open the full case workspace for the
-                            full timeline, notes, and send tools.
+                            <div className="mt-3 space-y-3 text-sm text-stone-700">
+                              <div className="flex items-center justify-between gap-3">
+                                <span>Tenancies</span>
+                                <span className="font-medium text-stone-900">{selectedCaseTenancies.length}</span>
+                              </div>
+                              <div className="flex items-center justify-between gap-3">
+                                <span>Phone support linked</span>
+                                <span className="font-medium text-stone-900">{selectedCaseCalls.length}</span>
+                              </div>
+                              <div className="flex items-center justify-between gap-3">
+                                <span>Deposit claims</span>
+                                <span className="font-medium text-stone-900">{selectedCaseDepositClaims.length}</span>
+                              </div>
+                              <div className="flex items-center justify-between gap-3">
+                                <span>Tenancy end</span>
+                                <span className="font-medium text-stone-900">
+                                  {selectedCaseTenancies[0]?.end_date ? formatShortDateTime(selectedCaseTenancies[0].end_date) : 'Not set'}
+                                </span>
+                              </div>
+                            </div>
                           </div>
-                        )}
+
+                          <div className="rounded-[1.4rem] border border-stone-200 bg-white/80 p-4 text-sm text-stone-600">
+                            Open the full case for notes, outbound sending, and deeper timeline controls.
+                          </div>
+                        </div>
+
+                        <div className="space-y-4">
+                          {!messagesLoading && !caseContextLoading && selectedCaseActivityFeed.length === 0 && (
+                            <div className="app-empty-state rounded-[1.4rem] p-5 text-sm">
+                              No CRM activity has been recorded for this case yet.
+                            </div>
+                          )}
+
+                          {selectedCaseActivityFeed.map((item) => (
+                            <article key={item.id} className={`rounded-[1.4rem] border p-4 ${item.tone}`}>
+                              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                <div className="min-w-0">
+                                  <div className="flex flex-wrap items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-stone-500">
+                                    <span>{item.label}</span>
+                                    {item.meta && <span>{item.meta}</span>}
+                                  </div>
+                                  <p className="mt-3 text-sm leading-7 text-stone-800">{item.body}</p>
+                                </div>
+                                <div className="flex shrink-0 items-center gap-3 text-xs text-stone-500">
+                                  <span>{item.sortAt ? new Date(item.sortAt).toLocaleString() : '-'}</span>
+                                  {item.href && (
+                                    <Link href={item.href} className="font-medium text-stone-700 underline-offset-4 hover:underline">
+                                      Open
+                                    </Link>
+                                  )}
+                                </div>
+                              </div>
+                            </article>
+                          ))}
+                        </div>
                       </div>
                     </section>
                   </div>

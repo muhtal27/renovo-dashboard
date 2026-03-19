@@ -222,12 +222,12 @@ export default function KnowledgePage() {
 
         <section className="app-surface-strong rounded-[2rem] p-6 md:p-8">
           <div>
-            <p className="app-kicker">Scotland knowledge base</p>
+            <p className="app-kicker">Knowledge base</p>
             <h1 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">
-              Give Annabelle approved Scotland answers first
+              Give the team approved Scotland answers first
             </h1>
             <p className="mt-4 max-w-4xl text-base leading-7 text-stone-600">
-              Use reviewed Scotland sources first so answers stay practical, consistent, and tied to the rules that actually matter. This should feel like the knowledge desk inside the same dashboard, not a disconnected library.
+              Use reviewed Scotland sources first so answers stay practical, consistent, and tied to the rules that actually matter. This should feel like the knowledge base inside the same dashboard, not a disconnected library.
             </p>
 
             <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -268,9 +268,9 @@ export default function KnowledgePage() {
 
             <div className="mt-5 grid gap-3 xl:grid-cols-4">
               {[
-                { label: 'Desk mode', value: 'Answer cockpit', meta: 'Knowledge is an operator lane, not a side wiki.' },
+                { label: 'Desk mode', value: 'Guidance desk', meta: 'Knowledge is an operator lane, not a side wiki.' },
                 { label: 'Authority', value: 'Official first', meta: 'Scotland and UK approved content rises to the top.' },
-                { label: 'Workflow fit', value: 'Case support', meta: 'Search this desk while working queue or CRM context.' },
+                { label: 'Workflow fit', value: 'Case support', meta: 'Search this desk while working customer support or tenancy CRM context.' },
                 { label: 'Review rule', value: 'No blind reuse', meta: 'Summaries stay reviewed before the system leans on them.' },
               ].map((item) => (
                 <article key={item.label} className="rounded-[1.35rem] border border-stone-200 bg-white/88 p-4">

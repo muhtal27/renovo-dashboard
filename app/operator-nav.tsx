@@ -16,12 +16,12 @@ type OperatorNavKey =
   | 'onboarding'
 
 const items: Array<{ key: OperatorNavKey; label: string; helper: string; href: string }> = [
-  { key: 'queue', label: 'Queue', helper: 'Live inbox and response desk', href: '/' },
-  { key: 'calls', label: 'Calls', helper: 'Voice review and linking console', href: '/calls' },
-  { key: 'crm', label: 'CRM', helper: 'Tenancy cockpit and inline actions', href: '/records' },
-  { key: 'rent', label: 'Rent', helper: 'Deep ledger and arrears drill-down', href: '/records/rent' },
-  { key: 'lease', label: 'Lease', helper: 'Renewals and lifecycle drill-down', href: '/records/lease-lifecycle' },
-  { key: 'knowledge', label: 'Knowledge', helper: 'Approved Scotland answers desk', href: '/knowledge' },
+  { key: 'queue', label: 'Customer Support', helper: 'Live inbox, follow-up desk, and case triage', href: '/' },
+  { key: 'calls', label: 'Phone Support', helper: 'Call review, missed calls, and case linking', href: '/calls' },
+  { key: 'crm', label: 'Tenancy CRM', helper: 'Joined-up tenancy view with inline actions', href: '/records' },
+  { key: 'rent', label: 'Accounts', helper: 'Ledger, balances, arrears, and cash posting', href: '/records/rent' },
+  { key: 'lease', label: 'Renewals', helper: 'Lease milestones, notices, and renewal workflow', href: '/records/lease-lifecycle' },
+  { key: 'knowledge', label: 'Knowledge Base', helper: 'Approved Scotland guidance and answers', href: '/knowledge' },
   { key: 'reporting', label: 'Reporting', helper: 'Portfolio pressure and leadership view', href: '/records/reporting' },
   { key: 'onboarding', label: 'New Business', helper: 'Access, invite, and setup console', href: '/records/onboarding' },
 ]
@@ -48,17 +48,17 @@ export function OperatorNav({ current }: { current: OperatorNavKey }) {
     <nav className="app-surface rounded-[1.9rem] p-4 md:p-5" aria-label="Operator navigation">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
         <div>
-          <p className="app-kicker">Operator Cockpit</p>
+          <p className="app-kicker">Agency Operations</p>
           <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-900">
-            One operating layer for queue, CRM, calls, knowledge, and control
+            One operating layer for customer support, tenancy CRM, accounts, renewals, and control
           </h2>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-stone-600">
-            Move across the core desks without dropping context. Treat specialist pages as drill-downs, not separate products.
+            Move across the core agency desks without dropping context. Treat specialist pages as drill-downs, not separate products.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <div className="rounded-full border border-stone-200 bg-white px-4 py-2 text-sm text-stone-600">
-            Power CRM mode
+            Unified desk mode
           </div>
           <button
             type="button"

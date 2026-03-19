@@ -560,12 +560,12 @@ export default function CallsPage() {
                 {liveMessage || 'Live updates connected'}
               </span>
             </div>
-            <p className="app-kicker mt-6">Calls inbox</p>
+            <p className="app-kicker mt-6">Phone support</p>
             <h1 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">
-              Run voice review inside the main operator cockpit
+              Run phone support inside the main agency desk
             </h1>
             <p className="mt-4 max-w-4xl text-base leading-7 text-stone-600">
-              Work from active calls, missed calls, review flags, and unlinked sessions in the same operating language as queue and CRM, so voice work feels like one lane of the same dashboard.
+              Work active calls, missed calls, review flags, and unlinked sessions in the same operating language as customer support and tenancy CRM, so phone work feels like one lane of the same dashboard.
             </p>
 
             <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
@@ -591,10 +591,10 @@ export default function CallsPage() {
 
             <div className="mt-5 grid gap-3 xl:grid-cols-4">
               {[
-                { label: 'Desk mode', value: 'Voice cockpit', meta: 'Same operator rhythm as queue and CRM.' },
+                { label: 'Desk mode', value: 'Phone support desk', meta: 'Same operator rhythm as customer support and tenancy CRM.' },
                 { label: 'Primary move', value: 'Link and assign', meta: 'Every useful call should end in a case or an owner.' },
                 { label: 'Review posture', value: 'Flag before drift', meta: 'Keep human review visible until the next step is explicit.' },
-                { label: 'System fit', value: 'One dashboard', meta: 'Calls are another lane inside the same operating layer.' },
+                { label: 'System fit', value: 'One dashboard', meta: 'Phone support is another lane inside the same operating layer.' },
               ].map((item) => (
                 <article key={item.label} className="rounded-[1.35rem] border border-stone-200 bg-white/88 p-4">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-stone-500">{item.label}</p>

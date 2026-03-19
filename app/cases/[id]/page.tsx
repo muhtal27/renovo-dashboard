@@ -21,6 +21,7 @@ type CaseDetail = {
   created_at: string | null
   last_customer_message_at: string | null
   assigned_user_id: string | null
+  tenancy_id: string | null
   contact_id: string | null
   property_id: string | null
   next_action_at?: string | null
@@ -56,6 +57,88 @@ type PropertyRow = {
   address_line_2: string | null
   city: string | null
   postcode: string | null
+}
+
+type TenancyRow = {
+  id: string
+  property_id: string | null
+  tenant_contact_id: string | null
+  landlord_contact_id: string | null
+  status: string | null
+  tenancy_status: string | null
+  start_date: string | null
+  end_date: string | null
+  updated_at: string | null
+}
+
+type CallSessionRow = {
+  id: string
+  created_at: string | null
+  started_at: string | null
+  ended_at: string | null
+  last_event_at: string | null
+  direction: string | null
+  status: string | null
+  outcome: string | null
+  ai_summary: string | null
+}
+
+type RentEntryRow = {
+  id: string
+  tenancy_id: string | null
+  case_id: string | null
+  entry_type: string | null
+  status: string | null
+  amount: number | string | null
+  due_date: string | null
+  posted_at: string | null
+  category: string | null
+  reference: string | null
+}
+
+type LeaseEventRow = {
+  id: string
+  tenancy_id: string | null
+  case_id: string | null
+  event_type: string | null
+  status: string | null
+  scheduled_for: string | null
+  completed_at: string | null
+  note: string | null
+}
+
+type DepositClaimRow = {
+  id: string
+  tenancy_id: string | null
+  case_id: string | null
+  claim_status: string | null
+  disputed_amount: number | string | null
+  total_claim_amount: number | string | null
+  updated_at: string | null
+}
+
+type MaintenanceRequestRow = {
+  id: number
+  case_id: string | null
+  tenancy_id: string | null
+  property_id: string | null
+  issue_type: string | null
+  description: string | null
+  priority: string | null
+  status: string | null
+  scheduled_for: string | null
+  updated_at: string | null
+}
+
+type UnifiedTimelineItem = {
+  id: string
+  kind: 'message' | 'call' | 'maintenance' | 'rent' | 'lease' | 'deposit'
+  sortAt: string | null
+  label: string
+  meta: string
+  body: string
+  toneClass: string
+  href?: string
 }
 
 type OutboundWebhookResponse = {
@@ -406,6 +489,69 @@ function formatRelativeTime(value: string | null) {
   return `${diffDays}d ago`
 }
 
+function formatMoney(value: number | string | null | undefined) {
+  const amount =
+    typeof value === 'number'
+      ? value
+      : typeof value === 'string' && value.trim() !== ''
+        ? Number(value)
+        : 0
+
+  return new Intl.NumberFormat('en-GB', {
+    style: 'currency',
+    currency: 'GBP',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(Number.isFinite(amount) ? amount : 0)
+}
+
+function formatLabel(value: string | null) {
+  if (!value) return 'Unknown'
+  return value.replace(/_/g, ' ')
+}
+
+function buildAddress(property: PropertyRow | null) {
+  if (!property) return 'Unknown property'
+
+  return [property.address_line_1, property.address_line_2, property.city, property.postcode]
+    .filter(Boolean)
+    .join(', ')
+}
+
+function getCallTimelineTone(status: string | null) {
+  if (status === 'failed' || status === 'abandoned') return 'border-red-200 bg-red-50'
+  if (status === 'voicemail') return 'border-amber-200 bg-amber-50'
+  if (status === 'completed') return 'border-sky-200 bg-sky-50'
+  return 'border-emerald-200 bg-emerald-50'
+}
+
+function getMaintenanceTimelineTone(status: string | null) {
+  if (status === 'completed') return 'border-emerald-200 bg-emerald-50'
+  if (status === 'awaiting_approval' || status === 'quote_requested') return 'border-amber-200 bg-amber-50'
+  if (status === 'cancelled') return 'border-stone-200 bg-stone-50'
+  return 'border-sky-200 bg-sky-50'
+}
+
+function getRentTimelineTone(status: string | null, entryType: string | null) {
+  if (status === 'void') return 'border-stone-200 bg-stone-50'
+  if (status === 'open' && entryType === 'charge') return 'border-red-200 bg-red-50'
+  if (status === 'cleared' || entryType === 'payment') return 'border-emerald-200 bg-emerald-50'
+  return 'border-amber-200 bg-amber-50'
+}
+
+function getLeaseTimelineTone(status: string | null) {
+  if (status === 'completed') return 'border-emerald-200 bg-emerald-50'
+  if (status === 'due') return 'border-red-200 bg-red-50'
+  if (status === 'planned') return 'border-sky-200 bg-sky-50'
+  return 'border-stone-200 bg-stone-50'
+}
+
+function getDepositTimelineTone(status: string | null) {
+  if (status === 'resolved') return 'border-emerald-200 bg-emerald-50'
+  if (status === 'disputed') return 'border-red-200 bg-red-50'
+  return 'border-amber-200 bg-amber-50'
+}
+
 function getSlaTone(lastCustomerMessageAt: string | null, priority: string | null) {
   if (!lastCustomerMessageAt) {
     return {
@@ -441,11 +587,18 @@ export default function CaseDetailPage({
   const [users, setUsers] = useState<UserRow[]>([])
   const [contact, setContact] = useState<ContactRow | null>(null)
   const [property, setProperty] = useState<PropertyRow | null>(null)
+  const [relatedTenancies, setRelatedTenancies] = useState<TenancyRow[]>([])
+  const [relatedCalls, setRelatedCalls] = useState<CallSessionRow[]>([])
+  const [relatedMaintenance, setRelatedMaintenance] = useState<MaintenanceRequestRow[]>([])
+  const [relatedRentEntries, setRelatedRentEntries] = useState<RentEntryRow[]>([])
+  const [relatedLeaseEvents, setRelatedLeaseEvents] = useState<LeaseEventRow[]>([])
+  const [relatedDepositClaims, setRelatedDepositClaims] = useState<DepositClaimRow[]>([])
 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [contactLoading, setContactLoading] = useState(false)
   const [propertyLoading, setPropertyLoading] = useState(false)
+  const [activityLoading, setActivityLoading] = useState(false)
 
   const [status, setStatus] = useState('')
   const [assignedUserId, setAssignedUserId] = useState('')
@@ -505,6 +658,7 @@ export default function CaseDetailPage({
         created_at,
         last_customer_message_at,
         assigned_user_id,
+        tenancy_id,
         contact_id,
         property_id
       `)
@@ -627,6 +781,104 @@ export default function CaseDetailPage({
     } else {
       setProperty(null)
     }
+
+    const tenancyResponse = nextCase.tenancy_id
+      ? supabase
+          .from('tenancies')
+          .select('id, property_id, tenant_contact_id, landlord_contact_id, status, tenancy_status, start_date, end_date, updated_at')
+          .eq('id', nextCase.tenancy_id)
+      : nextCase.property_id
+        ? supabase
+            .from('tenancies')
+            .select('id, property_id, tenant_contact_id, landlord_contact_id, status, tenancy_status, start_date, end_date, updated_at')
+            .eq('property_id', nextCase.property_id)
+            .order('updated_at', { ascending: false })
+            .limit(4)
+        : Promise.resolve({ data: [], error: null })
+
+    setActivityLoading(true)
+    const { data: tenancyData, error: tenancyError } = await tenancyResponse
+
+    if (tenancyError) {
+      setError(tenancyError.message)
+      setActivityLoading(false)
+      return
+    }
+
+    const safeTenancies = (tenancyData || []) as TenancyRow[]
+    const tenancyIds = Array.from(new Set(safeTenancies.map((item) => item.id).filter(Boolean)))
+
+    const rentEntriesResponse = tenancyIds.length
+      ? supabase
+          .from('rent_ledger_entries')
+          .select('id, tenancy_id, case_id, entry_type, status, amount, due_date, posted_at, category, reference')
+          .in('tenancy_id', tenancyIds)
+          .order('posted_at', { ascending: false })
+          .limit(24)
+      : Promise.resolve({ data: [], error: null })
+
+    const leaseEventsResponse = tenancyIds.length
+      ? supabase
+          .from('lease_lifecycle_events')
+          .select('id, tenancy_id, case_id, event_type, status, scheduled_for, completed_at, note')
+          .in('tenancy_id', tenancyIds)
+          .order('scheduled_for', { ascending: false })
+          .limit(24)
+      : Promise.resolve({ data: [], error: null })
+
+    const depositClaimsResponse = tenancyIds.length
+      ? supabase
+          .from('deposit_claims')
+          .select('id, tenancy_id, case_id, claim_status, disputed_amount, total_claim_amount, updated_at')
+          .in('tenancy_id', tenancyIds)
+          .order('updated_at', { ascending: false })
+          .limit(12)
+      : Promise.resolve({ data: [], error: null })
+
+    const [
+      { data: callData, error: callError },
+      { data: maintenanceData, error: maintenanceError },
+      { data: rentEntriesData, error: rentEntriesError },
+      { data: leaseEventsData, error: leaseEventsError },
+      { data: depositClaimsData, error: depositClaimsError },
+    ] = await Promise.all([
+      supabase
+        .from('call_sessions')
+        .select('id, created_at, started_at, ended_at, last_event_at, direction, status, outcome, ai_summary')
+        .eq('case_id', id)
+        .order('last_event_at', { ascending: false })
+        .limit(12),
+      supabase
+        .from('maintenance_requests')
+        .select('id, case_id, tenancy_id, property_id, issue_type, description, priority, status, scheduled_for, updated_at')
+        .eq('case_id', id)
+        .order('updated_at', { ascending: false })
+        .limit(12),
+      rentEntriesResponse,
+      leaseEventsResponse,
+      depositClaimsResponse,
+    ])
+
+    if (callError || maintenanceError || rentEntriesError || leaseEventsError || depositClaimsError) {
+      setError(
+        callError?.message ||
+          maintenanceError?.message ||
+          rentEntriesError?.message ||
+          leaseEventsError?.message ||
+          depositClaimsError?.message ||
+          'Unable to load case context.'
+      )
+      setActivityLoading(false)
+      return
+    }
+
+    setRelatedTenancies(safeTenancies)
+    setRelatedCalls((callData || []) as CallSessionRow[])
+    setRelatedMaintenance((maintenanceData || []) as MaintenanceRequestRow[])
+    setRelatedRentEntries((rentEntriesData || []) as RentEntryRow[])
+    setRelatedLeaseEvents((leaseEventsData || []) as LeaseEventRow[])
+    setRelatedDepositClaims((depositClaimsData || []) as DepositClaimRow[])
+    setActivityLoading(false)
   })
 
   const loadMessagesForCurrentCase = useEffectEvent(
@@ -698,6 +950,56 @@ export default function CaseDetailPage({
         async () => {
           await loadMessagesForCurrentCase(caseItem.id)
           showLiveMessage('Timeline refreshed live.')
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'call_sessions',
+          filter: `case_id=eq.${caseItem.id}`,
+        },
+        async () => {
+          await loadCaseBundle({ preserveLoading: true })
+          showLiveMessage('Call activity refreshed live.')
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'maintenance_requests',
+          filter: `case_id=eq.${caseItem.id}`,
+        },
+        async () => {
+          await loadCaseBundle({ preserveLoading: true })
+          showLiveMessage('Maintenance activity refreshed live.')
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'rent_ledger_entries' },
+        async () => {
+          await loadCaseBundle({ preserveLoading: true })
+          showLiveMessage('Ledger activity refreshed live.')
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'lease_lifecycle_events' },
+        async () => {
+          await loadCaseBundle({ preserveLoading: true })
+          showLiveMessage('Lease activity refreshed live.')
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'deposit_claims' },
+        async () => {
+          await loadCaseBundle({ preserveLoading: true })
+          showLiveMessage('Deposit activity refreshed live.')
         }
       )
       .on(
@@ -792,6 +1094,94 @@ export default function CaseDetailPage({
       }),
     [caseItem?.next_action_at, caseItem?.waiting_on, caseItem?.waiting_reason]
   )
+
+  const unifiedTimeline = useMemo<UnifiedTimelineItem[]>(() => {
+    const items: UnifiedTimelineItem[] = messages.map((message) => {
+      const style = getMessageStyle(message)
+
+      return {
+        id: `message-${message.id}`,
+        kind: 'message',
+        sortAt: message.created_at,
+        label: style.label,
+        meta: [message.channel || 'message', message.sender_type || '-', message.direction || '-'].join(' • '),
+        body: message.message_text || '-',
+        toneClass: style.cardClass,
+      }
+    })
+
+    for (const call of relatedCalls) {
+      items.push({
+        id: `call-${call.id}`,
+        kind: 'call',
+        sortAt: call.last_event_at || call.ended_at || call.started_at || call.created_at,
+        label: `${formatLabel(call.direction)} call`,
+        meta: [formatLabel(call.status), call.outcome ? formatLabel(call.outcome) : null].filter(Boolean).join(' • '),
+        body: call.ai_summary?.trim() || 'Call session logged on this case.',
+        toneClass: getCallTimelineTone(call.status),
+        href: '/calls',
+      })
+    }
+
+    for (const request of relatedMaintenance) {
+      items.push({
+        id: `maintenance-${request.id}`,
+        kind: 'maintenance',
+        sortAt: request.updated_at || request.scheduled_for,
+        label: `${formatLabel(request.issue_type)} maintenance`,
+        meta: [formatLabel(request.status), request.priority ? `${formatLabel(request.priority)} priority` : null].filter(Boolean).join(' • '),
+        body: request.description?.trim() || 'Maintenance request linked to this case.',
+        toneClass: getMaintenanceTimelineTone(request.status),
+        href: '/records/maintenance',
+      })
+    }
+
+    for (const entry of relatedRentEntries) {
+      items.push({
+        id: `rent-${entry.id}`,
+        kind: 'rent',
+        sortAt: entry.posted_at || entry.due_date,
+        label: `${formatLabel(entry.entry_type)} ledger entry`,
+        meta: [formatMoney(entry.amount), formatLabel(entry.status), entry.category ? formatLabel(entry.category) : null].filter(Boolean).join(' • '),
+        body: entry.reference?.trim() || 'Rent ledger movement linked to this tenancy.',
+        toneClass: getRentTimelineTone(entry.status, entry.entry_type),
+        href: '/records',
+      })
+    }
+
+    for (const event of relatedLeaseEvents) {
+      items.push({
+        id: `lease-${event.id}`,
+        kind: 'lease',
+        sortAt: event.completed_at || event.scheduled_for,
+        label: `${formatLabel(event.event_type)} lifecycle event`,
+        meta: [formatLabel(event.status), event.scheduled_for ? formatShortDateTime(event.scheduled_for) : null].filter(Boolean).join(' • '),
+        body: event.note?.trim() || 'Lease lifecycle event linked to this tenancy.',
+        toneClass: getLeaseTimelineTone(event.status),
+        href: '/records',
+      })
+    }
+
+    for (const claim of relatedDepositClaims) {
+      const totalAmount = claim.disputed_amount || claim.total_claim_amount
+      items.push({
+        id: `deposit-${claim.id}`,
+        kind: 'deposit',
+        sortAt: claim.updated_at,
+        label: 'Deposit claim',
+        meta: [formatLabel(claim.claim_status), totalAmount ? formatMoney(totalAmount) : null].filter(Boolean).join(' • '),
+        body: claim.claim_status === 'disputed' ? 'Deposit issue needs attention.' : 'Deposit activity recorded against this tenancy.',
+        toneClass: getDepositTimelineTone(claim.claim_status),
+        href: '/records',
+      })
+    }
+
+    return items.sort((left, right) => {
+      const leftTime = left.sortAt ? new Date(left.sortAt).getTime() : 0
+      const rightTime = right.sortAt ? new Date(right.sortAt).getTime() : 0
+      return rightTime - leftTime
+    })
+  }, [messages, relatedCalls, relatedDepositClaims, relatedLeaseEvents, relatedMaintenance, relatedRentEntries])
 
   async function addInternalAuditNote(messageText: string) {
     if (!caseItem) return null
@@ -1962,6 +2352,63 @@ export default function CaseDetailPage({
                     )}
                   </div>
                 </div>
+              </div>
+            </section>
+
+            <section className="app-surface rounded-[1.8rem] p-6">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="app-kicker">Joined-up timeline</p>
+                  <h2 className="mt-2 text-xl font-semibold">Case + CRM activity thread</h2>
+                  <p className="mt-2 max-w-2xl text-sm text-stone-600">
+                    This stream combines messages, calls, maintenance, ledger changes, lease events, and deposit activity so operators can work one thread instead of jumping between pages.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2 text-xs uppercase tracking-[0.24em] text-stone-500">
+                  <span className="rounded-full border border-stone-200 bg-stone-50 px-3 py-1.5">
+                    {unifiedTimeline.length} events
+                  </span>
+                  <span className="rounded-full border border-stone-200 bg-stone-50 px-3 py-1.5">
+                    {relatedTenancies.length} linked tenancy{relatedTenancies.length === 1 ? '' : 'ies'}
+                  </span>
+                  <span className="rounded-full border border-stone-200 bg-stone-50 px-3 py-1.5">
+                    {buildAddress(property)}
+                  </span>
+                </div>
+              </div>
+
+              {activityLoading && (
+                <div className="mt-4 text-sm text-stone-500">Loading joined-up activity…</div>
+              )}
+
+              {!activityLoading && unifiedTimeline.length === 0 && (
+                <div className="app-empty-state mt-4 rounded-[1.4rem] p-5 text-sm">
+                  No linked activity has been recorded for this case yet.
+                </div>
+              )}
+
+              <div className="mt-4 space-y-4">
+                {unifiedTimeline.slice(0, 14).map((item) => (
+                  <div key={item.id} className={`rounded-[1.4rem] border p-4 ${item.toneClass}`}>
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-wide text-stone-500">
+                          <span>{item.label}</span>
+                          {item.meta && <span>{item.meta}</span>}
+                        </div>
+                        <div className="mt-2 text-sm leading-6 text-stone-800">{item.body}</div>
+                      </div>
+                      <div className="flex shrink-0 items-center gap-3 text-xs text-stone-500">
+                        <span>{item.sortAt ? new Date(item.sortAt).toLocaleString() : '-'}</span>
+                        {item.href && (
+                          <Link href={item.href} className="font-medium text-stone-700 underline-offset-4 hover:underline">
+                            Open lane
+                          </Link>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </section>
 

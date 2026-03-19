@@ -333,7 +333,7 @@ export default function LeaseLifecyclePage() {
 
         <section className="app-surface-strong rounded-[2rem] p-6 md:p-8">
           <div>
-            <p className="app-kicker">Lease lifecycle</p>
+            <p className="app-kicker">Renewals</p>
             <h1 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">Track renewals, notice, and move-out work before it turns into inbox chaos</h1>
             <p className="mt-4 max-w-4xl text-base leading-7 text-stone-600">Keep term dates, renewal actions, notice windows, and move-out follow-through attached to the tenancy itself.</p>
 
@@ -367,7 +367,7 @@ export default function LeaseLifecyclePage() {
               <div className="app-card-muted rounded-full px-4 py-2 text-sm text-stone-600">{filteredTenancies.length} shown of {tenancies.length} tenancies</div>
             </div>
 
-            <div className="flex flex-wrap gap-2 md:gap-3" aria-label="Lease lifecycle tabs">
+            <div className="flex flex-wrap gap-2 md:gap-3" aria-label="Renewals tabs">
               {[
                 ['all', 'All tenancies'],
                 ['due', 'Due actions'],
@@ -381,13 +381,13 @@ export default function LeaseLifecyclePage() {
             </div>
 
             <label className="block max-w-xl">
-              <span className="mb-2 block text-sm font-medium text-stone-700">Search tenancy lifecycle</span>
+              <span className="mb-2 block text-sm font-medium text-stone-700">Search renewals workflow</span>
               <input type="text" placeholder="Search by tenant, landlord, property, or postcode" value={search} onChange={(event) => setSearch(event.target.value)} className="app-field text-sm outline-none" />
             </label>
           </div>
         </section>
 
-        {loading && <div className="app-surface mt-6 rounded-[1.8rem] p-6 text-sm text-stone-600">Loading lease lifecycle workspace...</div>}
+        {loading && <div className="app-surface mt-6 rounded-[1.8rem] p-6 text-sm text-stone-600">Loading renewals workspace...</div>}
         {pageError && <div className="mt-6 rounded-[1.8rem] border border-red-200 bg-red-50/95 p-6 text-sm text-red-700">Error: {pageError}</div>}
         {actionMessage && <div className="mt-6 rounded-[1.8rem] border border-sky-200 bg-sky-50/95 p-6 text-sm text-sky-800">{actionMessage}</div>}
 
