@@ -446,7 +446,6 @@ export default function HomePage() {
   const [messagesLoading, setMessagesLoading] = useState(false)
   const [caseContextLoading, setCaseContextLoading] = useState(false)
   const [actionLoading, setActionLoading] = useState(false)
-  const [signingOut, setSigningOut] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [actionMessage, setActionMessage] = useState<string | null>(null)
 
@@ -1480,13 +1479,13 @@ export default function HomePage() {
 
   async function handleCreateRenewalEvent(formData: FormData) {
     if (!selectedCase || !selectedCaseContext?.tenancy_id) {
-      setActionMessage('This case is not linked to a tenancy yet, so no renewal event can be created from the queue.')
+      setActionMessage('This case is not linked to a tenancy yet, so no end of tenancy event can be created from the queue.')
       return
     }
 
     const scheduledFor = String(formData.get('scheduled_for') || '').trim()
     if (!scheduledFor) {
-      setActionMessage('Choose a target date before creating a renewals event.')
+      setActionMessage('Choose a target date before creating an end of tenancy event.')
       return
     }
 
@@ -1518,7 +1517,7 @@ export default function HomePage() {
     }
 
     setSelectedCaseLeaseEvents((current) => [data as QueueLeaseEventRow, ...current])
-    setActionMessage('Renewals event created.')
+    setActionMessage('End of tenancy event created.')
     setCreatingRenewal(false)
   }
 
@@ -1568,22 +1567,6 @@ export default function HomePage() {
     setCreatingMaintenance(false)
   }
 
-  async function handleSignOut() {
-    setSigningOut(true)
-    setActionMessage(null)
-
-    const { error: signOutError } = await supabase.auth.signOut()
-
-    if (signOutError) {
-      setActionMessage(`Error: ${signOutError.message}`)
-      setSigningOut(false)
-      return
-    }
-
-    router.replace('/')
-    router.refresh()
-  }
-
   useEffect(() => {
     if (!selectedCaseId) return
     router.prefetch(`/cases/${selectedCaseId}`)
@@ -1616,13 +1599,6 @@ export default function HomePage() {
                 </span>
               </div>
 
-              <button
-                onClick={handleSignOut}
-                disabled={signingOut}
-                className="app-secondary-button rounded-full px-4 py-2 text-sm font-medium disabled:opacity-60"
-              >
-                {signingOut ? 'Signing out...' : 'Sign out'}
-              </button>
             </div>
 
             <h1 className="mt-4 max-w-5xl text-3xl font-semibold tracking-tight md:text-[3.1rem] md:leading-[1.04]">
@@ -2239,7 +2215,7 @@ export default function HomePage() {
                             href="/records/lease-lifecycle"
                             className="app-secondary-button rounded-2xl px-4 py-3 text-left text-sm font-medium"
                           >
-                            Open renewals
+                            Open end of tenancy
                           </Link>
                           <Link
                             href="/records/maintenance"
@@ -2293,7 +2269,7 @@ export default function HomePage() {
                             className="rounded-[1.4rem] border border-stone-200 bg-white/80 p-4"
                           >
                             <div className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">
-                              Renewals event
+                              End of tenancy event
                             </div>
                             <div className="mt-3 grid gap-3">
                               <select name="event_type" defaultValue="renewal_review" className="app-select w-full text-sm">
@@ -2310,7 +2286,7 @@ export default function HomePage() {
                                 disabled={creatingRenewal}
                                 className="app-secondary-button rounded-2xl px-4 py-3 text-left text-sm font-medium disabled:opacity-50"
                               >
-                                {creatingRenewal ? 'Creating renewals event...' : 'Create renewals event'}
+                                {creatingRenewal ? 'Creating end of tenancy event...' : 'Create end of tenancy event'}
                               </button>
                             </div>
                           </form>
@@ -2398,7 +2374,7 @@ export default function HomePage() {
                           <p className="app-kicker">Customer support thread</p>
                           <h3 className="mt-2 text-xl font-semibold">Joined-up case context</h3>
                           <p className="mt-2 max-w-2xl text-sm text-stone-600">
-                            Messages are now mixed with tenancy accounts, maintenance, renewals, deposit, and phone support signals so the queue behaves more like a working CRM.
+                            Messages are now mixed with tenancy accounts, maintenance, end of tenancy, deposit, and phone support signals so the queue behaves more like a working CRM.
                           </p>
                         </div>
                         <div className="flex flex-wrap gap-2">
@@ -2409,7 +2385,7 @@ export default function HomePage() {
                             {selectedCaseContextSummary.maintenanceLive} live maintenance
                           </div>
                           <div className="rounded-2xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-900">
-                            {selectedCaseContextSummary.dueLeaseEvents} renewals due
+                            {selectedCaseContextSummary.dueLeaseEvents} end of tenancy due
                           </div>
                           <div className="rounded-2xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-900">
                             {selectedCaseContextSummary.disputedDeposits} deposit disputes

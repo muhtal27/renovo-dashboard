@@ -217,20 +217,19 @@ export default function LeaseLifecyclePage() {
     })
   }, [contactById, eventsByTenancyId, propertyById, search, tab, tenancies])
 
-  useEffect(() => {
-    if (!filteredTenancies.length) {
-      setSelectedTenancyId(null)
-      return
-    }
-    if (!selectedTenancyId || !filteredTenancies.some((tenancy) => tenancy.id === selectedTenancyId)) {
-      setSelectedTenancyId(filteredTenancies[0].id)
-    }
-  }, [filteredTenancies, selectedTenancyId])
+  const selectedTenancy = useMemo(() => {
+    if (!filteredTenancies.length) return null
 
-  const selectedTenancy = useMemo(() => tenancies.find((tenancy) => tenancy.id === selectedTenancyId) || null, [selectedTenancyId, tenancies])
-  const selectedTenant = useMemo(() => (selectedTenancy?.tenant_contact_id ? contactById.get(selectedTenancy.tenant_contact_id) ?? null : null), [contactById, selectedTenancy?.tenant_contact_id])
-  const selectedLandlord = useMemo(() => (selectedTenancy?.landlord_contact_id ? contactById.get(selectedTenancy.landlord_contact_id) ?? null : null), [contactById, selectedTenancy?.landlord_contact_id])
-  const selectedProperty = useMemo(() => (selectedTenancy?.property_id ? propertyById.get(selectedTenancy.property_id) ?? null : null), [propertyById, selectedTenancy?.property_id])
+    const effectiveSelectedTenancyId =
+      selectedTenancyId && filteredTenancies.some((tenancy) => tenancy.id === selectedTenancyId)
+        ? selectedTenancyId
+        : filteredTenancies[0].id
+
+    return tenancies.find((tenancy) => tenancy.id === effectiveSelectedTenancyId) || null
+  }, [filteredTenancies, selectedTenancyId, tenancies])
+  const selectedTenant = useMemo(() => (selectedTenancy?.tenant_contact_id ? contactById.get(selectedTenancy.tenant_contact_id) ?? null : null), [contactById, selectedTenancy])
+  const selectedLandlord = useMemo(() => (selectedTenancy?.landlord_contact_id ? contactById.get(selectedTenancy.landlord_contact_id) ?? null : null), [contactById, selectedTenancy])
+  const selectedProperty = useMemo(() => (selectedTenancy?.property_id ? propertyById.get(selectedTenancy.property_id) ?? null : null), [propertyById, selectedTenancy])
   const selectedEvents = useMemo(() => {
     if (!selectedTenancy) return []
     return [...(eventsByTenancyId.get(selectedTenancy.id) ?? [])].sort((left, right) => {
@@ -244,14 +243,10 @@ export default function LeaseLifecyclePage() {
     return cases.filter((caseItem) => caseItem.tenancy_id === selectedTenancy.id || caseItem.property_id === selectedTenancy.property_id)
   }, [cases, selectedTenancy])
 
-  useEffect(() => {
-    if (!selectedCases.length) {
-      setSelectedCaseId('')
-      return
-    }
-    if (selectedCaseId && selectedCases.some((caseItem) => caseItem.id === selectedCaseId)) return
-    setSelectedCaseId(selectedCases[0]?.id || '')
-  }, [selectedCaseId, selectedCases])
+  const effectiveSelectedCaseId =
+    selectedCaseId && selectedCases.some((caseItem) => caseItem.id === selectedCaseId)
+      ? selectedCaseId
+      : selectedCases[0]?.id || ''
 
   const kpis = useMemo(() => ({
     due: events.filter((eventItem) => eventItem.status === 'due').length,
@@ -277,7 +272,7 @@ export default function LeaseLifecyclePage() {
       .from('lease_lifecycle_events')
       .insert({
         tenancy_id: selectedTenancy.id,
-        case_id: selectedCaseId || null,
+        case_id: effectiveSelectedCaseId || null,
         event_type: eventType,
         status,
         scheduled_for: scheduledFor,
@@ -333,8 +328,8 @@ export default function LeaseLifecyclePage() {
 
         <section className="app-surface-strong rounded-[2rem] p-6 md:p-8">
           <div>
-            <p className="app-kicker">Renewals</p>
-            <h1 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">Track renewals, notice, and move-out work before it turns into inbox chaos</h1>
+            <p className="app-kicker">End of Tenancy</p>
+            <h1 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">Track end of tenancy, notice, and move-out work before it turns into inbox chaos</h1>
             <p className="mt-4 max-w-4xl text-base leading-7 text-stone-600">Keep term dates, renewal actions, notice windows, and move-out follow-through attached to the tenancy itself.</p>
 
             <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -367,7 +362,7 @@ export default function LeaseLifecyclePage() {
               <div className="app-card-muted rounded-full px-4 py-2 text-sm text-stone-600">{filteredTenancies.length} shown of {tenancies.length} tenancies</div>
             </div>
 
-            <div className="flex flex-wrap gap-2 md:gap-3" aria-label="Renewals tabs">
+            <div className="flex flex-wrap gap-2 md:gap-3" aria-label="End of tenancy tabs">
               {[
                 ['all', 'All tenancies'],
                 ['due', 'Due actions'],
@@ -381,13 +376,13 @@ export default function LeaseLifecyclePage() {
             </div>
 
             <label className="block max-w-xl">
-              <span className="mb-2 block text-sm font-medium text-stone-700">Search renewals workflow</span>
+              <span className="mb-2 block text-sm font-medium text-stone-700">Search end of tenancy workflow</span>
               <input type="text" placeholder="Search by tenant, landlord, property, or postcode" value={search} onChange={(event) => setSearch(event.target.value)} className="app-field text-sm outline-none" />
             </label>
           </div>
         </section>
 
-        {loading && <div className="app-surface mt-6 rounded-[1.8rem] p-6 text-sm text-stone-600">Loading renewals workspace...</div>}
+        {loading && <div className="app-surface mt-6 rounded-[1.8rem] p-6 text-sm text-stone-600">Loading end of tenancy workspace...</div>}
         {pageError && <div className="mt-6 rounded-[1.8rem] border border-red-200 bg-red-50/95 p-6 text-sm text-red-700">Error: {pageError}</div>}
         {actionMessage && <div className="mt-6 rounded-[1.8rem] border border-sky-200 bg-sky-50/95 p-6 text-sm text-sky-800">{actionMessage}</div>}
 
@@ -454,7 +449,7 @@ export default function LeaseLifecyclePage() {
 
                       <div className="rounded-[1.5rem] border border-stone-200 bg-white/90 p-4">
                         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">Related case</p>
-                        <select value={selectedCaseId} onChange={(event) => setSelectedCaseId(event.target.value)} className="app-field mt-3 text-sm outline-none">
+                        <select value={effectiveSelectedCaseId} onChange={(event) => setSelectedCaseId(event.target.value)} className="app-field mt-3 text-sm outline-none">
                           <option value="">No linked case</option>
                           {selectedCases.map((caseItem) => (
                             <option key={caseItem.id} value={caseItem.id}>{(caseItem.case_number || caseItem.id).slice(0, 18)} • {formatLabel(caseItem.case_type)}</option>

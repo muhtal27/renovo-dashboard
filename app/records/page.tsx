@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { useEffect, useEffectEvent, useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { getOperatorLabel } from '@/lib/operator'
 import { supabase } from '@/lib/supabase'
 import { useOperatorGate } from '@/lib/use-operator-gate'
@@ -206,11 +205,9 @@ function getTenancyHealthTone(health: TenancyHealth) {
 }
 
 export default function RecordsPage() {
-  const router = useRouter()
   const { operator, authLoading, authError } = useOperatorGate()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [signingOut, setSigningOut] = useState(false)
 
   const [contacts, setContacts] = useState<ContactRow[]>([])
   const [properties, setProperties] = useState<PropertyRow[]>([])
@@ -629,18 +626,6 @@ export default function RecordsPage() {
     setActionMessage('Lifecycle event marked complete.')
   }
 
-  async function handleSignOut() {
-    setSigningOut(true)
-    const { error: signOutError } = await supabase.auth.signOut()
-    if (signOutError) {
-      setError(signOutError.message)
-      setSigningOut(false)
-      return
-    }
-    router.replace('/')
-    router.refresh()
-  }
-
   if (authLoading || !operator?.authUser) {
     return <OperatorSessionState authLoading={authLoading} operator={operator} />
   }
@@ -653,30 +638,20 @@ export default function RecordsPage() {
         <section className="app-surface-strong rounded-[2rem] p-6 md:p-7">
           <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
             <div>
-              <p className="app-kicker">Tenancy CRM</p>
+              <p className="app-kicker">Lease Sign</p>
               <h1 className="mt-3 max-w-4xl text-4xl font-semibold tracking-tight md:text-5xl">
-                One tenancy CRM for the full customer lifecycle
+                One lease sign workspace for the full customer lifecycle
               </h1>
               <p className="mt-4 max-w-3xl text-base leading-8 text-stone-700">
-                Track the tenancy, the accounts position, the renewal milestones, the deposit risk, and the live work around it without bouncing between six different tools. This is the joined-up control layer the CRM story is supposed to promise.
+                Track the tenancy, the accounts position, the end of tenancy milestones, the deposit risk, and the live work around it without bouncing between six different tools. This is the joined-up control layer the dashboard is supposed to promise.
               </p>
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={handleSignOut}
-                disabled={signingOut}
-                className="app-secondary-button rounded-full px-4 py-2 text-sm font-medium disabled:opacity-60"
-              >
-                {signingOut ? 'Signing out...' : 'Sign out'}
-              </button>
             </div>
           </div>
 
           <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-6">
             {[
               { label: 'Active tenancies', value: overallStats.active, tone: 'border-stone-200 bg-white' },
-              { label: 'Renewal window', value: overallStats.endingSoon, tone: 'border-amber-200 bg-amber-50' },
+              { label: 'End of tenancy window', value: overallStats.endingSoon, tone: 'border-amber-200 bg-amber-50' },
               { label: 'Arrears pressure', value: formatMoney(overallStats.arrears), tone: 'border-red-200 bg-red-50' },
               { label: 'Lease actions due', value: overallStats.dueEvents, tone: 'border-sky-200 bg-sky-50' },
               { label: 'Open tenancy cases', value: overallStats.openCases, tone: 'border-stone-200 bg-white' },
@@ -853,7 +828,7 @@ export default function RecordsPage() {
                   {[
                     { id: 'overview', label: 'Overview' },
                     { id: 'money', label: 'Accounts' },
-                    { id: 'lease', label: 'Renewals' },
+                    { id: 'lease', label: 'End of Tenancy' },
                     { id: 'casework', label: 'Case Management' },
                   ].map((item) => (
                     <button

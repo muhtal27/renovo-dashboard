@@ -16,11 +16,11 @@ type OperatorNavKey =
   | 'onboarding'
 
 const items: Array<{ key: OperatorNavKey; label: string; helper: string; href: string }> = [
-  { key: 'queue', label: 'Customer Support', helper: 'Live inbox, follow-up desk, and case triage', href: '/' },
+  { key: 'queue', label: 'Maintenance', helper: 'Live inbox, follow-up desk, and case triage', href: '/' },
   { key: 'calls', label: 'Phone Support', helper: 'Call review, missed calls, and case linking', href: '/calls' },
-  { key: 'crm', label: 'Tenancy CRM', helper: 'Joined-up tenancy view with inline actions', href: '/records' },
+  { key: 'crm', label: 'Lease Sign', helper: 'Joined-up tenancy view with inline actions', href: '/records' },
   { key: 'rent', label: 'Accounts', helper: 'Ledger, balances, arrears, and cash posting', href: '/records/rent' },
-  { key: 'lease', label: 'Renewals', helper: 'Lease milestones, notices, and renewal workflow', href: '/records/lease-lifecycle' },
+  { key: 'lease', label: 'End of Tenancy', helper: 'Lease milestones, notices, and move-out workflow', href: '/records/lease-lifecycle' },
   { key: 'knowledge', label: 'Knowledge Base', helper: 'Approved Scotland guidance and answers', href: '/knowledge' },
   { key: 'reporting', label: 'Reporting', helper: 'Portfolio pressure and leadership view', href: '/records/reporting' },
   { key: 'onboarding', label: 'New Business', helper: 'Access, invite, and setup console', href: '/records/onboarding' },
@@ -50,7 +50,7 @@ export function OperatorNav({ current }: { current: OperatorNavKey }) {
         <div>
           <p className="app-kicker">Agency Operations</p>
           <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-900">
-            One operating layer for customer support, tenancy CRM, accounts, renewals, and control
+            One operating layer for maintenance, lease sign, accounts, end of tenancy, and control
           </h2>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-stone-600">
             Move across the core agency desks without dropping context. Treat specialist pages as drill-downs, not separate products.
