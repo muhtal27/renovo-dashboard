@@ -2185,43 +2185,55 @@ export default function HomePage() {
                   )}
                 </div>
 
-                <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1.5fr)_repeat(2,minmax(0,0.7fr))]">
+                <div
+                  className={`mt-4 grid gap-3 ${
+                    tab === 'jobs'
+                      ? 'lg:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)_repeat(2,minmax(0,0.7fr))]'
+                      : 'lg:grid-cols-[minmax(0,1.5fr)_repeat(2,minmax(0,0.7fr))]'
+                  }`}
+                >
                   <label className="block">
                     <span className="mb-2 block text-sm font-medium text-stone-700">Search inbox</span>
                     <input
                       type="text"
-                      placeholder="Search by job, summary, contact, phone, or postcode"
+                      placeholder={
+                        tab === 'jobs'
+                          ? 'Search by job, issue, contractor, contact, or postcode'
+                          : 'Search by case, summary, contact, phone, or postcode'
+                      }
                       value={search}
                       onChange={(event) => setSearch(event.target.value)}
                       className="app-field text-sm outline-none"
                     />
                   </label>
 
-                  <div className="block">
-                    <span className="mb-2 block text-sm font-medium text-stone-700">Density</span>
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setInboxDensityPersisted('comfortable')}
-                        aria-pressed={inboxDensity === 'comfortable'}
-                        className={`rounded-full px-4 py-2 text-sm font-medium ${
-                          inboxDensity === 'comfortable' ? 'app-pill-active' : 'app-pill'
-                        }`}
-                      >
-                        Comfortable
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setInboxDensityPersisted('compact')}
-                        aria-pressed={inboxDensity === 'compact'}
-                        className={`rounded-full px-4 py-2 text-sm font-medium ${
-                          inboxDensity === 'compact' ? 'app-pill-active' : 'app-pill'
-                        }`}
-                      >
-                        Compact
-                      </button>
+                  {tab === 'jobs' && (
+                    <div className="block">
+                      <span className="mb-2 block text-sm font-medium text-stone-700">Density</span>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setInboxDensityPersisted('comfortable')}
+                          aria-pressed={inboxDensity === 'comfortable'}
+                          className={`rounded-full px-4 py-2 text-sm font-medium ${
+                            inboxDensity === 'comfortable' ? 'app-pill-active' : 'app-pill'
+                          }`}
+                        >
+                          Comfortable
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setInboxDensityPersisted('compact')}
+                          aria-pressed={inboxDensity === 'compact'}
+                          className={`rounded-full px-4 py-2 text-sm font-medium ${
+                            inboxDensity === 'compact' ? 'app-pill-active' : 'app-pill'
+                          }`}
+                        >
+                          Compact
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   <label className="block">
                     <span className="mb-2 block text-sm font-medium text-stone-700">Status</span>
