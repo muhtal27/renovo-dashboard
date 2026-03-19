@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 
 type OperatorNavKey =
@@ -29,6 +29,24 @@ const items: Array<{ key: OperatorNavKey; label: string; helper: string; href: s
 export function OperatorNav({ current }: { current: OperatorNavKey }) {
   const router = useRouter()
   const [signingOut, setSigningOut] = useState(false)
+  const [viewerLabel, setViewerLabel] = useState<string>('Signed in')
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadViewer() {
+      const { data } = await supabase.auth.getUser()
+      const email = data.user?.email?.trim()
+      if (cancelled) return
+      setViewerLabel(email ? email : 'Signed in')
+    }
+
+    void loadViewer()
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   async function handleSignOut() {
     setSigningOut(true)
@@ -58,7 +76,7 @@ export function OperatorNav({ current }: { current: OperatorNavKey }) {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <div className="rounded-full border border-stone-200 bg-white px-4 py-2 text-sm text-stone-600">
-            Unified desk mode
+            {viewerLabel}
           </div>
           <button
             type="button"
