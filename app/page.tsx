@@ -222,6 +222,7 @@ type QueueTab =
   | 'no_next_step'
 
 type JobSlaTab = 'all' | 'approval_aging' | 'overdue_visit' | 'no_contractor' | 'urgent'
+type InboxDensity = 'comfortable' | 'compact'
 
 type QueueFilterState = {
   search: string
@@ -545,6 +546,11 @@ export default function HomePage() {
   const [priorityFilter, setPriorityFilter] = useState('all')
   const [tab, setTab] = useState<QueueTab>('jobs')
   const [jobSlaTab, setJobSlaTab] = useState<JobSlaTab>('all')
+  const [inboxDensity, setInboxDensity] = useState<InboxDensity>(() => {
+    if (typeof window === 'undefined') return 'comfortable'
+    const saved = window.localStorage.getItem('maintenance_inbox_density')
+    return saved === 'compact' || saved === 'comfortable' ? saved : 'comfortable'
+  })
   const [liveMessage, setLiveMessage] = useState<string | null>(null)
   const [followUpAvailable, setFollowUpAvailable] = useState(true)
   const [creatingLedger, setCreatingLedger] = useState(false)
@@ -679,6 +685,12 @@ export default function HomePage() {
     })
     setLoading(false)
   })
+
+  function setInboxDensityPersisted(density: InboxDensity) {
+    setInboxDensity(density)
+    if (typeof window === 'undefined') return
+    window.localStorage.setItem('maintenance_inbox_density', density)
+  }
 
   const loadMessagesForCase = useEffectEvent(async (caseId: string) => {
     setMessagesLoading(true)
@@ -1303,6 +1315,16 @@ export default function HomePage() {
   )
 
   const caseById = useMemo(() => new Map(cases.map((item) => [item.id, item])), [cases])
+
+  const jobSlaCounts = useMemo(() => {
+    return {
+      all: jobs.length,
+      approval_aging: jobs.filter((job) => isApprovalAging(job)).length,
+      overdue_visit: jobs.filter((job) => isOverdueVisit(job)).length,
+      no_contractor: jobs.filter((job) => isOpenMaintenance(job.status) && !job.contractor_id).length,
+      urgent: jobs.filter((job) => job.priority === 'urgent' && isOpenMaintenance(job.status)).length,
+    }
+  }, [jobs])
 
   const filteredJobs = useMemo(() => {
     const query = search.trim().toLowerCase()
@@ -2111,11 +2133,11 @@ export default function HomePage() {
                   {tab === 'jobs' ? (
                     <>
                       {[
-                        ['all', 'All'],
-                        ['approval_aging', `Approval aging (${APPROVAL_AGING_HOURS}h+)`],
-                        ['overdue_visit', 'Overdue visit'],
-                        ['no_contractor', 'No contractor'],
-                        ['urgent', 'Urgent'],
+                        ['all', `All (${jobSlaCounts.all})`],
+                        ['approval_aging', `Approval aging (${jobSlaCounts.approval_aging})`],
+                        ['overdue_visit', `Overdue visit (${jobSlaCounts.overdue_visit})`],
+                        ['no_contractor', `No contractor (${jobSlaCounts.no_contractor})`],
+                        ['urgent', `Urgent (${jobSlaCounts.urgent})`],
                       ].map(([value, label]) => (
                         <button
                           key={value}
@@ -2174,6 +2196,32 @@ export default function HomePage() {
                       className="app-field text-sm outline-none"
                     />
                   </label>
+
+                  <div className="block">
+                    <span className="mb-2 block text-sm font-medium text-stone-700">Density</span>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setInboxDensityPersisted('comfortable')}
+                        aria-pressed={inboxDensity === 'comfortable'}
+                        className={`rounded-full px-4 py-2 text-sm font-medium ${
+                          inboxDensity === 'comfortable' ? 'app-pill-active' : 'app-pill'
+                        }`}
+                      >
+                        Comfortable
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setInboxDensityPersisted('compact')}
+                        aria-pressed={inboxDensity === 'compact'}
+                        className={`rounded-full px-4 py-2 text-sm font-medium ${
+                          inboxDensity === 'compact' ? 'app-pill-active' : 'app-pill'
+                        }`}
+                      >
+                        Compact
+                      </button>
+                    </div>
+                  </div>
 
                   <label className="block">
                     <span className="mb-2 block text-sm font-medium text-stone-700">Status</span>
@@ -2246,13 +2294,13 @@ export default function HomePage() {
                           setSelectedCaseId(job.case_id ?? null)
                         }}
                         aria-pressed={selected}
-                        className={`w-full rounded-[1.45rem] border p-3.5 text-left transition ${
+                        className={`w-full rounded-[1.45rem] border text-left transition ${
                           selected
                             ? 'app-selected-card'
                             : 'border-stone-200 bg-white hover:border-stone-400 hover:bg-stone-50'
                         }`}
                       >
-                        <div className="flex items-start justify-between gap-3">
+                        <div className={`flex items-start justify-between gap-3 ${inboxDensity === 'compact' ? 'p-3' : 'p-3.5'}`}>
                           <div className="min-w-0">
                             <div className="flex flex-wrap items-center gap-2">
                               <span className="text-sm font-semibold md:text-[15px]">{formatLabel(job.issue_type)} maintenance</span>
