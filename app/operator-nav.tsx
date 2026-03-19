@@ -1,6 +1,14 @@
 import Link from 'next/link'
 
-type OperatorNavKey = 'queue' | 'calls' | 'crm' | 'rent' | 'lease' | 'knowledge' | 'reporting'
+type OperatorNavKey =
+  | 'queue'
+  | 'calls'
+  | 'crm'
+  | 'rent'
+  | 'lease'
+  | 'knowledge'
+  | 'reporting'
+  | 'onboarding'
 
 const items: Array<{ key: OperatorNavKey; label: string; helper: string; href: string }> = [
   { key: 'queue', label: 'Queue', helper: 'Live inbound and case triage', href: '/' },
@@ -10,6 +18,7 @@ const items: Array<{ key: OperatorNavKey; label: string; helper: string; href: s
   { key: 'lease', label: 'Lease', helper: 'Renewals and lifecycle', href: '/records/lease-lifecycle' },
   { key: 'knowledge', label: 'Knowledge', helper: 'Scotland guidance base', href: '/knowledge' },
   { key: 'reporting', label: 'Reporting', helper: 'Portfolio and leadership view', href: '/records/reporting' },
+  { key: 'onboarding', label: 'New Business', helper: 'Invite, access, and setup', href: '/records/onboarding' },
 ]
 
 export function OperatorNav({ current }: { current: OperatorNavKey }) {
@@ -27,7 +36,7 @@ export function OperatorNav({ current }: { current: OperatorNavKey }) {
         </div>
       </div>
 
-      <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-7">
+      <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-8">
         {items.map((item) => {
           const active = item.key === current
 
