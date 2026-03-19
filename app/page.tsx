@@ -1166,6 +1166,7 @@ export default function HomePage() {
           timing,
           owner: item.assigned_user_name || 'Unassigned',
           meta: `${item.case_type || 'general'} • ${item.postcode || 'no postcode'}`,
+          href: `/cases/${item.id}`,
         }
       }),
     }
@@ -2025,8 +2026,11 @@ export default function HomePage() {
                   {todayAgenda.items.map((item) => (
                     <Link
                       key={item.id}
-                      href={item.href ?? `/cases/${item.id}`}
-                      onMouseEnter={() => prefetchCaseDetail(item.href?.startsWith('/cases/') ? item.href.replace('/cases/', '') : item.id)}
+                      href={item.href}
+                      onMouseEnter={() => {
+                        if (!item.href.startsWith('/cases/')) return
+                        prefetchCaseDetail(item.href.slice('/cases/'.length))
+                      }}
                       className="rounded-[1.2rem] border border-stone-200 bg-stone-50/90 p-4 transition hover:-translate-y-0.5 hover:border-stone-400 hover:bg-white"
                     >
                       <div className="flex items-start justify-between gap-3">
