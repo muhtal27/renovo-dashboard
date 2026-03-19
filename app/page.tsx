@@ -3,15 +3,13 @@
 import Link from 'next/link'
 import { useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import {
-  getOperatorLabel,
-  getSessionUser,
-  type CurrentOperator,
-} from '@/lib/operator'
+import { getOperatorLabel } from '@/lib/operator'
 import { resolveWorkspaceForUser } from '@/lib/portal'
 import { supabase } from '@/lib/supabase'
+import { useOperatorGate } from '@/lib/use-operator-gate'
 import { PublicHome } from '@/app/public-home'
 import { OperatorNav } from '@/app/operator-nav'
+import { OperatorSessionState } from '@/app/operator-session-state'
 
 type CaseRow = {
   id: string
@@ -306,8 +304,9 @@ export default function HomePage() {
   const router = useRouter()
   const queuePanelRef = useRef<HTMLElement | null>(null)
 
-  const [operator, setOperator] = useState<CurrentOperator | null>(null)
-  const [authLoading, setAuthLoading] = useState(true)
+  const { operator, authLoading, authError } = useOperatorGate({
+    unauthenticatedMode: 'allow-null',
+  })
   const [cases, setCases] = useState<CaseRow[]>([])
   const [messages, setMessages] = useState<MessageRow[]>([])
   const [users, setUsers] = useState<UserRow[]>([])
@@ -338,6 +337,7 @@ export default function HomePage() {
     depositDisputed: 0,
   })
   const operatorUserId = operator?.authUser?.id ?? null
+  const pageError = authError ?? error
 
   const loadCasesAndUsers = useEffectEvent(async (options?: { preserveLoading?: boolean }) => {
     if (!operatorUserId) return
@@ -489,112 +489,29 @@ export default function HomePage() {
     })
   })
 
-  const hydrateOperatorProfile = useEffectEvent(async (userId: string) => {
-    try {
-      const workspace = await resolveWorkspaceForUser(userId)
+  useEffect(() => {
+    if (authLoading || !operator?.authUser || operator.profile) return
+
+    let cancelled = false
+
+    void resolveWorkspaceForUser(operator.authUser.id).then((workspace) => {
+      if (cancelled) return
 
       if (workspace.destination && workspace.destination !== '/') {
         router.replace(workspace.destination)
         return
       }
 
-      const profile = workspace.operatorProfile
-
-      setOperator((current) => {
-        if (!current?.authUser || current.authUser.id !== userId) return current
-        return {
-          ...current,
-          profile,
-        }
-      })
-
-      if (!profile) {
-        setError('Your account is not linked to the operator workspace.')
-        return
-      }
-
-      if (profile.is_active === false) {
-        setError('Your operator profile is inactive. Please contact an administrator.')
-      }
-    } catch (profileError) {
-      setError(
-        profileError instanceof Error
-          ? profileError.message
-          : 'Unable to load operator profile.'
-      )
-    }
-  })
-
-  useEffect(() => {
-    let cancelled = false
-
-    async function bootstrapAuth() {
-      try {
-        const user = await getSessionUser()
-
-        if (cancelled) return
-
-        if (!user) {
-          setOperator(null)
-          setAuthLoading(false)
-          return
-        }
-
-        setOperator({
-          authUser: user,
-          profile: null,
-        })
-        setAuthLoading(false)
-        void hydrateOperatorProfile(user.id)
-      } catch (authError) {
-        if (!cancelled) {
-          setError(authError instanceof Error ? authError.message : 'Unable to load operator session.')
-          setAuthLoading(false)
-        }
-      }
-    }
-
-    bootstrapAuth()
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (!session) {
-        setOperator(null)
-        setAuthLoading(false)
-        router.replace('/')
-        return
-      }
-
-      try {
-        const user = session.user
-        if (!cancelled) {
-          setOperator({
-            authUser: user,
-            profile: null,
-          })
-        }
-        setAuthLoading(false)
-        void hydrateOperatorProfile(user.id)
-      } catch (authError) {
-        if (!cancelled) {
-          setError(authError instanceof Error ? authError.message : 'Unable to refresh operator session.')
-        }
-      } finally {
-        if (!cancelled) {
-          setAuthLoading(false)
-        }
-      }
+      setError('Your account is not linked to the operator workspace.')
     })
 
     return () => {
       cancelled = true
-      subscription.unsubscribe()
     }
-  }, [router])
+  }, [authLoading, operator?.authUser, operator?.profile, router])
 
   useEffect(() => {
-    if (!operatorUserId) return
+    if (!operatorUserId || !operator?.profile) return
 
     async function loadCases() {
       setError(null)
@@ -602,12 +519,12 @@ export default function HomePage() {
     }
 
     loadCases()
-  }, [operatorUserId])
+  }, [operator?.profile, operatorUserId])
 
   useEffect(() => {
-    if (!operatorUserId) return
+    if (!operatorUserId || !operator?.profile) return
     void loadOperationsPulse()
-  }, [operatorUserId])
+  }, [operator?.profile, operatorUserId])
 
   useEffect(() => {
     if (!selectedCaseId || !operatorUserId) {
@@ -1079,15 +996,7 @@ export default function HomePage() {
   }
 
   if (authLoading) {
-    return (
-      <main className="app-grid min-h-screen px-5 py-6 text-stone-900 md:px-8 md:py-8">
-        <div className="mx-auto max-w-4xl">
-          <div className="app-surface rounded-[2rem] px-6 py-10 text-sm text-stone-600">
-            Loading operator session...
-          </div>
-        </div>
-      </main>
-    )
+    return operator?.authUser ? <OperatorSessionState authLoading={authLoading} operator={operator} /> : <PublicHome />
   }
 
   if (!operator?.authUser) {
@@ -1237,13 +1146,13 @@ export default function HomePage() {
             Loading the queue...
           </div>
         )}
-        {error && (
+        {pageError && (
           <div className="mt-6 rounded-[1.8rem] border border-red-200 bg-red-50/95 p-6 text-sm text-red-700">
-            Error: {error}
+            Error: {pageError}
           </div>
         )}
 
-        {!loading && !error && (
+        {!loading && !pageError && (
           <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(360px,430px)_minmax(0,1fr)]">
             <section
               ref={queuePanelRef}
@@ -1253,9 +1162,9 @@ export default function HomePage() {
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="app-kicker">Live work list</p>
-                    <h2 className="mt-2 text-xl font-semibold">Choose the next job</h2>
+                    <h2 className="mt-2 text-xl font-semibold">Choose the next job from the operator inbox</h2>
                     <p className="mt-1 text-sm text-stone-600">
-                      Open the next item from here and keep the working summary beside it.
+                      Keep triage on the left and the working context on the right so the queue behaves like a real operating desk.
                     </p>
                     {!followUpAvailable && (
                       <p className="mt-2 text-xs text-stone-500">

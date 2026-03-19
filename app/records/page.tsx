@@ -3,17 +3,15 @@
 import Link from 'next/link'
 import { useEffect, useEffectEvent, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import {
-  getOperatorLabel,
-  getOperatorProfile,
-  getSessionUser,
-  type CurrentOperator,
-} from '@/lib/operator'
+import { getOperatorLabel } from '@/lib/operator'
 import { supabase } from '@/lib/supabase'
+import { useOperatorGate } from '@/lib/use-operator-gate'
 import { OperatorNav } from '@/app/operator-nav'
+import { OperatorSessionState } from '@/app/operator-session-state'
 
 type LifecycleTab = 'all' | 'at_risk' | 'arrears' | 'ending_soon' | 'deposits'
 type WaitingOn = 'none' | 'tenant' | 'landlord' | 'contractor' | 'internal'
+type WorkspaceFocus = 'overview' | 'money' | 'lease' | 'casework'
 
 type ContactRow = {
   id: string
@@ -209,9 +207,7 @@ function getTenancyHealthTone(health: TenancyHealth) {
 
 export default function RecordsPage() {
   const router = useRouter()
-
-  const [operator, setOperator] = useState<CurrentOperator | null>(null)
-  const [authLoading, setAuthLoading] = useState(true)
+  const { operator, authLoading, authError } = useOperatorGate()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [signingOut, setSigningOut] = useState(false)
@@ -227,23 +223,24 @@ export default function RecordsPage() {
   const [tab, setTab] = useState<LifecycleTab>('all')
   const [search, setSearch] = useState('')
   const [selectedTenancyId, setSelectedTenancyId] = useState<string | null>(null)
+  const [selectedCaseId, setSelectedCaseId] = useState('')
+  const [workspaceFocus, setWorkspaceFocus] = useState<WorkspaceFocus>('overview')
+  const [actionMessage, setActionMessage] = useState<string | null>(null)
+  const [savingEntry, setSavingEntry] = useState(false)
+  const [savingLifecycle, setSavingLifecycle] = useState(false)
+  const [updatingEntryId, setUpdatingEntryId] = useState<string | null>(null)
+  const [completingEventId, setCompletingEventId] = useState<string | null>(null)
+  const [entryType, setEntryType] = useState<RentEntryRow['entry_type']>('payment')
+  const [entryCategory, setEntryCategory] = useState('rent')
+  const [amountInput, setAmountInput] = useState('')
+  const [dueDateInput, setDueDateInput] = useState('')
+  const [referenceInput, setReferenceInput] = useState('')
+  const [lifecycleType, setLifecycleType] = useState('renewal_review')
+  const [scheduledForInput, setScheduledForInput] = useState('')
+  const [lifecycleNote, setLifecycleNote] = useState('')
 
   const operatorUserId = operator?.authUser?.id ?? null
-
-  const hydrateOperatorProfile = useEffectEvent(async (userId: string) => {
-    try {
-      const profile = await getOperatorProfile(userId)
-      setOperator((current) => {
-        if (!current?.authUser || current.authUser.id !== userId) return current
-        return { ...current, profile }
-      })
-      if (profile?.is_active === false) {
-        setError('Your operator profile is inactive. Please contact an administrator.')
-      }
-    } catch (profileError) {
-      setError(profileError instanceof Error ? profileError.message : 'Unable to load operator profile.')
-    }
-  })
+  const pageError = authError ?? error
 
   const loadWorkspace = useEffectEvent(async () => {
     if (!operatorUserId) return
@@ -295,57 +292,9 @@ export default function RecordsPage() {
   })
 
   useEffect(() => {
-    let cancelled = false
-
-    async function bootstrapAuth() {
-      try {
-        const user = await getSessionUser()
-        if (cancelled) return
-        if (!user) {
-          router.replace('/login')
-          setAuthLoading(false)
-          return
-        }
-        setOperator({ authUser: user, profile: null })
-        setAuthLoading(false)
-        void hydrateOperatorProfile(user.id)
-      } catch (authError) {
-        if (!cancelled) {
-          setError(authError instanceof Error ? authError.message : 'Unable to load operator session.')
-          setAuthLoading(false)
-        }
-      }
-    }
-
-    void bootstrapAuth()
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (!session) {
-        setOperator(null)
-        setAuthLoading(false)
-        router.replace('/login')
-        return
-      }
-
-      if (!cancelled) {
-        setOperator({ authUser: session.user, profile: null })
-        setAuthLoading(false)
-        void hydrateOperatorProfile(session.user.id)
-      }
-    })
-
-    return () => {
-      cancelled = true
-      subscription.unsubscribe()
-    }
-  }, [router])
-
-  useEffect(() => {
-    if (!operatorUserId) return
+    if (!operatorUserId || authError) return
     void loadWorkspace()
-  }, [operatorUserId])
+  }, [authError, operatorUserId])
 
   const contactById = useMemo(() => new Map(contacts.map((contact) => [contact.id, contact])), [contacts])
   const propertyById = useMemo(() => new Map(properties.map((property) => [property.id, property])), [properties])
@@ -493,6 +442,12 @@ export default function RecordsPage() {
     () => (selectedTenancy ? (casesByTenancyId.get(selectedTenancy.id) ?? []) : []),
     [casesByTenancyId, selectedTenancy]
   )
+  const resolvedSelectedCaseId =
+    selectedCaseId && selectedCases.some((caseItem) => caseItem.id === selectedCaseId)
+      ? selectedCaseId
+      : selectedCases.find(
+          (caseItem) => caseItem.case_type === 'rent' || caseItem.case_type === 'tenancy_admin'
+        )?.id ?? selectedCases[0]?.id ?? ''
   const selectedEntries = useMemo(
     () =>
       selectedTenancy
@@ -544,6 +499,136 @@ export default function RecordsPage() {
     return { active, endingSoon, arrears, dueEvents, openCases, disputedClaims }
   }, [cases, claims, healthByTenancyId, tenancies])
 
+  async function handleCreateEntry(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (!selectedTenancy) return
+
+    const amount = Number(amountInput)
+    if (!Number.isFinite(amount) || amount <= 0) {
+      setActionMessage('Enter a valid amount before adding a ledger item.')
+      return
+    }
+
+    setSavingEntry(true)
+    setActionMessage(null)
+
+    const { data, error: insertError } = await supabase
+      .from('rent_ledger_entries')
+      .insert({
+        tenancy_id: selectedTenancy.id,
+        case_id: resolvedSelectedCaseId || null,
+        entry_type: entryType,
+        category: entryCategory,
+        status: entryType === 'payment' || entryType === 'credit' ? 'cleared' : 'open',
+        amount,
+        due_date: dueDateInput || null,
+        reference: referenceInput.trim() || null,
+      })
+      .select('id, tenancy_id, entry_type, status, amount, due_date, posted_at, category, reference')
+      .single()
+
+    if (insertError) {
+      setActionMessage(`Error: ${insertError.message}`)
+      setSavingEntry(false)
+      return
+    }
+
+    setEntries((current) => [data as RentEntryRow, ...current])
+    setAmountInput('')
+    setDueDateInput('')
+    setReferenceInput('')
+    setActionMessage('Ledger item added to the tenancy workspace.')
+    setSavingEntry(false)
+  }
+
+  async function handleSetEntryStatus(entryId: string, status: RentEntryRow['status']) {
+    setUpdatingEntryId(entryId)
+    setActionMessage(null)
+
+    const { data, error: updateError } = await supabase
+      .from('rent_ledger_entries')
+      .update({ status })
+      .eq('id', entryId)
+      .select('id, tenancy_id, entry_type, status, amount, due_date, posted_at, category, reference')
+      .single()
+
+    if (updateError) {
+      setActionMessage(`Error: ${updateError.message}`)
+      setUpdatingEntryId(null)
+      return
+    }
+
+    setEntries((current) =>
+      current.map((entry) => (entry.id === entryId ? (data as RentEntryRow) : entry))
+    )
+    setUpdatingEntryId(null)
+    setActionMessage(`Ledger item marked ${status}.`)
+  }
+
+  async function handleCreateLifecycleEvent(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (!selectedTenancy) return
+    if (!scheduledForInput) {
+      setActionMessage('Choose a date before adding a lifecycle event.')
+      return
+    }
+
+    setSavingLifecycle(true)
+    setActionMessage(null)
+
+    const status = scheduledForInput <= new Date().toISOString().slice(0, 10) ? 'due' : 'planned'
+
+    const { data, error: insertError } = await supabase
+      .from('lease_lifecycle_events')
+      .insert({
+        tenancy_id: selectedTenancy.id,
+        case_id: resolvedSelectedCaseId || null,
+        event_type: lifecycleType,
+        status,
+        scheduled_for: scheduledForInput,
+        source: 'manual',
+        note: lifecycleNote.trim() || null,
+      })
+      .select('id, tenancy_id, event_type, status, scheduled_for, completed_at, note')
+      .single()
+
+    if (insertError) {
+      setActionMessage(`Error: ${insertError.message}`)
+      setSavingLifecycle(false)
+      return
+    }
+
+    setEvents((current) => [...current, data as LeaseEventRow])
+    setScheduledForInput('')
+    setLifecycleNote('')
+    setActionMessage('Lifecycle event added to the tenancy workspace.')
+    setSavingLifecycle(false)
+  }
+
+  async function handleCompleteLifecycleEvent(eventId: string) {
+    setCompletingEventId(eventId)
+    setActionMessage(null)
+
+    const { data, error: updateError } = await supabase
+      .from('lease_lifecycle_events')
+      .update({ status: 'completed', completed_at: new Date().toISOString() })
+      .eq('id', eventId)
+      .select('id, tenancy_id, event_type, status, scheduled_for, completed_at, note')
+      .single()
+
+    if (updateError) {
+      setActionMessage(`Error: ${updateError.message}`)
+      setCompletingEventId(null)
+      return
+    }
+
+    setEvents((current) =>
+      current.map((item) => (item.id === eventId ? (data as LeaseEventRow) : item))
+    )
+    setCompletingEventId(null)
+    setActionMessage('Lifecycle event marked complete.')
+  }
+
   async function handleSignOut() {
     setSigningOut(true)
     const { error: signOutError } = await supabase.auth.signOut()
@@ -556,14 +641,8 @@ export default function RecordsPage() {
     router.refresh()
   }
 
-  if (authLoading) {
-    return (
-      <main className="app-grid min-h-screen px-6 py-8 md:px-8 md:py-10">
-        <div className="mx-auto max-w-6xl rounded-[2rem] app-surface p-8 text-sm text-stone-600">
-          Loading tenancy control centre...
-        </div>
-      </main>
-    )
+  if (authLoading || !operator?.authUser) {
+    return <OperatorSessionState authLoading={authLoading} operator={operator} />
   }
 
   return (
@@ -611,9 +690,9 @@ export default function RecordsPage() {
           </div>
         </section>
 
-        {error && (
+        {pageError && (
           <div className="rounded-[1.8rem] border border-red-200 bg-red-50/95 p-6 text-sm text-red-700">
-            {error}
+            {pageError}
           </div>
         )}
 
@@ -770,6 +849,32 @@ export default function RecordsPage() {
                   </div>
                 </div>
 
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { id: 'overview', label: 'Overview' },
+                    { id: 'money', label: 'Money Console' },
+                    { id: 'lease', label: 'Lease Console' },
+                    { id: 'casework', label: 'Casework' },
+                  ].map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => setWorkspaceFocus(item.id as WorkspaceFocus)}
+                      className={`rounded-full px-4 py-2 text-sm font-medium ${
+                        workspaceFocus === item.id ? 'app-pill-active' : 'app-pill'
+                      }`}
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+
+                {actionMessage && (
+                  <div className="rounded-[1.4rem] border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-800">
+                    {actionMessage}
+                  </div>
+                )}
+
+                {workspaceFocus === 'overview' && (
                 <div className="grid gap-4 xl:grid-cols-2">
                   <article className="rounded-[1.6rem] border border-stone-200 bg-white/92 p-5">
                     <div className="flex items-end justify-between gap-4 border-b app-divider pb-4">
@@ -851,7 +956,9 @@ export default function RecordsPage() {
                     </div>
                   </article>
                 </div>
+                )}
 
+                {workspaceFocus === 'casework' && (
                 <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
                   <article className="rounded-[1.6rem] border border-stone-200 bg-white/92 p-5">
                     <div className="flex items-end justify-between gap-4 border-b app-divider pb-4">
@@ -910,6 +1017,223 @@ export default function RecordsPage() {
                     </div>
                   </article>
                 </div>
+                )}
+
+                {workspaceFocus === 'money' && (
+                  <div className="grid gap-4 xl:grid-cols-[340px_minmax(0,1fr)]">
+                    <article className="rounded-[1.6rem] border border-stone-200 bg-white/92 p-5">
+                      <p className="app-kicker">Money Console</p>
+                      <h3 className="mt-2 text-xl font-semibold">Post and resolve ledger movement here</h3>
+                      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                        <div className="rounded-[1.25rem] border border-stone-200 bg-stone-50/90 p-4">
+                          <p className="app-kicker">Live balance</p>
+                          <p className="mt-2 text-xl font-semibold text-stone-900">{formatMoney(selectedHealth.balance)}</p>
+                        </div>
+                        <div className="rounded-[1.25rem] border border-red-200 bg-red-50/90 p-4">
+                          <p className="app-kicker">Overdue now</p>
+                          <p className="mt-2 text-xl font-semibold text-red-700">{formatMoney(selectedHealth.overdue)}</p>
+                        </div>
+                      </div>
+
+                      <form className="mt-5 space-y-4" onSubmit={handleCreateEntry}>
+                        <label className="block">
+                          <span className="mb-2 block text-sm font-medium text-stone-700">Related case</span>
+                          <select value={resolvedSelectedCaseId} onChange={(event) => setSelectedCaseId(event.target.value)} className="app-field text-sm outline-none">
+                            <option value="">No linked case</option>
+                            {selectedCases.map((caseItem) => (
+                              <option key={caseItem.id} value={caseItem.id}>
+                                {(caseItem.case_number || caseItem.id).slice(0, 18)} • {formatLabel(caseItem.case_type)}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+
+                        <label className="block">
+                          <span className="mb-2 block text-sm font-medium text-stone-700">Entry type</span>
+                          <select value={entryType} onChange={(event) => setEntryType(event.target.value as RentEntryRow['entry_type'])} className="app-field text-sm outline-none">
+                            <option value="payment">Payment received</option>
+                            <option value="charge">Charge due</option>
+                            <option value="credit">Credit</option>
+                            <option value="adjustment">Adjustment</option>
+                          </select>
+                        </label>
+
+                        <label className="block">
+                          <span className="mb-2 block text-sm font-medium text-stone-700">Category</span>
+                          <select value={entryCategory} onChange={(event) => setEntryCategory(event.target.value)} className="app-field text-sm outline-none">
+                            <option value="rent">Rent</option>
+                            <option value="fee">Fee</option>
+                            <option value="maintenance_recharge">Maintenance recharge</option>
+                            <option value="deposit_claim">Deposit claim</option>
+                            <option value="other">Other</option>
+                          </select>
+                        </label>
+
+                        <label className="block">
+                          <span className="mb-2 block text-sm font-medium text-stone-700">Amount</span>
+                          <input type="number" min="0" step="0.01" value={amountInput} onChange={(event) => setAmountInput(event.target.value)} className="app-field text-sm outline-none" placeholder="0.00" />
+                        </label>
+
+                        <label className="block">
+                          <span className="mb-2 block text-sm font-medium text-stone-700">Due date</span>
+                          <input type="date" value={dueDateInput} onChange={(event) => setDueDateInput(event.target.value)} className="app-field text-sm outline-none" />
+                        </label>
+
+                        <label className="block">
+                          <span className="mb-2 block text-sm font-medium text-stone-700">Reference</span>
+                          <input type="text" value={referenceInput} onChange={(event) => setReferenceInput(event.target.value)} className="app-field text-sm outline-none" placeholder="Receipt, bank ref, or invoice" />
+                        </label>
+
+                        <button type="submit" disabled={savingEntry} className="app-primary-button inline-flex w-full items-center justify-center rounded-[1.4rem] px-4 py-3 text-sm font-medium disabled:opacity-60">
+                          {savingEntry ? 'Adding ledger item...' : 'Add ledger item'}
+                        </button>
+                      </form>
+                    </article>
+
+                    <article className="rounded-[1.6rem] border border-stone-200 bg-white/92 p-5">
+                      <div className="flex items-end justify-between gap-4 border-b app-divider pb-4">
+                        <div>
+                          <p className="app-kicker">Recent ledger movement</p>
+                          <h3 className="mt-2 text-xl font-semibold">Resolve balance without leaving the tenancy</h3>
+                        </div>
+                        <Link href="/records/rent" className="app-secondary-button rounded-full px-3 py-2 text-sm font-medium">
+                          Deep rent workspace
+                        </Link>
+                      </div>
+                      <div className="mt-4 space-y-3">
+                        {selectedEntries.length === 0 ? (
+                          <div className="app-empty-state rounded-[1.3rem] p-4 text-sm">No ledger items are linked yet.</div>
+                        ) : (
+                          selectedEntries.map((item) => (
+                            <div key={item.id} className="rounded-[1.25rem] border border-stone-200 bg-stone-50/90 p-4">
+                              <div className="flex flex-wrap items-center justify-between gap-3">
+                                <div>
+                                  <p className="text-sm font-semibold text-stone-900">{formatLabel(item.entry_type)} • {formatLabel(item.category)}</p>
+                                  <p className="mt-1 text-sm text-stone-600">Due {formatDate(item.due_date)} • {item.reference || 'No reference'}</p>
+                                </div>
+                                <div className="text-right">
+                                  <p className="text-sm font-semibold text-stone-900">{formatMoney(item.amount)}</p>
+                                  <p className="mt-1 text-xs uppercase tracking-[0.16em] text-stone-500">{item.status}</p>
+                                </div>
+                              </div>
+                              <div className="mt-3 flex flex-wrap gap-2">
+                                {item.status === 'open' && (
+                                  <button onClick={() => void handleSetEntryStatus(item.id, 'cleared')} disabled={updatingEntryId === item.id} className="app-secondary-button rounded-full px-3 py-2 text-xs font-medium disabled:opacity-60">
+                                    Mark cleared
+                                  </button>
+                                )}
+                                {item.status !== 'void' && (
+                                  <button onClick={() => void handleSetEntryStatus(item.id, 'void')} disabled={updatingEntryId === item.id} className="app-secondary-button rounded-full px-3 py-2 text-xs font-medium disabled:opacity-60">
+                                    Void
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </article>
+                  </div>
+                )}
+
+                {workspaceFocus === 'lease' && (
+                  <div className="grid gap-4 xl:grid-cols-[340px_minmax(0,1fr)]">
+                    <article className="rounded-[1.6rem] border border-stone-200 bg-white/92 p-5">
+                      <p className="app-kicker">Lease Console</p>
+                      <h3 className="mt-2 text-xl font-semibold">Book the next lifecycle action here</h3>
+                      <div className="mt-4 rounded-[1.25rem] border border-stone-200 bg-stone-50/90 p-4">
+                        <p className="app-kicker">Term dates</p>
+                        <p className="mt-2 text-lg font-semibold text-stone-900">
+                          {formatDate(selectedTenancy.start_date)} to {formatDate(selectedTenancy.end_date)}
+                        </p>
+                        <p className="mt-2 text-sm text-stone-600">Due events: {selectedHealth.dueEvents}</p>
+                      </div>
+
+                      <form className="mt-5 space-y-4" onSubmit={handleCreateLifecycleEvent}>
+                        <label className="block">
+                          <span className="mb-2 block text-sm font-medium text-stone-700">Related case</span>
+                          <select value={resolvedSelectedCaseId} onChange={(event) => setSelectedCaseId(event.target.value)} className="app-field text-sm outline-none">
+                            <option value="">No linked case</option>
+                            {selectedCases.map((caseItem) => (
+                              <option key={caseItem.id} value={caseItem.id}>
+                                {(caseItem.case_number || caseItem.id).slice(0, 18)} • {formatLabel(caseItem.case_type)}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+
+                        <label className="block">
+                          <span className="mb-2 block text-sm font-medium text-stone-700">Event type</span>
+                          <select value={lifecycleType} onChange={(event) => setLifecycleType(event.target.value)} className="app-field text-sm outline-none">
+                            <option value="renewal_review">Renewal review</option>
+                            <option value="rent_review">Rent review</option>
+                            <option value="inspection">Inspection</option>
+                            <option value="notice_received">Notice received</option>
+                            <option value="notice_served">Notice served</option>
+                            <option value="move_out">Move-out</option>
+                            <option value="deposit_follow_up">Deposit follow-up</option>
+                            <option value="other">Other</option>
+                          </select>
+                        </label>
+
+                        <label className="block">
+                          <span className="mb-2 block text-sm font-medium text-stone-700">Scheduled for</span>
+                          <input type="date" value={scheduledForInput} onChange={(event) => setScheduledForInput(event.target.value)} className="app-field text-sm outline-none" />
+                        </label>
+
+                        <label className="block">
+                          <span className="mb-2 block text-sm font-medium text-stone-700">Notes</span>
+                          <textarea value={lifecycleNote} onChange={(event) => setLifecycleNote(event.target.value)} className="app-field min-h-[120px] text-sm outline-none" placeholder="Context for renewal, notice, inspection, or move-out." />
+                        </label>
+
+                        <button type="submit" disabled={savingLifecycle} className="app-primary-button inline-flex w-full items-center justify-center rounded-[1.4rem] px-4 py-3 text-sm font-medium disabled:opacity-60">
+                          {savingLifecycle ? 'Adding lifecycle event...' : 'Add lifecycle event'}
+                        </button>
+                      </form>
+                    </article>
+
+                    <article className="rounded-[1.6rem] border border-stone-200 bg-white/92 p-5">
+                      <div className="flex items-end justify-between gap-4 border-b app-divider pb-4">
+                        <div>
+                          <p className="app-kicker">Lifecycle queue</p>
+                          <h3 className="mt-2 text-xl font-semibold">Run renewal and move-out work in one panel</h3>
+                        </div>
+                        <Link href="/records/lease-lifecycle" className="app-secondary-button rounded-full px-3 py-2 text-sm font-medium">
+                          Deep lifecycle workspace
+                        </Link>
+                      </div>
+                      <div className="mt-4 space-y-3">
+                        {selectedEvents.length === 0 ? (
+                          <div className="app-empty-state rounded-[1.3rem] p-4 text-sm">No lifecycle events are linked yet.</div>
+                        ) : (
+                          selectedEvents.map((item) => (
+                            <div key={item.id} className="rounded-[1.25rem] border border-stone-200 bg-stone-50/90 p-4">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span className={`rounded-full border px-2.5 py-1 text-[11px] font-medium ${getLifecycleTone(item.status)}`}>
+                                  {formatLabel(item.status)}
+                                </span>
+                                <span className="rounded-full border border-stone-200 bg-white px-2.5 py-1 text-[11px] font-medium text-stone-700">
+                                  {formatLabel(item.event_type)}
+                                </span>
+                              </div>
+                              <p className="mt-3 text-sm text-stone-700">
+                                {item.status === 'completed' ? `Completed ${formatDate(item.completed_at)}` : `Scheduled ${formatDate(item.scheduled_for)}`}
+                              </p>
+                              {item.note && <p className="mt-2 text-sm text-stone-600">{item.note}</p>}
+                              {item.status !== 'completed' && item.status !== 'cancelled' && (
+                                <div className="mt-3">
+                                  <button onClick={() => void handleCompleteLifecycleEvent(item.id)} disabled={completingEventId === item.id} className="app-secondary-button rounded-full px-3 py-2 text-xs font-medium disabled:opacity-60">
+                                    {completingEventId === item.id ? 'Completing...' : 'Mark complete'}
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </article>
+                  </div>
+                )}
               </div>
             )}
           </section>
@@ -918,15 +1242,15 @@ export default function RecordsPage() {
             <p className="app-kicker">Operator Context</p>
             <h2 className="mt-2 text-2xl font-semibold">{getOperatorLabel(operator)}</h2>
             <p className="mt-3 text-sm leading-7 text-stone-600">
-              Work from one joined-up tenancy view, then step into the detailed workspace only when you need a deeper action.
+              Work from one joined-up tenancy view. Use the embedded money, lifecycle, and casework consoles before stepping into a specialist page.
             </p>
 
             <div className="mt-5 space-y-3">
               {[
-                { label: 'Records', href: '/records/tenancies', body: 'Drill into the tenancy workspace.' },
-                { label: 'Rent', href: '/records/rent', body: 'Post payments, charges, and credits.' },
-                { label: 'Lease', href: '/records/lease-lifecycle', body: 'Manage renewal and move-out actions.' },
-                { label: 'Reporting', href: '/records/reporting', body: 'Read portfolio pressure and leadership view.' },
+                { label: 'Reporting', href: '/records/reporting', body: 'Portfolio-wide operating pressure and money posture.' },
+                { label: 'Properties', href: '/records/properties', body: 'Property-level drill-down when tenancy context is not enough.' },
+                { label: 'Contractors', href: '/records/contractors', body: 'Supplier relationships and maintenance delivery detail.' },
+                { label: 'New Business', href: '/records/onboarding', body: 'Invite and configure access for new users.' },
               ].map((item) => (
                 <Link key={item.label} href={item.href} className="block rounded-[1.3rem] border border-stone-200 bg-white/92 p-4 hover:border-stone-400 hover:bg-stone-50">
                   <p className="text-sm font-semibold text-stone-900">{item.label}</p>

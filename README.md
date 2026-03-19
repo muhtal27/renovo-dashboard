@@ -25,14 +25,17 @@ npm install
 
 2. Create `.env.local` from `.env.example`.
 
-3. Add the required public app variables:
+3. Add the required app variables:
 
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
 NEXT_PUBLIC_OPERATOR_OUTBOUND_WEBHOOK_URL=
 NEXT_PUBLIC_SITE_URL=
 ```
+
+`SUPABASE_SERVICE_ROLE_KEY` is only used by the New Business onboarding flow so it can look up existing Supabase Auth users by email before assigning dashboard or portal access.
 
 4. Start the app:
 
@@ -69,6 +72,7 @@ This repo is ready to deploy on Vercel as a standard Next.js app.
 
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY` for the New Business onboarding flow
 - `NEXT_PUBLIC_OPERATOR_OUTBOUND_WEBHOOK_URL`
 - `NEXT_PUBLIC_SITE_URL` (optional override if you want metadata/canonical URLs pinned to a specific domain)
 

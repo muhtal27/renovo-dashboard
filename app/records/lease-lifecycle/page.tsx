@@ -1,14 +1,10 @@
 'use client'
 
 import { useEffect, useEffectEvent, useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import {
-  getOperatorProfile,
-  getSessionUser,
-  type CurrentOperator,
-} from '@/lib/operator'
 import { supabase } from '@/lib/supabase'
+import { useOperatorGate } from '@/lib/use-operator-gate'
 import { OperatorNav } from '@/app/operator-nav'
+import { OperatorSessionState } from '@/app/operator-session-state'
 
 type LeaseTab = 'all' | 'due' | 'planned' | 'completed'
 
@@ -114,10 +110,7 @@ function isActiveTenancy(tenancy: TenancyRow) {
 }
 
 export default function LeaseLifecyclePage() {
-  const router = useRouter()
-
-  const [operator, setOperator] = useState<CurrentOperator | null>(null)
-  const [authLoading, setAuthLoading] = useState(true)
+  const { operator, authLoading, authError } = useOperatorGate()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [actionMessage, setActionMessage] = useState<string | null>(null)
@@ -139,21 +132,7 @@ export default function LeaseLifecyclePage() {
   const [selectedCaseId, setSelectedCaseId] = useState('')
 
   const operatorUserId = operator?.authUser?.id ?? null
-
-  const hydrateOperatorProfile = useEffectEvent(async (userId: string) => {
-    try {
-      const profile = await getOperatorProfile(userId)
-      setOperator((current) => {
-        if (!current?.authUser || current.authUser.id !== userId) return current
-        return { ...current, profile }
-      })
-      if (profile?.is_active === false) {
-        setError('Your operator profile is inactive. Please contact an administrator.')
-      }
-    } catch (profileError) {
-      setError(profileError instanceof Error ? profileError.message : 'Unable to load operator profile.')
-    }
-  })
+  const pageError = authError ?? error
 
   const loadWorkspace = useEffectEvent(async () => {
     if (!operatorUserId) return
@@ -192,61 +171,9 @@ export default function LeaseLifecyclePage() {
   })
 
   useEffect(() => {
-    let cancelled = false
-
-    async function bootstrapAuth() {
-      try {
-        const user = await getSessionUser()
-        if (cancelled) return
-        if (!user) {
-          router.replace('/login')
-          setAuthLoading(false)
-          return
-        }
-        setOperator({ authUser: user, profile: null })
-        setAuthLoading(false)
-        void hydrateOperatorProfile(user.id)
-      } catch (authError) {
-        if (!cancelled) {
-          setError(authError instanceof Error ? authError.message : 'Unable to load operator session.')
-          setAuthLoading(false)
-        }
-      }
-    }
-
-    bootstrapAuth()
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (!session) {
-        setOperator(null)
-        setAuthLoading(false)
-        router.replace('/login')
-        return
-      }
-
-      try {
-        if (!cancelled) setOperator({ authUser: session.user, profile: null })
-        setAuthLoading(false)
-        void hydrateOperatorProfile(session.user.id)
-      } catch (authError) {
-        if (!cancelled) setError(authError instanceof Error ? authError.message : 'Unable to refresh operator session.')
-      } finally {
-        if (!cancelled) setAuthLoading(false)
-      }
-    })
-
-    return () => {
-      cancelled = true
-      subscription.unsubscribe()
-    }
-  }, [router])
-
-  useEffect(() => {
-    if (!operatorUserId) return
+    if (!operatorUserId || authError) return
     void loadWorkspace()
-  }, [operatorUserId])
+  }, [authError, operatorUserId])
 
   const contactById = useMemo(() => new Map(contacts.map((contact) => [contact.id, contact])), [contacts])
   const propertyById = useMemo(() => new Map(properties.map((property) => [property.id, property])), [properties])
@@ -395,24 +322,8 @@ export default function LeaseLifecyclePage() {
     setActionMessage('Lifecycle event marked complete.')
   }
 
-  if (authLoading) {
-    return (
-      <main className="app-grid min-h-screen px-5 py-6 text-stone-900 md:px-8 md:py-8">
-        <div className="mx-auto max-w-4xl">
-          <div className="app-surface rounded-[2rem] px-6 py-10 text-sm text-stone-600">Loading operator session...</div>
-        </div>
-      </main>
-    )
-  }
-
-  if (!operator?.authUser) {
-    return (
-      <main className="app-grid min-h-screen px-5 py-6 text-stone-900 md:px-8 md:py-8">
-        <div className="mx-auto max-w-4xl">
-          <div className="app-surface rounded-[2rem] px-6 py-10 text-sm text-stone-600">Redirecting to sign in...</div>
-        </div>
-      </main>
-    )
+  if (authLoading || !operator?.authUser) {
+    return <OperatorSessionState authLoading={authLoading} operator={operator} />
   }
 
   return (
@@ -477,10 +388,10 @@ export default function LeaseLifecyclePage() {
         </section>
 
         {loading && <div className="app-surface mt-6 rounded-[1.8rem] p-6 text-sm text-stone-600">Loading lease lifecycle workspace...</div>}
-        {error && <div className="mt-6 rounded-[1.8rem] border border-red-200 bg-red-50/95 p-6 text-sm text-red-700">Error: {error}</div>}
+        {pageError && <div className="mt-6 rounded-[1.8rem] border border-red-200 bg-red-50/95 p-6 text-sm text-red-700">Error: {pageError}</div>}
         {actionMessage && <div className="mt-6 rounded-[1.8rem] border border-sky-200 bg-sky-50/95 p-6 text-sm text-sky-800">{actionMessage}</div>}
 
-        {!loading && !error && (
+        {!loading && !pageError && (
           <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(360px,440px)_minmax(0,1fr)] xl:items-start">
             <section className="app-surface rounded-[2rem] p-4 md:p-5 xl:sticky xl:top-6 xl:flex xl:h-[calc(100vh-3rem)] xl:flex-col">
               <div className="mb-4 rounded-[1.5rem] border border-stone-200 bg-white/90 p-4 backdrop-blur">

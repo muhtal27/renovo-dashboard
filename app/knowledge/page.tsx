@@ -1,14 +1,10 @@
 'use client'
 
 import { useEffect, useEffectEvent, useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import {
-  getOperatorProfile,
-  getSessionUser,
-  type CurrentOperator,
-} from '@/lib/operator'
 import { supabase } from '@/lib/supabase'
+import { useOperatorGate } from '@/lib/use-operator-gate'
 import { OperatorNav } from '@/app/operator-nav'
+import { OperatorSessionState } from '@/app/operator-session-state'
 
 type KnowledgeArticleRow = {
   id: string
@@ -70,10 +66,7 @@ function getAuthorityTone(authority: KnowledgeArticleRow['source_authority']) {
 }
 
 export default function KnowledgePage() {
-  const router = useRouter()
-
-  const [operator, setOperator] = useState<CurrentOperator | null>(null)
-  const [authLoading, setAuthLoading] = useState(true)
+  const { operator, authLoading, authError } = useOperatorGate()
   const [articles, setArticles] = useState<KnowledgeArticleRow[]>([])
   const [loading, setLoading] = useState(true)
   const [searchLoading, setSearchLoading] = useState(false)
@@ -81,30 +74,7 @@ export default function KnowledgePage() {
   const [search, setSearch] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('all')
   const [searchResults, setSearchResults] = useState<KnowledgeSearchRow[] | null>(null)
-
-  const hydrateOperatorProfile = useEffectEvent(async (userId: string) => {
-    try {
-      const profile = await getOperatorProfile(userId)
-
-      setOperator((current) => {
-        if (!current?.authUser || current.authUser.id !== userId) return current
-        return {
-          ...current,
-          profile,
-        }
-      })
-
-      if (profile?.is_active === false) {
-        setError('Your operator profile is inactive. Please contact an administrator.')
-      }
-    } catch (profileError) {
-      setError(
-        profileError instanceof Error
-          ? profileError.message
-          : 'Unable to load operator profile.'
-      )
-    }
-  })
+  const pageError = authError ?? error
 
   const loadArticles = useEffectEvent(async () => {
     setLoading(true)
@@ -173,77 +143,9 @@ export default function KnowledgePage() {
   })
 
   useEffect(() => {
-    let cancelled = false
-
-    async function bootstrapAuth() {
-      try {
-        const user = await getSessionUser()
-
-        if (cancelled) return
-
-        if (!user) {
-          router.replace('/login')
-          setAuthLoading(false)
-          return
-        }
-
-        setOperator({
-          authUser: user,
-          profile: null,
-        })
-        setAuthLoading(false)
-        void hydrateOperatorProfile(user.id)
-      } catch (authError) {
-        if (!cancelled) {
-          setError(authError instanceof Error ? authError.message : 'Unable to load operator session.')
-          setAuthLoading(false)
-        }
-      }
-    }
-
-    bootstrapAuth()
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (!session) {
-        setOperator(null)
-        setAuthLoading(false)
-        router.replace('/login')
-        return
-      }
-
-      try {
-        const user = session.user
-        if (!cancelled) {
-          setOperator({
-            authUser: user,
-            profile: null,
-          })
-        }
-        setAuthLoading(false)
-        void hydrateOperatorProfile(user.id)
-      } catch (authError) {
-        if (!cancelled) {
-          setError(authError instanceof Error ? authError.message : 'Unable to refresh operator session.')
-        }
-      } finally {
-        if (!cancelled) {
-          setAuthLoading(false)
-        }
-      }
-    })
-
-    return () => {
-      cancelled = true
-      subscription.unsubscribe()
-    }
-  }, [router])
-
-  useEffect(() => {
-    if (!operator?.authUser?.id) return
+    if (!operator?.authUser?.id || authError) return
     void loadArticles()
-  }, [operator?.authUser?.id])
+  }, [authError, operator?.authUser?.id])
 
   useEffect(() => {
     if (!operator?.authUser?.id) return
@@ -309,28 +211,8 @@ export default function KnowledgePage() {
     [articles]
   )
 
-  if (authLoading) {
-    return (
-      <main className="app-grid min-h-screen px-5 py-6 text-stone-900 md:px-8 md:py-8">
-        <div className="mx-auto max-w-4xl">
-          <div className="app-surface rounded-[2rem] px-6 py-10 text-sm text-stone-600">
-            Loading operator session...
-          </div>
-        </div>
-      </main>
-    )
-  }
-
-  if (!operator?.authUser) {
-    return (
-      <main className="app-grid min-h-screen px-5 py-6 text-stone-900 md:px-8 md:py-8">
-        <div className="mx-auto max-w-4xl">
-          <div className="app-surface rounded-[2rem] px-6 py-10 text-sm text-stone-600">
-            Redirecting to sign in...
-          </div>
-        </div>
-      </main>
-    )
+  if (authLoading || !operator?.authUser) {
+    return <OperatorSessionState authLoading={authLoading} operator={operator} />
   }
 
   return (
@@ -345,7 +227,7 @@ export default function KnowledgePage() {
               Give Annabelle approved Scotland answers first
             </h1>
             <p className="mt-4 max-w-4xl text-base leading-7 text-stone-600">
-              Use reviewed Scotland sources first so answers stay practical, consistent, and tied to the rules that actually matter.
+              Use reviewed Scotland sources first so answers stay practical, consistent, and tied to the rules that actually matter. This should feel like the knowledge desk inside the same dashboard, not a disconnected library.
             </p>
 
             <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -383,6 +265,21 @@ export default function KnowledgePage() {
             <div className="mt-4 rounded-[1.25rem] border border-stone-200 bg-white/85 px-4 py-3 text-sm leading-6 text-stone-600">
               Use official Scotland sources first, hand off case-specific legal advice, and review changes before Annabelle relies on updated summaries.
             </div>
+
+            <div className="mt-5 grid gap-3 xl:grid-cols-4">
+              {[
+                { label: 'Desk mode', value: 'Answer cockpit', meta: 'Knowledge is an operator lane, not a side wiki.' },
+                { label: 'Authority', value: 'Official first', meta: 'Scotland and UK approved content rises to the top.' },
+                { label: 'Workflow fit', value: 'Case support', meta: 'Search this desk while working queue or CRM context.' },
+                { label: 'Review rule', value: 'No blind reuse', meta: 'Summaries stay reviewed before the system leans on them.' },
+              ].map((item) => (
+                <article key={item.label} className="rounded-[1.35rem] border border-stone-200 bg-white/88 p-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-stone-500">{item.label}</p>
+                  <p className="mt-2 text-lg font-semibold text-stone-900">{item.value}</p>
+                  <p className="mt-2 text-sm leading-6 text-stone-600">{item.meta}</p>
+                </article>
+              ))}
+            </div>
           </div>
         </section>
 
@@ -391,7 +288,7 @@ export default function KnowledgePage() {
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div>
                 <p className="app-kicker">Knowledge Controls</p>
-                <h2 className="mt-2 text-2xl font-semibold">Filter the approved Scotland material</h2>
+                <h2 className="mt-2 text-2xl font-semibold">Filter the approved Scotland answer desk</h2>
               </div>
               <div className="app-card-muted rounded-full px-4 py-2 text-sm text-stone-600">
                 {filteredArticles.length} shown of {articles.length} approved
@@ -450,13 +347,13 @@ export default function KnowledgePage() {
           </div>
         )}
 
-        {error && (
+        {pageError && (
           <div className="mt-6 rounded-[1.8rem] border border-red-200 bg-red-50/95 p-6 text-sm text-red-700">
-            Error: {error}
+            Error: {pageError}
           </div>
         )}
 
-        {!loading && !error && (
+        {!loading && !pageError && (
           <section className="mt-6 grid gap-4">
             {filteredArticles.length === 0 && (
               <div className="app-empty-state rounded-[1.8rem] p-6 text-sm">

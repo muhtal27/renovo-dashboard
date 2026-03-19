@@ -179,6 +179,19 @@ export async function POST(request: Request) {
       message: 'Access updated successfully.',
     })
   } catch (error) {
+    if (
+      error instanceof Error &&
+      error.message.includes('Missing SUPABASE_SERVICE_ROLE_KEY')
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            'New Business onboarding requires the server-side SUPABASE_SERVICE_ROLE_KEY env var. Add it to `.env.local` for local development or to your deployment environment, then retry.',
+        },
+        { status: 503 }
+      )
+    }
+
     return NextResponse.json(
       {
         error: error instanceof Error ? error.message : 'Unable to process onboarding right now.',

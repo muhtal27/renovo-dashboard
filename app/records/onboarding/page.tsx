@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useEffectEvent, useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { getOperatorProfile, getSessionUser, type CurrentOperator } from '@/lib/operator'
+import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useOperatorGate } from '@/lib/use-operator-gate'
 import { OperatorNav } from '@/app/operator-nav'
+import { OperatorSessionState } from '@/app/operator-session-state'
 
 type OperatorRole = 'admin' | 'manager' | 'operator' | 'viewer'
 type PortalRole = 'tenant' | 'landlord' | 'contractor'
@@ -72,10 +72,9 @@ function getContactLabel(contact: ContactRow | null) {
 }
 
 export default function OnboardingPage() {
-  const router = useRouter()
-
-  const [operator, setOperator] = useState<CurrentOperator | null>(null)
-  const [authLoading, setAuthLoading] = useState(true)
+  const { operator, authLoading, authError } = useOperatorGate({
+    missingProfileMessage: 'Your account is not linked to the operator workspace.',
+  })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -96,30 +95,7 @@ export default function OnboardingPage() {
   const [contactId, setContactId] = useState('')
   const [contractorId, setContractorId] = useState('')
   const [isActive, setIsActive] = useState(true)
-
-  const hydrateOperatorProfile = useEffectEvent(async (userId: string) => {
-    try {
-      const profile = await getOperatorProfile(userId)
-
-      setOperator((current) => {
-        if (!current?.authUser || current.authUser.id !== userId) return current
-        return {
-          ...current,
-          profile,
-        }
-      })
-
-      if (!profile) {
-        setError('Your account is not linked to the operator workspace.')
-      } else if (profile.is_active === false) {
-        setError('Your operator profile is inactive. Please contact an administrator.')
-      }
-    } catch (profileError) {
-      setError(
-        profileError instanceof Error ? profileError.message : 'Unable to load operator profile.'
-      )
-    }
-  })
+  const pageError = authError ?? error
 
   async function loadPage() {
     setLoading(true)
@@ -167,45 +143,9 @@ export default function OnboardingPage() {
   }
 
   useEffect(() => {
-    let cancelled = false
-
-    async function bootstrapAuth() {
-      try {
-        const user = await getSessionUser()
-
-        if (cancelled) return
-
-        if (!user) {
-          router.replace('/login')
-          setAuthLoading(false)
-          return
-        }
-
-        setOperator({
-          authUser: user,
-          profile: null,
-        })
-        setAuthLoading(false)
-        void hydrateOperatorProfile(user.id)
-      } catch (authError) {
-        if (!cancelled) {
-          setError(authError instanceof Error ? authError.message : 'Unable to load operator session.')
-          setAuthLoading(false)
-        }
-      }
-    }
-
-    void bootstrapAuth()
-
-    return () => {
-      cancelled = true
-    }
-  }, [router])
-
-  useEffect(() => {
-    if (!operator?.authUser?.id) return
+    if (!operator?.authUser?.id || authError) return
     void loadPage()
-  }, [operator?.authUser?.id])
+  }, [authError, operator?.authUser?.id])
 
   const contactById = useMemo(
     () => new Map(contacts.map((contact) => [contact.id, contact])),
@@ -278,28 +218,8 @@ export default function OnboardingPage() {
     }
   }
 
-  if (authLoading) {
-    return (
-      <main className="app-grid min-h-screen px-5 py-6 text-stone-900 md:px-8 md:py-8">
-        <div className="mx-auto max-w-4xl">
-          <div className="app-surface rounded-[2rem] px-6 py-10 text-sm text-stone-600">
-            Loading operator session...
-          </div>
-        </div>
-      </main>
-    )
-  }
-
-  if (!operator?.authUser) {
-    return (
-      <main className="app-grid min-h-screen px-5 py-6 text-stone-900 md:px-8 md:py-8">
-        <div className="mx-auto max-w-4xl">
-          <div className="app-surface rounded-[2rem] px-6 py-10 text-sm text-stone-600">
-            Redirecting to sign in...
-          </div>
-        </div>
-      </main>
-    )
+  if (authLoading || !operator?.authUser) {
+    return <OperatorSessionState authLoading={authLoading} operator={operator} />
   }
 
   return (
@@ -518,9 +438,9 @@ export default function OnboardingPage() {
                 </div>
               )}
 
-              {error && (
+              {pageError && (
                 <div className="mt-4 rounded-[1.4rem] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                  Error: {error}
+                  Error: {pageError}
                 </div>
               )}
             </section>

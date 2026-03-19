@@ -1,24 +1,33 @@
 import { createClient } from '@supabase/supabase-js'
 
-function requireEnv(
-  name:
-    | 'NEXT_PUBLIC_SUPABASE_URL'
-    | 'NEXT_PUBLIC_SUPABASE_ANON_KEY'
-    | 'SUPABASE_SERVICE_ROLE_KEY'
-) {
-  const value = process.env[name]
+function requireFirstEnv(names: readonly string[]) {
+  for (const name of names) {
+    const value = process.env[name]
 
-  if (!value) {
-    throw new Error(`Missing ${name}.`)
+    if (value) {
+      return value
+    }
   }
 
-  return value
+  throw new Error(`Missing ${names.join(' or ')}.`)
+}
+
+function requireSupabaseUrl() {
+  return requireFirstEnv(['NEXT_PUBLIC_SUPABASE_URL', 'SUPABASE_URL'] as const)
+}
+
+function requireSupabaseAnonKey() {
+  return requireFirstEnv(['NEXT_PUBLIC_SUPABASE_ANON_KEY', 'SUPABASE_ANON_KEY'] as const)
+}
+
+function requireSupabaseServiceRoleKey() {
+  return requireFirstEnv(['SUPABASE_SERVICE_ROLE_KEY'] as const)
 }
 
 export function getSupabaseServerAuthClient() {
   return createClient(
-    requireEnv('NEXT_PUBLIC_SUPABASE_URL'),
-    requireEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY'),
+    requireSupabaseUrl(),
+    requireSupabaseAnonKey(),
     {
       auth: {
         persistSession: false,
@@ -30,8 +39,8 @@ export function getSupabaseServerAuthClient() {
 
 export function getSupabaseRlsClient(accessToken: string) {
   return createClient(
-    requireEnv('NEXT_PUBLIC_SUPABASE_URL'),
-    requireEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY'),
+    requireSupabaseUrl(),
+    requireSupabaseAnonKey(),
     {
       auth: {
         persistSession: false,
@@ -48,8 +57,8 @@ export function getSupabaseRlsClient(accessToken: string) {
 
 export function getSupabaseServiceRoleClient() {
   return createClient(
-    requireEnv('NEXT_PUBLIC_SUPABASE_URL'),
-    requireEnv('SUPABASE_SERVICE_ROLE_KEY'),
+    requireSupabaseUrl(),
+    requireSupabaseServiceRoleKey(),
     {
       auth: {
         persistSession: false,

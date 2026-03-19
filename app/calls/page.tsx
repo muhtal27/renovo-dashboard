@@ -2,15 +2,11 @@
 
 import Link from 'next/link'
 import { useEffect, useEffectEvent, useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import {
-  getOperatorLabel,
-  getOperatorProfile,
-  getSessionUser,
-  type CurrentOperator,
-} from '@/lib/operator'
+import { getOperatorLabel } from '@/lib/operator'
 import { supabase } from '@/lib/supabase'
+import { useOperatorGate } from '@/lib/use-operator-gate'
 import { OperatorNav } from '@/app/operator-nav'
+import { OperatorSessionState } from '@/app/operator-session-state'
 
 type CallStatus =
   | 'initiated'
@@ -212,10 +208,7 @@ function normalizeCallSessionRows(rows: SupabaseCallSessionRow[]) {
 }
 
 export default function CallsPage() {
-  const router = useRouter()
-
-  const [operator, setOperator] = useState<CurrentOperator | null>(null)
-  const [authLoading, setAuthLoading] = useState(true)
+  const { operator, authLoading, authError } = useOperatorGate()
   const [calls, setCalls] = useState<CallSessionRow[]>([])
   const [events, setEvents] = useState<CallEventRow[]>([])
   const [users, setUsers] = useState<UserRow[]>([])
@@ -236,6 +229,7 @@ export default function CallsPage() {
   const [linkedCaseId, setLinkedCaseId] = useState('')
   const [assignedUserId, setAssignedUserId] = useState('')
   const operatorUserId = operator?.authUser?.id ?? null
+  const pageError = authError ?? error
 
   const loadCalls = useEffectEvent(async (options?: { preserveLoading?: boolean }) => {
     if (!operatorUserId) return
@@ -340,102 +334,10 @@ export default function CallsPage() {
     setEventsLoading(false)
   })
 
-  const hydrateOperatorProfile = useEffectEvent(async (userId: string) => {
-    try {
-      const profile = await getOperatorProfile(userId)
-
-      setOperator((current) => {
-        if (!current?.authUser || current.authUser.id !== userId) return current
-        return {
-          ...current,
-          profile,
-        }
-      })
-
-      if (profile?.is_active === false) {
-        setError('Your operator profile is inactive. Please contact an administrator.')
-      }
-    } catch (profileError) {
-      setError(
-        profileError instanceof Error
-          ? profileError.message
-          : 'Unable to load operator profile.'
-      )
-    }
-  })
-
   useEffect(() => {
-    let cancelled = false
-
-    async function bootstrapAuth() {
-      try {
-        const user = await getSessionUser()
-
-        if (cancelled) return
-
-        if (!user) {
-          router.replace('/login')
-          setAuthLoading(false)
-          return
-        }
-
-        setOperator({
-          authUser: user,
-          profile: null,
-        })
-        setAuthLoading(false)
-        void hydrateOperatorProfile(user.id)
-      } catch (authError) {
-        if (!cancelled) {
-          setError(authError instanceof Error ? authError.message : 'Unable to load operator session.')
-          setAuthLoading(false)
-        }
-      }
-    }
-
-    bootstrapAuth()
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (!session) {
-        setOperator(null)
-        setAuthLoading(false)
-        router.replace('/login')
-        return
-      }
-
-      try {
-        const user = session.user
-        if (!cancelled) {
-          setOperator({
-            authUser: user,
-            profile: null,
-          })
-        }
-        setAuthLoading(false)
-        void hydrateOperatorProfile(user.id)
-      } catch (authError) {
-        if (!cancelled) {
-          setError(authError instanceof Error ? authError.message : 'Unable to refresh operator session.')
-        }
-      } finally {
-        if (!cancelled) {
-          setAuthLoading(false)
-        }
-      }
-    })
-
-    return () => {
-      cancelled = true
-      subscription.unsubscribe()
-    }
-  }, [router])
-
-  useEffect(() => {
-    if (!operatorUserId) return
+    if (!operatorUserId || authError) return
     void loadCalls()
-  }, [operatorUserId])
+  }, [authError, operatorUserId])
 
   useEffect(() => {
     if (!selectedCallId || !operatorUserId) {
@@ -642,28 +544,8 @@ export default function CallsPage() {
     )
   }
 
-  if (authLoading) {
-    return (
-      <main className="app-grid min-h-screen px-5 py-6 text-stone-900 md:px-8 md:py-8">
-        <div className="mx-auto max-w-4xl">
-          <div className="app-surface rounded-[2rem] px-6 py-10 text-sm text-stone-600">
-            Loading operator session...
-          </div>
-        </div>
-      </main>
-    )
-  }
-
-  if (!operator?.authUser) {
-    return (
-      <main className="app-grid min-h-screen px-5 py-6 text-stone-900 md:px-8 md:py-8">
-        <div className="mx-auto max-w-4xl">
-          <div className="app-surface rounded-[2rem] px-6 py-10 text-sm text-stone-600">
-            Redirecting to sign in...
-          </div>
-        </div>
-      </main>
-    )
+  if (authLoading || !operator?.authUser) {
+    return <OperatorSessionState authLoading={authLoading} operator={operator} />
   }
 
   return (
@@ -680,10 +562,10 @@ export default function CallsPage() {
             </div>
             <p className="app-kicker mt-6">Calls inbox</p>
             <h1 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">
-              Review calls, link them properly, and move on
+              Run voice review inside the main operator cockpit
             </h1>
             <p className="mt-4 max-w-4xl text-base leading-7 text-stone-600">
-              Work from active calls, missed calls, review flags, and unlinked sessions without losing the case context.
+              Work from active calls, missed calls, review flags, and unlinked sessions in the same operating language as queue and CRM, so voice work feels like one lane of the same dashboard.
             </p>
 
             <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
@@ -705,6 +587,21 @@ export default function CallsPage() {
 
             <div className="mt-4 rounded-[1.25rem] border border-stone-200 bg-white/85 px-4 py-3 text-sm leading-6 text-stone-600">
               Check active or flagged calls first, link every useful session to a case, and only clear review flags once the next action is clear.
+            </div>
+
+            <div className="mt-5 grid gap-3 xl:grid-cols-4">
+              {[
+                { label: 'Desk mode', value: 'Voice cockpit', meta: 'Same operator rhythm as queue and CRM.' },
+                { label: 'Primary move', value: 'Link and assign', meta: 'Every useful call should end in a case or an owner.' },
+                { label: 'Review posture', value: 'Flag before drift', meta: 'Keep human review visible until the next step is explicit.' },
+                { label: 'System fit', value: 'One dashboard', meta: 'Calls are another lane inside the same operating layer.' },
+              ].map((item) => (
+                <article key={item.label} className="rounded-[1.35rem] border border-stone-200 bg-white/88 p-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-stone-500">{item.label}</p>
+                  <p className="mt-2 text-lg font-semibold text-stone-900">{item.value}</p>
+                  <p className="mt-2 text-sm leading-6 text-stone-600">{item.meta}</p>
+                </article>
+              ))}
             </div>
           </div>
         </section>
@@ -762,20 +659,20 @@ export default function CallsPage() {
           </div>
         )}
 
-        {error && (
+        {pageError && (
           <div className="mt-6 rounded-[1.8rem] border border-red-200 bg-red-50/95 p-6 text-sm text-red-700">
-            Error: {error}
+            Error: {pageError}
           </div>
         )}
 
-        {!loading && !error && (
+        {!loading && !pageError && (
           <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(360px,440px)_minmax(0,1fr)] xl:items-start">
             <section className="app-surface rounded-[2rem] p-4 md:p-5 xl:sticky xl:top-6 xl:flex xl:h-[calc(100vh-3rem)] xl:flex-col">
               <div className="mb-4 rounded-[1.5rem] border border-stone-200 bg-white/90 p-4 backdrop-blur">
                 <p className="app-kicker">Recent Sessions</p>
-                <h2 className="mt-2 text-xl font-semibold">Choose a call</h2>
+                <h2 className="mt-2 text-xl font-semibold">Choose a call from the voice desk</h2>
                 <p className="mt-1 text-sm text-stone-600">
-                  Sessions refresh live as Annabelle events arrive.
+                  Sessions refresh live as Annabelle events arrive, but the working panel stays stable so the operator can act quickly.
                 </p>
               </div>
 
@@ -962,7 +859,7 @@ export default function CallsPage() {
                   <div className="mt-6 grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
                     <div className="space-y-4">
                       <section className="app-card-muted rounded-[1.6rem] p-5">
-                        <p className="app-kicker">Operator actions</p>
+                        <p className="app-kicker">Operator console</p>
 
                         <div className="mt-4 space-y-4">
                           <div>
