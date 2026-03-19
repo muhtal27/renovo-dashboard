@@ -221,7 +221,7 @@ type QueueTab =
   | 'recent'
   | 'no_next_step'
 
-type JobTab = 'all' | 'open' | 'approval' | 'scheduled' | 'unassigned' | 'urgent'
+type JobSlaTab = 'all' | 'approval_aging' | 'overdue_visit' | 'no_contractor' | 'urgent'
 
 type QueueFilterState = {
   search: string
@@ -311,6 +311,22 @@ function isOpenMaintenance(status: string) {
 
 function needsMaintenanceApproval(job: Pick<MaintenanceJobRow, 'status' | 'landlord_approval_required'>) {
   return job.status === 'awaiting_approval' || job.landlord_approval_required
+}
+
+const APPROVAL_AGING_HOURS = 24
+
+function isApprovalAging(job: Pick<MaintenanceJobRow, 'updated_at' | 'created_at' | 'status' | 'landlord_approval_required'>) {
+  if (!needsMaintenanceApproval(job)) return false
+  const base = job.updated_at ?? job.created_at
+  if (!base) return false
+  const ageMs = Date.now() - new Date(base).getTime()
+  return ageMs >= APPROVAL_AGING_HOURS * 60 * 60 * 1000
+}
+
+function isOverdueVisit(job: Pick<MaintenanceJobRow, 'status' | 'scheduled_for'>) {
+  if (!job.scheduled_for) return false
+  if (['completed', 'cancelled'].includes(job.status)) return false
+  return new Date(job.scheduled_for).getTime() < Date.now()
 }
 
 function formatShortDateTime(value: string | null) {
@@ -528,7 +544,7 @@ export default function HomePage() {
   const [statusFilter, setStatusFilter] = useState('all')
   const [priorityFilter, setPriorityFilter] = useState('all')
   const [tab, setTab] = useState<QueueTab>('jobs')
-  const [jobTab, setJobTab] = useState<JobTab>('all')
+  const [jobSlaTab, setJobSlaTab] = useState<JobSlaTab>('all')
   const [liveMessage, setLiveMessage] = useState<string | null>(null)
   const [followUpAvailable, setFollowUpAvailable] = useState(true)
   const [creatingLedger, setCreatingLedger] = useState(false)
@@ -1293,20 +1309,10 @@ export default function HomePage() {
 
     return jobs
       .filter((job) => {
-        if (jobTab === 'open' && !isOpenMaintenance(job.status)) return false
-        if (jobTab === 'approval' && !needsMaintenanceApproval(job)) return false
-        if (
-          jobTab === 'scheduled' &&
-          !(
-            job.status === 'scheduled' ||
-            job.status === 'approved' ||
-            job.status === 'in_progress'
-          )
-        ) {
-          return false
-        }
-        if (jobTab === 'unassigned' && !!job.contractor_id) return false
-        if (jobTab === 'urgent' && job.priority !== 'urgent') return false
+        if (jobSlaTab === 'approval_aging' && !isApprovalAging(job)) return false
+        if (jobSlaTab === 'overdue_visit' && !isOverdueVisit(job)) return false
+        if (jobSlaTab === 'no_contractor' && !!job.contractor_id) return false
+        if (jobSlaTab === 'urgent' && job.priority !== 'urgent') return false
 
         if (priorityFilter !== 'all' && job.priority !== priorityFilter) return false
         if (statusFilter !== 'all' && job.status !== statusFilter) return false
@@ -1336,7 +1342,7 @@ export default function HomePage() {
         const rightTime = new Date(right.updated_at ?? right.created_at ?? 0).getTime()
         return rightTime - leftTime
       })
-  }, [caseById, contactById, contractorById, jobTab, jobs, priorityFilter, propertyById, search, statusFilter])
+  }, [caseById, contactById, contractorById, jobSlaTab, jobs, priorityFilter, propertyById, search, statusFilter])
 
   const filteredCases = useMemo(() => {
     return cases
@@ -2106,18 +2112,17 @@ export default function HomePage() {
                     <>
                       {[
                         ['all', 'All'],
-                        ['open', 'Open'],
-                        ['approval', 'Approval'],
-                        ['scheduled', 'Scheduled'],
-                        ['unassigned', 'Unassigned'],
+                        ['approval_aging', `Approval aging (${APPROVAL_AGING_HOURS}h+)`],
+                        ['overdue_visit', 'Overdue visit'],
+                        ['no_contractor', 'No contractor'],
                         ['urgent', 'Urgent'],
                       ].map(([value, label]) => (
                         <button
                           key={value}
-                          onClick={() => setJobTab(value as JobTab)}
-                          aria-pressed={jobTab === value}
+                          onClick={() => setJobSlaTab(value as JobSlaTab)}
+                          aria-pressed={jobSlaTab === value}
                           className={`rounded-full px-4 py-2.5 text-sm font-medium ${
-                            jobTab === value ? 'app-pill-active' : 'app-pill'
+                            jobSlaTab === value ? 'app-pill-active' : 'app-pill'
                           }`}
                         >
                           {label}
