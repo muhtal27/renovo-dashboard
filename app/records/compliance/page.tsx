@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useEffectEvent, useMemo, useState } from 'react'
+import { useEffectEvent, useMemo, useState } from 'react'
 import { getOperatorLabel } from '@/lib/operator'
 import { supabase } from '@/lib/supabase'
 import { useOperatorGate } from '@/lib/use-operator-gate'
@@ -250,20 +250,18 @@ export default function ComplianceRecordsPage() {
     })
   }, [contactById, propertyById, records, search, tab])
 
-  useEffect(() => {
-    if (!filteredRecords.length) {
-      setSelectedRecordId(null)
-      return
-    }
-
-    if (!selectedRecordId || !filteredRecords.some((record) => record.id === selectedRecordId)) {
-      setSelectedRecordId(filteredRecords[0].id)
-    }
-  }, [filteredRecords, selectedRecordId])
-
   const selectedRecord = useMemo(
-    () => records.find((record) => record.id === selectedRecordId) || null,
-    [records, selectedRecordId]
+    () => {
+      if (!filteredRecords.length) return null
+
+      const effectiveSelectedRecordId =
+        selectedRecordId && filteredRecords.some((record) => record.id === selectedRecordId)
+          ? selectedRecordId
+          : filteredRecords[0].id
+
+      return records.find((record) => record.id === effectiveSelectedRecordId) || null
+    },
+    [filteredRecords, records, selectedRecordId]
   )
 
   const selectedProperty = useMemo(
@@ -276,7 +274,7 @@ export default function ComplianceRecordsPage() {
       selectedProperty?.landlord_contact_id
         ? contactById.get(selectedProperty.landlord_contact_id) ?? null
         : null,
-    [contactById, selectedProperty?.landlord_contact_id]
+    [contactById, selectedProperty]
   )
 
   const selectedCases = useMemo(

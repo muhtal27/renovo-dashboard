@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useEffectEvent, useMemo, useState } from 'react'
+import { useEffectEvent, useMemo, useState } from 'react'
 import { getOperatorLabel } from '@/lib/operator'
 import { supabase } from '@/lib/supabase'
 import { useOperatorGate } from '@/lib/use-operator-gate'
@@ -277,30 +277,28 @@ export default function TenancyRecordsPage() {
     })
   }, [claimsByTenancyId, contactById, propertyById, search, tab, tenancies])
 
-  useEffect(() => {
-    if (!filteredTenancies.length) {
-      setSelectedTenancyId(null)
-      return
-    }
-
-    if (!selectedTenancyId || !filteredTenancies.some((tenancy) => tenancy.id === selectedTenancyId)) {
-      setSelectedTenancyId(filteredTenancies[0].id)
-    }
-  }, [filteredTenancies, selectedTenancyId])
-
   const selectedTenancy = useMemo(
-    () => tenancies.find((tenancy) => tenancy.id === selectedTenancyId) || null,
-    [tenancies, selectedTenancyId]
+    () => {
+      if (!filteredTenancies.length) return null
+
+      const effectiveSelectedTenancyId =
+        selectedTenancyId && filteredTenancies.some((tenancy) => tenancy.id === selectedTenancyId)
+          ? selectedTenancyId
+          : filteredTenancies[0].id
+
+      return tenancies.find((tenancy) => tenancy.id === effectiveSelectedTenancyId) || null
+    },
+    [filteredTenancies, selectedTenancyId, tenancies]
   )
 
   const selectedProperty = useMemo(
     () => (selectedTenancy?.property_id ? propertyById.get(selectedTenancy.property_id) ?? null : null),
-    [propertyById, selectedTenancy?.property_id]
+    [propertyById, selectedTenancy]
   )
 
   const selectedTenant = useMemo(
     () => (selectedTenancy?.tenant_contact_id ? contactById.get(selectedTenancy.tenant_contact_id) ?? null : null),
-    [contactById, selectedTenancy?.tenant_contact_id]
+    [contactById, selectedTenancy]
   )
 
   const selectedLandlord = useMemo(
@@ -308,7 +306,7 @@ export default function TenancyRecordsPage() {
       selectedTenancy?.landlord_contact_id
         ? contactById.get(selectedTenancy.landlord_contact_id) ?? null
         : null,
-    [contactById, selectedTenancy?.landlord_contact_id]
+    [contactById, selectedTenancy]
   )
 
   const selectedClaims = useMemo(

@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useEffectEvent, useMemo, useState } from 'react'
+import { useEffectEvent, useMemo, useState } from 'react'
 import { getOperatorLabel } from '@/lib/operator'
 import { supabase } from '@/lib/supabase'
 import { useOperatorGate } from '@/lib/use-operator-gate'
@@ -181,34 +181,33 @@ export default function ViewingRecordsPage() {
     })
   }, [contactById, propertyById, requests, search, tab])
 
-  useEffect(() => {
-    if (!filteredRequests.length) {
-      setSelectedRequestId(null)
-      return
-    }
-    if (!selectedRequestId || !filteredRequests.some((request) => request.id === selectedRequestId)) {
-      setSelectedRequestId(filteredRequests[0].id)
-    }
-  }, [filteredRequests, selectedRequestId])
-
   const selectedRequest = useMemo(
-    () => requests.find((request) => request.id === selectedRequestId) || null,
-    [requests, selectedRequestId]
+    () => {
+      if (!filteredRequests.length) return null
+
+      const effectiveSelectedRequestId =
+        selectedRequestId && filteredRequests.some((request) => request.id === selectedRequestId)
+          ? selectedRequestId
+          : filteredRequests[0].id
+
+      return requests.find((request) => request.id === effectiveSelectedRequestId) || null
+    },
+    [filteredRequests, requests, selectedRequestId]
   )
 
   const selectedProperty = useMemo(
     () => (selectedRequest?.property_id ? propertyById.get(selectedRequest.property_id) ?? null : null),
-    [propertyById, selectedRequest?.property_id]
+    [propertyById, selectedRequest]
   )
 
   const selectedApplicant = useMemo(
     () => (selectedRequest?.applicant_contact_id ? contactById.get(selectedRequest.applicant_contact_id) ?? null : null),
-    [contactById, selectedRequest?.applicant_contact_id]
+    [contactById, selectedRequest]
   )
 
   const selectedCase = useMemo(
     () => (selectedRequest?.case_id ? caseById.get(selectedRequest.case_id) ?? null : null),
-    [caseById, selectedRequest?.case_id]
+    [caseById, selectedRequest]
   )
 
   const kpis = useMemo(

@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useEffectEvent, useMemo, useState } from 'react'
+import { useEffectEvent, useMemo, useState } from 'react'
 import { getOperatorLabel } from '@/lib/operator'
 import { supabase } from '@/lib/supabase'
 import { useOperatorGate } from '@/lib/use-operator-gate'
@@ -262,19 +262,18 @@ export default function ContractorRecordsPage() {
     })
   }, [contactById, contractors, quotesByContractorId, requestsByContractorId, search, tab, tradesByContractorId])
 
-  useEffect(() => {
-    if (!filteredContractors.length) {
-      setSelectedContractorId(null)
-      return
-    }
-    if (!selectedContractorId || !filteredContractors.some((contractor) => contractor.id === selectedContractorId)) {
-      setSelectedContractorId(filteredContractors[0].id)
-    }
-  }, [filteredContractors, selectedContractorId])
-
   const selectedContractor = useMemo(
-    () => contractors.find((contractor) => contractor.id === selectedContractorId) || null,
-    [contractors, selectedContractorId]
+    () => {
+      if (!filteredContractors.length) return null
+
+      const effectiveSelectedContractorId =
+        selectedContractorId && filteredContractors.some((contractor) => contractor.id === selectedContractorId)
+          ? selectedContractorId
+          : filteredContractors[0].id
+
+      return contractors.find((contractor) => contractor.id === effectiveSelectedContractorId) || null
+    },
+    [contractors, filteredContractors, selectedContractorId]
   )
 
   const selectedContact = useMemo(

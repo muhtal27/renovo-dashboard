@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useEffectEvent, useMemo, useState } from 'react'
+import { useEffectEvent, useMemo, useState } from 'react'
 import { getOperatorLabel } from '@/lib/operator'
 import { supabase } from '@/lib/supabase'
 import { useOperatorGate } from '@/lib/use-operator-gate'
@@ -237,19 +237,18 @@ export default function DepositRecordsPage() {
     })
   }, [claims, contactById, propertyById, search, tab, tenancyById])
 
-  useEffect(() => {
-    if (!filteredClaims.length) {
-      setSelectedClaimId(null)
-      return
-    }
-    if (!selectedClaimId || !filteredClaims.some((claim) => claim.id === selectedClaimId)) {
-      setSelectedClaimId(filteredClaims[0].id)
-    }
-  }, [filteredClaims, selectedClaimId])
-
   const selectedClaim = useMemo(
-    () => claims.find((claim) => claim.id === selectedClaimId) || null,
-    [claims, selectedClaimId]
+    () => {
+      if (!filteredClaims.length) return null
+
+      const effectiveSelectedClaimId =
+        selectedClaimId && filteredClaims.some((claim) => claim.id === selectedClaimId)
+          ? selectedClaimId
+          : filteredClaims[0].id
+
+      return claims.find((claim) => claim.id === effectiveSelectedClaimId) || null
+    },
+    [claims, filteredClaims, selectedClaimId]
   )
 
   const selectedTenancy = useMemo(
@@ -264,17 +263,17 @@ export default function DepositRecordsPage() {
 
   const selectedTenant = useMemo(
     () => (selectedTenancy?.tenant_contact_id ? contactById.get(selectedTenancy.tenant_contact_id) ?? null : null),
-    [contactById, selectedTenancy?.tenant_contact_id]
+    [contactById, selectedTenancy]
   )
 
   const selectedLandlord = useMemo(
     () => (selectedTenancy?.landlord_contact_id ? contactById.get(selectedTenancy.landlord_contact_id) ?? null : null),
-    [contactById, selectedTenancy?.landlord_contact_id]
+    [contactById, selectedTenancy]
   )
 
   const selectedCase = useMemo(
     () => (selectedClaim?.case_id ? caseById.get(selectedClaim.case_id) ?? null : null),
-    [caseById, selectedClaim?.case_id]
+    [caseById, selectedClaim]
   )
 
   const kpis = useMemo(
