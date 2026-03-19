@@ -672,23 +672,21 @@ export default function CallsPage() {
         <OperatorNav current="calls" />
 
         <section className="app-surface-strong rounded-[2rem] p-6 md:p-8">
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_380px]">
-            <div>
-              <div className="flex flex-wrap items-center gap-3">
-                <span className="app-live-pill rounded-full px-3 py-1 text-xs font-medium">
-                  {liveMessage || 'Live updates connected'}
-                </span>
-              </div>
-              <p className="app-kicker mt-6">Calls Inbox</p>
-              <h1 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">
-                Review what Annabelle heard and what still needs a human
-              </h1>
-              <p className="mt-4 max-w-3xl text-base leading-7 text-stone-600">
-                This inbox is the operator side of the voice layer: active calls, recent sessions,
-                low-confidence summaries, and unlinked sessions that still need structure.
-              </p>
+          <div>
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="app-live-pill rounded-full px-3 py-1 text-xs font-medium">
+                {liveMessage || 'Live updates connected'}
+              </span>
+            </div>
+            <p className="app-kicker mt-6">Calls inbox</p>
+            <h1 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">
+              Review calls, link them properly, and move on
+            </h1>
+            <p className="mt-4 max-w-4xl text-base leading-7 text-stone-600">
+              Work from active calls, missed calls, review flags, and unlinked sessions without losing the case context.
+            </p>
 
-              <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+            <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
                 {[
                   { label: 'Total calls', value: callKpis.total, tone: 'border-stone-200 bg-stone-50 text-stone-900' },
                   { label: 'Active now', value: callKpis.active, tone: 'border-emerald-200 bg-emerald-50 text-emerald-900' },
@@ -704,24 +702,10 @@ export default function CallsPage() {
                   </article>
                 ))}
               </div>
+
+            <div className="mt-4 rounded-[1.25rem] border border-stone-200 bg-white/85 px-4 py-3 text-sm leading-6 text-stone-600">
+              Check active or flagged calls first, link every useful session to a case, and only clear review flags once the next action is clear.
             </div>
-
-            <aside className="app-surface rounded-[1.8rem] p-5">
-              <p className="app-kicker">Operator</p>
-              <h2 className="mt-2 text-xl font-semibold">{getOperatorLabel(operator)}</h2>
-              <p className="mt-1 text-sm text-stone-600">
-                Keep the sessions here cleanly linked, assigned, and ready for follow-through.
-              </p>
-
-              <div className="app-card-muted mt-5 rounded-[1.4rem] p-4">
-                <p className="text-sm font-medium text-stone-900">Practical workflow</p>
-                <ul className="mt-3 space-y-2 text-sm text-stone-600">
-                  <li>Check active or flagged calls first.</li>
-                  <li>Link every useful call to a case.</li>
-                  <li>Clear review flags only after the next action is obvious.</li>
-                </ul>
-              </div>
-            </aside>
           </div>
         </section>
 
@@ -737,7 +721,7 @@ export default function CallsPage() {
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-2" aria-label="Call inbox tabs">
+            <div className="flex flex-wrap gap-2 md:gap-3" aria-label="Call inbox tabs">
               {[
                 ['all', 'All calls'],
                 ['active', 'Active'],

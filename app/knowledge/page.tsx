@@ -3,7 +3,6 @@
 import { useEffect, useEffectEvent, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
-  getOperatorLabel,
   getOperatorProfile,
   getSessionUser,
   type CurrentOperator,
@@ -340,19 +339,16 @@ export default function KnowledgePage() {
         <OperatorNav current="knowledge" />
 
         <section className="app-surface-strong rounded-[2rem] p-6 md:p-8">
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_360px]">
-            <div>
-              <p className="app-kicker">Scotland Knowledge Base</p>
-              <h1 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">
-                Give Annabelle approved Scotland-specific answers first
-              </h1>
-              <p className="mt-4 max-w-3xl text-base leading-7 text-stone-600">
-                This is the starting layer for Annabelle’s legal and FAQ grounding: approved
-                official Scotland sources, operator-readable summaries, and a structure we can
-                query later for retrieval instead of guessing.
-              </p>
+          <div>
+            <p className="app-kicker">Scotland knowledge base</p>
+            <h1 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">
+              Give Annabelle approved Scotland answers first
+            </h1>
+            <p className="mt-4 max-w-4xl text-base leading-7 text-stone-600">
+              Use reviewed Scotland sources first so answers stay practical, consistent, and tied to the rules that actually matter.
+            </p>
 
-              <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 {[
                   {
                     label: 'Approved articles',
@@ -383,25 +379,10 @@ export default function KnowledgePage() {
                   </article>
                 ))}
               </div>
+
+            <div className="mt-4 rounded-[1.25rem] border border-stone-200 bg-white/85 px-4 py-3 text-sm leading-6 text-stone-600">
+              Use official Scotland sources first, hand off case-specific legal advice, and review changes before Annabelle relies on updated summaries.
             </div>
-
-            <aside className="app-surface rounded-[1.8rem] p-5">
-              <p className="app-kicker">Operator</p>
-              <h2 className="mt-2 text-xl font-semibold">{getOperatorLabel(operator)}</h2>
-              <p className="mt-1 text-sm text-stone-600">
-                Keep Annabelle grounded in reviewed Scotland material before expanding into wider UK
-                property knowledge.
-              </p>
-
-              <div className="app-card-muted mt-5 rounded-[1.4rem] p-4">
-                <p className="text-sm font-medium text-stone-900">Ground rules</p>
-                <ul className="mt-3 space-y-2 text-sm text-stone-600">
-                  <li>Use official Scotland sources first.</li>
-                  <li>Hand off case-specific legal advice instead of improvising.</li>
-                  <li>Review changes before Annabelle relies on updated law summaries.</li>
-                </ul>
-              </div>
-            </aside>
           </div>
         </section>
 
@@ -417,7 +398,7 @@ export default function KnowledgePage() {
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-2" aria-label="Knowledge categories">
+            <div className="flex flex-wrap gap-2 md:gap-3" aria-label="Knowledge categories">
               <button
                 onClick={() => setCategoryFilter('all')}
                 aria-pressed={categoryFilter === 'all'}

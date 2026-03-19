@@ -15,27 +15,27 @@ const pressurePoints = [
   },
 ]
 
-const operatingLayers = [
+const crmSnapshots = [
   {
-    label: 'Annabelle Desk',
-    title: 'A live operator space for the hard days',
-    body: 'The queue, cases, messages, calls, recordings, follow-ups, and operational pulse already live in one surface so the team can act from facts instead of scattered inboxes.',
+    label: 'Tenancy control centre',
+    title: 'Run the tenancy from one screen',
+    body: 'Track the tenancy, the live cases, the next action, the people involved, and the current pressure from one CRM screen.',
     href: '/login',
-    cta: 'See the operator entrance',
+    cta: 'See the CRM entrance',
   },
   {
-    label: 'Linked Records',
-    title: 'Property, tenancy, job, rent, and compliance stay connected',
-    body: 'This reality is built so communication is never left floating on its own. Annabelle keeps the operational record tied back to the property and the live work around it.',
+    label: 'Rent and arrears',
+    title: 'Keep money work tied to the tenancy',
+    body: 'Charges, payments, arrears, and case links stay with the tenancy so rent work is not split across spreadsheets and inboxes.',
     href: '/login',
-    cta: 'Go to the live workspace',
+    cta: 'Open rent workspace',
   },
   {
-    label: 'Role Portals',
-    title: 'Landlords, tenants, and contractors see the right slice',
-    body: 'Instead of forwarding long email chains, each audience can be routed into a focused experience that reflects their role and the case state already held in the platform.',
-    href: '/portal',
-    cta: 'Open the portal entrance',
+    label: 'Lease and reporting',
+    title: 'Stay ahead of renewals and portfolio pressure',
+    body: 'Lease actions, reporting, maintenance, compliance, and deposits sit in the same CRM story so nothing important disappears between teams.',
+    href: '/records/reporting',
+    cta: 'See reporting workspace',
   },
 ]
 
@@ -81,36 +81,36 @@ const practicalProof = [
   'Built around live case context, not just chatbot answers.',
   'Supports operator, landlord, tenant, and contractor journeys from the same working foundation.',
   'Designed for 24/7 service continuity without pretending humans are replaceable.',
-  'Useful for agency leadership because the work is visible, measurable, and traceable.',
+  'Keeps the real work visible without making managers chase six different systems.',
 ]
 
 const workingAreas = [
-  'Calls, messages, email, tenancy activity, maintenance, and reporting linked back to the same live case context.',
-  'Maintenance, rent, lease lifecycle, and compliance living in the same operational story.',
+  'Tenancy CRM with people, property, case pressure, and next actions on one screen.',
+  'Rent, arrears, lease dates, maintenance, compliance, and reporting in one connected system.',
   'Scotland-specific knowledge to ground answers before widening scope.',
-  'Portal routing that sends each signed-in user to the right destination automatically.',
+  'Landlord, tenant, and contractor portals that open the right view automatically.',
 ]
 
 const actions = [
   {
-    title: 'Speak to Annabelle',
-    body: 'Start a conversation with Annabelle and hear how she handles real property questions in a way that feels calm, informed, and useful.',
-    href: 'tel:01313812887',
-    cta: 'Start a conversation',
+    title: 'Join the waiting list',
+    body: 'Commercial licences are not open yet. We are rolling Annabelle out carefully with a small number of agencies first.',
+    href: '#waitlist',
+    cta: 'Join the waiting list',
     tone: 'primary',
   },
   {
-    title: 'Try the live entry points',
-    body: 'Use the real login and portal routes already connected to the working system. That lets you explore the journey from the front door rather than from a slide deck.',
+    title: 'See the real CRM',
+    body: 'Start with the actual CRM entrance and see the product shape behind the story.',
     href: '/login',
     cta: 'Open the live sign-in',
     tone: 'secondary',
   },
   {
-    title: 'Start with the story',
-    body: 'If you want to understand why Annabelle matters, read the operating story first. The rest of the site will make more sense once the pressure behind it is clear.',
+    title: 'Read the agency story',
+    body: 'Start with the real letting-agency story if you want to understand why Annabelle matters.',
     href: '#story',
-    cta: 'Read the agency story',
+    cta: 'Read the story',
     tone: 'secondary',
   },
 ]
@@ -150,7 +150,7 @@ export function PublicHome() {
               <div>
                 <p className="app-kicker">Annabelle By Renovo</p>
                 <p className="mt-2 max-w-xl text-sm leading-6 text-stone-600">
-                  The all-in-one CRM and always-on operational story for modern letting agencies.
+                  One CRM for the whole letting-agency workload.
                 </p>
               </div>
 
@@ -158,8 +158,8 @@ export function PublicHome() {
                 <a href="#story" className="app-secondary-button rounded-full px-5 py-2.5 text-sm font-medium">
                   Read the story first
                 </a>
-                <a href="tel:01313812887" className="app-primary-button rounded-full px-5 py-2.5 text-sm font-medium">
-                  Speak to Annabelle
+                <a href="#waitlist" className="app-primary-button rounded-full px-5 py-2.5 text-sm font-medium">
+                  Join the waiting list
                 </a>
               </div>
             </div>
@@ -167,18 +167,18 @@ export function PublicHome() {
             <div className="relative mt-10 grid gap-8 xl:grid-cols-[minmax(0,1.18fr)_360px] xl:items-end">
               <div>
                 <div className="inline-flex rounded-full border border-emerald-200 bg-emerald-50/90 px-4 py-2 text-sm font-medium text-emerald-950/85">
-                  24/7 cover for the operational reality agencies actually live with
+                  24/7 help for the work agencies actually deal with
                 </div>
                 <h1 className="mt-6 max-w-5xl text-4xl font-semibold tracking-tight md:text-[5rem] md:leading-[0.94]">
-                  Annabelle keeps the agency moving when the work does not politely wait.
+                  Annabelle keeps the agency moving when the work does not stop.
                 </h1>
                 <p className="mt-6 max-w-3xl text-base leading-8 text-stone-700 md:text-lg">
-                  She does not clock off, call in sick, or lose the thread. Annabelle is the living operational reality that helps a letting agency stay responsive across calls, messages, maintenance, rent, compliance, landlord updates, and day-to-day coordination while the human team protects its time and energy for judgement, reassurance, and decisions. It means no juggling six different systems just to complete one task.
+                  She does not clock off, call in sick, or lose the thread. Annabelle helps a letting agency stay responsive across calls, messages, maintenance, rent, compliance, landlord updates, and day-to-day coordination while the human team keeps its time for judgement, reassurance, and decisions. It means no juggling six different systems just to complete one task.
                 </p>
 
                 <div className="mt-8 flex flex-wrap gap-3">
-                  <a href="tel:01313812887" className="app-primary-button rounded-2xl px-5 py-3 text-sm font-medium">
-                    Start with Annabelle
+                  <a href="#waitlist" className="app-primary-button rounded-2xl px-5 py-3 text-sm font-medium">
+                    Join the waiting list
                   </a>
                   <Link href="/login" className="app-secondary-button rounded-2xl px-5 py-3 text-sm font-medium">
                     Enter the live workspace
@@ -190,10 +190,10 @@ export function PublicHome() {
                 <p className="app-kicker">Why Agencies Give Her A Chance</p>
                 <div className="mt-4 space-y-3">
                   {[
-                    'She keeps the communication trail intact inside one joined-up CRM.',
+                    'She keeps the communication trail intact inside one CRM.',
                     'She reduces overnight and out-of-hours drift.',
                     'She gives operators a calmer start to the day.',
-                    'She makes leadership visibility less dependent on heroic effort.',
+                    'She makes daily oversight much easier.',
                   ].map((item) => (
                     <div key={item} className="rounded-[1.2rem] border border-stone-200 bg-white px-4 py-3 text-sm leading-6 text-stone-700">
                       {item}
@@ -252,7 +252,7 @@ export function PublicHome() {
               </h2>
             </div>
             <div className="rounded-full border border-stone-200 bg-white px-4 py-2 text-sm text-stone-600">
-              One joined-up place to work, respond, and stay in control
+              One place to work, reply, and stay in control
             </div>
           </div>
 
@@ -272,18 +272,18 @@ export function PublicHome() {
         <section id="platform" className="app-surface rounded-[2rem] p-6 md:p-7">
           <div className="flex flex-col gap-3 border-b app-divider pb-5 md:flex-row md:items-end md:justify-between">
             <div>
-              <p className="app-kicker">How Annabelle Works In Practice</p>
+              <p className="app-kicker">Best CRM Snapshots</p>
               <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
-                Not a brochure promise. A working operational reality.
+                Not a brochure promise. A real working system.
               </h2>
             </div>
             <Link href="/login" className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium">
-              See the live entrances
+              See the real screens
             </Link>
           </div>
 
           <div className="mt-6 grid gap-4 xl:grid-cols-3">
-            {operatingLayers.map((item) => (
+            {crmSnapshots.map((item) => (
               <article key={item.title} className="rounded-[1.55rem] border border-stone-200 bg-white/92 p-5">
                 <p className="app-kicker">{item.label}</p>
                 <h3 className="mt-3 text-xl font-semibold text-stone-900">{item.title}</h3>
@@ -293,6 +293,37 @@ export function PublicHome() {
                 </Link>
               </article>
             ))}
+          </div>
+        </section>
+
+        <section id="waitlist" className="app-surface rounded-[2rem] p-6 md:p-7">
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+            <div>
+              <p className="app-kicker">Waiting list</p>
+              <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">Commercial licences are not open just yet</h2>
+              <p className="mt-4 max-w-3xl text-base leading-8 text-stone-700">
+                We are still shaping Annabelle with care. If you want early access when agency slots open, join the waiting list now and we will keep you close to the rollout.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <a href="mailto:hello@renovoai.co.uk?subject=Annabelle%20waiting%20list" className="app-primary-button rounded-2xl px-5 py-3 text-sm font-medium">
+                  Join the waiting list
+                </a>
+                <Link href="/login" className="app-secondary-button rounded-2xl px-5 py-3 text-sm font-medium">
+                  See the live sign-in
+                </Link>
+              </div>
+            </div>
+
+            <div className="rounded-[1.7rem] border border-stone-200 bg-white/92 p-5">
+              <p className="app-kicker">What happens next</p>
+              <div className="mt-4 space-y-3">
+                {['We review agencies carefully before opening access.', 'You hear from us when early slots open.', 'You get the real product story, not a sales deck.'].map((item) => (
+                  <div key={item} className="rounded-[1.2rem] border border-stone-200 bg-stone-50/80 px-4 py-3 text-sm leading-6 text-stone-700">
+                    {item}
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </section>
 
@@ -340,7 +371,7 @@ export function PublicHome() {
                 The showcase is connected to a working reality that already has operational depth
               </h2>
               <p className="mt-4 max-w-3xl text-base leading-8 text-stone-700">
-                This is not a blank marketing shell. The world behind Annabelle already includes operator queue handling, linked records, maintenance, rent, lease lifecycle, reporting, portals, and a Scotland knowledge layer inside one joined-up CRM That matters because the story on this page is supported by a real structure underneath it.
+                This is not a blank marketing shell. Behind Annabelle there is already a real CRM with queue handling, linked records, maintenance, rent, lease dates, reporting, portals, and Scotland knowledge.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <Link href="/login" className="app-primary-button rounded-2xl px-5 py-3 text-sm font-medium">
@@ -375,8 +406,8 @@ export function PublicHome() {
               She brings value because she holds the operational thread together around the clock, helps the team recover breathing room, and turns messy letting agency work into a clearer system that can actually be managed.
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
-              <a href="tel:01313812887" className="app-primary-button rounded-2xl px-5 py-3 text-sm font-medium">
-                Speak to Annabelle now
+              <a href="#waitlist" className="app-primary-button rounded-2xl px-5 py-3 text-sm font-medium">
+                Join the waiting list
               </a>
               <Link href="/login" className="app-secondary-button rounded-2xl px-5 py-3 text-sm font-medium">
                 Try the live journey
