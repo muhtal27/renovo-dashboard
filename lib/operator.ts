@@ -13,7 +13,32 @@ export type CurrentOperator = {
   profile: OperatorProfile | null
 }
 
+const OPERATOR_PROFILE_CACHE_TTL_MS = 5 * 60 * 1000
+
+const operatorProfileCache = new Map<
+  string,
+  {
+    loadedAt: number
+    profile: OperatorProfile | null
+  }
+>()
+
+const operatorProfileInflight = new Map<string, Promise<OperatorProfile | null>>()
+
 export async function getOperatorProfile(userId: string) {
+  const cached = operatorProfileCache.get(userId)
+
+  if (cached && Date.now() - cached.loadedAt < OPERATOR_PROFILE_CACHE_TTL_MS) {
+    return cached.profile
+  }
+
+  const inflight = operatorProfileInflight.get(userId)
+
+  if (inflight) {
+    return inflight
+  }
+
+  const request = (async () => {
   const { data: profile, error: profileError } = await supabase
     .from('users_profiles')
     .select('id, full_name, is_active, role')
@@ -24,7 +49,23 @@ export async function getOperatorProfile(userId: string) {
     throw profileError
   }
 
-  return (profile as OperatorProfile | null) ?? null
+    const normalizedProfile = (profile as OperatorProfile | null) ?? null
+
+    operatorProfileCache.set(userId, {
+      loadedAt: Date.now(),
+      profile: normalizedProfile,
+    })
+
+    return normalizedProfile
+  })()
+
+  operatorProfileInflight.set(userId, request)
+
+  try {
+    return await request
+  } finally {
+    operatorProfileInflight.delete(userId)
+  }
 }
 
 export async function getCurrentOperator(): Promise<CurrentOperator> {

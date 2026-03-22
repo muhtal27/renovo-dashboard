@@ -2,7 +2,6 @@
 
 import type { ReactNode } from 'react'
 import { OperatorNav } from '@/app/operator-nav'
-import { OperatorSessionState } from '@/app/operator-session-state'
 import { getOperatorLabel } from '@/lib/operator'
 import { useOperatorGate } from '@/lib/use-operator-gate'
 
@@ -15,11 +14,7 @@ export function OperatorLayout({
   pageTitle?: string
   pageDescription?: string
 }) {
-  const { operator, authLoading } = useOperatorGate()
-
-  if (authLoading || !operator?.authUser) {
-    return <OperatorSessionState authLoading={authLoading} operator={operator} />
-  }
+  const { operator } = useOperatorGate()
 
   const operatorLabel = getOperatorLabel(operator)
 

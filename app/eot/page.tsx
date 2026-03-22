@@ -192,17 +192,6 @@ export default function EotCasesPage() {
       setLoading(true)
       setError(null)
 
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-
-      if (!session?.user) {
-        if (!cancelled) {
-          setLoading(false)
-        }
-        return
-      }
-
       const eotResponse = await supabase
         .from('end_of_tenancy_cases')
         .select(

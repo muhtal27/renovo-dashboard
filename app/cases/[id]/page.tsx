@@ -30,7 +30,6 @@ import {
   toNumber,
 } from '@/app/cases/[id]/workspace-utils'
 import { OperatorNav } from '@/app/operator-nav'
-import { OperatorSessionState } from '@/app/operator-session-state'
 import { endOfTenancyApiRequest } from '@/lib/end-of-tenancy/client-api'
 import { getOperatorLabel } from '@/lib/operator'
 import { supabase } from '@/lib/supabase'
@@ -127,7 +126,7 @@ function CaseWorkspaceSkeleton() {
 export default function CaseWorkspacePage() {
   const params = useParams<{ id: string }>()
   const caseId = typeof params?.id === 'string' ? params.id : ''
-  const { operator, authLoading, authError } = useOperatorGate()
+  const { operator } = useOperatorGate()
   const [baseCase, setBaseCase] = useState<BaseCasePreview | null>(null)
   const [envelope, setEnvelope] = useState<WorkspaceEnvelope | null>(null)
   const [loading, setLoading] = useState(true)
@@ -143,14 +142,23 @@ export default function CaseWorkspacePage() {
     setLoading(true)
     setError(null)
 
-    const caseResponse = await supabase
-      .from('cases')
-      .select('id, case_number, summary, status')
-      .eq('id', caseId)
-      .maybeSingle()
+    const [caseResponse, eotResponse] = await Promise.all([
+      supabase
+        .from('cases')
+        .select('id, case_number, summary, status')
+        .eq('id', caseId)
+        .maybeSingle(),
+      supabase
+        .from('end_of_tenancy_cases')
+        .select('id')
+        .eq('case_id', caseId)
+        .maybeSingle(),
+    ])
 
-    if (caseResponse.error) {
-      setError(caseResponse.error.message)
+    const bootstrapError = caseResponse.error || eotResponse.error
+
+    if (bootstrapError) {
+      setError(bootstrapError.message)
       setLoading(false)
       return
     }
@@ -160,18 +168,6 @@ export default function CaseWorkspacePage() {
 
     if (!caseRow) {
       setError('Case not found.')
-      setLoading(false)
-      return
-    }
-
-    const eotResponse = await supabase
-      .from('end_of_tenancy_cases')
-      .select('id')
-      .eq('case_id', caseId)
-      .maybeSingle()
-
-    if (eotResponse.error) {
-      setError(eotResponse.error.message)
       setLoading(false)
       return
     }
@@ -275,9 +271,8 @@ export default function CaseWorkspacePage() {
   }, [caseId])
 
   useEffect(() => {
-    if (!operator?.authUser || authError) return
     void loadWorkspace()
-  }, [authError, loadWorkspace, operator?.authUser])
+  }, [loadWorkspace])
 
   useEffect(() => {
     if (!envelope) return
@@ -411,10 +406,6 @@ export default function CaseWorkspacePage() {
     } finally {
       setInitializing(false)
     }
-  }
-
-  if (authLoading || !operator?.authUser) {
-    return <OperatorSessionState authLoading={authLoading} operator={operator} />
   }
 
   if (loading) {
