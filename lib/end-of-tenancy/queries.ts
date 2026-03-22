@@ -81,6 +81,15 @@ const MOVE_OUT_CHECKLIST_ITEM_SELECT =
 const MOVE_OUT_TRACKER_EVENT_SELECT =
   'id, move_out_tracker_id, actor_user_id, actor_type, source_table, source_record_id, event_type, title, detail, metadata, is_portal_visible, created_at'
 
+const END_OF_TENANCY_CASE_LIST_CASE_SELECT =
+  'id, case_number, status, property_id, assigned_user_id, last_activity_at, updated_at, created_at'
+
+const END_OF_TENANCY_CASE_LIST_TENANCY_SELECT =
+  'id, property_id, tenant_contact_id, landlord_contact_id, end_date'
+
+const END_OF_TENANCY_CASE_LIST_PROPERTY_SELECT =
+  'id, address_line_1, address_line_2, city, postcode'
+
 function getClient(supabase?: DbClient) {
   return supabase ?? getSupabaseServiceRoleClient()
 }
@@ -113,84 +122,6 @@ async function requireMany<T>(
   }
 
   return data ?? []
-}
-
-async function loadCasesByIds(supabase: DbClient, caseIds: string[]) {
-  if (caseIds.length === 0) {
-    return new Map<string, CaseRow>()
-  }
-
-  const rows = await requireMany<CaseRow>(
-    'Unable to load cases',
-    supabase.from('cases').select(CASE_SELECT).in('id', caseIds)
-  )
-
-  return new Map(rows.map((row) => [row.id, row]))
-}
-
-async function loadTenanciesByIds(supabase: DbClient, tenancyIds: string[]) {
-  if (tenancyIds.length === 0) {
-    return new Map<string, TenancyRow>()
-  }
-
-  const rows = await requireMany<TenancyRow>(
-    'Unable to load tenancies',
-    supabase.from('tenancies').select(TENANCY_SELECT).in('id', tenancyIds)
-  )
-
-  return new Map(rows.map((row) => [row.id, row]))
-}
-
-async function loadPropertiesByIds(supabase: DbClient, propertyIds: string[]) {
-  if (propertyIds.length === 0) {
-    return new Map<string, PropertyRow>()
-  }
-
-  const rows = await requireMany<PropertyRow>(
-    'Unable to load properties',
-    supabase.from('properties').select(PROPERTY_SELECT).in('id', propertyIds)
-  )
-
-  return new Map(rows.map((row) => [row.id, row]))
-}
-
-async function loadContactsByIds(supabase: DbClient, contactIds: string[]) {
-  if (contactIds.length === 0) {
-    return new Map<string, ContactSummaryRow>()
-  }
-
-  const rows = await requireMany<ContactSummaryRow>(
-    'Unable to load contacts',
-    supabase.from('contacts').select('id, full_name').in('id', contactIds)
-  )
-
-  return new Map(rows.map((row) => [row.id, row]))
-}
-
-async function loadUsersByIds(supabase: DbClient, userIds: string[]) {
-  if (userIds.length === 0) {
-    return new Map<string, UserProfileSummaryRow>()
-  }
-
-  const rows = await requireMany<UserProfileSummaryRow>(
-    'Unable to load users',
-    supabase.from('users_profiles').select('id, full_name').in('id', userIds)
-  )
-
-  return new Map(rows.map((row) => [row.id, row]))
-}
-
-async function loadDepositClaimsByIds(supabase: DbClient, depositClaimIds: string[]) {
-  if (depositClaimIds.length === 0) {
-    return new Map<string, DepositClaimRow>()
-  }
-
-  const rows = await requireMany<DepositClaimRow>(
-    'Unable to load deposit claims',
-    supabase.from('deposit_claims').select(DEPOSIT_CLAIM_SELECT).in('id', depositClaimIds)
-  )
-
-  return new Map(rows.map((row) => [row.id, row]))
 }
 
 export async function createEndOfTenancyCaseExtension(
@@ -254,48 +185,93 @@ export async function listEndOfTenancyCases(options?: {
 
   const eotCases = await requireMany<EndOfTenancyCaseRow>('Unable to list end-of-tenancy cases', query)
 
-  const caseMap = await loadCasesByIds(supabase, dedupe(eotCases.map((row) => row.case_id)))
-  const tenancyMap = await loadTenanciesByIds(supabase, dedupe(eotCases.map((row) => row.tenancy_id)))
-  const depositClaimMap = await loadDepositClaimsByIds(
-    supabase,
-    dedupe(eotCases.map((row) => row.deposit_claim_id))
-  )
-  const trackerRows =
-    eotCases.length > 0
-      ? await requireMany<MoveOutTrackerRow>(
-          'Unable to load move-out trackers',
-          supabase
-            .from('move_out_trackers')
-            .select(MOVE_OUT_TRACKER_SELECT)
-            .in('end_of_tenancy_case_id', dedupe(eotCases.map((row) => row.id)))
-        )
-      : []
-  const trackerByEndOfTenancyCaseId = new Map(
-    trackerRows.map((row) => [row.end_of_tenancy_case_id, row] as const)
-  )
+  if (eotCases.length === 0) {
+    return []
+  }
 
-  const propertyMap = await loadPropertiesByIds(
-    supabase,
-    dedupe(
-      eotCases.map((row) => {
-        const tenancy = tenancyMap.get(row.tenancy_id)
-        const baseCase = caseMap.get(row.case_id)
-        return tenancy?.property_id ?? baseCase?.property_id ?? null
-      })
-    )
+  const caseIds = dedupe(eotCases.map((row) => row.case_id))
+  const tenancyIds = dedupe(eotCases.map((row) => row.tenancy_id))
+
+  const [caseResult, tenancyResult] = await Promise.all([
+    caseIds.length
+      ? supabase.from('cases').select(END_OF_TENANCY_CASE_LIST_CASE_SELECT).in('id', caseIds)
+      : Promise.resolve({ data: [], error: null }),
+    tenancyIds.length
+      ? supabase
+          .from('tenancies')
+          .select(END_OF_TENANCY_CASE_LIST_TENANCY_SELECT)
+          .in('id', tenancyIds)
+      : Promise.resolve({ data: [], error: null }),
+  ])
+
+  if (caseResult.error) {
+    throw new Error(`Unable to load cases: ${caseResult.error.message}`)
+  }
+
+  if (tenancyResult.error) {
+    throw new Error(`Unable to load tenancies: ${tenancyResult.error.message}`)
+  }
+
+  const caseRows = ((caseResult.data || []) as unknown) as CaseRow[]
+  const tenancyRows = ((tenancyResult.data || []) as unknown) as TenancyRow[]
+
+  const caseMap = new Map(caseRows.map((row) => [row.id, row]))
+  const tenancyMap = new Map(tenancyRows.map((row) => [row.id, row]))
+
+  const propertyIds = dedupe(
+    eotCases.map((row) => {
+      const tenancy = tenancyMap.get(row.tenancy_id)
+      const baseCase = caseMap.get(row.case_id)
+      return tenancy?.property_id ?? baseCase?.property_id ?? null
+    })
   )
-  const contactMap = await loadContactsByIds(
-    supabase,
-    dedupe(
-      eotCases.flatMap((row) => {
-        const tenancy = tenancyMap.get(row.tenancy_id)
-        return [tenancy?.tenant_contact_id, tenancy?.landlord_contact_id]
-      })
-    )
+  const contactIds = dedupe(
+    eotCases.flatMap((row) => {
+      const tenancy = tenancyMap.get(row.tenancy_id)
+      return [tenancy?.tenant_contact_id, tenancy?.landlord_contact_id]
+    })
   )
-  const userMap = await loadUsersByIds(
-    supabase,
-    dedupe(eotCases.map((row) => caseMap.get(row.case_id)?.assigned_user_id ?? null))
+  const userIds = dedupe(eotCases.map((row) => caseMap.get(row.case_id)?.assigned_user_id ?? null))
+
+  const [propertyResult, contactResult, userResult] = await Promise.all([
+    propertyIds.length
+      ? supabase
+          .from('properties')
+          .select(END_OF_TENANCY_CASE_LIST_PROPERTY_SELECT)
+          .in('id', propertyIds)
+      : Promise.resolve({ data: [], error: null }),
+    contactIds.length
+      ? supabase.from('contacts').select('id, full_name').in('id', contactIds)
+      : Promise.resolve({ data: [], error: null }),
+    userIds.length
+      ? supabase.from('users_profiles').select('id, full_name').in('id', userIds)
+      : Promise.resolve({ data: [], error: null }),
+  ])
+
+  if (propertyResult.error) {
+    throw new Error(`Unable to load properties: ${propertyResult.error.message}`)
+  }
+
+  if (contactResult.error) {
+    throw new Error(`Unable to load contacts: ${contactResult.error.message}`)
+  }
+
+  if (userResult.error) {
+    throw new Error(`Unable to load users: ${userResult.error.message}`)
+  }
+
+  const propertyRows = ((propertyResult.data || []) as unknown) as PropertyRow[]
+  const contactRows = ((contactResult.data || []) as unknown) as ContactSummaryRow[]
+  const userRows = ((userResult.data || []) as unknown) as UserProfileSummaryRow[]
+
+  const propertyMap = new Map(
+    propertyRows.map((row) => [row.id, row])
+  )
+  const contactMap = new Map(
+    contactRows.map((row) => [row.id, row])
+  )
+  const userMap = new Map(
+    userRows.map((row) => [row.id, row])
   )
 
   return eotCases.map<EndOfTenancyCaseListItem>((endOfTenancyCase) => {
@@ -315,10 +291,8 @@ export async function listEndOfTenancyCases(options?: {
       assignedOperator: caseRow?.assigned_user_id
         ? userMap.get(caseRow.assigned_user_id) ?? null
         : null,
-      depositClaim: endOfTenancyCase.deposit_claim_id
-        ? depositClaimMap.get(endOfTenancyCase.deposit_claim_id) ?? null
-        : null,
-      moveOutTracker: trackerByEndOfTenancyCaseId.get(endOfTenancyCase.id) ?? null,
+      depositClaim: null,
+      moveOutTracker: null,
     }
   })
 }
