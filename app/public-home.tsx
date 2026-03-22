@@ -265,13 +265,13 @@ export function PublicHome({
           </div>
         </section>
 
-        <section id="workflow" className="bg-stone-900 rounded-[2rem] p-6 md:p-7">
+        <section id="workflow" className="bg-[linear-gradient(135deg,rgba(245,243,240,0.95),rgba(238,235,229,0.9))] rounded-[2rem] border border-stone-200 p-6 md:p-7">
           <div className="max-w-4xl">
-            <p className="app-kicker text-stone-400">Workflow</p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white md:text-4xl">
+            <p className="app-kicker text-stone-500">Workflow</p>
+            <h2 className="mt-3 text-3xl font-semibold tracking-tight text-stone-900 md:text-4xl">
               Purpose-built around the real end-of-tenancy review path
             </h2>
-            <p className="mt-4 text-base leading-8 text-stone-300">
+            <p className="mt-4 text-base leading-8 text-stone-700">
               Renovo is not a generic assistant bolted onto a property dashboard. It is structured
               around the property manager journey from evidence intake to reviewed recommendation and claim
               output.
@@ -280,12 +280,12 @@ export function PublicHome({
 
           <div className="mt-6 grid gap-4 xl:grid-cols-5">
             {workflowSteps.map((item) => (
-              <article key={item.step} className="rounded-[1.45rem] border border-stone-700 bg-stone-800 p-5">
+              <article key={item.step} className="rounded-[1.45rem] border border-stone-200 bg-white/92 p-5">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-stone-500">
                   Step {item.step}
                 </p>
-                <h3 className="mt-3 text-lg font-semibold text-white">{item.title}</h3>
-                <p className="mt-3 text-sm leading-7 text-stone-400">{item.body}</p>
+                <h3 className="mt-3 text-lg font-semibold text-stone-900">{item.title}</h3>
+                <p className="mt-3 text-sm leading-7 text-stone-600">{item.body}</p>
               </article>
             ))}
           </div>
