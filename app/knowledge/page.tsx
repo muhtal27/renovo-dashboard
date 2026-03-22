@@ -1,352 +1,466 @@
-'use client'
+import KnowledgeClient, {
+  type KnowledgeArticle,
+} from '@/app/knowledge/knowledge-client'
 
-import { useMemo, useState } from 'react'
-import { OperatorLayout } from '@/app/operator-layout'
-
-type RegionFilter = 'all' | 'england-wales' | 'scotland'
-
-type GuidanceArticle = {
-  title: string
-  category: string
-  regions: RegionFilter[]
-  summary: string
-  examples: string[]
-  evidence: string[]
-  mistakes: string[]
-  sourceLabel: string
-  sourceHref: string
-}
-
-const LAST_REVIEWED = 'March 2026'
-
-const CATEGORY_ITEMS = [
-  'Fair wear and tear',
-  'Betterment and proportionality',
-  'Evidence requirements',
-  'Cleaning claims',
-  'Damage and redecoration',
-  'Missing items',
-  'Rent arrears',
-  'Scheme and dispute process',
-  'Scotland notes',
-  'Templates and checklists',
-] as const
-
-const GUIDANCE_ARTICLES: GuidanceArticle[] = [
+const GUIDANCE_ARTICLES: KnowledgeArticle[] = [
   {
     title: 'Fair wear and tear',
-    category: 'Fair wear and tear',
+    category: 'Dispute Handling',
     regions: ['all', 'england-wales', 'scotland'],
     summary:
-      'Normal deterioration from reasonable use should not be treated as tenant-caused damage. Age, quality, tenancy length, and the number of occupants all matter when deciding whether a mark, scuff, or worn surface is ordinary use or a compensable loss.',
-    examples: [
-      'Flattened carpet pile in a busy walkway is usually wear and tear; a fresh stain or burn mark is more likely to be damage.',
-      'Light furniture shading and minor scuffs often follow normal use over a longer tenancy; deep gouges or broken fittings point to damage.',
-    ],
-    evidence: [
-      'Signed check in inventory with clear descriptions of age and condition.',
-      'Check out report and dated photos showing the exact area now in dispute.',
-      'Tenancy length, occupancy details, and any prior repair history for the item.',
-    ],
-    mistakes: [
-      'Treating age-related decline as if the item started the tenancy new.',
-      'Relying on after photos alone without a check in baseline.',
-    ],
+      'Normal deterioration from reasonable use should not be treated as tenant-caused damage. Age, quality, tenancy length, and occupancy all matter when deciding whether a mark, worn surface, or faded finish is ordinary use or a compensable loss.',
+    content: `**Practical summary**
+Normal wear from everyday living is not usually recoverable from the deposit. Managers should look at age, quality, tenancy length, occupancy, and how heavily an item was used before deciding whether a loss goes beyond ordinary deterioration.
+
+**Practical examples**
+- Carpet pile flattening in a main walkway is usually wear and tear, while a fresh burn or heavy staining is more likely to be damage.
+- Light wall scuffs after a longer tenancy may be ordinary use, while holes, gouges, or unauthorised decoration are more likely to justify a deduction.
+
+**What evidence to gather**
+- Signed check in inventory with condition notes and dated photos.
+- Check out report showing the same room, item, or surface at tenancy end.
+- Tenancy length, occupancy details, and any repair history that affects expected lifespan.
+
+**Common mistakes**
+- Treating an older item as if it was new at check in.
+- Relying on end-of-tenancy photos without a clear starting baseline.
+
+**What to remember**
+1. Ask what normal use would look like over this tenancy length.
+2. Link every deduction to a before-and-after evidence trail.
+3. Keep betterment in mind if the item was already ageing.`,
     sourceLabel: 'mydeposits',
     sourceHref:
       'https://www.mydeposits.co.uk/content-hub/fair-wear-and-tear-what-is-it-and-how-is-it-applied/',
   },
   {
     title: 'Betterment',
-    category: 'Betterment and proportionality',
+    category: 'Deposit Schemes',
     regions: ['all', 'england-wales', 'scotland'],
     summary:
       'A deduction should put the landlord back in the position they should reasonably have been in, not leave them with something newer or better at the tenant’s expense. Older items usually justify a reduced, proportionate award rather than full replacement cost.',
-    examples: [
-      'Replacing a five-year-old carpet with a brand-new one rarely supports a full claim for the total invoice.',
-      'If cleaning could solve the issue, a claim for full replacement will often be hard to justify.',
-    ],
-    evidence: [
-      'Age and original quality of the item.',
-      'Invoices or quotes showing repair versus replacement options.',
-      'Photos and reports explaining why a cheaper remedy would not work.',
-    ],
-    mistakes: [
-      'Claiming new-for-old costs without any allowance for age or lifespan.',
-      'Skipping evidence on why replacement was necessary instead of repair or cleaning.',
-    ],
+    content: `**Practical summary**
+Betterment means improving the landlord's position beyond the condition they could reasonably expect at tenancy end. Deposit awards should usually reflect age, quality, and likely remaining life rather than the full cost of buying a brand-new replacement.
+
+**Practical examples**
+- Replacing a five-year-old carpet with a new one rarely supports a full claim for the whole invoice.
+- If a cupboard door can be repaired safely, a full kitchen replacement cost will usually be hard to justify.
+
+**What evidence to gather**
+- Age and original quality of the item.
+- Repair and replacement quotes so proportionality can be explained.
+- Before and after evidence showing why cleaning or repair would not solve the issue.
+
+**Common mistakes**
+- Claiming new-for-old costs with no allowance for age or use.
+- Skipping evidence on why replacement was necessary instead of repair or cleaning.
+
+**What to remember**
+1. Lifespan estimates are commonly used reference points, not fixed rules.
+2. Cleaning issues are different from depreciation and replacement issues.
+3. Show how the figure was reduced to avoid betterment.`,
     sourceLabel: 'mydeposits',
     sourceHref:
       'https://www.mydeposits.co.uk/content-hub/rules-of-claiming-for-deposit-deductions/',
   },
   {
     title: 'Evidence checklist',
-    category: 'Evidence requirements',
+    category: 'Evidence and Documentation',
     regions: ['all', 'england-wales', 'scotland'],
     summary:
       'Strong deposit decisions are usually document-led. Schemes expect evidence that is specific to the disputed issue and easy to match back to the tenancy, the item, and the claimed amount.',
-    examples: [
-      'A rent arrears claim is stronger when the statement clearly shows the person, property, period, and balance calculation.',
-      'Damage claims are easier to defend when photos are dated and tied to a room, item, and report entry.',
-    ],
-    evidence: [
-      'Tenancy agreement, signed check in inventory, and check out report.',
-      'Dated photos, invoices or quotes, and a rent statement if arrears are part of the claim.',
-      'Relevant correspondence or notes only, not a full inbox export.',
-    ],
-    mistakes: [
-      'Submitting large bundles of irrelevant material that do not relate to the issue in dispute.',
-      'Using unlabeled photos with no explanation of what the adjudicator is meant to see.',
-    ],
+    content: `**Practical summary**
+Good evidence is specific, dated, and easy to follow. Managers should organise the file so each proposed deduction can be traced back to the tenancy agreement, inventories, photos, and any supporting invoices or notes.
+
+**What evidence to gather**
+- Tenancy agreement, signed check in inventory, and check out report.
+- Dated photos, invoices or quotes, and a rent statement if arrears are part of the claim.
+- Relevant correspondence or notes only, not a full inbox export.
+
+**Practical examples**
+- A rent arrears claim is stronger when the statement clearly shows the person, property, period, and balance calculation.
+- Damage claims are easier to defend when photos are labelled to the room, item, and report entry.
+
+**Common mistakes**
+- Submitting large bundles of irrelevant material that do not relate to the issue in dispute.
+- Using unlabelled photos with no explanation of what the reviewer is meant to see.
+
+**What to remember**
+1. The file should explain itself without extra verbal context.
+2. Group evidence by issue and amount.
+3. If a document does not support a deduction, leave it out of the main bundle.`,
     sourceLabel: 'DPS',
     sourceHref:
       'https://www.depositprotection.com/disputes/how-to-have-a-successful-tenancy-from-start-to-finish/gathering-evidence',
   },
   {
     title: 'Deposit dispute process',
-    category: 'Scheme and dispute process',
+    category: 'Deposit Schemes',
     regions: ['england-wales'],
     summary:
       'In England and Wales, deposit schemes offer free dispute resolution when the parties cannot agree on deductions. The decision turns heavily on the written evidence, so a thin file is usually harder to defend than a well-linked case pack.',
-    examples: [
-      'If a landlord and tenant disagree about cleaning or damage, both sides can submit documentary evidence to the scheme.',
-      'A claim with clear reports, dated photos, and invoices is easier to assess than a broad narrative with no supporting documents.',
-    ],
-    evidence: [
-      'The proposed repayment split and the reason for each deduction.',
-      'Issue-specific reports, photos, invoices, and any relevant tenancy clauses.',
-      'A clean chronology of what happened at the end of the tenancy.',
-    ],
-    mistakes: [
-      'Assuming the scheme will ask for missing evidence later.',
-      'Raising a dispute without first organising the evidence by issue and amount.',
-    ],
+    content: `**Practical summary**
+Scheme adjudication is usually a document-based process. Once the parties cannot agree, the quality and organisation of the written evidence becomes central to the outcome.
+
+**Practical examples**
+- If a landlord and tenant disagree about cleaning or damage, both sides can submit documentary evidence to the scheme.
+- A claim with clear reports, dated photos, and invoices is easier to assess than a broad narrative with no supporting documents.
+
+**What evidence to gather**
+- The proposed repayment split and the reason for each deduction.
+- Issue-specific reports, photos, invoices, and any relevant tenancy clauses.
+- A clean chronology of what happened at tenancy end.
+
+**Common mistakes**
+- Assuming the scheme will ask for missing evidence later.
+- Raising a dispute without first organising the evidence by issue and amount.
+
+**What to remember**
+1. Evidence windows are typically time-limited.
+2. Clear line-by-line explanations reduce avoidable back and forth.
+3. A weaker claim can often be narrowed before it reaches formal adjudication.`,
     sourceLabel: 'TDS',
     sourceHref:
       'https://custodial.tenancydepositscheme.com/tools-and-guides/faqs/tenants/what-evidence-do-i-need-to-submit/',
   },
   {
     title: 'Compliance basics',
-    category: 'Scheme and dispute process',
+    category: 'Deposit Schemes',
     regions: ['england-wales'],
     summary:
       'Deposit protection details are not just admin. In England and Wales the deposit must be protected promptly and the tenant must receive the prescribed information, including scheme details and how disputes are handled.',
-    examples: [
-      'At tenancy end, scheme name and reference details make it far easier to move quickly into repayment or dispute resolution.',
-      'Missing prescribed information can complicate the landlord position before any deduction is even assessed.',
-    ],
-    evidence: [
-      'Deposit protection certificate or confirmation.',
-      'Date the deposit was received and date it was protected.',
-      'Copy of the prescribed information pack given to the tenant.',
-    ],
-    mistakes: [
-      'Treating deposit scheme details as separate from the end-of-tenancy file.',
-      'Starting a claim without confirming the scheme record and prescribed information trail.',
-    ],
+    content: `**Practical summary**
+Deposit protection records should be part of the end-of-tenancy file, not kept separately. If the scheme details, timing, or prescribed information trail are unclear, the landlord's position is harder to defend before any deduction is even assessed.
+
+**What evidence to gather**
+- Deposit protection certificate or confirmation.
+- Date the deposit was received and date it was protected.
+- Copy of the prescribed information pack given to the tenant.
+
+**Practical examples**
+- At tenancy end, scheme name and reference details make it much easier to move quickly into repayment or dispute resolution.
+- Missing prescribed information can complicate the position before the deduction evidence is reviewed.
+
+**Common mistakes**
+- Treating deposit scheme details as separate from the tenancy-end evidence bundle.
+- Starting a claim without confirming the scheme record and prescribed information trail.
+
+**What to remember**
+1. Compliance paperwork supports the deduction process.
+2. Scheme details should be easy to find in the file.
+3. If the record is incomplete, fix the file position before escalating a dispute.`,
     sourceLabel: 'GOV.UK',
-    sourceHref: 'https://www.gov.uk/tenancy-deposit-protection/information-landlords-must-give-tenants',
+    sourceHref:
+      'https://www.gov.uk/tenancy-deposit-protection/information-landlords-must-give-tenants',
   },
   {
     title: 'Scotland notes',
-    category: 'Scotland notes',
+    category: 'Scotland',
     regions: ['scotland'],
     summary:
-      'Scottish tenancy deposit processes follow Scotland-specific scheme rules. Managers should check the approved Scottish scheme guidance and use the tenancy location as the starting point before applying any end-of-tenancy process assumptions from England and Wales.',
-    examples: [
-      'The approved scheme and return process should be checked against the Scottish scheme record before deductions are proposed.',
-      'Scotland-specific timing and information requirements should be confirmed from the official guidance for the tenancy.',
-    ],
-    evidence: [
-      'Deposit protection confirmation showing the Scottish approved scheme used.',
-      'Tenancy location, tenancy start date, and any scheme correspondence about return or dispute steps.',
-      'The same core tenancy evidence pack: agreement, inventories, check out report, dated photos, and invoices where relevant.',
-    ],
-    mistakes: [
-      'Assuming England and Wales scheme steps apply unchanged to a Scottish tenancy.',
-      'Proceeding without checking the official Scottish scheme guidance for the tenancy location.',
-    ],
+      'Scottish tenancy deposit processes follow Scotland-specific scheme rules. Managers should check the approved Scottish scheme guidance and use the tenancy location as the starting point before applying any process assumptions from England and Wales.',
+    content: `**Practical summary**
+Scottish tenancy-end handling often uses the same practical evidence standards as elsewhere in the UK, but the surrounding process rules are Scotland-specific. Managers should start with the tenancy location, the approved scheme record, and the current Scottish guidance before proposing deductions.
+
+**What evidence to gather**
+- Deposit protection confirmation showing the approved Scottish scheme used.
+- Tenancy location, tenancy start date, and any scheme correspondence about return or dispute steps.
+- The core tenancy evidence pack: agreement, inventories, check out report, dated photos, and invoices where relevant.
+
+**Common mistakes**
+- Assuming England and Wales scheme steps apply unchanged to a Scottish tenancy.
+- Proceeding without checking the scheme process for the tenancy location.
+
+**What to remember**
+1. Scotland-specific scheme steps can affect timings and evidence handling.
+2. The same evidence quality standards still matter.
+3. Check the scheme process before sending deduction proposals.`,
     sourceLabel: 'mygov.scot',
     sourceHref: 'https://www.mygov.scot/landlord-deposit/protection',
   },
+  {
+    title: 'Private Residential Tenancy — Scotland',
+    category: 'Scotland',
+    regions: ['scotland'],
+    summary:
+      'The Private Residential Tenancy applies to most new private tenancies in Scotland from 1 December 2017. This guide explains what it means for end-of-tenancy handling and deposit disputes.',
+    content: `**Practical summary**
+Most new private tenancies in Scotland from 1 December 2017 are private residential tenancies. They are open-ended rather than fixed-term in the usual sense, tenants can normally leave by giving notice, and landlords must rely on statutory grounds if they want possession.
+
+**What this means at tenancy end**
+- There is no Section 21 equivalent in Scotland.
+- Older assured or short assured tenancies did not automatically convert just because the new regime started.
+- Evidence gathering and deduction assessment still matter in the same practical way at tenancy end.
+
+**Operational impact**
+- Managers should confirm the tenancy type before relying on notices or process assumptions.
+- Deposit claims still depend on inventories, check out evidence, photos, and proportionate deduction reasoning.
+- The legal framework around possession and notice is different from England and Wales, so guidance should be checked for the tenancy location.
+
+**What to remember**
+1. PRT status affects the tenancy framework, not the need for strong end-of-tenancy evidence.
+2. Check the tenancy start date and tenancy type first.
+3. Keep legal process questions separate from deduction evidence analysis.`,
+    sourceLabel: 'GOV.SCOT',
+    sourceHref:
+      'https://www.gov.scot/publications/private-residential-tenancies-tenants-guide/',
+  },
+  {
+    title: 'Safe Deposits Scotland — How Disputes Work',
+    category: 'Scotland',
+    regions: ['scotland'],
+    summary:
+      'A practical guide to how disputes are handled through Safe Deposits Scotland, including evidence expectations and what managers should prepare before raising a dispute.',
+    content: `**Practical summary**
+When deductions are disputed, both parties may be invited to submit evidence through the scheme process. Preparation matters because evidence windows are typically time-limited, and timings can vary by scheme process and how complete the submissions are.
+
+**Evidence that usually carries the most weight**
+- Signed check in report.
+- Check out report tied to the same rooms or items.
+- Dated photos.
+- Invoices or repair quotes.
+- Clear written deduction summary and relevant communication records.
+
+**Practical approach**
+- Prepare the evidence pack before a dispute is raised if possible.
+- Keep the written deduction schedule concise and line-by-line.
+- Make sure each amount can be traced back to the supporting document.
+
+**Common mistakes**
+- Uploading large files with no explanation of what each item proves.
+- Relying on narrative alone without before-and-after evidence.
+
+**What to remember**
+1. Evidence quality matters more than volume.
+2. Scheme timelines can vary, so avoid leaving preparation until the last minute.
+3. A well-organised deduction summary makes adjudication easier.`,
+    sourceLabel: 'SafeDeposits Scotland',
+    sourceHref: 'https://www.safedepositsscotland.com/',
+  },
+  {
+    title: 'First-tier Tribunal Scotland — Housing and Property Chamber',
+    category: 'Scotland',
+    regions: ['scotland'],
+    summary:
+      'When the First-tier Tribunal becomes relevant in Scottish tenancy and deposit matters, and how it differs from scheme adjudication.',
+    content: `**Practical summary**
+The First-tier Tribunal for Scotland (Housing and Property Chamber) is the formal forum for many landlord-tenant disputes in Scotland. Scheme adjudication and tribunal proceedings are different processes, and managers should not assume one is simply an appeal route from the other.
+
+**Where it may become relevant**
+- Deposit-protection non-compliance.
+- Formal tenancy disputes.
+- Some higher-stakes or contested matters where a scheme process is not the correct route.
+
+**Operational impact**
+- Tribunal proceedings are usually more formal and slower than ordinary scheme dispute handling.
+- Evidence should still be organised carefully, but managers should check the relevant scheme rules and legal advice where escalation is being considered.
+- Keep notes clear if a matter might move beyond ordinary scheme adjudication.
+
+**What to remember**
+1. Scheme adjudication and tribunal proceedings are different processes.
+2. Check the correct forum before escalating.
+3. More formal proceedings usually require more careful preparation and timescales.`,
+    sourceLabel: 'Housing & Property Chamber',
+    sourceHref: 'https://housingandpropertychamber.scot/',
+  },
+  {
+    title: 'Tenancy Deposit Protection — Scotland',
+    category: 'Scotland',
+    regions: ['scotland'],
+    summary:
+      'The key rules for deposit protection in Scotland, the approved schemes, and what non-compliance means at the end of a tenancy.',
+    content: `**Practical summary**
+Scottish tenancy deposits generally need to be protected within 30 working days of the tenancy starting. Tenants must also be given the required scheme information so the protection position is clear from the outset.
+
+**Approved schemes**
+- Safe Deposits Scotland.
+- Letting Protection Service Scotland.
+- mydeposits Scotland.
+
+**Why this matters at tenancy end**
+- Non-compliance can create financial penalty risk.
+- It can leave the landlord or agent in a weaker position when the tenancy ends.
+- Dispute handling becomes more difficult if scheme information was not dealt with correctly.
+
+**What to remember**
+1. Deposit protection and scheme information should be checked before any tenancy-end proposal is sent.
+2. Keep the scheme name, reference, and protection date in the case file.
+3. If the record is incomplete, fix that first before pushing into dispute handling.`,
+    sourceLabel: 'mygov.scot',
+    sourceHref: 'https://www.mygov.scot/landlord-deposit/protection',
+  },
+  {
+    title: 'Fair Wear and Tear in Scotland',
+    category: 'Scotland',
+    regions: ['scotland'],
+    summary:
+      'How fair wear and tear is assessed in Scotland, including the practical importance of tenancy length, evidence quality, and betterment.',
+    content: `**Practical summary**
+The core principle in Scotland is broadly similar to England and Wales: tenants are not usually liable for normal deterioration caused by reasonable use. In practice, longer-running private residential tenancies can make tenancy length especially important when deciding whether a loss is ordinary use or damage.
+
+**Practical examples**
+- An older carpet in a long tenancy may justify only a reduced award even where staining is proven.
+- Paint scuffs may be ordinary use, but larger gouges or unauthorised decoration can justify a claim.
+- Condensation and mould issues in older properties may involve shared responsibility rather than a simple tenant-damage conclusion.
+
+**What evidence to gather**
+- Check in inventory and photos showing baseline condition and age.
+- Check out report and dated photographs from the same areas.
+- Repair history, ventilation notes, and any communication that affects responsibility.
+
+**What to remember**
+1. Tenancy length often carries real weight in Scotland.
+2. Evidence quality remains critical.
+3. Betterment still matters even when the damage itself is proven.`,
+    sourceLabel: 'mydeposits',
+    sourceHref:
+      'https://www.mydeposits.co.uk/content-hub/fair-wear-and-tear-what-is-it-and-how-is-it-applied/',
+  },
+  {
+    title: 'Letting Agent Regulation in Scotland',
+    category: 'Scotland',
+    regions: ['scotland'],
+    summary:
+      'The Scottish letting agent registration and Code of Practice framework, and why strong records matter at the end of a tenancy.',
+    content: `**Practical summary**
+Scottish letting agents must comply with the relevant registration and Code of Practice framework. At tenancy end, the operational themes are clear: good record keeping, transparent communication, and evidence-backed decisions matter.
+
+**What matters in practice**
+- Keep a clear record of instructions, inspections, and communications.
+- Explain proposed deductions in a factual, structured way.
+- Make sure any claim is backed by inventories, photos, and repair or replacement evidence.
+
+**Why the audit trail matters**
+- It supports transparent end-of-tenancy handling.
+- It makes manager review easier.
+- It reduces the risk of having to reconstruct reasoning later if the decision is challenged.
+
+**What to remember**
+1. Registration and Code obligations reinforce the need for strong records.
+2. Clear communication supports fairer outcomes.
+3. An audit trail is operationally useful, not just a compliance exercise.`,
+    sourceLabel: 'Letting Agent Register',
+    sourceHref: 'https://lettingagentregistration.gov.scot/about',
+  },
+  {
+    title: 'Betterment — How to Apply It to Deposit Claims',
+    category: 'Deposit Schemes',
+    regions: ['all', 'england-wales', 'scotland'],
+    summary:
+      'How betterment works in practice, with examples for carpets, decorating, and appliances.',
+    content: `**Practical summary**
+Betterment means awarding more than the landlord's reasonable loss. Full replacement cost is often not appropriate where the item was already used, ageing, or near the end of its ordinary lifespan.
+
+**Common proportionality examples**
+- Carpet: a common reference point for a mid-range carpet might be a multi-year lifespan, but this is only a guide and not a fixed rule.
+- Decoration: older paintwork may justify only a partial contribution even where fresh damage is proven.
+- Appliances: replacement cost may need to be reduced significantly where the appliance was already several years old.
+
+**What evidence to gather**
+- Age, quality, and prior condition of the item.
+- Repair versus replacement options.
+- Clear explanation of how the claimed figure was reduced.
+
+**What to remember**
+1. Lifespan examples are commonly used reference points, not fixed rules.
+2. Cleaning issues are different from replacement and depreciation issues.
+3. Explain the deduction calculation, not just the invoice amount.`,
+    sourceLabel: 'mydeposits',
+    sourceHref:
+      'https://www.mydeposits.co.uk/content-hub/rules-of-claiming-for-deposit-deductions/',
+  },
+  {
+    title: 'Check In Reports — What Makes a Strong One',
+    category: 'Evidence and Documentation',
+    regions: ['all', 'england-wales', 'scotland'],
+    summary:
+      'What a thorough check in report should include and why it is often the most important document in a deposit dispute.',
+    content: `**Practical summary**
+The check in report is often the most important document in a deposit dispute because it establishes the starting condition of the property. If the opening record is vague, later deductions become much harder to prove.
+
+**What a strong check in report includes**
+- Room-by-room written condition notes.
+- Dated photos.
+- Inventory of contents where relevant.
+- Tenant sign-off or a clear written opportunity to amend.
+
+**Common mistakes**
+- Vague descriptions such as "good condition" with no detail.
+- Missing photos or no date trail.
+- Failing to record pre-existing marks, wear, or damage.
+- Missing opening meter readings where they matter.
+
+**What to remember**
+1. Objectivity matters more than dramatic language.
+2. Detail at the start saves time at tenancy end.
+3. Signed or acknowledged reports usually carry more weight.`,
+    sourceLabel: 'DPS',
+    sourceHref:
+      'https://www.depositprotection.com/learning-centre/disputes/preparing-for-disputes-the-check-in',
+  },
+  {
+    title: 'Check Out Reports — What to Include and How to Compare',
+    category: 'Evidence and Documentation',
+    regions: ['all', 'england-wales', 'scotland'],
+    summary:
+      'How to produce a check out report that directly supports a deposit claim by comparing end condition clearly against the check in record.',
+    content: `**Practical summary**
+The check out report should compare the end condition back to the opening record, not simply describe the property in isolation. Comparison-focused language makes it easier to explain why a deduction is being proposed and what evidence supports it.
+
+**What to include**
+- Comparison-focused room notes tied back to the check in record.
+- Same-angle photos where possible.
+- Specific cleaning and condition observations.
+- Meter readings and timing close to the move out date.
+
+**Common mistakes**
+- Using subjective or emotional language.
+- Producing a report too long after the tenancy ended.
+- Taking photos that cannot easily be matched to the opening evidence.
+
+**What to remember**
+1. The goal is comparison, not commentary.
+2. Specific wording carries more weight than dramatic wording.
+3. Date proximity to move out helps defend the report.`,
+    sourceLabel: 'DPS',
+    sourceHref:
+      'https://www.depositprotection.com/press-releases/2022/student-tenant-checkout-tips',
+  },
+  {
+    title: 'Communicating Deposit Deductions to Tenants',
+    category: 'Dispute Handling',
+    regions: ['all', 'england-wales', 'scotland'],
+    summary:
+      'How to explain proposed deductions clearly and professionally so disputes are less likely to escalate.',
+    content: `**Practical summary**
+Proposed deductions should be communicated early, clearly, and in a professional tone. A structured line-item explanation linked to the evidence often reduces unnecessary escalation.
+
+**What the message should include**
+- The amount proposed for each line item.
+- A short factual reason for each deduction.
+- The key supporting evidence.
+- The next step if the tenant agrees or disputes the proposal.
+
+**Practical approach**
+- Keep the tone factual and professional.
+- Keep records of written communication.
+- Give the tenant a clear opportunity to review the supporting evidence.
+
+**Common mistakes**
+- Sending a single lump sum with no breakdown.
+- Using emotional language rather than evidence-linked wording.
+- Failing to keep a written record of what was sent and when.
+
+**What to remember**
+1. Early, evidence-linked communication often reduces disputes.
+2. Clear line items are easier to review than broad narratives.
+3. Written records matter if the case later escalates.`,
+    sourceLabel: 'TDS',
+    sourceHref:
+      'https://custodial.tenancydepositscheme.com/tools-and-guides/user-guides/all-users/deposit-deductions-template',
+  },
 ]
 
-function getSourceTone(label: string) {
-  switch (label) {
-    case 'GOV.UK':
-      return 'border border-stone-300 bg-stone-100 text-stone-700'
-    case 'TDS':
-      return 'border border-sky-200 bg-sky-50 text-sky-800'
-    case 'DPS':
-      return 'border border-emerald-200 bg-emerald-50 text-emerald-800'
-    case 'mydeposits':
-      return 'border border-amber-200 bg-amber-50 text-amber-800'
-    default:
-      return 'border border-stone-200 bg-stone-50 text-stone-700'
-  }
-}
-
 export default function KnowledgePage() {
-  const [regionFilter, setRegionFilter] = useState<RegionFilter>('all')
-
-  const visibleArticles = useMemo(
-    () =>
-      GUIDANCE_ARTICLES.filter((article) =>
-        regionFilter === 'all' ? true : article.regions.includes(regionFilter)
-      ),
-    [regionFilter]
-  )
-
-  return (
-    <OperatorLayout
-      pageTitle="Knowledge"
-      pageDescription="Practical guidance for fairer end-of-tenancy and deposit claim decisions."
-    >
-      <section className="app-surface rounded-[1.9rem] px-6 py-6 md:px-8">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div className="max-w-3xl rounded-[1.45rem] border border-emerald-200 bg-emerald-50/85 px-5 py-4 text-sm leading-7 text-emerald-950/85">
-            Rules and scheme processes vary by UK nation. Always check the official scheme
-            guidance for the tenancy location.
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {[
-              { value: 'all', label: 'All guidance' },
-              { value: 'england-wales', label: 'England & Wales' },
-              { value: 'scotland', label: 'Scotland' },
-            ].map((filter) => (
-              <button
-                key={filter.value}
-                type="button"
-                onClick={() => setRegionFilter(filter.value as RegionFilter)}
-                className={`rounded-full px-4 py-2 text-sm font-medium transition ${
-                  regionFilter === filter.value
-                    ? 'bg-white text-stone-900 shadow-sm ring-1 ring-stone-200'
-                    : 'border border-stone-200 bg-stone-50 text-stone-600 hover:bg-white hover:text-stone-900'
-                }`}
-              >
-                {filter.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="app-surface rounded-[1.9rem] px-6 py-6 md:px-8">
-        <div className="flex items-end justify-between gap-4">
-          <div>
-            <p className="app-kicker">Categories</p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-900">
-              Guidance topics for deposit-claim review
-            </h2>
-          </div>
-          <p className="hidden text-sm text-stone-500 md:block">
-            Filtered for{' '}
-            {regionFilter === 'all'
-              ? 'all UK guidance'
-              : regionFilter === 'england-wales'
-                ? 'England & Wales'
-                : 'Scotland'}
-          </p>
-        </div>
-
-        <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
-          {CATEGORY_ITEMS.map((item) => (
-            <article
-              key={item}
-              className="rounded-[1.35rem] border border-stone-200 bg-white/92 px-4 py-4"
-            >
-              <p className="text-sm font-medium text-stone-800">{item}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="grid gap-6 xl:grid-cols-2">
-        {visibleArticles.map((article) => (
-          <article key={article.title} className="app-surface rounded-[1.9rem] px-6 py-6 md:px-8">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <p className="app-kicker">{article.category}</p>
-                <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-900">
-                  {article.title}
-                </h2>
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <span
-                  className={`rounded-full px-3 py-1 text-xs font-semibold ${getSourceTone(article.sourceLabel)}`}
-                >
-                  {article.sourceLabel}
-                </span>
-                <span className="rounded-full border border-stone-200 bg-stone-50 px-3 py-1 text-xs font-medium text-stone-500">
-                  Last reviewed {LAST_REVIEWED}
-                </span>
-              </div>
-            </div>
-
-            <p className="mt-4 text-sm leading-7 text-stone-600">{article.summary}</p>
-
-            <div className="mt-6 space-y-5">
-              <div>
-                <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-stone-500">
-                  Practical examples
-                </h3>
-                <ul className="mt-3 space-y-2 text-sm leading-7 text-stone-600">
-                  {article.examples.map((item) => (
-                    <li key={item} className="flex gap-3">
-                      <span className="mt-2 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div>
-                <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-stone-500">
-                  What evidence to gather
-                </h3>
-                <ul className="mt-3 space-y-2 text-sm leading-7 text-stone-600">
-                  {article.evidence.map((item) => (
-                    <li key={item} className="flex gap-3">
-                      <span className="mt-2 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-sky-400" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div>
-                <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-stone-500">
-                  Common mistakes
-                </h3>
-                <ul className="mt-3 space-y-2 text-sm leading-7 text-stone-600">
-                  {article.mistakes.map((item) => (
-                    <li key={item} className="flex gap-3">
-                      <span className="mt-2 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-amber-400" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-
-            <div className="app-divider my-6" />
-
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <span className="text-sm text-stone-500">
-                Source guidance summary for property manager use
-              </span>
-              <a
-                href={article.sourceHref}
-                target="_blank"
-                rel="noreferrer"
-                className="app-secondary-button rounded-full px-4 py-2 text-sm font-medium text-stone-700"
-              >
-                Open source
-              </a>
-            </div>
-          </article>
-        ))}
-      </section>
-    </OperatorLayout>
-  )
+  return <KnowledgeClient articles={GUIDANCE_ARTICLES} />
 }
