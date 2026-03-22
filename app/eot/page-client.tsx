@@ -81,15 +81,6 @@ const STUCK_THRESHOLDS_HOURS: Record<string, number> = {
   recommendation_drafted: 48,
   needs_manual_review: 24,
 }
-const WORKFLOW_STATUS_ORDER = [
-  'evidence_pending',
-  'evidence_ready',
-  'review_pending',
-  'recommendation_drafted',
-  'needs_manual_review',
-  'recommendation_approved',
-  'ready_for_claim',
-] as const
 const SORT_KEYS = [
   'default',
   'caseRef',
@@ -230,6 +221,82 @@ function isOverdueMoveOut(row: QueueRow) {
   today.setHours(0, 0, 0, 0)
 
   return new Date(moveOutDate).getTime() < today.getTime()
+}
+
+function isAwaitingReview(row: QueueRow) {
+  return (
+    row.eotCase.workflow_status === 'recommendation_drafted' ||
+    row.eotCase.workflow_status === 'needs_manual_review'
+  )
+}
+
+function isEvidencePending(row: QueueRow) {
+  return ['evidence_pending', 'evidence_ready'].includes(row.eotCase.workflow_status)
+}
+
+function isStuckRow(row: QueueRow) {
+  return (
+    getStuckState(row.eotCase.workflow_status, row.eotCase.created_at, row.eotCase.updated_at) ===
+    'stuck'
+  )
+}
+
+function isNeedsActionToday(row: QueueRow) {
+  return isStuckRow(row) || isOverdueMoveOut(row)
+}
+
+function isAssigneeFilter(value: string) {
+  return value.startsWith('assignee:')
+}
+
+function getLastActivityValue(row: QueueRow) {
+  return row.case?.last_activity_at || row.case?.updated_at || row.eotCase.updated_at
+}
+
+function getLastActivityState(value: string | null | undefined) {
+  if (!value) return 'ok'
+
+  const diffHours = (Date.now() - new Date(value).getTime()) / (1000 * 60 * 60)
+
+  if (diffHours >= 120) return 'stale'
+  if (diffHours >= 72) return 'aging'
+  return 'ok'
+}
+
+function getLastActivityTone(state: 'stale' | 'aging' | 'ok') {
+  switch (state) {
+    case 'stale':
+      return 'text-red-600 font-medium'
+    case 'aging':
+      return 'text-amber-600 font-medium'
+    default:
+      return 'text-stone-500'
+  }
+}
+
+function matchesQueueFilter(row: QueueRow, filterValue: string) {
+  switch (filterValue) {
+    case 'all':
+      return true
+    case 'awaiting_review':
+      return isAwaitingReview(row)
+    case 'evidence_pending':
+      return isEvidencePending(row)
+    case 'stuck':
+      return isStuckRow(row)
+    case 'unassigned':
+      return isUnassigned(row)
+    case 'overdue_move_out':
+      return isOverdueMoveOut(row)
+    case 'needs_action_today':
+      return isNeedsActionToday(row)
+    default:
+      if (isAssigneeFilter(filterValue)) {
+        return row.assignedOperator?.id === filterValue.slice('assignee:'.length)
+      }
+
+      return false
+  }
 }
 
 function getWorkflowTone(status: string | null) {
@@ -610,7 +677,7 @@ export default function EotCasesPage({
     [rows]
   )
 
-  const defaultOrderedOpenRows = useMemo(() => {
+  const baselineOpenRows = useMemo(() => {
     return [...openRows].sort((left, right) => {
       const leftStuck = getStuckState(
         left.eotCase.workflow_status,
@@ -626,109 +693,109 @@ export default function EotCasesPage({
       const stuckDiff = stuckOrder[leftStuck] - stuckOrder[rightStuck]
       if (stuckDiff !== 0) return stuckDiff
 
-      const leftActivity =
-        left.case?.last_activity_at || left.case?.updated_at || left.case?.created_at || ''
-      const rightActivity =
-        right.case?.last_activity_at || right.case?.updated_at || right.case?.created_at || ''
+      const leftActivity = getLastActivityValue(left) || left.case?.created_at || ''
+      const rightActivity = getLastActivityValue(right) || right.case?.created_at || ''
       return rightActivity.localeCompare(leftActivity)
     })
   }, [openRows])
-
-  const workflowFilterOptions = useMemo(() => {
-    const orderMap = new Map<string, number>(
-      WORKFLOW_STATUS_ORDER.map((status, index) => [status, index])
-    )
-    const counts = new Map<string, number>()
-    let unassignedCount = 0
-    let overdueMoveOutCount = 0
-
-    for (const row of openRows) {
-      counts.set(
-        row.eotCase.workflow_status,
-        (counts.get(row.eotCase.workflow_status) ?? 0) + 1
-      )
-
-      if (isUnassigned(row)) {
-        unassignedCount++
-      }
-
-      if (isOverdueMoveOut(row)) {
-        overdueMoveOutCount++
-      }
-    }
-
-    const statusOptions = Array.from(counts.entries())
-      .sort((left, right) => {
-        const leftOrder = orderMap.get(left[0]) ?? Number.MAX_SAFE_INTEGER
-        const rightOrder = orderMap.get(right[0]) ?? Number.MAX_SAFE_INTEGER
-
-        if (leftOrder !== rightOrder) {
-          return leftOrder - rightOrder
-        }
-
-        return compareText(formatWorkflowLabel(left[0]), formatWorkflowLabel(right[0]))
-      })
-      .map(([value, count]) => ({
-        value,
-        label: formatWorkflowLabel(value),
-        count,
-      }))
-
-    return [
-      { value: 'all', label: 'All', count: openRows.length },
-      ...statusOptions,
-      { value: 'unassigned', label: 'Unassigned', count: unassignedCount },
-      { value: 'overdue_move_out', label: 'Overdue move-out', count: overdueMoveOutCount },
-    ]
-  }, [openRows])
-
-  useEffect(() => {
-    if (loading) return
-    if (workflowFilter === 'all') return
-
-    if (!workflowFilterOptions.some((option) => option.value === workflowFilter)) {
-      setWorkflowFilter('all')
-    }
-  }, [loading, workflowFilter, workflowFilterOptions])
-
-  const workflowFilteredRows = useMemo(() => {
-    if (workflowFilter === 'all') {
-      return defaultOrderedOpenRows
-    }
-
-    if (workflowFilter === 'unassigned') {
-      return defaultOrderedOpenRows.filter((row) => isUnassigned(row))
-    }
-
-    if (workflowFilter === 'overdue_move_out') {
-      return defaultOrderedOpenRows.filter((row) => isOverdueMoveOut(row))
-    }
-
-    return defaultOrderedOpenRows.filter(
-      (row) => row.eotCase.workflow_status === workflowFilter
-    )
-  }, [defaultOrderedOpenRows, workflowFilter])
 
   const searchFilteredRows = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase()
 
     if (!normalizedQuery) {
-      return workflowFilteredRows
+      return baselineOpenRows
     }
 
-    return workflowFilteredRows.filter((row) => getRowSearchText(row).includes(normalizedQuery))
-  }, [searchQuery, workflowFilteredRows])
+    return baselineOpenRows.filter((row) => getRowSearchText(row).includes(normalizedQuery))
+  }, [baselineOpenRows, searchQuery])
+
+  const filteredRows = useMemo(() => {
+    if (workflowFilter === 'all') {
+      return searchFilteredRows
+    }
+
+    return searchFilteredRows.filter((row) => matchesQueueFilter(row, workflowFilter))
+  }, [searchFilteredRows, workflowFilter])
 
   const defaultOrderMap = useMemo(
     () =>
-      new Map(defaultOrderedOpenRows.map((row, index) => [row.eotCase.id, index] as const)),
-    [defaultOrderedOpenRows]
+      new Map(baselineOpenRows.map((row, index) => [row.eotCase.id, index] as const)),
+    [baselineOpenRows]
   )
 
   const displayRows = useMemo(
-    () => sortQueueRows(searchFilteredRows, sortKey, sortDirection, defaultOrderMap),
-    [defaultOrderMap, searchFilteredRows, sortDirection, sortKey]
+    () => sortQueueRows(filteredRows, sortKey, sortDirection, defaultOrderMap),
+    [defaultOrderMap, filteredRows, sortDirection, sortKey]
   )
+
+  const teamLoadEntries = useMemo(() => {
+    const operatorCounts = new Map<
+      string,
+      { id: string; label: string; count: number; stuckCount: number }
+    >()
+    let unassignedCount = 0
+    let unassignedStuck = 0
+
+    for (const row of openRows) {
+      if (isUnassigned(row)) {
+        unassignedCount++
+        if (isStuckRow(row)) {
+          unassignedStuck++
+        }
+        continue
+      }
+
+      const operatorId = row.assignedOperator?.id
+      const operatorName = row.assignedOperator?.full_name?.trim()
+
+      if (!operatorId || !operatorName) continue
+
+      const existing = operatorCounts.get(operatorId)
+      if (existing) {
+        existing.count++
+        if (isStuckRow(row)) {
+          existing.stuckCount++
+        }
+      } else {
+        operatorCounts.set(operatorId, {
+          id: operatorId,
+          label: operatorName,
+          count: 1,
+          stuckCount: isStuckRow(row) ? 1 : 0,
+        })
+      }
+    }
+
+    const operatorEntries = Array.from(operatorCounts.values())
+      .sort((left, right) => {
+        if (right.count !== left.count) return right.count - left.count
+        return compareText(left.label, right.label)
+      })
+      .map((entry) => ({
+        key: entry.id,
+        label: entry.label,
+        count: entry.count,
+        stuckCount: entry.stuckCount,
+        filterValue: `assignee:${entry.id}`,
+        tone: 'stone' as const,
+      }))
+
+    return [
+      ...(unassignedCount > 0
+        ? [
+            {
+              key: 'unassigned',
+              label: 'Unassigned',
+              count: unassignedCount,
+              stuckCount: unassignedStuck,
+              filterValue: 'unassigned',
+              tone: 'amber' as const,
+            },
+          ]
+        : []),
+      ...operatorEntries,
+    ]
+  }, [openRows])
 
   useEffect(() => {
     const visibleIds = new Set(displayRows.map((row) => row.eotCase.id))
@@ -798,23 +865,12 @@ export default function EotCasesPage({
   const stats = useMemo(
     () => ({
       totalOpen: openRows.length,
-      awaitingReview: openRows.filter(
-        (row) =>
-          row.eotCase.workflow_status === 'recommendation_drafted' ||
-          row.eotCase.workflow_status === 'needs_manual_review'
-      ).length,
-      evidencePending: openRows.filter((row) =>
-        ['evidence_pending', 'evidence_ready'].includes(row.eotCase.workflow_status)
-      ).length,
-      stuckCases: openRows.filter(
-        (row) =>
-          getStuckState(
-            row.eotCase.workflow_status,
-            row.eotCase.created_at,
-            row.eotCase.updated_at
-          ) === 'stuck'
-      ).length,
+      awaitingReview: openRows.filter((row) => isAwaitingReview(row)).length,
+      evidencePending: openRows.filter((row) => isEvidencePending(row)).length,
+      stuckCases: openRows.filter((row) => isStuckRow(row)).length,
       unassigned: openRows.filter((row) => isUnassigned(row)).length,
+      overdueMoveOut: openRows.filter((row) => isOverdueMoveOut(row)).length,
+      needsActionToday: openRows.filter((row) => isNeedsActionToday(row)).length,
       closedThisMonth: rows.filter(
         (row) => {
           const effectiveClosedAt = row.eotCase.closed_at ?? row.eotCase.updated_at
@@ -830,6 +886,92 @@ export default function EotCasesPage({
     }),
     [monthRange.end, monthRange.start, openRows, rows]
   )
+
+  const summaryLine = useMemo(() => {
+    if (stats.stuckCases > 0) {
+      return `${stats.totalOpen} active · ${stats.stuckCases} stuck · ${stats.unassigned} unassigned`
+    }
+
+    if (stats.overdueMoveOut > 0) {
+      return `${stats.totalOpen} active · ${stats.overdueMoveOut} overdue move-out · ${stats.unassigned} unassigned`
+    }
+
+    return `${stats.totalOpen} active · ${stats.evidencePending} awaiting evidence · ${stats.unassigned} unassigned`
+  }, [stats.evidencePending, stats.overdueMoveOut, stats.stuckCases, stats.totalOpen, stats.unassigned])
+
+  const kpiChips = useMemo(
+    () => [
+      { value: 'all', label: 'All', count: stats.totalOpen, tone: 'neutral' as const },
+      {
+        value: 'awaiting_review',
+        label: 'Awaiting review',
+        count: stats.awaitingReview,
+        tone: 'review' as const,
+      },
+      {
+        value: 'evidence_pending',
+        label: 'Evidence pending',
+        count: stats.evidencePending,
+        tone: 'pending' as const,
+      },
+      { value: 'stuck', label: 'Stuck', count: stats.stuckCases, tone: 'danger' as const },
+      {
+        value: 'unassigned',
+        label: 'Unassigned',
+        count: stats.unassigned,
+        tone: 'warning' as const,
+      },
+      {
+        value: 'overdue_move_out',
+        label: 'Overdue move-out',
+        count: stats.overdueMoveOut,
+        tone: 'danger' as const,
+      },
+    ],
+    [
+      stats.awaitingReview,
+      stats.evidencePending,
+      stats.overdueMoveOut,
+      stats.stuckCases,
+      stats.totalOpen,
+      stats.unassigned,
+    ]
+  )
+
+  const presetOptions = useMemo(
+    () => [
+      {
+        value: 'needs_action_today',
+        label: 'Needs action today',
+        count: stats.needsActionToday,
+      },
+      { value: 'stuck', label: 'Stuck', count: stats.stuckCases },
+      { value: 'overdue_move_out', label: 'Overdue', count: stats.overdueMoveOut },
+      { value: 'unassigned', label: 'Unassigned', count: stats.unassigned },
+    ],
+    [stats.needsActionToday, stats.overdueMoveOut, stats.stuckCases, stats.unassigned]
+  )
+
+  const validFilterValues = useMemo(
+    () =>
+      new Set([
+        ...kpiChips.map((chip) => chip.value),
+        ...presetOptions.map((preset) => preset.value),
+        ...teamLoadEntries.map((entry) => entry.filterValue),
+      ]),
+    [kpiChips, presetOptions, teamLoadEntries]
+  )
+
+  useEffect(() => {
+    if (loading) return
+    if (workflowFilter === 'all') return
+
+    if (!validFilterValues.has(workflowFilter)) {
+      setWorkflowFilter('all')
+    }
+  }, [loading, validFilterValues, workflowFilter])
+
+  const hasActiveFilters = searchQuery.trim().length > 0 || workflowFilter !== 'all'
 
   function handleSort(nextSortKey: Exclude<QueueSortKey, 'default'>) {
     if (sortKey === nextSortKey) {
@@ -851,244 +993,178 @@ export default function EotCasesPage({
       pageTitle="End-of-tenancy cases"
       pageDescription="Review the active move-out queue, pick up cases awaiting manager judgement, and move approved recommendations into claim-ready output."
     >
-      <section className="app-surface rounded-[1.7rem] px-5 py-4">
-        <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-          <div>
-            <p className="app-kicker">Queue summary</p>
-            <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-stone-600">
-              <span>
-                <span className="font-semibold text-stone-900">{stats.totalOpen}</span> open
-              </span>
-              <span>
-                <span className="font-semibold text-stone-900">{stats.stuckCases}</span> stuck
-              </span>
-              <span>
-                <span className="font-semibold text-stone-900">{stats.unassigned}</span>{' '}
-                unassigned
-              </span>
+      <section className="sticky top-4 z-20 mb-5">
+        <div className="rounded-[2rem] border border-stone-200 bg-white/95 px-4 py-4 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-white/85 md:px-5">
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
+            <div>
+              <p className="app-kicker">Manager triage</p>
+              <h2 className="mt-1 text-2xl font-semibold tracking-tight text-stone-900">
+                Open cases
+              </h2>
+              <p className="mt-1 text-sm leading-6 text-stone-600">{summaryLine}</p>
+
+              <div className="mt-3 flex flex-wrap gap-2">
+                {kpiChips.map((chip) => (
+                  <button
+                    key={chip.value}
+                    type="button"
+                    onClick={() => setWorkflowFilter(chip.value)}
+                    className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium transition ${
+                      workflowFilter === chip.value
+                        ? chip.tone === 'danger'
+                          ? 'border-red-600 bg-red-600 text-white'
+                          : chip.tone === 'pending'
+                            ? 'border-amber-600 bg-amber-600 text-white'
+                            : chip.tone === 'review'
+                              ? 'border-violet-600 bg-violet-600 text-white'
+                              : chip.tone === 'warning'
+                                ? 'border-amber-700 bg-amber-700 text-white'
+                                : 'border-stone-900 bg-stone-900 text-white'
+                        : chip.tone === 'danger'
+                          ? 'border-red-200 bg-red-50 text-red-700 hover:border-red-300'
+                          : chip.tone === 'pending'
+                            ? 'border-amber-200 bg-amber-50 text-amber-700 hover:border-amber-300'
+                            : chip.tone === 'review'
+                              ? 'border-violet-200 bg-violet-50 text-violet-700 hover:border-violet-300'
+                              : chip.tone === 'warning'
+                                ? 'border-amber-200 bg-amber-50 text-amber-700 hover:border-amber-300'
+                                : 'border-stone-200 bg-stone-50 text-stone-700 hover:border-stone-300'
+                    }`}
+                  >
+                    <span>{chip.label}</span>
+                    <span className="font-semibold">{chip.count}</span>
+                  </button>
+                ))}
+              </div>
+
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-stone-400">
+                  Presets
+                </span>
+                {presetOptions.map((preset) => (
+                  <button
+                    key={preset.value}
+                    type="button"
+                    onClick={() => setWorkflowFilter(preset.value)}
+                    className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition ${
+                      workflowFilter === preset.value
+                        ? 'bg-stone-900 text-white'
+                        : 'text-stone-600 hover:bg-stone-100 hover:text-stone-900'
+                    }`}
+                  >
+                    <span>{preset.label}</span>
+                    <span className="font-semibold">{preset.count}</span>
+                  </button>
+                ))}
+              </div>
+
+              <div className="mt-3 flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+                <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center">
+                  <label className="flex-1">
+                    <span className="sr-only">Search cases</span>
+                    <input
+                      type="search"
+                      value={searchQuery}
+                      onChange={(event) => setSearchQuery(event.target.value)}
+                      placeholder="Search by case, address, tenant, landlord, or assignee"
+                      className="app-field w-full rounded-full px-4 py-2.5 text-sm text-stone-700 placeholder:text-stone-400"
+                    />
+                  </label>
+                  <div className="inline-flex shrink-0 rounded-full border border-stone-200 bg-stone-50 p-1">
+                    <button
+                      type="button"
+                      onClick={() => setDensity('comfortable')}
+                      className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
+                        density === 'comfortable'
+                          ? 'bg-white text-stone-900 shadow-sm'
+                          : 'text-stone-500 hover:text-stone-700'
+                      }`}
+                    >
+                      Comfortable
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDensity('compact')}
+                      className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
+                        density === 'compact'
+                          ? 'bg-white text-stone-900 shadow-sm'
+                          : 'text-stone-500 hover:text-stone-700'
+                      }`}
+                    >
+                      Compact
+                    </button>
+                  </div>
+                  <span className="inline-flex shrink-0 items-center rounded-full border border-stone-200 bg-stone-50 px-3 py-2 text-xs font-medium text-stone-600">
+                    {displayRows.length === openRows.length
+                      ? `${openRows.length} active`
+                      : `${displayRows.length} of ${openRows.length}`}
+                  </span>
+                  {hasActiveFilters ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSearchQuery('')
+                        setWorkflowFilter('all')
+                      }}
+                      className="inline-flex shrink-0 items-center rounded-full px-3 py-2 text-xs font-medium text-stone-500 transition hover:bg-stone-100 hover:text-stone-800"
+                    >
+                      Clear filters
+                    </button>
+                  ) : null}
+                </div>
+                <p className="text-xs text-stone-500 xl:shrink-0">
+                  Showing the most recent 250 cases.
+                </p>
+              </div>
             </div>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <span className="inline-flex items-center gap-2 rounded-full border border-stone-200 bg-stone-50 px-3 py-1.5 text-sm text-stone-600">
-              <span>Total open</span>
-              <span className="font-semibold text-stone-900">{stats.totalOpen}</span>
-            </span>
-            <span className="inline-flex items-center gap-2 rounded-full border border-violet-200 bg-violet-50 px-3 py-1.5 text-sm text-violet-700">
-              <span>Awaiting review</span>
-              <span className="font-semibold">{stats.awaitingReview}</span>
-            </span>
-            <span className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-sm text-amber-700">
-              <span>Evidence pending</span>
-              <span className="font-semibold">{stats.evidencePending}</span>
-            </span>
-            <span className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-3 py-1.5 text-sm text-red-700">
-              <span>Stuck</span>
-              <span className="font-semibold">{stats.stuckCases}</span>
-            </span>
-            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-sm text-emerald-700">
-              <span>Closed this month</span>
-              <span className="font-semibold">{stats.closedThisMonth}</span>
-            </span>
+
+            <aside className="rounded-[1.4rem] border border-stone-200 bg-stone-50/90 p-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-stone-500">
+                Team load
+              </p>
+              <p className="mt-1 text-sm text-stone-600">
+                Click a lane to focus the queue by assignee.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {teamLoadEntries.length > 0 ? (
+                  teamLoadEntries.map((entry) => (
+                    <button
+                      key={entry.key}
+                      type="button"
+                      onClick={() => setWorkflowFilter(entry.filterValue)}
+                      className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium transition ${
+                        workflowFilter === entry.filterValue
+                          ? entry.tone === 'amber'
+                            ? 'border-amber-700 bg-amber-700 text-white'
+                            : 'border-stone-900 bg-stone-900 text-white'
+                          : entry.tone === 'amber'
+                            ? 'border-amber-200 bg-amber-50 text-amber-700 hover:border-amber-300'
+                            : 'border-stone-200 bg-white text-stone-700 hover:border-stone-300'
+                      }`}
+                    >
+                      <span className="max-w-[11rem] truncate">{entry.label}</span>
+                      <span className="font-semibold">{entry.count}</span>
+                      {entry.stuckCount > 0 ? (
+                        <span
+                          className={`text-xs ${
+                            workflowFilter === entry.filterValue ? 'text-white/85' : 'text-red-600'
+                          }`}
+                        >
+                          • {entry.stuckCount}
+                        </span>
+                      ) : null}
+                    </button>
+                  ))
+                ) : (
+                  <span className="text-sm text-stone-500">No active cases to rebalance.</span>
+                )}
+              </div>
+            </aside>
           </div>
         </div>
       </section>
 
-      <section className="app-surface rounded-[2rem] p-6 md:p-8">
-        <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="app-kicker">Team load</p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-900">
-              Cases per operator
-            </h2>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-stone-600">
-              Rebalance work when one operator is overloaded to keep move-out dates on track.
-            </p>
-          </div>
-        </div>
-
-        <div className="app-divider my-6" />
-
-        {(() => {
-          const operatorCounts = new Map<
-            string,
-            { name: string; count: number; stuckCount: number }
-          >()
-          let unassignedCount = 0
-          let unassignedStuck = 0
-
-          for (const row of openRows) {
-            const stuck =
-              getStuckState(
-                row.eotCase.workflow_status,
-                row.eotCase.created_at,
-                row.eotCase.updated_at
-              ) === 'stuck'
-            const operatorId = row.assignedOperator?.id
-            const operatorName = row.assignedOperator?.full_name || null
-
-            if (!operatorId || !operatorName) {
-              unassignedCount++
-              if (stuck) unassignedStuck++
-              continue
-            }
-
-            const existing = operatorCounts.get(operatorId)
-            if (existing) {
-              existing.count++
-              if (stuck) existing.stuckCount++
-            } else {
-              operatorCounts.set(operatorId, {
-                name: operatorName,
-                count: 1,
-                stuckCount: stuck ? 1 : 0,
-              })
-            }
-          }
-
-          const sorted = Array.from(operatorCounts.values()).sort((a, b) => b.count - a.count)
-          const maxCount = Math.max(1, ...sorted.map((operator) => operator.count), unassignedCount)
-
-          return (
-            <div className="space-y-3">
-              {sorted.map((operator) => (
-                <div key={operator.name} className="flex items-center gap-4">
-                  <p className="w-36 truncate text-sm font-medium text-stone-800">
-                    {operator.name}
-                  </p>
-                  <div className="flex flex-1 items-center gap-3">
-                    <div className="relative h-7 flex-1 overflow-hidden rounded-full bg-stone-100">
-                      <div
-                        className={`absolute inset-y-0 left-0 rounded-full transition-all ${
-                          operator.count >= maxCount * 0.8
-                            ? 'bg-red-200'
-                            : operator.count >= maxCount * 0.5
-                              ? 'bg-amber-200'
-                              : 'bg-emerald-200'
-                        }`}
-                        style={{ width: `${Math.max(4, (operator.count / maxCount) * 100)}%` }}
-                      />
-                      <span className="relative z-10 flex h-full items-center px-3 text-xs font-semibold text-stone-700">
-                        {operator.count} case{operator.count === 1 ? '' : 's'}
-                        {operator.stuckCount > 0 && (
-                          <span className="ml-2 text-red-600">
-                            ({operator.stuckCount} stuck)
-                          </span>
-                        )}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-              {unassignedCount > 0 && (
-                <div className="flex items-center gap-4">
-                  <p className="w-36 truncate text-sm font-medium italic text-stone-500">
-                    Unassigned
-                  </p>
-                  <div className="flex flex-1 items-center gap-3">
-                    <div className="relative h-7 flex-1 overflow-hidden rounded-full bg-stone-100">
-                      <div
-                        className="absolute inset-y-0 left-0 rounded-full bg-stone-200"
-                        style={{ width: `${Math.max(4, (unassignedCount / maxCount) * 100)}%` }}
-                      />
-                      <span className="relative z-10 flex h-full items-center px-3 text-xs font-semibold text-stone-500">
-                        {unassignedCount} case{unassignedCount === 1 ? '' : 's'}
-                        {unassignedStuck > 0 && (
-                          <span className="ml-2 text-red-600">
-                            ({unassignedStuck} stuck)
-                          </span>
-                        )}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              )}
-              {sorted.length === 0 && unassignedCount === 0 && (
-                <p className="text-sm text-stone-500">No active cases to display.</p>
-              )}
-            </div>
-          )
-        })()}
-      </section>
-
-      <section className="app-surface rounded-[2rem] p-6 md:p-8">
-        <div>
-          <div>
-            <p className="app-kicker">Manager queue</p>
-            <h2 className="mt-1 text-2xl font-semibold tracking-tight text-stone-900">
-              Open cases
-            </h2>
-            <p className="mt-1 max-w-3xl text-sm leading-6 text-stone-600">
-              The queue is sorted by recent case activity so review work stays close to the live move-out position.
-            </p>
-          </div>
-        </div>
-
-        <div className="app-divider my-4" />
-
-        <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-          <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center">
-            <label className="flex-1">
-              <span className="sr-only">Search cases</span>
-              <input
-                type="search"
-                value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
-                placeholder="Search by case, address, tenant, landlord, or assignee"
-                className="app-field w-full rounded-full px-4 py-2.5 text-sm text-stone-700 placeholder:text-stone-400"
-              />
-            </label>
-            <div className="inline-flex shrink-0 rounded-full border border-stone-200 bg-stone-50 p-1">
-              <button
-                type="button"
-                onClick={() => setDensity('comfortable')}
-                className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
-                  density === 'comfortable'
-                    ? 'bg-white text-stone-900 shadow-sm'
-                    : 'text-stone-500 hover:text-stone-700'
-                }`}
-              >
-                Comfortable
-              </button>
-              <button
-                type="button"
-                onClick={() => setDensity('compact')}
-                className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
-                  density === 'compact'
-                    ? 'bg-white text-stone-900 shadow-sm'
-                    : 'text-stone-500 hover:text-stone-700'
-                }`}
-              >
-                Compact
-              </button>
-            </div>
-            <span className="inline-flex shrink-0 items-center rounded-full border border-stone-200 bg-stone-50 px-3 py-2 text-xs font-medium text-stone-600">
-              {displayRows.length === openRows.length
-                ? `${openRows.length} active`
-                : `${displayRows.length} of ${openRows.length}`}
-            </span>
-          </div>
-          <p className="text-xs text-stone-500 xl:shrink-0">Showing the most recent 250 cases.</p>
-        </div>
-
-        <div className="mt-4 flex flex-wrap gap-2">
-          {workflowFilterOptions.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              onClick={() => setWorkflowFilter(option.value)}
-              className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
-                workflowFilter === option.value
-                  ? 'border-stone-900 bg-stone-900 text-white'
-                  : 'border-stone-200 bg-stone-50 text-stone-600 hover:border-stone-300 hover:text-stone-800'
-              }`}
-            >
-              {option.label} ({option.count})
-            </button>
-          ))}
-        </div>
-
-        <div className="app-divider my-4" />
-
+      <section className="app-surface rounded-[2rem] p-4 md:p-5">
         {error ? (
           <div className="rounded-[1.5rem] border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
             {error}
@@ -1098,19 +1174,31 @@ export default function EotCasesPage({
         {loading ? (
           <SkeletonTable density={density} />
         ) : displayRows.length === 0 ? (
-          <div className="rounded-[1.6rem] border border-dashed border-stone-300 bg-stone-50/80 px-6 py-12 text-center">
-            <h3 className="text-lg font-semibold text-stone-900">
-              {searchQuery.trim() || workflowFilter !== 'all'
-                ? 'No cases match your current filters'
-                : 'No active end-of-tenancy cases'}
+          <div
+            className={`rounded-[1.6rem] px-6 py-12 text-center ${
+              hasActiveFilters
+                ? 'border border-dashed border-stone-300 bg-stone-50/80'
+                : 'border border-emerald-200 bg-emerald-50/80'
+            }`}
+          >
+            <h3
+              className={`text-lg font-semibold ${
+                hasActiveFilters ? 'text-stone-900' : 'text-emerald-900'
+              }`}
+            >
+              {hasActiveFilters ? 'No cases match your current filters' : 'Queue is clear'}
             </h3>
-            <p className="mt-3 text-sm leading-6 text-stone-500">
-              {searchQuery.trim() || workflowFilter !== 'all'
-                ? 'Try clearing your search or status filter, or refresh the queue to check for new case activity.'
-                : 'New EOT workspaces will appear here as soon as a case is opened for move-out review.'}
+            <p
+              className={`mt-3 text-sm leading-6 ${
+                hasActiveFilters ? 'text-stone-500' : 'text-emerald-800/80'
+              }`}
+            >
+              {hasActiveFilters
+                ? 'Try clearing your search or triage filters, or refresh the queue to check for new case activity.'
+                : 'There are no open end-of-tenancy cases needing attention right now.'}
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-              {searchQuery.trim() || workflowFilter !== 'all' ? (
+              {hasActiveFilters ? (
                 <button
                   type="button"
                   onClick={() => {
@@ -1327,149 +1415,173 @@ export default function EotCasesPage({
                 </tr>
               </thead>
               <tbody>
-                {displayRows.map((row) => (
-                  <tr
-                    key={row.eotCase.id}
-                    role="link"
-                    tabIndex={0}
-                    onClick={() => handleOpenCase(row)}
-                    onKeyDown={(event) => {
-                      const target = event.target as HTMLElement
+                {displayRows.map((row) => {
+                  const overdueMoveOut = isOverdueMoveOut(row)
+                  const stuckState = getStuckState(
+                    row.eotCase.workflow_status,
+                    row.eotCase.created_at,
+                    row.eotCase.updated_at
+                  )
+                  const daysInStatus = getDaysInStatus(
+                    row.eotCase.workflow_status,
+                    row.eotCase.created_at,
+                    row.eotCase.updated_at
+                  )
+                  const lastActivityValue = getLastActivityValue(row)
+                  const lastActivityState = getLastActivityState(lastActivityValue)
+                  const assignedName = row.assignedOperator?.full_name?.trim() || null
+                  const rowTone =
+                    stuckState === 'stuck' || overdueMoveOut
+                      ? 'border-red-200 bg-red-50/20'
+                      : !assignedName
+                        ? 'border-amber-200 bg-amber-50/20'
+                        : 'border-stone-200 bg-white'
 
-                      if (target.closest('a, button, input, label')) return
+                  return (
+                    <tr
+                      key={row.eotCase.id}
+                      role="link"
+                      tabIndex={0}
+                      onClick={() => handleOpenCase(row)}
+                      onKeyDown={(event) => {
+                        const target = event.target as HTMLElement
 
-                      if (event.key === 'Enter' || event.key === ' ') {
-                        event.preventDefault()
-                        handleOpenCase(row)
-                      }
-                    }}
-                    className="cursor-pointer rounded-[1.4rem] border border-stone-200 bg-white shadow-sm transition hover:shadow-md focus:outline-none focus:ring-2 focus:ring-stone-300"
-                  >
-                    <td className={`w-10 rounded-l-[1.4rem] ${rowCellPadding}`}>
-                      <input
-                        type="checkbox"
-                        checked={selectedIds.has(row.eotCase.id)}
-                        onClick={(event) => event.stopPropagation()}
-                        onChange={(event) => {
-                          setSelectedIds((previous) => {
-                            const next = new Set(previous)
-                            if (event.target.checked) {
-                              next.add(row.eotCase.id)
-                            } else {
-                              next.delete(row.eotCase.id)
-                            }
-                            return next
-                          })
-                        }}
-                        className="h-4 w-4 rounded border-stone-300 text-stone-900 focus:ring-stone-500"
-                      />
-                    </td>
-                    <td className={`${rowCellPadding} text-sm font-semibold text-stone-900`}>
-                      {row.case?.case_number || 'Unnumbered'}
-                    </td>
-                    <td className={`group relative cursor-default ${rowCellPadding} text-sm text-stone-700`}>
-                      <span>{buildAddress(row.property)}</span>
-                      <div className="pointer-events-none absolute left-0 top-full z-50 mt-1 hidden w-72 rounded-[1.2rem] border border-stone-200 bg-white p-4 shadow-xl group-hover:block">
-                        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-stone-500">
-                          Quick view
-                        </p>
-                        <div className="mt-2 space-y-2 text-xs text-stone-600">
-                          <p>
-                            <span className="font-medium text-stone-800">Tenant:</span>{' '}
-                            {row.tenant?.full_name || 'Unknown'}
+                        if (target.closest('a, button, input, label')) return
+
+                        if (event.key === 'Enter' || event.key === ' ') {
+                          event.preventDefault()
+                          handleOpenCase(row)
+                        }
+                      }}
+                      className={`cursor-pointer rounded-[1.4rem] border shadow-sm transition hover:shadow-md focus:outline-none focus:ring-2 focus:ring-stone-300 ${rowTone}`}
+                    >
+                      <td className={`w-10 rounded-l-[1.4rem] ${rowCellPadding}`}>
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.has(row.eotCase.id)}
+                          onClick={(event) => event.stopPropagation()}
+                          onChange={(event) => {
+                            setSelectedIds((previous) => {
+                              const next = new Set(previous)
+                              if (event.target.checked) {
+                                next.add(row.eotCase.id)
+                              } else {
+                                next.delete(row.eotCase.id)
+                              }
+                              return next
+                            })
+                          }}
+                          className="h-4 w-4 rounded border-stone-300 text-stone-900 focus:ring-stone-500"
+                        />
+                      </td>
+                      <td className={`${rowCellPadding} text-sm font-semibold text-stone-900`}>
+                        {row.case?.case_number || 'Unnumbered'}
+                      </td>
+                      <td
+                        className={`group relative cursor-default ${rowCellPadding} text-sm text-stone-700`}
+                      >
+                        <span>{buildAddress(row.property)}</span>
+                        <div className="pointer-events-none absolute left-0 top-full z-50 mt-1 hidden w-72 rounded-[1.2rem] border border-stone-200 bg-white p-4 shadow-xl group-hover:block">
+                          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-stone-500">
+                            Quick view
                           </p>
-                          <p>
-                            <span className="font-medium text-stone-800">Landlord:</span>{' '}
-                            {row.landlord?.full_name || 'Unknown'}
-                          </p>
-                          <p>
-                            <span className="font-medium text-stone-800">Status:</span>{' '}
-                            {formatWorkflowLabel(row.eotCase.workflow_status)}
-                          </p>
-                          <p>
-                            <span className="font-medium text-stone-800">Last activity:</span>{' '}
-                            {formatRelativeTime(
-                              row.case?.last_activity_at || row.case?.updated_at
-                            )}
-                          </p>
-                          <p>
-                            <span className="font-medium text-stone-800">Move-out:</span>{' '}
-                            {formatDate(row.eotCase.move_out_date || row.tenancy?.end_date)}
-                          </p>
+                          <div className="mt-2 space-y-2 text-xs text-stone-600">
+                            <p>
+                              <span className="font-medium text-stone-800">Tenant:</span>{' '}
+                              {row.tenant?.full_name || 'Unknown'}
+                            </p>
+                            <p>
+                              <span className="font-medium text-stone-800">Landlord:</span>{' '}
+                              {row.landlord?.full_name || 'Unknown'}
+                            </p>
+                            <p>
+                              <span className="font-medium text-stone-800">Status:</span>{' '}
+                              {formatWorkflowLabel(row.eotCase.workflow_status)}
+                            </p>
+                            <p>
+                              <span className="font-medium text-stone-800">Last activity:</span>{' '}
+                              {formatRelativeTime(lastActivityValue)}
+                            </p>
+                            <p>
+                              <span className="font-medium text-stone-800">Move-out:</span>{' '}
+                              {formatDate(getEffectiveMoveOutDate(row))}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className={`${rowCellPadding} text-sm text-stone-700`}>
-                      {row.tenant?.full_name || 'Unknown tenant'}
-                    </td>
-                    <td className={`${rowCellPadding} text-sm text-stone-700`}>
-                      {formatDate(row.eotCase.move_out_date || row.tenancy?.end_date)}
-                    </td>
-                    <td className={`${rowCellPadding} text-sm`}>
-                      <span
-                        className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${getWorkflowTone(row.eotCase.workflow_status)}`}
+                      </td>
+                      <td className={`${rowCellPadding} text-sm text-stone-700`}>
+                        {row.tenant?.full_name || 'Unknown tenant'}
+                      </td>
+                      <td
+                        className={`${rowCellPadding} text-sm ${overdueMoveOut ? 'text-red-700' : 'text-stone-700'}`}
                       >
-                        {formatWorkflowLabel(row.eotCase.workflow_status)}
-                      </span>
-                    </td>
-                    <td className={`${rowCellPadding} text-sm`}>
-                      {(() => {
-                        const days = getDaysInStatus(
-                          row.eotCase.workflow_status,
-                          row.eotCase.created_at,
-                          row.eotCase.updated_at
-                        )
-                        const stuck = getStuckState(
-                          row.eotCase.workflow_status,
-                          row.eotCase.created_at,
-                          row.eotCase.updated_at
-                        )
-                        return (
-                          <span
-                            className={`inline-flex items-center gap-1.5 ${getStuckTone(stuck)}`}
-                          >
-                            {stuck === 'stuck' && (
-                              <span className="h-2 w-2 animate-pulse rounded-full bg-red-500" />
-                            )}
-                            {stuck === 'aging' && (
-                              <span className="h-2 w-2 rounded-full bg-amber-400" />
-                            )}
-                            {days !== null ? `${days}d` : '—'}
+                        <div className="flex flex-col gap-1">
+                          <span className={overdueMoveOut ? 'font-semibold' : undefined}>
+                            {formatDate(getEffectiveMoveOutDate(row))}
                           </span>
-                        )
-                      })()}
-                    </td>
-                    <td className={`${rowCellPadding} text-sm`}>
-                      <span
-                        className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${getInspectionTone(row.eotCase.inspection_status)}`}
+                          {overdueMoveOut ? (
+                            <span className="inline-flex w-fit rounded-full border border-red-200 bg-red-50 px-2 py-0.5 text-[11px] font-medium text-red-700">
+                              Overdue
+                            </span>
+                          ) : null}
+                        </div>
+                      </td>
+                      <td className={`${rowCellPadding} text-sm`}>
+                        <span
+                          className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${getWorkflowTone(row.eotCase.workflow_status)}`}
+                        >
+                          {formatWorkflowLabel(row.eotCase.workflow_status)}
+                        </span>
+                      </td>
+                      <td className={`${rowCellPadding} text-sm`}>
+                        <span
+                          className={`inline-flex items-center gap-1.5 ${getStuckTone(stuckState)}`}
+                        >
+                          {stuckState === 'stuck' && (
+                            <span className="h-2 w-2 animate-pulse rounded-full bg-red-500" />
+                          )}
+                          {stuckState === 'aging' && (
+                            <span className="h-2 w-2 rounded-full bg-amber-400" />
+                          )}
+                          {daysInStatus !== null ? `${daysInStatus}d` : '—'}
+                        </span>
+                      </td>
+                      <td className={`${rowCellPadding} text-sm`}>
+                        <span
+                          className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${getInspectionTone(row.eotCase.inspection_status)}`}
+                        >
+                          {formatInspectionLabel(row.eotCase.inspection_status)}
+                        </span>
+                      </td>
+                      <td className={`${rowCellPadding} text-sm`}>
+                        {assignedName ? (
+                          <span className="text-stone-700">{assignedName}</span>
+                        ) : (
+                          <span className="inline-flex rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
+                            Unassigned
+                          </span>
+                        )}
+                      </td>
+                      <td
+                        className={`${rowCellPadding} text-sm ${getLastActivityTone(lastActivityState)}`}
                       >
-                        {formatInspectionLabel(row.eotCase.inspection_status)}
-                      </span>
-                    </td>
-                    <td className={`${rowCellPadding} text-sm text-stone-700`}>
-                      {row.assignedOperator?.full_name || 'Unassigned'}
-                    </td>
-                    <td className={`${rowCellPadding} text-sm text-stone-500`}>
-                      {formatRelativeTime(
-                        row.case?.last_activity_at ||
-                          row.case?.updated_at ||
-                          row.eotCase.updated_at
-                      )}
-                    </td>
-                    <td className={`rounded-r-[1.4rem] ${rowCellPadding} text-right`}>
-                      <Link
-                        href={getQueueRowHref(row)}
-                        onClick={(event) => {
-                          event.stopPropagation()
-                          saveQueueViewState()
-                        }}
-                        className="app-secondary-button inline-flex rounded-full px-4 py-2 text-sm font-medium text-stone-700"
-                      >
-                        Open case
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
+                        {formatRelativeTime(lastActivityValue)}
+                      </td>
+                      <td className={`rounded-r-[1.4rem] ${rowCellPadding} text-right`}>
+                        <Link
+                          href={getQueueRowHref(row)}
+                          onClick={(event) => {
+                            event.stopPropagation()
+                            saveQueueViewState()
+                          }}
+                          className="app-secondary-button inline-flex rounded-full px-4 py-2 text-sm font-medium text-stone-700"
+                        >
+                          Open case
+                        </Link>
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
 
