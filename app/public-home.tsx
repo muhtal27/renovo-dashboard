@@ -187,19 +187,22 @@ export function PublicHome({
                   </a>
                 </div>
 
-                <div className="mt-6 flex flex-wrap gap-2 text-xs font-medium text-stone-600 md:text-sm">
+                <div className="mt-6 grid gap-2 text-xs font-medium text-stone-600 md:grid-cols-2 md:text-sm">
                   {[
                     'Built for UK letting agencies',
                     'Human reviewed decisions only',
                     'End-of-tenancy specialist — not a generic CRM',
                     'Deposit scheme compliant audit trail',
                   ].map((item) => (
-                    <span
+                    <div
                       key={item}
-                      className="inline-flex rounded-full border border-stone-200 bg-white/85 px-3 py-2"
+                      className="rounded-2xl border border-stone-200 bg-white/90 px-4 py-3"
                     >
-                      {item}
-                    </span>
+                      <div className="flex items-start gap-2">
+                        <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400 shrink-0 mt-[5px]" />
+                        <span className="flex-1">{item}</span>
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>
