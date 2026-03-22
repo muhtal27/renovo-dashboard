@@ -46,6 +46,12 @@ export default function LoginPage() {
   const [loadingMagicLink, setLoadingMagicLink] = useState(false)
   const [loadingReset, setLoadingReset] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
+  const [returnTo] = useState(() => {
+    if (typeof window === 'undefined') return '/eot'
+
+    const nextReturnTo = new URLSearchParams(window.location.search).get('returnTo')
+    return nextReturnTo && nextReturnTo.startsWith('/') ? nextReturnTo : '/eot'
+  })
 
   async function resolveOperatorDestination(userId: string) {
     const operatorProfile = await getOperatorProfile(userId)
@@ -78,11 +84,11 @@ export default function LoginPage() {
         return
       }
 
-      router.replace(destination)
+      router.replace(returnTo)
     }
 
     void checkSession()
-  }, [router])
+  }, [returnTo, router])
 
   async function handlePasswordSignIn() {
     if (!email.trim() || !password) {
@@ -121,7 +127,7 @@ export default function LoginPage() {
       return
     }
 
-    router.replace(destination)
+    router.replace(returnTo)
     router.refresh()
   }
 
@@ -137,7 +143,10 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithOtp({
       email: email.trim(),
       options: {
-        emailRedirectTo: typeof window === 'undefined' ? undefined : `${window.location.origin}/`,
+        emailRedirectTo:
+          typeof window === 'undefined'
+            ? undefined
+            : `${window.location.origin}/login?returnTo=${returnTo}`,
         shouldCreateUser: false,
       },
     })
@@ -328,7 +337,7 @@ export default function LoginPage() {
                 autoComplete="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                placeholder="name@renovo.co.uk"
+                placeholder="your@email.co.uk"
                 className="app-field text-sm outline-none"
               />
             </label>

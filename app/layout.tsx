@@ -13,9 +13,6 @@ export const metadata: Metadata = {
   title: 'Renovo | End-of-Tenancy Decision Engine',
   description:
     'Renovo helps letting agencies review evidence, assess issues, draft decisions, and prepare claim output through a human-reviewed end-of-tenancy workflow.',
-  alternates: {
-    canonical: '/',
-  },
   openGraph: {
     title: 'Renovo | End-of-Tenancy Decision Engine',
     description:
@@ -23,9 +20,11 @@ export const metadata: Metadata = {
     url: siteUrl,
     siteName: 'Renovo',
     type: 'website',
+    images: [{ url: 'https://renovoai.co.uk/og-image.png', width: 1200, height: 630 }],
   },
   twitter: {
     title: 'Renovo | End-of-Tenancy Decision Engine',
+    images: ['https://renovoai.co.uk/og-image.png'],
   },
 }
 

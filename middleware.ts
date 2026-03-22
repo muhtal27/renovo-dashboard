@@ -81,11 +81,9 @@ function syncSessionCookie(
 }
 
 function redirectToLogin(request: NextRequest, secure: boolean, pathname: string) {
-  const url = request.nextUrl.clone()
-  url.pathname = '/login'
-  url.search = ''
+  const url = new URL(`/login?returnTo=${request.nextUrl.pathname}`, request.url)
 
-  const response = NextResponse.redirect(url, 307)
+  const response = NextResponse.redirect(url, 302)
   syncSessionCookie(response, null, secure)
   applyNoIndexHeader(pathname, response)
   return response

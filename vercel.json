@@ -1,4 +1,12 @@
 {
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "www.renovoai.co.uk" }],
+      "destination": "https://renovoai.co.uk/:path*",
+      "permanent": true
+    }
+  ],
   "headers": [
     {
       "source": "/eot",

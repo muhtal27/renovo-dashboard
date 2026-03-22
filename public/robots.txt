@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /eot
+Disallow: /eot/
+Disallow: /cases/
+Disallow: /calls
+Disallow: /knowledge
+Disallow: /api/
+Sitemap: https://renovoai.co.uk/sitemap.xml

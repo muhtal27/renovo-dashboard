@@ -231,7 +231,7 @@ export function PublicHome({
             <div>
               <p className="app-kicker">Product proof</p>
               <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
-                More than a static dashboard shot: the decision flow is visible in stages
+                Try the product before you sign up — click through a real end-of-tenancy case.
               </h2>
             </div>
             <Link
