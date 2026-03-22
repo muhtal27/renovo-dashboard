@@ -8,6 +8,7 @@ const NOINDEX_HEADER_VALUE = 'noindex, nofollow'
 function shouldNoIndex(pathname: string) {
   return (
     pathname === '/eot' ||
+    pathname.startsWith('/eot/') ||
     pathname === '/calls' ||
     pathname === '/knowledge' ||
     pathname.startsWith('/cases/') ||

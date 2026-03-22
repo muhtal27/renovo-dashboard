@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Renovo | End-of-Tenancy Decision Engine',
     description:
-      'Renovo helps letting agencies review evidence, assess issues, draft decisions, and prepare claim output through a human-reviewed end-of-tenancy workflow.',
+      'Evidence in. Claim-ready decisions out. The specialist EOT workflow for letting agencies.',
     url: siteUrl,
     siteName: 'Renovo',
     type: 'website',
