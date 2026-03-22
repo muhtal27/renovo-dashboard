@@ -26,6 +26,9 @@ export const metadata: Metadata = {
     title: 'Renovo | End-of-Tenancy Decision Engine',
     images: ['https://renovoai.co.uk/og-image.png'],
   },
+  icons: {
+    icon: '/favicon.ico',
+  },
 }
 
 export default function RootLayout({

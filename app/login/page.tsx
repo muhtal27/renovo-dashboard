@@ -2,11 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-
-const UNLINKED_ACCOUNT_MESSAGE =
-  'This email is not linked to a Renovo workspace yet. Ask an administrator to set up your access.'
 
 const workflowStages = [
   {
@@ -32,8 +28,6 @@ const workflowStages = [
 ]
 
 export default function LoginPage() {
-  const router = useRouter()
-
   const [mode, setMode] = useState<'sign_in' | 'sign_up' | 'reset'>('sign_in')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -43,6 +37,8 @@ export default function LoginPage() {
   const [loadingMagicLink, setLoadingMagicLink] = useState(false)
   const [loadingReset, setLoadingReset] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [magicSent, setMagicSent] = useState(false)
   const [returnTo] = useState(() => {
     if (typeof window === 'undefined') return '/eot'
 
@@ -62,16 +58,18 @@ export default function LoginPage() {
     }
 
     void checkSession()
-  }, [returnTo, router])
+  }, [returnTo])
 
   async function handlePasswordSignIn() {
     if (!email.trim() || !password) {
-      setMessage('Enter your email and password to sign in.')
+      setError('Enter your email and password to sign in.')
       return
     }
 
     setLoadingPassword(true)
     setMessage(null)
+    setError(null)
+    setMagicSent(false)
 
     const { error } = await supabase.auth.signInWithPassword({
       email: email.trim(),
@@ -79,7 +77,13 @@ export default function LoginPage() {
     })
 
     if (error) {
-      setMessage(`Error: ${error.message}`)
+      if (error.message.includes('Invalid login credentials')) {
+        setError('Email or password not recognised. Please try again.')
+      } else if (error.message.includes('Email not confirmed')) {
+        setError('Please confirm your email address before signing in.')
+      } else {
+        setError('Something went wrong. Please try again.')
+      }
       setLoadingPassword(false)
       return
     }
@@ -89,12 +93,14 @@ export default function LoginPage() {
 
   async function handleMagicLink() {
     if (!email.trim()) {
-      setMessage('Enter your email address to receive a magic link.')
+      setError('Enter your email address to receive a magic link.')
       return
     }
 
     setLoadingMagicLink(true)
     setMessage(null)
+    setError(null)
+    setMagicSent(false)
 
     const { error } = await supabase.auth.signInWithOtp({
       email: email.trim(),
@@ -108,23 +114,12 @@ export default function LoginPage() {
     })
 
     if (error) {
-      const normalizedMessage = error.message.toLowerCase()
-
-      if (
-        normalizedMessage.includes('signups not allowed') ||
-        normalizedMessage.includes('user not found') ||
-        normalizedMessage.includes('otp')
-      ) {
-        setMessage(UNLINKED_ACCOUNT_MESSAGE)
-      } else {
-        setMessage(`Error: ${error.message}`)
-      }
-
+      setError("We couldn't send a magic link to that address. Please check your email and try again.")
       setLoadingMagicLink(false)
       return
     }
 
-    setMessage('Magic link sent. Check your email to continue.')
+    setMagicSent(true)
     setLoadingMagicLink(false)
   }
 
@@ -259,6 +254,8 @@ export default function LoginPage() {
                 onClick={() => {
                   setMode(value as 'sign_in' | 'sign_up' | 'reset')
                   setMessage(null)
+                  setError(null)
+                  setMagicSent(false)
                 }}
                 className={`rounded-full px-4 py-2.5 text-sm font-medium ${
                   mode === value ? 'app-pill-active' : 'app-pill'
@@ -292,7 +289,10 @@ export default function LoginPage() {
                 type="email"
                 autoComplete="email"
                 value={email}
-                onChange={(event) => setEmail(event.target.value)}
+                onChange={(event) => {
+                  setEmail(event.target.value)
+                  setMagicSent(false)
+                }}
                 placeholder="your@email.co.uk"
                 className="app-field text-sm outline-none"
               />
@@ -327,6 +327,15 @@ export default function LoginPage() {
             )}
           </div>
 
+          {mode === 'sign_in' && error ? (
+            <div
+              aria-live="polite"
+              className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900"
+            >
+              {error}
+            </div>
+          ) : null}
+
           <div className="mt-6 grid gap-3">
             {mode === 'sign_in' && (
               <>
@@ -338,13 +347,19 @@ export default function LoginPage() {
                   {loadingPassword ? 'Signing in...' : 'Sign in with password'}
                 </button>
 
-                <button
-                  onClick={handleMagicLink}
-                  disabled={loadingPassword || loadingMagicLink}
-                  className="app-secondary-button rounded-2xl px-4 py-3.5 text-sm font-medium disabled:opacity-60"
-                >
-                  {loadingMagicLink ? 'Sending...' : 'Email me a magic link'}
-                </button>
+                {magicSent ? (
+                  <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3.5 text-sm font-medium text-emerald-900">
+                    ✓ Magic link sent — check your inbox
+                  </div>
+                ) : (
+                  <button
+                    onClick={handleMagicLink}
+                    disabled={loadingPassword || loadingMagicLink}
+                    className="app-secondary-button rounded-2xl px-4 py-3.5 text-sm font-medium disabled:opacity-60"
+                  >
+                    {loadingMagicLink ? 'Sending...' : 'Email me a magic link'}
+                  </button>
+                )}
               </>
             )}
 

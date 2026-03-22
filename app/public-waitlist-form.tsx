@@ -18,6 +18,7 @@ export function PublicWaitlistForm() {
   const [form, setForm] = useState<FormState>(INITIAL_FORM_STATE)
   const [submitting, setSubmitting] = useState(false)
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle')
+  const [submitted, setSubmitted] = useState(false)
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -44,6 +45,7 @@ export function PublicWaitlistForm() {
       }
 
       setStatus('success')
+      setSubmitted(true)
     } catch {
       setStatus('error')
     } finally {
@@ -58,9 +60,13 @@ export function PublicWaitlistForm() {
         Leave your details
       </h3>
 
-      {status === 'success' ? (
-        <div className="mt-5 rounded-[1.2rem] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-950">
-          You&apos;re on the list — we&apos;ll be in touch.
+      {submitted ? (
+        <div className="mt-5 rounded-[1.4rem] border border-emerald-200 bg-emerald-50 px-5 py-6 text-center text-emerald-950">
+          <p className="text-2xl font-semibold">✓</p>
+          <p className="mt-3 text-lg font-semibold">You&apos;re on the list</p>
+          <p className="mt-2 text-sm leading-6 text-emerald-900/85">
+            We&apos;ll be in touch when rollout capacity opens for your agency.
+          </p>
         </div>
       ) : (
         <>

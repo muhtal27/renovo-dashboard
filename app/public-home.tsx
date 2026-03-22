@@ -157,13 +157,13 @@ export function PublicHome({
                 </div>
 
                 <h1 className="mt-6 max-w-5xl text-4xl font-semibold tracking-tight md:text-[4.7rem] md:leading-[0.94]">
-                  Move from messy move-out evidence to claim-ready decisions in one property manager flow.
+                  From messy move-out to claim-ready — in one flow.
                 </h1>
 
                 <p className="mt-6 max-w-3xl text-base leading-8 text-stone-700 md:text-lg">
-                  Renovo brings together documents, extracted facts, issues, recommendations, and
-                  review history so property managers can make fairer end-of-tenancy decisions faster,
-                  without losing the reasoning behind them.
+                  Renovo brings together documents, extracted facts, issues, and recommendations so
+                  property managers can make fairer end-of-tenancy decisions faster — without
+                  losing the reasoning behind them.
                 </p>
 
                 <div className="mt-8 flex flex-wrap gap-3">
@@ -179,6 +179,22 @@ export function PublicHome({
                   >
                     Request early access
                   </a>
+                </div>
+
+                <div className="mt-6 flex flex-wrap gap-2 text-xs font-medium text-stone-600 md:text-sm">
+                  {[
+                    'Built for UK letting agencies',
+                    'Human-reviewed decisions only',
+                    'End-of-tenancy specialist — not a generic CRM',
+                    'Deposit scheme compliant audit trail',
+                  ].map((item) => (
+                    <span
+                      key={item}
+                      className="inline-flex rounded-full border border-stone-200 bg-white/85 px-3 py-2"
+                    >
+                      {item}
+                    </span>
+                  ))}
                 </div>
               </div>
 

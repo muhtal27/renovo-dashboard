@@ -563,6 +563,20 @@ export default function HomepageDemo() {
             </div>
           ) : null}
         </div>
+
+        <div className="rounded-[1.5rem] border border-emerald-200 bg-emerald-50/80 p-5">
+          <p className="app-kicker text-emerald-900">Ready to use this for real cases?</p>
+          <p className="mt-3 max-w-3xl text-sm leading-7 text-emerald-950/85">
+            This is a preview of a live end-of-tenancy case. Join the rollout list to use Renovo
+            with your own agency&apos;s cases.
+          </p>
+          <a
+            href="#waitlist"
+            className="mt-4 inline-flex text-sm font-semibold text-emerald-900 transition hover:text-emerald-950"
+          >
+            Join the rollout list →
+          </a>
+        </div>
       </div>
     )
   }
