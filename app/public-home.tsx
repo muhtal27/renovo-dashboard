@@ -231,7 +231,7 @@ export function PublicHome({
           </div>
         </section>
 
-        <section className="app-surface rounded-[2rem] p-6 md:p-7">
+        <section className="bg-stone-50/60 rounded-[2rem] px-6 py-8 md:px-8 md:py-10">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-4xl">
               <p className="app-kicker">Your existing setup</p>
@@ -265,13 +265,13 @@ export function PublicHome({
           </div>
         </section>
 
-        <section id="workflow" className="app-surface rounded-[2rem] p-6 md:p-7">
+        <section id="workflow" className="bg-stone-900 rounded-[2rem] p-6 md:p-7">
           <div className="max-w-4xl">
-            <p className="app-kicker">Workflow</p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
+            <p className="app-kicker text-stone-400">Workflow</p>
+            <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white md:text-4xl">
               Purpose-built around the real end-of-tenancy review path
             </h2>
-            <p className="mt-4 text-base leading-8 text-stone-700">
+            <p className="mt-4 text-base leading-8 text-stone-300">
               Renovo is not a generic assistant bolted onto a property dashboard. It is structured
               around the property manager journey from evidence intake to reviewed recommendation and claim
               output.
@@ -280,18 +280,18 @@ export function PublicHome({
 
           <div className="mt-6 grid gap-4 xl:grid-cols-5">
             {workflowSteps.map((item) => (
-              <article key={item.step} className="rounded-[1.45rem] border border-stone-200 bg-white/92 p-5">
+              <article key={item.step} className="rounded-[1.45rem] border border-stone-700 bg-stone-800 p-5">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-stone-500">
                   Step {item.step}
                 </p>
-                <h3 className="mt-3 text-lg font-semibold text-stone-900">{item.title}</h3>
-                <p className="mt-3 text-sm leading-7 text-stone-600">{item.body}</p>
+                <h3 className="mt-3 text-lg font-semibold text-white">{item.title}</h3>
+                <p className="mt-3 text-sm leading-7 text-stone-400">{item.body}</p>
               </article>
             ))}
           </div>
         </section>
 
-        <section id="platform" className="app-surface rounded-[2rem] p-6 md:p-7">
+        <section id="platform" className="bg-[linear-gradient(180deg,rgba(250,247,242,0.4),rgba(255,255,255,0.7))] rounded-[2rem] border border-stone-100 p-6 md:p-7">
           <div className="flex flex-col gap-3 border-b app-divider pb-5 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="app-kicker">Product proof</p>
@@ -317,7 +317,7 @@ export function PublicHome({
         </section>
 
         <section className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
-          <div className="app-surface rounded-[2rem] p-6 md:p-7">
+          <div className="bg-[linear-gradient(135deg,rgba(255,251,235,0.9),rgba(255,247,230,0.7))] rounded-[2rem] border border-amber-100 p-6 md:p-7">
             <p className="app-kicker">Property manager outcome</p>
             <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
               Stronger decisions without hiding the reasoning
@@ -333,7 +333,7 @@ export function PublicHome({
             </div>
           </div>
 
-          <div className="app-surface rounded-[2rem] p-6 md:p-7">
+          <div className="bg-stone-50/40 rounded-[2rem] border border-stone-100/80 p-6 md:p-7">
             <p className="app-kicker">Supporting areas</p>
             <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
               Everything around the decision stays close, but secondary
@@ -345,9 +345,9 @@ export function PublicHome({
 
             <div className="mt-6 grid gap-4 md:grid-cols-2">
               {supportingAreas.map((item) => (
-                <article key={item.title} className="rounded-[1.45rem] border border-stone-200 bg-white/92 p-5">
-                  <h3 className="text-lg font-semibold text-stone-900">{item.title}</h3>
-                  <p className="mt-3 text-sm leading-7 text-stone-600">{item.body}</p>
+                <article key={item.title} className="rounded-[1.45rem] border border-stone-100 bg-white/60 p-4">
+                  <h3 className="text-lg font-semibold text-stone-700">{item.title}</h3>
+                  <p className="mt-3 text-sm leading-7 text-stone-500">{item.body}</p>
                 </article>
               ))}
             </div>
