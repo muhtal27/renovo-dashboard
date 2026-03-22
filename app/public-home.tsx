@@ -111,6 +111,12 @@ export function PublicHome({
               >
                 Product
               </a>
+              <Link
+                href="/how-it-works"
+                className="hidden text-sm font-medium text-stone-600 hover:text-stone-900 md:inline-flex"
+              >
+                How it works
+              </Link>
               <a
                 href="#waitlist"
                 className="inline-flex text-sm font-medium text-stone-700 hover:text-stone-900"
