@@ -9,6 +9,10 @@
   ],
   "headers": [
     {
+      "source": "/login",
+      "headers": [{ "key": "X-Robots-Tag", "value": "noindex" }]
+    },
+    {
       "source": "/eot",
       "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }]
     },

@@ -5,6 +5,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { OperatorLayout } from '@/app/operator-layout'
 import { supabase } from '@/lib/supabase'
 
+export const dynamic = 'force-dynamic'
+
 type EndOfTenancyCaseRow = {
   id: string
   case_id: string
