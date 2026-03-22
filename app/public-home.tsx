@@ -50,40 +50,6 @@ const setupItems = [
   'PMS sync — Coming: pull from your existing system',
 ]
 
-const operatorOutcomes = [
-  {
-    title: 'Faster review cycles',
-    body: 'Property managers stop bouncing between tenancy records, message history, and claim spreadsheets before they can even begin assessing the case.',
-  },
-  {
-    title: 'More consistent decisions',
-    body: 'The same workflow, evidence structure, and review states help teams reach steadier outcomes across branches and property managers.',
-  },
-  {
-    title: 'Clearer challenge handling',
-    body: 'When a landlord or tenant pushes back, the rationale and evidence trail are already visible instead of needing to be recreated.',
-  },
-]
-
-const supportingAreas = [
-  {
-    title: 'Deposit claims',
-    body: 'Keep disputed amounts, claim totals, and line-item output close to the EOT decision.',
-  },
-  {
-    title: 'Tenancies',
-    body: 'Ground every recommendation in tenancy dates, occupant context, and linked documents.',
-  },
-  {
-    title: 'Properties',
-    body: 'Use property history and address context without leaving the main decision flow.',
-  },
-  {
-    title: 'Knowledge',
-    body: 'Support review with approved guidance that can be cited when it is useful, not forced.',
-  },
-]
-
 export function PublicHome({
   productDemo,
 }: {
@@ -316,41 +282,43 @@ export function PublicHome({
           </div>
         </section>
 
-        <section className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
-          <div className="bg-[linear-gradient(135deg,rgba(255,251,235,0.9),rgba(255,247,230,0.7))] rounded-[2rem] border border-amber-100 p-6 md:p-7">
-            <p className="app-kicker">Property manager outcome</p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
-              Stronger decisions without hiding the reasoning
-            </h2>
+        <section className="bg-[linear-gradient(135deg,rgba(255,251,235,0.9),rgba(255,247,230,0.7))] rounded-[2rem] border border-amber-100 p-6 md:p-7">
+          <p className="app-kicker">What changes for your team</p>
+          <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
+            Stronger decisions without hiding the reasoning
+          </h2>
+          <p className="mt-4 max-w-3xl text-base leading-8 text-stone-700">
+            Property managers get one place for evidence, issues, and review. Decisions are
+            documented as they are made. Challenges are answered with a trail that already exists.
+          </p>
 
-            <div className="mt-6 space-y-4">
-              {operatorOutcomes.map((item) => (
-                <article key={item.title} className="rounded-[1.45rem] border border-stone-200 bg-white/92 p-5">
-                  <h3 className="text-lg font-semibold text-stone-900">{item.title}</h3>
-                  <p className="mt-3 text-sm leading-7 text-stone-600">{item.body}</p>
-                </article>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-stone-50/40 rounded-[2rem] border border-stone-100/80 p-6 md:p-7">
-            <p className="app-kicker">Supporting areas</p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
-              Everything around the decision stays close, but secondary
-            </h2>
-            <p className="mt-4 text-base leading-8 text-stone-700">
-              Deposit claims, tenancies, properties, and knowledge support the end-of-tenancy
-              engine. They no longer compete with it.
-            </p>
-
-            <div className="mt-6 grid gap-4 md:grid-cols-2">
-              {supportingAreas.map((item) => (
-                <article key={item.title} className="rounded-[1.45rem] border border-stone-100 bg-white/60 p-4">
-                  <h3 className="text-lg font-semibold text-stone-700">{item.title}</h3>
-                  <p className="mt-3 text-sm leading-7 text-stone-500">{item.body}</p>
-                </article>
-              ))}
-            </div>
+          <div className="mt-6 grid gap-4 md:grid-cols-3">
+            <article className="rounded-[1.45rem] border border-amber-100/80 bg-white/80 p-5">
+              <h3 className="text-base font-semibold text-stone-900">Faster review cycles</h3>
+              <p className="mt-2 text-sm leading-7 text-stone-600">
+                No more rebuilding context from inbox threads, spreadsheets, and PDFs before you
+                can even begin assessing the case. Everything is already in one place when you open
+                it.
+              </p>
+            </article>
+            <article className="rounded-[1.45rem] border border-amber-100/80 bg-white/80 p-5">
+              <h3 className="text-base font-semibold text-stone-900">
+                More consistent decisions
+              </h3>
+              <p className="mt-2 text-sm leading-7 text-stone-600">
+                The same evidence structure, issue categories, and review states mean different
+                managers reach steadier outcomes — across branches and across cases.
+              </p>
+            </article>
+            <article className="rounded-[1.45rem] border border-amber-100/80 bg-white/80 p-5">
+              <h3 className="text-base font-semibold text-stone-900">
+                Defensible when challenged
+              </h3>
+              <p className="mt-2 text-sm leading-7 text-stone-600">
+                When a landlord or tenant pushes back, the rationale and evidence trail are already
+                there. You are not recreating the reasoning from memory.
+              </p>
+            </article>
           </div>
         </section>
 
