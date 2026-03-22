@@ -240,6 +240,16 @@ export type PropertyRow = {
   updated_at: string | null
 }
 
+export type ContactSummaryRow = {
+  id: string
+  full_name: string | null
+}
+
+export type UserProfileSummaryRow = {
+  id: string
+  full_name: string | null
+}
+
 export type DepositClaimRow = {
   id: string
   case_id: string | null
@@ -566,6 +576,9 @@ export type EndOfTenancyCaseListItem = {
   case: CaseRow | null
   tenancy: TenancyRow | null
   property: PropertyRow | null
+  tenant: ContactSummaryRow | null
+  landlord: ContactSummaryRow | null
+  assignedOperator: UserProfileSummaryRow | null
   depositClaim: DepositClaimRow | null
   moveOutTracker: MoveOutTrackerRow | null
 }

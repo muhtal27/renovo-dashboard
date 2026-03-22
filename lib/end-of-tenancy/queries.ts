@@ -4,6 +4,7 @@ import type {
   AttachCaseDocumentInput,
   CaseDocumentRow,
   CaseRow,
+  ContactSummaryRow,
   CreateDecisionRecommendationInput,
   CreateEndOfTenancyCaseInput,
   DecisionRecommendationRow,
@@ -25,6 +26,7 @@ import type {
   TenancyRow,
   UpsertDepositClaimLineItemInput,
   UpsertEndOfTenancyIssueInput,
+  UserProfileSummaryRow,
   LinkIssueEvidenceInput,
   DocumentExtractionRow,
 } from '@/lib/end-of-tenancy/types'
@@ -152,6 +154,32 @@ async function loadPropertiesByIds(supabase: DbClient, propertyIds: string[]) {
   return new Map(rows.map((row) => [row.id, row]))
 }
 
+async function loadContactsByIds(supabase: DbClient, contactIds: string[]) {
+  if (contactIds.length === 0) {
+    return new Map<string, ContactSummaryRow>()
+  }
+
+  const rows = await requireMany<ContactSummaryRow>(
+    'Unable to load contacts',
+    supabase.from('contacts').select('id, full_name').in('id', contactIds)
+  )
+
+  return new Map(rows.map((row) => [row.id, row]))
+}
+
+async function loadUsersByIds(supabase: DbClient, userIds: string[]) {
+  if (userIds.length === 0) {
+    return new Map<string, UserProfileSummaryRow>()
+  }
+
+  const rows = await requireMany<UserProfileSummaryRow>(
+    'Unable to load users',
+    supabase.from('users_profiles').select('id, full_name').in('id', userIds)
+  )
+
+  return new Map(rows.map((row) => [row.id, row]))
+}
+
 async function loadDepositClaimsByIds(supabase: DbClient, depositClaimIds: string[]) {
   if (depositClaimIds.length === 0) {
     return new Map<string, DepositClaimRow>()
@@ -256,6 +284,19 @@ export async function listEndOfTenancyCases(options?: {
       })
     )
   )
+  const contactMap = await loadContactsByIds(
+    supabase,
+    dedupe(
+      eotCases.flatMap((row) => {
+        const tenancy = tenancyMap.get(row.tenancy_id)
+        return [tenancy?.tenant_contact_id, tenancy?.landlord_contact_id]
+      })
+    )
+  )
+  const userMap = await loadUsersByIds(
+    supabase,
+    dedupe(eotCases.map((row) => caseMap.get(row.case_id)?.assigned_user_id ?? null))
+  )
 
   return eotCases.map<EndOfTenancyCaseListItem>((endOfTenancyCase) => {
     const caseRow = caseMap.get(endOfTenancyCase.case_id) ?? null
@@ -267,6 +308,13 @@ export async function listEndOfTenancyCases(options?: {
       case: caseRow,
       tenancy,
       property: propertyId ? propertyMap.get(propertyId) ?? null : null,
+      tenant: tenancy?.tenant_contact_id ? contactMap.get(tenancy.tenant_contact_id) ?? null : null,
+      landlord: tenancy?.landlord_contact_id
+        ? contactMap.get(tenancy.landlord_contact_id) ?? null
+        : null,
+      assignedOperator: caseRow?.assigned_user_id
+        ? userMap.get(caseRow.assigned_user_id) ?? null
+        : null,
       depositClaim: endOfTenancyCase.deposit_claim_id
         ? depositClaimMap.get(endOfTenancyCase.deposit_claim_id) ?? null
         : null,
@@ -675,6 +723,9 @@ export async function getEndOfTenancyCaseDetail(
     case: baseCase,
     tenancy,
     property,
+    tenant: null,
+    landlord: null,
+    assignedOperator: null,
     depositClaim,
     moveOutTracker,
     documents,

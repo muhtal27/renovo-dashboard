@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { OperatorLayout } from '@/app/operator-layout'
-import { supabase } from '@/lib/supabase'
+import { endOfTenancyApiRequest } from '@/lib/end-of-tenancy/client-api'
 
 type EndOfTenancyCaseRow = {
   id: string
@@ -62,6 +62,19 @@ type QueueRow = {
   tenant: ContactRow | null
   landlord: ContactRow | null
   assignedOperator: UserProfileRow | null
+}
+
+type EndOfTenancyCaseListResponse = {
+  ok: boolean
+  items: Array<{
+    endOfTenancyCase: EndOfTenancyCaseRow
+    case: CaseRow | null
+    tenancy: TenancyRow | null
+    property: PropertyRow | null
+    tenant: ContactRow | null
+    landlord: ContactRow | null
+    assignedOperator: UserProfileRow | null
+  }>
 }
 
 function formatRelativeTime(value: string | null | undefined) {
@@ -192,141 +205,21 @@ export default function EotCasesPage() {
       setLoading(true)
       setError(null)
 
-      const eotResponse = await supabase
-        .from('end_of_tenancy_cases')
-        .select(
-          'id, case_id, tenancy_id, workflow_status, inspection_status, move_out_date, closed_at, updated_at'
+      try {
+        const response = await endOfTenancyApiRequest<EndOfTenancyCaseListResponse>(
+          '/api/eot/cases?limit=250'
         )
-        .order('updated_at', { ascending: false })
-        .limit(250)
 
-      if (eotResponse.error) {
-        if (!cancelled) {
-          setError(eotResponse.error.message)
-          setLoading(false)
-        }
-        return
-      }
-
-      const eotCases = (eotResponse.data || []) as EndOfTenancyCaseRow[]
-      const caseIds = [...new Set(eotCases.map((item) => item.case_id).filter(Boolean))]
-      const tenancyIds = [...new Set(eotCases.map((item) => item.tenancy_id).filter(Boolean))]
-
-      const [caseResponse, tenancyResponse] = await Promise.all([
-        caseIds.length
-          ? supabase
-              .from('cases')
-              .select(
-                'id, case_number, status, tenancy_id, property_id, assigned_user_id, last_activity_at, updated_at, created_at'
-              )
-              .in('id', caseIds)
-          : Promise.resolve({ data: [], error: null }),
-        tenancyIds.length
-          ? supabase
-              .from('tenancies')
-              .select('id, property_id, tenant_contact_id, landlord_contact_id, end_date')
-              .in('id', tenancyIds)
-          : Promise.resolve({ data: [], error: null }),
-      ])
-
-      const firstError = caseResponse.error || tenancyResponse.error
-
-      if (firstError) {
-        if (!cancelled) {
-          setError(firstError.message)
-          setLoading(false)
-        }
-        return
-      }
-
-      const cases = (caseResponse.data || []) as CaseRow[]
-      const tenancies = (tenancyResponse.data || []) as TenancyRow[]
-      const casesById = new Map(cases.map((item) => [item.id, item] as const))
-      const tenanciesById = new Map(tenancies.map((item) => [item.id, item] as const))
-
-      const propertyIds = [
-        ...new Set(
-          eotCases
-            .map((item) => {
-              const tenancy = tenanciesById.get(item.tenancy_id)
-              const caseRow = casesById.get(item.case_id)
-              return tenancy?.property_id ?? caseRow?.property_id ?? null
-            })
-            .filter(Boolean)
-        ),
-      ] as string[]
-
-      const contactIds = [
-        ...new Set(
-          tenancies
-            .flatMap((item) => [item.tenant_contact_id, item.landlord_contact_id])
-            .filter(Boolean)
-        ),
-      ] as string[]
-
-      const userIds = [
-        ...new Set(cases.map((item) => item.assigned_user_id).filter(Boolean)),
-      ] as string[]
-
-      const [propertyResponse, contactsResponse, usersResponse] = await Promise.all([
-        propertyIds.length
-          ? supabase
-              .from('properties')
-              .select('id, address_line_1, address_line_2, city, postcode')
-              .in('id', propertyIds)
-          : Promise.resolve({ data: [], error: null }),
-        contactIds.length
-          ? supabase.from('contacts').select('id, full_name').in('id', contactIds)
-          : Promise.resolve({ data: [], error: null }),
-        userIds.length
-          ? supabase.from('users_profiles').select('id, full_name').in('id', userIds)
-          : Promise.resolve({ data: [], error: null }),
-      ])
-
-      const secondaryError =
-        propertyResponse.error || contactsResponse.error || usersResponse.error
-
-      if (secondaryError) {
-        if (!cancelled) {
-          setError(secondaryError.message)
-          setLoading(false)
-        }
-        return
-      }
-
-      const propertiesById = new Map(
-        ((propertyResponse.data || []) as PropertyRow[]).map((item) => [item.id, item] as const)
-      )
-      const contactsById = new Map(
-        ((contactsResponse.data || []) as ContactRow[]).map((item) => [item.id, item] as const)
-      )
-      const usersById = new Map(
-        ((usersResponse.data || []) as UserProfileRow[]).map((item) => [item.id, item] as const)
-      )
-
-      const queueRows = eotCases
-        .map<QueueRow>((eotCase) => {
-          const caseRow = casesById.get(eotCase.case_id) ?? null
-          const tenancy = tenanciesById.get(eotCase.tenancy_id) ?? null
-          const property =
-            propertiesById.get(tenancy?.property_id ?? caseRow?.property_id ?? '') ?? null
-
-          return {
-            eotCase,
-            case: caseRow,
-            tenancy,
-            property,
-            tenant: tenancy?.tenant_contact_id
-              ? contactsById.get(tenancy.tenant_contact_id) ?? null
-              : null,
-            landlord: tenancy?.landlord_contact_id
-              ? contactsById.get(tenancy.landlord_contact_id) ?? null
-              : null,
-            assignedOperator: caseRow?.assigned_user_id
-              ? usersById.get(caseRow.assigned_user_id) ?? null
-              : null,
-          }
-        })
+        const queueRows = response.items
+          .map<QueueRow>((item) => ({
+            eotCase: item.endOfTenancyCase,
+            case: item.case,
+            tenancy: item.tenancy,
+            property: item.property,
+            tenant: item.tenant,
+            landlord: item.landlord,
+            assignedOperator: item.assignedOperator,
+          }))
         .sort((left, right) => {
           const leftActivity = left.case?.last_activity_at || left.case?.updated_at || left.case?.created_at || ''
           const rightActivity =
@@ -334,9 +227,15 @@ export default function EotCasesPage() {
           return rightActivity.localeCompare(leftActivity)
         })
 
-      if (!cancelled) {
-        setRows(queueRows)
-        setLoading(false)
+        if (!cancelled) {
+          setRows(queueRows)
+          setLoading(false)
+        }
+      } catch (loadError) {
+        if (!cancelled) {
+          setError(loadError instanceof Error ? loadError.message : 'Unable to load the queue.')
+          setLoading(false)
+        }
       }
     }
 
