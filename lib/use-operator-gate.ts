@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useEffectEvent, useState } from 'react'
+import { useEffect, useEffectEvent, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { User } from '@supabase/supabase-js'
 import { getOperatorProfile, type CurrentOperator } from '@/lib/operator'
@@ -14,75 +14,48 @@ type UseOperatorGateOptions = {
 }
 
 export function useOperatorGate({
-  missingProfileMessage,
   sessionErrorMessage = 'Unable to load your workspace.',
-  refreshErrorMessage = 'Unable to refresh your workspace.',
   unauthenticatedMode = 'redirect',
 }: UseOperatorGateOptions = {}) {
   const router = useRouter()
   const [operator, setOperator] = useState<CurrentOperator | null>(null)
   const [authLoading, setAuthLoading] = useState(true)
   const [authError, setAuthError] = useState<string | null>(null)
-  const strictOperatorAccess = unauthenticatedMode === 'redirect'
-
-  const failClosed = useEffectEvent(async (message: string) => {
-    setOperator(null)
-    setAuthError(message)
-    setAuthLoading(false)
-
-    if (strictOperatorAccess) {
-      await supabase.auth.signOut()
-      router.replace('/login')
-    }
-  })
+  const profileRequestIdRef = useRef(0)
 
   const hydrateOperator = useEffectEvent(async (user: User) => {
-    setOperator({
-      authUser: user,
-      profile: null,
-    })
+    const requestId = ++profileRequestIdRef.current
 
     try {
       const profile = await getOperatorProfile(user.id)
 
-      setOperator({
-        authUser: user,
-        profile,
-      })
-
-      if (!profile) {
-        const missingProfileError =
-          missingProfileMessage || 'Your account is not linked to your workspace.'
-
-        if (strictOperatorAccess) {
-          await failClosed(missingProfileError)
-          return
-        }
-
-        setAuthError(missingProfileError)
+      if (profileRequestIdRef.current !== requestId) {
         return
       }
 
-      if (profile?.is_active === false) {
-        await failClosed('Your manager profile is inactive. Please contact an administrator.')
-        return
-      }
-
-      setAuthError(null)
-    } catch (profileError) {
-      setAuthError(
-        profileError instanceof Error ? profileError.message : 'Unable to load your profile.'
+      setOperator((current) =>
+        current?.authUser?.id === user.id
+          ? {
+              authUser: user,
+              profile: profile ?? null,
+            }
+          : current
       )
+    } catch {
+      if (profileRequestIdRef.current !== requestId) {
+        return
+      }
     }
   })
 
   useEffect(() => {
     let cancelled = false
 
-    async function applyUser(user: User | null, failureMessage: string) {
+    async function applyUser(user: User | null) {
       if (cancelled) return
 
       if (!user) {
+        profileRequestIdRef.current += 1
         setOperator(null)
         setAuthError(null)
         setAuthLoading(false)
@@ -94,17 +67,13 @@ export function useOperatorGate({
         return
       }
 
-      try {
-        await hydrateOperator(user)
-      } catch (authError) {
-        if (!cancelled) {
-          setAuthError(authError instanceof Error ? authError.message : failureMessage)
-        }
-      } finally {
-        if (!cancelled) {
-          setAuthLoading(false)
-        }
-      }
+      setOperator({
+        authUser: user,
+        profile: null,
+      })
+      setAuthError(null)
+      setAuthLoading(false)
+      void hydrateOperator(user)
     }
 
     async function bootstrapAuth() {
@@ -118,7 +87,7 @@ export function useOperatorGate({
           throw userError
         }
 
-        await applyUser(user ?? null, sessionErrorMessage)
+        await applyUser(user ?? null)
       } catch (authError) {
         if (!cancelled) {
           setAuthError(authError instanceof Error ? authError.message : sessionErrorMessage)
@@ -132,14 +101,14 @@ export function useOperatorGate({
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      void applyUser(session?.user ?? null, refreshErrorMessage)
+      void applyUser(session?.user ?? null)
     })
 
     return () => {
       cancelled = true
       subscription.unsubscribe()
     }
-  }, [refreshErrorMessage, router, sessionErrorMessage, unauthenticatedMode])
+  }, [router, sessionErrorMessage, unauthenticatedMode])
 
   return {
     operator,

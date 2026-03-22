@@ -3,13 +3,10 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { getOperatorProfile } from '@/lib/operator'
 import { supabase } from '@/lib/supabase'
 
 const UNLINKED_ACCOUNT_MESSAGE =
   'This email is not linked to a Renovo workspace yet. Ask an administrator to set up your access.'
-
-const OPERATOR_WORKSPACE_ROLES = new Set(['admin', 'manager', 'operator', 'viewer'])
 
 const workflowStages = [
   {
@@ -53,36 +50,13 @@ export default function LoginPage() {
     return nextReturnTo && nextReturnTo.startsWith('/') ? nextReturnTo : '/eot'
   })
 
-  async function resolveOperatorDestination(userId: string) {
-    const operatorProfile = await getOperatorProfile(userId)
-    if (!operatorProfile || operatorProfile.is_active === false) {
-      return null
-    }
-
-    // Assumption: older operator profiles may not have role populated yet, so active profiles
-    // still land on the operator case queue instead of being locked out.
-    if (!operatorProfile.role || OPERATOR_WORKSPACE_ROLES.has(operatorProfile.role)) {
-      return '/eot'
-    }
-
-    return null
-  }
-
   useEffect(() => {
     async function checkSession() {
       const {
-        data: { session },
-      } = await supabase.auth.getSession()
+        data: { user },
+      } = await supabase.auth.getUser()
 
-      if (!session?.user) return
-
-      const destination = await resolveOperatorDestination(session.user.id)
-
-    if (!destination) {
-      await supabase.auth.signOut()
-      setMessage(UNLINKED_ACCOUNT_MESSAGE)
-      return
-    }
+      if (!user) return
 
       window.location.href = returnTo
     }
@@ -99,30 +73,13 @@ export default function LoginPage() {
     setLoadingPassword(true)
     setMessage(null)
 
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signInWithPassword({
       email: email.trim(),
       password,
     })
 
     if (error) {
       setMessage(`Error: ${error.message}`)
-      setLoadingPassword(false)
-      return
-    }
-
-    const userId = data.user?.id || data.session?.user.id
-
-    if (!userId) {
-      setMessage('Signed in, but no matching workspace was found yet.')
-      setLoadingPassword(false)
-      return
-    }
-
-    const destination = await resolveOperatorDestination(userId)
-
-    if (!destination) {
-      await supabase.auth.signOut()
-      setMessage(UNLINKED_ACCOUNT_MESSAGE)
       setLoadingPassword(false)
       return
     }

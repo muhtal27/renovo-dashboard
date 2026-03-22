@@ -84,8 +84,9 @@ export function OperatorNav({ current, viewerName }: OperatorNavProps) {
 
   async function handleSignOut() {
     setSigningOut(true)
+
+    await supabase.auth.signOut()
     window.location.href = '/login'
-    void supabase.auth.signOut()
   }
 
   const displayName = viewerName?.trim() || fallbackViewerLabel

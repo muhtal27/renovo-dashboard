@@ -545,7 +545,7 @@ export default function HomePage() {
   const [creatingLedger, setCreatingLedger] = useState(false)
   const [creatingRenewal, setCreatingRenewal] = useState(false)
   const [creatingMaintenance, setCreatingMaintenance] = useState(false)
-	  const [operationsPulse, setOperationsPulse] = useState<OperationsPulseState>({
+  const [operationsPulse, setOperationsPulse] = useState<OperationsPulseState>({
 	    maintenanceLive: 0,
 	    maintenanceApproval: 0,
 	    maintenanceScheduled: 0,
@@ -553,11 +553,7 @@ export default function HomePage() {
 	    complianceSoon: 0,
 	  })
   const operatorUserId = operator?.authUser?.id ?? null
-  const workspaceAccessError =
-    !authLoading && !!operator?.authUser && !operator.profile
-      ? 'Your account is not linked to your workspace.'
-      : null
-  const pageError = authError ?? error ?? workspaceAccessError
+  const pageError = authError ?? error
 
   const loadCasesAndUsers = useEffectEvent(async (options?: { preserveLoading?: boolean }) => {
     if (!operatorUserId) return
@@ -856,7 +852,7 @@ export default function HomePage() {
 	  })
 
   useEffect(() => {
-    if (!operatorUserId || !operator?.profile) return
+    if (!operatorUserId) return
 
     async function loadCases() {
       setError(null)
@@ -864,12 +860,12 @@ export default function HomePage() {
     }
 
     loadCases()
-  }, [operator?.profile, operatorUserId])
+  }, [operatorUserId])
 
   useEffect(() => {
-    if (!operatorUserId || !operator?.profile) return
+    if (!operatorUserId) return
     void loadOperationsPulse()
-  }, [operator?.profile, operatorUserId])
+  }, [operatorUserId])
 
   useEffect(() => {
     if (!selectedCaseId || !operatorUserId) {
