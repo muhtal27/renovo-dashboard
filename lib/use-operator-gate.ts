@@ -15,8 +15,8 @@ type UseOperatorGateOptions = {
 
 export function useOperatorGate({
   missingProfileMessage,
-  sessionErrorMessage = 'Unable to load operator session.',
-  refreshErrorMessage = 'Unable to refresh operator session.',
+  sessionErrorMessage = 'Unable to load your workspace.',
+  refreshErrorMessage = 'Unable to refresh your workspace.',
   unauthenticatedMode = 'redirect',
 }: UseOperatorGateOptions = {}) {
   const router = useRouter()
@@ -52,7 +52,7 @@ export function useOperatorGate({
 
       if (!profile) {
         const missingProfileError =
-          missingProfileMessage || 'Your account is not linked to the operator workspace.'
+          missingProfileMessage || 'Your account is not linked to your workspace.'
 
         if (strictOperatorAccess) {
           await failClosed(missingProfileError)
@@ -64,14 +64,14 @@ export function useOperatorGate({
       }
 
       if (profile?.is_active === false) {
-        await failClosed('Your operator profile is inactive. Please contact an administrator.')
+        await failClosed('Your manager profile is inactive. Please contact an administrator.')
         return
       }
 
       setAuthError(null)
     } catch (profileError) {
       setAuthError(
-        profileError instanceof Error ? profileError.message : 'Unable to load operator profile.'
+        profileError instanceof Error ? profileError.message : 'Unable to load your profile.'
       )
     }
   })

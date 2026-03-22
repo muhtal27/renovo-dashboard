@@ -250,7 +250,7 @@ export default function CaseWorkspacePage() {
       const contactsById = new Map(contacts.map((contact) => [contact.id, contact] as const))
       const actorNames = Object.fromEntries(
         ((usersResponse.data || []) as Array<{ id: string; full_name: string | null; email?: string | null }>).map(
-          (user) => [user.id, user.full_name?.trim() || user.email?.trim() || 'Unknown operator']
+          (user) => [user.id, user.full_name?.trim() || user.email?.trim() || 'Unknown manager']
         )
       )
 
@@ -526,7 +526,7 @@ export default function CaseWorkspacePage() {
                       Move-out progress and next action
                     </h2>
                     <p className="mt-3 max-w-3xl text-sm leading-6 text-stone-600">
-                      Keep the operator view anchored on the current workflow step, checklist, and recent audit activity.
+                      Keep the manager view anchored on the current workflow step, checklist, and recent audit activity.
                     </p>
                   </div>
                   <div className="rounded-[1.5rem] border border-stone-200 bg-white px-5 py-4">
@@ -571,7 +571,7 @@ export default function CaseWorkspacePage() {
 
                 <div className="mt-6 grid gap-4 xl:grid-cols-[minmax(0,1fr),360px]">
                   <div className="rounded-[1.6rem] border border-stone-200 bg-white p-5">
-                    <p className="app-kicker">Operator checklist</p>
+                    <p className="app-kicker">Manager checklist</p>
                     <div className="mt-4 grid gap-3 sm:grid-cols-2">
                       {workspace.moveOutChecklistItems.length === 0 ? (
                         <p className="text-sm text-stone-500">Checklist items will appear as the move-out tracker advances.</p>

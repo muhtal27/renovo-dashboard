@@ -283,7 +283,7 @@ export function Recommendation({
                         <div>
                           <p className="text-sm font-semibold text-stone-900">
                             {action.actor_user_id
-                              ? actorNames[action.actor_user_id] || 'Unknown operator'
+                              ? actorNames[action.actor_user_id] || 'Unknown manager'
                               : action.actor_type === 'ai'
                                 ? 'Renovo AI'
                                 : 'System'}

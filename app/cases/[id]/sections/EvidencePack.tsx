@@ -246,7 +246,7 @@ export function EvidencePack({
             onChange={(event) => setNotes(event.target.value)}
             rows={4}
             className="app-field w-full resize-y"
-            placeholder="Optional context for the operator review trail"
+            placeholder="Optional context for the manager review trail"
           />
         </div>
 

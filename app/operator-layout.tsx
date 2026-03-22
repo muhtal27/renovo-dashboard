@@ -25,7 +25,7 @@ export function OperatorLayout({
         <div className="mx-auto flex max-w-[1520px] flex-col gap-6">
           {(pageTitle || pageDescription) && (
             <section className="app-surface rounded-[1.9rem] px-6 py-6 md:px-8">
-              {pageTitle ? <p className="app-kicker">Renovo operator</p> : null}
+              {pageTitle ? <p className="app-kicker">Renovo manager</p> : null}
               {pageTitle ? (
                 <h1 className="mt-2 text-3xl font-semibold tracking-tight text-stone-900">
                   {pageTitle}

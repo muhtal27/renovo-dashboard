@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { getOperatorProfile } from '@/lib/operator'
 import { supabase } from '@/lib/supabase'
 
 type OperatorNavProps = {
@@ -29,10 +30,14 @@ const NAV_ITEMS = [
 ] as const
 
 function getInitials(value: string | null | undefined) {
+  if (!value || value === '...') {
+    return ''
+  }
+
   const parts = value?.trim().split(/\s+/).filter(Boolean) ?? []
 
   if (parts.length === 0) {
-    return 'R'
+    return ''
   }
 
   return parts
@@ -45,7 +50,7 @@ export function OperatorNav({ current, viewerName }: OperatorNavProps) {
   const pathname = usePathname()
   const router = useRouter()
   const [signingOut, setSigningOut] = useState(false)
-  const [fallbackViewerLabel, setFallbackViewerLabel] = useState('Renovo property manager')
+  const [fallbackViewerLabel, setFallbackViewerLabel] = useState('...')
   void current
 
   useEffect(() => {
@@ -60,10 +65,14 @@ export function OperatorNav({ current, viewerName }: OperatorNavProps) {
 
       if (cancelled) return
 
+      const profile = user ? await getOperatorProfile(user.id).catch(() => null) : null
+
+      if (cancelled) return
+
       setFallbackViewerLabel(
-        user?.user_metadata?.full_name?.trim() ||
+        profile?.full_name?.trim() ||
           user?.email?.trim() ||
-          'Renovo property manager'
+          '...'
       )
     }
 

@@ -80,13 +80,14 @@ function syncSessionCookie(
   })
 }
 
-function redirectToLogin(request: NextRequest, secure: boolean) {
+function redirectToLogin(request: NextRequest, secure: boolean, pathname: string) {
   const url = request.nextUrl.clone()
   url.pathname = '/login'
   url.search = ''
 
   const response = NextResponse.redirect(url, 307)
   syncSessionCookie(response, null, secure)
+  applyNoIndexHeader(pathname, response)
   return response
 }
 
@@ -112,7 +113,7 @@ export async function middleware(request: NextRequest) {
   const sessionCookie = parseSupabaseSessionCookie(request.cookies.get(SUPABASE_SESSION_COOKIE)?.value)
 
   if (!sessionCookie) {
-    return redirectToLogin(request, secure)
+    return redirectToLogin(request, secure, pathname)
   }
 
   const supabase = createServerClient()
@@ -138,7 +139,7 @@ export async function middleware(request: NextRequest) {
   }
 
   if (userResponse.error || !userResponse.data.user) {
-    return redirectToLogin(request, secure)
+    return redirectToLogin(request, secure, pathname)
   }
 
   const response = NextResponse.next()

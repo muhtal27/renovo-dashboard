@@ -555,7 +555,7 @@ export default function HomePage() {
   const operatorUserId = operator?.authUser?.id ?? null
   const workspaceAccessError =
     !authLoading && !!operator?.authUser && !operator.profile
-      ? 'Your account is not linked to the operator workspace.'
+      ? 'Your account is not linked to your workspace.'
       : null
   const pageError = authError ?? error ?? workspaceAccessError
 
@@ -937,7 +937,7 @@ export default function HomePage() {
         { event: '*', schema: 'public', table: 'users_profiles' },
         async () => {
           await loadCasesAndUsers({ preserveLoading: true })
-          showLiveMessage('Operator list refreshed.')
+          showLiveMessage('Manager list refreshed.')
         }
       )
 

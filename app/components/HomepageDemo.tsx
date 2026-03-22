@@ -155,7 +155,7 @@ const DEMO_ISSUES: DemoIssue[] = [
 const RECOMMENDATION = {
   outcome: 'partial_claim',
   outcomeLabel: 'Partial claim recommended',
-  status: 'Awaiting operator review',
+  status: 'Needs your review',
   totalRecommended: RECOMMENDED_TOTAL,
   confidence: AI_CONFIDENCE,
   summary: 'Evidence supports a partial claim of £640 from the £1,200 deposit.',
@@ -201,7 +201,7 @@ const WORKFLOW_STEPS = [
   { label: 'Evidence collected', state: 'complete' as const },
   { label: 'Issues assessed', state: 'complete' as const },
   { label: 'Recommendation drafted', state: 'complete' as const },
-  { label: 'Operator review', state: 'current' as const },
+  { label: 'Manager review', state: 'current' as const },
   { label: 'Claim output', state: 'pending' as const },
 ]
 
@@ -327,7 +327,7 @@ export default function HomepageDemo() {
           <p className="text-sm leading-7 text-stone-700">
             Renovo has reviewed 5 documents, identified 4 issues, and drafted a partial claim
             recommendation of £640 from a £1,200 deposit. Two issues have high confidence
-            photographic evidence. One issue requires operator judgement on fair wear and tear.
+            photographic evidence. One issue requires manager judgement on fair wear and tear.
             Awaiting your review.
           </p>
         </SectionCard>

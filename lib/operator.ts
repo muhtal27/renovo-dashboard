@@ -109,12 +109,12 @@ export async function getSessionUser() {
 }
 
 export function getOperatorLabel(operator: CurrentOperator | null) {
-  if (!operator?.authUser) return 'Unknown operator'
+  if (!operator?.authUser) return ''
 
   return (
     operator.profile?.full_name ||
     operator.authUser.user_metadata?.full_name ||
     operator.authUser.email ||
-    'Unknown operator'
+    ''
   )
 }

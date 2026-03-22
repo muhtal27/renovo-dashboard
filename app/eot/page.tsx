@@ -361,7 +361,9 @@ export default function EotCasesPage() {
     () => ({
       totalOpen: openRows.length,
       awaitingReview: openRows.filter(
-        (row) => row.eotCase.workflow_status === 'recommendation_drafted'
+        (row) =>
+          row.eotCase.workflow_status === 'recommendation_drafted' ||
+          row.eotCase.workflow_status === 'needs_manual_review'
       ).length,
       evidencePending: openRows.filter((row) =>
         ['evidence_pending', 'evidence_ready'].includes(row.eotCase.workflow_status)
@@ -379,15 +381,11 @@ export default function EotCasesPage() {
   return (
     <OperatorLayout
       pageTitle="End-of-tenancy cases"
-      pageDescription="Review the active move-out queue, pick up cases awaiting operator judgement, and move approved recommendations into claim-ready output."
+      pageDescription="Review the active move-out queue, pick up cases awaiting manager judgement, and move approved recommendations into claim-ready output."
     >
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Total EOT cases open" value={stats.totalOpen} tone="text-stone-900" />
-        <StatCard
-          label="Awaiting operator review"
-          value={stats.awaitingReview}
-          tone="text-violet-700"
-        />
+        <StatCard label="Needs your review" value={stats.awaitingReview} tone="text-violet-700" />
         <StatCard
           label="Evidence pending"
           value={stats.evidencePending}
@@ -399,7 +397,7 @@ export default function EotCasesPage() {
       <section className="app-surface rounded-[2rem] p-6 md:p-8">
         <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="app-kicker">Operator queue</p>
+            <p className="app-kicker">Manager queue</p>
             <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-900">
               Open cases
             </h2>
@@ -440,7 +438,7 @@ export default function EotCasesPage() {
                   <th className="px-3 py-2">Move-out date</th>
                   <th className="px-3 py-2">Workflow status</th>
                   <th className="px-3 py-2">Inspection</th>
-                  <th className="px-3 py-2">Assigned operator</th>
+                  <th className="px-3 py-2">Assigned to</th>
                   <th className="px-3 py-2">Last activity</th>
                   <th className="px-3 py-2" />
                 </tr>

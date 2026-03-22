@@ -6,7 +6,7 @@ export function OperatorSessionState({
   authLoading: boolean
   operator: CurrentOperator | null
 }) {
-  const message = authLoading ? 'Loading operator session...' : 'Redirecting to sign in...'
+  const message = authLoading ? 'Loading your workspace...' : 'Redirecting to sign in...'
 
   return (
     <main className="app-grid min-h-screen px-5 py-6 text-stone-900 md:px-8 md:py-8">
