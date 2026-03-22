@@ -15,6 +15,7 @@ type EndOfTenancyCaseRow = {
   inspection_status: string
   move_out_date: string | null
   closed_at: string | null
+  created_at: string | null
   updated_at: string | null
 }
 
@@ -74,7 +75,7 @@ type EndOfTenancyCaseListResponse = {
 const DENSITY_STORAGE_KEY = 'eot-dashboard-density'
 const QUEUE_VIEW_STATE_STORAGE_KEY = 'eot-dashboard-queue-view'
 const STUCK_THRESHOLDS_HOURS: Record<string, number> = {
-  evidence_pending: 72,
+  evidence_pending: 48,
   evidence_ready: 48,
   review_pending: 48,
   recommendation_drafted: 48,
@@ -146,18 +147,39 @@ function formatRelativeTime(value: string | null | undefined) {
   })
 }
 
-function getDaysInStatus(updatedAt: string | null | undefined) {
-  if (!updatedAt) return null
-  const diffMs = Date.now() - new Date(updatedAt).getTime()
+function getStatusBaseline(
+  workflowStatus: string | null,
+  createdAt: string | null | undefined,
+  updatedAt: string | null | undefined
+) {
+  if (!workflowStatus) return updatedAt || createdAt || null
+
+  if (workflowStatus === 'evidence_pending') {
+    return createdAt || updatedAt || null
+  }
+
+  return updatedAt || createdAt || null
+}
+
+function getDaysInStatus(
+  workflowStatus: string | null,
+  createdAt: string | null | undefined,
+  updatedAt: string | null | undefined
+) {
+  const baseline = getStatusBaseline(workflowStatus, createdAt, updatedAt)
+  if (!baseline) return null
+  const diffMs = Date.now() - new Date(baseline).getTime()
   return Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)))
 }
 
 function getStuckState(
   workflowStatus: string | null,
+  createdAt: string | null | undefined,
   updatedAt: string | null | undefined
 ): 'stuck' | 'aging' | 'ok' {
-  if (!updatedAt || !workflowStatus) return 'ok'
-  const diffHours = (Date.now() - new Date(updatedAt).getTime()) / (1000 * 60 * 60)
+  const baseline = getStatusBaseline(workflowStatus, createdAt, updatedAt)
+  if (!baseline || !workflowStatus) return 'ok'
+  const diffHours = (Date.now() - new Date(baseline).getTime()) / (1000 * 60 * 60)
   const threshold = STUCK_THRESHOLDS_HOURS[workflowStatus]
   if (!threshold) return 'ok'
   if (diffHours >= threshold) return 'stuck'
@@ -190,6 +212,24 @@ function buildAddress(property: PropertyRow | null) {
   return [property.address_line_1, property.address_line_2, property.city, property.postcode]
     .filter(Boolean)
     .join(', ')
+}
+
+function getEffectiveMoveOutDate(row: QueueRow) {
+  return row.eotCase.move_out_date || row.tenancy?.end_date || null
+}
+
+function isUnassigned(row: QueueRow) {
+  return !row.assignedOperator?.full_name?.trim()
+}
+
+function isOverdueMoveOut(row: QueueRow) {
+  const moveOutDate = getEffectiveMoveOutDate(row)
+  if (!moveOutDate) return false
+
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
+  return new Date(moveOutDate).getTime() < today.getTime()
 }
 
 function getWorkflowTone(status: string | null) {
@@ -295,11 +335,17 @@ function getComparableValue(row: QueueRow, sortKey: Exclude<QueueSortKey, 'defau
     case 'tenantName':
       return row.tenant?.full_name || ''
     case 'moveOutDate':
-      return row.eotCase.move_out_date || row.tenancy?.end_date || ''
+      return getEffectiveMoveOutDate(row) || ''
     case 'workflowStatus':
       return formatWorkflowLabel(row.eotCase.workflow_status)
     case 'inStatus':
-      return getDaysInStatus(row.eotCase.updated_at) ?? -1
+      return (
+        getDaysInStatus(
+          row.eotCase.workflow_status,
+          row.eotCase.created_at,
+          row.eotCase.updated_at
+        ) ?? -1
+      )
     case 'inspection':
       return formatInspectionLabel(row.eotCase.inspection_status)
     case 'assignedTo':
@@ -352,23 +398,6 @@ function sortQueueRows(
 function getSortIndicator(sortKey: QueueSortKey, activeSortKey: QueueSortKey, direction: SortDirection) {
   if (sortKey !== activeSortKey) return '↕'
   return direction === 'asc' ? '↑' : '↓'
-}
-
-function StatCard({
-  label,
-  value,
-  tone,
-}: {
-  label: string
-  value: string | number
-  tone: string
-}) {
-  return (
-    <div className="app-surface rounded-[1.7rem] px-5 py-5">
-      <p className="app-kicker">{label}</p>
-      <p className={`mt-3 text-3xl font-semibold tracking-tight ${tone}`}>{value}</p>
-    </div>
-  )
 }
 
 function SkeletonTable({
@@ -583,8 +612,16 @@ export default function EotCasesPage({
 
   const defaultOrderedOpenRows = useMemo(() => {
     return [...openRows].sort((left, right) => {
-      const leftStuck = getStuckState(left.eotCase.workflow_status, left.eotCase.updated_at)
-      const rightStuck = getStuckState(right.eotCase.workflow_status, right.eotCase.updated_at)
+      const leftStuck = getStuckState(
+        left.eotCase.workflow_status,
+        left.eotCase.created_at,
+        left.eotCase.updated_at
+      )
+      const rightStuck = getStuckState(
+        right.eotCase.workflow_status,
+        right.eotCase.created_at,
+        right.eotCase.updated_at
+      )
       const stuckOrder = { stuck: 0, aging: 1, ok: 2 }
       const stuckDiff = stuckOrder[leftStuck] - stuckOrder[rightStuck]
       if (stuckDiff !== 0) return stuckDiff
@@ -602,12 +639,22 @@ export default function EotCasesPage({
       WORKFLOW_STATUS_ORDER.map((status, index) => [status, index])
     )
     const counts = new Map<string, number>()
+    let unassignedCount = 0
+    let overdueMoveOutCount = 0
 
     for (const row of openRows) {
       counts.set(
         row.eotCase.workflow_status,
         (counts.get(row.eotCase.workflow_status) ?? 0) + 1
       )
+
+      if (isUnassigned(row)) {
+        unassignedCount++
+      }
+
+      if (isOverdueMoveOut(row)) {
+        overdueMoveOutCount++
+      }
     }
 
     const statusOptions = Array.from(counts.entries())
@@ -627,7 +674,12 @@ export default function EotCasesPage({
         count,
       }))
 
-    return [{ value: 'all', label: 'All', count: openRows.length }, ...statusOptions]
+    return [
+      { value: 'all', label: 'All', count: openRows.length },
+      ...statusOptions,
+      { value: 'unassigned', label: 'Unassigned', count: unassignedCount },
+      { value: 'overdue_move_out', label: 'Overdue move-out', count: overdueMoveOutCount },
+    ]
   }, [openRows])
 
   useEffect(() => {
@@ -642,6 +694,14 @@ export default function EotCasesPage({
   const workflowFilteredRows = useMemo(() => {
     if (workflowFilter === 'all') {
       return defaultOrderedOpenRows
+    }
+
+    if (workflowFilter === 'unassigned') {
+      return defaultOrderedOpenRows.filter((row) => isUnassigned(row))
+    }
+
+    if (workflowFilter === 'overdue_move_out') {
+      return defaultOrderedOpenRows.filter((row) => isOverdueMoveOut(row))
     }
 
     return defaultOrderedOpenRows.filter(
@@ -747,8 +807,14 @@ export default function EotCasesPage({
         ['evidence_pending', 'evidence_ready'].includes(row.eotCase.workflow_status)
       ).length,
       stuckCases: openRows.filter(
-        (row) => getStuckState(row.eotCase.workflow_status, row.eotCase.updated_at) === 'stuck'
+        (row) =>
+          getStuckState(
+            row.eotCase.workflow_status,
+            row.eotCase.created_at,
+            row.eotCase.updated_at
+          ) === 'stuck'
       ).length,
+      unassigned: openRows.filter((row) => isUnassigned(row)).length,
       closedThisMonth: rows.filter(
         (row) => {
           const effectiveClosedAt = row.eotCase.closed_at ?? row.eotCase.updated_at
@@ -785,16 +851,46 @@ export default function EotCasesPage({
       pageTitle="End-of-tenancy cases"
       pageDescription="Review the active move-out queue, pick up cases awaiting manager judgement, and move approved recommendations into claim-ready output."
     >
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-        <StatCard label="Total EOT cases open" value={stats.totalOpen} tone="text-stone-900" />
-        <StatCard label="Needs your review" value={stats.awaitingReview} tone="text-violet-700" />
-        <StatCard
-          label="Evidence pending"
-          value={stats.evidencePending}
-          tone="text-amber-700"
-        />
-        <StatCard label="Stuck cases" value={stats.stuckCases} tone="text-red-600" />
-        <StatCard label="Closed this month" value={stats.closedThisMonth} tone="text-emerald-700" />
+      <section className="app-surface rounded-[1.7rem] px-5 py-4">
+        <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+          <div>
+            <p className="app-kicker">Queue summary</p>
+            <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-stone-600">
+              <span>
+                <span className="font-semibold text-stone-900">{stats.totalOpen}</span> open
+              </span>
+              <span>
+                <span className="font-semibold text-stone-900">{stats.stuckCases}</span> stuck
+              </span>
+              <span>
+                <span className="font-semibold text-stone-900">{stats.unassigned}</span>{' '}
+                unassigned
+              </span>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <span className="inline-flex items-center gap-2 rounded-full border border-stone-200 bg-stone-50 px-3 py-1.5 text-sm text-stone-600">
+              <span>Total open</span>
+              <span className="font-semibold text-stone-900">{stats.totalOpen}</span>
+            </span>
+            <span className="inline-flex items-center gap-2 rounded-full border border-violet-200 bg-violet-50 px-3 py-1.5 text-sm text-violet-700">
+              <span>Awaiting review</span>
+              <span className="font-semibold">{stats.awaitingReview}</span>
+            </span>
+            <span className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-sm text-amber-700">
+              <span>Evidence pending</span>
+              <span className="font-semibold">{stats.evidencePending}</span>
+            </span>
+            <span className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-3 py-1.5 text-sm text-red-700">
+              <span>Stuck</span>
+              <span className="font-semibold">{stats.stuckCases}</span>
+            </span>
+            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-sm text-emerald-700">
+              <span>Closed this month</span>
+              <span className="font-semibold">{stats.closedThisMonth}</span>
+            </span>
+          </div>
+        </div>
       </section>
 
       <section className="app-surface rounded-[2rem] p-6 md:p-8">
@@ -822,7 +918,11 @@ export default function EotCasesPage({
 
           for (const row of openRows) {
             const stuck =
-              getStuckState(row.eotCase.workflow_status, row.eotCase.updated_at) === 'stuck'
+              getStuckState(
+                row.eotCase.workflow_status,
+                row.eotCase.created_at,
+                row.eotCase.updated_at
+              ) === 'stuck'
             const operatorId = row.assignedOperator?.id
             const operatorName = row.assignedOperator?.full_name || null
 
@@ -911,24 +1011,21 @@ export default function EotCasesPage({
       </section>
 
       <section className="app-surface rounded-[2rem] p-6 md:p-8">
-        <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+        <div>
           <div>
             <p className="app-kicker">Manager queue</p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-900">
+            <h2 className="mt-1 text-2xl font-semibold tracking-tight text-stone-900">
               Open cases
             </h2>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-stone-600">
+            <p className="mt-1 max-w-3xl text-sm leading-6 text-stone-600">
               The queue is sorted by recent case activity so review work stays close to the live move-out position.
             </p>
           </div>
-          <div className="rounded-full border border-stone-200 bg-stone-50 px-4 py-2 text-sm text-stone-600">
-            {openRows.length} active cases
-          </div>
         </div>
 
-        <div className="app-divider my-6" />
+        <div className="app-divider my-4" />
 
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
           <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center">
             <label className="flex-1">
               <span className="sr-only">Search cases</span>
@@ -940,7 +1037,7 @@ export default function EotCasesPage({
                 className="app-field w-full rounded-full px-4 py-2.5 text-sm text-stone-700 placeholder:text-stone-400"
               />
             </label>
-            <div className="inline-flex rounded-full border border-stone-200 bg-stone-50 p-1">
+            <div className="inline-flex shrink-0 rounded-full border border-stone-200 bg-stone-50 p-1">
               <button
                 type="button"
                 onClick={() => setDensity('comfortable')}
@@ -964,13 +1061,16 @@ export default function EotCasesPage({
                 Compact
               </button>
             </div>
+            <span className="inline-flex shrink-0 items-center rounded-full border border-stone-200 bg-stone-50 px-3 py-2 text-xs font-medium text-stone-600">
+              {displayRows.length === openRows.length
+                ? `${openRows.length} active`
+                : `${displayRows.length} of ${openRows.length}`}
+            </span>
           </div>
-          <p className="text-xs text-stone-500">Showing the most recent 250 cases.</p>
+          <p className="text-xs text-stone-500 xl:shrink-0">Showing the most recent 250 cases.</p>
         </div>
 
-        <div className="app-divider my-6" />
-
-        <div className="flex flex-wrap gap-2">
+        <div className="mt-4 flex flex-wrap gap-2">
           {workflowFilterOptions.map((option) => (
             <button
               key={option.value}
@@ -987,7 +1087,7 @@ export default function EotCasesPage({
           ))}
         </div>
 
-        <div className="app-divider my-6" />
+        <div className="app-divider my-4" />
 
         {error ? (
           <div className="rounded-[1.5rem] border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
@@ -1314,9 +1414,14 @@ export default function EotCasesPage({
                     </td>
                     <td className={`${rowCellPadding} text-sm`}>
                       {(() => {
-                        const days = getDaysInStatus(row.eotCase.updated_at)
+                        const days = getDaysInStatus(
+                          row.eotCase.workflow_status,
+                          row.eotCase.created_at,
+                          row.eotCase.updated_at
+                        )
                         const stuck = getStuckState(
                           row.eotCase.workflow_status,
+                          row.eotCase.created_at,
                           row.eotCase.updated_at
                         )
                         return (
