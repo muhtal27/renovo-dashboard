@@ -244,7 +244,7 @@ export function PublicHome({
           </div>
 
           <div className="mt-8 grid items-stretch gap-3 lg:grid-cols-[1fr_auto_1fr_auto_1fr]">
-            <div className="rounded-[1.6rem] border border-stone-200 bg-stone-50/80 p-5">
+            <div className="rounded-[1.6rem] border border-emerald-100 bg-[linear-gradient(180deg,rgba(249,250,251,0.95),rgba(240,253,244,0.7))] p-5">
               <div className="mb-4 flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-emerald-500" />
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-stone-500">
@@ -253,21 +253,21 @@ export function PublicHome({
               </div>
 
               <div className="space-y-3">
-                <div className="rounded-[1rem] border border-stone-200 bg-white px-4 py-3">
+                <div className="rounded-[1.1rem] border border-emerald-100/80 bg-white/90 px-4 py-3">
                   <p className="text-xs font-semibold text-stone-500">Living room — Carpet</p>
                   <p className="mt-1 text-sm font-medium text-stone-900">
                     Professionally cleaned. No marks or staining.
                   </p>
                 </div>
 
-                <div className="rounded-[1rem] border border-stone-200 bg-white px-4 py-3">
+                <div className="rounded-[1.1rem] border border-emerald-100/80 bg-white/90 px-4 py-3">
                   <p className="text-xs font-semibold text-stone-500">Master bedroom — Walls</p>
                   <p className="mt-1 text-sm font-medium text-stone-900">
                     Freshly painted. Neutral white throughout.
                   </p>
                 </div>
 
-                <div className="rounded-[1rem] border border-stone-200 bg-white px-4 py-3">
+                <div className="rounded-[1.1rem] border border-emerald-100/80 bg-white/90 px-4 py-3">
                   <p className="text-xs font-semibold text-stone-500">
                     Kitchen — Cupboard doors
                   </p>
@@ -279,6 +279,50 @@ export function PublicHome({
 
               <p className="mt-3 text-center text-xs text-stone-400">
                 14 Bruntsfield Place · Signed by tenant
+              </p>
+            </div>
+
+            <div className="hidden items-center justify-center px-1 lg:flex">
+              <span className="text-xl text-stone-300">→</span>
+            </div>
+
+            <div className="rounded-[1.6rem] border border-amber-100 bg-[linear-gradient(180deg,rgba(250,250,249,0.95),rgba(255,251,235,0.75))] p-5">
+              <div className="mb-4 flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-amber-400" />
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-stone-500">
+                  Check out · March 2024
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <div className="rounded-[1.1rem] border border-amber-100/80 bg-amber-50/55 px-4 py-3">
+                  <p className="text-xs font-semibold text-stone-500">Living room — Carpet</p>
+                  <p className="mt-1 text-sm font-medium text-amber-700">
+                    Large wine stain, approx. 30cm. Right corner near sofa.
+                  </p>
+                  <p className="mt-1 text-[10px] text-stone-400">📷 Photo evidence attached</p>
+                </div>
+
+                <div className="rounded-[1.1rem] border border-amber-100/80 bg-amber-50/55 px-4 py-3">
+                  <p className="text-xs font-semibold text-stone-500">Master bedroom — Walls</p>
+                  <p className="mt-1 text-sm font-medium text-amber-700">
+                    Multiple scuff marks. Patch repaint required.
+                  </p>
+                  <p className="mt-1 text-[10px] text-stone-400">📷 Photo evidence attached</p>
+                </div>
+
+                <div className="rounded-[1.1rem] border border-amber-100/80 bg-amber-50/55 px-4 py-3">
+                  <p className="text-xs font-semibold text-stone-500">
+                    Kitchen — Cupboard door
+                  </p>
+                  <p className="mt-1 text-sm font-medium text-amber-700">
+                    Left door hinge broken. Door detached.
+                  </p>
+                </div>
+              </div>
+
+              <p className="mt-3 text-center text-xs text-stone-400">
+                Check out report · 8 March 2024
               </p>
             </div>
 
@@ -303,7 +347,7 @@ export function PublicHome({
                   </p>
                   <p className="text-xs leading-5 text-stone-600">
                     5 documents processed. Check in inventory matched against check out report and
-                    move out photographs.
+                    check out photographs.
                   </p>
                 </div>
 
@@ -331,50 +375,6 @@ export function PublicHome({
 
               <p className="mt-3 text-center text-[10px] font-medium text-emerald-700">
                 AI drafted · Manager decides
-              </p>
-            </div>
-
-            <div className="hidden items-center justify-center px-1 lg:flex">
-              <span className="text-xl text-stone-300">→</span>
-            </div>
-
-            <div className="rounded-[1.6rem] border border-stone-200 bg-stone-50/80 p-5">
-              <div className="mb-4 flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-amber-400" />
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-stone-500">
-                  Move out · March 2024
-                </p>
-              </div>
-
-              <div className="space-y-3">
-                <div className="rounded-[1rem] border border-stone-200 bg-stone-100 px-4 py-3">
-                  <p className="text-xs font-semibold text-stone-500">Living room — Carpet</p>
-                  <p className="mt-1 text-sm font-medium text-amber-700">
-                    Large wine stain, approx. 30cm. Right corner near sofa.
-                  </p>
-                  <p className="mt-1 text-[10px] text-stone-400">📷 Photo evidence attached</p>
-                </div>
-
-                <div className="rounded-[1rem] border border-stone-200 bg-stone-100 px-4 py-3">
-                  <p className="text-xs font-semibold text-stone-500">Master bedroom — Walls</p>
-                  <p className="mt-1 text-sm font-medium text-amber-700">
-                    Multiple scuff marks. Patch repaint required.
-                  </p>
-                  <p className="mt-1 text-[10px] text-stone-400">📷 Photo evidence attached</p>
-                </div>
-
-                <div className="rounded-[1rem] border border-stone-200 bg-stone-100 px-4 py-3">
-                  <p className="text-xs font-semibold text-stone-500">
-                    Kitchen — Cupboard door
-                  </p>
-                  <p className="mt-1 text-sm font-medium text-amber-700">
-                    Left door hinge broken. Door detached.
-                  </p>
-                </div>
-              </div>
-
-              <p className="mt-3 text-center text-xs text-stone-400">
-                Check out report · 8 March 2024
               </p>
             </div>
           </div>
