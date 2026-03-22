@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { requireActiveOperator } from '@/app/api/eot/_auth'
+import { ApiError, requireActiveOperator } from '@/app/api/eot/_auth'
 import { getDefaultEndOfTenancyAiProvider } from '@/lib/end-of-tenancy/ai-provider'
 import { withEndOfTenancyTransaction } from '@/lib/end-of-tenancy/db'
 import { prepareEndOfTenancyAiInput } from '@/lib/end-of-tenancy/ai'
@@ -110,62 +110,69 @@ function resolveSourceReference(
   source: RecommendationSourceOutput,
   workspace: Awaited<ReturnType<typeof prepareEndOfTenancyAiInput>>['workspace']
 ) {
-  const firstIssueId = workspace.issues[0]?.id ?? null
-  const firstDocumentId = workspace.documents[0]?.id ?? null
-  const firstExtractionId =
-    workspace.documents.flatMap((document) => document.extractions)[0]?.id ?? null
+  const note = (source.source_note || '').toLowerCase()
 
-  if (source.source_type === 'issue' && firstIssueId) {
+  if (source.source_type === 'issue') {
+    const matched =
+      workspace.issues.find((issue) => note.includes(issue.title.toLowerCase())) ??
+      workspace.issues[0] ??
+      null
+    if (matched) {
+      return {
+        sourceType: 'issue' as const,
+        issueId: matched.id,
+        caseDocumentId: null,
+        documentExtractionId: null,
+      }
+    }
+  }
+
+  if (source.source_type === 'document') {
+    const matched =
+      workspace.documents.find(
+        (doc) => doc.file_name && note.includes(doc.file_name.toLowerCase())
+      ) ??
+      workspace.documents[0] ??
+      null
+    if (matched) {
+      return {
+        sourceType: 'case_document' as const,
+        issueId: null,
+        caseDocumentId: matched.id,
+        documentExtractionId: null,
+      }
+    }
+  }
+
+  if (source.source_type === 'extraction') {
+    const allExtractions = workspace.documents.flatMap((doc) => doc.extractions)
+    const matched = allExtractions[0] ?? null
+    if (matched) {
+      return {
+        sourceType: 'document_extraction' as const,
+        issueId: null,
+        caseDocumentId: null,
+        documentExtractionId: matched.id,
+      }
+    }
+  }
+
+  // Fallback: try any available record in priority order
+  if (workspace.issues[0]) {
     return {
       sourceType: 'issue' as const,
-      issueId: firstIssueId,
+      issueId: workspace.issues[0].id,
       caseDocumentId: null,
       documentExtractionId: null,
     }
   }
 
-  if (source.source_type === 'document' && firstDocumentId) {
+  if (workspace.documents[0]) {
     return {
       sourceType: 'case_document' as const,
       issueId: null,
-      caseDocumentId: firstDocumentId,
+      caseDocumentId: workspace.documents[0].id,
       documentExtractionId: null,
-    }
-  }
-
-  if (source.source_type === 'extraction' && firstExtractionId) {
-    return {
-      sourceType: 'document_extraction' as const,
-      issueId: null,
-      caseDocumentId: null,
-      documentExtractionId: firstExtractionId,
-    }
-  }
-
-  if (firstIssueId) {
-    return {
-      sourceType: 'issue' as const,
-      issueId: firstIssueId,
-      caseDocumentId: null,
-      documentExtractionId: null,
-    }
-  }
-
-  if (firstDocumentId) {
-    return {
-      sourceType: 'case_document' as const,
-      issueId: null,
-      caseDocumentId: firstDocumentId,
-      documentExtractionId: null,
-    }
-  }
-
-  if (firstExtractionId) {
-    return {
-      sourceType: 'document_extraction' as const,
-      issueId: null,
-      caseDocumentId: null,
-      documentExtractionId: firstExtractionId,
     }
   }
 
@@ -351,7 +358,7 @@ export async function POST(request: Request) {
             ? error.message
             : 'Unable to generate the recommendation.',
       },
-      { status: 500 }
+      { status: error instanceof ApiError ? error.status : 500 }
     )
   }
 }

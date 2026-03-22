@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { requireActiveOperator } from '@/app/api/eot/_auth'
+import { ApiError, requireActiveOperator } from '@/app/api/eot/_auth'
 import { withEndOfTenancyTransaction } from '@/lib/end-of-tenancy/db'
 import { getEndOfTenancyCaseDetail } from '@/lib/end-of-tenancy/queries'
 
@@ -172,7 +172,7 @@ export async function POST(request: Request) {
             ? error.message
             : 'Unable to generate the claim.',
       },
-      { status: 500 }
+      { status: error instanceof ApiError ? error.status : 500 }
     )
   }
 }

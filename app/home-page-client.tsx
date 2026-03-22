@@ -1858,7 +1858,7 @@ export default function HomePage() {
 
   if (authLoading) {
     return operator?.authUser ? (
-      <OperatorSessionState authLoading={authLoading} operator={operator} />
+      <OperatorSessionState authLoading={authLoading} />
     ) : (
       <PublicHome productDemo={<HomepageDemo />} />
     )
@@ -1871,7 +1871,7 @@ export default function HomePage() {
   return (
     <main className="app-grid min-h-screen px-5 py-6 text-stone-900 md:px-8 md:py-8">
       <div className="mx-auto max-w-[1520px] space-y-6">
-        <OperatorNav current="maintenance" />
+        <OperatorNav />
 
         <div className="space-y-6">
           <section className="app-surface-strong overflow-hidden rounded-[2rem] p-5 md:p-6">

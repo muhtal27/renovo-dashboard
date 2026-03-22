@@ -44,16 +44,7 @@
     "app/api/eot/generate-claim/route.ts": {
       "regions": ["lhr1"]
     },
-    "app/api/end-of-tenancy/route.ts": {
-      "regions": ["lhr1"]
-    },
-    "app/api/end-of-tenancy/[id]/route.ts": {
-      "regions": ["lhr1"]
-    },
     "app/api/waitlist/route.ts": {
-      "regions": ["lhr1"]
-    },
-    "app/api/onboarding/route.ts": {
       "regions": ["lhr1"]
     }
   }

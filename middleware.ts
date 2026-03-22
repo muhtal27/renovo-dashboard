@@ -89,7 +89,7 @@ function redirectToLogin(request: NextRequest, secure: boolean, pathname: string
   return response
 }
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const host = request.headers.get('host')
 
   if (host === LEGACY_HOST) {

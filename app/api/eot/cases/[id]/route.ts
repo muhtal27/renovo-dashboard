@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { requireActiveOperator } from '@/app/api/eot/_auth'
+import { ApiError, requireActiveOperator } from '@/app/api/eot/_auth'
 import {
   generateDraftAssessmentForEndOfTenancyCase,
   isEndOfTenancyAiDraftingConfigured,
@@ -281,7 +281,7 @@ export async function GET(request: Request, context: RouteParams) {
         error:
           error instanceof Error ? error.message : 'Unable to load the end-of-tenancy workspace.',
       },
-      { status: 500 }
+      { status: error instanceof ApiError ? error.status : 500 }
     )
   }
 }
@@ -472,7 +472,7 @@ export async function POST(request: Request, context: RouteParams) {
             ? error.message
             : 'Unable to process the end-of-tenancy action right now.',
       },
-      { status: 500 }
+      { status: error instanceof ApiError ? error.status : 500 }
     )
   }
 }

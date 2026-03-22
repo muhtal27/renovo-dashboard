@@ -1,10 +1,7 @@
-import type { CurrentOperator } from '@/lib/operator'
-
 export function OperatorSessionState({
   authLoading,
 }: {
   authLoading: boolean
-  operator: CurrentOperator | null
 }) {
   const message = authLoading ? 'Loading your workspace...' : 'Redirecting to sign in...'
 

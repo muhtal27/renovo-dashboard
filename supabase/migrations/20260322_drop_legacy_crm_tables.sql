@@ -1,4 +1,10 @@
--- Manual cleanup migration: run this only after code cleanup verification confirms
--- the legacy CRM/onboarding tables below are no longer needed by any deployed route.
-
-drop table if exists public.portal_profiles cascade;
+-- WARNING: portal_profiles is still referenced by active RLS helper functions:
+--   current_portal_contact_id(), current_portal_contractor_id(), is_active_operator()
+-- and by every portal RLS policy across contacts, cases, properties, tenancies,
+-- messages, maintenance_requests, compliance_records, deposit_claims, etc.
+--
+-- DO NOT drop this table until all dependent functions and policies are migrated
+-- to a replacement mechanism.
+--
+-- Original line (DO NOT UNCOMMENT):
+-- drop table if exists public.portal_profiles cascade;

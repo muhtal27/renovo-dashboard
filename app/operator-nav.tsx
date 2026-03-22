@@ -6,7 +6,6 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 
 type OperatorNavProps = {
-  current?: string
   viewerName?: string | null
 }
 
@@ -40,11 +39,10 @@ function getInitials(value: string | null | undefined) {
   return `${first}${last}`
 }
 
-export function OperatorNav({ current, viewerName }: OperatorNavProps) {
+export function OperatorNav({ viewerName }: OperatorNavProps) {
   const pathname = usePathname()
   const [signingOut, setSigningOut] = useState(false)
   const [fallbackViewerLabel, setFallbackViewerLabel] = useState('')
-  void current
 
   useEffect(() => {
     if (viewerName?.trim()) return

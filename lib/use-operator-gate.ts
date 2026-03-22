@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useEffectEvent, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { User } from '@supabase/supabase-js'
 import { getOperatorProfile, type CurrentOperator } from '@/lib/operator'
@@ -23,33 +23,33 @@ export function useOperatorGate({
   const [authError, setAuthError] = useState<string | null>(null)
   const profileRequestIdRef = useRef(0)
 
-  const hydrateOperator = useEffectEvent(async (user: User) => {
-    const requestId = ++profileRequestIdRef.current
-
-    try {
-      const profile = await getOperatorProfile(user.id)
-
-      if (profileRequestIdRef.current !== requestId) {
-        return
-      }
-
-      setOperator((current) =>
-        current?.authUser?.id === user.id
-          ? {
-              authUser: user,
-              profile: profile ?? null,
-            }
-          : current
-      )
-    } catch {
-      if (profileRequestIdRef.current !== requestId) {
-        return
-      }
-    }
-  })
-
   useEffect(() => {
     let cancelled = false
+
+    async function hydrateOperator(user: User) {
+      const requestId = ++profileRequestIdRef.current
+
+      try {
+        const profile = await getOperatorProfile(user.id)
+
+        if (cancelled || profileRequestIdRef.current !== requestId) {
+          return
+        }
+
+        setOperator((current) =>
+          current?.authUser?.id === user.id
+            ? {
+                authUser: user,
+                profile: profile ?? null,
+              }
+            : current
+        )
+      } catch {
+        if (cancelled || profileRequestIdRef.current !== requestId) {
+          return
+        }
+      }
+    }
 
     async function applyUser(user: User | null) {
       if (cancelled) return

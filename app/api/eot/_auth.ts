@@ -3,6 +3,16 @@ import {
   getSupabaseServerAuthClient,
 } from '@/lib/supabase-admin'
 
+export class ApiError extends Error {
+  status: number
+
+  constructor(message: string, status: number) {
+    super(message)
+    this.name = 'ApiError'
+    this.status = status
+  }
+}
+
 async function getBearerToken(request: Request) {
   const authHeader = request.headers.get('authorization') || ''
 
@@ -21,7 +31,7 @@ export async function requireActiveOperator(request: Request): Promise<ActiveOpe
   const token = await getBearerToken(request)
 
   if (!token) {
-    throw new Error('Missing bearer token.')
+    throw new ApiError('Missing bearer token.', 401)
   }
 
   const authClient = getSupabaseServerAuthClient()
@@ -31,7 +41,7 @@ export async function requireActiveOperator(request: Request): Promise<ActiveOpe
   } = await authClient.auth.getUser(token)
 
   if (authError || !user) {
-    throw new Error(authError?.message || 'Unable to verify operator session.')
+    throw new ApiError(authError?.message || 'Unable to verify operator session.', 401)
   }
 
   const rlsClient = getSupabaseRlsClient(token)
@@ -42,11 +52,11 @@ export async function requireActiveOperator(request: Request): Promise<ActiveOpe
     .maybeSingle()
 
   if (profileError) {
-    throw new Error(profileError.message)
+    throw new ApiError(profileError.message, 500)
   }
 
   if (!operatorProfile || operatorProfile.is_active === false) {
-    throw new Error('Only active operators can access end-of-tenancy workflows.')
+    throw new ApiError('Only active operators can access end-of-tenancy workflows.', 403)
   }
 
   return {

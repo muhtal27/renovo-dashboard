@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { requireActiveOperator } from '@/app/api/eot/_auth'
+import { ApiError, requireActiveOperator } from '@/app/api/eot/_auth'
 import { listEndOfTenancyCases } from '@/lib/end-of-tenancy/queries'
 import { initializeEndOfTenancyCaseFromExistingCase } from '@/lib/end-of-tenancy/service'
 import { getSupabaseServiceRoleClient } from '@/lib/supabase-admin'
@@ -66,7 +66,7 @@ export async function GET(request: Request) {
         error:
           error instanceof Error ? error.message : 'Unable to load end-of-tenancy cases right now.',
       },
-      { status: 500 }
+      { status: error instanceof ApiError ? error.status : 500 }
     )
   }
 }
@@ -101,7 +101,7 @@ export async function POST(request: Request) {
             ? error.message
             : 'Unable to initialise the end-of-tenancy case right now.',
       },
-      { status: 500 }
+      { status: error instanceof ApiError ? error.status : 500 }
     )
   }
 }
