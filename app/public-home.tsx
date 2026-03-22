@@ -231,6 +231,177 @@ export function PublicHome({
           </div>
         </section>
 
+        <section className="app-surface rounded-[2rem] p-6 md:p-8">
+          <div>
+            <p className="app-kicker">How the review works</p>
+            <h2 className="mt-2 text-2xl font-semibold text-stone-900 md:text-3xl">
+              Check in meets check out. Renovo finds what changed.
+            </h2>
+            <p className="mt-3 max-w-2xl text-sm leading-7 text-stone-600">
+              Every issue is cross-referenced against the opening inventory. The AI drafts a
+              rationale for each one. Your manager decides.
+            </p>
+          </div>
+
+          <div className="mt-8 grid items-stretch gap-3 lg:grid-cols-[1fr_auto_1fr_auto_1fr]">
+            <div className="rounded-[1.6rem] border border-stone-200 bg-stone-50/80 p-5">
+              <div className="mb-4 flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-stone-500">
+                  Check in · Sept 2023
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <div className="rounded-[1rem] border border-stone-200 bg-white px-4 py-3">
+                  <p className="text-xs font-semibold text-stone-500">Living room — Carpet</p>
+                  <p className="mt-1 text-sm font-medium text-stone-900">
+                    Professionally cleaned. No marks or staining.
+                  </p>
+                </div>
+
+                <div className="rounded-[1rem] border border-stone-200 bg-white px-4 py-3">
+                  <p className="text-xs font-semibold text-stone-500">Master bedroom — Walls</p>
+                  <p className="mt-1 text-sm font-medium text-stone-900">
+                    Freshly painted. Neutral white throughout.
+                  </p>
+                </div>
+
+                <div className="rounded-[1rem] border border-stone-200 bg-white px-4 py-3">
+                  <p className="text-xs font-semibold text-stone-500">
+                    Kitchen — Cupboard doors
+                  </p>
+                  <p className="mt-1 text-sm font-medium text-stone-900">
+                    All intact. Hinges secure. No damage noted.
+                  </p>
+                </div>
+              </div>
+
+              <p className="mt-3 text-center text-xs text-stone-400">
+                14 Bruntsfield Place · Signed by tenant
+              </p>
+            </div>
+
+            <div className="hidden items-center justify-center px-1 lg:flex">
+              <span className="text-xl text-stone-300">→</span>
+            </div>
+
+            <div className="flex flex-col rounded-[1.6rem] border border-emerald-200 bg-[linear-gradient(160deg,rgba(240,253,244,0.95),rgba(220,252,231,0.7))] p-5">
+              <div className="mb-4 text-center">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">
+                  Renovo review
+                </p>
+                <p className="mt-1 text-sm font-semibold text-stone-900">
+                  Cross-referencing evidence
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <div className="rounded-[1.1rem] border border-emerald-100 bg-white/90 px-4 py-3">
+                  <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-emerald-600">
+                    Step 1 — Documents read
+                  </p>
+                  <p className="text-xs leading-5 text-stone-600">
+                    5 documents processed. Check in inventory matched against check out report and
+                    move out photographs.
+                  </p>
+                </div>
+
+                <div className="rounded-[1.1rem] border border-amber-100 bg-amber-50/70 px-4 py-3">
+                  <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-amber-700">
+                    Step 2 — Mismatch identified
+                  </p>
+                  <p className="text-xs leading-5 text-stone-600">
+                    Carpet staining not present at check in. Bedroom wall scuffs exceed fair wear
+                    and tear threshold. Cupboard door broken.
+                  </p>
+                </div>
+
+                <div className="rounded-[1.1rem] border border-stone-200 bg-white px-4 py-3">
+                  <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-stone-500">
+                    Step 3 — Recommendation drafted
+                  </p>
+                  <div className="mt-1 flex items-center justify-between">
+                    <p className="text-xs text-stone-600">Partial claim</p>
+                    <p className="text-base font-semibold text-stone-900">£640.00</p>
+                  </div>
+                  <p className="mt-1 text-[10px] text-stone-400">Awaiting manager approval</p>
+                </div>
+              </div>
+
+              <p className="mt-3 text-center text-[10px] font-medium text-emerald-700">
+                AI drafted · Manager decides
+              </p>
+            </div>
+
+            <div className="hidden items-center justify-center px-1 lg:flex">
+              <span className="text-xl text-stone-300">→</span>
+            </div>
+
+            <div className="rounded-[1.6rem] border border-stone-200 bg-stone-50/80 p-5">
+              <div className="mb-4 flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-amber-400" />
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-stone-500">
+                  Move out · March 2024
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <div className="rounded-[1rem] border border-stone-200 bg-stone-100 px-4 py-3">
+                  <p className="text-xs font-semibold text-stone-500">Living room — Carpet</p>
+                  <p className="mt-1 text-sm font-medium text-amber-700">
+                    Large wine stain, approx. 30cm. Right corner near sofa.
+                  </p>
+                  <p className="mt-1 text-[10px] text-stone-400">📷 Photo evidence attached</p>
+                </div>
+
+                <div className="rounded-[1rem] border border-stone-200 bg-stone-100 px-4 py-3">
+                  <p className="text-xs font-semibold text-stone-500">Master bedroom — Walls</p>
+                  <p className="mt-1 text-sm font-medium text-amber-700">
+                    Multiple scuff marks. Patch repaint required.
+                  </p>
+                  <p className="mt-1 text-[10px] text-stone-400">📷 Photo evidence attached</p>
+                </div>
+
+                <div className="rounded-[1rem] border border-stone-200 bg-stone-100 px-4 py-3">
+                  <p className="text-xs font-semibold text-stone-500">
+                    Kitchen — Cupboard door
+                  </p>
+                  <p className="mt-1 text-sm font-medium text-amber-700">
+                    Left door hinge broken. Door detached.
+                  </p>
+                </div>
+              </div>
+
+              <p className="mt-3 text-center text-xs text-stone-400">
+                Check out report · 8 March 2024
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-y-2 border-t border-stone-100 pt-5">
+            <span className="flex items-center gap-1.5 px-3 text-sm">
+              <span className="font-semibold text-stone-900">5</span>
+              <span className="text-stone-500">documents reviewed</span>
+            </span>
+            <span className="select-none text-xs text-stone-300">·</span>
+            <span className="flex items-center gap-1.5 px-3 text-sm">
+              <span className="font-semibold text-stone-900">4</span>
+              <span className="text-stone-500">issues identified</span>
+            </span>
+            <span className="select-none text-xs text-stone-300">·</span>
+            <span className="flex items-center gap-1.5 px-3 text-sm">
+              <span className="font-semibold text-stone-900">£640</span>
+              <span className="text-stone-500">recommended claim</span>
+            </span>
+            <span className="select-none text-xs text-stone-300">·</span>
+            <span className="flex items-center gap-1.5 px-3 text-sm">
+              <span className="font-semibold text-amber-700">1</span>
+              <span className="text-stone-500">awaiting manager review</span>
+            </span>
+          </div>
+        </section>
+
         <section id="workflow" className="bg-[linear-gradient(135deg,rgba(245,243,240,0.95),rgba(238,235,229,0.9))] rounded-[2rem] border border-stone-200 p-6 md:p-7">
           <div className="max-w-4xl">
             <p className="app-kicker text-stone-500">Workflow</p>
