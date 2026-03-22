@@ -66,35 +66,35 @@ const DEMO_TABS: Array<{ id: DemoTab; label: string }> = [
 const DEMO_DOCUMENTS: DemoDocument[] = [
   {
     id: 'doc-1',
-    name: 'Check-in inventory report',
+    name: 'Check in inventory report',
     role: 'check_in',
     format: 'PDF',
     uploadedAt: '4 Sep 2022',
   },
   {
     id: 'doc-2',
-    name: 'Check-out inspection report',
+    name: 'Check out inspection report',
     role: 'check_out',
     format: 'PDF',
     uploadedAt: '10 Mar 2024',
   },
   {
     id: 'doc-3',
-    name: 'Move-out photos, living room',
+    name: 'Move out photos, living room',
     role: 'photo',
     format: '14 images',
     uploadedAt: '10 Mar 2024',
   },
   {
     id: 'doc-4',
-    name: 'Move-out photos, bedroom 1',
+    name: 'Move out photos, bedroom 1',
     role: 'photo',
     format: '9 images',
     uploadedAt: '10 Mar 2024',
   },
   {
     id: 'doc-5',
-    name: 'Move-out photos, kitchen',
+    name: 'Move out photos, kitchen',
     role: 'photo',
     format: '7 images',
     uploadedAt: '10 Mar 2024',
@@ -111,8 +111,8 @@ const DEMO_ISSUES: DemoIssue[] = [
     severity: 'high',
     amount: 280,
     status: 'accepted',
-    description: 'Significant staining is visible in the living room carpet compared with the check-in condition.',
-    evidence: 'check-out report p.5, living room photos #3 and #7',
+    description: 'Significant staining is visible in the living room carpet compared with the check in condition.',
+    evidence: 'check out report p.5, living room photos #3 and #7',
   },
   {
     id: 'issue-2',
@@ -124,7 +124,7 @@ const DEMO_ISSUES: DemoIssue[] = [
     amount: 160,
     status: 'accepted',
     description: 'The kitchen cupboard door is detached and requires a direct repair or replacement.',
-    evidence: 'check-out report p.8, kitchen photos #2',
+    evidence: 'check out report p.8, kitchen photos #2',
   },
   {
     id: 'issue-3',
@@ -147,8 +147,8 @@ const DEMO_ISSUES: DemoIssue[] = [
     severity: 'low',
     amount: 80,
     status: 'accepted',
-    description: 'Picture hooks recorded at check-in are now missing from the hallway finish.',
-    evidence: 'check-in inventory p.3',
+    description: 'Picture hooks recorded at check in are now missing from the hallway finish.',
+    evidence: 'check in inventory p.3',
   },
 ]
 
@@ -160,10 +160,10 @@ const RECOMMENDATION = {
   confidence: AI_CONFIDENCE,
   summary: 'Evidence supports a partial claim of £640 from the £1,200 deposit.',
   rationale:
-    'The carpet stain and broken cupboard door are clearly documented in the check-out report with photographic comparison to check-in condition. The bedroom wall scuffs are borderline given the 18-month tenancy, but the extent shown exceeds typical fair wear and tear. The picture hooks are a minor item but traceable in the check-in inventory. Responsible amounts have been assessed proportionally.',
+    'The carpet stain and broken cupboard door are clearly documented in the check out report with photographic comparison to check in condition. The bedroom wall scuffs are borderline given the 18-month tenancy, but the extent shown exceeds typical fair wear and tear. The picture hooks are a minor item but traceable in the check in inventory. Responsible amounts have been assessed proportionally.',
   sources: [
-    'Check-in inventory p.3',
-    'Check-out report p.5, p.8',
+    'Check in inventory p.3',
+    'Check out report p.5, p.8',
     'Living room photos #3, #7',
     'Deposit scheme guidance',
     'Fair wear and tear policy',
@@ -212,8 +212,8 @@ const ROLE_BADGE_STYLES: Record<DocumentRole, string> = {
 }
 
 const ROLE_LABELS: Record<DocumentRole, string> = {
-  check_in: 'Check-in',
-  check_out: 'Check-out',
+  check_in: 'Check in',
+  check_out: 'Check out',
   photo: 'Photos',
 }
 
@@ -421,8 +421,8 @@ export default function HomepageDemo() {
         </SectionCard>
 
         <p className="text-sm leading-7 text-stone-500">
-          All 5 documents have been extracted and cross-referenced. Facts compared across check-in
-          and check-out reports.
+          All 5 documents have been extracted and cross-referenced. Facts compared across check in
+          and check out reports.
         </p>
       </div>
     )

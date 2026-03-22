@@ -7,11 +7,11 @@ const overviewMetrics = [
     label: 'for evidence, issues, review, and claim output',
   },
   {
-    value: 'Human-reviewed',
+    value: 'Human reviewed',
     label: 'AI can draft, but property managers still approve every decision',
   },
   {
-    value: 'Claim-ready',
+    value: 'Claim ready',
     label: 'Recommendations convert into line items with traceable evidence',
   },
 ]
@@ -157,7 +157,7 @@ export function PublicHome({
                 </div>
 
                 <h1 className="mt-6 max-w-5xl text-4xl font-semibold tracking-tight md:text-[4.7rem] md:leading-[0.94]">
-                  From messy move-out to claim-ready — in one flow.
+                  From messy move out to claim ready — in one flow.
                 </h1>
 
                 <p className="mt-6 max-w-3xl text-base leading-8 text-stone-700 md:text-lg">
@@ -184,7 +184,7 @@ export function PublicHome({
                 <div className="mt-6 flex flex-wrap gap-2 text-xs font-medium text-stone-600 md:text-sm">
                   {[
                     'Built for UK letting agencies',
-                    'Human-reviewed decisions only',
+                    'Human reviewed decisions only',
                     'End-of-tenancy specialist — not a generic CRM',
                     'Deposit scheme compliant audit trail',
                   ].map((item) => (

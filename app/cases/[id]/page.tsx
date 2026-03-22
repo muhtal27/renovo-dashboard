@@ -574,7 +574,7 @@ export default function CaseWorkspacePage() {
                     <p className="app-kicker">Manager checklist</p>
                     <div className="mt-4 grid gap-3 sm:grid-cols-2">
                       {workspace.moveOutChecklistItems.length === 0 ? (
-                        <p className="text-sm text-stone-500">Checklist items will appear as the move-out tracker advances.</p>
+                        <p className="text-sm text-stone-500">Checklist items will appear as the move out tracker advances.</p>
                       ) : (
                         workspace.moveOutChecklistItems.map((item) => (
                           <div
@@ -614,7 +614,7 @@ export default function CaseWorkspacePage() {
                   <p className="app-kicker">Audit trail</p>
                   <div className="mt-4 space-y-4">
                     {workspace.moveOutTrackerEvents.length === 0 ? (
-                      <p className="text-sm text-stone-500">No move-out events have been recorded yet.</p>
+                      <p className="text-sm text-stone-500">No move out events have been recorded yet.</p>
                     ) : (
                       workspace.moveOutTrackerEvents
                         .slice()
