@@ -27,6 +27,16 @@ export type ActiveOperatorContext = {
   authUserId: string
 }
 
+type CachedOperatorProfile = {
+  operatorProfileId: string
+  expiresAt: number
+}
+
+const operatorProfileCache = new Map<string, CachedOperatorProfile>()
+const OPERATOR_PROFILE_CACHE_TTL_MS = 30_000
+// This only caches the post-auth active users_profiles lookup on warm instances.
+// Activation changes may take up to 30 seconds to propagate to cached requests.
+
 export async function requireActiveOperator(request: Request): Promise<ActiveOperatorContext> {
   const token = await getBearerToken(request)
 
@@ -44,6 +54,16 @@ export async function requireActiveOperator(request: Request): Promise<ActiveOpe
     throw new ApiError(authError?.message || 'Unable to verify operator session.', 401)
   }
 
+  const cachedOperator = operatorProfileCache.get(user.id)
+
+  if (cachedOperator && Date.now() < cachedOperator.expiresAt) {
+    return {
+      accessToken: token,
+      operatorProfileId: cachedOperator.operatorProfileId,
+      authUserId: user.id,
+    }
+  }
+
   const rlsClient = getSupabaseRlsClient(token)
   const { data: operatorProfile, error: profileError } = await rlsClient
     .from('users_profiles')
@@ -56,8 +76,14 @@ export async function requireActiveOperator(request: Request): Promise<ActiveOpe
   }
 
   if (!operatorProfile || operatorProfile.is_active === false) {
+    operatorProfileCache.delete(user.id)
     throw new ApiError('Only active operators can access end-of-tenancy workflows.', 403)
   }
+
+  operatorProfileCache.set(user.id, {
+    operatorProfileId: operatorProfile.id,
+    expiresAt: Date.now() + OPERATOR_PROFILE_CACHE_TTL_MS,
+  })
 
   return {
     accessToken: token,

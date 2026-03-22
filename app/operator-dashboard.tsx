@@ -667,121 +667,124 @@ export default function OperatorDashboard({ operator }: OperatorDashboardProps) 
     })
     setLoading(false)
   })
-  loadCasesAndUsersRef.current = async (options?: { preserveLoading?: boolean }) => {
-    if (!operatorUserId) return
+  useEffect(() => {
+    loadCasesAndUsersRef.current = async (options?: { preserveLoading?: boolean }) => {
+      if (!operatorUserId) return
 
-    if (!options?.preserveLoading) {
-      setLoading(true)
-    }
+      if (!options?.preserveLoading) {
+        setLoading(true)
+      }
 
-    const [
-      { data: caseData, error: caseError },
-      { data: userData, error: userError },
-      { data: contactsData, error: contactsError },
-      { data: propertiesData, error: propertiesError },
-      { data: contractorsData, error: contractorsError },
-      { data: jobsData, error: jobsError },
-    ] =
-      await Promise.all([
-        supabase
-          .from('v_cases_list')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(100),
-        supabase
-          .from('users_profiles')
-          .select('id, full_name')
-          .eq('is_active', true)
-          .order('full_name', { ascending: true }),
-        supabase
-          .from('contacts')
-          .select('id, full_name, phone, email, company_name')
-          .order('updated_at', { ascending: false })
-          .limit(1200),
-        supabase
-          .from('properties')
-          .select('id, address_line_1, address_line_2, city, postcode')
-          .order('updated_at', { ascending: false })
-          .limit(1200),
-        supabase
-          .from('contractors')
-          .select('id, contact_id, company_name, primary_trade, coverage_area, emergency_callout, is_active')
-          .order('updated_at', { ascending: false }),
-        supabase
-          .from('maintenance_requests')
-          .select(
-            'id, created_at, case_id, property_id, tenancy_id, reported_by_contact_id, issue_type, subcategory, description, access_notes, priority, status, contractor_id, scheduled_for, completed_at, landlord_approval_required, estimated_cost, final_cost, updated_at'
+      const [
+        { data: caseData, error: caseError },
+        { data: userData, error: userError },
+        { data: contactsData, error: contactsError },
+        { data: propertiesData, error: propertiesError },
+        { data: contractorsData, error: contractorsError },
+        { data: jobsData, error: jobsError },
+      ] =
+        await Promise.all([
+          supabase
+            .from('v_cases_list')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(100),
+          supabase
+            .from('users_profiles')
+            .select('id, full_name')
+            .eq('is_active', true)
+            .order('full_name', { ascending: true }),
+          supabase
+            .from('contacts')
+            .select('id, full_name, phone, email, company_name')
+            .order('updated_at', { ascending: false })
+            .limit(1200),
+          supabase
+            .from('properties')
+            .select('id, address_line_1, address_line_2, city, postcode')
+            .order('updated_at', { ascending: false })
+            .limit(1200),
+          supabase
+            .from('contractors')
+            .select('id, contact_id, company_name, primary_trade, coverage_area, emergency_callout, is_active')
+            .order('updated_at', { ascending: false }),
+          supabase
+            .from('maintenance_requests')
+            .select(
+              'id, created_at, case_id, property_id, tenancy_id, reported_by_contact_id, issue_type, subcategory, description, access_notes, priority, status, contractor_id, scheduled_for, completed_at, landlord_approval_required, estimated_cost, final_cost, updated_at'
+            )
+            .order('updated_at', { ascending: false })
+            .limit(250),
+        ])
+
+      const firstError = [caseError, userError, contactsError, propertiesError, contractorsError, jobsError].find(Boolean)
+
+      if (firstError) {
+        setError(firstError.message)
+        setLoading(false)
+        return
+      }
+
+      const rows = (caseData || []) as CaseRow[]
+      let mergedRows = rows
+
+      if (rows.length > 0) {
+        const { data: followUpData, error: followUpError } = await supabase
+          .from('cases')
+          .select('id, next_action_at, waiting_on, waiting_reason')
+          .in('id', rows.map((item) => item.id))
+
+        if (followUpError) {
+          setFollowUpAvailable(false)
+        } else {
+          setFollowUpAvailable(true)
+          const followUpMap = new Map(
+            ((followUpData || []) as FollowUpRow[]).map((item) => [item.id, item])
           )
-          .order('updated_at', { ascending: false })
-          .limit(250),
-      ])
 
-    const firstError = [caseError, userError, contactsError, propertiesError, contractorsError, jobsError].find(Boolean)
+          mergedRows = rows.map((item) => {
+            const followUp = followUpMap.get(item.id)
 
-    if (firstError) {
-      setError(firstError.message)
-      setLoading(false)
-      return
-    }
-
-    const rows = (caseData || []) as CaseRow[]
-    let mergedRows = rows
-
-    if (rows.length > 0) {
-      const { data: followUpData, error: followUpError } = await supabase
-        .from('cases')
-        .select('id, next_action_at, waiting_on, waiting_reason')
-        .in('id', rows.map((item) => item.id))
-
-      if (followUpError) {
-        setFollowUpAvailable(false)
+            return {
+              ...item,
+              next_action_at: followUp?.next_action_at ?? null,
+              waiting_on: followUp?.waiting_on ?? 'none',
+              waiting_reason: followUp?.waiting_reason ?? null,
+            }
+          })
+        }
       } else {
         setFollowUpAvailable(true)
-        const followUpMap = new Map(
-          ((followUpData || []) as FollowUpRow[]).map((item) => [item.id, item])
-        )
-
-        mergedRows = rows.map((item) => {
-          const followUp = followUpMap.get(item.id)
-
-          return {
-            ...item,
-            next_action_at: followUp?.next_action_at ?? null,
-            waiting_on: followUp?.waiting_on ?? 'none',
-            waiting_reason: followUp?.waiting_reason ?? null,
-          }
-        })
       }
-    } else {
-      setFollowUpAvailable(true)
+
+      const jobRows = (jobsData || []) as MaintenanceJobRow[]
+      const nextSelectedJobId =
+        selectedJobId !== null && jobRows.some((item) => item.id === selectedJobId)
+          ? selectedJobId
+          : (jobRows[0]?.id ?? null)
+      const nextSelectedJob =
+        nextSelectedJobId !== null ? jobRows.find((item) => item.id === nextSelectedJobId) ?? null : null
+
+      setCases(mergedRows)
+      setJobs(jobRows)
+      setUsers((userData || []) as UserRow[])
+      setContacts((contactsData || []) as ContactRow[])
+      setProperties((propertiesData || []) as PropertyRow[])
+      setContractors((contractorsData || []) as ContractorRow[])
+
+      setSelectedJobId(nextSelectedJobId)
+
+      setSelectedCaseId((current) => {
+        const nextFromJobs = nextSelectedJob?.case_id ?? null
+        const nextFromCases = mergedRows[0]?.id ?? null
+
+        if (tab === 'jobs') return nextFromJobs ?? nextFromCases
+
+        return current && mergedRows.some((item) => item.id === current) ? current : nextFromCases
+      })
+      setLoading(false)
     }
-
-    const jobRows = (jobsData || []) as MaintenanceJobRow[]
-    const nextSelectedJobId =
-      selectedJobId !== null && jobRows.some((item) => item.id === selectedJobId)
-        ? selectedJobId
-        : (jobRows[0]?.id ?? null)
-    const nextSelectedJob = nextSelectedJobId !== null ? jobRows.find((item) => item.id === nextSelectedJobId) ?? null : null
-
-    setCases(mergedRows)
-    setJobs(jobRows)
-    setUsers((userData || []) as UserRow[])
-    setContacts((contactsData || []) as ContactRow[])
-    setProperties((propertiesData || []) as PropertyRow[])
-    setContractors((contractorsData || []) as ContractorRow[])
-
-    setSelectedJobId(nextSelectedJobId)
-
-    setSelectedCaseId((current) => {
-      const nextFromJobs = nextSelectedJob?.case_id ?? null
-      const nextFromCases = mergedRows[0]?.id ?? null
-
-      if (tab === 'jobs') return nextFromJobs ?? nextFromCases
-
-      return current && mergedRows.some((item) => item.id === current) ? current : nextFromCases
-    })
-    setLoading(false)
-  }
+  }, [operatorUserId, selectedJobId, tab])
 
   const loadCasesAndUsers = useCallback(
     (options?: { preserveLoading?: boolean }) => loadCasesAndUsersRef.current(options),
@@ -812,24 +815,26 @@ export default function OperatorDashboard({ operator }: OperatorDashboardProps) 
     setMessages((data || []) as MessageRow[])
     setMessagesLoading(false)
   })
-  loadMessagesForCaseRef.current = async (caseId: string) => {
-    setMessagesLoading(true)
+  useEffect(() => {
+    loadMessagesForCaseRef.current = async (caseId: string) => {
+      setMessagesLoading(true)
 
-    const { data, error: messagesError } = await supabase
-      .from('messages')
-      .select('id, message_text, sender_type, direction, channel, created_at')
-      .eq('case_id', caseId)
-      .order('created_at', { ascending: true })
+      const { data, error: messagesError } = await supabase
+        .from('messages')
+        .select('id, message_text, sender_type, direction, channel, created_at')
+        .eq('case_id', caseId)
+        .order('created_at', { ascending: true })
 
-    if (messagesError) {
-      setActionMessage(`Error loading messages: ${messagesError.message}`)
+      if (messagesError) {
+        setActionMessage(`Error loading messages: ${messagesError.message}`)
+        setMessagesLoading(false)
+        return
+      }
+
+      setMessages((data || []) as MessageRow[])
       setMessagesLoading(false)
-      return
     }
-
-    setMessages((data || []) as MessageRow[])
-    setMessagesLoading(false)
-  }
+  }, [])
 
   const loadMessagesForCase = useCallback((caseId: string) => loadMessagesForCaseRef.current(caseId), [])
 
@@ -949,122 +954,124 @@ export default function OperatorDashboard({ operator }: OperatorDashboardProps) 
     setSelectedCaseDepositClaims((depositClaimsData || []) as QueueDepositClaimRow[])
     setCaseContextLoading(false)
   })
-  loadSelectedCaseContextRef.current = async (caseId: string) => {
-    setCaseContextLoading(true)
+  useEffect(() => {
+    loadSelectedCaseContextRef.current = async (caseId: string) => {
+      setCaseContextLoading(true)
 
-    const { data: baseCase, error: baseCaseError } = await supabase
-      .from('cases')
-      .select('id, tenancy_id, property_id, contact_id')
-      .eq('id', caseId)
-      .maybeSingle()
+      const { data: baseCase, error: baseCaseError } = await supabase
+        .from('cases')
+        .select('id, tenancy_id, property_id, contact_id')
+        .eq('id', caseId)
+        .maybeSingle()
 
-    if (baseCaseError) {
-      setActionMessage(`Error loading CRM context: ${baseCaseError.message}`)
-      setCaseContextLoading(false)
-      return
-    }
+      if (baseCaseError) {
+        setActionMessage(`Error loading CRM context: ${baseCaseError.message}`)
+        setCaseContextLoading(false)
+        return
+      }
 
-    setSelectedCaseContext((baseCase as SelectedCaseContextRow) ?? null)
+      setSelectedCaseContext((baseCase as SelectedCaseContextRow) ?? null)
 
-    const tenancyResponse = baseCase?.tenancy_id
-      ? supabase
-          .from('tenancies')
-          .select('id, property_id, status, tenancy_status, end_date')
-          .eq('id', baseCase.tenancy_id)
-      : baseCase?.property_id
+      const tenancyResponse = baseCase?.tenancy_id
         ? supabase
             .from('tenancies')
             .select('id, property_id, status, tenancy_status, end_date')
-            .eq('property_id', baseCase.property_id)
-            .order('updated_at', { ascending: false })
-            .limit(4)
+            .eq('id', baseCase.tenancy_id)
+        : baseCase?.property_id
+          ? supabase
+              .from('tenancies')
+              .select('id, property_id, status, tenancy_status, end_date')
+              .eq('property_id', baseCase.property_id)
+              .order('updated_at', { ascending: false })
+              .limit(4)
+          : Promise.resolve({ data: [], error: null })
+
+      const { data: tenancyData, error: tenancyError } = await tenancyResponse
+
+      if (tenancyError) {
+        setActionMessage(`Error loading tenancy context: ${tenancyError.message}`)
+        setCaseContextLoading(false)
+        return
+      }
+
+      const safeTenancies = (tenancyData || []) as QueueTenancyRow[]
+      const tenancyIds = Array.from(new Set(safeTenancies.map((item) => item.id).filter(Boolean)))
+
+      const rentEntriesResponse = tenancyIds.length
+        ? supabase
+            .from('rent_ledger_entries')
+            .select('id, tenancy_id, case_id, entry_type, status, amount, due_date, posted_at, category')
+            .in('tenancy_id', tenancyIds)
+            .order('posted_at', { ascending: false })
+            .limit(8)
         : Promise.resolve({ data: [], error: null })
 
-    const { data: tenancyData, error: tenancyError } = await tenancyResponse
+      const leaseEventsResponse = tenancyIds.length
+        ? supabase
+            .from('lease_lifecycle_events')
+            .select('id, tenancy_id, case_id, event_type, status, scheduled_for, completed_at')
+            .in('tenancy_id', tenancyIds)
+            .order('scheduled_for', { ascending: false })
+            .limit(8)
+        : Promise.resolve({ data: [], error: null })
 
-    if (tenancyError) {
-      setActionMessage(`Error loading tenancy context: ${tenancyError.message}`)
-      setCaseContextLoading(false)
-      return
-    }
+      const depositClaimsResponse = tenancyIds.length
+        ? supabase
+            .from('deposit_claims')
+            .select('id, tenancy_id, case_id, claim_status, disputed_amount, total_claim_amount, updated_at')
+            .in('tenancy_id', tenancyIds)
+            .order('updated_at', { ascending: false })
+            .limit(6)
+        : Promise.resolve({ data: [], error: null })
 
-    const safeTenancies = (tenancyData || []) as QueueTenancyRow[]
-    const tenancyIds = Array.from(new Set(safeTenancies.map((item) => item.id).filter(Boolean)))
-
-    const rentEntriesResponse = tenancyIds.length
-      ? supabase
-          .from('rent_ledger_entries')
-          .select('id, tenancy_id, case_id, entry_type, status, amount, due_date, posted_at, category')
-          .in('tenancy_id', tenancyIds)
-          .order('posted_at', { ascending: false })
-          .limit(8)
-      : Promise.resolve({ data: [], error: null })
-
-    const leaseEventsResponse = tenancyIds.length
-      ? supabase
-          .from('lease_lifecycle_events')
-          .select('id, tenancy_id, case_id, event_type, status, scheduled_for, completed_at')
-          .in('tenancy_id', tenancyIds)
-          .order('scheduled_for', { ascending: false })
-          .limit(8)
-      : Promise.resolve({ data: [], error: null })
-
-    const depositClaimsResponse = tenancyIds.length
-      ? supabase
-          .from('deposit_claims')
-          .select('id, tenancy_id, case_id, claim_status, disputed_amount, total_claim_amount, updated_at')
-          .in('tenancy_id', tenancyIds)
+      const [
+        { data: callData, error: callError },
+        { data: maintenanceData, error: maintenanceError },
+        { data: rentEntriesData, error: rentEntriesError },
+        { data: leaseEventsData, error: leaseEventsError },
+        { data: depositClaimsData, error: depositClaimsError },
+      ] = await Promise.all([
+        supabase
+          .from('call_sessions')
+          .select('id, created_at, last_event_at, direction, status, outcome')
+          .eq('case_id', caseId)
+          .order('last_event_at', { ascending: false })
+          .limit(6),
+        supabase
+          .from('maintenance_requests')
+          .select('id, case_id, tenancy_id, property_id, issue_type, priority, status, scheduled_for, updated_at')
+          .eq('case_id', caseId)
           .order('updated_at', { ascending: false })
-          .limit(6)
-      : Promise.resolve({ data: [], error: null })
+          .limit(6),
+        rentEntriesResponse,
+        leaseEventsResponse,
+        depositClaimsResponse,
+      ])
 
-    const [
-      { data: callData, error: callError },
-      { data: maintenanceData, error: maintenanceError },
-      { data: rentEntriesData, error: rentEntriesError },
-      { data: leaseEventsData, error: leaseEventsError },
-      { data: depositClaimsData, error: depositClaimsError },
-    ] = await Promise.all([
-      supabase
-        .from('call_sessions')
-        .select('id, created_at, last_event_at, direction, status, outcome')
-        .eq('case_id', caseId)
-        .order('last_event_at', { ascending: false })
-        .limit(6),
-      supabase
-        .from('maintenance_requests')
-        .select('id, case_id, tenancy_id, property_id, issue_type, priority, status, scheduled_for, updated_at')
-        .eq('case_id', caseId)
-        .order('updated_at', { ascending: false })
-        .limit(6),
-      rentEntriesResponse,
-      leaseEventsResponse,
-      depositClaimsResponse,
-    ])
+      if (callError || maintenanceError || rentEntriesError || leaseEventsError || depositClaimsError) {
+        setActionMessage(
+          `Error loading CRM context: ${
+            callError?.message ||
+            maintenanceError?.message ||
+            rentEntriesError?.message ||
+            leaseEventsError?.message ||
+            depositClaimsError?.message ||
+            'Unknown error'
+          }`
+        )
+        setCaseContextLoading(false)
+        return
+      }
 
-    if (callError || maintenanceError || rentEntriesError || leaseEventsError || depositClaimsError) {
-      setActionMessage(
-        `Error loading CRM context: ${
-          callError?.message ||
-          maintenanceError?.message ||
-          rentEntriesError?.message ||
-          leaseEventsError?.message ||
-          depositClaimsError?.message ||
-          'Unknown error'
-        }`
-      )
+      setSelectedCaseTenancies(safeTenancies)
+      setSelectedCaseCalls((callData || []) as QueueCallRow[])
+      setSelectedCaseMaintenance((maintenanceData || []) as QueueMaintenanceRow[])
+      setSelectedCaseRentEntries((rentEntriesData || []) as QueueRentEntryRow[])
+      setSelectedCaseLeaseEvents((leaseEventsData || []) as QueueLeaseEventRow[])
+      setSelectedCaseDepositClaims((depositClaimsData || []) as QueueDepositClaimRow[])
       setCaseContextLoading(false)
-      return
     }
-
-    setSelectedCaseTenancies(safeTenancies)
-    setSelectedCaseCalls((callData || []) as QueueCallRow[])
-    setSelectedCaseMaintenance((maintenanceData || []) as QueueMaintenanceRow[])
-    setSelectedCaseRentEntries((rentEntriesData || []) as QueueRentEntryRow[])
-    setSelectedCaseLeaseEvents((leaseEventsData || []) as QueueLeaseEventRow[])
-    setSelectedCaseDepositClaims((depositClaimsData || []) as QueueDepositClaimRow[])
-    setCaseContextLoading(false)
-  }
+  }, [])
 
   const loadSelectedCaseContext = useCallback(
     (caseId: string) => loadSelectedCaseContextRef.current(caseId),
@@ -1108,43 +1115,45 @@ export default function OperatorDashboard({ operator }: OperatorDashboardProps) 
       ).length,
     })
   })
-  loadOperationsPulseRef.current = async () => {
-    const [maintenanceResponse, complianceResponse] = await Promise.all([
-      supabase
-        .from('maintenance_requests')
-        .select('status, landlord_approval_required, scheduled_for')
-        .limit(1000),
-      supabase.from('compliance_records').select('status').limit(1000),
-    ])
+  useEffect(() => {
+    loadOperationsPulseRef.current = async () => {
+      const [maintenanceResponse, complianceResponse] = await Promise.all([
+        supabase
+          .from('maintenance_requests')
+          .select('status, landlord_approval_required, scheduled_for')
+          .limit(1000),
+        supabase.from('compliance_records').select('status').limit(1000),
+      ])
 
-    if (maintenanceResponse.error || complianceResponse.error) {
-      return
+      if (maintenanceResponse.error || complianceResponse.error) {
+        return
+      }
+
+      const maintenanceRows = (maintenanceResponse.data || []) as MaintenancePulseRow[]
+      const complianceRows = (complianceResponse.data || []) as CompliancePulseRow[]
+
+      setOperationsPulse({
+        maintenanceLive: maintenanceRows.filter(
+          (request) => !['completed', 'cancelled'].includes(request.status)
+        ).length,
+        maintenanceApproval: maintenanceRows.filter(
+          (request) =>
+            request.status === 'awaiting_approval' || request.landlord_approval_required
+        ).length,
+        maintenanceScheduled: maintenanceRows.filter(
+          (request) =>
+            ['approved', 'scheduled', 'in_progress'].includes(request.status) &&
+            !!request.scheduled_for
+        ).length,
+        complianceRisk: complianceRows.filter((record) =>
+          ['expired', 'missing'].includes(record.status)
+        ).length,
+        complianceSoon: complianceRows.filter((record) =>
+          ['expiring', 'pending'].includes(record.status)
+        ).length,
+      })
     }
-
-    const maintenanceRows = (maintenanceResponse.data || []) as MaintenancePulseRow[]
-    const complianceRows = (complianceResponse.data || []) as CompliancePulseRow[]
-
-    setOperationsPulse({
-      maintenanceLive: maintenanceRows.filter(
-        (request) => !['completed', 'cancelled'].includes(request.status)
-      ).length,
-      maintenanceApproval: maintenanceRows.filter(
-        (request) =>
-          request.status === 'awaiting_approval' || request.landlord_approval_required
-      ).length,
-      maintenanceScheduled: maintenanceRows.filter(
-        (request) =>
-          ['approved', 'scheduled', 'in_progress'].includes(request.status) &&
-          !!request.scheduled_for
-      ).length,
-      complianceRisk: complianceRows.filter((record) =>
-        ['expired', 'missing'].includes(record.status)
-      ).length,
-      complianceSoon: complianceRows.filter((record) =>
-        ['expiring', 'pending'].includes(record.status)
-      ).length,
-    })
-  }
+  }, [])
 
   const loadOperationsPulse = useCallback(() => loadOperationsPulseRef.current(), [])
 
