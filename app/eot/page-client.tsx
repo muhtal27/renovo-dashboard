@@ -70,6 +70,7 @@ type EndOfTenancyCaseListResponse = {
   items: EndOfTenancyCaseListItem[]
 }
 
+const DENSITY_STORAGE_KEY = 'eot-dashboard-density'
 const STUCK_THRESHOLDS_HOURS: Record<string, number> = {
   evidence_pending: 72,
   evidence_ready: 48,
@@ -210,6 +211,23 @@ function mapListItemsToQueueRows(items: EndOfTenancyCaseListItem[]) {
     })
 }
 
+function getRowSearchText(row: QueueRow) {
+  return [
+    row.case?.case_number,
+    buildAddress(row.property),
+    row.tenant?.full_name,
+    row.landlord?.full_name,
+    row.assignedOperator?.full_name,
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase()
+}
+
+function getRowCellPadding(density: 'compact' | 'comfortable') {
+  return density === 'compact' ? 'px-3 py-3' : 'px-3 py-4'
+}
+
 function StatCard({
   label,
   value,
@@ -227,19 +245,77 @@ function StatCard({
   )
 }
 
-function SkeletonRows() {
+function SkeletonTable({
+  density,
+}: {
+  density: 'compact' | 'comfortable'
+}) {
+  const cellPadding = getRowCellPadding(density)
+
   return (
-    <div className="space-y-3">
-      {Array.from({ length: 6 }).map((_, index) => (
-        <div
-          key={index}
-          className="grid animate-pulse gap-3 rounded-[1.3rem] border border-stone-200 bg-stone-50/80 px-4 py-4 md:grid-cols-[0.35fr,0.95fr,1.5fr,1fr,0.85fr,0.9fr,0.75fr,0.9fr,1fr,0.9fr,0.8fr]"
-        >
-          {Array.from({ length: 11 }).map((__, cellIndex) => (
-            <div key={cellIndex} className="h-5 rounded-full bg-stone-200/80" />
+    <div className="overflow-x-auto">
+      <table className="min-w-full border-separate border-spacing-y-3">
+        <thead>
+          <tr className="text-left text-xs font-semibold uppercase tracking-[0.16em] text-stone-500">
+            <th className="w-10 px-3 py-2">
+              <div className="h-4 w-4 animate-pulse rounded bg-stone-200" />
+            </th>
+            <th className="px-3 py-2">Case ref</th>
+            <th className="px-3 py-2">Property address</th>
+            <th className="px-3 py-2">Tenant name</th>
+            <th className="px-3 py-2">Move-out date</th>
+            <th className="px-3 py-2">Workflow status</th>
+            <th className="px-3 py-2">In status</th>
+            <th className="px-3 py-2">Inspection</th>
+            <th className="px-3 py-2">Assigned to</th>
+            <th className="px-3 py-2">Last activity</th>
+            <th className="px-3 py-2" />
+          </tr>
+        </thead>
+        <tbody>
+          {Array.from({ length: 6 }).map((_, index) => (
+            <tr key={index}>
+              <td
+                className={`w-10 rounded-l-[1.4rem] border-b border-l border-t border-stone-200 bg-white ${cellPadding}`}
+              >
+                <div className="h-4 w-4 animate-pulse rounded bg-stone-200" />
+              </td>
+              <td className={`border-y border-stone-200 bg-white ${cellPadding}`}>
+                <div className="h-5 w-20 animate-pulse rounded-full bg-stone-200" />
+              </td>
+              <td className={`border-y border-stone-200 bg-white ${cellPadding}`}>
+                <div className="h-5 w-40 animate-pulse rounded-full bg-stone-200" />
+              </td>
+              <td className={`border-y border-stone-200 bg-white ${cellPadding}`}>
+                <div className="h-5 w-28 animate-pulse rounded-full bg-stone-200" />
+              </td>
+              <td className={`border-y border-stone-200 bg-white ${cellPadding}`}>
+                <div className="h-5 w-24 animate-pulse rounded-full bg-stone-200" />
+              </td>
+              <td className={`border-y border-stone-200 bg-white ${cellPadding}`}>
+                <div className="h-7 w-28 animate-pulse rounded-full bg-stone-200" />
+              </td>
+              <td className={`border-y border-stone-200 bg-white ${cellPadding}`}>
+                <div className="h-5 w-14 animate-pulse rounded-full bg-stone-200" />
+              </td>
+              <td className={`border-y border-stone-200 bg-white ${cellPadding}`}>
+                <div className="h-7 w-20 animate-pulse rounded-full bg-stone-200" />
+              </td>
+              <td className={`border-y border-stone-200 bg-white ${cellPadding}`}>
+                <div className="h-5 w-24 animate-pulse rounded-full bg-stone-200" />
+              </td>
+              <td className={`border-y border-stone-200 bg-white ${cellPadding}`}>
+                <div className="h-5 w-16 animate-pulse rounded-full bg-stone-200" />
+              </td>
+              <td
+                className={`rounded-r-[1.4rem] border-b border-r border-t border-stone-200 bg-white text-right ${cellPadding}`}
+              >
+                <div className="ml-auto h-9 w-24 animate-pulse rounded-full bg-stone-200" />
+              </td>
+            </tr>
           ))}
-        </div>
-      ))}
+        </tbody>
+      </table>
     </div>
   )
 }
@@ -256,6 +332,9 @@ export default function EotCasesPage({
   const [error, setError] = useState<string | null>(null)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [bulkLoading, setBulkLoading] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [density, setDensity] = useState<'compact' | 'comfortable'>('comfortable')
+  const [densityHydrated, setDensityHydrated] = useState(false)
 
   const refreshQueue = useCallback(async () => {
     const response = await endOfTenancyApiRequest<EndOfTenancyCaseListResponse>(
@@ -265,12 +344,26 @@ export default function EotCasesPage({
     return mapListItemsToQueueRows(response.items)
   }, [])
 
+  const loadCases = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      const queueRows = await refreshQueue()
+      setRows(queueRows)
+    } catch (loadError) {
+      setError(loadError instanceof Error ? loadError.message : 'Unable to load the queue.')
+    } finally {
+      setLoading(false)
+    }
+  }, [refreshQueue])
+
   useEffect(() => {
     if (initialItems !== undefined) return
 
     let cancelled = false
 
-    async function loadCases() {
+    void (async () => {
       setLoading(true)
       setError(null)
 
@@ -279,22 +372,38 @@ export default function EotCasesPage({
 
         if (!cancelled) {
           setRows(queueRows)
-          setLoading(false)
         }
       } catch (loadError) {
         if (!cancelled) {
           setError(loadError instanceof Error ? loadError.message : 'Unable to load the queue.')
+        }
+      } finally {
+        if (!cancelled) {
           setLoading(false)
         }
       }
-    }
-
-    void loadCases()
+    })()
 
     return () => {
       cancelled = true
     }
   }, [initialItems, refreshQueue])
+
+  useEffect(() => {
+    const storedDensity =
+      typeof window !== 'undefined' ? window.localStorage.getItem(DENSITY_STORAGE_KEY) : null
+
+    if (storedDensity === 'compact' || storedDensity === 'comfortable') {
+      setDensity(storedDensity)
+    }
+
+    setDensityHydrated(true)
+  }, [])
+
+  useEffect(() => {
+    if (!densityHydrated || typeof window === 'undefined') return
+    window.localStorage.setItem(DENSITY_STORAGE_KEY, density)
+  }, [density, densityHydrated])
 
   const openRows = useMemo(
     () => rows.filter((row) => (row.case?.status || '').toLowerCase() !== 'closed'),
@@ -317,8 +426,18 @@ export default function EotCasesPage({
     })
   }, [openRows])
 
+  const filteredOpenRows = useMemo(() => {
+    const normalizedQuery = searchQuery.trim().toLowerCase()
+
+    if (!normalizedQuery) {
+      return sortedOpenRows
+    }
+
+    return sortedOpenRows.filter((row) => getRowSearchText(row).includes(normalizedQuery))
+  }, [searchQuery, sortedOpenRows])
+
   useEffect(() => {
-    const visibleIds = new Set(sortedOpenRows.map((row) => row.eotCase.id))
+    const visibleIds = new Set(filteredOpenRows.map((row) => row.eotCase.id))
 
     setSelectedIds((previous) => {
       const next = new Set(Array.from(previous).filter((id) => visibleIds.has(id)))
@@ -327,12 +446,20 @@ export default function EotCasesPage({
 
       return changed ? next : previous
     })
-  }, [sortedOpenRows])
+  }, [filteredOpenRows])
 
-  const startOfMonth = useMemo(() => {
-    const date = new Date()
-    return new Date(date.getFullYear(), date.getMonth(), 1).toISOString()
+  const monthRange = useMemo(() => {
+    const now = new Date()
+    const start = new Date(now.getFullYear(), now.getMonth(), 1)
+    const end = new Date(now.getFullYear(), now.getMonth() + 1, 1)
+
+    return {
+      start: start.toISOString(),
+      end: end.toISOString(),
+    }
   }, [])
+
+  const rowCellPadding = getRowCellPadding(density)
 
   const stats = useMemo(
     () => ({
@@ -349,13 +476,19 @@ export default function EotCasesPage({
         (row) => getStuckState(row.eotCase.workflow_status, row.eotCase.updated_at) === 'stuck'
       ).length,
       closedThisMonth: rows.filter(
-        (row) =>
-          row.eotCase.workflow_status === 'closed' &&
-          row.eotCase.closed_at != null &&
-          row.eotCase.closed_at >= startOfMonth
+        (row) => {
+          const effectiveClosedAt = row.eotCase.closed_at ?? row.eotCase.updated_at
+
+          return (
+            row.eotCase.workflow_status === 'closed' &&
+            effectiveClosedAt != null &&
+            effectiveClosedAt >= monthRange.start &&
+            effectiveClosedAt < monthRange.end
+          )
+        }
       ).length,
     }),
-    [openRows, rows, startOfMonth]
+    [monthRange.end, monthRange.start, openRows, rows]
   )
 
   return (
@@ -506,6 +639,48 @@ export default function EotCasesPage({
 
         <div className="app-divider my-6" />
 
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center">
+            <label className="flex-1">
+              <span className="sr-only">Search cases</span>
+              <input
+                type="search"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Search by case, address, tenant, landlord, or assignee"
+                className="app-field w-full rounded-full px-4 py-2.5 text-sm text-stone-700 placeholder:text-stone-400"
+              />
+            </label>
+            <div className="inline-flex rounded-full border border-stone-200 bg-stone-50 p-1">
+              <button
+                type="button"
+                onClick={() => setDensity('comfortable')}
+                className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
+                  density === 'comfortable'
+                    ? 'bg-white text-stone-900 shadow-sm'
+                    : 'text-stone-500 hover:text-stone-700'
+                }`}
+              >
+                Comfortable
+              </button>
+              <button
+                type="button"
+                onClick={() => setDensity('compact')}
+                className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
+                  density === 'compact'
+                    ? 'bg-white text-stone-900 shadow-sm'
+                    : 'text-stone-500 hover:text-stone-700'
+                }`}
+              >
+                Compact
+              </button>
+            </div>
+          </div>
+          <p className="text-xs text-stone-500">Showing the most recent 250 cases.</p>
+        </div>
+
+        <div className="app-divider my-6" />
+
         {error ? (
           <div className="rounded-[1.5rem] border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
             {error}
@@ -513,13 +688,37 @@ export default function EotCasesPage({
         ) : null}
 
         {loading ? (
-          <SkeletonRows />
-        ) : openRows.length === 0 ? (
+          <SkeletonTable density={density} />
+        ) : filteredOpenRows.length === 0 ? (
           <div className="rounded-[1.6rem] border border-dashed border-stone-300 bg-stone-50/80 px-6 py-12 text-center">
-            <h3 className="text-lg font-semibold text-stone-900">No active end-of-tenancy cases</h3>
+            <h3 className="text-lg font-semibold text-stone-900">
+              {searchQuery.trim()
+                ? 'No cases match your search'
+                : 'No active end-of-tenancy cases'}
+            </h3>
             <p className="mt-3 text-sm leading-6 text-stone-500">
-              New EOT workspaces will appear here as soon as a case is opened for move-out review.
+              {searchQuery.trim()
+                ? 'Try a different search term or refresh the queue to check for new case activity.'
+                : 'New EOT workspaces will appear here as soon as a case is opened for move-out review.'}
             </p>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+              {searchQuery.trim() ? (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="app-secondary-button rounded-full px-4 py-2 text-sm font-medium text-stone-700"
+                >
+                  Clear search
+                </button>
+              ) : null}
+              <button
+                type="button"
+                onClick={() => void loadCases()}
+                className="app-primary-button rounded-full px-4 py-2 text-sm font-medium"
+              >
+                Refresh queue
+              </button>
+            </div>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -530,11 +729,11 @@ export default function EotCasesPage({
                     <input
                       type="checkbox"
                       checked={
-                        sortedOpenRows.length > 0 && selectedIds.size === sortedOpenRows.length
+                        filteredOpenRows.length > 0 && selectedIds.size === filteredOpenRows.length
                       }
                       onChange={(event) => {
                         if (event.target.checked) {
-                          setSelectedIds(new Set(sortedOpenRows.map((row) => row.eotCase.id)))
+                          setSelectedIds(new Set(filteredOpenRows.map((row) => row.eotCase.id)))
                         } else {
                           setSelectedIds(new Set())
                         }
@@ -555,12 +754,12 @@ export default function EotCasesPage({
                 </tr>
               </thead>
               <tbody>
-                {sortedOpenRows.map((row) => (
+                {filteredOpenRows.map((row) => (
                   <tr
                     key={row.eotCase.id}
                     className="rounded-[1.4rem] border border-stone-200 bg-white shadow-sm"
                   >
-                    <td className="w-10 rounded-l-[1.4rem] px-3 py-4">
+                    <td className={`w-10 rounded-l-[1.4rem] ${rowCellPadding}`}>
                       <input
                         type="checkbox"
                         checked={selectedIds.has(row.eotCase.id)}
@@ -578,10 +777,10 @@ export default function EotCasesPage({
                         className="h-4 w-4 rounded border-stone-300 text-stone-900 focus:ring-stone-500"
                       />
                     </td>
-                    <td className="px-3 py-4 text-sm font-semibold text-stone-900">
+                    <td className={`${rowCellPadding} text-sm font-semibold text-stone-900`}>
                       {row.case?.case_number || 'Unnumbered'}
                     </td>
-                    <td className="group relative cursor-default px-3 py-4 text-sm text-stone-700">
+                    <td className={`group relative cursor-default ${rowCellPadding} text-sm text-stone-700`}>
                       <span>{buildAddress(row.property)}</span>
                       <div className="pointer-events-none absolute left-0 top-full z-50 mt-1 hidden w-72 rounded-[1.2rem] border border-stone-200 bg-white p-4 shadow-xl group-hover:block">
                         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-stone-500">
@@ -613,20 +812,20 @@ export default function EotCasesPage({
                         </div>
                       </div>
                     </td>
-                    <td className="px-3 py-4 text-sm text-stone-700">
+                    <td className={`${rowCellPadding} text-sm text-stone-700`}>
                       {row.tenant?.full_name || 'Unknown tenant'}
                     </td>
-                    <td className="px-3 py-4 text-sm text-stone-700">
+                    <td className={`${rowCellPadding} text-sm text-stone-700`}>
                       {formatDate(row.eotCase.move_out_date || row.tenancy?.end_date)}
                     </td>
-                    <td className="px-3 py-4 text-sm">
+                    <td className={`${rowCellPadding} text-sm`}>
                       <span
                         className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${getWorkflowTone(row.eotCase.workflow_status)}`}
                       >
                         {formatWorkflowLabel(row.eotCase.workflow_status)}
                       </span>
                     </td>
-                    <td className="px-3 py-4 text-sm">
+                    <td className={`${rowCellPadding} text-sm`}>
                       {(() => {
                         const days = getDaysInStatus(row.eotCase.updated_at)
                         const stuck = getStuckState(
@@ -648,24 +847,24 @@ export default function EotCasesPage({
                         )
                       })()}
                     </td>
-                    <td className="px-3 py-4 text-sm">
+                    <td className={`${rowCellPadding} text-sm`}>
                       <span
                         className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${getInspectionTone(row.eotCase.inspection_status)}`}
                       >
                         {formatInspectionLabel(row.eotCase.inspection_status)}
                       </span>
                     </td>
-                    <td className="px-3 py-4 text-sm text-stone-700">
+                    <td className={`${rowCellPadding} text-sm text-stone-700`}>
                       {row.assignedOperator?.full_name || 'Unassigned'}
                     </td>
-                    <td className="px-3 py-4 text-sm text-stone-500">
+                    <td className={`${rowCellPadding} text-sm text-stone-500`}>
                       {formatRelativeTime(
                         row.case?.last_activity_at ||
                           row.case?.updated_at ||
                           row.eotCase.updated_at
                       )}
                     </td>
-                    <td className="rounded-r-[1.4rem] px-3 py-4 text-right">
+                    <td className={`rounded-r-[1.4rem] ${rowCellPadding} text-right`}>
                       <Link
                         href={`/cases/${row.case?.id || row.eotCase.case_id}`}
                         className="app-secondary-button inline-flex rounded-full px-4 py-2 text-sm font-medium text-stone-700"
