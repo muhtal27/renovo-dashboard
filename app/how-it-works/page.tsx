@@ -20,31 +20,26 @@ const dataCards = [
 const walkthroughSteps = [
   {
     step: '01',
-    title: 'Notice served',
-    body: 'A tenant gives notice on a 14-month assured shorthold tenancy. The property manager opens a new case in Renovo, enters the move out date, deposit amount (£1,350 held with MyDeposits), and links the tenancy.',
+    title: 'Case opened and documents uploaded',
+    body: 'A tenant gives notice on a 14-month assured shorthold tenancy. The property manager opens a new case in Renovo, enters the move out date, deposit amount (£1,350 held with MyDeposits), and uploads the check in inventory, check out inspection report, and move out photos. Renovo extracts key facts from each document — room condition, item status, meter readings.',
   },
   {
     step: '02',
-    title: 'Documents uploaded',
-    body: 'On move out day, the property manager uploads the original check in inventory, the check out inspection report, and three folders of photos. Renovo extracts the key facts — room condition, item status, meter readings — from each document.',
-  },
-  {
-    step: '03',
     title: 'Issues identified',
     body: 'The property manager reviews the extracted facts and adds four issues: carpet staining in the living room (£280), a broken kitchen cupboard door (£160), scuff marks on the bedroom wall (£120, shared responsibility), and missing picture hooks (£80). Each issue is tagged with responsibility, severity, and the evidence that supports it.',
   },
   {
-    step: '04',
+    step: '03',
     title: 'Recommendation drafted',
     body: 'The property manager clicks Generate recommendation. Renovo reviews the documents, the issues, and the evidence links, then drafts a partial claim recommendation of £640 with a written rationale explaining each amount and flagging the bedroom wall as a fair wear and tear judgement call.',
   },
   {
-    step: '05',
+    step: '04',
     title: 'Manager reviews and approves',
     body: 'The manager reads the rationale, adjusts the bedroom wall amount down to £90 based on their judgement, adds a note explaining the change, and approves the recommendation. The full review history — including the edit and the note — is logged automatically.',
   },
   {
-    step: '06',
+    step: '05',
     title: 'Claim submitted',
     body: 'Renovo generates the deposit claim line items from the approved recommendation. The manager submits to MyDeposits with the rationale and evidence already documented. If the tenant challenges, the full decision trail is already there.',
   },
@@ -151,8 +146,8 @@ export default function HowItWorksPage() {
               What a typical end-of-tenancy review looks like in Renovo
             </h2>
             <p className="mt-4 text-base leading-8 text-stone-700">
-              This is not a case study. It is a realistic walkthrough of how a property manager
-              would use Renovo on a standard case.
+              This is not a case study. It is a realistic walkthrough of the same five steps shown
+              above — applied to a real scenario.
             </p>
           </div>
 
