@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { getOperatorLabel } from '@/lib/operator'
 import { supabase } from '@/lib/supabase'
 import { useOperatorGate } from '@/lib/use-operator-gate'
+import HomepageDemo from '@/app/components/HomepageDemo'
 import { PublicHome } from '@/app/public-home'
 import { OperatorNav } from '@/app/operator-nav'
 import { OperatorSessionState } from '@/app/operator-session-state'
@@ -1856,15 +1857,19 @@ export default function HomePage() {
   }, [router, selectedCaseId])
 
   if (authLoading && !operator?.authUser) {
-    return <PublicHome />
+    return <PublicHome productDemo={<HomepageDemo />} />
   }
 
   if (authLoading) {
-    return operator?.authUser ? <OperatorSessionState authLoading={authLoading} operator={operator} /> : <PublicHome />
+    return operator?.authUser ? (
+      <OperatorSessionState authLoading={authLoading} operator={operator} />
+    ) : (
+      <PublicHome productDemo={<HomepageDemo />} />
+    )
   }
 
   if (!operator?.authUser) {
-    return <PublicHome />
+    return <PublicHome productDemo={<HomepageDemo />} />
   }
 
   return (

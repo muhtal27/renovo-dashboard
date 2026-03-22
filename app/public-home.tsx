@@ -1,4 +1,3 @@
-import Image from 'next/image'
 import Link from 'next/link'
 import { PublicWaitlistForm } from '@/app/public-waitlist-form'
 
@@ -45,29 +44,6 @@ const workflowSteps = [
   },
 ]
 
-const proofStates = [
-  {
-    label: 'Evidence pack',
-    tone: 'border-sky-200 bg-sky-50/90 text-sky-950',
-    body: 'Documents, extracted facts, and linked evidence sit together so the property manager is not rebuilding the case from inbox threads.',
-  },
-  {
-    label: 'Issue review',
-    tone: 'border-amber-200 bg-amber-50/95 text-amber-950',
-    body: 'Each issue carries responsibility, severity, proposed amount, and traceable supporting evidence before a recommendation is drafted.',
-  },
-  {
-    label: 'Recommendation',
-    tone: 'border-emerald-200 bg-emerald-50/90 text-emerald-950',
-    body: 'Rationale, confidence, and source references stay visible so the property manager can review the logic rather than trust a black box.',
-  },
-  {
-    label: 'Claim output',
-    tone: 'border-stone-200 bg-white text-stone-900',
-    body: 'Approved recommendations convert into line items ready for the deposit claim, with the audit trail still attached.',
-  },
-]
-
 const operatorOutcomes = [
   {
     title: 'Faster review cycles',
@@ -102,7 +78,11 @@ const supportingAreas = [
   },
 ]
 
-export function PublicHome() {
+export function PublicHome({
+  productDemo,
+}: {
+  productDemo?: React.ReactNode
+}) {
   return (
     <main className="app-grid min-h-screen px-5 py-6 text-stone-900 md:px-8 md:py-8">
       <div className="mx-auto max-w-[1380px] space-y-6">
@@ -262,32 +242,12 @@ export function PublicHome() {
             </Link>
           </div>
 
-          <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.18fr)_380px] xl:items-start">
-            <div className="overflow-hidden rounded-[1.8rem] border border-stone-200 bg-white shadow-[0_18px_44px_rgba(55,43,27,0.1)]">
-              <picture>
-                <source srcSet="/renovo-workspace-snapshot.png 1600w" />
-                <Image
-                  src="/renovo-workspace-snapshot.png"
-                  alt="Renovo property manager workspace showing evidence, tenancy context, issues, recommendations, and claim output in one view"
-                  width={1600}
-                  height={1200}
-                  className="h-auto w-full"
-                  priority
-                />
-              </picture>
-            </div>
-
-            <div className="space-y-4">
-              {proofStates.map((item) => (
-                <article
-                  key={item.label}
-                  className={`rounded-[1.45rem] border p-5 ${item.tone}`}
-                >
-                  <p className="app-kicker">{item.label}</p>
-                  <p className="mt-3 text-sm leading-7 opacity-85">{item.body}</p>
-                </article>
-              ))}
-            </div>
+          <div className="mt-6 space-y-4">
+            {productDemo}
+            <p className="text-sm leading-7 text-stone-500">
+              This is a live interactive preview. Click through each stage to see how Renovo
+              handles a real end-of-tenancy case.
+            </p>
           </div>
         </section>
 
