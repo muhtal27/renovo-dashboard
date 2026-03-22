@@ -34,25 +34,6 @@ const workflowStages = [
   },
 ]
 
-const accessPanels = [
-  {
-    title: 'Operator workspace',
-    body: 'The main flow is built for evidence review, issue assessment, recommendation approval, and claim preparation.',
-  },
-  {
-    title: 'Audit-first review',
-    body: 'Renovo keeps the reasoning, evidence trail, and review actions visible instead of hiding the logic behind a single result.',
-  },
-  {
-    title: 'Supporting portals',
-    body: 'Landlord, tenant, and contractor access can still be enabled where the agency wants supporting visibility around the case.',
-  },
-  {
-    title: 'Agency-linked access',
-    body: 'Creating a sign-in does not grant workspace access until your agency links the correct role and destination.',
-  },
-]
-
 export default function LoginPage() {
   const router = useRouter()
 
@@ -249,22 +230,9 @@ export default function LoginPage() {
     <main className="app-grid min-h-screen px-6 py-8 text-stone-900 md:px-8 md:py-10">
       <div className="mx-auto grid max-w-7xl gap-6 xl:grid-cols-[minmax(0,1.1fr)_460px]">
         <section className="app-surface-strong rounded-[2.2rem] p-8 md:p-10">
-          <div className="flex flex-wrap gap-2">
-            <span className="rounded-full border border-emerald-200 bg-emerald-50/90 px-4 py-2 text-sm font-medium text-emerald-950/85">
-              Renovo access
-            </span>
-            <span className="rounded-full border border-stone-200 bg-white/92 px-4 py-2 text-sm font-medium text-stone-700">
-              Human-reviewed decisions
-            </span>
-          </div>
-
-          <h1 className="mt-6 max-w-4xl text-4xl font-semibold tracking-tight md:text-[4.6rem] md:leading-[0.95]">
-            Secure entry to the end-of-tenancy decision engine
-          </h1>
+          <p className="app-kicker">Renovo</p>
           <p className="mt-5 max-w-3xl text-base leading-8 text-stone-600 md:text-lg">
-            Operators move from evidence review to claim output in one specialist workflow.
-            Supporting portals remain available where an agency has enabled them, but the product
-            now starts with the end-of-tenancy decision path.
+            The end-of-tenancy decision engine for letting agencies.
           </p>
 
           <div className="mt-8 grid gap-3 xl:grid-cols-4">
@@ -280,38 +248,6 @@ export default function LoginPage() {
                 <p className="mt-2 text-sm leading-6 text-stone-600">{item.body}</p>
               </article>
             ))}
-          </div>
-
-          <div className="mt-8 grid gap-4 md:grid-cols-2">
-            {accessPanels.map((item) => (
-              <article
-                key={item.title}
-                className="rounded-[1.55rem] border border-stone-200 bg-white/94 p-5 shadow-sm"
-              >
-                <h2 className="text-lg font-semibold text-stone-900">{item.title}</h2>
-                <p className="mt-3 text-sm leading-7 text-stone-600">{item.body}</p>
-              </article>
-            ))}
-          </div>
-
-          <div className="mt-8 rounded-[1.7rem] border border-emerald-200 bg-emerald-50/90 p-6">
-            <p className="text-sm font-semibold text-emerald-900">Before you sign in</p>
-            <div className="mt-3 grid gap-3 md:grid-cols-2">
-              <div className="rounded-[1.2rem] border border-emerald-200/80 bg-white/70 p-4">
-                <p className="text-sm font-medium text-emerald-950">Use your approved email</p>
-                <p className="mt-2 text-sm leading-6 text-emerald-950/80">
-                  Sign in with the email your agency has linked to Renovo so we can route you to
-                  the correct workspace.
-                </p>
-              </div>
-              <div className="rounded-[1.2rem] border border-emerald-200/80 bg-white/70 p-4">
-                <p className="text-sm font-medium text-emerald-950">New sign-ins still need linking</p>
-                <p className="mt-2 text-sm leading-6 text-emerald-950/80">
-                  Creating an account only sets up your sign-in. A team administrator still needs to
-                  grant the right workspace role.
-                </p>
-              </div>
-            </div>
           </div>
         </section>
 
@@ -370,7 +306,7 @@ export default function LoginPage() {
 
           <div className="mt-6 rounded-[1.5rem] border border-stone-200 bg-stone-50/85 p-4">
             <p className="text-sm font-medium text-stone-900">
-              {mode === 'sign_in' && 'For approved operators and linked portal users'}
+              {mode === 'sign_in' && 'For approved property managers'}
               {mode === 'sign_up' && 'Create a sign-in before your access is linked'}
               {mode === 'reset' && 'Recover the password for your approved Renovo email'}
             </p>

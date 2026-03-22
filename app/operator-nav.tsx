@@ -45,7 +45,7 @@ export function OperatorNav({ current, viewerName }: OperatorNavProps) {
   const pathname = usePathname()
   const router = useRouter()
   const [signingOut, setSigningOut] = useState(false)
-  const [fallbackViewerLabel, setFallbackViewerLabel] = useState('Renovo operator')
+  const [fallbackViewerLabel, setFallbackViewerLabel] = useState('Renovo property manager')
   void current
 
   useEffect(() => {
@@ -63,7 +63,7 @@ export function OperatorNav({ current, viewerName }: OperatorNavProps) {
       setFallbackViewerLabel(
         user?.user_metadata?.full_name?.trim() ||
           user?.email?.trim() ||
-          'Renovo operator'
+          'Renovo property manager'
       )
     }
 
@@ -92,7 +92,7 @@ export function OperatorNav({ current, viewerName }: OperatorNavProps) {
 
   return (
     <div className="sticky top-0 z-40 border-b border-stone-200/80 bg-stone-50/90 backdrop-blur">
-      <nav className="app-grid px-5 py-4 text-stone-900 md:px-8" aria-label="Operator navigation">
+      <nav className="app-grid px-5 py-4 text-stone-900 md:px-8" aria-label="Property manager navigation">
         <div className="mx-auto flex w-full max-w-[1520px] items-center justify-between gap-4">
           <div className="flex min-w-0 items-center gap-4">
             <Link
@@ -126,7 +126,7 @@ export function OperatorNav({ current, viewerName }: OperatorNavProps) {
           <div className="flex items-center gap-3">
             <div className="hidden text-right md:block">
               <p className="text-sm font-medium text-stone-900">{displayName}</p>
-              <p className="text-xs text-stone-500">Operator workspace</p>
+              <p className="text-xs text-stone-500">Property manager workspace</p>
             </div>
             <div className="flex h-10 w-10 items-center justify-center rounded-full border border-stone-200 bg-white text-sm font-semibold text-stone-700">
               {getInitials(displayName)}

@@ -9,7 +9,7 @@ const overviewMetrics = [
   },
   {
     value: 'Human-reviewed',
-    label: 'AI can draft, but operators still approve every decision',
+    label: 'AI can draft, but property managers still approve every decision',
   },
   {
     value: 'Claim-ready',
@@ -36,7 +36,7 @@ const workflowSteps = [
   {
     step: '04',
     title: 'Review with control',
-    body: 'Operators submit, approve, reject, or send back recommendations with a full audit trail.',
+    body: 'Property managers submit, approve, reject, or send back recommendations with a full audit trail.',
   },
   {
     step: '05',
@@ -49,7 +49,7 @@ const proofStates = [
   {
     label: 'Evidence pack',
     tone: 'border-sky-200 bg-sky-50/90 text-sky-950',
-    body: 'Documents, extracted facts, and linked evidence sit together so the operator is not rebuilding the case from inbox threads.',
+    body: 'Documents, extracted facts, and linked evidence sit together so the property manager is not rebuilding the case from inbox threads.',
   },
   {
     label: 'Issue review',
@@ -59,7 +59,7 @@ const proofStates = [
   {
     label: 'Recommendation',
     tone: 'border-emerald-200 bg-emerald-50/90 text-emerald-950',
-    body: 'Rationale, confidence, and source references stay visible so the operator can review the logic rather than trust a black box.',
+    body: 'Rationale, confidence, and source references stay visible so the property manager can review the logic rather than trust a black box.',
   },
   {
     label: 'Claim output',
@@ -71,11 +71,11 @@ const proofStates = [
 const operatorOutcomes = [
   {
     title: 'Faster review cycles',
-    body: 'Operators stop bouncing between tenancy records, message history, and claim spreadsheets before they can even begin assessing the case.',
+    body: 'Property managers stop bouncing between tenancy records, message history, and claim spreadsheets before they can even begin assessing the case.',
   },
   {
     title: 'More consistent decisions',
-    body: 'The same workflow, evidence structure, and review states help teams reach steadier outcomes across branches and operators.',
+    body: 'The same workflow, evidence structure, and review states help teams reach steadier outcomes across branches and property managers.',
   },
   {
     title: 'Clearer challenge handling',
@@ -108,9 +108,9 @@ export function PublicHome() {
       <div className="mx-auto max-w-[1380px] space-y-6">
         <header className="sticky top-0 z-30">
           <div className="app-surface flex items-center justify-between rounded-[1.45rem] border border-stone-200/85 px-4 py-3 md:px-5">
-            <a href="#" className="app-kicker">
+            <Link href="/" className="app-kicker">
               Renovo
-            </a>
+            </Link>
 
             <nav className="flex items-center gap-2 md:gap-3" aria-label="Homepage">
               <a
@@ -177,12 +177,12 @@ export function PublicHome() {
                 </div>
 
                 <h1 className="mt-6 max-w-5xl text-4xl font-semibold tracking-tight md:text-[4.7rem] md:leading-[0.94]">
-                  Move from messy move-out evidence to claim-ready decisions in one operator flow.
+                  Move from messy move-out evidence to claim-ready decisions in one property manager flow.
                 </h1>
 
                 <p className="mt-6 max-w-3xl text-base leading-8 text-stone-700 md:text-lg">
                   Renovo brings together documents, extracted facts, issues, recommendations, and
-                  review history so operators can make fairer end-of-tenancy decisions faster,
+                  review history so property managers can make fairer end-of-tenancy decisions faster,
                   without losing the reasoning behind them.
                 </p>
 
@@ -228,7 +228,7 @@ export function PublicHome() {
             </h2>
             <p className="mt-4 text-base leading-8 text-stone-700">
               Renovo is not a generic assistant bolted onto a property dashboard. It is structured
-              around the operator journey from evidence intake to reviewed recommendation and claim
+              around the property manager journey from evidence intake to reviewed recommendation and claim
               output.
             </p>
           </div>
@@ -268,7 +268,7 @@ export function PublicHome() {
                 <source srcSet="/renovo-workspace-snapshot.png 1600w" />
                 <Image
                   src="/renovo-workspace-snapshot.png"
-                  alt="Renovo operator workspace showing evidence, tenancy context, issues, recommendations, and claim output in one view"
+                  alt="Renovo property manager workspace showing evidence, tenancy context, issues, recommendations, and claim output in one view"
                   width={1600}
                   height={1200}
                   className="h-auto w-full"
@@ -293,7 +293,7 @@ export function PublicHome() {
 
         <section className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
           <div className="app-surface rounded-[2rem] p-6 md:p-7">
-            <p className="app-kicker">Operator outcome</p>
+            <p className="app-kicker">Property manager outcome</p>
             <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
               Stronger decisions without hiding the reasoning
             </h2>
