@@ -44,6 +44,12 @@ const workflowSteps = [
   },
 ]
 
+const setupItems = [
+  'Manual upload — Drag and drop or browse to add documents',
+  'Email intake — Forward documents from your inbox',
+  'PMS sync — Coming: pull from your existing system',
+]
+
 const operatorOutcomes = [
   {
     title: 'Faster review cycles',
@@ -213,6 +219,40 @@ export function PublicHome({
                 </div>
               </aside>
             </div>
+          </div>
+        </section>
+
+        <section className="app-surface rounded-[2rem] p-6 md:p-7">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-4xl">
+              <p className="app-kicker">Your existing setup</p>
+              <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
+                No integration required to get started
+              </h2>
+              <p className="mt-4 text-base leading-8 text-stone-700">
+                Property managers open a case when notice is served and upload documents directly
+                — check in inventory, check out report, move out photos. Renovo works alongside
+                your current property management software. Nothing in your existing stack changes.
+              </p>
+            </div>
+
+            <Link
+              href="/how-it-works"
+              className="text-sm font-medium text-stone-700 underline-offset-4 hover:text-stone-900 hover:underline lg:self-start"
+            >
+              How does data get into Renovo? →
+            </Link>
+          </div>
+
+          <div className="mt-6 flex flex-wrap gap-3 text-sm text-stone-700">
+            {setupItems.map((item) => (
+              <div
+                key={item}
+                className="inline-flex rounded-full border border-stone-200 bg-white px-4 py-2"
+              >
+                {item}
+              </div>
+            ))}
           </div>
         </section>
 
