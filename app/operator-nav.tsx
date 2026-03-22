@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { getOperatorProfile } from '@/lib/operator'
 import { supabase } from '@/lib/supabase'
 
 type OperatorNavProps = {
@@ -59,19 +58,13 @@ export function OperatorNav({ current, viewerName }: OperatorNavProps) {
 
     async function loadViewer() {
       const {
-        data: { user },
-      } = await supabase.auth.getUser()
-
-      if (cancelled) return
-
-      const profile = user ? await getOperatorProfile(user.id).catch(() => null) : null
+        data: { session },
+      } = await supabase.auth.getSession()
 
       if (cancelled) return
 
       setFallbackViewerLabel(
-        profile?.full_name?.trim() ||
-          user?.email?.trim() ||
-          ''
+        session?.user?.email?.trim() || ''
       )
     }
 

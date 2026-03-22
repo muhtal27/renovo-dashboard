@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { CaseHeader } from '@/app/cases/[id]/components/CaseHeader'
 import { ContextRail } from '@/app/cases/[id]/components/ContextRail'
@@ -133,13 +133,23 @@ export default function CaseWorkspacePage() {
   const [error, setError] = useState<string | null>(null)
   const [activeSection, setActiveSection] = useState<WorkspaceSectionKey>('overview')
   const [initializing, setInitializing] = useState(false)
+  const envelopeRef = useRef<WorkspaceEnvelope | null>(null)
+  const requestIdRef = useRef(0)
 
   const operatorLabel = getOperatorLabel(operator)
 
-  const loadWorkspace = useCallback(async () => {
-    if (!caseId) return
+  useEffect(() => {
+    envelopeRef.current = envelope
+  }, [envelope])
 
-    setLoading(true)
+  const loadWorkspace = useCallback(async (options?: { preserveShell?: boolean }) => {
+    if (!caseId) return
+    const requestId = ++requestIdRef.current
+    const preserveShell = options?.preserveShell === true && envelopeRef.current != null
+
+    if (!preserveShell) {
+      setLoading(true)
+    }
     setError(null)
 
     const [caseResponse, eotResponse] = await Promise.all([
@@ -158,12 +168,14 @@ export default function CaseWorkspacePage() {
     const bootstrapError = caseResponse.error || eotResponse.error
 
     if (bootstrapError) {
+      if (requestId !== requestIdRef.current) return
       setError(bootstrapError.message)
       setLoading(false)
       return
     }
 
     const caseRow = (caseResponse.data as BaseCasePreview | null) ?? null
+    if (requestId !== requestIdRef.current) return
     setBaseCase(caseRow)
 
     if (!caseRow) {
@@ -175,6 +187,7 @@ export default function CaseWorkspacePage() {
     const endOfTenancyCaseId = (eotResponse.data as { id: string } | null)?.id ?? null
 
     if (!endOfTenancyCaseId) {
+      if (requestId !== requestIdRef.current) return
       setEnvelope(null)
       setLoading(false)
       return
@@ -185,6 +198,7 @@ export default function CaseWorkspacePage() {
         ok: boolean
         workspace: WorkspaceEnvelope['workspace']
       }>(`/api/end-of-tenancy/${endOfTenancyCaseId}`)
+      if (requestId !== requestIdRef.current) return
 
       const workspace = workspaceResponse.workspace
       const tenantId = workspace.tenancy?.tenant_contact_id ?? null
@@ -207,6 +221,18 @@ export default function CaseWorkspacePage() {
           ].filter(Boolean)
         ),
       ] as string[]
+
+      const currentEnvelope = envelopeRef.current
+
+      setEnvelope({
+        workspace,
+        tenant: currentEnvelope?.tenant ?? null,
+        landlord: currentEnvelope?.landlord ?? null,
+        complianceRecords: currentEnvelope?.complianceRecords ?? [],
+        actorNames: currentEnvelope?.actorNames ?? {},
+        latestRecommendationConfidence: currentEnvelope?.latestRecommendationConfidence ?? null,
+      })
+      setLoading(false)
 
       const [contactsResponse, complianceResponse, usersResponse, aiRunResponse] = await Promise.all([
         [tenantId, landlordId].filter(Boolean).length > 0
@@ -235,15 +261,15 @@ export default function CaseWorkspacePage() {
               .maybeSingle()
           : Promise.resolve({ data: null, error: null }),
       ])
+      if (requestId !== requestIdRef.current) return
 
-      const firstError =
+      if (
         contactsResponse.error ||
         complianceResponse.error ||
         usersResponse.error ||
         aiRunResponse.error
-
-      if (firstError) {
-        throw new Error(firstError.message)
+      ) {
+        return
       }
 
       const contacts = (contactsResponse.data || []) as WorkspaceContact[]
@@ -264,11 +290,18 @@ export default function CaseWorkspacePage() {
           ((aiRunResponse.data as { confidence: number | null } | null)?.confidence ?? null),
       })
     } catch (loadError) {
+      if (requestId !== requestIdRef.current) return
       setError(loadError instanceof Error ? loadError.message : 'Unable to load the case workspace.')
     } finally {
-      setLoading(false)
+      if (requestId === requestIdRef.current) {
+        setLoading(false)
+      }
     }
   }, [caseId])
+
+  const refreshWorkspace = useCallback(async () => {
+    await loadWorkspace({ preserveShell: true })
+  }, [loadWorkspace])
 
   useEffect(() => {
     void loadWorkspace()
@@ -650,13 +683,13 @@ export default function CaseWorkspacePage() {
                 caseId={caseId}
                 endOfTenancyCaseId={workspace.endOfTenancyCase.id}
                 documents={workspace.documents}
-                onRefresh={loadWorkspace}
+                onRefresh={refreshWorkspace}
               />
 
               <Issues
                 endOfTenancyCaseId={workspace.endOfTenancyCase.id}
                 issues={workspace.issues}
-                onRefresh={loadWorkspace}
+                onRefresh={refreshWorkspace}
               />
 
               <Recommendation
@@ -664,7 +697,7 @@ export default function CaseWorkspacePage() {
                 recommendations={workspace.recommendations}
                 actorNames={actorNames}
                 latestRecommendationConfidence={latestRecommendationConfidence}
-                onRefresh={loadWorkspace}
+                onRefresh={refreshWorkspace}
               />
 
               <ClaimOutput
@@ -674,7 +707,7 @@ export default function CaseWorkspacePage() {
                 lineItems={workspace.lineItems}
                 issues={workspace.issues}
                 tenancy={workspace.tenancy}
-                onRefresh={loadWorkspace}
+                onRefresh={refreshWorkspace}
               />
 
               <TenancyDetails

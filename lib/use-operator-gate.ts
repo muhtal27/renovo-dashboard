@@ -79,15 +79,15 @@ export function useOperatorGate({
     async function bootstrapAuth() {
       try {
         const {
-          data: { user },
-          error: userError,
-        } = await supabase.auth.getUser()
+          data: { session },
+          error: sessionError,
+        } = await supabase.auth.getSession()
 
-        if (userError) {
-          throw userError
+        if (sessionError) {
+          throw sessionError
         }
 
-        await applyUser(user ?? null)
+        await applyUser(session?.user ?? null)
       } catch (authError) {
         if (!cancelled) {
           setAuthError(authError instanceof Error ? authError.message : sessionErrorMessage)
