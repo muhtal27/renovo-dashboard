@@ -197,7 +197,7 @@ export default function CaseWorkspacePage() {
       const workspaceResponse = await endOfTenancyApiRequest<{
         ok: boolean
         workspace: WorkspaceEnvelope['workspace']
-      }>(`/api/end-of-tenancy/${endOfTenancyCaseId}`)
+      }>(`/api/eot/cases/${endOfTenancyCaseId}`)
       if (requestId !== requestIdRef.current) return
 
       const workspace = workspaceResponse.workspace
@@ -421,7 +421,7 @@ export default function CaseWorkspacePage() {
     setError(null)
 
     try {
-      await endOfTenancyApiRequest('/api/end-of-tenancy', {
+      await endOfTenancyApiRequest('/api/eot/cases', {
         method: 'POST',
         body: JSON.stringify({
           action: 'initialize_case',

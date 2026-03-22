@@ -91,7 +91,7 @@ export function EvidencePack({
     try {
       const upload = await uploadDocumentToStorage(selectedFile, caseId)
 
-      await endOfTenancyApiRequest(`/api/end-of-tenancy/${endOfTenancyCaseId}`, {
+      await endOfTenancyApiRequest(`/api/eot/cases/${endOfTenancyCaseId}`, {
         method: 'POST',
         body: JSON.stringify({
           action: 'attach_evidence',

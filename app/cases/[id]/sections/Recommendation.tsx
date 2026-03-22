@@ -53,7 +53,7 @@ export function Recommendation({
     setMessage(null)
 
     try {
-      await endOfTenancyApiRequest(`/api/end-of-tenancy/${endOfTenancyCaseId}`, {
+      await endOfTenancyApiRequest(`/api/eot/cases/${endOfTenancyCaseId}`, {
         method: 'POST',
         body: JSON.stringify({
           action: 'review_recommendation',

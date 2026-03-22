@@ -115,7 +115,7 @@ export function Issues({
     setError(null)
 
     try {
-      await endOfTenancyApiRequest(`/api/end-of-tenancy/${endOfTenancyCaseId}`, {
+      await endOfTenancyApiRequest(`/api/eot/cases/${endOfTenancyCaseId}`, {
         method: 'POST',
         body: JSON.stringify({
           action: 'create_issue',
@@ -146,7 +146,7 @@ export function Issues({
     setError(null)
 
     try {
-      await endOfTenancyApiRequest(`/api/end-of-tenancy/${endOfTenancyCaseId}`, {
+      await endOfTenancyApiRequest(`/api/eot/cases/${endOfTenancyCaseId}`, {
         method: 'POST',
         body: JSON.stringify({
           action: 'update_issue',

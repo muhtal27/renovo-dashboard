@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { requireActiveOperator } from '@/app/api/end-of-tenancy/_auth'
+import { requireActiveOperator } from '@/app/api/eot/_auth'
 import {
   generateDraftAssessmentForEndOfTenancyCase,
   isEndOfTenancyAiDraftingConfigured,
@@ -68,7 +68,17 @@ type ActionPayload =
     }
   | {
       action: 'create_issue'
-      issueType: 'cleaning' | 'damage' | 'missing_item' | 'repair' | 'redecoration' | 'gardening' | 'rubbish_removal' | 'rent_arrears' | 'utilities' | 'other'
+      issueType:
+        | 'cleaning'
+        | 'damage'
+        | 'missing_item'
+        | 'repair'
+        | 'redecoration'
+        | 'gardening'
+        | 'rubbish_removal'
+        | 'rent_arrears'
+        | 'utilities'
+        | 'other'
       title: string
       description?: string | null
       roomArea?: string | null
@@ -79,7 +89,17 @@ type ActionPayload =
   | {
       action: 'update_issue'
       issueId: string
-      issueType?: 'cleaning' | 'damage' | 'missing_item' | 'repair' | 'redecoration' | 'gardening' | 'rubbish_removal' | 'rent_arrears' | 'utilities' | 'other'
+      issueType?:
+        | 'cleaning'
+        | 'damage'
+        | 'missing_item'
+        | 'repair'
+        | 'redecoration'
+        | 'gardening'
+        | 'rubbish_removal'
+        | 'rent_arrears'
+        | 'utilities'
+        | 'other'
       title?: string
       description?: string | null
       roomArea?: string | null
@@ -107,7 +127,13 @@ type ActionPayload =
       aiRunId?: string | null
       decisionSummary?: string | null
       rationale?: string | null
-      recommendedOutcome?: 'no_action' | 'partial_claim' | 'full_claim' | 'insufficient_evidence' | 'refer_to_human' | 'no_decision'
+      recommendedOutcome?:
+        | 'no_action'
+        | 'partial_claim'
+        | 'full_claim'
+        | 'insufficient_evidence'
+        | 'refer_to_human'
+        | 'no_decision'
       totalRecommendedAmount?: number | null
       issueIds?: string[]
     }
@@ -117,7 +143,13 @@ type ActionPayload =
       reviewAction: 'submit' | 'approve' | 'reject' | 'override' | 'comment' | 'send_back'
       notes?: string | null
       override?: {
-        recommendedOutcome?: 'no_action' | 'partial_claim' | 'full_claim' | 'insufficient_evidence' | 'refer_to_human' | 'no_decision'
+        recommendedOutcome?:
+          | 'no_action'
+          | 'partial_claim'
+          | 'full_claim'
+          | 'insufficient_evidence'
+          | 'refer_to_human'
+          | 'no_decision'
         totalRecommendedAmount?: number | null
         decisionSummary?: string | null
         rationale?: string | null
@@ -234,9 +266,8 @@ export async function POST(request: Request, context: RouteParams) {
           confidence: payload.confidence ?? null,
         })
         break
-      case 'create_issue':
-        {
-          const issue = await upsertEndOfTenancyIssue({
+      case 'create_issue': {
+        const issue = await upsertEndOfTenancyIssue({
           endOfTenancyCaseId: id,
           createdByUserId: operator.operatorProfileId,
           issueType: payload.issueType,
@@ -248,19 +279,19 @@ export async function POST(request: Request, context: RouteParams) {
           proposedAmount: payload.proposedAmount ?? null,
           status: 'open',
         })
-          await syncMoveOutTrackerProgress(id, {
-            event: {
-              actorType: 'user',
-              actorUserId: operator.operatorProfileId,
-              eventType: 'issue_created',
-              title: 'Issue created',
-              detail: `${issue.title} was added to the move-out review.`,
-              sourceTable: 'end_of_tenancy_issues',
-              sourceRecordId: issue.id,
-            },
-          })
-        }
+        await syncMoveOutTrackerProgress(id, {
+          event: {
+            actorType: 'user',
+            actorUserId: operator.operatorProfileId,
+            eventType: 'issue_created',
+            title: 'Issue created',
+            detail: `${issue.title} was added to the move-out review.`,
+            sourceTable: 'end_of_tenancy_issues',
+            sourceRecordId: issue.id,
+          },
+        })
         break
+      }
       case 'update_issue':
         await updateIssueAssessment({
           issueId: payload.issueId,

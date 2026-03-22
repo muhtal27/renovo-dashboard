@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { requireActiveOperator } from '@/app/api/end-of-tenancy/_auth'
+import { requireActiveOperator } from '@/app/api/eot/_auth'
 import { getDefaultEndOfTenancyAiProvider } from '@/lib/end-of-tenancy/ai-provider'
 import { withEndOfTenancyTransaction } from '@/lib/end-of-tenancy/db'
 import { prepareEndOfTenancyAiInput } from '@/lib/end-of-tenancy/ai'
