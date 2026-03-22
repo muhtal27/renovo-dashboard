@@ -11,8 +11,6 @@ import { Issues } from '@/app/cases/[id]/sections/Issues'
 import { Recommendation } from '@/app/cases/[id]/sections/Recommendation'
 import { TenancyDetails } from '@/app/cases/[id]/sections/TenancyDetails'
 import type {
-  ComplianceRecordRow,
-  WorkspaceContact,
   WorkspaceEnvelope,
   WorkspaceSectionKey,
   WorkspaceSectionStatus,
@@ -32,7 +30,6 @@ import {
 import { OperatorNav } from '@/app/operator-nav'
 import { endOfTenancyApiRequest } from '@/lib/end-of-tenancy/client-api'
 import { getOperatorLabel } from '@/lib/operator'
-import { supabase } from '@/lib/supabase'
 import { useOperatorGate } from '@/lib/use-operator-gate'
 
 type BaseCasePreview = {
@@ -152,142 +149,46 @@ export default function CaseWorkspacePage() {
     }
     setError(null)
 
-    const [caseResponse, eotResponse] = await Promise.all([
-      supabase
-        .from('cases')
-        .select('id, case_number, summary, status')
-        .eq('id', caseId)
-        .maybeSingle(),
-      supabase
-        .from('end_of_tenancy_cases')
-        .select('id')
-        .eq('case_id', caseId)
-        .maybeSingle(),
-    ])
-
-    const bootstrapError = caseResponse.error || eotResponse.error
-
-    if (bootstrapError) {
-      if (requestId !== requestIdRef.current) return
-      setError(bootstrapError.message)
-      setLoading(false)
-      return
-    }
-
-    const caseRow = (caseResponse.data as BaseCasePreview | null) ?? null
-    if (requestId !== requestIdRef.current) return
-    setBaseCase(caseRow)
-
-    if (!caseRow) {
-      setError('Case not found.')
-      setLoading(false)
-      return
-    }
-
-    const endOfTenancyCaseId = (eotResponse.data as { id: string } | null)?.id ?? null
-
-    if (!endOfTenancyCaseId) {
-      if (requestId !== requestIdRef.current) return
-      setEnvelope(null)
-      setLoading(false)
-      return
-    }
-
     try {
-      const workspaceResponse = await endOfTenancyApiRequest<{
+      const bootstrap = await endOfTenancyApiRequest<{
         ok: boolean
-        workspace: WorkspaceEnvelope['workspace']
-      }>(`/api/eot/cases/${endOfTenancyCaseId}`)
+        case: BaseCasePreview | null
+        endOfTenancyCaseId: string | null
+      }>(`/api/eot/cases?caseId=${encodeURIComponent(caseId)}`)
       if (requestId !== requestIdRef.current) return
 
-      const workspace = workspaceResponse.workspace
-      const tenantId = workspace.tenancy?.tenant_contact_id ?? null
-      const landlordId =
-        workspace.tenancy?.landlord_contact_id ?? workspace.property?.landlord_contact_id ?? null
-      const propertyId = workspace.property?.id ?? null
-      const latestRecommendation =
-        [...workspace.recommendations].sort((left, right) =>
-          (right.created_at || '').localeCompare(left.created_at || '')
-        )[0] ?? null
+      setBaseCase(bootstrap.case ?? null)
 
-      const actorIds = [
-        ...new Set(
-          [
-            workspace.case?.assigned_user_id,
-            ...workspace.documents.map((document) => document.uploaded_by_user_id),
-            ...workspace.recommendations.flatMap((recommendation) =>
-              recommendation.reviewActions.map((action) => action.actor_user_id)
-            ),
-          ].filter(Boolean)
-        ),
-      ] as string[]
-
-      const currentEnvelope = envelopeRef.current
-
-      setEnvelope({
-        workspace,
-        tenant: currentEnvelope?.tenant ?? null,
-        landlord: currentEnvelope?.landlord ?? null,
-        complianceRecords: currentEnvelope?.complianceRecords ?? [],
-        actorNames: currentEnvelope?.actorNames ?? {},
-        latestRecommendationConfidence: currentEnvelope?.latestRecommendationConfidence ?? null,
-      })
-      setLoading(false)
-
-      const [contactsResponse, complianceResponse, usersResponse, aiRunResponse] = await Promise.all([
-        [tenantId, landlordId].filter(Boolean).length > 0
-          ? supabase
-              .from('contacts')
-              .select('id, full_name, email, phone, company_name')
-              .in('id', [tenantId, landlordId].filter(Boolean) as string[])
-          : Promise.resolve({ data: [], error: null }),
-        propertyId
-          ? supabase
-              .from('compliance_records')
-              .select(
-                'id, property_id, record_type, status, issue_date, expiry_date, reference_number, document_url, updated_at'
-              )
-              .eq('property_id', propertyId)
-              .order('expiry_date', { ascending: true })
-          : Promise.resolve({ data: [], error: null }),
-        actorIds.length > 0
-          ? supabase.from('users_profiles').select('id, full_name, email').in('id', actorIds)
-          : Promise.resolve({ data: [], error: null }),
-        latestRecommendation?.ai_run_id
-          ? supabase
-              .from('ai_runs')
-              .select('id, confidence')
-              .eq('id', latestRecommendation.ai_run_id)
-              .maybeSingle()
-          : Promise.resolve({ data: null, error: null }),
-      ])
-      if (requestId !== requestIdRef.current) return
-
-      if (
-        contactsResponse.error ||
-        complianceResponse.error ||
-        usersResponse.error ||
-        aiRunResponse.error
-      ) {
+      if (!bootstrap.case) {
+        setEnvelope(null)
+        setError('Case not found.')
         return
       }
 
-      const contacts = (contactsResponse.data || []) as WorkspaceContact[]
-      const contactsById = new Map(contacts.map((contact) => [contact.id, contact] as const))
-      const actorNames = Object.fromEntries(
-        ((usersResponse.data || []) as Array<{ id: string; full_name: string | null; email?: string | null }>).map(
-          (user) => [user.id, user.full_name?.trim() || user.email?.trim() || 'Unknown manager']
-        )
-      )
+      if (!bootstrap.endOfTenancyCaseId) {
+        setEnvelope(null)
+        return
+      }
+
+      const workspaceResponse = await endOfTenancyApiRequest<{
+        ok: boolean
+        workspace: WorkspaceEnvelope['workspace']
+        tenant: WorkspaceEnvelope['tenant']
+        landlord: WorkspaceEnvelope['landlord']
+        complianceRecords: WorkspaceEnvelope['complianceRecords']
+        actorNames: WorkspaceEnvelope['actorNames']
+        latestRecommendationConfidence: WorkspaceEnvelope['latestRecommendationConfidence']
+      }>(`/api/eot/cases/${bootstrap.endOfTenancyCaseId}`)
+      if (requestId !== requestIdRef.current) return
 
       setEnvelope({
-        workspace,
-        tenant: tenantId ? contactsById.get(tenantId) ?? null : null,
-        landlord: landlordId ? contactsById.get(landlordId) ?? null : null,
-        complianceRecords: (complianceResponse.data || []) as ComplianceRecordRow[],
-        actorNames,
+        workspace: workspaceResponse.workspace,
+        tenant: workspaceResponse.tenant ?? null,
+        landlord: workspaceResponse.landlord ?? null,
+        complianceRecords: workspaceResponse.complianceRecords ?? [],
+        actorNames: workspaceResponse.actorNames ?? {},
         latestRecommendationConfidence:
-          ((aiRunResponse.data as { confidence: number | null } | null)?.confidence ?? null),
+          workspaceResponse.latestRecommendationConfidence ?? null,
       })
     } catch (loadError) {
       if (requestId !== requestIdRef.current) return

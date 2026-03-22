@@ -19,6 +19,7 @@ import {
   updateIssueAssessment,
 } from '@/lib/end-of-tenancy/service'
 import { loadEndOfTenancyWorkspace } from '@/lib/end-of-tenancy/workspace'
+import { getSupabaseServiceRoleClient } from '@/lib/supabase-admin'
 
 type RouteParams = {
   params: Promise<{ id: string }>
@@ -178,9 +179,100 @@ export async function GET(request: Request, context: RouteParams) {
       return NextResponse.json({ error: 'End-of-tenancy case not found.' }, { status: 404 })
     }
 
+    const supabase = getSupabaseServiceRoleClient()
+    const tenantId = workspace.tenancy?.tenant_contact_id ?? null
+    const landlordId =
+      workspace.tenancy?.landlord_contact_id ?? workspace.property?.landlord_contact_id ?? null
+    const propertyId = workspace.property?.id ?? null
+    const latestRecommendation =
+      [...workspace.recommendations].sort((left, right) =>
+        (right.created_at || '').localeCompare(left.created_at || '')
+      )[0] ?? null
+
+    const actorIds = [
+      ...new Set(
+        [
+          workspace.case?.assigned_user_id,
+          ...workspace.documents.map((document) => document.uploaded_by_user_id),
+          ...workspace.recommendations.flatMap((recommendation) =>
+            recommendation.reviewActions.map((action) => action.actor_user_id)
+          ),
+        ].filter(Boolean)
+      ),
+    ] as string[]
+
+    const [contactsResult, complianceResult, usersResult, aiRunResult] = await Promise.all([
+      [tenantId, landlordId].filter(Boolean).length > 0
+        ? supabase
+            .from('contacts')
+            .select('id, full_name, email, phone, company_name')
+            .in('id', [tenantId, landlordId].filter(Boolean) as string[])
+        : Promise.resolve({ data: [], error: null }),
+      propertyId
+        ? supabase
+            .from('compliance_records')
+            .select(
+              'id, property_id, record_type, status, issue_date, expiry_date, reference_number, document_url, updated_at'
+            )
+            .eq('property_id', propertyId)
+            .order('expiry_date', { ascending: true })
+        : Promise.resolve({ data: [], error: null }),
+      actorIds.length > 0
+        ? supabase.from('users_profiles').select('id, full_name, email').in('id', actorIds)
+        : Promise.resolve({ data: [], error: null }),
+      latestRecommendation?.ai_run_id
+        ? supabase
+            .from('ai_runs')
+            .select('id, confidence')
+            .eq('id', latestRecommendation.ai_run_id)
+            .maybeSingle()
+        : Promise.resolve({ data: null, error: null }),
+    ])
+
+    if (contactsResult.error) {
+      throw new Error(contactsResult.error.message)
+    }
+
+    if (complianceResult.error) {
+      throw new Error(complianceResult.error.message)
+    }
+
+    if (usersResult.error) {
+      throw new Error(usersResult.error.message)
+    }
+
+    if (aiRunResult.error) {
+      throw new Error(aiRunResult.error.message)
+    }
+
+    const contacts = (contactsResult.data ||
+      []) as Array<{ id: string; full_name: string | null; email: string | null; phone: string | null; company_name: string | null }>
+    const contactsById = new Map(contacts.map((contact) => [contact.id, contact] as const))
+    const actorNames = Object.fromEntries(
+      (((usersResult.data || []) as Array<{ id: string; full_name: string | null; email?: string | null }>).map(
+        (user) => [user.id, user.full_name?.trim() || user.email?.trim() || 'Unknown manager']
+      ))
+    )
+
     return NextResponse.json({
       ok: true,
       workspace,
+      tenant: tenantId ? contactsById.get(tenantId) ?? null : null,
+      landlord: landlordId ? contactsById.get(landlordId) ?? null : null,
+      complianceRecords: (complianceResult.data || []) as Array<{
+        id: string
+        property_id: string
+        record_type: string
+        status: string
+        issue_date: string | null
+        expiry_date: string | null
+        reference_number: string | null
+        document_url: string | null
+        updated_at: string | null
+      }>,
+      actorNames,
+      latestRecommendationConfidence:
+        ((aiRunResult.data as { confidence: number | null } | null)?.confidence ?? null),
       aiDraftingConfigured: isEndOfTenancyAiDraftingConfigured(),
     })
   } catch (error) {

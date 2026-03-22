@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { requireActiveOperator } from '@/app/api/eot/_auth'
 import { listEndOfTenancyCases } from '@/lib/end-of-tenancy/queries'
 import { initializeEndOfTenancyCaseFromExistingCase } from '@/lib/end-of-tenancy/service'
+import { getSupabaseServiceRoleClient } from '@/lib/supabase-admin'
 
 type InitializePayload = {
   action: 'initialize_case'
@@ -16,6 +17,39 @@ export async function GET(request: Request) {
   try {
     await requireActiveOperator(request)
     const { searchParams } = new URL(request.url)
+    const caseId = searchParams.get('caseId')
+
+    if (caseId) {
+      const supabase = getSupabaseServiceRoleClient()
+      const [baseCaseResult, extensionResult] = await Promise.all([
+        supabase
+          .from('cases')
+          .select('id, case_number, summary, status')
+          .eq('id', caseId)
+          .maybeSingle(),
+        supabase
+          .from('end_of_tenancy_cases')
+          .select('id')
+          .eq('case_id', caseId)
+          .maybeSingle(),
+      ])
+
+      if (baseCaseResult.error) {
+        throw new Error(baseCaseResult.error.message)
+      }
+
+      if (extensionResult.error) {
+        throw new Error(extensionResult.error.message)
+      }
+
+      return NextResponse.json({
+        ok: true,
+        case: baseCaseResult.data ?? null,
+        endOfTenancyCaseId:
+          ((extensionResult.data as { id: string } | null)?.id ?? null),
+      })
+    }
+
     const workflowStatus = searchParams.get('workflowStatus') || undefined
     const limitParam = searchParams.get('limit')
     const limit = limitParam ? Number(limitParam) : 100
