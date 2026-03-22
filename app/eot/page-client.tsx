@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { OperatorLayout } from '@/app/operator-layout'
 import { endOfTenancyApiRequest } from '@/lib/end-of-tenancy/client-api'
+import type { EndOfTenancyCaseListItem } from '@/lib/end-of-tenancy/types'
 
 type EndOfTenancyCaseRow = {
   id: string
@@ -23,7 +24,7 @@ type CaseRow = {
   tenancy_id: string | null
   property_id: string | null
   assigned_user_id: string | null
-  last_activity_at: string | null
+  last_activity_at?: string | null
   updated_at: string | null
   created_at: string | null
 }
@@ -66,15 +67,7 @@ type QueueRow = {
 
 type EndOfTenancyCaseListResponse = {
   ok: boolean
-  items: Array<{
-    endOfTenancyCase: EndOfTenancyCaseRow
-    case: CaseRow | null
-    tenancy: TenancyRow | null
-    property: PropertyRow | null
-    tenant: ContactRow | null
-    landlord: ContactRow | null
-    assignedOperator: UserProfileRow | null
-  }>
+  items: EndOfTenancyCaseListItem[]
 }
 
 function formatRelativeTime(value: string | null | undefined) {
@@ -193,12 +186,36 @@ function SkeletonRows() {
   )
 }
 
-export default function EotCasesPage() {
-  const [rows, setRows] = useState<QueueRow[]>([])
-  const [loading, setLoading] = useState(true)
+export default function EotCasesPage({
+  initialItems,
+}: {
+  initialItems?: EndOfTenancyCaseListItem[]
+}) {
+  const initialRows = (initialItems ?? [])
+    .map<QueueRow>((item) => ({
+      eotCase: item.endOfTenancyCase,
+      case: item.case,
+      tenancy: item.tenancy,
+      property: item.property,
+      tenant: item.tenant,
+      landlord: item.landlord,
+      assignedOperator: item.assignedOperator,
+    }))
+    .sort((left, right) => {
+      const leftActivity =
+        left.case?.last_activity_at || left.case?.updated_at || left.case?.created_at || ''
+      const rightActivity =
+        right.case?.last_activity_at || right.case?.updated_at || right.case?.created_at || ''
+      return rightActivity.localeCompare(leftActivity)
+    })
+
+  const [rows, setRows] = useState<QueueRow[]>(initialRows)
+  const [loading, setLoading] = useState(initialItems === undefined)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    if (initialItems !== undefined) return
+
     let cancelled = false
 
     async function loadCases() {
@@ -220,12 +237,13 @@ export default function EotCasesPage() {
             landlord: item.landlord,
             assignedOperator: item.assignedOperator,
           }))
-        .sort((left, right) => {
-          const leftActivity = left.case?.last_activity_at || left.case?.updated_at || left.case?.created_at || ''
-          const rightActivity =
-            right.case?.last_activity_at || right.case?.updated_at || right.case?.created_at || ''
-          return rightActivity.localeCompare(leftActivity)
-        })
+          .sort((left, right) => {
+            const leftActivity =
+              left.case?.last_activity_at || left.case?.updated_at || left.case?.created_at || ''
+            const rightActivity =
+              right.case?.last_activity_at || right.case?.updated_at || right.case?.created_at || ''
+            return rightActivity.localeCompare(leftActivity)
+          })
 
         if (!cancelled) {
           setRows(queueRows)
@@ -244,7 +262,7 @@ export default function EotCasesPage() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [initialItems])
 
   const openRows = useMemo(
     () => rows.filter((row) => (row.case?.status || '').toLowerCase() !== 'closed'),
