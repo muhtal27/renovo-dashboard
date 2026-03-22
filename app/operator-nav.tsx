@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { getOperatorProfile } from '@/lib/operator'
 import { supabase } from '@/lib/supabase'
@@ -48,7 +48,6 @@ function getInitials(value: string | null | undefined) {
 
 export function OperatorNav({ current, viewerName }: OperatorNavProps) {
   const pathname = usePathname()
-  const router = useRouter()
   const [signingOut, setSigningOut] = useState(false)
   const [fallbackViewerLabel, setFallbackViewerLabel] = useState('')
   void current
@@ -85,16 +84,8 @@ export function OperatorNav({ current, viewerName }: OperatorNavProps) {
 
   async function handleSignOut() {
     setSigningOut(true)
-
-    const { error } = await supabase.auth.signOut()
-
-    if (error) {
-      setSigningOut(false)
-      return
-    }
-
-    router.replace('/login')
-    router.refresh()
+    window.location.href = '/login'
+    void supabase.auth.signOut()
   }
 
   const displayName = viewerName?.trim() || fallbackViewerLabel

@@ -78,13 +78,13 @@ export default function LoginPage() {
 
       const destination = await resolveOperatorDestination(session.user.id)
 
-      if (!destination) {
-        await supabase.auth.signOut()
-        setMessage(UNLINKED_ACCOUNT_MESSAGE)
-        return
-      }
+    if (!destination) {
+      await supabase.auth.signOut()
+      setMessage(UNLINKED_ACCOUNT_MESSAGE)
+      return
+    }
 
-      router.replace(returnTo)
+      window.location.href = returnTo
     }
 
     void checkSession()
@@ -127,8 +127,7 @@ export default function LoginPage() {
       return
     }
 
-    router.replace(returnTo)
-    router.refresh()
+    window.location.href = returnTo
   }
 
   async function handleMagicLink() {
@@ -387,7 +386,7 @@ export default function LoginPage() {
                   disabled={loadingPassword || loadingMagicLink}
                   className="app-secondary-button rounded-2xl px-4 py-3.5 text-sm font-medium disabled:opacity-60"
                 >
-                  {loadingMagicLink ? 'Sending link...' : 'Email me a magic link'}
+                  {loadingMagicLink ? 'Sending...' : 'Email me a magic link'}
                 </button>
               </>
             )}
