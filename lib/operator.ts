@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase'
 export type OperatorProfile = {
   id: string
   full_name: string | null
+  avatar_url: string | null
   is_active: boolean | null
   role: string | null
 }
@@ -41,7 +42,7 @@ export async function getOperatorProfile(userId: string) {
   const request = (async () => {
   const { data: profile, error: profileError } = await supabase
     .from('users_profiles')
-    .select('id, full_name, is_active, role')
+    .select('id, full_name, avatar_url, is_active, role')
     .eq('auth_user_id', userId)
     .maybeSingle()
 
@@ -113,7 +114,6 @@ export function getOperatorLabel(operator: CurrentOperator | null) {
 
   return (
     operator.profile?.full_name ||
-    operator.authUser.user_metadata?.full_name ||
     operator.authUser.email ||
     ''
   )

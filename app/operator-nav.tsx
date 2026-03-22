@@ -30,7 +30,7 @@ const NAV_ITEMS = [
 ] as const
 
 function getInitials(value: string | null | undefined) {
-  if (!value || value === '...') {
+  if (!value) {
     return ''
   }
 
@@ -40,17 +40,17 @@ function getInitials(value: string | null | undefined) {
     return ''
   }
 
-  return parts
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? '')
-    .join('')
+  const first = parts[0]?.[0]?.toUpperCase() ?? ''
+  const last = parts.length > 1 ? parts[parts.length - 1]?.[0]?.toUpperCase() ?? '' : ''
+
+  return `${first}${last}`
 }
 
 export function OperatorNav({ current, viewerName }: OperatorNavProps) {
   const pathname = usePathname()
   const router = useRouter()
   const [signingOut, setSigningOut] = useState(false)
-  const [fallbackViewerLabel, setFallbackViewerLabel] = useState('...')
+  const [fallbackViewerLabel, setFallbackViewerLabel] = useState('')
   void current
 
   useEffect(() => {
@@ -72,7 +72,7 @@ export function OperatorNav({ current, viewerName }: OperatorNavProps) {
       setFallbackViewerLabel(
         profile?.full_name?.trim() ||
           user?.email?.trim() ||
-          '...'
+          ''
       )
     }
 
