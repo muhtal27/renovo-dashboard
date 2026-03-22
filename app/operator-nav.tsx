@@ -17,11 +17,6 @@ const NAV_ITEMS = [
     isActive: (pathname: string) => pathname.startsWith('/eot') || pathname.startsWith('/cases'),
   },
   {
-    label: 'Calls',
-    href: '/calls',
-    isActive: (pathname: string) => pathname === '/calls',
-  },
-  {
     label: 'Knowledge',
     href: '/knowledge',
     isActive: (pathname: string) => pathname === '/knowledge',
