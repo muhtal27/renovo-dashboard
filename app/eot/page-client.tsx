@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { OperatorLayout } from '@/app/operator-layout'
 import { endOfTenancyApiRequest } from '@/lib/end-of-tenancy/client-api'
 import type { EndOfTenancyCaseListItem } from '@/lib/end-of-tenancy/types'
@@ -71,12 +72,57 @@ type EndOfTenancyCaseListResponse = {
 }
 
 const DENSITY_STORAGE_KEY = 'eot-dashboard-density'
+const QUEUE_VIEW_STATE_STORAGE_KEY = 'eot-dashboard-queue-view'
 const STUCK_THRESHOLDS_HOURS: Record<string, number> = {
   evidence_pending: 72,
   evidence_ready: 48,
   review_pending: 48,
   recommendation_drafted: 48,
   needs_manual_review: 24,
+}
+const WORKFLOW_STATUS_ORDER = [
+  'evidence_pending',
+  'evidence_ready',
+  'review_pending',
+  'recommendation_drafted',
+  'needs_manual_review',
+  'recommendation_approved',
+  'ready_for_claim',
+] as const
+const SORT_KEYS = [
+  'default',
+  'caseRef',
+  'propertyAddress',
+  'tenantName',
+  'moveOutDate',
+  'workflowStatus',
+  'inStatus',
+  'inspection',
+  'assignedTo',
+  'lastActivity',
+] as const
+
+type QueueSortKey = (typeof SORT_KEYS)[number]
+type SortDirection = 'asc' | 'desc'
+
+type SavedQueueViewState = {
+  searchQuery?: string
+  workflowFilter?: string
+  sortKey?: QueueSortKey
+  sortDirection?: SortDirection
+  scrollY?: number
+}
+
+const SORT_DEFAULT_DIRECTIONS: Record<Exclude<QueueSortKey, 'default'>, SortDirection> = {
+  caseRef: 'asc',
+  propertyAddress: 'asc',
+  tenantName: 'asc',
+  moveOutDate: 'asc',
+  workflowStatus: 'asc',
+  inStatus: 'desc',
+  inspection: 'asc',
+  assignedTo: 'asc',
+  lastActivity: 'desc',
 }
 
 function formatRelativeTime(value: string | null | undefined) {
@@ -228,6 +274,86 @@ function getRowCellPadding(density: 'compact' | 'comfortable') {
   return density === 'compact' ? 'px-3 py-3' : 'px-3 py-4'
 }
 
+function isValidSortKey(value: string): value is QueueSortKey {
+  return SORT_KEYS.includes(value as QueueSortKey)
+}
+
+function compareText(left: string, right: string) {
+  return left.localeCompare(right, 'en-GB', { numeric: true, sensitivity: 'base' })
+}
+
+function getQueueRowHref(row: QueueRow) {
+  return `/cases/${row.case?.id || row.eotCase.case_id}`
+}
+
+function getComparableValue(row: QueueRow, sortKey: Exclude<QueueSortKey, 'default'>) {
+  switch (sortKey) {
+    case 'caseRef':
+      return row.case?.case_number || ''
+    case 'propertyAddress':
+      return buildAddress(row.property)
+    case 'tenantName':
+      return row.tenant?.full_name || ''
+    case 'moveOutDate':
+      return row.eotCase.move_out_date || row.tenancy?.end_date || ''
+    case 'workflowStatus':
+      return formatWorkflowLabel(row.eotCase.workflow_status)
+    case 'inStatus':
+      return getDaysInStatus(row.eotCase.updated_at) ?? -1
+    case 'inspection':
+      return formatInspectionLabel(row.eotCase.inspection_status)
+    case 'assignedTo':
+      return row.assignedOperator?.full_name || 'Unassigned'
+    case 'lastActivity':
+      return row.case?.last_activity_at || row.case?.updated_at || row.case?.created_at || ''
+  }
+}
+
+function sortQueueRows(
+  rows: QueueRow[],
+  sortKey: QueueSortKey,
+  sortDirection: SortDirection,
+  fallbackOrder: Map<string, number>
+) {
+  if (sortKey === 'default') {
+    return rows
+  }
+
+  const directionMultiplier = sortDirection === 'asc' ? 1 : -1
+
+  return [...rows].sort((left, right) => {
+    const leftValue = getComparableValue(left, sortKey)
+    const rightValue = getComparableValue(right, sortKey)
+    const leftMissing = leftValue === '' || leftValue === null
+    const rightMissing = rightValue === '' || rightValue === null
+
+    if (leftMissing && !rightMissing) return 1
+    if (!leftMissing && rightMissing) return -1
+
+    let comparison = 0
+
+    if (typeof leftValue === 'number' && typeof rightValue === 'number') {
+      comparison = leftValue - rightValue
+    } else {
+      comparison = compareText(String(leftValue), String(rightValue))
+    }
+
+    if (comparison !== 0) {
+      return comparison * directionMultiplier
+    }
+
+    return (
+      (fallbackOrder.get(left.eotCase.id) ?? Number.MAX_SAFE_INTEGER) -
+      (fallbackOrder.get(right.eotCase.id) ?? Number.MAX_SAFE_INTEGER)
+    )
+  })
+}
+
+function getSortIndicator(sortKey: QueueSortKey, activeSortKey: QueueSortKey, direction: SortDirection) {
+  if (sortKey !== activeSortKey) return '↕'
+  return direction === 'asc' ? '↑' : '↓'
+}
+
 function StatCard({
   label,
   value,
@@ -325,6 +451,7 @@ export default function EotCasesPage({
 }: {
   initialItems?: EndOfTenancyCaseListItem[]
 }) {
+  const router = useRouter()
   const initialRows = mapListItemsToQueueRows(initialItems ?? [])
 
   const [rows, setRows] = useState<QueueRow[]>(initialRows)
@@ -335,6 +462,10 @@ export default function EotCasesPage({
   const [searchQuery, setSearchQuery] = useState('')
   const [density, setDensity] = useState<'compact' | 'comfortable'>('comfortable')
   const [densityHydrated, setDensityHydrated] = useState(false)
+  const [workflowFilter, setWorkflowFilter] = useState('all')
+  const [sortKey, setSortKey] = useState<QueueSortKey>('default')
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
+  const restoredScrollRef = useRef<number | null>(null)
 
   const refreshQueue = useCallback(async () => {
     const response = await endOfTenancyApiRequest<EndOfTenancyCaseListResponse>(
@@ -405,12 +536,52 @@ export default function EotCasesPage({
     window.localStorage.setItem(DENSITY_STORAGE_KEY, density)
   }, [density, densityHydrated])
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const savedState = window.sessionStorage.getItem(QUEUE_VIEW_STATE_STORAGE_KEY)
+
+    if (!savedState) return
+
+    window.sessionStorage.removeItem(QUEUE_VIEW_STATE_STORAGE_KEY)
+
+    try {
+      const parsed = JSON.parse(savedState) as SavedQueueViewState
+
+      if (typeof parsed.searchQuery === 'string') {
+        setSearchQuery(parsed.searchQuery)
+      }
+
+      if (typeof parsed.workflowFilter === 'string') {
+        setWorkflowFilter(parsed.workflowFilter)
+      }
+
+      if (typeof parsed.sortKey === 'string' && isValidSortKey(parsed.sortKey)) {
+        setSortKey(parsed.sortKey)
+      }
+
+      if (parsed.sortDirection === 'asc' || parsed.sortDirection === 'desc') {
+        setSortDirection(parsed.sortDirection)
+      }
+
+      if (
+        typeof parsed.scrollY === 'number' &&
+        Number.isFinite(parsed.scrollY) &&
+        parsed.scrollY >= 0
+      ) {
+        restoredScrollRef.current = parsed.scrollY
+      }
+    } catch {
+      // Ignore invalid sessionStorage state.
+    }
+  }, [])
+
   const openRows = useMemo(
     () => rows.filter((row) => (row.case?.status || '').toLowerCase() !== 'closed'),
     [rows]
   )
 
-  const sortedOpenRows = useMemo(() => {
+  const defaultOrderedOpenRows = useMemo(() => {
     return [...openRows].sort((left, right) => {
       const leftStuck = getStuckState(left.eotCase.workflow_status, left.eotCase.updated_at)
       const rightStuck = getStuckState(right.eotCase.workflow_status, right.eotCase.updated_at)
@@ -426,18 +597,81 @@ export default function EotCasesPage({
     })
   }, [openRows])
 
-  const filteredOpenRows = useMemo(() => {
+  const workflowFilterOptions = useMemo(() => {
+    const orderMap = new Map<string, number>(
+      WORKFLOW_STATUS_ORDER.map((status, index) => [status, index])
+    )
+    const counts = new Map<string, number>()
+
+    for (const row of openRows) {
+      counts.set(
+        row.eotCase.workflow_status,
+        (counts.get(row.eotCase.workflow_status) ?? 0) + 1
+      )
+    }
+
+    const statusOptions = Array.from(counts.entries())
+      .sort((left, right) => {
+        const leftOrder = orderMap.get(left[0]) ?? Number.MAX_SAFE_INTEGER
+        const rightOrder = orderMap.get(right[0]) ?? Number.MAX_SAFE_INTEGER
+
+        if (leftOrder !== rightOrder) {
+          return leftOrder - rightOrder
+        }
+
+        return compareText(formatWorkflowLabel(left[0]), formatWorkflowLabel(right[0]))
+      })
+      .map(([value, count]) => ({
+        value,
+        label: formatWorkflowLabel(value),
+        count,
+      }))
+
+    return [{ value: 'all', label: 'All', count: openRows.length }, ...statusOptions]
+  }, [openRows])
+
+  useEffect(() => {
+    if (loading) return
+    if (workflowFilter === 'all') return
+
+    if (!workflowFilterOptions.some((option) => option.value === workflowFilter)) {
+      setWorkflowFilter('all')
+    }
+  }, [loading, workflowFilter, workflowFilterOptions])
+
+  const workflowFilteredRows = useMemo(() => {
+    if (workflowFilter === 'all') {
+      return defaultOrderedOpenRows
+    }
+
+    return defaultOrderedOpenRows.filter(
+      (row) => row.eotCase.workflow_status === workflowFilter
+    )
+  }, [defaultOrderedOpenRows, workflowFilter])
+
+  const searchFilteredRows = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase()
 
     if (!normalizedQuery) {
-      return sortedOpenRows
+      return workflowFilteredRows
     }
 
-    return sortedOpenRows.filter((row) => getRowSearchText(row).includes(normalizedQuery))
-  }, [searchQuery, sortedOpenRows])
+    return workflowFilteredRows.filter((row) => getRowSearchText(row).includes(normalizedQuery))
+  }, [searchQuery, workflowFilteredRows])
+
+  const defaultOrderMap = useMemo(
+    () =>
+      new Map(defaultOrderedOpenRows.map((row, index) => [row.eotCase.id, index] as const)),
+    [defaultOrderedOpenRows]
+  )
+
+  const displayRows = useMemo(
+    () => sortQueueRows(searchFilteredRows, sortKey, sortDirection, defaultOrderMap),
+    [defaultOrderMap, searchFilteredRows, sortDirection, sortKey]
+  )
 
   useEffect(() => {
-    const visibleIds = new Set(filteredOpenRows.map((row) => row.eotCase.id))
+    const visibleIds = new Set(displayRows.map((row) => row.eotCase.id))
 
     setSelectedIds((previous) => {
       const next = new Set(Array.from(previous).filter((id) => visibleIds.has(id)))
@@ -446,7 +680,7 @@ export default function EotCasesPage({
 
       return changed ? next : previous
     })
-  }, [filteredOpenRows])
+  }, [displayRows])
 
   const monthRange = useMemo(() => {
     const now = new Date()
@@ -460,6 +694,46 @@ export default function EotCasesPage({
   }, [])
 
   const rowCellPadding = getRowCellPadding(density)
+
+  const saveQueueViewState = useCallback(() => {
+    if (typeof window === 'undefined') return
+
+    const nextState: SavedQueueViewState = {
+      searchQuery,
+      workflowFilter,
+      sortKey,
+      sortDirection,
+      scrollY: window.scrollY,
+    }
+
+    window.sessionStorage.setItem(QUEUE_VIEW_STATE_STORAGE_KEY, JSON.stringify(nextState))
+  }, [searchQuery, sortDirection, sortKey, workflowFilter])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const handleBeforeUnload = () => {
+      saveQueueViewState()
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+
+    return () => {
+      saveQueueViewState()
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+    }
+  }, [saveQueueViewState])
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || restoredScrollRef.current === null || loading) return
+
+    const nextScrollY = restoredScrollRef.current
+    restoredScrollRef.current = null
+
+    window.requestAnimationFrame(() => {
+      window.scrollTo({ top: nextScrollY, behavior: 'auto' })
+    })
+  }, [loading])
 
   const stats = useMemo(
     () => ({
@@ -490,6 +764,21 @@ export default function EotCasesPage({
     }),
     [monthRange.end, monthRange.start, openRows, rows]
   )
+
+  function handleSort(nextSortKey: Exclude<QueueSortKey, 'default'>) {
+    if (sortKey === nextSortKey) {
+      setSortDirection((current) => (current === 'asc' ? 'desc' : 'asc'))
+      return
+    }
+
+    setSortKey(nextSortKey)
+    setSortDirection(SORT_DEFAULT_DIRECTIONS[nextSortKey])
+  }
+
+  function handleOpenCase(row: QueueRow) {
+    saveQueueViewState()
+    router.push(getQueueRowHref(row))
+  }
 
   return (
     <OperatorLayout
@@ -681,6 +970,25 @@ export default function EotCasesPage({
 
         <div className="app-divider my-6" />
 
+        <div className="flex flex-wrap gap-2">
+          {workflowFilterOptions.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => setWorkflowFilter(option.value)}
+              className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+                workflowFilter === option.value
+                  ? 'border-stone-900 bg-stone-900 text-white'
+                  : 'border-stone-200 bg-stone-50 text-stone-600 hover:border-stone-300 hover:text-stone-800'
+              }`}
+            >
+              {option.label} ({option.count})
+            </button>
+          ))}
+        </div>
+
+        <div className="app-divider my-6" />
+
         {error ? (
           <div className="rounded-[1.5rem] border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
             {error}
@@ -689,26 +997,29 @@ export default function EotCasesPage({
 
         {loading ? (
           <SkeletonTable density={density} />
-        ) : filteredOpenRows.length === 0 ? (
+        ) : displayRows.length === 0 ? (
           <div className="rounded-[1.6rem] border border-dashed border-stone-300 bg-stone-50/80 px-6 py-12 text-center">
             <h3 className="text-lg font-semibold text-stone-900">
-              {searchQuery.trim()
-                ? 'No cases match your search'
+              {searchQuery.trim() || workflowFilter !== 'all'
+                ? 'No cases match your current filters'
                 : 'No active end-of-tenancy cases'}
             </h3>
             <p className="mt-3 text-sm leading-6 text-stone-500">
-              {searchQuery.trim()
-                ? 'Try a different search term or refresh the queue to check for new case activity.'
+              {searchQuery.trim() || workflowFilter !== 'all'
+                ? 'Try clearing your search or status filter, or refresh the queue to check for new case activity.'
                 : 'New EOT workspaces will appear here as soon as a case is opened for move-out review.'}
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-              {searchQuery.trim() ? (
+              {searchQuery.trim() || workflowFilter !== 'all' ? (
                 <button
                   type="button"
-                  onClick={() => setSearchQuery('')}
+                  onClick={() => {
+                    setSearchQuery('')
+                    setWorkflowFilter('all')
+                  }}
                   className="app-secondary-button rounded-full px-4 py-2 text-sm font-medium text-stone-700"
                 >
-                  Clear search
+                  Clear filters
                 </button>
               ) : null}
               <button
@@ -729,11 +1040,11 @@ export default function EotCasesPage({
                     <input
                       type="checkbox"
                       checked={
-                        filteredOpenRows.length > 0 && selectedIds.size === filteredOpenRows.length
+                        displayRows.length > 0 && selectedIds.size === displayRows.length
                       }
                       onChange={(event) => {
                         if (event.target.checked) {
-                          setSelectedIds(new Set(filteredOpenRows.map((row) => row.eotCase.id)))
+                          setSelectedIds(new Set(displayRows.map((row) => row.eotCase.id)))
                         } else {
                           setSelectedIds(new Set())
                         }
@@ -741,28 +1052,204 @@ export default function EotCasesPage({
                       className="h-4 w-4 rounded border-stone-300 text-stone-900 focus:ring-stone-500"
                     />
                   </th>
-                  <th className="px-3 py-2">Case ref</th>
-                  <th className="px-3 py-2">Property address</th>
-                  <th className="px-3 py-2">Tenant name</th>
-                  <th className="px-3 py-2">Move-out date</th>
-                  <th className="px-3 py-2">Workflow status</th>
-                  <th className="px-3 py-2">In status</th>
-                  <th className="px-3 py-2">Inspection</th>
-                  <th className="px-3 py-2">Assigned to</th>
-                  <th className="px-3 py-2">Last activity</th>
+                  <th
+                    className="px-3 py-2"
+                    aria-sort={
+                      sortKey === 'caseRef'
+                        ? sortDirection === 'asc'
+                          ? 'ascending'
+                          : 'descending'
+                        : 'none'
+                    }
+                  >
+                    <button
+                      type="button"
+                      onClick={() => handleSort('caseRef')}
+                      className="inline-flex items-center gap-1 hover:text-stone-700"
+                    >
+                      <span>Case ref</span>
+                      <span aria-hidden="true">{getSortIndicator('caseRef', sortKey, sortDirection)}</span>
+                    </button>
+                  </th>
+                  <th
+                    className="px-3 py-2"
+                    aria-sort={
+                      sortKey === 'propertyAddress'
+                        ? sortDirection === 'asc'
+                          ? 'ascending'
+                          : 'descending'
+                        : 'none'
+                    }
+                  >
+                    <button
+                      type="button"
+                      onClick={() => handleSort('propertyAddress')}
+                      className="inline-flex items-center gap-1 hover:text-stone-700"
+                    >
+                      <span>Property address</span>
+                      <span aria-hidden="true">{getSortIndicator('propertyAddress', sortKey, sortDirection)}</span>
+                    </button>
+                  </th>
+                  <th
+                    className="px-3 py-2"
+                    aria-sort={
+                      sortKey === 'tenantName'
+                        ? sortDirection === 'asc'
+                          ? 'ascending'
+                          : 'descending'
+                        : 'none'
+                    }
+                  >
+                    <button
+                      type="button"
+                      onClick={() => handleSort('tenantName')}
+                      className="inline-flex items-center gap-1 hover:text-stone-700"
+                    >
+                      <span>Tenant name</span>
+                      <span aria-hidden="true">{getSortIndicator('tenantName', sortKey, sortDirection)}</span>
+                    </button>
+                  </th>
+                  <th
+                    className="px-3 py-2"
+                    aria-sort={
+                      sortKey === 'moveOutDate'
+                        ? sortDirection === 'asc'
+                          ? 'ascending'
+                          : 'descending'
+                        : 'none'
+                    }
+                  >
+                    <button
+                      type="button"
+                      onClick={() => handleSort('moveOutDate')}
+                      className="inline-flex items-center gap-1 hover:text-stone-700"
+                    >
+                      <span>Move-out date</span>
+                      <span aria-hidden="true">{getSortIndicator('moveOutDate', sortKey, sortDirection)}</span>
+                    </button>
+                  </th>
+                  <th
+                    className="px-3 py-2"
+                    aria-sort={
+                      sortKey === 'workflowStatus'
+                        ? sortDirection === 'asc'
+                          ? 'ascending'
+                          : 'descending'
+                        : 'none'
+                    }
+                  >
+                    <button
+                      type="button"
+                      onClick={() => handleSort('workflowStatus')}
+                      className="inline-flex items-center gap-1 hover:text-stone-700"
+                    >
+                      <span>Workflow status</span>
+                      <span aria-hidden="true">{getSortIndicator('workflowStatus', sortKey, sortDirection)}</span>
+                    </button>
+                  </th>
+                  <th
+                    className="px-3 py-2"
+                    aria-sort={
+                      sortKey === 'inStatus'
+                        ? sortDirection === 'asc'
+                          ? 'ascending'
+                          : 'descending'
+                        : 'none'
+                    }
+                  >
+                    <button
+                      type="button"
+                      onClick={() => handleSort('inStatus')}
+                      className="inline-flex items-center gap-1 hover:text-stone-700"
+                    >
+                      <span>In status</span>
+                      <span aria-hidden="true">{getSortIndicator('inStatus', sortKey, sortDirection)}</span>
+                    </button>
+                  </th>
+                  <th
+                    className="px-3 py-2"
+                    aria-sort={
+                      sortKey === 'inspection'
+                        ? sortDirection === 'asc'
+                          ? 'ascending'
+                          : 'descending'
+                        : 'none'
+                    }
+                  >
+                    <button
+                      type="button"
+                      onClick={() => handleSort('inspection')}
+                      className="inline-flex items-center gap-1 hover:text-stone-700"
+                    >
+                      <span>Inspection</span>
+                      <span aria-hidden="true">{getSortIndicator('inspection', sortKey, sortDirection)}</span>
+                    </button>
+                  </th>
+                  <th
+                    className="px-3 py-2"
+                    aria-sort={
+                      sortKey === 'assignedTo'
+                        ? sortDirection === 'asc'
+                          ? 'ascending'
+                          : 'descending'
+                        : 'none'
+                    }
+                  >
+                    <button
+                      type="button"
+                      onClick={() => handleSort('assignedTo')}
+                      className="inline-flex items-center gap-1 hover:text-stone-700"
+                    >
+                      <span>Assigned to</span>
+                      <span aria-hidden="true">{getSortIndicator('assignedTo', sortKey, sortDirection)}</span>
+                    </button>
+                  </th>
+                  <th
+                    className="px-3 py-2"
+                    aria-sort={
+                      sortKey === 'lastActivity'
+                        ? sortDirection === 'asc'
+                          ? 'ascending'
+                          : 'descending'
+                        : 'none'
+                    }
+                  >
+                    <button
+                      type="button"
+                      onClick={() => handleSort('lastActivity')}
+                      className="inline-flex items-center gap-1 hover:text-stone-700"
+                    >
+                      <span>Last activity</span>
+                      <span aria-hidden="true">{getSortIndicator('lastActivity', sortKey, sortDirection)}</span>
+                    </button>
+                  </th>
                   <th className="px-3 py-2" />
                 </tr>
               </thead>
               <tbody>
-                {filteredOpenRows.map((row) => (
+                {displayRows.map((row) => (
                   <tr
                     key={row.eotCase.id}
-                    className="rounded-[1.4rem] border border-stone-200 bg-white shadow-sm"
+                    role="link"
+                    tabIndex={0}
+                    onClick={() => handleOpenCase(row)}
+                    onKeyDown={(event) => {
+                      const target = event.target as HTMLElement
+
+                      if (target.closest('a, button, input, label')) return
+
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault()
+                        handleOpenCase(row)
+                      }
+                    }}
+                    className="cursor-pointer rounded-[1.4rem] border border-stone-200 bg-white shadow-sm transition hover:shadow-md focus:outline-none focus:ring-2 focus:ring-stone-300"
                   >
                     <td className={`w-10 rounded-l-[1.4rem] ${rowCellPadding}`}>
                       <input
                         type="checkbox"
                         checked={selectedIds.has(row.eotCase.id)}
+                        onClick={(event) => event.stopPropagation()}
                         onChange={(event) => {
                           setSelectedIds((previous) => {
                             const next = new Set(previous)
@@ -866,7 +1353,11 @@ export default function EotCasesPage({
                     </td>
                     <td className={`rounded-r-[1.4rem] ${rowCellPadding} text-right`}>
                       <Link
-                        href={`/cases/${row.case?.id || row.eotCase.case_id}`}
+                        href={getQueueRowHref(row)}
+                        onClick={(event) => {
+                          event.stopPropagation()
+                          saveQueueViewState()
+                        }}
                         className="app-secondary-button inline-flex rounded-full px-4 py-2 text-sm font-medium text-stone-700"
                       >
                         Open case
