@@ -629,79 +629,54 @@ async function persistDraftAssessment(params: {
   const storedRecommendation = recommendationResult.data as DecisionRecommendationRow
   const storedSources: DecisionRecommendationSourceRow[] = []
 
-  for (const issueId of sourceIssueIds) {
-    const sourceResult = await supabase
-      .from('decision_recommendation_sources')
-      .insert({
-        decision_recommendation_id: storedRecommendation.id,
-        source_type: 'issue',
-        issue_id: issueId,
-        source_note: 'AI draft linked issue assessment',
-      })
-      .select(
-        'id, decision_recommendation_id, source_type, issue_id, issue_evidence_link_id, case_document_id, document_extraction_id, knowledge_article_id, knowledge_article_chunk_id, deposit_claim_id, source_note, created_at'
-      )
-      .single()
+  const sourceRows: Array<Record<string, unknown>> = []
 
-    if (!sourceResult.error) {
-      storedSources.push(sourceResult.data as DecisionRecommendationSourceRow)
-    }
+  for (const linkedIssueId of sourceIssueIds) {
+    sourceRows.push({
+      decision_recommendation_id: storedRecommendation.id,
+      source_type: 'issue',
+      issue_id: linkedIssueId,
+      source_note: 'AI draft linked issue assessment',
+    })
   }
 
-  for (const evidenceLinkId of issueEvidenceLinkIds) {
-    const sourceResult = await supabase
-      .from('decision_recommendation_sources')
-      .insert({
-        decision_recommendation_id: storedRecommendation.id,
-        source_type: 'issue_evidence_link',
-        issue_evidence_link_id: evidenceLinkId,
-        source_note: 'AI draft linked issue evidence',
-      })
-      .select(
-        'id, decision_recommendation_id, source_type, issue_id, issue_evidence_link_id, case_document_id, document_extraction_id, knowledge_article_id, knowledge_article_chunk_id, deposit_claim_id, source_note, created_at'
-      )
-      .single()
-
-    if (!sourceResult.error) {
-      storedSources.push(sourceResult.data as DecisionRecommendationSourceRow)
-    }
+  for (const linkedEvidenceLinkId of issueEvidenceLinkIds) {
+    sourceRows.push({
+      decision_recommendation_id: storedRecommendation.id,
+      source_type: 'issue_evidence_link',
+      issue_evidence_link_id: linkedEvidenceLinkId,
+      source_note: 'AI draft linked issue evidence',
+    })
   }
 
-  for (const articleId of assessment.recommendation.source_knowledge_article_ids ?? []) {
-    const sourceResult = await supabase
-      .from('decision_recommendation_sources')
-      .insert({
-        decision_recommendation_id: storedRecommendation.id,
-        source_type: 'knowledge_article',
-        knowledge_article_id: articleId,
-        source_note: 'AI draft cited approved knowledge article',
-      })
-      .select(
-        'id, decision_recommendation_id, source_type, issue_id, issue_evidence_link_id, case_document_id, document_extraction_id, knowledge_article_id, knowledge_article_chunk_id, deposit_claim_id, source_note, created_at'
-      )
-      .single()
-
-    if (!sourceResult.error) {
-      storedSources.push(sourceResult.data as DecisionRecommendationSourceRow)
-    }
+  for (const sourceKnowledgeArticleId of assessment.recommendation.source_knowledge_article_ids ?? []) {
+    sourceRows.push({
+      decision_recommendation_id: storedRecommendation.id,
+      source_type: 'knowledge_article',
+      knowledge_article_id: sourceKnowledgeArticleId,
+      source_note: 'AI draft cited approved knowledge article',
+    })
   }
 
-  for (const chunkId of assessment.recommendation.source_knowledge_chunk_ids ?? []) {
-    const sourceResult = await supabase
+  for (const sourceKnowledgeChunkId of assessment.recommendation.source_knowledge_chunk_ids ?? []) {
+    sourceRows.push({
+      decision_recommendation_id: storedRecommendation.id,
+      source_type: 'knowledge_article_chunk',
+      knowledge_article_chunk_id: sourceKnowledgeChunkId,
+      source_note: 'AI draft cited approved knowledge chunk',
+    })
+  }
+
+  if (sourceRows.length > 0) {
+    const batchResult = await supabase
       .from('decision_recommendation_sources')
-      .insert({
-        decision_recommendation_id: storedRecommendation.id,
-        source_type: 'knowledge_article_chunk',
-        knowledge_article_chunk_id: chunkId,
-        source_note: 'AI draft cited approved knowledge chunk',
-      })
+      .insert(sourceRows)
       .select(
         'id, decision_recommendation_id, source_type, issue_id, issue_evidence_link_id, case_document_id, document_extraction_id, knowledge_article_id, knowledge_article_chunk_id, deposit_claim_id, source_note, created_at'
       )
-      .single()
 
-    if (!sourceResult.error) {
-      storedSources.push(sourceResult.data as DecisionRecommendationSourceRow)
+    if (!batchResult.error && batchResult.data) {
+      storedSources.push(...(batchResult.data as DecisionRecommendationSourceRow[]))
     }
   }
 

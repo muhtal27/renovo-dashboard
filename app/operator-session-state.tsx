@@ -1,8 +1,13 @@
+import type { CurrentOperator } from '@/lib/operator-types'
+
+type OperatorSessionStateProps = {
+  authLoading: boolean
+  operator?: CurrentOperator | null
+}
+
 export function OperatorSessionState({
   authLoading,
-}: {
-  authLoading: boolean
-}) {
+}: OperatorSessionStateProps) {
   const message = authLoading ? 'Loading your workspace...' : 'Redirecting to sign in...'
 
   return (
