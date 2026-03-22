@@ -9,6 +9,8 @@ import { supabase } from '@/lib/supabase'
 const UNLINKED_ACCOUNT_MESSAGE =
   'This email is not linked to a Renovo workspace yet. Ask an administrator to set up your access.'
 
+const OPERATOR_WORKSPACE_ROLES = new Set(['admin', 'manager', 'operator', 'viewer'])
+
 const workflowStages = [
   {
     step: '01',
@@ -70,7 +72,13 @@ export default function LoginPage() {
       return null
     }
 
-    return '/'
+    // Assumption: older operator profiles may not have role populated yet, so active profiles
+    // still land on the operator case queue instead of being locked out.
+    if (!operatorProfile.role || OPERATOR_WORKSPACE_ROLES.has(operatorProfile.role)) {
+      return '/eot'
+    }
+
+    return null
   }
 
   useEffect(() => {

@@ -10,18 +10,18 @@ const siteUrl =
 
 export const metadata: Metadata = {
   metadataBase: siteUrl ? new URL(siteUrl) : undefined,
-  title: 'Annabelle | 24/7 Lettings Operations For Agencies',
+  title: 'Renovo | End-of-Tenancy Decision Engine',
   description:
-    'Annabelle by Renovo helps letting agencies stay responsive across calls, maintenance, rent, compliance, landlord communication, and tenant updates without losing the operational thread.',
+    'Renovo helps letting agencies review evidence, assess issues, draft decisions, and prepare claim output through a human-reviewed end-of-tenancy workflow.',
   alternates: {
     canonical: '/',
   },
   openGraph: {
-    title: 'Annabelle | 24/7 Lettings Operations For Agencies',
+    title: 'Renovo | End-of-Tenancy Decision Engine',
     description:
-      'A practical always-on operating layer for letting agencies that need calmer service, clearer records, and stronger workflow continuity.',
+      'A specialist end-of-tenancy workflow for evidence review, recommendation drafting, and claim-ready output.',
     url: siteUrl,
-    siteName: 'Annabelle',
+    siteName: 'Renovo',
     type: 'website',
   },
 }
