@@ -3,11 +3,53 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { getOperatorProfile } from '@/lib/operator'
 import { supabase } from '@/lib/supabase'
-import { resolveWorkspaceForUser } from '@/lib/portal'
 
 const UNLINKED_ACCOUNT_MESSAGE =
   'This email is not linked to a Renovo workspace yet. Ask an administrator to set up your access.'
+
+const workflowStages = [
+  {
+    step: '01',
+    title: 'Evidence',
+    body: 'Documents, extracted facts, and tenancy context stay together.',
+  },
+  {
+    step: '02',
+    title: 'Issues',
+    body: 'Responsibility, severity, and amount pressure stay reviewable.',
+  },
+  {
+    step: '03',
+    title: 'Decision',
+    body: 'Recommendations and rationale stay visible before approval.',
+  },
+  {
+    step: '04',
+    title: 'Claim output',
+    body: 'Approved decisions turn into claim-ready line items.',
+  },
+]
+
+const accessPanels = [
+  {
+    title: 'Operator workspace',
+    body: 'The main flow is built for evidence review, issue assessment, recommendation approval, and claim preparation.',
+  },
+  {
+    title: 'Audit-first review',
+    body: 'Renovo keeps the reasoning, evidence trail, and review actions visible instead of hiding the logic behind a single result.',
+  },
+  {
+    title: 'Supporting portals',
+    body: 'Landlord, tenant, and contractor access can still be enabled where the agency wants supporting visibility around the case.',
+  },
+  {
+    title: 'Agency-linked access',
+    body: 'Creating a sign-in does not grant workspace access until your agency links the correct role and destination.',
+  },
+]
 
 export default function LoginPage() {
   const router = useRouter()
@@ -22,6 +64,15 @@ export default function LoginPage() {
   const [loadingReset, setLoadingReset] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
 
+  async function resolveOperatorDestination(userId: string) {
+    const operatorProfile = await getOperatorProfile(userId)
+    if (!operatorProfile || operatorProfile.is_active === false) {
+      return null
+    }
+
+    return '/'
+  }
+
   useEffect(() => {
     async function checkSession() {
       const {
@@ -30,15 +81,15 @@ export default function LoginPage() {
 
       if (!session?.user) return
 
-      const workspace = await resolveWorkspaceForUser(session.user.id)
+      const destination = await resolveOperatorDestination(session.user.id)
 
-      if (!workspace.destination) {
+      if (!destination) {
         await supabase.auth.signOut()
         setMessage(UNLINKED_ACCOUNT_MESSAGE)
         return
       }
 
-      router.replace(workspace.destination)
+      router.replace(destination)
     }
 
     void checkSession()
@@ -72,16 +123,16 @@ export default function LoginPage() {
       return
     }
 
-    const workspace = await resolveWorkspaceForUser(userId)
+    const destination = await resolveOperatorDestination(userId)
 
-    if (!workspace.destination) {
+    if (!destination) {
       await supabase.auth.signOut()
       setMessage(UNLINKED_ACCOUNT_MESSAGE)
       setLoadingPassword(false)
       return
     }
 
-    router.replace(workspace.destination)
+    router.replace(destination)
     router.refresh()
   }
 
@@ -188,58 +239,83 @@ export default function LoginPage() {
 
   return (
     <main className="app-grid min-h-screen px-6 py-8 text-stone-900 md:px-8 md:py-10">
-      <div className="mx-auto grid max-w-6xl gap-6 xl:grid-cols-[minmax(0,1fr)_460px]">
-        <section className="app-surface-strong rounded-[2rem] p-8 md:p-10">
-          <p className="app-kicker">Renovo Access</p>
-          <h1 className="mt-4 max-w-2xl text-4xl font-semibold tracking-tight md:text-5xl">
-            One calmer front door for operators, tenants, landlords, and contractors
+      <div className="mx-auto grid max-w-7xl gap-6 xl:grid-cols-[minmax(0,1.1fr)_460px]">
+        <section className="app-surface-strong rounded-[2.2rem] p-8 md:p-10">
+          <div className="flex flex-wrap gap-2">
+            <span className="rounded-full border border-emerald-200 bg-emerald-50/90 px-4 py-2 text-sm font-medium text-emerald-950/85">
+              Renovo access
+            </span>
+            <span className="rounded-full border border-stone-200 bg-white/92 px-4 py-2 text-sm font-medium text-stone-700">
+              Human-reviewed decisions
+            </span>
+          </div>
+
+          <h1 className="mt-6 max-w-4xl text-4xl font-semibold tracking-tight md:text-[4.6rem] md:leading-[0.95]">
+            Secure entry to the end-of-tenancy decision engine
           </h1>
-          <p className="mt-4 max-w-2xl text-base leading-7 text-stone-600">
-            Sign in once, then land in the workspace that matches your role. Operators keep the
-            queue moving, and customers or contractors can follow live updates without needing to
-            chase by phone or email.
+          <p className="mt-5 max-w-3xl text-base leading-8 text-stone-600 md:text-lg">
+            Operators move from evidence review to claim output in one specialist workflow.
+            Supporting portals remain available where an agency has enabled them, but the product
+            now starts with the end-of-tenancy decision path.
           </p>
 
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
-            {[
-              {
-                title: 'Operator workspace',
-                body: 'Run the live queue, Annabelle calls, records, maintenance, and compliance from one place.',
-              },
-              {
-                title: 'Customer portals',
-                body: 'Tenants and landlords can track live updates and current issues without waiting for a reply.',
-              },
-              {
-                title: 'Contractor access',
-                body: 'Give contractors a direct view of assigned jobs, quotes, and access notes when the portal role is ready.',
-              },
-            ].map((item) => (
-              <div key={item.title} className="rounded-[1.5rem] border border-stone-200 bg-white p-5 shadow-sm">
-                <h2 className="text-lg font-semibold">{item.title}</h2>
+          <div className="mt-8 grid gap-3 xl:grid-cols-4">
+            {workflowStages.map((item) => (
+              <article
+                key={item.step}
+                className="rounded-[1.45rem] border border-stone-200 bg-white/92 p-4 shadow-sm"
+              >
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-stone-500">
+                  Step {item.step}
+                </p>
+                <h2 className="mt-2 text-base font-semibold text-stone-900">{item.title}</h2>
                 <p className="mt-2 text-sm leading-6 text-stone-600">{item.body}</p>
-              </div>
+              </article>
             ))}
           </div>
 
-          <div className="mt-8 rounded-[1.6rem] border border-emerald-200 bg-emerald-50/90 p-5">
-            <p className="text-sm font-semibold text-emerald-900">Friendly reminder</p>
-            <p className="mt-2 text-sm leading-6 text-emerald-900/80">
-              Use the same email as the profile linked to your Supabase account so Renovo can send
-              you to the correct workspace after sign-in.
-            </p>
+          <div className="mt-8 grid gap-4 md:grid-cols-2">
+            {accessPanels.map((item) => (
+              <article
+                key={item.title}
+                className="rounded-[1.55rem] border border-stone-200 bg-white/94 p-5 shadow-sm"
+              >
+                <h2 className="text-lg font-semibold text-stone-900">{item.title}</h2>
+                <p className="mt-3 text-sm leading-7 text-stone-600">{item.body}</p>
+              </article>
+            ))}
+          </div>
+
+          <div className="mt-8 rounded-[1.7rem] border border-emerald-200 bg-emerald-50/90 p-6">
+            <p className="text-sm font-semibold text-emerald-900">Before you sign in</p>
+            <div className="mt-3 grid gap-3 md:grid-cols-2">
+              <div className="rounded-[1.2rem] border border-emerald-200/80 bg-white/70 p-4">
+                <p className="text-sm font-medium text-emerald-950">Use your approved email</p>
+                <p className="mt-2 text-sm leading-6 text-emerald-950/80">
+                  Sign in with the email your agency has linked to Renovo so we can route you to
+                  the correct workspace.
+                </p>
+              </div>
+              <div className="rounded-[1.2rem] border border-emerald-200/80 bg-white/70 p-4">
+                <p className="text-sm font-medium text-emerald-950">New sign-ins still need linking</p>
+                <p className="mt-2 text-sm leading-6 text-emerald-950/80">
+                  Creating an account only sets up your sign-in. A team administrator still needs to
+                  grant the right workspace role.
+                </p>
+              </div>
+            </div>
           </div>
         </section>
 
-        <section className="app-surface rounded-[2rem] p-8">
+        <section className="app-surface rounded-[2.2rem] p-8">
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="app-kicker">
                 {mode === 'sign_in' ? 'Sign In' : mode === 'sign_up' ? 'Sign Up' : 'Reset Password'}
               </p>
-              <h2 className="mt-2 text-3xl font-semibold tracking-tight">
+              <h2 className="mt-2 text-3xl font-semibold tracking-tight md:text-[2.6rem]">
                 {mode === 'sign_in'
-                  ? 'Enter your workspace'
+                  ? 'Enter the workspace'
                   : mode === 'sign_up'
                     ? 'Create your account'
                     : 'Recover your password'}
@@ -249,20 +325,20 @@ export default function LoginPage() {
               href="/"
               className="app-secondary-button rounded-full px-4 py-2 text-sm font-medium"
             >
-              Back
+              Back to Renovo
             </Link>
           </div>
 
           <p className="mt-4 text-sm leading-6 text-stone-600">
             {mode === 'sign_in' &&
-              'Password is fastest if you already have one. Magic link is useful on a new device.'}
+              'Password is fastest if you already have one. Magic link is useful when you are signing in on a new device.'}
             {mode === 'sign_up' &&
-              'Create your auth account first. Workspace access still needs to be linked by the agency.'}
+              'Create your sign-in first. Workspace access still needs to be linked by your agency before you can enter the product.'}
             {mode === 'reset' &&
               'Send yourself a password reset link, then choose a new password from the recovery screen.'}
           </p>
 
-          <div className="mt-6 flex flex-wrap gap-2">
+          <div className="mt-6 grid gap-2 sm:grid-cols-3">
             {[
               ['sign_in', 'Sign in'],
               ['sign_up', 'Sign up'],
@@ -275,13 +351,29 @@ export default function LoginPage() {
                   setMode(value as 'sign_in' | 'sign_up' | 'reset')
                   setMessage(null)
                 }}
-                className={`rounded-full px-4 py-2 text-sm font-medium ${
+                className={`rounded-full px-4 py-2.5 text-sm font-medium ${
                   mode === value ? 'app-pill-active' : 'app-pill'
                 }`}
               >
                 {label}
               </button>
             ))}
+          </div>
+
+          <div className="mt-6 rounded-[1.5rem] border border-stone-200 bg-stone-50/85 p-4">
+            <p className="text-sm font-medium text-stone-900">
+              {mode === 'sign_in' && 'For approved operators and linked portal users'}
+              {mode === 'sign_up' && 'Create a sign-in before your access is linked'}
+              {mode === 'reset' && 'Recover the password for your approved Renovo email'}
+            </p>
+            <p className="mt-2 text-sm leading-6 text-stone-600">
+              {mode === 'sign_in' &&
+                'If your email is linked correctly, Renovo will send you straight to the right workspace after sign-in.'}
+              {mode === 'sign_up' &&
+                'If your agency has not linked your role yet, you will not be able to enter a workspace until they do.'}
+              {mode === 'reset' &&
+                'Use the same email that was approved for Renovo access so the reset links back to the correct sign-in.'}
+            </p>
           </div>
 
           <div className="mt-6 space-y-4">

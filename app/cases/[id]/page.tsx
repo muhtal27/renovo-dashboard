@@ -1132,7 +1132,6 @@ export default function CaseDetailPage({
         meta: [formatLabel(request.status), request.priority ? `${formatLabel(request.priority)} priority` : null].filter(Boolean).join(' • '),
         body: request.description?.trim() || 'Maintenance request linked to this case.',
         toneClass: getMaintenanceTimelineTone(request.status),
-        href: '/records/maintenance',
       })
     }
 
@@ -1145,7 +1144,6 @@ export default function CaseDetailPage({
         meta: [formatMoney(entry.amount), formatLabel(entry.status), entry.category ? formatLabel(entry.category) : null].filter(Boolean).join(' • '),
         body: entry.reference?.trim() || 'Rent ledger movement linked to this tenancy.',
         toneClass: getRentTimelineTone(entry.status, entry.entry_type),
-        href: '/records',
       })
     }
 
@@ -1158,7 +1156,6 @@ export default function CaseDetailPage({
         meta: [formatLabel(event.status), event.scheduled_for ? formatShortDateTime(event.scheduled_for) : null].filter(Boolean).join(' • '),
         body: event.note?.trim() || 'Lease lifecycle event linked to this tenancy.',
         toneClass: getLeaseTimelineTone(event.status),
-        href: '/records',
       })
     }
 
@@ -1172,7 +1169,6 @@ export default function CaseDetailPage({
         meta: [formatLabel(claim.claim_status), totalAmount ? formatMoney(totalAmount) : null].filter(Boolean).join(' • '),
         body: claim.claim_status === 'disputed' ? 'Deposit issue needs attention.' : 'Deposit activity recorded against this tenancy.',
         toneClass: getDepositTimelineTone(claim.claim_status),
-        href: '/records',
       })
     }
 

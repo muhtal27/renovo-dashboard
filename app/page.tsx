@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getOperatorLabel } from '@/lib/operator'
-import { resolveWorkspaceForUser } from '@/lib/portal'
 import { supabase } from '@/lib/supabase'
 import { useOperatorGate } from '@/lib/use-operator-gate'
 import { PublicHome } from '@/app/public-home'
@@ -553,7 +552,11 @@ export default function HomePage() {
 	    complianceSoon: 0,
 	  })
   const operatorUserId = operator?.authUser?.id ?? null
-  const pageError = authError ?? error
+  const workspaceAccessError =
+    !authLoading && !!operator?.authUser && !operator.profile
+      ? 'Your account is not linked to the operator workspace.'
+      : null
+  const pageError = authError ?? error ?? workspaceAccessError
 
   const loadCasesAndUsers = useEffectEvent(async (options?: { preserveLoading?: boolean }) => {
     if (!operatorUserId) return
@@ -852,27 +855,6 @@ export default function HomePage() {
 	  })
 
   useEffect(() => {
-    if (authLoading || !operator?.authUser || operator.profile) return
-
-    let cancelled = false
-
-    void resolveWorkspaceForUser(operator.authUser.id).then((workspace) => {
-      if (cancelled) return
-
-      if (workspace.destination && workspace.destination !== '/') {
-        router.replace(workspace.destination)
-        return
-      }
-
-      setError('Your account is not linked to the operator workspace.')
-    })
-
-    return () => {
-      cancelled = true
-    }
-  }, [authLoading, operator?.authUser, operator?.profile, router])
-
-  useEffect(() => {
     if (!operatorUserId || !operator?.profile) return
 
     async function loadCases() {
@@ -1093,7 +1075,7 @@ export default function HomePage() {
             timing: job.scheduled_for ? formatShortDateTime(job.scheduled_for) : formatRelativeTime(job.updated_at ?? job.created_at),
             owner: contractor?.company_name?.trim() || 'Unassigned',
             meta: buildAddress(property),
-            href: job.case_id ? `/cases/${job.case_id}` : '/records/maintenance',
+            href: job.case_id ? `/cases/${job.case_id}` : undefined,
           }
         }),
       }
@@ -1168,7 +1150,6 @@ export default function HomePage() {
 	  const operationsPulseCards = useMemo(
 	    () => [
 	      {
-        href: '/records/maintenance',
         label: 'Maintenance',
         value: operationsPulse.maintenanceLive,
         helper:
@@ -1181,7 +1162,6 @@ export default function HomePage() {
             : 'border-sky-200 bg-sky-50 text-sky-900',
       },
       {
-        href: '/records/compliance',
         label: 'Compliance',
         value: operationsPulse.complianceRisk,
         helper:
@@ -1411,7 +1391,6 @@ export default function HomePage() {
             : item.status === 'awaiting_approval'
               ? 'border-amber-200 bg-amber-50'
               : 'border-sky-200 bg-sky-50',
-        href: '/records/maintenance',
       })
     }
 
@@ -1428,7 +1407,6 @@ export default function HomePage() {
             : entry.status === 'cleared'
               ? 'border-emerald-200 bg-emerald-50'
               : 'border-amber-200 bg-amber-50',
-        href: '/records',
       })
     }
 
@@ -1445,7 +1423,6 @@ export default function HomePage() {
             : event.status === 'completed'
               ? 'border-emerald-200 bg-emerald-50'
               : 'border-sky-200 bg-sky-50',
-        href: '/records',
       })
     }
 
@@ -1462,7 +1439,6 @@ export default function HomePage() {
             : claim.claim_status === 'resolved'
               ? 'border-emerald-200 bg-emerald-50'
               : 'border-amber-200 bg-amber-50',
-        href: '/records/deposits',
       })
     }
 
@@ -1894,7 +1870,7 @@ export default function HomePage() {
   return (
     <main className="app-grid min-h-screen px-5 py-6 text-stone-900 md:px-8 md:py-8">
       <div className="mx-auto max-w-[1520px] space-y-6">
-        <OperatorNav current="queue" />
+        <OperatorNav current="maintenance" />
 
         <div className="space-y-6">
           <section className="app-surface-strong overflow-hidden rounded-[2rem] p-5 md:p-6">
@@ -1943,11 +1919,10 @@ export default function HomePage() {
 	              </div>
 
               <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                {operationsPulseCards.map((card) => (
-                  <Link
+              {operationsPulseCards.map((card) => (
+                  <article
                     key={card.label}
-                    href={card.href}
-                    className={`rounded-[1.25rem] border p-4 transition hover:-translate-y-0.5 hover:shadow-sm ${card.tone}`}
+                    className={`rounded-[1.25rem] border p-4 ${card.tone}`}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
@@ -1956,7 +1931,7 @@ export default function HomePage() {
                       </div>
                       <span className="text-2xl font-semibold leading-none">{card.value}</span>
                     </div>
-                  </Link>
+                  </article>
                 ))}
               </div>
             </section>
@@ -1993,32 +1968,54 @@ export default function HomePage() {
                 </div>
               ) : (
                 <div className="mt-4 grid gap-3 xl:grid-cols-2">
-                  {todayAgenda.items.map((item) => (
-                    <Link
-                      key={item.id}
-                      href={item.href}
-                      onMouseEnter={() => {
-                        if (!item.href.startsWith('/cases/')) return
-                        prefetchCaseDetail(item.href.slice('/cases/'.length))
-                      }}
-                      className="rounded-[1.2rem] border border-stone-200 bg-stone-50/90 p-4 transition hover:-translate-y-0.5 hover:border-stone-400 hover:bg-white"
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <p className="text-sm font-semibold text-stone-900">{item.caseNumber}</p>
-                          <p className="mt-1 text-sm leading-6 text-stone-700">{item.title}</p>
+                  {todayAgenda.items.map((item) =>
+                    item.href ? (
+                      <Link
+                        key={item.id}
+                        href={item.href}
+                        onMouseEnter={() => {
+                          if (!item.href?.startsWith('/cases/')) return
+                          prefetchCaseDetail(item.href.slice('/cases/'.length))
+                        }}
+                        className="rounded-[1.2rem] border border-stone-200 bg-stone-50/90 p-4 transition hover:-translate-y-0.5 hover:border-stone-400 hover:bg-white"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold text-stone-900">{item.caseNumber}</p>
+                            <p className="mt-1 text-sm leading-6 text-stone-700">{item.title}</p>
+                          </div>
+                          <span className="rounded-full border border-stone-200 bg-white px-2.5 py-1 text-[11px] font-medium text-stone-700">
+                            {item.lane}
+                          </span>
                         </div>
-                        <span className="rounded-full border border-stone-200 bg-white px-2.5 py-1 text-[11px] font-medium text-stone-700">
-                          {item.lane}
-                        </span>
-                      </div>
-                      <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] font-medium uppercase tracking-[0.16em] text-stone-500">
-                        <span>{item.timing}</span>
-                        <span>Owner {item.owner}</span>
-                      </div>
-                      <p className="mt-2 text-xs leading-5 text-stone-500">{item.meta}</p>
-                    </Link>
-                  ))}
+                        <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] font-medium uppercase tracking-[0.16em] text-stone-500">
+                          <span>{item.timing}</span>
+                          <span>Owner {item.owner}</span>
+                        </div>
+                        <p className="mt-2 text-xs leading-5 text-stone-500">{item.meta}</p>
+                      </Link>
+                    ) : (
+                      <article
+                        key={item.id}
+                        className="rounded-[1.2rem] border border-stone-200 bg-stone-50/90 p-4"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold text-stone-900">{item.caseNumber}</p>
+                            <p className="mt-1 text-sm leading-6 text-stone-700">{item.title}</p>
+                          </div>
+                          <span className="rounded-full border border-stone-200 bg-white px-2.5 py-1 text-[11px] font-medium text-stone-700">
+                            {item.lane}
+                          </span>
+                        </div>
+                        <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] font-medium uppercase tracking-[0.16em] text-stone-500">
+                          <span>{item.timing}</span>
+                          <span>Owner {item.owner}</span>
+                        </div>
+                        <p className="mt-2 text-xs leading-5 text-stone-500">{item.meta}</p>
+                      </article>
+                    )
+                  )}
                 </div>
               )}
             </section>
@@ -2766,36 +2763,6 @@ export default function HomePage() {
                           </form>
                         </section>
                       )}
-
-                      <section className="app-card-muted rounded-[1.6rem] p-5">
-                        <p className="app-kicker">Linked desks</p>
-                        <div className="mt-4 grid gap-3">
-                          <Link
-                            href="/records"
-                            className="app-secondary-button rounded-2xl px-4 py-3 text-left text-sm font-medium"
-                          >
-                            Open lease sign
-                          </Link>
-                          <Link
-                            href="/records/rent"
-                            className="app-secondary-button rounded-2xl px-4 py-3 text-left text-sm font-medium"
-                          >
-                            Open accounts
-                          </Link>
-                          <Link
-                            href="/records/lease-lifecycle"
-                            className="app-secondary-button rounded-2xl px-4 py-3 text-left text-sm font-medium"
-                          >
-                            Open end of tenancy
-                          </Link>
-                          <Link
-                            href="/records/maintenance"
-                            className="app-secondary-button rounded-2xl px-4 py-3 text-left text-sm font-medium"
-                          >
-                            Open maintenance
-                          </Link>
-                        </div>
-                      </section>
 
                       <section className="app-card-muted rounded-[1.6rem] p-5">
                         <p className="app-kicker">Create from queue</p>
