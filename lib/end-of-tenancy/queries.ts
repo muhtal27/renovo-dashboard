@@ -553,25 +553,24 @@ export async function getEndOfTenancyCaseDetail(
     return null
   }
 
-  const baseCase = await requireMaybeSingle<CaseRow>(
-    'Unable to load base case',
-    supabase.from('cases').select(CASE_SELECT).eq('id', endOfTenancyCase.case_id).maybeSingle()
-  )
-
-  const tenancy = await requireMaybeSingle<TenancyRow>(
-    'Unable to load tenancy',
-    supabase.from('tenancies').select(TENANCY_SELECT).eq('id', endOfTenancyCase.tenancy_id).maybeSingle()
-  )
-
-  const propertyId = tenancy?.property_id ?? baseCase?.property_id ?? null
-
-  const [property, depositClaim, documents, issues, recommendations] = await Promise.all([
-    propertyId
-      ? requireMaybeSingle<PropertyRow>(
-          'Unable to load property',
-          supabase.from('properties').select(PROPERTY_SELECT).eq('id', propertyId).maybeSingle()
-        )
-      : Promise.resolve(null),
+  // Round 2: everything that only depends on endOfTenancyCase — run in parallel
+  const [baseCase, tenancy, moveOutTracker, depositClaim, documents, issues, recommendations] = await Promise.all([
+    requireMaybeSingle<CaseRow>(
+      'Unable to load base case',
+      supabase.from('cases').select(CASE_SELECT).eq('id', endOfTenancyCase.case_id).maybeSingle()
+    ),
+    requireMaybeSingle<TenancyRow>(
+      'Unable to load tenancy',
+      supabase.from('tenancies').select(TENANCY_SELECT).eq('id', endOfTenancyCase.tenancy_id).maybeSingle()
+    ),
+    requireMaybeSingle<MoveOutTrackerRow>(
+      'Unable to load move-out tracker',
+      supabase
+        .from('move_out_trackers')
+        .select(MOVE_OUT_TRACKER_SELECT)
+        .eq('end_of_tenancy_case_id', endOfTenancyCase.id)
+        .maybeSingle()
+    ),
     endOfTenancyCase.deposit_claim_id
       ? requireMaybeSingle<DepositClaimRow>(
           'Unable to load deposit claim',
@@ -604,22 +603,21 @@ export async function getEndOfTenancyCaseDetail(
     ),
   ])
 
-  const moveOutTracker = await requireMaybeSingle<MoveOutTrackerRow>(
-    'Unable to load move-out tracker',
-    supabase
-      .from('move_out_trackers')
-      .select(MOVE_OUT_TRACKER_SELECT)
-      .eq('end_of_tenancy_case_id', endOfTenancyCase.id)
-      .maybeSingle()
-  )
-
+  // Derive IDs needed for round 3
+  const propertyId = tenancy?.property_id ?? baseCase?.property_id ?? null
   const documentIds = dedupe(documents.map((row) => row.id))
   const issueIds = dedupe(issues.map((row) => row.id))
   const recommendationIds = dedupe(recommendations.map((row) => row.id))
-
   const trackerId = moveOutTracker?.id ?? null
 
-  const [extractions, evidenceLinks, recommendationSources, lineItems, reviewActions, moveOutChecklistItems, moveOutTrackerEvents] = await Promise.all([
+  // Round 3: property + all child collections — run in parallel
+  const [property, extractions, evidenceLinks, recommendationSources, lineItems, reviewActions, moveOutChecklistItems, moveOutTrackerEvents] = await Promise.all([
+    propertyId
+      ? requireMaybeSingle<PropertyRow>(
+          'Unable to load property',
+          supabase.from('properties').select(PROPERTY_SELECT).eq('id', propertyId).maybeSingle()
+        )
+      : Promise.resolve(null),
     documentIds.length > 0
       ? requireMany<DocumentExtractionRow>(
           'Unable to load document extractions',
