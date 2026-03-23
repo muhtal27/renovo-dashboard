@@ -204,12 +204,12 @@ export function PublicHome({
                 </div>
 
                 <h1 className="mt-6 max-w-5xl text-4xl font-semibold tracking-tight md:text-[4.7rem] md:leading-[0.94]">
-                  Turn check in and check out evidence into a reviewable claim decision.
+                  From check-in to claim decision.
                 </h1>
 
                 <p className="mt-6 max-w-3xl text-base leading-8 text-stone-700 md:text-lg">
-                  Renovo gives property managers one end-of-tenancy workspace for documents,
-                  extracted facts, issues, recommendations, and claim output.
+                  Renovo gives property managers one workspace for check-in evidence, check-out
+                  evidence, issues, recommendations, and claim output.
                 </p>
 
                 <div className="mt-8 flex flex-wrap gap-3">
