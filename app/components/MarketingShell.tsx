@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 
 type MarketingShellProps = {
   children: ReactNode
-  currentPath: '/' | '/how-it-works' | '/pricing'
+  currentPath: '/' | '/how-it-works' | '/pricing' | '/about'
   navAriaLabel?: string
 }
 
@@ -12,12 +12,14 @@ const desktopNavItems = [
   { label: 'Demo', type: 'anchor', hash: '#platform' },
   { label: 'Benefits', type: 'anchor', hash: '#benefits' },
   { label: 'Pricing', type: 'route', href: '/pricing' },
+  { label: 'About', type: 'route', href: '/about' },
   { label: 'Early access', type: 'anchor', hash: '#waitlist' },
 ] as const
 
 const mobileNavItems = [
   { label: 'Demo', type: 'anchor', hash: '#platform' },
   { label: 'Pricing', type: 'route', href: '/pricing' },
+  { label: 'About', type: 'route', href: '/about' },
   { label: 'Early access', type: 'anchor', hash: '#waitlist' },
 ] as const
 
