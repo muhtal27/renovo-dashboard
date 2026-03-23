@@ -1,4 +1,6 @@
 import Link from 'next/link'
+import { ComparisonCard } from '@/app/components/ComparisonCard'
+import { HeroDemoPreview } from '@/app/components/HeroDemoPreview'
 import { PublicWaitlistForm } from '@/app/public-waitlist-form'
 
 const overviewMetrics = [
@@ -50,6 +52,38 @@ const setupItems = [
   'PMS sync — Coming: pull from your existing system',
 ]
 
+const checkInItems = [
+  {
+    label: 'Living room — Carpet',
+    description: 'Professionally cleaned. No marks or staining.',
+  },
+  {
+    label: 'Master bedroom — Walls',
+    description: 'Freshly painted. Neutral white throughout.',
+  },
+  {
+    label: 'Kitchen — Cupboard doors',
+    description: 'All intact. Hinges secure. No damage noted.',
+  },
+]
+
+const checkOutItems = [
+  {
+    label: 'Living room — Carpet',
+    description: 'Large wine stain, approx. 30cm. Right corner near sofa.',
+    meta: 'Photo evidence attached',
+  },
+  {
+    label: 'Master bedroom — Walls',
+    description: 'Multiple scuff marks. Patch repaint required.',
+    meta: 'Photo evidence attached',
+  },
+  {
+    label: 'Kitchen — Cupboard door',
+    description: 'Left door hinge broken. Door detached.',
+  },
+]
+
 export function PublicHome({
   productDemo,
 }: {
@@ -59,33 +93,48 @@ export function PublicHome({
     <main className="app-grid min-h-screen px-5 py-6 text-stone-900 md:px-8 md:py-8">
       <div className="mx-auto max-w-[1380px] space-y-6">
         <header className="sticky top-0 z-30">
-          <div className="app-surface flex items-center justify-between rounded-[1.45rem] border border-stone-200/85 px-4 py-3 md:px-5">
+          <div className="app-surface flex items-center justify-between gap-4 rounded-[1.45rem] border border-stone-200/85 px-4 py-3 backdrop-blur md:px-5">
             <Link href="/" className="app-kicker">
               Renovo
             </Link>
 
-            <nav className="flex items-center gap-2 md:gap-3" aria-label="Homepage">
+            <nav className="hidden items-center gap-4 md:flex" aria-label="Homepage">
               <a
-                href="#workflow"
-                className="hidden text-sm font-medium text-stone-600 hover:text-stone-900 md:inline-flex"
+                href="#how-it-works"
+                className="text-sm font-medium text-stone-600 hover:text-stone-900"
               >
-                Workflow
+                How it works
               </a>
               <a
                 href="#platform"
-                className="hidden text-sm font-medium text-stone-600 hover:text-stone-900 md:inline-flex"
+                className="text-sm font-medium text-stone-600 hover:text-stone-900"
               >
-                Product
+                Demo
               </a>
-              <Link
-                href="/how-it-works"
-                className="hidden text-sm font-medium text-stone-600 hover:text-stone-900 md:inline-flex"
+              <a
+                href="#benefits"
+                className="text-sm font-medium text-stone-600 hover:text-stone-900"
               >
-                How it works
-              </Link>
+                Benefits
+              </a>
               <a
                 href="#waitlist"
-                className="inline-flex text-sm font-medium text-stone-700 hover:text-stone-900"
+                className="text-sm font-medium text-stone-600 hover:text-stone-900"
+              >
+                Early access
+              </a>
+            </nav>
+
+            <div className="flex items-center gap-2">
+              <a
+                href="#platform"
+                className="inline-flex text-sm font-medium text-stone-700 hover:text-stone-900 md:hidden"
+              >
+                Demo
+              </a>
+              <a
+                href="#waitlist"
+                className="inline-flex text-sm font-medium text-stone-700 hover:text-stone-900 md:hidden"
               >
                 Early access
               </a>
@@ -95,7 +144,7 @@ export function PublicHome({
               >
                 Sign in
               </Link>
-            </nav>
+            </div>
           </div>
         </header>
 
@@ -111,24 +160,9 @@ export function PublicHome({
                   The end-of-tenancy decision engine for letting agencies.
                 </p>
               </div>
-
-              <div className="flex flex-wrap items-center gap-2">
-                <a
-                  href="#workflow"
-                  className="app-secondary-button rounded-full px-5 py-2.5 text-sm font-medium"
-                >
-                  See the workflow
-                </a>
-                <a
-                  href="#waitlist"
-                  className="app-primary-button rounded-full px-5 py-2.5 text-sm font-medium"
-                >
-                  Join the list
-                </a>
-              </div>
             </div>
 
-            <div className="relative mt-10 grid gap-8 xl:grid-cols-[minmax(0,1.14fr)_360px] xl:items-end">
+            <div className="relative mt-10 grid gap-8 xl:grid-cols-[minmax(0,1.02fr)_minmax(420px,0.98fr)] xl:items-center">
               <div>
                 <div className="inline-flex rounded-full border border-emerald-200 bg-emerald-50/90 px-4 py-2 text-sm font-medium text-emerald-950/85">
                   Evidence in. Reviewable decision out.
@@ -145,17 +179,17 @@ export function PublicHome({
                 </p>
 
                 <div className="mt-8 flex flex-wrap gap-3">
-                  <Link
-                    href="/login"
-                    className="app-primary-button rounded-2xl px-5 py-3 text-sm font-medium"
-                  >
-                    Open the live sign-in
-                  </Link>
                   <a
                     href="#waitlist"
+                    className="app-primary-button rounded-2xl px-5 py-3 text-sm font-medium"
+                  >
+                    Request Early Access
+                  </a>
+                  <a
+                    href="#platform"
                     className="app-secondary-button rounded-2xl px-5 py-3 text-sm font-medium"
                   >
-                    Request early access
+                    Try Live Demo
                   </a>
                 </div>
 
@@ -179,20 +213,7 @@ export function PublicHome({
                 </div>
               </div>
 
-              <aside className="rounded-[1.85rem] border border-stone-200 bg-white/90 p-5 shadow-[0_20px_42px_rgba(55,43,27,0.08)] backdrop-blur">
-                <p className="app-kicker">Why it lands</p>
-                <div className="mt-4 space-y-3">
-                  {overviewMetrics.map((item) => (
-                    <article
-                      key={item.value}
-                      className="rounded-[1.2rem] border border-stone-200 bg-white px-4 py-3"
-                    >
-                      <p className="text-sm font-semibold text-stone-900">{item.value}</p>
-                      <p className="mt-2 text-sm leading-6 text-stone-600">{item.label}</p>
-                    </article>
-                  ))}
-                </div>
-              </aside>
+              <HeroDemoPreview highlights={overviewMetrics} />
             </div>
           </div>
         </section>
@@ -231,7 +252,10 @@ export function PublicHome({
           </div>
         </section>
 
-        <section className="app-surface rounded-[2rem] p-6 md:p-8">
+        <section
+          id="how-it-works"
+          className="app-surface scroll-mt-28 rounded-[2rem] p-6 md:scroll-mt-32 md:p-8"
+        >
           <div>
             <p className="app-kicker">How the review works</p>
             <h2 className="mt-2 text-2xl font-semibold text-stone-900 md:text-3xl">
@@ -244,87 +268,23 @@ export function PublicHome({
           </div>
 
           <div className="mt-8 grid items-stretch gap-3 lg:grid-cols-[1fr_auto_1fr_auto_1fr]">
-            <div className="rounded-[1.6rem] border border-emerald-100 bg-[linear-gradient(180deg,rgba(249,250,251,0.95),rgba(240,253,244,0.7))] p-5">
-              <div className="mb-4 flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-stone-500">
-                  Check in · Sept 2023
-                </p>
-              </div>
-
-              <div className="space-y-3">
-                <div className="rounded-[1.1rem] border border-emerald-100/80 bg-white/90 px-4 py-3">
-                  <p className="text-xs font-semibold text-stone-500">Living room — Carpet</p>
-                  <p className="mt-1 text-sm font-medium text-stone-900">
-                    Professionally cleaned. No marks or staining.
-                  </p>
-                </div>
-
-                <div className="rounded-[1.1rem] border border-emerald-100/80 bg-white/90 px-4 py-3">
-                  <p className="text-xs font-semibold text-stone-500">Master bedroom — Walls</p>
-                  <p className="mt-1 text-sm font-medium text-stone-900">
-                    Freshly painted. Neutral white throughout.
-                  </p>
-                </div>
-
-                <div className="rounded-[1.1rem] border border-emerald-100/80 bg-white/90 px-4 py-3">
-                  <p className="text-xs font-semibold text-stone-500">
-                    Kitchen — Cupboard doors
-                  </p>
-                  <p className="mt-1 text-sm font-medium text-stone-900">
-                    All intact. Hinges secure. No damage noted.
-                  </p>
-                </div>
-              </div>
-
-              <p className="mt-3 text-center text-xs text-stone-400">
-                14 Bruntsfield Place · Signed by tenant
-              </p>
-            </div>
+            <ComparisonCard
+              eyebrow="Check in · Sept 2023"
+              footer="14 Bruntsfield Place · Signed by tenant"
+              items={checkInItems}
+              variant="good"
+            />
 
             <div className="hidden items-center justify-center px-1 lg:flex">
               <span className="text-xl text-stone-300">→</span>
             </div>
 
-            <div className="rounded-[1.6rem] border border-amber-100 bg-[linear-gradient(180deg,rgba(250,250,249,0.95),rgba(255,251,235,0.75))] p-5">
-              <div className="mb-4 flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-amber-400" />
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-stone-500">
-                  Check out · March 2024
-                </p>
-              </div>
-
-              <div className="space-y-3">
-                <div className="rounded-[1.1rem] border border-amber-100/80 bg-amber-50/55 px-4 py-3">
-                  <p className="text-xs font-semibold text-stone-500">Living room — Carpet</p>
-                  <p className="mt-1 text-sm font-medium text-amber-700">
-                    Large wine stain, approx. 30cm. Right corner near sofa.
-                  </p>
-                  <p className="mt-1 text-[10px] text-stone-400">📷 Photo evidence attached</p>
-                </div>
-
-                <div className="rounded-[1.1rem] border border-amber-100/80 bg-amber-50/55 px-4 py-3">
-                  <p className="text-xs font-semibold text-stone-500">Master bedroom — Walls</p>
-                  <p className="mt-1 text-sm font-medium text-amber-700">
-                    Multiple scuff marks. Patch repaint required.
-                  </p>
-                  <p className="mt-1 text-[10px] text-stone-400">📷 Photo evidence attached</p>
-                </div>
-
-                <div className="rounded-[1.1rem] border border-amber-100/80 bg-amber-50/55 px-4 py-3">
-                  <p className="text-xs font-semibold text-stone-500">
-                    Kitchen — Cupboard door
-                  </p>
-                  <p className="mt-1 text-sm font-medium text-amber-700">
-                    Left door hinge broken. Door detached.
-                  </p>
-                </div>
-              </div>
-
-              <p className="mt-3 text-center text-xs text-stone-400">
-                Check out report · 8 March 2024
-              </p>
-            </div>
+            <ComparisonCard
+              eyebrow="Check out · March 2024"
+              footer="Check out report · 8 March 2024"
+              items={checkOutItems}
+              variant="damage"
+            />
 
             <div className="hidden items-center justify-center px-1 lg:flex">
               <span className="text-xl text-stone-300">→</span>
@@ -402,7 +362,10 @@ export function PublicHome({
           </div>
         </section>
 
-        <section id="workflow" className="bg-[linear-gradient(135deg,rgba(245,243,240,0.95),rgba(238,235,229,0.9))] rounded-[2rem] border border-stone-200 p-6 md:p-7">
+        <section
+          id="workflow"
+          className="scroll-mt-28 rounded-[2rem] border border-stone-200 bg-[linear-gradient(135deg,rgba(245,243,240,0.95),rgba(238,235,229,0.9))] p-6 md:scroll-mt-32 md:p-7"
+        >
           <div className="max-w-4xl">
             <p className="app-kicker text-stone-500">Workflow</p>
             <h2 className="mt-3 text-3xl font-semibold tracking-tight text-stone-900 md:text-4xl">
@@ -428,7 +391,10 @@ export function PublicHome({
           </div>
         </section>
 
-        <section id="platform" className="bg-[linear-gradient(180deg,rgba(250,247,242,0.4),rgba(255,255,255,0.7))] rounded-[2rem] border border-stone-100 p-6 md:p-7">
+        <section
+          id="platform"
+          className="scroll-mt-28 rounded-[2rem] border border-stone-100 bg-[linear-gradient(180deg,rgba(250,247,242,0.4),rgba(255,255,255,0.7))] p-6 md:scroll-mt-32 md:p-7"
+        >
           <div className="flex flex-col gap-3 border-b app-divider pb-5 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="app-kicker">Product proof</p>
@@ -436,12 +402,12 @@ export function PublicHome({
                 Try the product before you sign up — click through a real end-of-tenancy case.
               </h2>
             </div>
-            <Link
-              href="/login"
-              className="app-secondary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium"
+            <a
+              href="#waitlist"
+              className="app-primary-button inline-flex items-center rounded-full px-4 py-2 text-sm font-medium"
             >
-              Open the live sign-in
-            </Link>
+              Request Early Access
+            </a>
           </div>
 
           <div className="mt-6 space-y-4">
@@ -453,7 +419,10 @@ export function PublicHome({
           </div>
         </section>
 
-        <section className="bg-[linear-gradient(135deg,rgba(255,251,235,0.9),rgba(255,247,230,0.7))] rounded-[2rem] border border-amber-100 p-6 md:p-7">
+        <section
+          id="benefits"
+          className="scroll-mt-28 rounded-[2rem] border border-amber-100 bg-[linear-gradient(135deg,rgba(255,251,235,0.9),rgba(255,247,230,0.7))] p-6 md:scroll-mt-32 md:p-7"
+        >
           <p className="app-kicker">What changes for your team</p>
           <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
             Stronger decisions without hiding the reasoning
@@ -493,7 +462,7 @@ export function PublicHome({
           </div>
         </section>
 
-        <section id="waitlist" className="app-surface-strong rounded-[2.2rem] p-6 md:p-8">
+        <section id="waitlist" className="app-surface-strong scroll-mt-28 rounded-[2.2rem] p-6 md:scroll-mt-32 md:p-8">
           <div className="grid gap-6 rounded-[1.8rem] border border-stone-200 bg-[linear-gradient(135deg,rgba(255,255,255,0.97),rgba(240,247,243,0.94))] px-6 py-7 md:px-8 md:py-9 xl:grid-cols-[minmax(0,1fr)_420px]">
             <div>
               <p className="app-kicker">Early access</p>
@@ -512,12 +481,12 @@ export function PublicHome({
                   immediately from the live entrance.
                 </p>
                 <div className="mt-4">
-                  <Link
-                    href="/login"
+                  <a
+                    href="#platform"
                     className="app-secondary-button inline-flex rounded-full px-4 py-2 text-sm font-medium"
                   >
-                    Existing users sign in here
-                  </Link>
+                    Try Live Demo
+                  </a>
                 </div>
               </div>
             </div>
