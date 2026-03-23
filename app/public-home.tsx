@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { ComparisonCard } from '@/app/components/ComparisonCard'
 import { HeroDemoPreview } from '@/app/components/HeroDemoPreview'
+import { LandingTrustSection } from '@/app/components/LandingTrustSection'
 import { PublicWaitlistForm } from '@/app/public-waitlist-form'
 
 const overviewMetrics = [
@@ -81,6 +82,40 @@ const checkOutItems = [
   {
     label: 'Kitchen — Cupboard door',
     description: 'Left door hinge broken. Door detached.',
+  },
+]
+
+const trustPoints = [
+  {
+    title: 'Managers stay in control',
+    body: 'Renovo can draft the recommendation, but a manager still reviews the evidence, checks the reasoning, and approves the outcome.',
+  },
+  {
+    title: 'Every amount stays linked',
+    body: 'Issues, source references, and claim line items stay connected in the same workspace, so the reasoning is still visible when the case is reviewed later.',
+  },
+  {
+    title: 'Adoption stays low-friction',
+    body: 'Start with manual upload or email intake, keep your current property management system, and bring Renovo into the review step first.',
+  },
+]
+
+const trustFaqs = [
+  {
+    question: 'Does Renovo make the final decision?',
+    answer: 'No. Renovo helps structure the review, but a manager still decides whether to approve, reject, or adjust the recommendation.',
+  },
+  {
+    question: 'Do we need to replace our current system?',
+    answer: 'No. Renovo is designed to sit alongside your current setup, starting with the review workflow rather than forcing a wider system change.',
+  },
+  {
+    question: 'What does a manager actually review?',
+    answer: 'The manager reviews the documents, extracted facts, linked issues, recommendation, and claim output together in one workspace.',
+  },
+  {
+    question: 'What happens if a case is challenged?',
+    answer: 'The evidence, issue decisions, and reasoning stay attached to the case, so the team is not rebuilding the story from inboxes or memory later.',
   },
 ]
 
@@ -463,6 +498,8 @@ export function PublicHome({
             </article>
           </div>
         </section>
+
+        <LandingTrustSection points={trustPoints} faqs={trustFaqs} />
 
         <section id="waitlist" className="app-surface-strong scroll-mt-28 rounded-[2.2rem] p-6 md:scroll-mt-32 md:p-8">
           <div className="grid gap-6 rounded-[1.8rem] border border-stone-200 bg-[linear-gradient(135deg,rgba(255,255,255,0.97),rgba(240,247,243,0.94))] px-6 py-7 md:px-8 md:py-9 xl:grid-cols-[minmax(0,1fr)_420px]">
