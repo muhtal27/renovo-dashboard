@@ -54,8 +54,19 @@ export function MarketingShell({
       <div className="mx-auto max-w-[1380px] space-y-6">
         <header className="sticky top-0 z-30">
           <div className="app-surface flex items-center justify-between gap-4 rounded-[1.45rem] border border-stone-200/85 px-4 py-3 backdrop-blur md:px-5">
-            <Link href="/" className="app-kicker">
-              Renovo
+            <Link
+              href="/"
+              aria-label="Renovo home"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-stone-200 bg-white/90"
+            >
+              <span className="sr-only">Renovo</span>
+              <span className="grid grid-cols-[10px_1fr] gap-1.5">
+                <span className="h-4 rounded-[5px] border border-stone-400 bg-stone-50" />
+                <span className="flex flex-col justify-center gap-1">
+                  <span className="h-[1.5px] w-3 rounded-full bg-stone-700" />
+                  <span className="h-[1.5px] w-4 rounded-full bg-stone-400" />
+                </span>
+              </span>
             </Link>
 
             <nav className="hidden items-center gap-4 md:flex" aria-label={navAriaLabel}>

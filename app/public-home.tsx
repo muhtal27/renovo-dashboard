@@ -127,8 +127,8 @@ export function PublicHome({
 }) {
   return (
     <MarketingShell currentPath="/" navAriaLabel="Homepage">
-        <section className="app-surface-strong overflow-hidden rounded-[2.45rem] p-4 md:p-6">
-          <div className="relative overflow-hidden rounded-[2rem] border border-stone-200/85 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.98),rgba(255,255,255,0.62)_38%,rgba(231,246,241,0.82)_70%,rgba(229,237,245,0.78)_100%)] px-6 py-7 md:px-10 md:py-10">
+        <section className="overflow-hidden rounded-[2.45rem] border border-stone-200 bg-white p-4 shadow-[0_20px_48px_rgba(55,43,27,0.08)] md:p-6">
+          <div className="relative overflow-hidden rounded-[2rem] border border-stone-200/85 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.99),rgba(255,255,255,0.95)_40%,rgba(243,247,244,0.92)_72%,rgba(245,242,237,0.9)_100%)] px-6 py-7 md:px-10 md:py-10">
             <div className="pointer-events-none absolute -right-12 top-0 h-72 w-72 rounded-full bg-emerald-200/40 blur-3xl" />
             <div className="pointer-events-none absolute -left-10 bottom-0 h-64 w-64 rounded-full bg-amber-200/20 blur-3xl" />
 
@@ -163,12 +163,12 @@ export function PublicHome({
                   >
                     Request Early Access
                   </a>
-                  <a
-                    href="#platform"
+                  <Link
+                    href="/?demo=recommendation#platform"
                     className="app-secondary-button rounded-2xl px-5 py-3 text-sm font-medium"
                   >
                     Try Live Demo
-                  </a>
+                  </Link>
                 </div>
 
                 <div className="mt-6 grid gap-2 text-xs font-medium text-stone-600 md:grid-cols-2 md:text-sm">
@@ -196,7 +196,7 @@ export function PublicHome({
           </div>
         </section>
 
-        <section className="bg-stone-50/60 rounded-[2rem] px-6 py-8 md:px-8 md:py-10">
+        <section className="rounded-[2rem] bg-[#F9F9F9] px-6 py-8 md:px-8 md:py-10">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-4xl">
               <p className="app-kicker">Your existing setup</p>
@@ -463,12 +463,12 @@ export function PublicHome({
                   sign in from the top right.
                 </p>
                 <div className="mt-4">
-                  <a
-                    href="#platform"
+                  <Link
+                    href="/?demo=recommendation#platform"
                     className="app-secondary-button inline-flex rounded-full px-4 py-2 text-sm font-medium"
                   >
                     Try Live Demo
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>

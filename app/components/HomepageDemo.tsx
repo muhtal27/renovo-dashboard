@@ -36,12 +36,6 @@ type DemoLineItem = {
   amount: number
 }
 
-type DemoToast = {
-  id: number
-  message: string
-  visible: boolean
-}
-
 const CASE_REFERENCE = 'EOT-2024-0041'
 const PROPERTY_ADDRESS = '14 Bruntsfield Place, Edinburgh EH10 4HJ'
 const TENANT_NAME = 'James Holbrook'
@@ -247,16 +241,6 @@ const RESPONSIBILITY_LABELS: Record<IssueResponsibility, string> = {
   shared: 'Shared',
 }
 
-const TOAST_MESSAGES = {
-  approve:
-    'In the live product, this approves the recommendation and creates the deposit claim.',
-  revise:
-    'In the live product, this returns the recommendation for revision with your notes.',
-  reject: 'In the live product, this rejects the recommendation and logs the reason.',
-  submit: 'In the live product, this submits the claim to MyDeposits.',
-  download: 'PDF export is available in the live product.',
-} as const
-
 function formatMoney(value: number) {
   return value.toLocaleString('en-GB', { style: 'currency', currency: 'GBP' })
 }
@@ -286,22 +270,7 @@ function SectionCard({
 }
 
 export default function HomepageDemo() {
-  const [activeTab, setActiveTab] = useState<DemoTab>('overview')
-  const [toast, setToast] = useState<DemoToast | null>(null)
-
-  function showToast(message: string) {
-    const id = Date.now()
-
-    setToast({ id, message, visible: true })
-
-    window.setTimeout(() => {
-      setToast((current) => (current?.id === id ? { ...current, visible: false } : current))
-    }, 2400)
-
-    window.setTimeout(() => {
-      setToast((current) => (current?.id === id ? null : current))
-    }, 3000)
-  }
+  const [activeTab, setActiveTab] = useState<DemoTab>('recommendation')
 
   function renderOverviewTab() {
     return (
@@ -528,40 +497,8 @@ export default function HomepageDemo() {
           </div>
         </SectionCard>
 
-        <div className="space-y-3">
-          <div className="flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={() => showToast(TOAST_MESSAGES.approve)}
-              className="app-primary-button rounded-2xl px-4 py-3 text-sm font-medium"
-            >
-              Approve and generate claim
-            </button>
-            <button
-              type="button"
-              onClick={() => showToast(TOAST_MESSAGES.revise)}
-              className="app-secondary-button rounded-2xl px-4 py-3 text-sm font-medium"
-            >
-              Send back for revision
-            </button>
-            <button
-              type="button"
-              onClick={() => showToast(TOAST_MESSAGES.reject)}
-              className="rounded-2xl border border-red-200 bg-white px-4 py-3 text-sm font-medium text-red-700 transition hover:border-red-300 hover:bg-red-50"
-            >
-              Reject
-            </button>
-          </div>
-
-          {toast ? (
-            <div
-              className={`rounded-2xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-700 transition-all duration-300 ${
-                toast.visible ? 'translate-y-0 opacity-100' : '-translate-y-1 opacity-0'
-              }`}
-            >
-              {toast.message}
-            </div>
-          ) : null}
+        <div className="rounded-[1.2rem] border border-stone-200 bg-stone-50/70 px-4 py-3 text-sm text-stone-600">
+          Read-only preview. Manager actions are available in the live product.
         </div>
 
         <div className="rounded-[1.5rem] border border-emerald-200 bg-emerald-50/80 p-5">
@@ -638,33 +575,8 @@ export default function HomepageDemo() {
           </div>
         </SectionCard>
 
-        <div className="space-y-3">
-          <div className="flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={() => showToast(TOAST_MESSAGES.submit)}
-              className="app-primary-button rounded-2xl px-4 py-3 text-sm font-medium"
-            >
-              Submit to deposit scheme
-            </button>
-            <button
-              type="button"
-              onClick={() => showToast(TOAST_MESSAGES.download)}
-              className="app-secondary-button rounded-2xl px-4 py-3 text-sm font-medium"
-            >
-              Download PDF summary
-            </button>
-          </div>
-
-          {toast ? (
-            <div
-              className={`rounded-2xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-700 transition-all duration-300 ${
-                toast.visible ? 'translate-y-0 opacity-100' : '-translate-y-1 opacity-0'
-              }`}
-            >
-              {toast.message}
-            </div>
-          ) : null}
+        <div className="rounded-[1.2rem] border border-stone-200 bg-stone-50/70 px-4 py-3 text-sm text-stone-600">
+          Read-only preview. Submission and export controls are hidden here.
         </div>
       </div>
     )
@@ -688,7 +600,7 @@ export default function HomepageDemo() {
           </p>
 
           <DemoBadge
-            label="Live demo"
+            label="Read-only preview"
             className="border-emerald-200 bg-emerald-100 text-emerald-800"
           />
         </div>
