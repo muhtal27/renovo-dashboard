@@ -166,7 +166,7 @@ function formatGBP(value: number) {
 
 function ComparisonCell({ value, muted = false }: { value: string; muted?: boolean }) {
   if (muted) {
-    return <span className="text-sm italic text-slate-500">{value}</span>
+    return <span className="text-sm italic text-stone-400">{value}</span>
   }
 
   const isSymbol = value === '✓' || value === '✗'
@@ -175,8 +175,8 @@ function ComparisonCell({ value, muted = false }: { value: string; muted?: boole
     <span
       className={
         isSymbol
-          ? 'text-base font-semibold text-slate-100'
-          : 'text-sm font-medium text-slate-100'
+          ? 'text-base font-semibold text-stone-900'
+          : 'text-sm font-medium text-stone-900'
       }
     >
       {value}
@@ -191,38 +191,38 @@ export default function PricingPageClient() {
 
   return (
     <MarketingShell currentPath="/pricing">
-      <div className="rounded-[2.45rem] bg-slate-950 px-4 py-6 text-white md:px-6 md:py-8">
+      <div className="rounded-[2.45rem] bg-[linear-gradient(180deg,rgba(250,247,242,0.8),rgba(255,255,255,0.94))] px-4 py-6 text-stone-900 md:px-6 md:py-8">
         <div className="mx-auto max-w-7xl px-4 pb-24 pt-16 sm:px-6 lg:px-8 lg:pt-24">
           <section className="mx-auto max-w-3xl text-center">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-300/90">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-700">
               Pricing
             </p>
 
-            <h1 className="mt-4 text-balance text-4xl font-semibold tracking-tight text-white sm:text-5xl lg:text-6xl">
+            <h1 className="mt-4 text-balance text-4xl font-semibold tracking-tight text-stone-900 sm:text-5xl lg:text-6xl">
               Simple pricing. Serious time savings.
             </h1>
 
-            <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-slate-300">
+            <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-stone-600">
               Set up in a day. No hidden fees. Cancel anytime.
             </p>
 
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-              <div className="inline-flex items-center gap-2 rounded-full border border-slate-800 bg-slate-900/70 px-4 py-2 text-sm text-slate-200">
-                <ShieldCheck className="h-4 w-4 text-emerald-300" />
+              <div className="inline-flex items-center gap-2 rounded-full border border-stone-200 bg-white/90 px-4 py-2 text-sm text-stone-700">
+                <ShieldCheck className="h-4 w-4 text-emerald-600" />
                 <span>No long-term contract</span>
               </div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-slate-800 bg-slate-900/70 px-4 py-2 text-sm text-slate-200">
-                <Sparkles className="h-4 w-4 text-amber-300" />
+              <div className="inline-flex items-center gap-2 rounded-full border border-stone-200 bg-white/90 px-4 py-2 text-sm text-stone-700">
+                <Sparkles className="h-4 w-4 text-amber-600" />
                 <span>Setup included in onboarding call</span>
               </div>
             </div>
           </section>
 
           <section className="mt-12 flex flex-col items-center justify-center">
-            <div className="inline-flex items-center gap-4 rounded-full border border-slate-800 bg-slate-950/70 px-4 py-3 shadow-[0_0_0_1px_rgba(255,255,255,0.02)]">
+            <div className="inline-flex items-center gap-4 rounded-full border border-stone-200 bg-white/92 px-4 py-3 shadow-[0_12px_28px_rgba(55,43,27,0.06)]">
               <span
                 className={`text-sm transition-colors ${
-                  billing === 'monthly' ? 'text-white' : 'text-slate-400'
+                  billing === 'monthly' ? 'text-stone-900' : 'text-stone-400'
                 }`}
               >
                 Monthly
@@ -235,10 +235,10 @@ export default function PricingPageClient() {
                 onClick={() =>
                   setBilling((prev) => (prev === 'monthly' ? 'annual' : 'monthly'))
                 }
-                className="relative h-7 w-14 rounded-full bg-slate-800 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-amber-400/60"
+                className="relative h-7 w-14 rounded-full bg-stone-200 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-amber-400/60"
               >
                 <span
-                  className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow-md transition-transform duration-300 ${
+                  className={`absolute top-1 h-5 w-5 rounded-full bg-stone-900 shadow-md transition-transform duration-300 ${
                     billing === 'monthly'
                       ? 'left-1 translate-x-0'
                       : 'left-1 translate-x-7'
@@ -248,15 +248,15 @@ export default function PricingPageClient() {
 
               <span
                 className={`text-sm transition-colors ${
-                  billing === 'annual' ? 'text-white' : 'text-slate-400'
+                  billing === 'annual' ? 'text-stone-900' : 'text-stone-400'
                 }`}
               >
                 Annual
               </span>
             </div>
 
-            <p className="mt-3 text-sm text-slate-400">
-              Billing: <span className="text-slate-200">{billingLabel}</span>
+            <p className="mt-3 text-sm text-stone-500">
+              Billing: <span className="text-stone-800">{billingLabel}</span>
             </p>
           </section>
 
@@ -273,24 +273,24 @@ export default function PricingPageClient() {
                     className={[
                       'relative flex h-full flex-col rounded-3xl border p-6 transition-all duration-300',
                       plan.highlighted
-                        ? 'border-amber-400/40 bg-gradient-to-b from-slate-900 to-[#0b1627] shadow-2xl shadow-amber-950/20 ring-1 ring-amber-400/20 lg:-my-3 lg:px-7 lg:py-7'
-                        : 'border-slate-800 bg-slate-950/70 shadow-lg shadow-black/10',
+                        ? 'border-amber-300 bg-[linear-gradient(180deg,rgba(255,251,235,0.95),rgba(255,255,255,0.98))] shadow-2xl shadow-amber-200/40 ring-1 ring-amber-300/40 lg:-my-3 lg:px-7 lg:py-7'
+                        : 'border-stone-200 bg-white/92 shadow-[0_18px_40px_rgba(55,43,27,0.08)]',
                     ].join(' ')}
                   >
                     {plan.highlighted ? (
-                      <div className="absolute right-5 top-5 rounded-full border border-amber-300/30 bg-amber-400/15 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-amber-200">
+                      <div className="absolute right-5 top-5 rounded-full border border-amber-300 bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-amber-800">
                         Most Popular
                       </div>
                     ) : null}
 
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <h2 className="text-2xl font-semibold text-white">{plan.name}</h2>
-                        <p className="mt-2 text-sm text-slate-400">{plan.tag}</p>
+                        <h2 className="text-2xl font-semibold text-stone-900">{plan.name}</h2>
+                        <p className="mt-2 text-sm text-stone-500">{plan.tag}</p>
                       </div>
 
                       {billing === 'annual' ? (
-                        <div className="shrink-0 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-300">
+                        <div className="shrink-0 rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
                           Save £{plan.save}
                         </div>
                       ) : null}
@@ -298,42 +298,42 @@ export default function PricingPageClient() {
 
                     <div className="mt-8">
                       <div className="flex items-end gap-2">
-                        <span className="text-4xl font-semibold tracking-tight text-white">
+                        <span className="text-4xl font-semibold tracking-tight text-stone-900">
                           {formatGBP(price)}
                         </span>
-                        <span className="pb-1 text-base text-slate-400">{suffix}</span>
+                        <span className="pb-1 text-base text-stone-500">{suffix}</span>
                       </div>
-                      <p className="mt-3 text-sm text-slate-400">
+                      <p className="mt-3 text-sm text-stone-500">
                         Setup fee:{' '}
-                        <span className="font-medium text-slate-200">
+                        <span className="font-medium text-stone-800">
                           {formatGBP(plan.setupFee)}
                         </span>{' '}
                         one-time
                       </p>
                     </div>
 
-                    <div className="mt-8 space-y-3 rounded-2xl border border-slate-800/80 bg-slate-900/60 p-4">
+                    <div className="mt-8 space-y-3 rounded-2xl border border-stone-200 bg-stone-50/80 p-4">
                       <div className="flex items-center justify-between gap-4">
-                        <span className="text-sm text-slate-400">Portfolio</span>
-                        <span className="text-sm font-medium text-slate-100">
+                        <span className="text-sm text-stone-500">Portfolio</span>
+                        <span className="text-sm font-medium text-stone-900">
                           {plan.portfolio}
                         </span>
                       </div>
                       <div className="flex items-center justify-between gap-4">
-                        <span className="text-sm text-slate-400">Users</span>
-                        <span className="text-sm font-medium text-slate-100">
+                        <span className="text-sm text-stone-500">Users</span>
+                        <span className="text-sm font-medium text-stone-900">
                           {plan.users}
                         </span>
                       </div>
                       <div className="flex items-center justify-between gap-4">
-                        <span className="text-sm text-slate-400">Storage</span>
-                        <span className="text-sm font-medium text-slate-100">
+                        <span className="text-sm text-stone-500">Storage</span>
+                        <span className="text-sm font-medium text-stone-900">
                           {plan.storage}
                         </span>
                       </div>
                       <div className="flex items-center justify-between gap-4">
-                        <span className="text-sm text-slate-400">Support</span>
-                        <span className="text-right text-sm font-medium text-slate-100">
+                        <span className="text-sm text-stone-500">Support</span>
+                        <span className="text-right text-sm font-medium text-stone-900">
                           {plan.support}
                         </span>
                       </div>
@@ -343,9 +343,9 @@ export default function PricingPageClient() {
                       {plan.features.map((feature) => (
                         <li
                           key={feature}
-                          className="flex items-start gap-3 text-sm text-slate-300"
+                          className="flex items-start gap-3 text-sm text-stone-600"
                         >
-                          <span className="mt-0.5 inline-flex rounded-full border border-emerald-500/30 bg-emerald-500/10 p-1 text-emerald-300">
+                          <span className="mt-0.5 inline-flex rounded-full border border-emerald-300 bg-emerald-50 p-1 text-emerald-700">
                             <Check className="h-3.5 w-3.5" />
                           </span>
                           <span>{feature}</span>
@@ -359,8 +359,8 @@ export default function PricingPageClient() {
                         className={[
                           'inline-flex w-full items-center justify-center rounded-2xl px-4 py-3 text-sm font-medium transition-all duration-200',
                           plan.highlighted
-                            ? 'bg-amber-400 text-slate-950 hover:bg-amber-300'
-                            : 'border border-slate-700 bg-transparent text-slate-100 hover:border-slate-500 hover:bg-slate-900',
+                            ? 'bg-amber-400 text-stone-950 hover:bg-amber-300'
+                            : 'border border-stone-300 bg-transparent text-stone-900 hover:border-stone-400 hover:bg-stone-50',
                         ].join(' ')}
                       >
                         {plan.cta}
@@ -371,14 +371,14 @@ export default function PricingPageClient() {
               })}
             </div>
 
-            <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-950/60 px-5 py-4 sm:px-6">
+            <div className="mt-6 rounded-2xl border border-stone-200 bg-white/92 px-5 py-4 sm:px-6">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-base font-medium text-slate-100">
+                <p className="text-base font-medium text-stone-900">
                   Managing 300+ tenancies? Let&apos;s talk.
                 </p>
                 <Link
                   href="/#waitlist"
-                  className="inline-flex items-center text-sm font-medium text-amber-300 transition-colors hover:text-amber-200"
+                  className="inline-flex items-center text-sm font-medium text-amber-700 transition-colors hover:text-amber-800"
                 >
                   Book a call →
                 </Link>
@@ -387,17 +387,17 @@ export default function PricingPageClient() {
           </section>
 
           <section className="mt-12">
-            <div className="overflow-hidden rounded-3xl border border-amber-300/20 bg-gradient-to-r from-amber-400/20 via-amber-300/10 to-orange-300/10 p-6 sm:p-8">
+            <div className="overflow-hidden rounded-3xl border border-amber-200 bg-gradient-to-r from-amber-100 via-amber-50 to-orange-50 p-6 sm:p-8">
               <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex items-start gap-4">
-                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-amber-300/30 bg-amber-300/15 text-amber-200">
+                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-amber-300 bg-amber-100 text-amber-700">
                     <Clock3 className="h-6 w-6" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold text-white sm:text-2xl">
+                    <h3 className="text-xl font-semibold text-stone-900 sm:text-2xl">
                       Early access offer — Setup fee waived for the first 20 agencies.
                     </h3>
-                    <p className="mt-2 text-sm leading-6 text-amber-50/85 sm:text-base">
+                    <p className="mt-2 text-sm leading-6 text-stone-600 sm:text-base">
                       Join now and save up to £799 on onboarding.
                     </p>
                   </div>
@@ -406,7 +406,7 @@ export default function PricingPageClient() {
                 <div className="shrink-0">
                   <Link
                     href="/#waitlist"
-                    className="inline-flex items-center justify-center rounded-2xl bg-amber-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-amber-300"
+                    className="inline-flex items-center justify-center rounded-2xl bg-amber-400 px-5 py-3 text-sm font-semibold text-stone-950 transition hover:bg-amber-300"
                   >
                     Claim Early Access
                   </Link>
@@ -417,7 +417,7 @@ export default function PricingPageClient() {
 
           <section className="mt-20">
             <div className="mx-auto max-w-3xl text-center">
-              <h2 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+              <h2 className="text-3xl font-semibold tracking-tight text-stone-900 sm:text-4xl">
                 What does it actually cost per tenancy?
               </h2>
             </div>
@@ -426,19 +426,19 @@ export default function PricingPageClient() {
               {perTenancyStats.map((stat) => (
                 <div
                   key={stat.label}
-                  className="rounded-2xl border border-slate-800 bg-slate-950/60 p-6 text-center"
+                  className="rounded-2xl border border-stone-200 bg-white/92 p-6 text-center"
                 >
-                  <p className="text-sm uppercase tracking-wide text-slate-400">
+                  <p className="text-sm uppercase tracking-wide text-stone-500">
                     {stat.label}
                   </p>
-                  <p className="mt-3 text-3xl font-semibold text-white">
+                  <p className="mt-3 text-3xl font-semibold text-stone-900">
                     {stat.value}
                   </p>
                 </div>
               ))}
             </div>
 
-            <p className="mt-5 text-center text-sm text-slate-400 sm:text-base">
+            <p className="mt-5 text-center text-sm text-stone-500 sm:text-base">
               Less than the cost of a single solicitor call — and the decision is already documented.
             </p>
           </section>
@@ -449,26 +449,26 @@ export default function PricingPageClient() {
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
                   Compare plans
                 </p>
-                <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+                <h2 className="mt-3 text-3xl font-semibold tracking-tight text-stone-900 sm:text-4xl">
                   Feature comparison
                 </h2>
               </div>
             </div>
 
-            <div className="mt-8 overflow-x-auto rounded-3xl border border-slate-800 bg-slate-950/60">
+            <div className="mt-8 overflow-x-auto rounded-3xl border border-stone-200 bg-white/92">
               <table className="min-w-[760px] w-full border-collapse">
                 <thead>
-                  <tr className="border-b border-slate-800 bg-slate-900/70">
-                    <th className="px-6 py-4 text-left text-sm font-medium text-slate-300">
+                  <tr className="border-b border-stone-200 bg-stone-50/80">
+                    <th className="px-6 py-4 text-left text-sm font-medium text-stone-600">
                       Feature
                     </th>
-                    <th className="px-6 py-4 text-center text-sm font-medium text-slate-100">
+                    <th className="px-6 py-4 text-center text-sm font-medium text-stone-900">
                       Starter
                     </th>
-                    <th className="px-6 py-4 text-center text-sm font-medium text-amber-200">
+                    <th className="px-6 py-4 text-center text-sm font-medium text-amber-700">
                       Agency
                     </th>
-                    <th className="px-6 py-4 text-center text-sm font-medium text-slate-100">
+                    <th className="px-6 py-4 text-center text-sm font-medium text-stone-900">
                       Studio
                     </th>
                   </tr>
@@ -479,15 +479,15 @@ export default function PricingPageClient() {
                       key={row.feature}
                       className={
                         index !== comparisonRows.length - 1
-                          ? 'border-b border-slate-800'
+                          ? 'border-b border-stone-200'
                           : ''
                       }
                     >
-                      <td className="px-6 py-4 text-sm text-slate-300">{row.feature}</td>
+                      <td className="px-6 py-4 text-sm text-stone-600">{row.feature}</td>
                       <td className="px-6 py-4 text-center">
                         <ComparisonCell value={row.starter} muted={Boolean(row.muted)} />
                       </td>
-                      <td className="bg-amber-400/5 px-6 py-4 text-center">
+                      <td className="bg-amber-50/70 px-6 py-4 text-center">
                         <ComparisonCell value={row.agency} muted={Boolean(row.muted)} />
                       </td>
                       <td className="px-6 py-4 text-center">
@@ -502,7 +502,7 @@ export default function PricingPageClient() {
 
           <section className="mt-20">
             <div className="mx-auto max-w-3xl text-center">
-              <h2 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+              <h2 className="text-3xl font-semibold tracking-tight text-stone-900 sm:text-4xl">
                 Common questions
               </h2>
             </div>
@@ -514,7 +514,7 @@ export default function PricingPageClient() {
                 return (
                   <div
                     key={item.q}
-                    className="rounded-2xl border border-slate-800 bg-slate-950/60"
+                    className="rounded-2xl border border-stone-200 bg-white/92"
                   >
                     <button
                       type="button"
@@ -522,11 +522,11 @@ export default function PricingPageClient() {
                       onClick={() => setOpenFaq(isOpen ? null : index)}
                       aria-expanded={isOpen}
                     >
-                      <span className="text-base font-medium text-slate-100">
+                      <span className="text-base font-medium text-stone-900">
                         {item.q}
                       </span>
                       <ChevronDown
-                        className={`h-5 w-5 shrink-0 text-slate-400 transition-transform duration-300 ${
+                        className={`h-5 w-5 shrink-0 text-stone-400 transition-transform duration-300 ${
                           isOpen ? 'rotate-180' : ''
                         }`}
                       />
@@ -538,7 +538,7 @@ export default function PricingPageClient() {
                       }`}
                     >
                       <div className="overflow-hidden">
-                        <div className="px-5 pb-5 text-sm leading-6 text-slate-400 sm:px-6">
+                        <div className="px-5 pb-5 text-sm leading-6 text-stone-600 sm:px-6">
                           {item.a}
                         </div>
                       </div>
@@ -550,21 +550,21 @@ export default function PricingPageClient() {
           </section>
 
           <section className="mt-20">
-            <div className="rounded-3xl border border-slate-800 bg-gradient-to-b from-slate-950/80 to-slate-950/50 px-6 py-12 text-center sm:px-8">
-              <h2 className="mx-auto max-w-3xl text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+            <div className="rounded-3xl border border-stone-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(250,247,242,0.92))] px-6 py-12 text-center sm:px-8">
+              <h2 className="mx-auto max-w-3xl text-3xl font-semibold tracking-tight text-stone-900 sm:text-4xl">
                 Ready to simplify every end of tenancy?
               </h2>
 
               <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
                 <Link
                   href="/#waitlist"
-                  className="inline-flex w-full items-center justify-center rounded-2xl bg-amber-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-amber-300 sm:w-auto"
+                  className="inline-flex w-full items-center justify-center rounded-2xl bg-amber-400 px-5 py-3 text-sm font-semibold text-stone-950 transition hover:bg-amber-300 sm:w-auto"
                 >
                   Request Early Access
                 </Link>
                 <Link
                   href="/#platform"
-                  className="inline-flex w-full items-center justify-center rounded-2xl border border-slate-700 bg-transparent px-5 py-3 text-sm font-semibold text-slate-100 transition hover:border-slate-500 hover:bg-slate-900 sm:w-auto"
+                  className="inline-flex w-full items-center justify-center rounded-2xl border border-stone-300 bg-transparent px-5 py-3 text-sm font-semibold text-stone-900 transition hover:border-stone-400 hover:bg-stone-50 sm:w-auto"
                 >
                   Try Live Demo
                 </Link>
