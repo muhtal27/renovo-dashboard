@@ -18,7 +18,7 @@ export function LandingTrustSection({
   faqs,
 }: LandingTrustSectionProps) {
   return (
-    <section className="rounded-[2rem] bg-[#0A192F] p-6 text-white md:p-7">
+    <section className="rounded-[2rem] bg-stone-900 p-6 text-white md:p-7">
       <div className="grid gap-6 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
         <div className="max-w-3xl">
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-200/90">
