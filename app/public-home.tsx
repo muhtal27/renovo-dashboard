@@ -6,38 +6,38 @@ import { PublicWaitlistForm } from '@/app/public-waitlist-form'
 const overviewMetrics = [
   {
     value: '1 workspace',
-    label: 'for evidence, issues, review, and claim output',
+    label: 'Evidence, issues, review, and claim output in one place',
   },
   {
     value: 'Human reviewed',
-    label: 'AI can draft, but property managers still approve every decision',
+    label: 'Managers stay in control of every recommendation',
   },
   {
     value: 'Claim ready',
-    label: 'Recommendations convert into line items with traceable evidence',
+    label: 'Approved outcomes turn into claim line items with linked evidence',
   },
 ]
 
 const workflowSteps = [
   {
     step: '01',
-    title: 'Collect the full case',
-    body: 'Bring the tenancy, property, deposit claim, documents, and extracted facts into one reviewable workspace.',
+    title: 'Gather the full case',
+    body: 'Bring the tenancy, deposit, documents, and extracted facts into one workspace before review starts.',
   },
   {
     step: '02',
     title: 'Assess the issues',
-    body: 'Turn evidence into specific issues with responsibility, severity, and amount pressure visible in one place.',
+    body: 'Turn evidence into specific issues with responsibility, severity, and estimated cost visible side by side.',
   },
   {
     step: '03',
     title: 'Draft the decision',
-    body: 'Use AI drafting to help frame the recommendation, rationale, and source references without hiding the reasoning.',
+    body: 'Use AI drafting to structure the recommendation, rationale, and source references without hiding why the amount is suggested.',
   },
   {
     step: '04',
     title: 'Review with control',
-    body: 'Property managers submit, approve, reject, or send back recommendations with a full audit trail.',
+    body: 'Managers approve, reject, or adjust the recommendation with a full audit trail.',
   },
   {
     step: '05',
@@ -71,12 +71,12 @@ const checkOutItems = [
   {
     label: 'Living room — Carpet',
     description: 'Large wine stain, approx. 30cm. Right corner near sofa.',
-    meta: 'Photo evidence attached',
+    meta: 'Photo evidence linked',
   },
   {
     label: 'Master bedroom — Walls',
     description: 'Multiple scuff marks. Patch repaint required.',
-    meta: 'Photo evidence attached',
+    meta: 'Photo evidence linked',
   },
   {
     label: 'Kitchen — Cupboard door',
@@ -157,7 +157,7 @@ export function PublicHome({
               <div>
                 <p className="app-kicker">Renovo</p>
                 <p className="mt-2 max-w-xl text-sm leading-6 text-stone-600">
-                  The end-of-tenancy decision engine for letting agencies.
+                  Reviewable end-of-tenancy decisions for letting agencies.
                 </p>
               </div>
             </div>
@@ -165,17 +165,16 @@ export function PublicHome({
             <div className="relative mt-10 grid gap-8 xl:grid-cols-[minmax(0,1.02fr)_minmax(420px,0.98fr)] xl:items-center">
               <div>
                 <div className="inline-flex rounded-full border border-emerald-200 bg-emerald-50/90 px-4 py-2 text-sm font-medium text-emerald-950/85">
-                  Evidence in. Reviewable decision out.
+                  Check in. Check out. Decision trail.
                 </div>
 
                 <h1 className="mt-6 max-w-5xl text-4xl font-semibold tracking-tight md:text-[4.7rem] md:leading-[0.94]">
-                  From messy move out to claim ready — in one flow.
+                  Turn check in and check out evidence into a reviewable claim decision.
                 </h1>
 
                 <p className="mt-6 max-w-3xl text-base leading-8 text-stone-700 md:text-lg">
-                  Renovo brings together documents, extracted facts, issues, and recommendations so
-                  property managers can make fairer end-of-tenancy decisions faster — without
-                  losing the reasoning behind them.
+                  Renovo gives property managers one end-of-tenancy workspace for documents,
+                  extracted facts, issues, recommendations, and claim output.
                 </p>
 
                 <div className="mt-8 flex flex-wrap gap-3">
@@ -196,9 +195,9 @@ export function PublicHome({
                 <div className="mt-6 grid gap-2 text-xs font-medium text-stone-600 md:grid-cols-2 md:text-sm">
                   {[
                     'Built for UK letting agencies',
-                    'Human reviewed decisions only',
-                    'End-of-tenancy specialist — not a generic CRM',
-                    'Deposit scheme compliant audit trail',
+                    'Managers approve every decision',
+                    'End-of-tenancy specialist, not a generic CRM',
+                    'Evidence linked audit trail',
                   ].map((item) => (
                     <div
                       key={item}
@@ -226,9 +225,9 @@ export function PublicHome({
                 No integration required to get started
               </h2>
               <p className="mt-4 text-base leading-8 text-stone-700">
-                Property managers open a case when notice is served and upload documents directly
-                — check in inventory, check out report, move out photos. Renovo works alongside
-                your current property management software. Nothing in your existing stack changes.
+                Open a case when notice is served, upload the check in inventory, check out
+                report, and move out photos, and keep working in your current property management
+                system. Renovo sits alongside your stack from day one.
               </p>
             </div>
 
@@ -259,11 +258,11 @@ export function PublicHome({
           <div>
             <p className="app-kicker">How the review works</p>
             <h2 className="mt-2 text-2xl font-semibold text-stone-900 md:text-3xl">
-              Check in meets check out. Renovo finds what changed.
+              Check in compared with check out. Renovo highlights what changed.
             </h2>
             <p className="mt-3 max-w-2xl text-sm leading-7 text-stone-600">
-              Every issue is cross-referenced against the opening inventory. The AI drafts a
-              rationale for each one. Your manager decides.
+              The opening inventory, check out report, and photos are cross-referenced in one
+              place. Renovo drafts the reasoning. A manager decides the outcome.
             </p>
           </div>
 
@@ -296,7 +295,7 @@ export function PublicHome({
                   Renovo review
                 </p>
                 <p className="mt-1 text-sm font-semibold text-stone-900">
-                  Cross-referencing evidence
+                  Evidence comparison and draft
                 </p>
               </div>
 
@@ -306,8 +305,8 @@ export function PublicHome({
                     Step 1 — Documents read
                   </p>
                   <p className="text-xs leading-5 text-stone-600">
-                    5 documents processed. Check in inventory matched against check out report and
-                    check out photographs.
+                    5 documents processed. The check in inventory is matched against the check out
+                    report and photos.
                   </p>
                 </div>
 
@@ -316,8 +315,8 @@ export function PublicHome({
                     Step 2 — Mismatch identified
                   </p>
                   <p className="text-xs leading-5 text-stone-600">
-                    Carpet staining not present at check in. Bedroom wall scuffs exceed fair wear
-                    and tear threshold. Cupboard door broken.
+                    Carpet staining, wall scuffs, and a broken cupboard door are flagged against
+                    the opening condition record.
                   </p>
                 </div>
 
@@ -334,7 +333,7 @@ export function PublicHome({
               </div>
 
               <p className="mt-3 text-center text-[10px] font-medium text-emerald-700">
-                AI drafted · Manager decides
+                AI drafts · Manager approves
               </p>
             </div>
           </div>
@@ -369,12 +368,12 @@ export function PublicHome({
           <div className="max-w-4xl">
             <p className="app-kicker text-stone-500">Workflow</p>
             <h2 className="mt-3 text-3xl font-semibold tracking-tight text-stone-900 md:text-4xl">
-              Purpose-built around the real end-of-tenancy review path
+              Built around the real end-of-tenancy workflow
             </h2>
             <p className="mt-4 text-base leading-8 text-stone-700">
-              Renovo is not a generic assistant bolted onto a property dashboard. It is structured
-              around the property manager journey from evidence intake to reviewed recommendation and claim
-              output.
+              Renovo follows the path property managers already work through: gather evidence,
+              assess issues, review the recommendation, and prepare claim output with the
+              reasoning attached.
             </p>
           </div>
 
@@ -399,8 +398,12 @@ export function PublicHome({
             <div>
               <p className="app-kicker">Product proof</p>
               <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
-                Try the product before you sign up — click through a real end-of-tenancy case.
+                Try the product before you sign up
               </h2>
+              <p className="mt-3 max-w-3xl text-sm leading-7 text-stone-600">
+                Click through a real end-of-tenancy case to see how evidence becomes a reviewed
+                recommendation and claim output.
+              </p>
             </div>
             <a
               href="#waitlist"
@@ -425,20 +428,19 @@ export function PublicHome({
         >
           <p className="app-kicker">What changes for your team</p>
           <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
-            Stronger decisions without hiding the reasoning
+            Faster decisions, with the reasoning intact
           </h2>
           <p className="mt-4 max-w-3xl text-base leading-8 text-stone-700">
-            Property managers get one place for evidence, issues, and review. Decisions are
-            documented as they are made. Challenges are answered with a trail that already exists.
+            Property managers get one place for evidence, issues, and review. The decision trail
+            is built as the case moves forward, not recreated later.
           </p>
 
           <div className="mt-6 grid gap-4 md:grid-cols-3">
             <article className="rounded-[1.45rem] border border-amber-100/80 bg-white/80 p-5">
               <h3 className="text-base font-semibold text-stone-900">Faster review cycles</h3>
               <p className="mt-2 text-sm leading-7 text-stone-600">
-                No more rebuilding context from inbox threads, spreadsheets, and PDFs before you
-                can even begin assessing the case. Everything is already in one place when you open
-                it.
+                Open the case and start reviewing immediately. No rebuilding context from inbox
+                threads, spreadsheets, and PDFs first.
               </p>
             </article>
             <article className="rounded-[1.45rem] border border-amber-100/80 bg-white/80 p-5">
@@ -446,8 +448,8 @@ export function PublicHome({
                 More consistent decisions
               </h3>
               <p className="mt-2 text-sm leading-7 text-stone-600">
-                The same evidence structure, issue categories, and review states mean different
-                managers reach steadier outcomes — across branches and across cases.
+                The same evidence structure and review states help managers reach steadier outcomes
+                across branches and cases.
               </p>
             </article>
             <article className="rounded-[1.45rem] border border-amber-100/80 bg-white/80 p-5">
@@ -455,8 +457,8 @@ export function PublicHome({
                 Defensible when challenged
               </h3>
               <p className="mt-2 text-sm leading-7 text-stone-600">
-                When a landlord or tenant pushes back, the rationale and evidence trail are already
-                there. You are not recreating the reasoning from memory.
+                If a landlord or tenant pushes back, the rationale and evidence are already
+                attached to the case.
               </p>
             </article>
           </div>
@@ -467,18 +469,17 @@ export function PublicHome({
             <div>
               <p className="app-kicker">Early access</p>
               <h2 className="mt-3 max-w-4xl text-3xl font-semibold tracking-tight md:text-4xl">
-                Join the Renovo rollout list without leaving the page
+                Request early access
               </h2>
               <p className="mt-4 max-w-3xl text-base leading-8 text-stone-700">
-                We are opening Renovo carefully with agencies that want a more reviewable,
-                specialist end-of-tenancy workflow. Leave your details and we will follow up when
-                rollout capacity opens.
+                Join the rollout list if you want a more reviewable end-of-tenancy workflow for
+                your agency. We will follow up when capacity opens.
               </p>
               <div className="mt-6 rounded-[1.45rem] border border-emerald-200 bg-emerald-50/85 p-5">
                 <p className="text-sm font-semibold text-emerald-950">What happens next</p>
                 <p className="mt-2 text-sm leading-7 text-emerald-950/85">
-                  We will use these details for rollout contact only. Existing users can sign in
-                  immediately from the live entrance.
+                  We will use these details for rollout contact only. If you already have access,
+                  sign in from the top right.
                 </p>
                 <div className="mt-4">
                   <a

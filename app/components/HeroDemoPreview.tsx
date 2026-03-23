@@ -17,19 +17,19 @@ export function HeroDemoPreview({ highlights }: HeroDemoPreviewProps) {
           <span className="h-2.5 w-2.5 rounded-full bg-emerald-300" />
         </div>
         <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-stone-500">
-          Live workspace preview
+          Live demo preview
         </p>
       </div>
 
       <div className="mt-4 overflow-hidden rounded-[1.45rem] border border-stone-200 bg-stone-50">
         <div className="border-b border-stone-200 bg-white/95 px-4 py-3">
-          <p className="app-kicker">Preview case</p>
+          <p className="app-kicker">Example case</p>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <span className="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-800">
-              Recommendation drafted
+              Draft recommendation
             </span>
             <span className="inline-flex rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-700">
-              £640 under review
+              £640 proposed claim
             </span>
           </div>
         </div>
