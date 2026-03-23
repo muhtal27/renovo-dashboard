@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { MarketingShell } from '@/app/components/MarketingShell'
 
 const dataCards = [
   {
@@ -77,50 +78,7 @@ export const metadata: Metadata = {
 
 export default function HowItWorksPage() {
   return (
-    <main className="app-grid min-h-screen px-5 py-6 text-stone-900 md:px-8 md:py-8">
-      <div className="mx-auto max-w-[1380px] space-y-6">
-        <header className="sticky top-0 z-30">
-          <div className="app-surface flex items-center justify-between rounded-[1.45rem] border border-stone-200/85 px-4 py-3 md:px-5">
-            <Link href="/" className="app-kicker">
-              Renovo
-            </Link>
-
-            <nav className="flex items-center gap-2 md:gap-3" aria-label="Marketing">
-              <Link
-                href="/"
-                className="inline-flex text-sm font-medium text-stone-600 hover:text-stone-900"
-              >
-                Home
-              </Link>
-              <Link
-                href="/#platform"
-                className="hidden text-sm font-medium text-stone-600 hover:text-stone-900 md:inline-flex"
-              >
-                Product
-              </Link>
-              <Link
-                href="/how-it-works"
-                aria-current="page"
-                className="hidden text-sm font-medium text-stone-900 md:inline-flex"
-              >
-                How it works
-              </Link>
-              <Link
-                href="/#waitlist"
-                className="inline-flex text-sm font-medium text-stone-700 hover:text-stone-900"
-              >
-                Request access
-              </Link>
-              <Link
-                href="/login"
-                className="app-secondary-button rounded-full px-4 py-2 text-sm font-medium"
-              >
-                Open the live sign-in
-              </Link>
-            </nav>
-          </div>
-        </header>
-
+    <MarketingShell currentPath="/how-it-works">
         <section className="app-surface-strong rounded-[2.45rem] p-4 md:p-6">
           <div className="rounded-[2rem] border border-stone-200/85 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.98),rgba(255,255,255,0.66)_38%,rgba(231,246,241,0.78)_70%,rgba(229,237,245,0.72)_100%)] px-6 py-8 md:px-10 md:py-10">
             <p className="app-kicker">How it works</p>
@@ -285,7 +243,6 @@ export default function HowItWorksPage() {
             </div>
           </div>
         </section>
-      </div>
-    </main>
+    </MarketingShell>
   )
 }

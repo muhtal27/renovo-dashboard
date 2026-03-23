@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { ComparisonCard } from '@/app/components/ComparisonCard'
 import { HeroDemoPreview } from '@/app/components/HeroDemoPreview'
 import { LandingTrustSection } from '@/app/components/LandingTrustSection'
+import { MarketingShell } from '@/app/components/MarketingShell'
 import { PublicWaitlistForm } from '@/app/public-waitlist-form'
 
 const overviewMetrics = [
@@ -125,64 +126,7 @@ export function PublicHome({
   productDemo?: React.ReactNode
 }) {
   return (
-    <main className="app-grid min-h-screen px-5 py-6 text-stone-900 md:px-8 md:py-8">
-      <div className="mx-auto max-w-[1380px] space-y-6">
-        <header className="sticky top-0 z-30">
-          <div className="app-surface flex items-center justify-between gap-4 rounded-[1.45rem] border border-stone-200/85 px-4 py-3 backdrop-blur md:px-5">
-            <Link href="/" className="app-kicker">
-              Renovo
-            </Link>
-
-            <nav className="hidden items-center gap-4 md:flex" aria-label="Homepage">
-              <a
-                href="#how-it-works"
-                className="text-sm font-medium text-stone-600 hover:text-stone-900"
-              >
-                How it works
-              </a>
-              <a
-                href="#platform"
-                className="text-sm font-medium text-stone-600 hover:text-stone-900"
-              >
-                Demo
-              </a>
-              <a
-                href="#benefits"
-                className="text-sm font-medium text-stone-600 hover:text-stone-900"
-              >
-                Benefits
-              </a>
-              <a
-                href="#waitlist"
-                className="text-sm font-medium text-stone-600 hover:text-stone-900"
-              >
-                Early access
-              </a>
-            </nav>
-
-            <div className="flex items-center gap-2">
-              <a
-                href="#platform"
-                className="inline-flex text-sm font-medium text-stone-700 hover:text-stone-900 md:hidden"
-              >
-                Demo
-              </a>
-              <a
-                href="#waitlist"
-                className="inline-flex text-sm font-medium text-stone-700 hover:text-stone-900 md:hidden"
-              >
-                Early access
-              </a>
-              <Link
-                href="/login"
-                className="app-secondary-button rounded-full px-4 py-2 text-sm font-medium"
-              >
-                Sign in
-              </Link>
-            </div>
-          </div>
-        </header>
-
+    <MarketingShell currentPath="/" navAriaLabel="Homepage">
         <section className="app-surface-strong overflow-hidden rounded-[2.45rem] p-4 md:p-6">
           <div className="relative overflow-hidden rounded-[2rem] border border-stone-200/85 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.98),rgba(255,255,255,0.62)_38%,rgba(231,246,241,0.82)_70%,rgba(229,237,245,0.78)_100%)] px-6 py-7 md:px-10 md:py-10">
             <div className="pointer-events-none absolute -right-12 top-0 h-72 w-72 rounded-full bg-emerald-200/40 blur-3xl" />
@@ -532,7 +476,6 @@ export function PublicHome({
             <PublicWaitlistForm />
           </div>
         </section>
-      </div>
-    </main>
+    </MarketingShell>
   )
 }
