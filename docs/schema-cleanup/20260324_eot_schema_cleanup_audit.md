@@ -274,6 +274,69 @@ These are excluded from automatic removal unless separately proven safe:
 | `trg_lease_lifecycle_events_sync_context` | `public.lease_lifecycle_events` | lifecycle automation path | Keep for now |
 | `trg_lease_lifecycle_events_ensure_move_out_tracker` | `public.lease_lifecycle_events` | live move-out tracker dependency | Keep for now |
 
+## Targeted Review: `public.case_tags` and `public.tags`
+
+Live schema shape:
+- `public.tags`
+  - columns:
+    - `id uuid primary key default gen_random_uuid()`
+    - `name text not null unique`
+    - `created_at timestamptz not null default now()`
+  - indexes / constraints:
+    - `tags_pkey`
+    - `tags_name_key`
+- `public.case_tags`
+  - columns:
+    - `id uuid primary key default gen_random_uuid()`
+    - `case_id uuid not null`
+    - `tag_id uuid not null`
+  - indexes / constraints:
+    - `case_tags_pkey`
+    - `case_tags_case_id_tag_id_key`
+    - `idx_case_tags_case_id`
+    - `idx_case_tags_tag_id`
+    - `case_tags_case_id_fkey -> public.cases(id) on delete cascade`
+    - `case_tags_tag_id_fkey -> public.tags(id) on delete cascade`
+- triggers:
+  - none found on either table
+- RLS:
+  - enabled on both tables
+  - `tags_operator_select`
+  - `case_tags_operator_select`
+- grants:
+  - broad grants exist for `anon`, `authenticated`, `service_role`, and `postgres`
+
+Repo-visible dependencies:
+- no `app/` or `lib/` references found
+- no repo-visible SQL function, trigger, or view reads/writes either table
+- the only non-cleanup repo reference outside RLS setup is a seed cleanup statement:
+  - `delete from public.case_tags where case_id in (select id from fixture_cases);`
+
+Live-database findings:
+- `public.tags` row count: `0`
+- `public.case_tags` row count: `0`
+- no sampled current cases carry tags because the join table is empty
+
+Interpretation:
+- the legacy tagging surface is not tied to the current EOT workflow
+- no current writer or reader was identified
+- both tables are structurally simple and inactive
+- because `case_tags` depends on `tags`, they should be archived together in one step
+
+Recommendation:
+- `Safe to archive first`
+- archive both together in a single micro-stage:
+  - rename `public.tags` to `public._deprecated_20260324_tags`
+  - rename `public.case_tags` to `public._deprecated_20260324_case_tags`
+  - rename related constraints/indexes for clarity and future name reuse
+  - revoke `anon` and `authenticated` access from both archived tables
+
+Rollback considerations:
+- rename `_deprecated_20260324_tags` back to `tags`
+- rename `_deprecated_20260324_case_tags` back to `case_tags`
+- restore original constraint/index names if needed
+- restore revoked table grants if any hidden caller appears during rollback
+
 ## Stage Plan
 
 ### Stage A — Remove clearly dead view only
