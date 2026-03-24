@@ -2,9 +2,14 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import { getSupabaseServiceRoleClient } from '@/lib/supabase-admin'
 import type {
   AttachCaseDocumentInput,
+  CaseCommunicationAttachment,
+  CaseCommunicationRecord,
+  CaseCommunicationRow,
   CaseDocumentRow,
+  CaseDocumentSummary,
   CaseRow,
   ContactSummaryRow,
+  CreateCaseCommunicationInput,
   CreateDecisionRecommendationInput,
   CreateEndOfTenancyCaseInput,
   DecisionRecommendationRow,
@@ -81,6 +86,9 @@ const MOVE_OUT_CHECKLIST_ITEM_SELECT =
 const MOVE_OUT_TRACKER_EVENT_SELECT =
   'id, move_out_tracker_id, actor_user_id, actor_type, source_table, source_record_id, event_type, title, detail, metadata, is_portal_visible, created_at'
 
+const CASE_COMMUNICATION_SELECT =
+  'id, case_id, end_of_tenancy_case_id, thread_key, direction, channel, recipient_role, sender_user_id, sender_contact_id, recipient_contact_id, subject, body, attachments, metadata, status, unread, sent_at, read_at, created_at, updated_at'
+
 const END_OF_TENANCY_CASE_LIST_CASE_SELECT =
   'id, case_number, status, property_id, assigned_user_id, last_activity_at, updated_at, created_at'
 
@@ -96,6 +104,34 @@ function getClient(supabase?: DbClient) {
 
 function dedupe(values: Array<string | null | undefined>) {
   return Array.from(new Set(values.filter((value): value is string => Boolean(value))))
+}
+
+function getContactLabel(contact: {
+  full_name?: string | null
+  company_name?: string | null
+  email?: string | null
+} | null) {
+  return contact?.full_name?.trim() || contact?.company_name?.trim() || contact?.email?.trim() || null
+}
+
+function getUserLabel(user: {
+  full_name?: string | null
+  email?: string | null
+} | null) {
+  return user?.full_name?.trim() || user?.email?.trim() || null
+}
+
+function emptyDocumentSummary(): CaseDocumentSummary {
+  return {
+    total: 0,
+    checkIn: 0,
+    checkOut: 0,
+    photos: 0,
+    supporting: 0,
+    invoices: 0,
+    receipts: 0,
+    other: 0,
+  }
 }
 
 async function requireMaybeSingle<T>(
@@ -191,8 +227,10 @@ export async function listEndOfTenancyCases(options?: {
 
   const caseIds = dedupe(eotCases.map((row) => row.case_id))
   const tenancyIds = dedupe(eotCases.map((row) => row.tenancy_id))
+  const depositClaimIds = dedupe(eotCases.map((row) => row.deposit_claim_id))
+  const endOfTenancyCaseIds = dedupe(eotCases.map((row) => row.id))
 
-  const [caseResult, tenancyResult] = await Promise.all([
+  const [caseResult, tenancyResult, depositClaimResult, moveOutTrackerResult, documentSummaryResult] = await Promise.all([
     caseIds.length
       ? supabase.from('cases').select(END_OF_TENANCY_CASE_LIST_CASE_SELECT).in('id', caseIds)
       : Promise.resolve({ data: [], error: null }),
@@ -201,6 +239,18 @@ export async function listEndOfTenancyCases(options?: {
           .from('tenancies')
           .select(END_OF_TENANCY_CASE_LIST_TENANCY_SELECT)
           .in('id', tenancyIds)
+      : Promise.resolve({ data: [], error: null }),
+    depositClaimIds.length
+      ? supabase.from('deposit_claims').select(DEPOSIT_CLAIM_SELECT).in('id', depositClaimIds)
+      : Promise.resolve({ data: [], error: null }),
+    endOfTenancyCaseIds.length
+      ? supabase
+          .from('move_out_trackers')
+          .select(MOVE_OUT_TRACKER_SELECT)
+          .in('end_of_tenancy_case_id', endOfTenancyCaseIds)
+      : Promise.resolve({ data: [], error: null }),
+    caseIds.length
+      ? supabase.from('case_documents').select('id, case_id, document_role').in('case_id', caseIds)
       : Promise.resolve({ data: [], error: null }),
   ])
 
@@ -212,11 +262,66 @@ export async function listEndOfTenancyCases(options?: {
     throw new Error(`Unable to load tenancies: ${tenancyResult.error.message}`)
   }
 
+  if (depositClaimResult.error) {
+    throw new Error(`Unable to load deposit claims: ${depositClaimResult.error.message}`)
+  }
+
+  if (moveOutTrackerResult.error) {
+    throw new Error(`Unable to load move-out trackers: ${moveOutTrackerResult.error.message}`)
+  }
+
+  if (documentSummaryResult.error) {
+    throw new Error(`Unable to load case document summaries: ${documentSummaryResult.error.message}`)
+  }
+
   const caseRows = ((caseResult.data || []) as unknown) as CaseRow[]
   const tenancyRows = ((tenancyResult.data || []) as unknown) as TenancyRow[]
+  const depositClaimRows = ((depositClaimResult.data || []) as unknown) as DepositClaimRow[]
+  const moveOutTrackerRows = ((moveOutTrackerResult.data || []) as unknown) as MoveOutTrackerRow[]
+  const documentSummaryRows = ((documentSummaryResult.data || []) as Array<{
+    id: string
+    case_id: string
+    document_role: string | null
+  }>)
 
   const caseMap = new Map(caseRows.map((row) => [row.id, row]))
   const tenancyMap = new Map(tenancyRows.map((row) => [row.id, row]))
+  const depositClaimMap = new Map(depositClaimRows.map((row) => [row.id, row]))
+  const moveOutTrackerMap = new Map(
+    moveOutTrackerRows.map((row) => [row.end_of_tenancy_case_id, row])
+  )
+  const documentSummaryMap = new Map<string, CaseDocumentSummary>()
+
+  for (const row of documentSummaryRows) {
+    const summary = documentSummaryMap.get(row.case_id) ?? emptyDocumentSummary()
+    summary.total += 1
+
+    switch (row.document_role) {
+      case 'check_in':
+        summary.checkIn += 1
+        break
+      case 'check_out':
+        summary.checkOut += 1
+        break
+      case 'photo':
+        summary.photos += 1
+        break
+      case 'supporting_evidence':
+        summary.supporting += 1
+        break
+      case 'invoice':
+        summary.invoices += 1
+        break
+      case 'receipt':
+        summary.receipts += 1
+        break
+      default:
+        summary.other += 1
+        break
+    }
+
+    documentSummaryMap.set(row.case_id, summary)
+  }
 
   const propertyIds = dedupe(
     eotCases.map((row) => {
@@ -291,10 +396,219 @@ export async function listEndOfTenancyCases(options?: {
       assignedOperator: caseRow?.assigned_user_id
         ? userMap.get(caseRow.assigned_user_id) ?? null
         : null,
-      depositClaim: null,
-      moveOutTracker: null,
+      depositClaim: endOfTenancyCase.deposit_claim_id
+        ? depositClaimMap.get(endOfTenancyCase.deposit_claim_id) ?? null
+        : null,
+      moveOutTracker: moveOutTrackerMap.get(endOfTenancyCase.id) ?? null,
+      documentSummary: documentSummaryMap.get(endOfTenancyCase.case_id) ?? emptyDocumentSummary(),
     }
   })
+}
+
+export async function listCaseCommunicationRecords(
+  options?: {
+    supabase?: DbClient
+    caseIds?: string[]
+    endOfTenancyCaseIds?: string[]
+    unreadOnly?: boolean
+    limit?: number
+  }
+) {
+  const supabase = getClient(options?.supabase)
+  let query = supabase
+    .from('case_communications')
+    .select(CASE_COMMUNICATION_SELECT)
+    .order('created_at', { ascending: false })
+    .limit(options?.limit ?? 250)
+
+  if (options?.caseIds?.length) {
+    query = query.in('case_id', dedupe(options.caseIds))
+  }
+
+  if (options?.endOfTenancyCaseIds?.length) {
+    query = query.in('end_of_tenancy_case_id', dedupe(options.endOfTenancyCaseIds))
+  }
+
+  if (options?.unreadOnly) {
+    query = query.eq('unread', true)
+  }
+
+  const rows = await requireMany<CaseCommunicationRow>('Unable to load case communications', query)
+
+  if (rows.length === 0) {
+    return []
+  }
+
+  const userIds = dedupe(rows.map((row) => row.sender_user_id))
+  const contactIds = dedupe(
+    rows.flatMap((row) => [row.sender_contact_id, row.recipient_contact_id])
+  )
+
+  const [userResult, contactResult] = await Promise.all([
+    userIds.length
+      ? supabase.from('users_profiles').select('id, full_name, email').in('id', userIds)
+      : Promise.resolve({ data: [], error: null }),
+    contactIds.length
+      ? supabase
+          .from('contacts')
+          .select('id, full_name, company_name, email')
+          .in('id', contactIds)
+      : Promise.resolve({ data: [], error: null }),
+  ])
+
+  if (userResult.error) {
+    throw new Error(`Unable to load communication users: ${userResult.error.message}`)
+  }
+
+  if (contactResult.error) {
+    throw new Error(`Unable to load communication contacts: ${contactResult.error.message}`)
+  }
+
+  const userMap = new Map(
+    (((userResult.data || []) as Array<{ id: string; full_name: string | null; email: string | null }>).map(
+      (user) => [user.id, user] as const
+    ))
+  )
+  const contactMap = new Map(
+    (((contactResult.data || []) as Array<{
+      id: string
+      full_name: string | null
+      company_name: string | null
+      email: string | null
+    }>).map((contact) => [contact.id, contact] as const))
+  )
+
+  return rows.map<CaseCommunicationRecord>((row) => ({
+    ...row,
+    sender_name: row.sender_user_id
+      ? getUserLabel(userMap.get(row.sender_user_id) ?? null)
+      : getContactLabel(row.sender_contact_id ? contactMap.get(row.sender_contact_id) ?? null : null),
+    recipient_name: row.recipient_contact_id
+      ? getContactLabel(contactMap.get(row.recipient_contact_id) ?? null)
+      : row.recipient_role === 'internal'
+        ? 'Internal'
+        : null,
+  }))
+}
+
+export async function createCaseCommunication(
+  input: CreateCaseCommunicationInput,
+  options?: { supabase?: DbClient }
+) {
+  const supabase = getClient(options?.supabase)
+
+  const attachments = (input.attachments ?? []).map<CaseCommunicationAttachment>((attachment) => ({
+    case_document_id: attachment.case_document_id ?? null,
+    file_name: attachment.file_name ?? null,
+    file_url: attachment.file_url ?? null,
+    document_role: attachment.document_role ?? null,
+  }))
+
+  const { data, error } = await supabase
+    .from('case_communications')
+    .insert({
+      case_id: input.caseId,
+      end_of_tenancy_case_id: input.endOfTenancyCaseId ?? null,
+      thread_key: input.threadKey ?? 'primary',
+      direction: input.direction,
+      channel: input.channel,
+      recipient_role: input.recipientRole,
+      sender_user_id: input.senderUserId ?? null,
+      sender_contact_id: input.senderContactId ?? null,
+      recipient_contact_id: input.recipientContactId ?? null,
+      subject: input.subject ?? null,
+      body: input.body,
+      attachments,
+      metadata: input.metadata ?? {},
+      status: input.status ?? 'draft',
+      unread: input.unread ?? false,
+      sent_at: input.sentAt ?? null,
+      read_at: input.readAt ?? null,
+    })
+    .select(CASE_COMMUNICATION_SELECT)
+    .single()
+
+  if (error) {
+    throw new Error(`Unable to create case communication: ${error.message}`)
+  }
+
+  const communication = data as CaseCommunicationRow
+
+  const [userResult, contactResult] = await Promise.all([
+    communication.sender_user_id
+      ? supabase
+          .from('users_profiles')
+          .select('id, full_name, email')
+          .eq('id', communication.sender_user_id)
+          .maybeSingle()
+      : Promise.resolve({ data: null, error: null }),
+    [communication.sender_contact_id, communication.recipient_contact_id].filter(Boolean).length > 0
+      ? supabase
+          .from('contacts')
+          .select('id, full_name, company_name, email')
+          .in(
+            'id',
+            [communication.sender_contact_id, communication.recipient_contact_id].filter(
+              Boolean
+            ) as string[]
+          )
+      : Promise.resolve({ data: [], error: null }),
+  ])
+
+  if (userResult.error) {
+    throw new Error(`Unable to load communication sender: ${userResult.error.message}`)
+  }
+
+  if (contactResult.error) {
+    throw new Error(`Unable to load communication contacts: ${contactResult.error.message}`)
+  }
+
+  const contacts = (contactResult.data || []) as Array<{
+    id: string
+    full_name: string | null
+    company_name: string | null
+    email: string | null
+  }>
+  const contactMap = new Map(contacts.map((contact) => [contact.id, contact] as const))
+
+  return {
+    ...communication,
+    sender_name: communication.sender_user_id
+      ? getUserLabel((userResult.data as { full_name?: string | null; email?: string | null } | null) ?? null)
+      : getContactLabel(
+          communication.sender_contact_id
+            ? contactMap.get(communication.sender_contact_id) ?? null
+            : null
+        ),
+    recipient_name: communication.recipient_contact_id
+      ? getContactLabel(contactMap.get(communication.recipient_contact_id) ?? null)
+      : communication.recipient_role === 'internal'
+        ? 'Internal'
+        : null,
+  }
+}
+
+export async function markCaseCommunicationRead(
+  communicationId: string,
+  options?: { supabase?: DbClient }
+) {
+  const supabase = getClient(options?.supabase)
+  const { data, error } = await supabase
+    .from('case_communications')
+    .update({
+      unread: false,
+      read_at: new Date().toISOString(),
+      status: 'read',
+    })
+    .eq('id', communicationId)
+    .select(CASE_COMMUNICATION_SELECT)
+    .single()
+
+  if (error) {
+    throw new Error(`Unable to mark communication as read: ${error.message}`)
+  }
+
+  return data as CaseCommunicationRow
 }
 
 export async function attachCaseDocument(
@@ -554,7 +868,7 @@ export async function getEndOfTenancyCaseDetail(
   }
 
   // Round 2: everything that only depends on endOfTenancyCase — run in parallel
-  const [baseCase, tenancy, moveOutTracker, depositClaim, documents, issues, recommendations] = await Promise.all([
+  const [baseCase, tenancy, moveOutTracker, depositClaim, documents, issues, recommendations, communications] = await Promise.all([
     requireMaybeSingle<CaseRow>(
       'Unable to load base case',
       supabase.from('cases').select(CASE_SELECT).eq('id', endOfTenancyCase.case_id).maybeSingle()
@@ -601,6 +915,11 @@ export async function getEndOfTenancyCaseDetail(
         .eq('end_of_tenancy_case_id', endOfTenancyCase.id)
         .order('created_at')
     ),
+    listCaseCommunicationRecords({
+      supabase,
+      endOfTenancyCaseIds: [endOfTenancyCase.id],
+      limit: 500,
+    }),
   ])
 
   // Derive IDs needed for round 3
@@ -690,6 +1009,36 @@ export async function getEndOfTenancyCaseDetail(
       : Promise.resolve([]),
   ])
 
+  const documentSummary = emptyDocumentSummary()
+
+  for (const document of documents) {
+    documentSummary.total += 1
+
+    switch (document.document_role) {
+      case 'check_in':
+        documentSummary.checkIn += 1
+        break
+      case 'check_out':
+        documentSummary.checkOut += 1
+        break
+      case 'photo':
+        documentSummary.photos += 1
+        break
+      case 'supporting_evidence':
+        documentSummary.supporting += 1
+        break
+      case 'invoice':
+        documentSummary.invoices += 1
+        break
+      case 'receipt':
+        documentSummary.receipts += 1
+        break
+      default:
+        documentSummary.other += 1
+        break
+    }
+  }
+
   const detail: EndOfTenancyCaseDetail = {
     endOfTenancyCase,
     case: baseCase,
@@ -700,6 +1049,7 @@ export async function getEndOfTenancyCaseDetail(
     assignedOperator: null,
     depositClaim,
     moveOutTracker,
+    documentSummary,
     documents,
     extractions,
     issues,
@@ -710,6 +1060,7 @@ export async function getEndOfTenancyCaseDetail(
     reviewActions,
     moveOutChecklistItems,
     moveOutTrackerEvents,
+    communications,
   }
 
   return detail

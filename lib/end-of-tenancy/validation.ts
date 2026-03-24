@@ -1,4 +1,7 @@
 import type {
+  CaseCommunicationChannel,
+  CaseCommunicationDirection,
+  CaseCommunicationRecipientRole,
   CaseDocumentRole,
   DecisionReviewActionType,
   DepositClaimLineItemCategory,
@@ -13,6 +16,9 @@ import type {
   RecommendationStatus,
 } from '@/lib/end-of-tenancy/types'
 import {
+  CASE_COMMUNICATION_CHANNELS,
+  CASE_COMMUNICATION_DIRECTIONS,
+  CASE_COMMUNICATION_RECIPIENT_ROLES,
   MOVE_OUT_CHECKLIST_ITEM_KEYS,
   MOVE_OUT_CHECKLIST_ITEM_STATUSES,
   MOVE_OUT_TRACKER_EVENT_TYPES,
@@ -110,6 +116,13 @@ const MOVE_OUT_CHECKLIST_KEYS: MoveOutChecklistItemKey[] = [...MOVE_OUT_CHECKLIS
 const MOVE_OUT_CHECKLIST_STATUSES: MoveOutChecklistItemStatus[] = [...MOVE_OUT_CHECKLIST_ITEM_STATUSES]
 
 const MOVE_OUT_EVENT_TYPES: MoveOutTrackerEventType[] = [...MOVE_OUT_TRACKER_EVENT_TYPES]
+const CASE_COMMUNICATION_DIRECTION_VALUES: CaseCommunicationDirection[] = [
+  ...CASE_COMMUNICATION_DIRECTIONS,
+]
+const CASE_COMMUNICATION_CHANNEL_VALUES: CaseCommunicationChannel[] = [...CASE_COMMUNICATION_CHANNELS]
+const CASE_COMMUNICATION_RECIPIENT_ROLE_VALUES: CaseCommunicationRecipientRole[] = [
+  ...CASE_COMMUNICATION_RECIPIENT_ROLES,
+]
 
 export function assertNonEmptyString(value: unknown, label: string): asserts value is string {
   if (typeof value !== 'string' || value.trim() === '') {
@@ -216,4 +229,16 @@ export function assertMoveOutChecklistItemStatus(value: unknown, label = 'status
 
 export function assertMoveOutTrackerEventType(value: unknown, label = 'eventType') {
   assertEnum(value, label, MOVE_OUT_EVENT_TYPES)
+}
+
+export function assertCaseCommunicationDirection(value: unknown, label = 'direction') {
+  assertEnum(value, label, CASE_COMMUNICATION_DIRECTION_VALUES)
+}
+
+export function assertCaseCommunicationChannel(value: unknown, label = 'channel') {
+  assertEnum(value, label, CASE_COMMUNICATION_CHANNEL_VALUES)
+}
+
+export function assertCaseCommunicationRecipientRole(value: unknown, label = 'recipientRole') {
+  assertEnum(value, label, CASE_COMMUNICATION_RECIPIENT_ROLE_VALUES)
 }

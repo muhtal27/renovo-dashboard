@@ -9,8 +9,8 @@ type FaqItem = {
 }
 
 type LandingTrustSectionProps = {
-  points: TrustPoint[]
-  faqs: FaqItem[]
+  points: ReadonlyArray<TrustPoint>
+  faqs: ReadonlyArray<FaqItem>
 }
 
 export function LandingTrustSection({
@@ -22,15 +22,15 @@ export function LandingTrustSection({
       <div className="grid gap-6 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
         <div className="max-w-3xl">
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-700">
-            Guidance hub
+            Control and trust
           </p>
           <h2 className="mt-3 text-3xl font-semibold tracking-tight text-stone-900 md:text-4xl">
-            Clear reasoning beats black-box automation
+            Control stays with your team
           </h2>
           <p className="mt-4 text-base leading-8 text-stone-700">
-            Renovo is designed to make end-of-tenancy decisions easier to review, easier to
-            explain, and easier to defend later. Trust comes from seeing the evidence, the issue,
-            and the reasoning together in one place.
+            Renovo prepares the work, but your team reviews every issue, amount, and explanation
+            before anything is sent. The reasoning stays visible, the evidence stays linked, and
+            the record is there if a claim is challenged later.
           </p>
         </div>
 
@@ -51,15 +51,15 @@ export function LandingTrustSection({
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-2xl">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-stone-500">
-              Built for deposit-scheme-ready workflows
+              Built for review and challenge
             </p>
             <p className="mt-2 text-sm leading-7 text-stone-600">
-              Designed around real dispute documentation, with evidence, reasoning, and claim
-              output kept reviewable before scheme submission.
+              Property data is encrypted in transit and at rest. Core customer data is stored in
+              the EU, and we use trusted sub-processors only where needed to run the service.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            {['MyDeposits', 'TDS', 'DPS', 'More schemes'].map((item) => (
+            {['Human sign-off', 'Evidence linked', 'Override anything', 'Data stays yours'].map((item) => (
               <span
                 key={item}
                 className="inline-flex rounded-full border border-stone-200 bg-white px-3 py-2 text-xs font-medium uppercase tracking-[0.16em] text-stone-500"
@@ -70,7 +70,7 @@ export function LandingTrustSection({
           </div>
         </div>
         <p className="mt-3 text-xs text-stone-500">
-          Scheme references are shown for workflow context only.
+          Claim review and submission stay under your team&apos;s control from draft through sign-off.
         </p>
       </div>
 

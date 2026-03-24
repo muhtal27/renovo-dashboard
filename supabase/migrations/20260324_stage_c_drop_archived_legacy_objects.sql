@@ -1,0 +1,44 @@
+-- Stage C template: permanent drop after cooling period.
+-- DO NOT APPLY until archived objects have remained unused for the agreed window
+-- and manual sign-off confirms that recovery is no longer required.
+--
+-- Pre-conditions:
+--   1. Stage B archive completed successfully.
+--   2. Archived objects remained unused for the agreed cooling period.
+--   3. No app-code, SQL, BI, or support/export dependencies remain.
+--
+-- Rollback plan:
+--   restore from backup or point-in-time recovery only.
+--
+-- Verification SQL before any drop:
+--   select schemaname, tablename
+--   from pg_tables
+--   where schemaname = 'public'
+--     and tablename like '\_deprecated\_20260324\_%' escape '\'
+--   order by tablename;
+--
+-- App smoke tests after the drop window:
+--   /eot
+--   /cases/[id]
+--   evidence upload
+--   recommendation generation
+--   claim generation
+--   knowledge search
+--
+-- Candidate archived tables:
+--   _deprecated_20260324_case_assignments
+--   _deprecated_20260324_case_tags
+--   _deprecated_20260324_tags
+--   _deprecated_20260324_resolved_messages
+--   _deprecated_20260324_contact_methods
+--   _deprecated_20260324_case_events
+--   _deprecated_20260324_landlord_statements
+--   _deprecated_20260324_tenancy_key_sets
+--   _deprecated_20260324_tenancy_utilities
+--
+-- Example statements (commented intentionally):
+-- drop table if exists public._deprecated_20260324_case_assignments;
+-- drop table if exists public._deprecated_20260324_case_tags;
+-- drop table if exists public._deprecated_20260324_tags;
+--
+-- Run only after validation and backup confirmation.

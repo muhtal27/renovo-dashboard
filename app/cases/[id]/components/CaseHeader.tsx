@@ -22,7 +22,7 @@ export function CaseHeader({
     <section className="app-surface rounded-[2rem] px-6 py-6 md:px-8">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <Link href="/eot" className="app-kicker inline-flex items-center gap-2 text-stone-500">
+          <Link href="/cases" className="app-kicker inline-flex items-center gap-2 text-stone-500">
             <span aria-hidden="true">←</span>
             Back to cases
           </Link>

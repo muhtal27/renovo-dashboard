@@ -190,6 +190,32 @@ export const MOVE_OUT_TRACKER_EVENT_TYPES = [
 export type MoveOutTrackerEventType = (typeof MOVE_OUT_TRACKER_EVENT_TYPES)[number]
 export type MoveOutTrackerActorType = 'system' | 'user' | 'tenant' | 'landlord' | 'ai'
 
+export const CASE_COMMUNICATION_DIRECTIONS = ['internal', 'outbound', 'inbound'] as const
+export type CaseCommunicationDirection = (typeof CASE_COMMUNICATION_DIRECTIONS)[number]
+
+export const CASE_COMMUNICATION_CHANNELS = [
+  'internal_note',
+  'email',
+  'portal_message',
+  'sms',
+  'manual_log',
+] as const
+export type CaseCommunicationChannel = (typeof CASE_COMMUNICATION_CHANNELS)[number]
+
+export const CASE_COMMUNICATION_RECIPIENT_ROLES = ['tenant', 'landlord', 'internal'] as const
+export type CaseCommunicationRecipientRole = (typeof CASE_COMMUNICATION_RECIPIENT_ROLES)[number]
+
+export const CASE_COMMUNICATION_STATUSES = [
+  'draft',
+  'queued',
+  'sent',
+  'delivered',
+  'failed',
+  'received',
+  'read',
+] as const
+export type CaseCommunicationStatus = (typeof CASE_COMMUNICATION_STATUSES)[number]
+
 export type JsonPrimitive = string | number | boolean | null
 export type JsonValue = JsonPrimitive | JsonValue[] | { [key: string]: JsonValue }
 
@@ -330,6 +356,41 @@ export type MoveOutTrackerEventRow = {
   created_at: string
 }
 
+export type CaseCommunicationAttachment = {
+  case_document_id?: string | null
+  file_name?: string | null
+  file_url?: string | null
+  document_role?: CaseDocumentRole | null
+}
+
+export type CaseCommunicationRow = {
+  id: string
+  case_id: string
+  end_of_tenancy_case_id: string | null
+  thread_key: string
+  direction: CaseCommunicationDirection
+  channel: CaseCommunicationChannel
+  recipient_role: CaseCommunicationRecipientRole
+  sender_user_id: string | null
+  sender_contact_id: string | null
+  recipient_contact_id: string | null
+  subject: string | null
+  body: string
+  attachments: JsonValue
+  metadata: JsonValue
+  status: CaseCommunicationStatus
+  unread: boolean
+  sent_at: string | null
+  read_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type CaseCommunicationRecord = CaseCommunicationRow & {
+  sender_name: string | null
+  recipient_name: string | null
+}
+
 export type CaseDocumentRow = {
   id: string
   case_id: string
@@ -360,6 +421,17 @@ export type DocumentExtractionRow = {
   confidence: number | null
   created_at: string
   updated_at: string
+}
+
+export type CaseDocumentSummary = {
+  total: number
+  checkIn: number
+  checkOut: number
+  photos: number
+  supporting: number
+  invoices: number
+  receipts: number
+  other: number
 }
 
 export type EndOfTenancyIssueRow = {
@@ -561,6 +633,26 @@ export type StoreDecisionReviewActionInput = {
   actionNotes?: string | null
 }
 
+export type CreateCaseCommunicationInput = {
+  caseId: string
+  endOfTenancyCaseId?: string | null
+  threadKey?: string | null
+  direction: CaseCommunicationDirection
+  channel: CaseCommunicationChannel
+  recipientRole: CaseCommunicationRecipientRole
+  senderUserId?: string | null
+  senderContactId?: string | null
+  recipientContactId?: string | null
+  subject?: string | null
+  body: string
+  attachments?: CaseCommunicationAttachment[]
+  metadata?: JsonValue
+  status?: CaseCommunicationStatus
+  unread?: boolean
+  sentAt?: string | null
+  readAt?: string | null
+}
+
 export type UpdateMoveOutChecklistItemInput = {
   endOfTenancyCaseId: string
   itemKey: MoveOutChecklistItemKey
@@ -581,6 +673,7 @@ export type EndOfTenancyCaseListItem = {
   assignedOperator: UserProfileSummaryRow | null
   depositClaim: DepositClaimRow | null
   moveOutTracker: MoveOutTrackerRow | null
+  documentSummary: CaseDocumentSummary
 }
 
 export type EndOfTenancyCaseDetail = EndOfTenancyCaseListItem & {
@@ -594,6 +687,7 @@ export type EndOfTenancyCaseDetail = EndOfTenancyCaseListItem & {
   reviewActions: DecisionReviewActionRow[]
   moveOutChecklistItems: MoveOutChecklistItemRow[]
   moveOutTrackerEvents: MoveOutTrackerEventRow[]
+  communications: CaseCommunicationRecord[]
 }
 
 export type EndOfTenancyWorkspacePayload = {
@@ -605,6 +699,7 @@ export type EndOfTenancyWorkspacePayload = {
   moveOutTracker: MoveOutTrackerRow | null
   moveOutChecklistItems: MoveOutChecklistItemRow[]
   moveOutTrackerEvents: MoveOutTrackerEventRow[]
+  communications: CaseCommunicationRecord[]
   documents: Array<
     CaseDocumentRow & {
       extractions: DocumentExtractionRow[]

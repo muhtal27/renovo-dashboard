@@ -11,14 +11,39 @@ type OperatorNavProps = {
 
 const NAV_ITEMS = [
   {
-    label: 'Cases',
+    label: 'Dashboard',
     href: '/eot',
-    isActive: (pathname: string) => pathname.startsWith('/eot') || pathname.startsWith('/cases'),
+    isActive: (pathname: string) => pathname === '/eot',
+  },
+  {
+    label: 'Cases',
+    href: '/cases',
+    isActive: (pathname: string) => pathname === '/cases' || pathname.startsWith('/cases/'),
+  },
+  {
+    label: 'Disputes',
+    href: '/disputes',
+    isActive: (pathname: string) => pathname.startsWith('/disputes'),
+  },
+  {
+    label: 'Inventories',
+    href: '/inventories',
+    isActive: (pathname: string) => pathname.startsWith('/inventories'),
+  },
+  {
+    label: 'Inbox',
+    href: '/inbox',
+    isActive: (pathname: string) => pathname.startsWith('/inbox'),
   },
   {
     label: 'Knowledge',
     href: '/knowledge',
     isActive: (pathname: string) => pathname === '/knowledge',
+  },
+  {
+    label: 'Settings',
+    href: '/settings',
+    isActive: (pathname: string) => pathname.startsWith('/settings'),
   },
 ] as const
 

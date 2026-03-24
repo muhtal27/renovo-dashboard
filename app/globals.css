@@ -80,9 +80,26 @@ button:disabled {
 
 :focus-visible {
   outline: none;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
   box-shadow:
-    0 0 0 1px var(--accent),
-    0 0 0 4px rgba(31, 107, 88, 0.18);
+    0 0 0 2px rgba(255, 253, 249, 0.98),
+    0 0 0 5px rgba(47, 87, 75, 0.3);
+}
+
+a:focus-visible,
+button:focus-visible {
+  border-radius: 0.9rem;
+}
+
+a:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 0.24em;
 }
 
 ::selection {

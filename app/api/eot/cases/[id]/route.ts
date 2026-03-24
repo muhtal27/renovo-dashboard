@@ -4,7 +4,11 @@ import {
   generateDraftAssessmentForEndOfTenancyCase,
   isEndOfTenancyAiDraftingConfigured,
 } from '@/lib/end-of-tenancy/ai'
-import { upsertEndOfTenancyIssue } from '@/lib/end-of-tenancy/queries'
+import {
+  createCaseCommunication,
+  markCaseCommunicationRead,
+  upsertEndOfTenancyIssue,
+} from '@/lib/end-of-tenancy/queries'
 import { syncMoveOutTrackerProgress } from '@/lib/end-of-tenancy/tracker'
 import type { JsonValue } from '@/lib/end-of-tenancy/types'
 import {
@@ -18,6 +22,14 @@ import {
   updateMoveOutChecklist,
   updateIssueAssessment,
 } from '@/lib/end-of-tenancy/service'
+import {
+  assertArray,
+  assertCaseCommunicationChannel,
+  assertCaseCommunicationDirection,
+  assertCaseCommunicationRecipientRole,
+  assertNonEmptyString,
+  assertOptionalString,
+} from '@/lib/end-of-tenancy/validation'
 import { loadEndOfTenancyWorkspace } from '@/lib/end-of-tenancy/workspace'
 import { getSupabaseServiceRoleClient } from '@/lib/supabase-admin'
 
@@ -168,6 +180,38 @@ type ActionPayload =
       action: 'mark_needs_manual_review'
       note?: string | null
     }
+  | {
+      action: 'create_communication'
+      direction: 'internal' | 'outbound' | 'inbound'
+      channel: 'internal_note' | 'email' | 'portal_message' | 'sms' | 'manual_log'
+      recipientRole: 'tenant' | 'landlord' | 'internal'
+      recipientContactId?: string | null
+      subject?: string | null
+      body: string
+      attachments?: Array<{
+        caseDocumentId?: string | null
+        fileName?: string | null
+        fileUrl?: string | null
+        documentRole?:
+          | 'check_in'
+          | 'check_out'
+          | 'invoice'
+          | 'receipt'
+          | 'photo'
+          | 'video'
+          | 'email'
+          | 'message_attachment'
+          | 'tenancy_agreement'
+          | 'deposit_scheme'
+          | 'supporting_evidence'
+          | 'other'
+          | null
+      }>
+    }
+  | {
+      action: 'mark_communication_read'
+      communicationId: string
+    }
 
 export async function GET(request: Request, context: RouteParams) {
   try {
@@ -194,6 +238,7 @@ export async function GET(request: Request, context: RouteParams) {
         [
           workspace.case?.assigned_user_id,
           ...workspace.documents.map((document) => document.uploaded_by_user_id),
+          ...workspace.communications.map((communication) => communication.sender_user_id),
           ...workspace.recommendations.flatMap((recommendation) =>
             recommendation.reviewActions.map((action) => action.actor_user_id)
           ),
@@ -445,6 +490,88 @@ export async function POST(request: Request, context: RouteParams) {
           operatorUserId: operator.operatorProfileId,
           note: payload.note ?? null,
         })
+        break
+      case 'create_communication': {
+        assertCaseCommunicationDirection(payload.direction)
+        assertCaseCommunicationChannel(payload.channel)
+        assertCaseCommunicationRecipientRole(payload.recipientRole)
+        assertOptionalString(payload.subject, 'subject')
+        assertNonEmptyString(payload.body, 'body')
+        if (payload.recipientContactId != null) {
+          assertOptionalString(payload.recipientContactId, 'recipientContactId')
+        }
+        if (payload.attachments != null) {
+          assertArray(payload.attachments, 'attachments', (item, index) => {
+            if (typeof item !== 'object' || item == null) {
+              throw new Error(`attachments[${index}] must be an object.`)
+            }
+          })
+        }
+
+        const workspace = await loadEndOfTenancyWorkspace(id)
+
+        if (!workspace) {
+          return NextResponse.json({ error: 'End-of-tenancy case not found.' }, { status: 404 })
+        }
+
+        const defaultRecipientContactId =
+          payload.recipientRole === 'tenant'
+            ? workspace.tenancy?.tenant_contact_id ?? null
+            : payload.recipientRole === 'landlord'
+              ? workspace.tenancy?.landlord_contact_id ?? workspace.property?.landlord_contact_id ?? null
+              : null
+
+        const communication = await createCaseCommunication({
+          caseId: workspace.case?.id ?? workspace.endOfTenancyCase.case_id,
+          endOfTenancyCaseId: id,
+          direction: payload.direction,
+          channel: payload.channel,
+          recipientRole: payload.recipientRole,
+          senderUserId: operator.operatorProfileId,
+          recipientContactId: payload.recipientContactId ?? defaultRecipientContactId,
+          subject: payload.subject ?? null,
+          body: payload.body.trim(),
+          attachments: (payload.attachments ?? []).map((attachment) => ({
+            case_document_id: attachment.caseDocumentId ?? null,
+            file_name: attachment.fileName ?? null,
+            file_url: attachment.fileUrl ?? null,
+            document_role: attachment.documentRole ?? null,
+          })),
+          metadata:
+            payload.recipientRole === 'internal'
+              ? { visibility: 'staff_only' }
+              : { delivery_state: 'queued_for_integration' },
+          status:
+            payload.recipientRole === 'internal'
+              ? 'read'
+              : payload.direction === 'outbound'
+                ? 'queued'
+                : 'received',
+          unread: payload.direction === 'inbound',
+        })
+
+        await syncMoveOutTrackerProgress(id, {
+          event: {
+            actorType: 'user',
+            actorUserId: operator.operatorProfileId,
+            eventType: 'other',
+            title:
+              payload.recipientRole === 'internal'
+                ? 'Internal note added'
+                : `Message queued for ${payload.recipientRole}`,
+            detail:
+              communication.subject?.trim()
+                ? `${communication.subject} was added to the case communication thread.`
+                : 'A communication entry was added to the case record.',
+            sourceTable: 'case_communications',
+            sourceRecordId: communication.id,
+          },
+        })
+        break
+      }
+      case 'mark_communication_read':
+        assertNonEmptyString(payload.communicationId, 'communicationId')
+        await markCaseCommunicationRead(payload.communicationId)
         break
       default:
         return NextResponse.json({ error: 'Unsupported end-of-tenancy action.' }, { status: 400 })

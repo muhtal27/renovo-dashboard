@@ -2,7 +2,6 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import HomepageDemo from '@/app/components/HomepageDemo'
 import { PublicHome } from '@/app/public-home'
 import { useOperatorGate } from '@/lib/use-operator-gate'
 
@@ -19,7 +18,7 @@ export default function HomePage() {
   }, [authLoading, operator, router])
 
   if (authLoading) {
-    return <PublicHome productDemo={<HomepageDemo />} />
+    return <PublicHome />
   }
 
   if (operator?.authUser) {
@@ -34,5 +33,5 @@ export default function HomePage() {
     )
   }
 
-  return <PublicHome productDemo={<HomepageDemo />} />
+  return <PublicHome />
 }

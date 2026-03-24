@@ -1,0 +1,43 @@
+-- Stage B template: archive-first table cleanup.
+-- DO NOT APPLY until Stage A has passed a cooling period and manual review confirms
+-- that each table below is unused by app code, SQL, seeds, tests, BI, and support flows.
+--
+-- Archive convention:
+--   public.<table_name> -> public._deprecated_20260324_<table_name>
+--
+-- Rollback plan:
+--   alter table public._deprecated_20260324_<table_name> rename to <table_name>;
+--   restore grants if any were revoked.
+--
+-- Verification SQL after each rename:
+--   select schemaname, tablename
+--   from pg_tables
+--   where schemaname = 'public'
+--     and tablename in ('<table_name>', '_deprecated_20260324_<table_name>');
+--
+-- App smoke tests after each batch:
+--   /eot
+--   /cases/[id]
+--   evidence upload
+--   recommendation generation
+--   claim generation
+--
+-- Candidate tables:
+--   case_assignments
+--   case_tags
+--   tags
+--   resolved_messages
+--   contact_methods
+--   case_events
+--   landlord_statements
+--   tenancy_key_sets
+--   tenancy_utilities
+--
+-- Example statements (commented intentionally):
+-- alter table public.case_assignments rename to _deprecated_20260324_case_assignments;
+-- revoke all on table public._deprecated_20260324_case_assignments from anon, authenticated;
+--
+-- alter table public.case_tags rename to _deprecated_20260324_case_tags;
+-- revoke all on table public._deprecated_20260324_case_tags from anon, authenticated;
+--
+-- Repeat only after verifying each table independently.

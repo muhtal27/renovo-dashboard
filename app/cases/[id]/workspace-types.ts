@@ -40,6 +40,7 @@ export type WorkspaceSectionKey =
   | 'issues'
   | 'recommendation'
   | 'claim'
-  | 'tenancy'
+  | 'communication'
+  | 'activity'
 
 export type WorkspaceSectionStatus = 'green' | 'amber' | 'red' | 'gray'

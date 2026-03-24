@@ -2,25 +2,25 @@ import type { Metadata } from 'next'
 import HomePageClient from '@/app/home-page-client'
 
 export const metadata: Metadata = {
-  title: 'Renovo | End-of-Tenancy Decision Engine',
+  title: 'Renovo | End-of-Tenancy Automation',
   description:
-    'Evidence in. Claim-ready decisions out. Renovo helps letting agencies review evidence, assess issues, and prepare deposit claim output through a human-reviewed workflow.',
+    'Renovo automates end-of-tenancy work for UK property managers and letting agencies, from evidence review and issue assessment to claim-ready output.',
   alternates: {
-    canonical: 'https://renovoai.co.uk',
+    canonical: 'https://renovoai.co.uk/',
   },
   openGraph: {
-    title: 'Renovo | End-of-Tenancy Decision Engine',
+    title: 'Renovo | End-of-Tenancy Automation',
     description:
-      'Evidence in. Claim-ready decisions out. The specialist EOT workflow for letting agencies.',
-    url: 'https://renovoai.co.uk',
+      'Renovo automates end-of-tenancy work for UK property managers and letting agencies, from evidence review and issue assessment to claim-ready output.',
+    url: 'https://renovoai.co.uk/',
     siteName: 'Renovo',
     type: 'website',
     images: [{ url: 'https://renovoai.co.uk/og-image.png', width: 1200, height: 630 }],
   },
   twitter: {
-    title: 'Renovo | End-of-Tenancy Decision Engine',
+    title: 'Renovo | End-of-Tenancy Automation',
     description:
-      'Evidence in. Claim-ready decisions out. The specialist EOT workflow for letting agencies.',
+      'Renovo automates end-of-tenancy work for UK property managers and letting agencies, from evidence review and issue assessment to claim-ready output.',
     images: ['https://renovoai.co.uk/og-image.png'],
   },
 }

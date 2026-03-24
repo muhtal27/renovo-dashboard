@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useState } from 'react'
 
 type DemoTab = 'overview' | 'evidence' | 'issues' | 'recommendation' | 'claim'
@@ -37,14 +38,14 @@ type DemoLineItem = {
 }
 
 const CASE_REFERENCE = 'EOT-2024-0041'
-const PROPERTY_ADDRESS = '14 Bruntsfield Place, Edinburgh EH10 4HJ'
+const PROPERTY_ADDRESS = 'Flat 2B, Ashgrove House'
 const TENANT_NAME = 'James Holbrook'
 const LANDLORD_NAME = 'Mrs D. Cairns'
 const MOVE_OUT_DATE = '8 March 2024'
 const TENANCY_DURATION = '18 months'
-const DEPOSIT_DISPLAY = '£1,200 — MyDeposits scheme'
+const DEPOSIT_DISPLAY = '£1,200 held against tenancy'
 const RENT_DISPLAY = '£1,100/month'
-const CLAIM_REFERENCE = 'DPS-2022-881234'
+const CLAIM_REFERENCE = 'CLM-2024-0041'
 const RECOMMENDED_TOTAL = 640
 const DEPOSIT_TOTAL = 1200
 const AI_CONFIDENCE = 82
@@ -159,7 +160,7 @@ const RECOMMENDATION = {
     'Check in inventory p.3',
     'Check out report p.5, p.8',
     'Living room photos #3, #7',
-    'Deposit scheme guidance',
+    'Claim guidance',
     'Fair wear and tear policy',
   ],
 }
@@ -269,18 +270,23 @@ function SectionCard({
   return <div className={`rounded-[1.4rem] border border-stone-200 bg-white ${className}`}>{children}</div>
 }
 
-export default function HomepageDemo() {
+export default function HomepageDemo({
+  variant = 'full',
+}: {
+  variant?: 'full' | 'compact'
+}) {
   const [activeTab, setActiveTab] = useState<DemoTab>('recommendation')
+  const isCompact = variant === 'compact'
 
   function renderOverviewTab() {
     return (
-      <div className="space-y-5">
+      <div className={isCompact ? 'space-y-4' : 'space-y-5'}>
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           {[
             { label: 'Documents reviewed', value: '5' },
             { label: 'Issues identified', value: '4', meta: '2 high · 1 medium · 1 low' },
             { label: 'Recommended claim', value: formatMoney(RECOMMENDED_TOTAL) },
-            { label: 'AI confidence', value: `${AI_CONFIDENCE}%` },
+            { label: 'Draft confidence', value: `${AI_CONFIDENCE}%` },
           ].map((item) => (
             <SectionCard key={item.label} className="p-4 shadow-sm">
               <p className="text-sm text-stone-500">{item.label}</p>
@@ -483,7 +489,7 @@ export default function HomepageDemo() {
         </SectionCard>
 
         <SectionCard className="p-5 shadow-sm">
-          <h3 className="text-lg font-semibold text-stone-900">AI rationale</h3>
+          <h3 className="text-lg font-semibold text-stone-900">Recommendation rationale</h3>
           <p className="mt-4 text-sm leading-7 text-stone-700">{RECOMMENDATION.rationale}</p>
           <div className="mt-4 flex flex-wrap gap-2">
             {RECOMMENDATION.sources.map((source) => (
@@ -501,19 +507,21 @@ export default function HomepageDemo() {
           Read-only preview. Manager actions are available in the live product.
         </div>
 
-        <div className="rounded-[1.5rem] border border-emerald-200 bg-emerald-50/80 p-5">
-          <p className="app-kicker text-emerald-900">Ready to use this for real cases?</p>
-          <p className="mt-3 max-w-3xl text-sm leading-7 text-emerald-950/85">
-            This is a preview of a live end-of-tenancy case. Join the rollout list to use Renovo
-            with your own agency&apos;s cases.
-          </p>
-          <a
-            href="#waitlist"
-            className="mt-4 inline-flex text-sm font-semibold text-emerald-900 transition hover:text-emerald-950"
-          >
-            Join the rollout list →
-          </a>
-        </div>
+        {isCompact ? null : (
+          <div className="rounded-[1.5rem] border border-emerald-200 bg-emerald-50/80 p-5">
+            <p className="app-kicker text-emerald-900">Ready to use this for real cases?</p>
+            <p className="mt-3 max-w-3xl text-sm leading-7 text-emerald-950/85">
+              This is a preview of a live end-of-tenancy case. Join the rollout list to use Renovo
+              with your own agency&apos;s cases.
+            </p>
+            <Link
+              href="/#waitlist"
+              className="mt-4 inline-flex text-sm font-semibold text-emerald-900 transition hover:text-emerald-950"
+            >
+              Join the rollout list →
+            </Link>
+          </div>
+        )}
       </div>
     )
   }
@@ -529,7 +537,7 @@ export default function HomepageDemo() {
                 {formatMoney(RECOMMENDED_TOTAL)} of {formatMoney(DEPOSIT_TOTAL)} deposit
               </p>
               <p className="mt-2 text-sm text-emerald-900/85">
-                MyDeposits · Ref {CLAIM_REFERENCE}
+                Draft claim reference · {CLAIM_REFERENCE}
               </p>
             </div>
             <DemoBadge
@@ -583,7 +591,11 @@ export default function HomepageDemo() {
   }
 
   return (
-    <div className="app-surface min-h-[520px] overflow-hidden rounded-[1.9rem] border border-stone-200 shadow-[0_18px_44px_rgba(55,43,27,0.1)]">
+    <div
+      className={`app-surface overflow-hidden rounded-[1.9rem] border border-stone-200 shadow-[0_18px_44px_rgba(55,43,27,0.1)] ${
+        isCompact ? '' : 'min-h-[520px]'
+      }`}
+    >
       <div className="border-b border-stone-200 bg-stone-50/90 px-4 py-3 md:px-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -596,7 +608,7 @@ export default function HomepageDemo() {
           </div>
 
           <p className="min-w-0 flex-1 truncate text-center text-sm font-medium text-stone-600">
-            {CASE_REFERENCE} · 14 Bruntsfield Place
+            {CASE_REFERENCE} · Ashgrove House
           </p>
 
           <DemoBadge
@@ -629,14 +641,22 @@ export default function HomepageDemo() {
         </div>
       </div>
 
-      <div className="space-y-5 bg-[linear-gradient(180deg,rgba(250,247,242,0.32),rgba(255,255,255,0.92))] p-4 md:p-5">
-        <SectionCard className="p-5 shadow-sm">
+      <div
+        className={`bg-[linear-gradient(180deg,rgba(250,247,242,0.32),rgba(255,255,255,0.92))] ${
+          isCompact ? 'space-y-4 p-4' : 'space-y-5 p-4 md:p-5'
+        }`}
+      >
+        <SectionCard className={isCompact ? 'p-4 shadow-sm' : 'p-5 shadow-sm'}>
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-stone-500">
                 Case context
               </p>
-              <h3 className="mt-2 text-2xl font-semibold tracking-tight text-stone-900">
+              <h3
+                className={`mt-2 font-semibold tracking-tight text-stone-900 ${
+                  isCompact ? 'text-xl md:text-2xl' : 'text-2xl'
+                }`}
+              >
                 {PROPERTY_ADDRESS}
               </h3>
               <p className="mt-3 text-sm leading-7 text-stone-600">

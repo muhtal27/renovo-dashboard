@@ -1,8 +1,8 @@
 import { cookies } from 'next/headers'
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
-import EotCasesClientPage from '@/app/eot/page-client'
-import { listCaseCommunicationRecords, listEndOfTenancyCases } from '@/lib/end-of-tenancy/queries'
+import CasesQueuePageClient from '@/app/cases/page-client'
+import { listEndOfTenancyCases } from '@/lib/end-of-tenancy/queries'
 import {
   parseSupabaseSessionCookie,
   SUPABASE_SESSION_COOKIE,
@@ -10,17 +10,17 @@ import {
 import { getSupabaseServerAuthClient } from '@/lib/supabase-admin'
 
 export const metadata: Metadata = {
-  title: 'Dashboard | Renovo',
+  title: 'Cases | Renovo',
 }
 
-export default async function EotCasesPage() {
+export default async function CasesQueuePage() {
   const cookieStore = await cookies()
   const sessionCookie = parseSupabaseSessionCookie(
     cookieStore.get(SUPABASE_SESSION_COOKIE)?.value
   )
 
   if (!sessionCookie) {
-    redirect('/login?returnTo=/eot')
+    redirect('/login?returnTo=/cases')
   }
 
   const authClient = getSupabaseServerAuthClient()
@@ -30,11 +30,10 @@ export default async function EotCasesPage() {
   } = await authClient.auth.getUser(sessionCookie.access_token)
 
   if (authError || !user) {
-    redirect('/login?returnTo=/eot')
+    redirect('/login?returnTo=/cases')
   }
 
   let initialItems: Awaited<ReturnType<typeof listEndOfTenancyCases>> | undefined
-  let initialCommunications: Awaited<ReturnType<typeof listCaseCommunicationRecords>> | undefined
 
   try {
     initialItems = await listEndOfTenancyCases({ limit: 250 })
@@ -42,21 +41,5 @@ export default async function EotCasesPage() {
     initialItems = undefined
   }
 
-  if (initialItems) {
-    try {
-      initialCommunications = await listCaseCommunicationRecords({
-        caseIds: initialItems.map((item) => item.case?.id || item.endOfTenancyCase.case_id),
-        limit: 400,
-      })
-    } catch {
-      initialCommunications = []
-    }
-  }
-
-  return (
-    <EotCasesClientPage
-      initialItems={initialItems}
-      initialCommunications={initialCommunications}
-    />
-  )
+  return <CasesQueuePageClient initialItems={initialItems} />
 }

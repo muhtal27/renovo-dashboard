@@ -5,11 +5,12 @@ import { useParams } from 'next/navigation'
 import { CaseHeader } from '@/app/cases/[id]/components/CaseHeader'
 import { ContextRail } from '@/app/cases/[id]/components/ContextRail'
 import { SidebarNav } from '@/app/cases/[id]/components/SidebarNav'
+import { ActivityLog } from '@/app/cases/[id]/sections/ActivityLog'
 import { ClaimOutput } from '@/app/cases/[id]/sections/ClaimOutput'
+import { Communication } from '@/app/cases/[id]/sections/Communication'
 import { EvidencePack } from '@/app/cases/[id]/sections/EvidencePack'
 import { Issues } from '@/app/cases/[id]/sections/Issues'
 import { Recommendation } from '@/app/cases/[id]/sections/Recommendation'
-import { TenancyDetails } from '@/app/cases/[id]/sections/TenancyDetails'
 import type {
   WorkspaceEnvelope,
   WorkspaceSectionKey,
@@ -217,7 +218,8 @@ export default function CaseWorkspacePage() {
       'issues',
       'recommendation',
       'claim',
-      'tenancy',
+      'communication',
+      'activity',
     ]
 
     const observer = new IntersectionObserver(
@@ -277,7 +279,7 @@ export default function CaseWorkspacePage() {
       },
       {
         id: 'evidence',
-        label: 'Evidence pack',
+        label: 'Evidence',
         href: '#evidence',
         status: workspace.documents.length === 0 ? 'red' : 'green',
       },
@@ -305,10 +307,18 @@ export default function CaseWorkspacePage() {
         status: workspace.depositClaim ? 'green' : 'gray',
       },
       {
-        id: 'tenancy',
-        label: 'Tenancy details',
-        href: '#tenancy',
-        status: 'gray',
+        id: 'communication',
+        label: 'Communication',
+        href: '#communication',
+        status: workspace.communications.some((communication) => communication.unread)
+          ? 'amber'
+          : 'gray',
+      },
+      {
+        id: 'activity',
+        label: 'Activity log',
+        href: '#activity',
+        status: workspace.moveOutTrackerEvents.length + workspace.communications.length > 0 ? 'green' : 'gray',
       },
     ]
 
@@ -611,11 +621,22 @@ export default function CaseWorkspacePage() {
                 onRefresh={refreshWorkspace}
               />
 
-              <TenancyDetails
+              <Communication
+                endOfTenancyCaseId={workspace.endOfTenancyCase.id}
                 workspace={workspace}
+                communications={workspace.communications}
                 tenant={tenant}
                 landlord={landlord}
-                complianceRecords={complianceRecords}
+                actorNames={actorNames}
+                onRefresh={refreshWorkspace}
+              />
+
+              <ActivityLog
+                events={workspace.moveOutTrackerEvents}
+                communications={workspace.communications}
+                actorNames={actorNames}
+                tenant={tenant}
+                landlord={landlord}
               />
             </div>
 

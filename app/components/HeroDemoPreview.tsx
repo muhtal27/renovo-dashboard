@@ -1,7 +1,7 @@
 import Image from 'next/image'
 
 type HeroDemoPreviewProps = {
-  highlights: Array<{
+  highlights: ReadonlyArray<{
     value: string
     label: string
   }>
@@ -17,7 +17,7 @@ export function HeroDemoPreview({ highlights }: HeroDemoPreviewProps) {
           <span className="h-2.5 w-2.5 rounded-full bg-emerald-300" />
         </div>
         <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-stone-500">
-          Live demo preview
+          Workflow preview
         </p>
       </div>
 
@@ -26,10 +26,10 @@ export function HeroDemoPreview({ highlights }: HeroDemoPreviewProps) {
           <p className="app-kicker">Example case</p>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <span className="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-800">
-              Draft recommendation
+              Manager review
             </span>
             <span className="inline-flex rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-700">
-              £640 proposed claim
+              Claim-ready output
             </span>
           </div>
         </div>

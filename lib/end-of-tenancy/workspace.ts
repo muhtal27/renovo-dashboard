@@ -61,6 +61,7 @@ export async function loadEndOfTenancyWorkspace(
     moveOutTracker: detail.moveOutTracker,
     moveOutChecklistItems: detail.moveOutChecklistItems,
     moveOutTrackerEvents: detail.moveOutTrackerEvents,
+    communications: detail.communications,
     documents: detail.documents.map((document) => ({
       ...document,
       extractions: extractionsByDocumentId.get(document.id) ?? [],
