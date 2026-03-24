@@ -7,6 +7,9 @@ type MarketingShellProps = {
     | '/'
     | '/demo'
     | '/how-it-works'
+    | '/investors'
+    | '/partnerships'
+    | '/integrations'
     | '/pricing'
     | '/about'
     | '/contact'
@@ -19,20 +22,17 @@ const desktopNavItems = [
   { label: 'How it works', type: 'route', href: '/how-it-works' },
   { label: 'Features', type: 'anchor', hash: '#features' },
   { label: "Who it's for", type: 'anchor', hash: '#who-its-for' },
-  { label: 'Pricing', type: 'route', href: '/pricing' },
   { label: 'About', type: 'route', href: '/about' },
-  { label: 'Contact', type: 'route', href: '/contact' },
   { label: 'Early access', type: 'anchor', hash: '#waitlist' },
 ] as const
 
 const mobileNavItems = [
   { label: 'About', type: 'route', href: '/about' },
-  { label: 'Contact', type: 'route', href: '/contact' },
-  { label: 'Early access', type: 'anchor', hash: '#waitlist' },
 ] as const
 
 const legalNavItems = [
   { label: 'Contact', href: '/contact' },
+  { label: 'Investors', href: '/investors' },
   { label: 'Privacy', href: '/privacy' },
   { label: 'Terms', href: '/terms' },
 ] as const
@@ -182,12 +182,6 @@ export function MarketingShell({
                     {item.label}
                   </Link>
                 ))}
-                <a
-                  href="mailto:hello@renovoai.co.uk"
-                  className="text-sm font-medium text-stone-600 hover:text-stone-900"
-                >
-                  hello@renovoai.co.uk
-                </a>
               </nav>
             </div>
           </div>

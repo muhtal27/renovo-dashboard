@@ -4,18 +4,18 @@ import Link from 'next/link'
 import { ExternalLink, LayoutPanelTop, Link as LinkIcon, ShieldCheck } from 'lucide-react'
 import { MarketingShell } from '@/app/components/MarketingShell'
 
-const problemStats = [
+const problemSignals = [
   {
-    stat: '3–4 hours',
-    label: 'Average time spent per end of tenancy case',
+    stat: 'Fragmented workflow',
+    label: 'End-of-tenancy work still sits across reports, photos, email, and memory in many agencies.',
   },
   {
-    stat: '£1,175',
-    label: 'Average UK deposit value at risk without proper documentation',
+    stat: 'High-volume turnover',
+    label: 'Tenancy ends create repeat operational work that becomes harder to manage as portfolios grow.',
   },
   {
-    stat: '1 in 3',
-    label: 'Deposit disputes that could be avoided with better evidence trails',
+    stat: 'Evidence matters',
+    label: 'Claims are stronger when the write-up, reasoning, and source evidence stay together.',
   },
 ] as const
 
@@ -23,26 +23,38 @@ const principles = [
   {
     icon: ShieldCheck,
     title: 'Managers stay in control',
-    body: 'Renovo drafts the recommendation — a manager still reviews the evidence, checks the reasoning, and approves the outcome. Automation should support decisions, not replace them.',
+    body: 'Renovo prepares the review, but a manager still checks the evidence, applies judgement, and approves the outcome.',
   },
   {
     icon: LinkIcon,
     title: 'Evidence over memory',
-    body: 'Every claim amount stays linked to the issue and the source document that supports it. When a case is challenged, the reasoning is already attached — not rebuilt from an inbox.',
+    body: 'Each claim item stays linked to the underlying report entries, photos, and notes, so the reasoning does not need to be rebuilt later.',
   },
   {
     icon: LayoutPanelTop,
     title: 'Built for the real workflow',
-    body: 'Not how software thinks property management works — but how it actually works. Gather evidence, assess issues, draft the decision, get it approved, output the claim.',
+    body: 'Renovo automates the core end-of-tenancy workflow, from evidence review to claim preparation.',
   },
 ] as const
 
-const partnerSlots = ['MyDeposits', 'TDS', 'Your PMS', 'More coming'] as const
+const partnerAreas = [
+  'Inventory and inspection systems',
+  'Property management software',
+  'Claim and dispute preparation workflows',
+  'Strategic channel relationships',
+] as const
+
+const stageItems = [
+  'Pre-seed',
+  'Product built',
+  'Early access open',
+  'Pilot and partnership conversations underway',
+] as const
 
 export const metadata: Metadata = {
-  title: 'About | Renovo',
+  title: 'Company & Investors | Renovo',
   description:
-    'Learn who built Renovo, the problem it solves, and why it was built for evidence-led end-of-tenancy decisions.',
+    'Learn how Renovo automates end-of-tenancy work for UK property managers and why the company is focused on evidence-led workflow automation.',
   alternates: {
     canonical: 'https://renovoai.co.uk/about',
   },
@@ -55,33 +67,32 @@ export default function AboutPage() {
         <div className="mx-auto max-w-7xl space-y-20 px-4 pb-24 pt-16 sm:px-6 lg:px-8 lg:pt-24">
           <section className="mx-auto max-w-4xl text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-700">
-              About Renovo
+              Company
             </p>
             <h1 className="mt-4 text-balance text-4xl font-semibold tracking-tight text-stone-900 sm:text-5xl lg:text-6xl">
-              Built by a property manager who got tired of rebuilding the same case from scratch.
+              Renovo automates end-of-tenancy work for UK property managers
             </h1>
             <p className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-stone-600">
-              I manage end of tenancy properties in Edinburgh. Every checkout meant the same thing
-              — hours rebuilding a case from emails, PDFs, and memory, hoping the documentation
-              would hold up if challenged. I built Renovo because that process was broken and
-              nothing on the market was built to fix it.
+              Renovo was built from direct operational experience of the checkout process: reviewing
+              evidence, judging fair wear and tear, preparing claims, and trying to keep the audit
+              trail intact when a case is challenged.
             </p>
           </section>
 
           <section>
             <div className="mx-auto max-w-4xl text-center">
               <h2 className="text-3xl font-semibold tracking-tight text-stone-900 sm:text-4xl">
-                The problem every property manager knows
+                The company thesis
               </h2>
             </div>
 
             <div className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-3">
-              {problemStats.map((item) => (
+              {problemSignals.map((item) => (
                 <article
                   key={item.label}
                   className="rounded-3xl border border-stone-200 bg-white/92 p-6 text-center shadow-[0_18px_40px_rgba(55,43,27,0.08)]"
                 >
-                  <p className="text-4xl font-semibold tracking-tight text-stone-900 sm:text-5xl">
+                  <p className="text-3xl font-semibold tracking-tight text-stone-900 sm:text-4xl">
                     {item.stat}
                   </p>
                   <p className="mt-3 text-sm leading-6 text-stone-500">{item.label}</p>
@@ -90,10 +101,9 @@ export default function AboutPage() {
             </div>
 
             <p className="mx-auto mt-8 max-w-4xl text-center text-base leading-8 text-stone-600">
-              Existing property management tools handle rent collection, maintenance, and
-              tenancies. None of them are built specifically for the end of tenancy decision — the
-              moment where documentation, evidence, and defensible reasoning matter most. That&apos;s
-              the gap Renovo fills.
+              The UK lettings market has a standardised deposit protection framework, but much of
+              the end-of-tenancy work around it is still handled manually. Renovo is focused on the
+              operational gap between evidence collection and claim preparation.
             </p>
           </section>
 
@@ -101,7 +111,7 @@ export default function AboutPage() {
             <div className="grid gap-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-start">
               <div>
                 <h2 className="text-3xl font-semibold tracking-tight text-stone-900 sm:text-4xl">
-                  Who&apos;s behind Renovo
+                  Founder
                 </h2>
                 <div className="mt-8 overflow-hidden rounded-[2rem] border border-stone-200 bg-[radial-gradient(circle_at_top,rgba(251,191,36,0.12),rgba(255,255,255,0.82)_35%,rgba(255,251,235,0.94)_70%)] p-6 shadow-[0_18px_40px_rgba(55,43,27,0.08)]">
                   <div className="relative aspect-[4/5] overflow-hidden rounded-[1.6rem] border border-stone-200 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(250,247,242,0.94))]">
@@ -124,18 +134,17 @@ export default function AboutPage() {
                   Founder &amp; CEO, Renovo
                 </p>
                 <p className="mt-6 text-base leading-8 text-stone-600">
-                  Muhammad has worked as an end of tenancy property manager in Edinburgh for years
-                  — managing the full checkout cycle, deposit documentation, and claim decisions
-                  firsthand. He built Renovo after experiencing the same broken process on repeat:
-                  cross-referencing check-in and check-out documents manually, rebuilding the
-                  reasoning from memory, and hoping the paper trail would hold up when a landlord
-                  or tenant pushed back. Renovo is the tool he needed and couldn&apos;t find.
+                  Muhammad has worked in end-of-tenancy property management, handling checkout
+                  evidence, deposit documentation, and claim preparation first-hand. Renovo grew
+                  from that day-to-day experience of repeated manual comparison, inconsistent case
+                  write-ups, and the difficulty of defending a claim when the reasoning is spread
+                  across different files and inboxes.
                 </p>
 
                 <blockquote className="mt-6 rounded-[1.5rem] border border-amber-200 bg-amber-50/90 px-5 py-4 text-base leading-8 text-stone-700">
                   <p>
-                    “I didn&apos;t build this because I spotted a market opportunity. I built it
-                    because I was doing this job every week and it was taking far too long.”
+                    “The problem was not a lack of data. It was the amount of manual work needed to
+                    turn that data into a reviewable, defensible claim.”
                   </p>
                 </blockquote>
 
@@ -158,7 +167,7 @@ export default function AboutPage() {
           <section>
             <div className="mx-auto max-w-4xl text-center">
               <h2 className="text-3xl font-semibold tracking-tight text-stone-900 sm:text-4xl">
-                Our principles
+                Product principles
               </h2>
             </div>
 
@@ -183,49 +192,28 @@ export default function AboutPage() {
           </section>
 
           <section>
-            <div className="mx-auto max-w-5xl text-center">
-              <h2 className="text-3xl font-semibold tracking-tight text-stone-900 sm:text-4xl">
-                Where we&apos;re going
-              </h2>
-              <p className="mx-auto mt-6 max-w-4xl text-base leading-8 text-stone-600">
-                Renovo is starting with the end of tenancy decision — the most
-                documentation-heavy, dispute-prone moment in any tenancy lifecycle. Changes in
-                England under the Renters&apos; Rights Act, alongside rising documentation
-                expectations across the wider market, are making evidence-led decisions more
-                important than ever for property managers and letting agencies. Our goal is to
-                become the standard for how end of tenancy decisions are made, reviewed, and
-                defended across letting agencies — starting in Scotland and growing from there.
-              </p>
-            </div>
-          </section>
-
-          <section>
             <div className="grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)] lg:items-start">
               <div>
                 <h2 className="text-3xl font-semibold tracking-tight text-stone-900 sm:text-4xl">
-                  Join the team
+                  Current stage
                 </h2>
                 <p className="mt-6 max-w-3xl text-base leading-8 text-stone-600">
-                  Renovo is early stage and growing. We&apos;re looking for people who care about
-                  property, love building things that solve real problems, and want to work on
-                  something that genuinely makes a hard job easier.
+                  Renovo is early, but the product direction is clear: automate the operational
+                  centre of end-of-tenancy work without removing manager judgement.
                 </p>
               </div>
 
               <div className="rounded-[1.9rem] border border-stone-200 bg-white/92 p-6 shadow-[0_18px_40px_rgba(55,43,27,0.08)]">
-                <h3 className="text-xl font-semibold text-stone-900">Interested in joining us?</h3>
-                <p className="mt-4 text-sm leading-7 text-stone-600">
-                  We don&apos;t have open roles listed yet — but we&apos;re always open to
-                  conversations with the right people. If you&apos;re a developer, designer, or
-                  property professional who wants to be part of what we&apos;re building, get in
-                  touch.
-                </p>
-                <Link
-                  href="mailto:hello@renovoai.co.uk"
-                  className="mt-6 inline-flex items-center text-sm font-medium text-amber-700 transition-colors hover:text-amber-800"
-                >
-                  Send us a message →
-                </Link>
+                <div className="space-y-3">
+                  {stageItems.map((item) => (
+                    <div
+                      key={item}
+                      className="rounded-[1.2rem] border border-stone-200 bg-stone-50/80 px-4 py-3 text-sm font-medium text-stone-700"
+                    >
+                      {item}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </section>
@@ -233,19 +221,19 @@ export default function AboutPage() {
           <section>
             <div className="mx-auto max-w-4xl text-center">
               <h2 className="text-3xl font-semibold tracking-tight text-stone-900 sm:text-4xl">
-                Built to work alongside your existing stack
+                Built to work alongside existing systems
               </h2>
               <p className="mt-4 text-base leading-8 text-stone-500">
-                Renovo sits alongside your current property management system from day one.
+                Renovo is designed to sit between evidence collection, internal review, and
+                downstream claim or dispute workflows.
               </p>
             </div>
 
-            {/* Replace these placeholder slots once partnerships are confirmed. */}
             <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">
-              {partnerSlots.map((item) => (
+              {partnerAreas.map((item) => (
                 <div
                   key={item}
-                  className="flex h-20 items-center justify-center rounded-2xl border border-stone-200 bg-white/80 px-4 text-sm font-medium text-stone-400 opacity-75 grayscale"
+                  className="flex min-h-20 items-center justify-center rounded-2xl border border-stone-200 bg-white/80 px-4 text-center text-sm font-medium text-stone-500"
                 >
                   {item}
                 </div>
@@ -257,32 +245,43 @@ export default function AboutPage() {
             <div className="grid gap-4 md:grid-cols-2">
               <article className="rounded-3xl border border-amber-200 bg-[linear-gradient(180deg,rgba(255,251,235,0.96),rgba(255,255,255,0.98))] px-6 py-7 shadow-[0_18px_40px_rgba(55,43,27,0.08)]">
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-700">
-                  Property manager?
+                  Operator or buyer?
                 </p>
                 <h2 className="mt-4 text-2xl font-semibold tracking-tight text-stone-900 sm:text-3xl">
-                  See how Renovo fits your workflow.
+                  See how Renovo fits the workflow.
                 </h2>
                 <Link
-                  href="/#waitlist"
+                  href="/demo"
                   className="mt-6 inline-flex items-center justify-center rounded-2xl bg-amber-400 px-5 py-3 text-sm font-semibold text-stone-950 transition hover:bg-amber-300"
                 >
-                  Request Early Access
+                  View live demo
                 </Link>
               </article>
 
               <article className="rounded-3xl border border-stone-200 bg-white/92 px-6 py-7 shadow-[0_18px_40px_rgba(55,43,27,0.08)]">
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-stone-500">
-                  Investor or partner?
+                  Investor or strategic partner?
                 </p>
                 <h2 className="mt-4 text-2xl font-semibold tracking-tight text-stone-900 sm:text-3xl">
-                  We&apos;d love to tell you more.
+                  Interested in learning more?
                 </h2>
+                <p className="mt-4 text-sm leading-7 text-stone-600">
+                  We&apos;re happy to speak with investors, operators, and strategic partners who
+                  understand the operational challenges around end-of-tenancy work.
+                </p>
                 <Link
-                  href="mailto:hello@renovoai.co.uk"
+                  href="/contact"
                   className="mt-6 inline-flex items-center justify-center rounded-2xl border border-stone-300 px-5 py-3 text-sm font-semibold text-stone-900 transition hover:border-stone-400 hover:bg-stone-50"
                 >
-                  Get in touch
+                  Contact Renovo
                 </Link>
+                <a
+                  href="/renovo-company-one-pager.pdf"
+                  download
+                  className="mt-4 inline-flex items-center justify-center text-sm font-medium text-stone-600 underline decoration-stone-300 underline-offset-4 transition hover:text-stone-900"
+                >
+                  Download company one-pager
+                </a>
               </article>
             </div>
           </section>
