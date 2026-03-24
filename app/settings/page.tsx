@@ -38,7 +38,7 @@ export default async function SettingsPage() {
   return (
     <OperatorLayout
       pageTitle="Settings"
-      pageDescription="Review operator workspace settings and outbound communication readiness without leaving the Renovo workflow."
+      pageDescription="Review operator workspace settings and outbound communication readiness for the clean-slate rollout."
     >
       <section className="grid gap-6 xl:grid-cols-2">
         <article className="app-surface rounded-[2rem] px-6 py-6 md:px-8">
@@ -49,7 +49,7 @@ export default async function SettingsPage() {
           <dl className="mt-6 space-y-3 text-sm">
             <div className="flex items-start justify-between gap-4">
               <dt className="text-stone-500">Primary workspace</dt>
-              <dd className="text-right text-stone-800">End-of-tenancy operations</dd>
+              <dd className="text-right text-stone-800">Clean-slate backend rollout</dd>
             </div>
             <div className="flex items-start justify-between gap-4">
               <dt className="text-stone-500">Audit trail</dt>
@@ -68,8 +68,8 @@ export default async function SettingsPage() {
             Messaging integration status
           </h2>
           <p className="mt-4 text-sm leading-6 text-stone-600">
-            External messages can already be drafted and logged from inside a case. Delivery
-            integration can be connected separately without changing the case audit record.
+            External messaging can be connected separately while the new FastAPI and Supabase stack
+            is being stood up.
           </p>
           <div className="mt-6 rounded-[1.5rem] border border-stone-200 bg-white px-5 py-5">
             <p className="text-sm font-semibold text-stone-900">
@@ -82,10 +82,10 @@ export default async function SettingsPage() {
             </p>
           </div>
           <Link
-            href="/inbox"
+            href="/knowledge"
             className="mt-6 inline-flex items-center rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-medium text-stone-700 transition hover:border-stone-300 hover:text-stone-900"
           >
-            Review inbox
+            Open guidance
           </Link>
         </article>
       </section>

@@ -204,8 +204,8 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
 
   return (
     <OperatorLayout
-      pageTitle="Knowledge"
-      pageDescription="Practical guidance for fairer end-of-tenancy and deposit claim decisions."
+      pageTitle="Deposit Guidance"
+      pageDescription="Authoritative scheme, evidence, and deduction guidance for end-of-tenancy decision-making."
     >
       <section className="app-surface rounded-[1.9rem] px-6 py-6 md:px-8">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">

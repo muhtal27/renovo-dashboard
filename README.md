@@ -1,19 +1,18 @@
 # Renovo Dashboard
 
-Renovo is a Next.js operator dashboard backed by Supabase. It now includes:
+Renovo is a Next.js frontend plus a clean-slate Python backend for end-of-tenancy automation.
 
-- Operator workspace for calls, cases, knowledge, and records
+- Marketing and operator-facing frontend in `app/`
+- Clean FastAPI + SQLAlchemy + Alembic backend in `backend/`
 - Role-based login routing
-- Tenant portal
-- Landlord portal
-- Contractor portal
+- Supabase for auth, storage, and PostgreSQL
 
 ## Stack
 
 - Next.js 16
 - React 19
 - Supabase client auth + realtime
-- SQL migrations in `supabase/migrations`
+- FastAPI, SQLAlchemy 2.0, Alembic, and pgvector in `backend/`
 
 ## Local Setup
 
@@ -43,19 +42,22 @@ NEXT_PUBLIC_SITE_URL=
 npm run dev
 ```
 
-## SQL And Migrations
+5. Start the backend:
 
-Portal and knowledge changes are tracked in `supabase/migrations`.
+```bash
+cd backend
+poetry install
+poetry run alembic upgrade head
+poetry run uvicorn app.main:app --reload
+```
 
-Important recent migrations include:
+## Database And Migrations
 
-- `20260318_add_portal_profiles.sql`
-- `20260318_add_portal_rls.sql`
-- `20260318_add_tenant_portal_actions.sql`
-- `20260318_add_landlord_portal_actions.sql`
-- `20260318_add_scotland_knowledge_base.sql`
+Application schema is managed only through Alembic migrations in `backend/alembic/versions`.
 
-If you are deploying a fresh environment, make sure those migrations have been run in Supabase before testing the portals.
+- Do not create app schema manually in the Supabase dashboard.
+- Do not use legacy SQL files or remote schema dumps.
+- Every schema change should be a new Alembic revision.
 
 ## Vercel Deployment
 
@@ -79,15 +81,14 @@ This repo is ready to deploy on Vercel as a standard Next.js app.
 ### Deployment checklist
 
 1. Import the GitHub repo into Vercel.
-2. Add the three required environment variables in Vercel Project Settings.
-3. Confirm the Supabase SQL migrations have already been applied in the target project.
+2. Add the required frontend environment variables in Vercel Project Settings.
+3. Separately deploy the Python backend and run Alembic migrations there.
 4. Deploy.
 5. Smoke test:
    - operator login
-   - portal login routing
-   - tenant self-service actions
-   - landlord self-service actions
-   - outbound operator sending
+   - knowledge pages
+   - waitlist/contact submission
+   - backend health and migrations
 
 ## Handy Commands
 
@@ -96,18 +97,6 @@ npm run dev
 npm run lint
 npm run build
 ```
-
-Optional local SQL runner:
-
-```bash
-npm run sql -- "select now();"
-```
-
-The SQL runner expects one of:
-
-- `SUPABASE_DB_URL`
-- `DATABASE_URL`
-- `POSTGRES_URL`
 
 ## Notes
 
