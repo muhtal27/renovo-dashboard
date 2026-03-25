@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { syncBrowserSupabaseSessionCookie } from '@/lib/supabase-session'
 
 export default function ResetPasswordPage() {
   const router = useRouter()
@@ -20,6 +21,8 @@ export default function ResetPasswordPage() {
         data: { session },
       } = await supabase.auth.getSession()
 
+      syncBrowserSupabaseSessionCookie(session)
+
       if (!session?.user) {
         setMessage('This password reset link is invalid or has expired. Request a new one from the login page.')
         setLoading(false)
@@ -31,6 +34,16 @@ export default function ResetPasswordPage() {
     }
 
     void checkRecoverySession()
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      syncBrowserSupabaseSessionCookie(session)
+    })
+
+    return () => {
+      subscription.unsubscribe()
+    }
   }, [])
 
   async function handleUpdatePassword() {

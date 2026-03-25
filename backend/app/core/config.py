@@ -31,7 +31,7 @@ class Settings(BaseSettings):
     @computed_field(return_type=str)
     @property
     def alembic_database_url(self) -> str:
-        return make_url(self.database_url).set(drivername="postgresql").render_as_string(
+        return make_url(self.database_url).set(drivername="postgresql+asyncpg").render_as_string(
             hide_password=False
         )
 

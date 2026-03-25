@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { syncBrowserSupabaseSessionCookie } from '@/lib/supabase-session'
 
 const workflowStages = [
   {
@@ -49,15 +50,27 @@ export default function LoginPage() {
   useEffect(() => {
     async function checkSession() {
       const {
-        data: { user },
-      } = await supabase.auth.getUser()
+        data: { session },
+      } = await supabase.auth.getSession()
 
-      if (!user) return
+      syncBrowserSupabaseSessionCookie(session)
+
+      if (!session?.user) return
 
       window.location.href = returnTo
     }
 
     void checkSession()
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      syncBrowserSupabaseSessionCookie(session)
+    })
+
+    return () => {
+      subscription.unsubscribe()
+    }
   }, [returnTo])
 
   async function handlePasswordSignIn() {
@@ -71,7 +84,7 @@ export default function LoginPage() {
     setError(null)
     setMagicSent(false)
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email: email.trim(),
       password,
     })
@@ -88,6 +101,7 @@ export default function LoginPage() {
       return
     }
 
+    syncBrowserSupabaseSessionCookie(data.session)
     window.location.href = returnTo
   }
 

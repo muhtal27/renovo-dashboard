@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   Phone,
   Settings,
+  ClipboardList,
 } from 'lucide-react'
 
 type OperatorNavProps = {
@@ -14,6 +15,12 @@ type OperatorNavProps = {
 }
 
 const PRIMARY_ITEMS = [
+  {
+    label: 'Cases',
+    href: '/eot',
+    icon: ClipboardList,
+    isActive: (pathname: string) => pathname === '/eot' || pathname.startsWith('/eot/'),
+  },
   {
     label: 'Knowledge',
     href: '/knowledge',

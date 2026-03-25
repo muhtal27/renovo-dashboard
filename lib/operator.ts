@@ -18,6 +18,21 @@ const operatorProfileCache = new Map<
 
 const operatorProfileInflight = new Map<string, Promise<OperatorProfile | null>>()
 
+function isMissingUsersProfilesSource(error: unknown) {
+  if (!error || typeof error !== 'object') {
+    return false
+  }
+
+  const code = 'code' in error ? error.code : null
+  const message = 'message' in error ? error.message : null
+
+  return (
+    code === 'PGRST205' ||
+    (typeof message === 'string' &&
+      message.toLowerCase().includes('users_profiles'))
+  )
+}
+
 export async function getOperatorProfile(userId: string) {
   const cached = operatorProfileCache.get(userId)
 
@@ -39,6 +54,15 @@ export async function getOperatorProfile(userId: string) {
       .maybeSingle()
 
     if (profileError) {
+      if (isMissingUsersProfilesSource(profileError)) {
+        operatorProfileCache.set(userId, {
+          loadedAt: Date.now(),
+          profile: null,
+        })
+
+        return null
+      }
+
       throw profileError
     }
 

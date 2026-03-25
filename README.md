@@ -32,6 +32,9 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 NEXT_PUBLIC_OPERATOR_OUTBOUND_WEBHOOK_URL=
 NEXT_PUBLIC_SITE_URL=
+EOT_API_BASE_URL=
+EOT_TENANT_ID=
+NEXT_PUBLIC_EOT_TENANT_ID=
 ```
 
 `SUPABASE_SERVICE_ROLE_KEY` is only used by the New Business onboarding flow so it can look up existing Supabase Auth users by email before assigning dashboard or portal access.
@@ -49,6 +52,31 @@ cd backend
 poetry install
 poetry run alembic upgrade head
 poetry run uvicorn app.main:app --reload
+```
+
+`EOT_API_BASE_URL` should point at the FastAPI service root, for example `http://127.0.0.1:8000`.
+`EOT_TENANT_ID` is an optional fallback if the signed-in Supabase user does not already carry a
+`tenant_id` or workspace identifier in auth metadata.
+
+## Local Auth Bootstrap
+
+If you need a deterministic local operator account, add `SUPABASE_SERVICE_ROLE_KEY` to
+`.env.local` and run:
+
+```bash
+node scripts/bootstrap-local-auth.mjs
+```
+
+Defaults created or updated by the script:
+
+- email: `local-operator@renovo.dev`
+- password: `RenovoLocal123!`
+- tenant id: `019d2215-620d-77c3-aa71-c0b5d517e9f8`
+
+Override any value if needed:
+
+```bash
+node scripts/bootstrap-local-auth.mjs --email you@example.com --password 'YourPassword123!' --tenant-id 019d2215-620d-77c3-aa71-c0b5d517e9f8
 ```
 
 ## Database And Migrations
@@ -77,6 +105,8 @@ This repo is ready to deploy on Vercel as a standard Next.js app.
 - `SUPABASE_SERVICE_ROLE_KEY` for the New Business onboarding flow
 - `NEXT_PUBLIC_OPERATOR_OUTBOUND_WEBHOOK_URL`
 - `NEXT_PUBLIC_SITE_URL` (optional override if you want metadata/canonical URLs pinned to a specific domain)
+- `EOT_API_BASE_URL` so the Next.js proxy can forward `/api/eot/*` requests to the FastAPI service
+- `EOT_TENANT_ID` if tenant resolution is not already stored in Supabase auth metadata
 
 ### Deployment checklist
 

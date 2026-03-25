@@ -26,6 +26,15 @@ export function useOperatorGate({
   useEffect(() => {
     let cancelled = false
 
+    function redirectToLogin() {
+      const returnTo =
+        typeof window === 'undefined'
+          ? '/eot'
+          : `${window.location.pathname}${window.location.search || ''}`
+
+      router.replace(`/login?returnTo=${encodeURIComponent(returnTo)}`)
+    }
+
     async function hydrateOperator(user: User) {
       const requestId = ++profileRequestIdRef.current
 
@@ -61,7 +70,7 @@ export function useOperatorGate({
         setAuthLoading(false)
 
         if (unauthenticatedMode === 'redirect') {
-          router.replace('/login')
+          redirectToLogin()
         }
 
         return

@@ -9,6 +9,22 @@ type MinimalSessionCookie = {
   expires_at?: AuthSession['expires_at']
 }
 
+export function toMinimalSupabaseSession(session: Partial<AuthSession> | null | undefined) {
+  if (
+    !session ||
+    typeof session.access_token !== 'string' ||
+    typeof session.refresh_token !== 'string'
+  ) {
+    return null
+  }
+
+  return {
+    access_token: session.access_token,
+    refresh_token: session.refresh_token,
+    expires_at: typeof session.expires_at === 'number' ? session.expires_at : undefined,
+  } satisfies MinimalSessionCookie
+}
+
 function canUseBrowserStorage() {
   return typeof window !== 'undefined' && typeof document !== 'undefined'
 }
@@ -37,21 +53,7 @@ function clearCookie(name: string) {
 
 function toMinimalSessionCookie(value: string): MinimalSessionCookie | null {
   try {
-    const parsed = JSON.parse(value) as Partial<AuthSession> | null
-
-    if (
-      !parsed ||
-      typeof parsed.access_token !== 'string' ||
-      typeof parsed.refresh_token !== 'string'
-    ) {
-      return null
-    }
-
-    return {
-      access_token: parsed.access_token,
-      refresh_token: parsed.refresh_token,
-      expires_at: typeof parsed.expires_at === 'number' ? parsed.expires_at : undefined,
-    }
+    return toMinimalSupabaseSession(JSON.parse(value) as Partial<AuthSession> | null)
   } catch {
     return null
   }
@@ -85,6 +87,19 @@ export function serializeSupabaseSessionCookie(session: MinimalSessionCookie) {
   return encodeURIComponent(JSON.stringify(session))
 }
 
+export function syncBrowserSupabaseSessionCookie(session: Partial<AuthSession> | null | undefined) {
+  if (!canUseBrowserStorage()) return
+
+  const minimalSession = toMinimalSupabaseSession(session)
+
+  if (!minimalSession) {
+    clearCookie(SUPABASE_SESSION_COOKIE)
+    return
+  }
+
+  writeCookie(SUPABASE_SESSION_COOKIE, serializeSupabaseSessionCookie(minimalSession))
+}
+
 export function createBrowserSupabaseStorage(storageKey: string) {
   return {
     getItem(key: string) {
@@ -108,7 +123,7 @@ export function createBrowserSupabaseStorage(storageKey: string) {
       const minimalSession = toMinimalSessionCookie(value)
 
       if (minimalSession) {
-        writeCookie(SUPABASE_SESSION_COOKIE, serializeSupabaseSessionCookie(minimalSession))
+        syncBrowserSupabaseSessionCookie(minimalSession)
       } else {
         clearCookie(SUPABASE_SESSION_COOKIE)
       }

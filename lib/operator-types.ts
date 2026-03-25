@@ -16,5 +16,13 @@ export type CurrentOperator = {
 export function getOperatorLabel(operator: CurrentOperator | null) {
   if (!operator?.authUser) return ''
 
-  return operator.profile?.full_name || operator.authUser.email || ''
+  const metadata = operator.authUser.user_metadata
+
+  return (
+    operator.profile?.full_name ||
+    (typeof metadata?.full_name === 'string' ? metadata.full_name : null) ||
+    (typeof metadata?.name === 'string' ? metadata.name : null) ||
+    operator.authUser.email ||
+    ''
+  )
 }

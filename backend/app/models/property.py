@@ -10,6 +10,7 @@ from app.models.base import TenantScopedModel
 
 if TYPE_CHECKING:
     from app.models.inspection import Inspection
+    from app.models.tenancy import Tenancy
     from app.models.tenant import Tenant
 
 
@@ -36,6 +37,10 @@ class Property(TenantScopedModel, Base):
 
     tenant: Mapped["Tenant"] = relationship(back_populates="properties")
     inspections: Mapped[list["Inspection"]] = relationship(
+        back_populates="property",
+        cascade="all, delete-orphan",
+    )
+    tenancies: Mapped[list["Tenancy"]] = relationship(
         back_populates="property",
         cascade="all, delete-orphan",
     )
