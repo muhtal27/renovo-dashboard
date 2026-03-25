@@ -143,7 +143,6 @@ export type EotCaseWorkspace = {
 }
 
 export type CreateEotCaseInput = {
-  tenant_id: string
   property_id: string
   summary: string | null
   status: EotCaseStatus
@@ -160,7 +159,6 @@ export type CreateEotCaseInput = {
 }
 
 export type CreateEotEvidenceInput = {
-  tenant_id: string
   case_id: string
   file_url: string
   type: EotEvidenceType
@@ -170,7 +168,6 @@ export type CreateEotEvidenceInput = {
 }
 
 export type UpsertEotIssueInput = {
-  tenant_id: string
   case_id: string
   issue_id?: string
   title?: string
@@ -186,7 +183,6 @@ export type UpsertEotIssueInput = {
 }
 
 export type CreateEotMessageInput = {
-  tenant_id: string
   case_id: string
   sender_type: EotMessageSenderType
   sender_id: string

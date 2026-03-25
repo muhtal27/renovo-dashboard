@@ -267,7 +267,11 @@ function SectionCard({
   children: React.ReactNode
   className?: string
 }) {
-  return <div className={`rounded-[1.4rem] border border-stone-200 bg-white ${className}`}>{children}</div>
+  return (
+    <div className={`rounded-xl border border-[rgba(15,14,13,0.1)] bg-white ${className}`}>
+      {children}
+    </div>
+  )
 }
 
 export default function HomepageDemo({
@@ -592,11 +596,11 @@ export default function HomepageDemo({
 
   return (
     <div
-      className={`app-surface overflow-hidden rounded-[1.9rem] border border-stone-200 shadow-[0_18px_44px_rgba(55,43,27,0.1)] ${
+      className={`overflow-hidden rounded-xl border border-[rgba(15,14,13,0.1)] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.06)] ${
         isCompact ? '' : 'min-h-[520px]'
       }`}
     >
-      <div className="border-b border-stone-200 bg-stone-50/90 px-4 py-3 md:px-5">
+      <div className="border-b border-[rgba(15,14,13,0.1)] bg-[#f2efe9] px-4 py-3 md:px-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="hidden items-center gap-1.5 sm:flex">
@@ -607,8 +611,8 @@ export default function HomepageDemo({
             <p className="app-kicker">Renovo</p>
           </div>
 
-          <p className="min-w-0 flex-1 truncate text-center text-sm font-medium text-stone-600">
-            {CASE_REFERENCE} · Ashgrove House
+          <p className="min-w-0 flex-1 truncate text-center text-sm font-medium text-[#3d3b37]">
+            {CASE_REFERENCE} - Ashgrove House
           </p>
 
           <DemoBadge
@@ -618,7 +622,7 @@ export default function HomepageDemo({
         </div>
       </div>
 
-      <div className="border-b border-stone-200 bg-white/90 px-3 py-2 md:px-4">
+      <div className="border-b border-[rgba(15,14,13,0.1)] bg-white px-3 py-2 md:px-4">
         <div className="flex gap-2 overflow-x-auto pb-1">
           {DEMO_TABS.map((tab) => {
             const active = tab.id === activeTab
@@ -628,10 +632,10 @@ export default function HomepageDemo({
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
-                className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition ${
+                className={`whitespace-nowrap rounded px-4 py-2 text-sm font-medium transition ${
                   active
                     ? 'bg-stone-900 text-white shadow-sm'
-                    : 'border border-stone-200 bg-stone-50 text-stone-600 hover:bg-white hover:text-stone-900'
+                    : 'border border-[rgba(15,14,13,0.1)] bg-[#f2efe9] text-[#3d3b37] hover:bg-white hover:text-stone-900'
                 }`}
               >
                 {tab.label}
@@ -642,7 +646,7 @@ export default function HomepageDemo({
       </div>
 
       <div
-        className={`bg-[linear-gradient(180deg,rgba(250,247,242,0.32),rgba(255,255,255,0.92))] ${
+        className={`bg-[#faf8f5] ${
           isCompact ? 'space-y-4 p-4' : 'space-y-5 p-4 md:p-5'
         }`}
       >
@@ -653,7 +657,7 @@ export default function HomepageDemo({
                 Case context
               </p>
               <h3
-                className={`mt-2 font-semibold tracking-tight text-stone-900 ${
+                className={`mt-2 tracking-tight text-stone-900 ${
                   isCompact ? 'text-xl md:text-2xl' : 'text-2xl'
                 }`}
               >

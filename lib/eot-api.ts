@@ -14,7 +14,6 @@ import type {
 type RequestOptions = {
   method?: 'GET' | 'POST'
   body?: unknown
-  searchParams?: URLSearchParams
 }
 
 export class EotApiError extends Error {
@@ -28,8 +27,7 @@ export class EotApiError extends Error {
 }
 
 async function requestJson<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  const url = options.searchParams?.toString() ? `${path}?${options.searchParams}` : path
-  const response = await fetch(url, {
+  const response = await fetch(path, {
     method: options.method ?? 'GET',
     headers: options.body ? { 'Content-Type': 'application/json' } : undefined,
     body: options.body ? JSON.stringify(options.body) : undefined,
@@ -58,14 +56,12 @@ async function requestJson<T>(path: string, options: RequestOptions = {}): Promi
   return payload as T
 }
 
-export function listEotCases(tenantId: string) {
-  const searchParams = new URLSearchParams({ tenant_id: tenantId })
-  return requestJson<EotCaseListItem[]>('/api/eot/cases', { searchParams })
+export function listEotCases() {
+  return requestJson<EotCaseListItem[]>('/api/eot/cases')
 }
 
-export function getEotCaseWorkspace(tenantId: string, caseId: string) {
-  const searchParams = new URLSearchParams({ tenant_id: tenantId })
-  return requestJson<EotCaseWorkspace>(`/api/eot/cases/${caseId}`, { searchParams })
+export function getEotCaseWorkspace(caseId: string) {
+  return requestJson<EotCaseWorkspace>(`/api/eot/cases/${caseId}`)
 }
 
 export function createEotCase(input: CreateEotCaseInput) {

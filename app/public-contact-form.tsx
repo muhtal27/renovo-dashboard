@@ -120,16 +120,16 @@ export function PublicContactForm({
   }
 
   return (
-    <section className="rounded-[1.75rem] border border-stone-200 bg-white/92 p-5 shadow-[0_16px_36px_rgba(55,43,27,0.08)]">
+    <section className="rounded-xl border border-[rgba(15,14,13,0.1)] bg-white p-5 shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
       <p className="app-kicker">Contact form</p>
-      <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-900">
+      <h2 className="mt-3 text-2xl tracking-tight text-[#0f0e0d]">
         Send us a message
       </h2>
 
       {status === 'success' ? (
-        <div className="mt-5 rounded-[1.4rem] border border-emerald-200 bg-emerald-50 px-5 py-6 text-center text-emerald-950">
-          <p className="text-2xl font-semibold">✓</p>
-          <p className="mt-3 text-lg font-semibold">Message received</p>
+        <div className="mt-5 rounded-xl border border-[#b9e3d7] bg-[#e1f5ee] px-5 py-6 text-center text-[#0c5946]">
+          <p className="text-2xl">✓</p>
+          <p className="mt-3 text-lg">Message received</p>
           <p className="mt-2 text-sm leading-6 text-emerald-900/85">
             Thanks for getting in touch. We&apos;ll reply as soon as we can.
           </p>
@@ -152,8 +152,8 @@ export function PublicContactForm({
 
             <div className="grid gap-4 md:grid-cols-2">
               <label className="block">
-                <span className="mb-2 block text-sm font-medium text-stone-700">
-                  Full name <span className="text-stone-500">(required)</span>
+                <span className="mb-2 block text-sm font-medium text-[#3d3b37]">
+                  Full name <span className="text-[#7a7670]">(required)</span>
                 </span>
                 <input
                   type="text"
@@ -167,8 +167,8 @@ export function PublicContactForm({
               </label>
 
               <label className="block">
-                <span className="mb-2 block text-sm font-medium text-stone-700">
-                  Work email <span className="text-stone-500">(required)</span>
+                <span className="mb-2 block text-sm font-medium text-[#3d3b37]">
+                  Work email <span className="text-[#7a7670]">(required)</span>
                 </span>
                 <input
                   type="email"
@@ -184,8 +184,8 @@ export function PublicContactForm({
 
             <div className="grid gap-4 md:grid-cols-2">
               <label className="block">
-                <span className="mb-2 block text-sm font-medium text-stone-700">
-                  Company / agency name <span className="text-stone-500">(optional)</span>
+                <span className="mb-2 block text-sm font-medium text-[#3d3b37]">
+                  Company / agency name <span className="text-[#7a7670]">(optional)</span>
                 </span>
                 <input
                   type="text"
@@ -199,8 +199,8 @@ export function PublicContactForm({
               </label>
 
               <label className="block">
-                <span className="mb-2 block text-sm font-medium text-stone-700">
-                  Enquiry type <span className="text-stone-500">(required)</span>
+                <span className="mb-2 block text-sm font-medium text-[#3d3b37]">
+                  Enquiry type <span className="text-[#7a7670]">(required)</span>
                 </span>
                 <select
                   value={form.enquiryType}
@@ -223,8 +223,8 @@ export function PublicContactForm({
             </div>
 
             <label className="block">
-              <span className="mb-2 block text-sm font-medium text-stone-700">
-                Portfolio size <span className="text-stone-500">(optional)</span>
+              <span className="mb-2 block text-sm font-medium text-[#3d3b37]">
+                Portfolio size <span className="text-[#7a7670]">(optional)</span>
               </span>
               <select
                 value={form.portfolioSize}
@@ -246,8 +246,8 @@ export function PublicContactForm({
             </label>
 
             <label className="block">
-              <span className="mb-2 block text-sm font-medium text-stone-700">
-                Message <span className="text-stone-500">(required)</span>
+              <span className="mb-2 block text-sm font-medium text-[#3d3b37]">
+                Message <span className="text-[#7a7670]">(required)</span>
               </span>
               <textarea
                 value={form.message}
@@ -261,13 +261,13 @@ export function PublicContactForm({
             </label>
 
             {fieldError ? (
-              <div className="rounded-[1.2rem] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+              <div className="rounded-lg border border-[#ead8a9] bg-[#fdf6e3] px-4 py-3 text-sm text-[#7f611f]">
                 {fieldError}
               </div>
             ) : null}
 
             {status === 'error' ? (
-              <div className="rounded-[1.2rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900">
+              <div className="rounded-lg border border-[#efc7c7] bg-[#fcebeb] px-4 py-3 text-sm text-[#8d2e2e]">
                 Something went wrong. Please try again or email hello@renovoai.co.uk.
               </div>
             ) : null}
@@ -275,14 +275,18 @@ export function PublicContactForm({
             <button
               type="submit"
               disabled={submitting}
-              className="app-primary-button w-full rounded-2xl px-4 py-3 text-sm font-medium disabled:opacity-60"
+              className="app-primary-button w-full rounded px-4 py-3 text-sm font-medium disabled:opacity-60"
             >
               {submitting ? 'Sending...' : 'Send message'}
             </button>
           </form>
 
-          <p className="mt-4 text-xs leading-6 text-stone-500">
-            We only use these details to respond to your enquiry.
+          <p className="mt-4 text-xs leading-6 text-[#7a7670]">
+            We only use these details to respond to your enquiry. See our{' '}
+            <a href="/privacy" className="underline decoration-[rgba(15,14,13,0.18)] underline-offset-4">
+              privacy notice
+            </a>
+            .
           </p>
         </>
       )}

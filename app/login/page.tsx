@@ -201,37 +201,40 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="app-grid min-h-screen px-6 py-8 text-stone-900 md:px-8 md:py-10">
-      <div className="mx-auto grid max-w-7xl gap-6 xl:grid-cols-[minmax(0,1.1fr)_460px]">
-        <section className="app-surface-strong rounded-[2.2rem] p-8 md:p-10">
+    <main className="marketing-page min-h-screen bg-[#faf8f5] py-8 text-[#0f0e0d] md:py-10">
+      <div className="marketing-frame grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_460px]">
+        <section className="rounded-xl border border-[rgba(15,14,13,0.1)] bg-white p-8 shadow-[0_8px_24px_rgba(0,0,0,0.04)] md:p-10">
           <p className="app-kicker">Renovo</p>
-          <p className="mt-5 max-w-3xl text-base leading-8 text-stone-600 md:text-lg">
+          <h1 className="mt-4 text-[clamp(2rem,4vw,2.9rem)] leading-[1.08]">
+            Workspace sign-in
+          </h1>
+          <p className="mt-5 max-w-3xl text-base leading-8 text-[#3d3b37] md:text-lg">
             The end-of-tenancy decision engine for letting agencies.
           </p>
 
-          <div className="mt-8 grid gap-3 xl:grid-cols-4">
+          <div className="mt-8 rounded-xl border border-[rgba(15,14,13,0.1)] bg-[#fcfbf9] p-5">
+            <p className="app-kicker">Inside the workspace</p>
+            <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {workflowStages.map((item) => (
-              <article
-                key={item.step}
-                className="rounded-[1.45rem] border border-stone-200 bg-white/92 p-4 shadow-sm"
-              >
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-stone-500">
+              <div key={item.step} className="border-l border-[rgba(15,14,13,0.12)] pl-4 first:border-l-0 first:pl-0">
+                <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[#7a7670]">
                   Step {item.step}
                 </p>
-                <h2 className="mt-2 text-base font-semibold text-stone-900">{item.title}</h2>
-                <p className="mt-2 text-sm leading-6 text-stone-600">{item.body}</p>
-              </article>
+                <h2 className="mt-2 text-base">{item.title}</h2>
+                <p className="mt-2 text-sm leading-6 text-[#3d3b37]">{item.body}</p>
+              </div>
             ))}
+          </div>
           </div>
         </section>
 
-        <section className="app-surface rounded-[2.2rem] p-8">
+        <section className="rounded-xl border border-[rgba(15,14,13,0.1)] bg-white p-8 shadow-[0_8px_24px_rgba(0,0,0,0.04)]">
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="app-kicker">
                 {mode === 'sign_in' ? 'Sign In' : mode === 'sign_up' ? 'Sign Up' : 'Reset Password'}
               </p>
-              <h2 className="mt-2 text-3xl font-semibold tracking-tight md:text-[2.6rem]">
+              <h2 className="mt-2 text-3xl tracking-tight md:text-[2.6rem]">
                 {mode === 'sign_in'
                   ? 'Enter the workspace'
                   : mode === 'sign_up'
@@ -241,13 +244,13 @@ export default function LoginPage() {
             </div>
             <Link
               href="/"
-              className="app-secondary-button rounded-full px-4 py-2 text-sm font-medium"
+              className="app-secondary-button rounded px-4 py-2 text-sm font-medium"
             >
               Back to Renovo
             </Link>
           </div>
 
-          <p className="mt-4 text-sm leading-6 text-stone-600">
+          <p className="mt-4 text-sm leading-6 text-[#3d3b37]">
             {mode === 'sign_in' &&
               'Password is fastest if you already have one. Magic link is useful when you are signing in on a new device.'}
             {mode === 'sign_up' &&
@@ -271,7 +274,7 @@ export default function LoginPage() {
                   setError(null)
                   setMagicSent(false)
                 }}
-                className={`rounded-full px-4 py-2.5 text-sm font-medium ${
+                className={`rounded px-4 py-2.5 text-sm font-medium ${
                   mode === value ? 'app-pill-active' : 'app-pill'
                 }`}
               >
@@ -280,13 +283,13 @@ export default function LoginPage() {
             ))}
           </div>
 
-          <div className="mt-6 rounded-[1.5rem] border border-stone-200 bg-stone-50/85 p-4">
-            <p className="text-sm font-medium text-stone-900">
+          <div className="mt-6 rounded-lg border border-[rgba(15,14,13,0.1)] bg-[#fcfbf9] p-4">
+            <p className="text-sm font-medium text-[#0f0e0d]">
               {mode === 'sign_in' && 'For approved property managers'}
               {mode === 'sign_up' && 'Create a sign-in before your access is linked'}
               {mode === 'reset' && 'Recover the password for your approved Renovo email'}
             </p>
-            <p className="mt-2 text-sm leading-6 text-stone-600">
+            <p className="mt-2 text-sm leading-6 text-[#3d3b37]">
               {mode === 'sign_in' &&
                 'If your email is linked correctly, Renovo will send you straight to the right workspace after sign-in.'}
               {mode === 'sign_up' &&
@@ -298,7 +301,7 @@ export default function LoginPage() {
 
           <div className="mt-6 space-y-4">
             <label className="block">
-              <span className="mb-2 block text-sm font-medium text-stone-700">Email address</span>
+              <span className="mb-2 block text-sm font-medium text-[#3d3b37]">Email address</span>
               <input
                 type="email"
                 autoComplete="email"
@@ -314,7 +317,7 @@ export default function LoginPage() {
 
             {mode !== 'reset' && (
               <label className="block">
-                <span className="mb-2 block text-sm font-medium text-stone-700">Password</span>
+                <span className="mb-2 block text-sm font-medium text-[#3d3b37]">Password</span>
                 <input
                   type="password"
                   autoComplete={mode === 'sign_up' ? 'new-password' : 'current-password'}
@@ -328,7 +331,7 @@ export default function LoginPage() {
 
             {mode === 'sign_up' && (
               <label className="block">
-                <span className="mb-2 block text-sm font-medium text-stone-700">Confirm password</span>
+                <span className="mb-2 block text-sm font-medium text-[#3d3b37]">Confirm password</span>
                 <input
                   type="password"
                   autoComplete="new-password"
@@ -344,7 +347,7 @@ export default function LoginPage() {
           {mode === 'sign_in' && error ? (
             <div
               aria-live="polite"
-              className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900"
+              className="mt-4 rounded-lg border border-[#efc7c7] bg-[#fcebeb] px-4 py-3 text-sm text-[#8d2e2e]"
             >
               {error}
             </div>
@@ -356,20 +359,20 @@ export default function LoginPage() {
                 <button
                   onClick={handlePasswordSignIn}
                   disabled={loadingPassword || loadingMagicLink}
-                  className="app-primary-button rounded-2xl px-4 py-3.5 text-sm font-medium disabled:opacity-60"
+                  className="app-primary-button rounded px-4 py-3.5 text-sm font-medium disabled:opacity-60"
                 >
                   {loadingPassword ? 'Signing in...' : 'Sign in with password'}
                 </button>
 
                 {magicSent ? (
-                  <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3.5 text-sm font-medium text-emerald-900">
-                    ✓ Magic link sent — check your inbox
+                  <div className="rounded-lg border border-[#b9e3d7] bg-[#e1f5ee] px-4 py-3.5 text-sm font-medium text-[#0c5946]">
+                    ✓ Magic link sent - check your inbox
                   </div>
                 ) : (
                   <button
                     onClick={handleMagicLink}
                     disabled={loadingPassword || loadingMagicLink}
-                    className="app-secondary-button rounded-2xl px-4 py-3.5 text-sm font-medium disabled:opacity-60"
+                    className="app-secondary-button rounded px-4 py-3.5 text-sm font-medium disabled:opacity-60"
                   >
                     {loadingMagicLink ? 'Sending...' : 'Email me a magic link'}
                   </button>
@@ -381,7 +384,7 @@ export default function LoginPage() {
               <button
                 onClick={handleSignUp}
                 disabled={loadingSignUp}
-                className="app-primary-button rounded-2xl px-4 py-3.5 text-sm font-medium disabled:opacity-60"
+                className="app-primary-button rounded px-4 py-3.5 text-sm font-medium disabled:opacity-60"
               >
                 {loadingSignUp ? 'Creating account...' : 'Create account'}
               </button>
@@ -391,7 +394,7 @@ export default function LoginPage() {
               <button
                 onClick={handleResetPassword}
                 disabled={loadingReset}
-                className="app-primary-button rounded-2xl px-4 py-3.5 text-sm font-medium disabled:opacity-60"
+                className="app-primary-button rounded px-4 py-3.5 text-sm font-medium disabled:opacity-60"
               >
                 {loadingReset ? 'Sending reset...' : 'Send password reset email'}
               </button>
@@ -401,7 +404,7 @@ export default function LoginPage() {
           {message && (
             <div
               aria-live="polite"
-              className="app-card-muted mt-4 rounded-2xl px-4 py-3 text-sm text-stone-700"
+              className="mt-4 rounded-lg border border-[rgba(15,14,13,0.1)] bg-[#fcfbf9] px-4 py-3 text-sm text-[#3d3b37]"
             >
               {message}
             </div>

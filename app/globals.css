@@ -1,27 +1,28 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f4f7f5;
-  --foreground: #241f18;
-  --panel: rgba(255, 252, 247, 0.92);
-  --panel-strong: #fffdf9;
-  --line: rgba(84, 67, 47, 0.14);
-  --line-strong: rgba(84, 67, 47, 0.22);
-  --muted: #6d6458;
-  --accent: #476f63;
-  --accent-strong: #2f574b;
-  --accent-soft: #e6efe9;
-  --accent-mist: rgba(71, 111, 99, 0.08);
-  --warm-soft: #f7f2eb;
-  --warm-strong: #f1e8dc;
-  --shadow-soft: 0 20px 44px rgba(58, 41, 24, 0.09);
-  --shadow-strong: 0 32px 74px rgba(58, 41, 24, 0.14);
+  --background: #fbfaf7;
+  --foreground: #0f0e0d;
+  --panel: rgba(255, 255, 255, 0.94);
+  --panel-strong: #ffffff;
+  --line: rgba(15, 14, 13, 0.1);
+  --line-strong: rgba(15, 14, 13, 0.18);
+  --muted: #7a7670;
+  --accent: #0f6e56;
+  --accent-strong: #0c5946;
+  --accent-soft: #e1f5ee;
+  --accent-mist: rgba(15, 110, 86, 0.09);
+  --warm-soft: #f6f3ed;
+  --warm-strong: #ebe3d6;
+  --gold: #9e7a2a;
+  --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.06);
+  --shadow-strong: 0 16px 44px rgba(0, 0, 0, 0.08);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: "Avenir Next", "Segoe UI", "Helvetica Neue", sans-serif;
+  --font-sans: var(--font-dm-sans), "Segoe UI", sans-serif;
   --font-mono: "SFMono-Regular", "SF Mono", "Menlo", monospace;
 }
 
@@ -35,10 +36,12 @@ html {
 
 body {
   color-scheme: light;
-  background: var(--background);
+  background:
+    radial-gradient(circle at top left, rgba(241, 232, 214, 0.42), transparent 34%),
+    radial-gradient(circle at top right, rgba(225, 245, 238, 0.28), transparent 28%),
+    linear-gradient(180deg, #fdfcf9 0%, #fbfaf7 38%, #f8f5ef 100%);
   color: var(--foreground);
-  background-image: linear-gradient(180deg, #f9fcfa 0%, #f4f7f5 55%, #eef3f0 100%);
-  font-family: "Avenir Next", "Segoe UI", "Helvetica Neue", sans-serif;
+  font-family: var(--font-dm-sans), "Segoe UI", sans-serif;
   line-height: 1.5;
   min-height: 100vh;
   text-rendering: optimizeLegibility;
@@ -49,8 +52,17 @@ h1,
 h2,
 h3,
 h4 {
-  color: #1f1a14;
+  font-family: var(--font-dm-serif), Georgia, serif;
+  color: #0f0e0d;
   letter-spacing: -0.025em;
+  font-weight: 400;
+}
+
+.marketing-page h1.font-semibold,
+.marketing-page h2.font-semibold,
+.marketing-page h3.font-semibold,
+.marketing-page h4.font-semibold {
+  font-weight: 400;
 }
 
 a,
@@ -104,25 +116,24 @@ a:focus-visible {
 }
 
 .app-surface {
-  background: linear-gradient(180deg, rgba(255, 253, 249, 0.95) 0%, rgba(255, 251, 246, 0.88) 100%);
+  background: rgba(255, 255, 255, 0.92);
   border: 1px solid var(--line);
+  border-radius: 12px;
   box-shadow: var(--shadow-soft);
-  backdrop-filter: blur(10px);
 }
 
 .app-surface-strong {
-  background:
-    linear-gradient(180deg, rgba(255, 254, 251, 0.98) 0%, rgba(255, 251, 245, 0.98) 100%),
-    var(--panel-strong);
+  background: var(--panel-strong);
   border: 1px solid var(--line);
+  border-radius: 12px;
   box-shadow: var(--shadow-strong);
 }
 
 .app-pill {
   align-items: center;
-  background: rgba(255, 255, 255, 0.86);
-  border: 1px solid rgba(84, 67, 47, 0.16);
-  color: #4f483f;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid var(--line);
+  color: #3d3b37;
   display: inline-flex;
   justify-content: center;
   line-height: 1.15;
@@ -132,15 +143,15 @@ a:focus-visible {
 }
 
 .app-pill:hover {
-  background: rgba(255, 255, 255, 0.96);
-  border-color: rgba(84, 67, 47, 0.28);
+  background: #fff;
+  border-color: var(--line-strong);
 }
 
 .app-pill-active {
   align-items: center;
   background: var(--accent-soft);
-  border: 1px solid rgba(71, 111, 99, 0.34);
-  box-shadow: 0 8px 20px rgba(71, 111, 99, 0.12);
+  border: 1px solid rgba(15, 110, 86, 0.25);
+  box-shadow: none;
   color: var(--accent-strong);
   display: inline-flex;
   justify-content: center;
@@ -152,10 +163,10 @@ a:focus-visible {
 
 .app-primary-button {
   align-items: center;
-  background: linear-gradient(180deg, #557d70 0%, #3d6659 100%);
-  border: 1px solid rgba(47, 87, 75, 0.2);
-  box-shadow: 0 14px 30px rgba(47, 87, 75, 0.18);
-  color: #f8fcfa;
+  background: #0f0e0d;
+  border: 1px solid #0f0e0d;
+  box-shadow: none;
+  color: #faf8f5;
   display: inline-flex;
   justify-content: center;
   line-height: 1.15;
@@ -165,8 +176,8 @@ a:focus-visible {
 }
 
 .app-primary-button:hover {
-  background: linear-gradient(180deg, #476f63 0%, #2f574b 100%);
-  box-shadow: 0 18px 34px rgba(47, 87, 75, 0.22);
+  background: #3d3b37;
+  border-color: #3d3b37;
 }
 
 .app-primary-button:disabled {
@@ -175,10 +186,10 @@ a:focus-visible {
 
 .app-secondary-button {
   align-items: center;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(250, 246, 240, 0.94) 100%);
-  border: 1px solid rgba(84, 67, 47, 0.18);
-  color: #4d463d;
-  box-shadow: 0 8px 20px rgba(58, 41, 24, 0.06);
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  color: #0f0e0d;
+  box-shadow: none;
   display: inline-flex;
   justify-content: center;
   line-height: 1.15;
@@ -188,8 +199,8 @@ a:focus-visible {
 }
 
 .app-secondary-button:hover {
-  background: #fffdf9;
-  border-color: rgba(84, 67, 47, 0.28);
+  background: #f8f6f2;
+  border-color: #0f0e0d;
 }
 
 .app-tertiary-button {
@@ -224,10 +235,10 @@ a:focus-visible {
 }
 
 .app-kicker {
-  color: #756b5d;
+  color: var(--muted);
   font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.22em;
+  font-weight: 500;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
@@ -240,22 +251,18 @@ a:focus-visible {
 }
 
 .app-grid::before {
-  content: "";
-  inset: 0;
-  pointer-events: none;
-  position: fixed;
-  background-image: none;
+  content: none;
 }
 
 .app-field,
 .app-select,
 .app-textarea {
   width: 100%;
-  border-radius: 1rem;
-  border: 1px solid rgba(84, 67, 47, 0.2);
-  background: rgba(255, 255, 255, 0.92);
+  border-radius: 0.5rem;
+  border: 1px solid var(--line-strong);
+  background: #fff;
   color: var(--foreground);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  box-shadow: none;
 }
 
 .app-field,
@@ -272,13 +279,13 @@ a:focus-visible {
 
 .app-field::placeholder,
 .app-textarea::placeholder {
-  color: #8b8072;
+  color: #7a7670;
 }
 
 .app-field:hover,
 .app-select:hover,
 .app-textarea:hover {
-  border-color: rgba(84, 67, 47, 0.28);
+  border-color: #0f0e0d;
 }
 
 .app-field:disabled,
@@ -312,6 +319,115 @@ a:focus-visible {
 
 .app-divider {
   border-color: rgba(84, 67, 47, 0.12);
+}
+
+.operator-app h1,
+.operator-app h2,
+.operator-app h3,
+.operator-app h4 {
+  font-family: var(--font-dm-sans), "Segoe UI", sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+}
+
+.operator-app {
+  position: relative;
+  isolation: isolate;
+}
+
+.operator-app::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: #eef3f9;
+  z-index: -1;
+}
+
+.operator-app ::selection {
+  background: rgba(37, 99, 235, 0.16);
+}
+
+.marketing-frame {
+  width: min(100%, 1600px);
+  margin: 0 auto;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+.marketing-page .page-shell {
+  width: min(100%, 1600px);
+  margin: 0 auto;
+  padding: 56px 24px 72px;
+}
+
+.marketing-page .page-stack {
+  display: grid;
+  gap: 24px;
+}
+
+.marketing-page .page-hero {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(250, 247, 241, 0.94) 100%);
+  padding: 32px 28px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+}
+
+.marketing-page .page-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.94);
+  padding: 28px 24px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+}
+
+.marketing-page .page-title {
+  margin-top: 12px;
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1.08;
+}
+
+.marketing-page .page-copy {
+  margin-top: 16px;
+  max-width: 760px;
+  font-size: 17px;
+  font-weight: 300;
+  line-height: 1.8;
+  color: #3d3b37;
+}
+
+.marketing-page .page-grid-2 {
+  display: grid;
+  gap: 24px;
+}
+
+.marketing-page .page-grid-3 {
+  display: grid;
+  gap: 24px;
+}
+
+@media (min-width: 768px) {
+  .marketing-frame {
+    padding-left: 40px;
+    padding-right: 40px;
+  }
+
+  .marketing-page .page-shell {
+    padding: 72px 40px 88px;
+  }
+
+  .marketing-page .page-hero {
+    padding: 40px 36px;
+  }
+
+  .marketing-page .page-grid-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .marketing-page .page-grid-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

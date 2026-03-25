@@ -59,7 +59,7 @@ function applyNoIndexHeader(pathname: string, response: NextResponse) {
 
 function syncSessionCookie(
   response: NextResponse,
-  session: { access_token: string; refresh_token: string; expires_at?: number } | null,
+  session: { access_token: string; refresh_token?: string; expires_at?: number } | null,
   secure: boolean
 ) {
   if (!session) {
@@ -118,7 +118,7 @@ export async function proxy(request: NextRequest) {
   let activeSession = sessionCookie
   let userResponse = await supabase.auth.getUser(sessionCookie.access_token)
 
-  if (userResponse.error || !userResponse.data.user) {
+  if ((userResponse.error || !userResponse.data.user) && sessionCookie.refresh_token) {
     const refreshResponse = await supabase.auth.refreshSession({
       refresh_token: sessionCookie.refresh_token,
     })

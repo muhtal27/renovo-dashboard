@@ -1,5 +1,18 @@
 import './globals.css'
 import type { Metadata } from 'next'
+import { DM_Sans, DM_Serif_Display } from 'next/font/google'
+
+const dmSans = DM_Sans({
+  subsets: ['latin'],
+  variable: '--font-dm-sans',
+  weight: ['300', '400', '500', '600', '700'],
+})
+
+const dmSerif = DM_Serif_Display({
+  subsets: ['latin'],
+  variable: '--font-dm-serif',
+  weight: ['400'],
+})
 
 const defaultSiteUrl = 'https://renovoai.co.uk'
 const siteUrl =
@@ -38,7 +51,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className={`${dmSans.variable} ${dmSerif.variable}`}>{children}</body>
     </html>
   )
 }

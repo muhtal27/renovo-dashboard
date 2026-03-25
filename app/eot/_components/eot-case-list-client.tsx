@@ -2,8 +2,10 @@
 
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { FormEvent, useEffect, useState } from 'react'
-import { createEotCase, listEotCases, EotApiError } from '@/lib/eot-api'
+import { FormEvent, useEffect, useMemo, useState } from 'react'
+import { Check, Copy, Plus, RefreshCcw } from 'lucide-react'
+import { createEotCase, EotApiError, listEotCases } from '@/lib/eot-api'
+import { byLastActivityDesc } from '@/lib/eot-dashboard'
 import type {
   CreateEotCaseInput,
   EotCaseListItem,
@@ -11,10 +13,18 @@ import type {
   EotCaseStatus,
 } from '@/lib/eot-types'
 import {
+  DataTable,
   EmptyState,
-  EotBadge,
-  EotCard,
-  formatDate,
+  FilterToolbar,
+  getCaseAttentionTone,
+  getCaseProgress,
+  KPIStatCard,
+  PageHeader,
+  ProgressBar,
+  SectionCard,
+  SkeletonPanel,
+  StatusBadge,
+  ToolbarPill,
   formatDateTime,
   formatEnumLabel,
 } from '@/app/eot/_components/eot-ui'
@@ -31,10 +41,6 @@ const CASE_STATUSES: EotCaseStatus[] = [
   'resolved',
 ]
 
-type CaseListClientProps = {
-  tenantId: string | null
-}
-
 type CreateCaseFormState = {
   propertyId: string
   summary: string
@@ -47,6 +53,8 @@ type CreateCaseFormState = {
   depositAmount: string
   notes: string
 }
+
+type SavedView = 'all' | 'attention' | 'ready' | 'disputed' | 'recent'
 
 const DEFAULT_FORM_STATE: CreateCaseFormState = {
   propertyId: '',
@@ -61,7 +69,7 @@ const DEFAULT_FORM_STATE: CreateCaseFormState = {
   notes: '',
 }
 
-export function EotCaseListClient({ tenantId }: CaseListClientProps) {
+export function EotCaseListClient() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const search = searchParams.get('search')?.trim().toLowerCase() ?? ''
@@ -69,20 +77,18 @@ export function EotCaseListClient({ tenantId }: CaseListClientProps) {
   const [cases, setCases] = useState<EotCaseListItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [refreshing, setRefreshing] = useState(false)
   const [createOpen, setCreateOpen] = useState(false)
   const [createPending, setCreatePending] = useState(false)
   const [createError, setCreateError] = useState<string | null>(null)
   const [formState, setFormState] = useState<CreateCaseFormState>(DEFAULT_FORM_STATE)
+  const [statusFilter, setStatusFilter] = useState<'all' | EotCaseStatus>('all')
+  const [priorityFilter, setPriorityFilter] = useState<'all' | EotCasePriority>('all')
+  const [savedView, setSavedView] = useState<SavedView>('all')
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
-    const currentTenantId = tenantId
-
-    if (!currentTenantId) {
-      setLoading(false)
-      return
-    }
-    const resolvedTenantId: string = currentTenantId
-
     let cancelled = false
 
     async function loadCases() {
@@ -90,10 +96,10 @@ export function EotCaseListClient({ tenantId }: CaseListClientProps) {
       setError(null)
 
       try {
-        const nextCases = await listEotCases(resolvedTenantId)
+        const nextCases = await listEotCases()
 
         if (!cancelled) {
-          setCases(nextCases)
+          setCases([...nextCases].sort(byLastActivityDesc))
         }
       } catch (loadError) {
         if (!cancelled) {
@@ -113,35 +119,108 @@ export function EotCaseListClient({ tenantId }: CaseListClientProps) {
     return () => {
       cancelled = true
     }
-  }, [tenantId])
+  }, [])
 
-  const visibleCases = cases.filter((caseItem) => {
-    if (!search) return true
+  useEffect(() => {
+    setSelectedIds((current) => current.filter((id) => cases.some((caseItem) => caseItem.id === id)))
+  }, [cases])
 
-    const haystack = [
-      caseItem.property.name,
-      caseItem.property.reference ?? '',
-      caseItem.tenant_name,
-      caseItem.status,
-      caseItem.priority,
-    ]
-      .join(' ')
-      .toLowerCase()
+  const visibleCases = useMemo(() => {
+    return cases.filter((caseItem) => {
+      if (search) {
+        const haystack = [
+          caseItem.property.name,
+          caseItem.property.reference ?? '',
+          caseItem.tenant_name,
+          caseItem.status,
+          caseItem.priority,
+          caseItem.id,
+        ]
+          .join(' ')
+          .toLowerCase()
 
-    return haystack.includes(search)
-  })
+        if (!haystack.includes(search)) {
+          return false
+        }
+      }
+
+      if (statusFilter !== 'all' && caseItem.status !== statusFilter) {
+        return false
+      }
+
+      if (priorityFilter !== 'all' && caseItem.priority !== priorityFilter) {
+        return false
+      }
+
+      const attention = getCaseAttentionTone({
+        priority: caseItem.priority,
+        status: caseItem.status,
+        lastActivityAt: caseItem.last_activity_at,
+      })
+
+      if (savedView === 'attention' && attention.label !== 'High attention') {
+        return false
+      }
+
+      if (savedView === 'ready' && caseItem.status !== 'ready_for_claim') {
+        return false
+      }
+
+      if (savedView === 'disputed' && caseItem.status !== 'disputed') {
+        return false
+      }
+
+      if (savedView === 'recent') {
+        const ageInMs = Date.now() - new Date(caseItem.last_activity_at).getTime()
+        const twoDays = 1000 * 60 * 60 * 24 * 2
+        if (ageInMs > twoDays) {
+          return false
+        }
+      }
+
+      return true
+    })
+  }, [cases, priorityFilter, savedView, search, statusFilter])
+
+  const stats = useMemo(() => {
+    const readyForClaim = cases.filter((caseItem) => caseItem.status === 'ready_for_claim').length
+    const highPriority = cases.filter((caseItem) => caseItem.priority === 'high').length
+    const requiringAttention = cases.filter((caseItem) => {
+      return (
+        getCaseAttentionTone({
+          priority: caseItem.priority,
+          status: caseItem.status,
+          lastActivityAt: caseItem.last_activity_at,
+        }).label === 'High attention'
+      )
+    }).length
+
+    return {
+      total: cases.length,
+      readyForClaim,
+      highPriority,
+      requiringAttention,
+    }
+  }, [cases])
+
+  async function refreshCases() {
+    setRefreshing(true)
+
+    try {
+      const nextCases = await listEotCases()
+      setCases([...nextCases].sort(byLastActivityDesc))
+      setError(null)
+    } catch (refreshError) {
+      setError(refreshError instanceof Error ? refreshError.message : 'Unable to refresh cases.')
+    } finally {
+      setRefreshing(false)
+    }
+  }
 
   async function handleCreateCase(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    if (createPending) {
-      return
-    }
-
-    if (!tenantId) {
-      setCreateError('No workspace tenant is configured for this operator.')
-      return
-    }
+    if (createPending) return
 
     if (!formState.propertyId.trim()) {
       setCreateError('Property ID is required.')
@@ -157,7 +236,6 @@ export function EotCaseListClient({ tenantId }: CaseListClientProps) {
     setCreateError(null)
 
     const payload: CreateEotCaseInput = {
-      tenant_id: tenantId,
       property_id: formState.propertyId.trim(),
       summary: formState.summary.trim() || null,
       status: formState.status,
@@ -190,144 +268,164 @@ export function EotCaseListClient({ tenantId }: CaseListClientProps) {
     }
   }
 
-  if (!tenantId) {
-    return (
-      <EotCard className="px-6 py-6 md:px-8">
-        <p className="app-kicker">Workspace configuration</p>
-        <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-900">
-          Tenant ID required
-        </h2>
-        <p className="mt-4 max-w-3xl text-sm leading-7 text-stone-600">
-          Renovo needs an EOT tenant identifier to load the live workspace. Add
-          `EOT_TENANT_ID`, `NEXT_PUBLIC_EOT_TENANT_ID`, or include `tenant_id` in the signed-in
-          user&apos;s Supabase metadata.
-        </p>
-      </EotCard>
+  function toggleSelection(caseId: string) {
+    setSelectedIds((current) =>
+      current.includes(caseId) ? current.filter((id) => id !== caseId) : [...current, caseId]
     )
+  }
+
+  function toggleSelectAll() {
+    if (selectedIds.length === visibleCases.length) {
+      setSelectedIds([])
+      return
+    }
+
+    setSelectedIds(visibleCases.map((caseItem) => caseItem.id))
+  }
+
+  async function handleCopySelection() {
+    if (!selectedIds.length) return
+    await navigator.clipboard.writeText(selectedIds.join('\n'))
+    setCopied(true)
+    window.setTimeout(() => setCopied(false), 1800)
   }
 
   return (
     <div className="space-y-6">
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <EotCard className="px-5 py-5">
-          <p className="text-sm text-stone-500">Active cases</p>
-          <p className="mt-3 text-3xl font-semibold tracking-tight text-stone-900">{cases.length}</p>
-        </EotCard>
-        <EotCard className="px-5 py-5">
-          <p className="text-sm text-stone-500">Ready for claim</p>
-          <p className="mt-3 text-3xl font-semibold tracking-tight text-stone-900">
-            {cases.filter((caseItem) => caseItem.status === 'ready_for_claim').length}
-          </p>
-        </EotCard>
-        <EotCard className="px-5 py-5">
-          <p className="text-sm text-stone-500">High priority</p>
-          <p className="mt-3 text-3xl font-semibold tracking-tight text-stone-900">
-            {cases.filter((caseItem) => caseItem.priority === 'high').length}
-          </p>
-        </EotCard>
-        <EotCard className="px-5 py-5">
-          <p className="text-sm text-stone-500">Last activity</p>
-          <p className="mt-3 text-lg font-semibold tracking-tight text-stone-900">
-            {cases[0] ? formatDateTime(cases[0].last_activity_at) : 'No activity yet'}
-          </p>
-        </EotCard>
+      <PageHeader
+        eyebrow="Cases"
+        title="Operational case pipeline"
+        description="Track active end-of-tenancy cases, prioritise risk, and move operators into the correct workspace with fewer clicks."
+        actions={
+          <>
+            <button
+              type="button"
+              onClick={() => setCreateOpen((current) => !current)}
+              className="inline-flex items-center gap-2 rounded-[14px] border border-slate-900 bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
+            >
+              <Plus className="h-4 w-4" />
+              {createOpen ? 'Close intake' : 'New case'}
+            </button>
+            <button
+              type="button"
+              onClick={() => void refreshCases()}
+              className="inline-flex items-center gap-2 rounded-[14px] border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:text-slate-950"
+            >
+              <RefreshCcw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+              Refresh
+            </button>
+          </>
+        }
+      />
+
+      <section className="grid gap-4 xl:grid-cols-4">
+        <KPIStatCard
+          label="Active cases"
+          value={stats.total}
+          detail="Live cases in the operational queue."
+        />
+        <KPIStatCard
+          label="Needs attention"
+          value={stats.requiringAttention}
+          detail="High-priority, disputed, or stale cases."
+          tone="danger"
+        />
+        <KPIStatCard
+          label="Ready for claim"
+          value={stats.readyForClaim}
+          detail="Cases at final review or output stage."
+          tone="accent"
+        />
+        <KPIStatCard
+          label="High priority"
+          value={stats.highPriority}
+          detail="Escalated cases with greater operational risk."
+          tone="warning"
+        />
       </section>
 
-      <EotCard className="px-6 py-6 md:px-8">
-        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-          <div>
-            <p className="app-kicker">Cases</p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-900">
-              Live end-of-tenancy pipeline
-            </h2>
-            <p className="mt-3 max-w-3xl text-sm leading-7 text-stone-600">
-              Review active case status, last activity, evidence volume, and issue count. Search
-              filters the loaded cases client-side without changing the backend query contract.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() => setCreateOpen((current) => !current)}
-            className="inline-flex items-center justify-center rounded-[1rem] border border-stone-900 bg-stone-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-stone-800"
-          >
-            {createOpen ? 'Close form' : 'New case'}
-          </button>
-        </div>
+      {createOpen ? (
+        <SectionCard className="px-6 py-6">
+          <PageHeader
+            eyebrow="Intake"
+            title="Create a new case"
+            description="Create the live case record and tenancy context. New cases open directly into the workspace."
+            className="border-none bg-transparent px-0 py-0 shadow-none"
+          />
 
-        {createOpen ? (
-          <form className="mt-6 grid gap-4 border-t border-stone-200 pt-6" onSubmit={handleCreateCase}>
-            <div className="grid gap-4 lg:grid-cols-2">
+          <form className="mt-6 grid gap-4" onSubmit={handleCreateCase}>
+            <div className="grid gap-4 xl:grid-cols-2">
               <label className="text-sm">
-                <span className="font-medium text-stone-700">Property ID</span>
+                <span className="font-medium text-slate-700">Property ID</span>
                 <input
                   required
                   value={formState.propertyId}
                   onChange={(event) =>
                     setFormState((current) => ({ ...current, propertyId: event.target.value }))
                   }
-                  className="mt-2 h-12 w-full rounded-[1rem] border border-stone-300 bg-white px-4 text-stone-900"
+                  className="mt-2 h-12 w-full rounded-[16px] border border-slate-200 bg-[#f8fafc] px-4 text-slate-900"
                   placeholder="UUID from the live property record"
                 />
               </label>
               <label className="text-sm">
-                <span className="font-medium text-stone-700">Tenant name</span>
+                <span className="font-medium text-slate-700">Tenant name</span>
                 <input
                   required
                   value={formState.tenantName}
                   onChange={(event) =>
                     setFormState((current) => ({ ...current, tenantName: event.target.value }))
                   }
-                  className="mt-2 h-12 w-full rounded-[1rem] border border-stone-300 bg-white px-4 text-stone-900"
+                  className="mt-2 h-12 w-full rounded-[16px] border border-slate-200 bg-[#f8fafc] px-4 text-slate-900"
                   placeholder="Primary tenancy contact"
                 />
               </label>
               <label className="text-sm">
-                <span className="font-medium text-stone-700">Tenant email</span>
+                <span className="font-medium text-slate-700">Tenant email</span>
                 <input
                   type="email"
                   value={formState.tenantEmail}
                   onChange={(event) =>
                     setFormState((current) => ({ ...current, tenantEmail: event.target.value }))
                   }
-                  className="mt-2 h-12 w-full rounded-[1rem] border border-stone-300 bg-white px-4 text-stone-900"
+                  className="mt-2 h-12 w-full rounded-[16px] border border-slate-200 bg-[#f8fafc] px-4 text-slate-900"
                   placeholder="tenant@example.com"
                 />
               </label>
               <label className="text-sm">
-                <span className="font-medium text-stone-700">Deposit amount</span>
+                <span className="font-medium text-slate-700">Deposit amount</span>
                 <input
                   value={formState.depositAmount}
                   onChange={(event) =>
                     setFormState((current) => ({ ...current, depositAmount: event.target.value }))
                   }
-                  className="mt-2 h-12 w-full rounded-[1rem] border border-stone-300 bg-white px-4 text-stone-900"
+                  className="mt-2 h-12 w-full rounded-[16px] border border-slate-200 bg-[#f8fafc] px-4 text-slate-900"
                   placeholder="1200.00"
                 />
               </label>
               <label className="text-sm">
-                <span className="font-medium text-stone-700">Start date</span>
+                <span className="font-medium text-slate-700">Start date</span>
                 <input
                   type="date"
                   value={formState.startDate}
                   onChange={(event) =>
                     setFormState((current) => ({ ...current, startDate: event.target.value }))
                   }
-                  className="mt-2 h-12 w-full rounded-[1rem] border border-stone-300 bg-white px-4 text-stone-900"
+                  className="mt-2 h-12 w-full rounded-[16px] border border-slate-200 bg-[#f8fafc] px-4 text-slate-900"
                 />
               </label>
               <label className="text-sm">
-                <span className="font-medium text-stone-700">End date</span>
+                <span className="font-medium text-slate-700">End date</span>
                 <input
                   type="date"
                   value={formState.endDate}
                   onChange={(event) =>
                     setFormState((current) => ({ ...current, endDate: event.target.value }))
                   }
-                  className="mt-2 h-12 w-full rounded-[1rem] border border-stone-300 bg-white px-4 text-stone-900"
+                  className="mt-2 h-12 w-full rounded-[16px] border border-slate-200 bg-[#f8fafc] px-4 text-slate-900"
                 />
               </label>
               <label className="text-sm">
-                <span className="font-medium text-stone-700">Priority</span>
+                <span className="font-medium text-slate-700">Priority</span>
                 <select
                   value={formState.priority}
                   onChange={(event) =>
@@ -336,7 +434,7 @@ export function EotCaseListClient({ tenantId }: CaseListClientProps) {
                       priority: event.target.value as EotCasePriority,
                     }))
                   }
-                  className="mt-2 h-12 w-full rounded-[1rem] border border-stone-300 bg-white px-4 text-stone-900"
+                  className="mt-2 h-12 w-full rounded-[16px] border border-slate-200 bg-[#f8fafc] px-4 text-slate-900"
                 >
                   {CASE_PRIORITIES.map((priority) => (
                     <option key={priority} value={priority}>
@@ -346,7 +444,7 @@ export function EotCaseListClient({ tenantId }: CaseListClientProps) {
                 </select>
               </label>
               <label className="text-sm">
-                <span className="font-medium text-stone-700">Initial status</span>
+                <span className="font-medium text-slate-700">Initial status</span>
                 <select
                   value={formState.status}
                   onChange={(event) =>
@@ -355,7 +453,7 @@ export function EotCaseListClient({ tenantId }: CaseListClientProps) {
                       status: event.target.value as EotCaseStatus,
                     }))
                   }
-                  className="mt-2 h-12 w-full rounded-[1rem] border border-stone-300 bg-white px-4 text-stone-900"
+                  className="mt-2 h-12 w-full rounded-[16px] border border-slate-200 bg-[#f8fafc] px-4 text-slate-900"
                 >
                   {CASE_STATUSES.map((status) => (
                     <option key={status} value={status}>
@@ -367,31 +465,31 @@ export function EotCaseListClient({ tenantId }: CaseListClientProps) {
             </div>
 
             <label className="text-sm">
-              <span className="font-medium text-stone-700">Case summary</span>
+              <span className="font-medium text-slate-700">Case summary</span>
               <textarea
                 value={formState.summary}
                 onChange={(event) =>
                   setFormState((current) => ({ ...current, summary: event.target.value }))
                 }
-                className="mt-2 min-h-28 w-full rounded-[1rem] border border-stone-300 bg-white px-4 py-3 text-stone-900"
+                className="mt-2 min-h-28 w-full rounded-[16px] border border-slate-200 bg-[#f8fafc] px-4 py-3 text-slate-900"
                 placeholder="What is the tenancy-end context for this case?"
               />
             </label>
 
             <label className="text-sm">
-              <span className="font-medium text-stone-700">Tenancy notes</span>
+              <span className="font-medium text-slate-700">Tenancy notes</span>
               <textarea
                 value={formState.notes}
                 onChange={(event) =>
                   setFormState((current) => ({ ...current, notes: event.target.value }))
                 }
-                className="mt-2 min-h-24 w-full rounded-[1rem] border border-stone-300 bg-white px-4 py-3 text-stone-900"
+                className="mt-2 min-h-24 w-full rounded-[16px] border border-slate-200 bg-[#f8fafc] px-4 py-3 text-slate-900"
                 placeholder="Deposit scheme, move-out context, or internal tenancy notes"
               />
             </label>
 
             {createError ? (
-              <p className="rounded-[1rem] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              <p className="rounded-[16px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
                 {createError}
               </p>
             ) : null}
@@ -400,91 +498,265 @@ export function EotCaseListClient({ tenantId }: CaseListClientProps) {
               <button
                 type="submit"
                 disabled={createPending}
-                className="inline-flex items-center justify-center rounded-[1rem] border border-stone-900 bg-stone-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-stone-800 disabled:opacity-60"
+                className="inline-flex items-center justify-center rounded-[14px] border border-slate-900 bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:opacity-60"
               >
                 {createPending ? 'Creating case...' : 'Create case'}
               </button>
-              <p className="text-sm text-stone-500">
+              <p className="text-sm text-slate-500">
                 New cases are created against the live tenant and immediately open the workspace.
               </p>
             </div>
           </form>
-        ) : null}
-      </EotCard>
+        </SectionCard>
+      ) : null}
 
-      <EotCard className="overflow-hidden">
-        {loading ? (
-          <div className="px-6 py-10 text-sm text-stone-500">Loading live case data...</div>
-        ) : error ? (
-          <div className="px-6 py-10">
+      <SectionCard className="overflow-hidden">
+        <div className="sticky top-4 z-10 border-b border-slate-200 bg-white/95 px-6 py-5 backdrop-blur">
+          <FilterToolbar>
+            <div className="flex flex-wrap items-center gap-2">
+              {[
+                { value: 'all' as const, label: 'All cases' },
+                { value: 'attention' as const, label: 'Needs attention' },
+                { value: 'ready' as const, label: 'Ready for claim' },
+                { value: 'disputed' as const, label: 'Disputed' },
+                { value: 'recent' as const, label: 'Recently active' },
+              ].map((view) => (
+                <button key={view.value} type="button" onClick={() => setSavedView(view.value)}>
+                  <ToolbarPill active={savedView === view.value}>{view.label}</ToolbarPill>
+                </button>
+              ))}
+            </div>
+
+            <div className="flex flex-col gap-3 md:flex-row md:items-center">
+              <select
+                value={statusFilter}
+                onChange={(event) => setStatusFilter(event.target.value as 'all' | EotCaseStatus)}
+                className="h-10 rounded-[14px] border border-slate-200 bg-white px-3 text-sm text-slate-700"
+              >
+                <option value="all">All statuses</option>
+                {CASE_STATUSES.map((status) => (
+                  <option key={status} value={status}>
+                    {formatEnumLabel(status)}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={priorityFilter}
+                onChange={(event) =>
+                  setPriorityFilter(event.target.value as 'all' | EotCasePriority)
+                }
+                className="h-10 rounded-[14px] border border-slate-200 bg-white px-3 text-sm text-slate-700"
+              >
+                <option value="all">All priorities</option>
+                {CASE_PRIORITIES.map((priority) => (
+                  <option key={priority} value={priority}>
+                    {formatEnumLabel(priority)}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </FilterToolbar>
+
+          {selectedIds.length ? (
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-[18px] border border-slate-200 bg-[#f8fafc] px-4 py-3">
+              <p className="text-sm text-slate-700">
+                {selectedIds.length} case{selectedIds.length === 1 ? '' : 's'} selected
+              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => void handleCopySelection()}
+                  className="inline-flex items-center gap-2 rounded-[12px] border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700"
+                >
+                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                  {copied ? 'Copied IDs' : 'Copy IDs'}
+                </button>
+                <Link
+                  href={`/eot/${selectedIds[0]}`}
+                  className="inline-flex items-center rounded-[12px] border border-slate-900 bg-slate-900 px-3 py-2 text-sm font-medium text-white"
+                >
+                  Open first selected
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => setSelectedIds([])}
+                  className="inline-flex items-center rounded-[12px] border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700"
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
+          ) : null}
+        </div>
+
+        <div className="px-6 py-6">
+          {loading ? (
+            <div className="grid gap-4 xl:grid-cols-2">
+              <SkeletonPanel />
+              <SkeletonPanel />
+            </div>
+          ) : error ? (
             <EmptyState title="Unable to load cases" body={error} />
-          </div>
-        ) : visibleCases.length === 0 ? (
-          <div className="px-6 py-10">
+          ) : visibleCases.length === 0 ? (
             <EmptyState
-              title={cases.length === 0 ? 'No live cases yet' : 'No cases match this search'}
+              title={cases.length === 0 ? 'No live cases yet' : 'No cases match this view'}
               body={
                 cases.length === 0
-                  ? 'Create the first case to start the live end-of-tenancy workflow.'
-                  : 'Try a different property, tenant, status, or priority term.'
+                  ? 'Create the first case to start the operational workflow.'
+                  : 'Adjust the saved view or filters to widen the queue.'
               }
             />
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-stone-200">
-              <thead className="bg-stone-50/90">
-                <tr className="text-left text-xs font-semibold uppercase tracking-[0.16em] text-stone-500">
-                  <th className="px-5 py-3">Property</th>
-                  <th className="px-5 py-3">Tenant</th>
-                  <th className="px-5 py-3">Status</th>
-                  <th className="px-5 py-3">Priority</th>
-                  <th className="px-5 py-3">Evidence</th>
-                  <th className="px-5 py-3">Issues</th>
-                  <th className="px-5 py-3">Last activity</th>
-                  <th className="px-5 py-3 text-right">Open</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-stone-200 bg-white">
-                {visibleCases.map((caseItem) => (
-                  <tr key={caseItem.id} className="text-sm text-stone-700">
-                    <td className="px-5 py-4">
-                      <p className="font-medium text-stone-900">{caseItem.property.name}</p>
-                      <p className="mt-1 text-xs text-stone-500">
-                        {caseItem.property.reference || 'No property reference'}
-                      </p>
-                    </td>
-                    <td className="px-5 py-4">
-                      <p className="font-medium text-stone-900">{caseItem.tenant_name}</p>
-                      <p className="mt-1 text-xs text-stone-500">Last activity {formatDate(caseItem.last_activity_at)}</p>
-                    </td>
-                    <td className="px-5 py-4">
-                      <EotBadge label={formatEnumLabel(caseItem.status)} tone={caseItem.status} />
-                    </td>
-                    <td className="px-5 py-4">
-                      <EotBadge
-                        label={formatEnumLabel(caseItem.priority)}
-                        tone={caseItem.priority}
+          ) : (
+            <DataTable>
+              <table className="min-w-full text-left">
+                <thead className="bg-[#f8fafc] text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                  <tr>
+                    <th className="px-4 py-3">
+                      <input
+                        type="checkbox"
+                        checked={visibleCases.length > 0 && selectedIds.length === visibleCases.length}
+                        onChange={toggleSelectAll}
+                        aria-label="Select all visible cases"
                       />
-                    </td>
-                    <td className="px-5 py-4">{caseItem.evidence_count}</td>
-                    <td className="px-5 py-4">{caseItem.issue_count}</td>
-                    <td className="px-5 py-4">{formatDateTime(caseItem.last_activity_at)}</td>
-                    <td className="px-5 py-4 text-right">
-                      <Link
-                        href={`/eot/${caseItem.id}`}
-                        className="inline-flex rounded-full border border-stone-200 bg-stone-50 px-3 py-2 text-sm font-medium text-stone-700 transition hover:border-stone-300 hover:bg-white hover:text-stone-900"
-                      >
-                        Open case
-                      </Link>
-                    </td>
+                    </th>
+                    <th className="px-4 py-3">Case</th>
+                    <th className="px-4 py-3">Workflow</th>
+                    <th className="px-4 py-3">Attention</th>
+                    <th className="px-4 py-3">Coverage</th>
+                    <th className="px-4 py-3">Last updated</th>
+                    <th className="px-4 py-3 text-right">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </EotCard>
+                </thead>
+                <tbody className="divide-y divide-slate-200 bg-white">
+                  {visibleCases.map((caseItem) => {
+                    const selected = selectedIds.includes(caseItem.id)
+                    const attention = getCaseAttentionTone({
+                      priority: caseItem.priority,
+                      status: caseItem.status,
+                      lastActivityAt: caseItem.last_activity_at,
+                    })
+
+                    return (
+                      <tr
+                        key={caseItem.id}
+                        className={selected ? 'bg-slate-50/90' : 'hover:bg-slate-50/70'}
+                      >
+                        <td className="px-4 py-4 align-top">
+                          <input
+                            type="checkbox"
+                            checked={selected}
+                            onChange={() => toggleSelection(caseItem.id)}
+                            aria-label={`Select case ${caseItem.id}`}
+                          />
+                        </td>
+                        <td className="px-4 py-4 align-top">
+                          <div className="space-y-2">
+                            <div>
+                              <p className="text-sm font-semibold text-slate-950">
+                                {caseItem.property.name}
+                              </p>
+                              <p className="mt-1 text-sm text-slate-600">{caseItem.tenant_name}</p>
+                            </div>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <StatusBadge
+                                label={caseItem.property.reference || 'Reference pending'}
+                                tone="document"
+                              />
+                              <span className="text-xs font-medium uppercase tracking-[0.14em] text-slate-400">
+                                {caseItem.id.slice(0, 8)}
+                              </span>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-4 align-top">
+                          <div className="space-y-3">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <StatusBadge
+                                label={formatEnumLabel(caseItem.status)}
+                                tone={caseItem.status}
+                              />
+                              <StatusBadge
+                                label={formatEnumLabel(caseItem.priority)}
+                                tone={caseItem.priority}
+                              />
+                            </div>
+                            <ProgressBar
+                              value={getCaseProgress(caseItem.status)}
+                              label={
+                                <>
+                                  <span>Progress</span>
+                                  <span>{getCaseProgress(caseItem.status)}%</span>
+                                </>
+                              }
+                            />
+                          </div>
+                        </td>
+                        <td className="px-4 py-4 align-top">
+                          <div className="space-y-2">
+                            <StatusBadge label={attention.label} tone={attention.tone} />
+                            <p className="text-sm leading-6 text-slate-600">
+                              {caseItem.status === 'ready_for_claim'
+                                ? 'Ready for final operator review.'
+                                : caseItem.status === 'disputed'
+                                  ? 'Requires dispute handling and audit trace.'
+                                  : 'Normal workflow progression.'}
+                            </p>
+                          </div>
+                        </td>
+                        <td className="px-4 py-4 align-top">
+                          <div className="grid gap-2">
+                            <div className="rounded-[14px] border border-slate-200 bg-[#f8fafc] px-3 py-2">
+                              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                                Evidence
+                              </p>
+                              <p className="mt-1 text-sm font-semibold text-slate-950">
+                                {caseItem.evidence_count}
+                              </p>
+                            </div>
+                            <div className="rounded-[14px] border border-slate-200 bg-[#f8fafc] px-3 py-2">
+                              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                                Issues
+                              </p>
+                              <p className="mt-1 text-sm font-semibold text-slate-950">
+                                {caseItem.issue_count}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-4 align-top">
+                          <div>
+                            <p className="text-sm font-medium text-slate-950">
+                              {formatDateTime(caseItem.last_activity_at)}
+                            </p>
+                            <p className="mt-1 text-sm text-slate-500">Latest case activity</p>
+                          </div>
+                        </td>
+                        <td className="px-4 py-4 align-top text-right">
+                          <div className="flex flex-col items-end gap-2">
+                            <Link
+                              href={`/eot/${caseItem.id}`}
+                              className="inline-flex items-center rounded-[12px] border border-slate-900 bg-slate-900 px-3 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
+                            >
+                              Open workspace
+                            </Link>
+                            <button
+                              type="button"
+                              onClick={() => toggleSelection(caseItem.id)}
+                              className="inline-flex items-center rounded-[12px] border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700"
+                            >
+                              {selected ? 'Deselect' : 'Select'}
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </DataTable>
+          )}
+        </div>
+      </SectionCard>
     </div>
   )
 }

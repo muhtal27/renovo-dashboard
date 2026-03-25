@@ -100,8 +100,8 @@ function renderContent(content: string) {
         return (
           <ul key={blockIndex} className="mt-3 space-y-2 list-none">
             {lines.map((line) => (
-              <li key={line} className="flex items-start gap-2 text-sm leading-7 text-stone-600">
-                <span className="mt-2 h-1.5 w-1.5 rounded-full bg-stone-400 shrink-0" />
+              <li key={line} className="flex items-start gap-2 text-sm leading-7 text-slate-600">
+                <span className="mt-2 h-1.5 w-1.5 rounded-full bg-slate-400 shrink-0" />
                 <span>{renderInlineFormatting(line.replace(/^- /, ''))}</span>
               </li>
             ))}
@@ -121,8 +121,8 @@ function renderContent(content: string) {
 
               return (
                 <div key={line} className="flex items-start gap-3">
-                  <span className="text-sm font-medium text-stone-500">{match[1]}.</span>
-                  <span className="text-sm leading-7 text-stone-600">
+                  <span className="text-sm font-medium text-slate-500">{match[1]}.</span>
+                  <span className="text-sm leading-7 text-slate-600">
                     {renderInlineFormatting(match[2])}
                   </span>
                 </div>
@@ -133,7 +133,7 @@ function renderContent(content: string) {
       }
 
       return (
-        <p key={blockIndex} className="text-sm leading-7 text-stone-600">
+        <p key={blockIndex} className="text-sm leading-7 text-slate-600">
           {renderInlineFormatting(block)}
         </p>
       )
@@ -204,19 +204,22 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
 
   return (
     <OperatorLayout
-      pageTitle="Deposit Guidance"
-      pageDescription="Authoritative scheme, evidence, and deduction guidance for end-of-tenancy decision-making."
+      pageTitle="Knowledge"
+      pageDescription="Authoritative scheme, evidence, and deduction knowledge for end-of-tenancy operators."
+      searchPlaceholder="Search the knowledge library"
+      searchTargetPath="/knowledge"
+      breadcrumbs={[{ label: 'Overview', href: '/overview' }, { label: 'Knowledge' }]}
     >
-      <section className="app-surface rounded-[1.9rem] px-6 py-6 md:px-8">
+      <section className="rounded-[24px] border border-[rgba(15,23,42,0.08)] bg-white px-6 py-6 shadow-[0_18px_50px_rgba(15,23,42,0.05)] md:px-8">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-          <div className="max-w-3xl rounded-[1.45rem] border border-emerald-200 bg-emerald-50/85 px-5 py-4 text-sm leading-7 text-emerald-950/85">
+          <div className="max-w-3xl rounded-[18px] border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm leading-7 text-emerald-950/85">
             Rules and scheme processes vary by UK nation. Always check the official scheme
-            guidance for the tenancy location.
+            knowledge source for the tenancy location before finalising an operator decision.
           </div>
           <div className="flex flex-col gap-3 xl:items-end">
             <div className="flex flex-wrap gap-2">
               {[
-                { value: 'all', label: 'All guidance' },
+                { value: 'all', label: 'All knowledge' },
                 { value: 'england-wales', label: 'England & Wales' },
                 { value: 'scotland', label: 'Scotland' },
               ].map((filter) => (
@@ -224,10 +227,10 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
                   key={filter.value}
                   type="button"
                   onClick={() => setRegionFilter(filter.value as RegionFilter)}
-                  className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+                  className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
                     regionFilter === filter.value
-                      ? 'bg-white text-stone-900 shadow-sm ring-1 ring-stone-200'
-                      : 'border border-stone-200 bg-stone-50 text-stone-600 hover:bg-white hover:text-stone-900'
+                      ? 'border-slate-900 bg-slate-900 text-white'
+                      : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-white hover:text-slate-900'
                   }`}
                 >
                   {filter.label}
@@ -238,26 +241,26 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
               <input
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
-                placeholder="Search the guidance library"
-                className="app-field h-11 w-full rounded-[1rem] border border-stone-200 bg-white px-4 text-sm"
+                placeholder="Search the knowledge library"
+                className="h-11 w-full rounded-[14px] border border-slate-200 bg-[#f8fafc] px-4 text-sm text-slate-900"
               />
             </div>
           </div>
         </div>
       </section>
 
-      <section className="app-surface rounded-[1.9rem] px-6 py-6 md:px-8">
+      <section className="rounded-[24px] border border-[rgba(15,23,42,0.08)] bg-white px-6 py-6 shadow-[0_18px_50px_rgba(15,23,42,0.05)] md:px-8">
         <div className="flex items-end justify-between gap-4">
           <div>
-            <p className="app-kicker">Categories</p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-900">
-              Guidance topics for deposit-claim review
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Categories</p>
+            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
+              Knowledge topics for deposit review
             </h2>
           </div>
-          <p className="hidden text-sm text-stone-500 md:block">
+          <p className="hidden text-sm text-slate-500 md:block">
             Filtered for{' '}
             {regionFilter === 'all'
-              ? 'all UK guidance'
+              ? 'all UK knowledge'
               : regionFilter === 'england-wales'
                 ? 'England & Wales'
                 : 'Scotland'}
@@ -268,9 +271,9 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
           {CATEGORY_ITEMS.map((item) => (
             <article
               key={item}
-              className="rounded-[1.35rem] border border-stone-200 bg-white/92 px-4 py-4"
+              className="rounded-[18px] border border-slate-200 bg-[#f8fafc] px-4 py-4"
             >
-              <p className="text-sm font-medium text-stone-800">{item}</p>
+              <p className="text-sm font-medium text-slate-800">{item}</p>
             </article>
           ))}
         </div>
@@ -282,14 +285,14 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
                 key={filter}
                 type="button"
                 onClick={() => setCategoryFilter(filter)}
-                className={`inline-flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition ${
+                className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition ${
                   categoryFilter === filter
-                    ? 'bg-white text-stone-900 shadow-sm ring-1 ring-stone-200'
-                    : 'border border-stone-200 bg-stone-50 text-stone-600 hover:bg-white hover:text-stone-900'
+                    ? 'border-slate-900 bg-slate-900 text-white'
+                    : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-white hover:text-slate-900'
                 }`}
               >
                 <span>{filter}</span>
-                <span className="text-stone-400">({categoryCounts.get(filter) ?? 0})</span>
+                <span className="text-slate-400">({categoryCounts.get(filter) ?? 0})</span>
               </button>
             ))}
           </div>
@@ -305,20 +308,20 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
             return (
               <article
                 key={article.title}
-                className="app-surface rounded-[1.9rem] px-6 py-6 md:px-8"
+                className="rounded-[24px] border border-[rgba(15,23,42,0.08)] bg-white px-6 py-6 shadow-[0_18px_50px_rgba(15,23,42,0.05)] md:px-8"
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="app-kicker">{article.category}</p>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">{article.category}</p>
                       {article.category === 'Scotland' ? (
-                        <span className="inline-flex rounded-full bg-blue-50 border border-blue-200 px-2 py-0.5 text-xs font-medium text-blue-700">
+                        <span className="inline-flex rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
                           Scotland
                         </span>
                       ) : null}
                     </div>
-                    <p className="mt-1 text-xs text-stone-400">{summaryReadingTime}</p>
-                    <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-900">
+                    <p className="mt-1 text-xs text-slate-400">{summaryReadingTime}</p>
+                    <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
                       {article.title}
                     </h2>
                   </div>
@@ -328,29 +331,29 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
                     >
                       {article.sourceLabel}
                     </span>
-                    <span className="rounded-full border border-stone-200 bg-stone-50 px-3 py-1 text-xs font-medium text-stone-500">
+                    <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-500">
                       Last reviewed {LAST_REVIEWED}
                     </span>
                   </div>
                 </div>
 
-                <p className="mt-4 text-sm leading-7 text-stone-600">{article.summary}</p>
+                <p className="mt-4 text-sm leading-7 text-slate-600">{article.summary}</p>
 
-                <div className="app-divider my-6" />
+                <div className="my-6 border-t border-slate-200" />
 
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <a
                     href={article.sourceHref}
                     target="_blank"
                     rel="noreferrer"
-                    className="app-secondary-button rounded-full px-4 py-2 text-sm font-medium text-stone-700"
+                    className="inline-flex items-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:text-slate-950"
                   >
                     Open source
                   </a>
                   <button
                     type="button"
                     onClick={() => setSelectedArticle(article)}
-                    className="app-primary-button rounded-full px-4 py-2 text-sm font-medium"
+                    className="inline-flex items-center rounded-full border border-slate-900 bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
                   >
                     Read article
                   </button>
@@ -360,27 +363,27 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
           })}
         </section>
       ) : (
-        <section className="app-surface rounded-[1.9rem] px-6 py-8 text-center md:px-8">
+        <section className="rounded-[24px] border border-[rgba(15,23,42,0.08)] bg-white px-6 py-8 text-center shadow-[0_18px_50px_rgba(15,23,42,0.05)] md:px-8">
           {searchQuery.trim() ? (
-            <p className="text-sm font-medium text-stone-700">
-              No guidance matched{' '}
+            <p className="text-sm font-medium text-slate-700">
+              No knowledge matched{' '}
               <span className="rounded bg-amber-100 px-1 text-amber-900">
                 {searchQuery.trim()}
               </span>
               .
             </p>
           ) : (
-            <p className="text-sm font-medium text-stone-700">
-              No guidance matched the current filters.
+            <p className="text-sm font-medium text-slate-700">
+              No knowledge matched the current filters.
             </p>
           )}
-          <p className="mt-2 text-sm leading-7 text-stone-500">
+          <p className="mt-2 text-sm leading-7 text-slate-500">
             Try a broader search or clear the current filter to see the full library.
           </p>
           <button
             type="button"
             onClick={clearSearch}
-            className="app-secondary-button mt-5 rounded-full px-4 py-2 text-sm font-medium text-stone-700"
+            className="mt-5 inline-flex items-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:text-slate-950"
           >
             Clear search
           </button>
@@ -388,31 +391,31 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
       )}
 
       {selectedArticle ? (
-        <div className="fixed inset-0 z-50 flex justify-end bg-stone-950/25">
+        <div className="fixed inset-0 z-50 flex justify-end bg-slate-950/35">
           <button
             type="button"
             onClick={() => setSelectedArticle(null)}
             className="flex-1 cursor-default"
             aria-label="Close article panel"
           />
-          <aside className="relative flex h-full w-full max-w-2xl flex-col border-l border-stone-200 bg-white shadow-2xl">
-            <div className="border-b border-stone-200 px-6 py-5">
+          <aside className="relative flex h-full w-full max-w-2xl flex-col border-l border-slate-200 bg-white shadow-2xl">
+            <div className="border-b border-slate-200 px-6 py-5">
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="app-kicker">{selectedArticle.category}</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">{selectedArticle.category}</p>
                     {selectedArticle.category === 'Scotland' ? (
-                      <span className="inline-flex rounded-full bg-blue-50 border border-blue-200 px-2 py-0.5 text-xs font-medium text-blue-700">
+                      <span className="inline-flex rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
                         Scotland
                       </span>
                     ) : null}
                   </div>
-                  <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-900">
+                  <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
                     {selectedArticle.title}
                   </h2>
-                  <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-stone-500">
+                  <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-slate-500">
                     <span>{getReadingTime(selectedArticle.content)}</span>
-                    <span className="text-stone-300">•</span>
+                    <span className="text-slate-300">•</span>
                     <span>Last reviewed {LAST_REVIEWED}</span>
                   </div>
                 </div>
@@ -420,14 +423,14 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
                   <button
                     type="button"
                     onClick={() => window.print()}
-                    className="text-sm text-stone-500 hover:text-stone-700 cursor-pointer"
+                    className="cursor-pointer text-sm text-slate-500 hover:text-slate-700"
                   >
                     Print article
                   </button>
                   <button
                     type="button"
                     onClick={() => setSelectedArticle(null)}
-                    className="text-sm font-medium text-stone-500 hover:text-stone-900"
+                    className="text-sm font-medium text-slate-500 hover:text-slate-900"
                   >
                     Close
                   </button>
@@ -446,21 +449,21 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
                   href={selectedArticle.sourceHref}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-sm font-medium text-stone-500 underline decoration-stone-300 underline-offset-4 hover:text-stone-700"
+                  className="text-sm font-medium text-slate-500 underline decoration-slate-300 underline-offset-4 hover:text-slate-700"
                 >
                   Open source
                 </a>
               </div>
 
-              <p className="mt-5 text-base leading-8 text-stone-700">{selectedArticle.summary}</p>
+              <p className="mt-5 text-base leading-8 text-slate-700">{selectedArticle.summary}</p>
 
               <div className="mt-6 space-y-5">{renderContent(selectedArticle.content)}</div>
 
               {relatedArticles.length > 0 ? (
                 <>
-                  <div className="app-divider my-6" />
+                  <div className="my-6 border-t border-slate-200" />
                   <div>
-                    <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-stone-500">
+                    <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-500">
                       More in this category
                     </h3>
                     <div className="mt-4 grid gap-3">
@@ -469,13 +472,13 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
                           key={article.title}
                           type="button"
                           onClick={() => setSelectedArticle(article)}
-                          className="rounded-[1.25rem] border border-stone-200 bg-stone-50 px-4 py-4 text-left transition hover:bg-white"
+                          className="rounded-[18px] border border-slate-200 bg-slate-50 px-4 py-4 text-left transition hover:bg-white"
                         >
                           <div className="flex items-center justify-between gap-3">
-                            <span className="text-sm font-medium text-stone-900">
+                            <span className="text-sm font-medium text-slate-900">
                               {article.title}
                             </span>
-                            <span className="text-sm font-medium text-stone-500">Read →</span>
+                            <span className="text-sm font-medium text-slate-500">Read →</span>
                           </div>
                         </button>
                       ))}

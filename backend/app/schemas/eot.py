@@ -52,7 +52,6 @@ class TenancyResponse(ORMModel):
 
 
 class CaseCreateRequest(BaseModel):
-    tenant_id: UUID
     property_id: UUID
     summary: str | None = None
     status: CaseStatus = CaseStatus.DRAFT
@@ -91,7 +90,6 @@ class CaseListItem(BaseModel):
 
 
 class EvidenceCreateRequest(BaseModel):
-    tenant_id: UUID
     case_id: UUID
     file_url: str
     type: EvidenceType
@@ -128,7 +126,6 @@ class RecommendationResponse(ORMModel):
 
 
 class IssueUpsertRequest(BaseModel):
-    tenant_id: UUID
     case_id: UUID
     issue_id: UUID | None = None
     title: str | None = None
@@ -162,7 +159,6 @@ class ClaimResponse(ORMModel):
 
 
 class MessageCreateRequest(BaseModel):
-    tenant_id: UUID
     case_id: UUID
     sender_type: MessageSenderType
     sender_id: str

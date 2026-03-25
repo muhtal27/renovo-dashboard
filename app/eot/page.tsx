@@ -1,8 +1,7 @@
 import type { Metadata } from 'next'
 import { OperatorLayout } from '@/app/operator-layout'
 import { EotCaseListClient } from '@/app/eot/_components/eot-case-list-client'
-import { resolveEotTenantId } from '@/lib/eot-server'
-import { requireOperatorUser } from '@/lib/operator-server'
+import { requireOperatorTenant } from '@/lib/operator-server'
 
 export const metadata: Metadata = {
   title: 'Cases | Renovo',
@@ -13,7 +12,7 @@ type PageProps = {
 }
 
 export default async function EotCasesPage({ searchParams }: PageProps) {
-  const user = await requireOperatorUser('/eot')
+  await requireOperatorTenant('/eot')
   const resolvedSearchParams = await searchParams
   const searchValue = resolvedSearchParams.search
   const initialSearchValue = Array.isArray(searchValue) ? searchValue[0] ?? '' : searchValue ?? ''
@@ -21,12 +20,13 @@ export default async function EotCasesPage({ searchParams }: PageProps) {
   return (
     <OperatorLayout
       pageTitle="Cases"
-      pageDescription="Live end-of-tenancy case list powered by the FastAPI workflow backend."
-      searchPlaceholder="Search live cases by property, tenant, status, or priority"
+      pageDescription="Operational case queue with live end-of-tenancy workflow state, priority signals, and fast access into the workspace."
+      searchPlaceholder="Search live cases by property, tenant, status, priority, or case ID"
       searchTargetPath="/eot"
       initialSearchValue={initialSearchValue}
+      breadcrumbs={[{ label: 'Overview', href: '/overview' }, { label: 'Cases' }]}
     >
-      <EotCaseListClient tenantId={resolveEotTenantId(user)} />
+      <EotCaseListClient />
     </OperatorLayout>
   )
 }

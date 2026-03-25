@@ -80,149 +80,131 @@ export const metadata: Metadata = {
 export default function PrivacyPage() {
   return (
     <MarketingShell currentPath="/privacy">
-      <section className="app-surface rounded-[2rem] p-6 md:p-8">
-        <div className="mx-auto max-w-5xl">
+      <div className="page-shell page-stack">
+        <section className="page-hero">
           <p className="app-kicker">Privacy</p>
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-stone-900 md:text-4xl">
-            Privacy notice
-          </h1>
-          <p className="mt-4 max-w-4xl text-sm leading-7 text-stone-600 md:text-base md:leading-8">
+          <h1 className="page-title">Privacy notice</h1>
+          <p className="page-copy max-w-4xl">
             Renovo automates end-of-tenancy work for property managers and letting agencies. This
             notice explains what personal data we collect, how we use it, where it is processed,
             and the choices available to you.
           </p>
+          <p className="mt-6 text-sm leading-7 text-[#3d3b37]">
+            Renovo is operated in the United Kingdom. For privacy questions, contact{' '}
+            <a href="mailto:hello@renovoai.co.uk">hello@renovoai.co.uk</a>.
+          </p>
+        </section>
 
-          <div className="mt-8 grid gap-4 md:grid-cols-2">
-            <article className="rounded-[1.45rem] border border-stone-200 bg-white/92 p-5">
-              <p className="app-kicker">Who we are</p>
-              <p className="mt-3 text-sm leading-7 text-stone-600">
-                Renovo is operated in the United Kingdom. For privacy questions, contact{' '}
-                <a href="mailto:hello@renovoai.co.uk">hello@renovoai.co.uk</a>.
-              </p>
-            </article>
-            <article className="rounded-[1.45rem] border border-stone-200 bg-white/92 p-5">
-              <p className="app-kicker">Core storage and processing</p>
-              <p className="mt-3 text-sm leading-7 text-stone-600">
-                Your core customer data, including account information, uploaded documents, and
-                processed results, is stored in the EU via Supabase. Some technical data may be
-                processed through Vercel&apos;s global infrastructure, and specific checkout
-                content is sent to OpenAI when analysis features are used.
-              </p>
-            </article>
-          </div>
-
-          <section className="mt-8">
+        <section className="page-grid-2">
+          <article className="page-card">
             <p className="app-kicker">What we collect</p>
-            <div className="mt-4 grid gap-4 md:grid-cols-3">
-              {dataCategories.map((item) => (
-                <article
+            <div className="mt-5 space-y-5">
+              {dataCategories.map((item, index) => (
+                <div
                   key={item.title}
-                  className="rounded-[1.45rem] border border-stone-200 bg-white/92 p-5"
+                  className={index === dataCategories.length - 1 ? '' : 'border-b border-[rgba(15,14,13,0.08)] pb-5'}
                 >
-                  <h2 className="text-base font-semibold text-stone-900">{item.title}</h2>
-                  <p className="mt-3 text-sm leading-7 text-stone-600">{item.body}</p>
-                </article>
+                  <h2 className="text-base">{item.title}</h2>
+                  <p className="mt-3 text-sm leading-7 text-[#3d3b37]">{item.body}</p>
+                </div>
               ))}
             </div>
-          </section>
+          </article>
 
-          <section className="mt-8">
+          <article className="page-card">
             <p className="app-kicker">Why we use it</p>
-            <div className="mt-4 grid gap-4 md:grid-cols-2">
-              {lawfulBases.map((item) => (
-                <article
+            <div className="mt-5 space-y-5">
+              {lawfulBases.map((item, index) => (
+                <div
                   key={item.title}
-                  className="rounded-[1.45rem] border border-stone-200 bg-white/92 p-5"
+                  className={index === lawfulBases.length - 1 ? '' : 'border-b border-[rgba(15,14,13,0.08)] pb-5'}
                 >
-                  <h2 className="text-base font-semibold text-stone-900">{item.title}</h2>
-                  <p className="mt-3 text-sm leading-7 text-stone-600">{item.body}</p>
-                </article>
+                  <h2 className="text-base">{item.title}</h2>
+                  <p className="mt-3 text-sm leading-7 text-[#3d3b37]">{item.body}</p>
+                </div>
               ))}
             </div>
-          </section>
+          </article>
+        </section>
 
-          <section className="mt-8 rounded-[1.45rem] border border-stone-200 bg-white/92 p-5">
-            <p className="app-kicker">Processors and infrastructure</p>
-            <div className="mt-4 overflow-x-auto">
-              <table className="min-w-full divide-y divide-stone-200">
-                <thead className="bg-stone-50/90">
-                  <tr className="text-left text-xs font-semibold uppercase tracking-[0.16em] text-stone-500">
-                    <th className="px-4 py-3">Provider</th>
-                    <th className="px-4 py-3">Purpose</th>
-                    <th className="px-4 py-3">Location</th>
+        <section className="page-card">
+          <p className="app-kicker">Core storage and processing</p>
+          <p className="mt-4 max-w-4xl text-sm leading-7 text-[#3d3b37]">
+            Your core customer data, including account information, uploaded documents, and
+            processed results, is stored in the EU via Supabase. Some technical data may be
+            processed through Vercel&apos;s global infrastructure, and specific checkout content is
+            sent to OpenAI when analysis features are used.
+          </p>
+        </section>
+
+        <section className="page-card">
+          <p className="app-kicker">Processors and infrastructure</p>
+          <div className="mt-4 overflow-x-auto">
+            <table className="min-w-full divide-y divide-[rgba(15,14,13,0.1)]">
+              <thead className="bg-[#fcfbf9]">
+                <tr className="text-left text-xs font-medium uppercase tracking-[0.16em] text-[#7a7670]">
+                  <th className="px-4 py-3">Provider</th>
+                  <th className="px-4 py-3">Purpose</th>
+                  <th className="px-4 py-3">Location</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[rgba(15,14,13,0.1)] bg-white">
+                {processorRows.map((row) => (
+                  <tr key={row.name} className="text-sm text-[#3d3b37]">
+                    <td className="px-4 py-4 font-medium text-[#0f0e0d]">{row.name}</td>
+                    <td className="px-4 py-4">{row.role}</td>
+                    <td className="px-4 py-4">{row.location}</td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-stone-200 bg-white">
-                  {processorRows.map((row) => (
-                    <tr key={row.name} className="text-sm text-stone-700">
-                      <td className="px-4 py-4 font-medium text-stone-900">{row.name}</td>
-                      <td className="px-4 py-4">{row.role}</td>
-                      <td className="px-4 py-4">{row.location}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
 
-          <section className="mt-8 grid gap-4 md:grid-cols-2">
-            <article className="rounded-[1.45rem] border border-stone-200 bg-white/92 p-5">
-              <p className="app-kicker">International transfers</p>
-              <p className="mt-3 text-sm leading-7 text-stone-600">
+        <section className="page-grid-2">
+          <article className="page-card">
+            <p className="app-kicker">Retention and transfers</p>
+            <div className="mt-4 space-y-4 text-sm leading-7 text-[#3d3b37]">
+              <p>
+                We keep data only for as long as needed to provide the service, maintain security,
+                meet legal obligations, resolve disputes, and manage onboarding or customer
+                relationships.
+              </p>
+              <p>
                 Where data is processed outside the UK or EEA, we rely on appropriate transfer
                 safeguards where required, such as contractual protections and equivalent provider
                 commitments.
               </p>
-            </article>
-            <article className="rounded-[1.45rem] border border-stone-200 bg-white/92 p-5">
-              <p className="app-kicker">Retention</p>
-              <p className="mt-3 text-sm leading-7 text-stone-600">
-                We keep data only for as long as needed to provide the service, maintain security,
-                meet legal obligations, resolve disputes, and manage onboarding or customer
-                relationships. Retention periods depend on the type of data and the purpose for
-                which it was collected.
-              </p>
-            </article>
-          </section>
+            </div>
+          </article>
 
-          <section className="mt-8 grid gap-4 md:grid-cols-2">
-            <article className="rounded-[1.45rem] border border-stone-200 bg-white/92 p-5">
-              <p className="app-kicker">Your rights</p>
-              <ul className="mt-3 space-y-2 text-sm leading-7 text-stone-600">
-                {rights.map((item) => (
-                  <li key={item} className="flex items-start gap-2">
-                    <span className="mt-[10px] h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </article>
-            <article className="rounded-[1.45rem] border border-stone-200 bg-white/92 p-5">
-              <p className="app-kicker">Cookies</p>
-              <p className="mt-3 text-sm leading-7 text-stone-600">
-                We use cookies and similar technologies where needed for sign-in, session handling,
-                security, and service operation. We may also use limited analytics tooling,
-                including PostHog, to understand product usage and improve the service.
-              </p>
-            </article>
-          </section>
+          <article className="page-card">
+            <p className="app-kicker">Your rights and cookies</p>
+            <ul className="mt-4 space-y-2 text-sm leading-7 text-[#3d3b37]">
+              {rights.map((item) => (
+                <li key={item} className="flex items-start gap-2">
+                  <span className="mt-[10px] h-1.5 w-1.5 shrink-0 rounded-full bg-[#0f6e56]" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-5 text-sm leading-7 text-[#3d3b37]">
+              We use cookies and similar technologies where needed for sign-in, session handling,
+              security, and service operation. We may also use limited analytics tooling,
+              including PostHog, to understand product usage and improve the service.
+            </p>
+          </article>
+        </section>
 
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link
-              href="/"
-              className="app-secondary-button inline-flex rounded-full px-4 py-2 text-sm font-medium"
-            >
-              Back to homepage
-            </Link>
-            <a
-              href="mailto:hello@renovoai.co.uk"
-              className="app-primary-button inline-flex rounded-full px-4 py-2 text-sm font-medium"
-            >
-              Contact Renovo
-            </a>
-          </div>
+        <div className="flex flex-wrap gap-3">
+          <Link href="/" className="app-secondary-button inline-flex rounded px-4 py-2 text-sm font-medium">
+            Back to homepage
+          </Link>
+          <a href="mailto:hello@renovoai.co.uk" className="app-primary-button inline-flex rounded px-4 py-2 text-sm font-medium">
+            Contact Renovo
+          </a>
         </div>
-      </section>
+      </div>
     </MarketingShell>
   )
 }

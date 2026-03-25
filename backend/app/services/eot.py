@@ -103,15 +103,15 @@ class EOTService:
             raise LookupError("Case not found for tenant.")
         return self._workspace_payload(case)
 
-    async def create_case(self, payload: CaseCreateRequest) -> CaseWorkspaceResponse:
-        tenant = await self.session.get(Tenant, payload.tenant_id)
+    async def create_case(self, tenant_id: UUID, payload: CaseCreateRequest) -> CaseWorkspaceResponse:
+        tenant = await self.session.get(Tenant, tenant_id)
         if tenant is None or tenant.deleted_at is not None:
             raise LookupError("Tenant does not exist.")
 
         property_record = await self.session.scalar(
             select(Property).where(
                 Property.id == payload.property_id,
-                Property.tenant_id == payload.tenant_id,
+                Property.tenant_id == tenant_id,
                 Property.deleted_at.is_(None),
             )
         )
@@ -120,7 +120,7 @@ class EOTService:
 
         activity_at = self._utcnow()
         tenancy = Tenancy(
-            tenant_id=payload.tenant_id,
+            tenant_id=tenant_id,
             property_id=payload.property_id,
             tenant_name=payload.tenancy.tenant_name,
             tenant_email=payload.tenancy.tenant_email,
@@ -133,7 +133,7 @@ class EOTService:
         await self.session.flush()
 
         case = Case(
-            tenant_id=payload.tenant_id,
+            tenant_id=tenant_id,
             tenancy_id=tenancy.id,
             summary=payload.summary,
             status=payload.status,
@@ -146,7 +146,7 @@ class EOTService:
 
         self.session.add(
             Claim(
-                tenant_id=payload.tenant_id,
+                tenant_id=tenant_id,
                 case_id=case.id,
                 total_amount=Decimal("0.00"),
                 breakdown=[],
@@ -155,15 +155,15 @@ class EOTService:
         )
         await self.session.commit()
 
-        return await self.get_case_workspace(payload.tenant_id, case.id)
+        return await self.get_case_workspace(tenant_id, case.id)
 
-    async def add_evidence(self, payload: EvidenceCreateRequest) -> EvidenceResponse:
-        case = await self._get_case_for_tenant(tenant_id=payload.tenant_id, case_id=payload.case_id)
+    async def add_evidence(self, tenant_id: UUID, payload: EvidenceCreateRequest) -> EvidenceResponse:
+        case = await self._get_case_for_tenant(tenant_id=tenant_id, case_id=payload.case_id)
         if case is None:
             raise LookupError("Case not found for tenant.")
 
         evidence = Evidence(
-            tenant_id=payload.tenant_id,
+            tenant_id=tenant_id,
             case_id=payload.case_id,
             file_url=payload.file_url,
             type=payload.type,
@@ -177,9 +177,9 @@ class EOTService:
         await self.session.refresh(evidence)
         return EvidenceResponse.model_validate(evidence)
 
-    async def upsert_issue(self, payload: IssueUpsertRequest) -> IssueResponse:
+    async def upsert_issue(self, tenant_id: UUID, payload: IssueUpsertRequest) -> IssueResponse:
         case = await self._get_case_for_tenant(
-            tenant_id=payload.tenant_id,
+            tenant_id=tenant_id,
             case_id=payload.case_id,
             options=[
                 selectinload(Case.issues).selectinload(Issue.recommendation),
@@ -193,7 +193,7 @@ class EOTService:
             if not payload.title:
                 raise ValueError("title is required when creating an issue.")
             issue = Issue(
-                tenant_id=payload.tenant_id,
+                tenant_id=tenant_id,
                 case_id=payload.case_id,
                 title=payload.title,
                 description=payload.description,
@@ -208,7 +208,7 @@ class EOTService:
                 .where(
                     Issue.id == payload.issue_id,
                     Issue.case_id == payload.case_id,
-                    Issue.tenant_id == payload.tenant_id,
+                    Issue.tenant_id == tenant_id,
                     Issue.deleted_at.is_(None),
                 )
                 .options(selectinload(Issue.recommendation))
@@ -226,7 +226,7 @@ class EOTService:
 
         if payload.evidence_ids is not None:
             issue.evidence_items = await self._load_case_evidence(
-                tenant_id=payload.tenant_id,
+                tenant_id=tenant_id,
                 case_id=payload.case_id,
                 evidence_ids=payload.evidence_ids,
             )
@@ -234,7 +234,7 @@ class EOTService:
         recommendation = issue.recommendation
         if recommendation is None:
             recommendation = Recommendation(
-                tenant_id=payload.tenant_id,
+                tenant_id=tenant_id,
                 issue_id=issue.id,
             )
             self.session.add(recommendation)
@@ -257,13 +257,13 @@ class EOTService:
             raise LookupError("Issue not found after save.")
         return IssueResponse.model_validate(issue)
 
-    async def send_message(self, payload: MessageCreateRequest) -> MessageResponse:
-        case = await self._get_case_for_tenant(tenant_id=payload.tenant_id, case_id=payload.case_id)
+    async def send_message(self, tenant_id: UUID, payload: MessageCreateRequest) -> MessageResponse:
+        case = await self._get_case_for_tenant(tenant_id=tenant_id, case_id=payload.case_id)
         if case is None:
             raise LookupError("Case not found for tenant.")
 
         message = Message(
-            tenant_id=payload.tenant_id,
+            tenant_id=tenant_id,
             case_id=payload.case_id,
             sender_type=payload.sender_type,
             sender_id=payload.sender_id,

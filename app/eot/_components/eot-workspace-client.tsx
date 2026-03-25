@@ -2,13 +2,30 @@
 
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { FormEvent, useEffect, useRef, useState } from 'react'
+import { FormEvent, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  ArrowLeft,
+  ExternalLink,
+  FileText,
+  ImageIcon,
+  MessageSquareText,
+  RefreshCcw,
+  Send,
+  TriangleAlert,
+  Upload,
+  Video,
+} from 'lucide-react'
 import {
   createEotEvidence,
   createEotMessage,
   getEotCaseWorkspace,
   upsertEotIssue,
 } from '@/lib/eot-api'
+import {
+  buildWorkspaceTimeline,
+  getClaimReadiness,
+  getOpenHighSeverityIssues,
+} from '@/lib/eot-dashboard'
 import type {
   CreateEotEvidenceInput,
   CreateEotMessageInput,
@@ -22,19 +39,28 @@ import type {
   UpsertEotIssueInput,
 } from '@/lib/eot-types'
 import {
+  ActivityTimeline,
+  DetailPanel,
   EmptyState,
-  EotBadge,
-  EotCard,
+  KPIStatCard,
+  KeyValueList,
+  MetaItem,
+  PageHeader,
+  ProgressBar,
+  SectionCard,
+  SkeletonPanel,
+  StatusBadge,
+  WorkspaceSection,
   formatAddress,
   formatCurrency,
   formatDate,
   formatDateTime,
   formatEnumLabel,
+  getCaseProgress,
 } from '@/app/eot/_components/eot-ui'
 
 type WorkspaceClientProps = {
   caseId: string
-  tenantId: string | null
   defaultActor: string
 }
 
@@ -92,9 +118,56 @@ const DEFAULT_MESSAGE_FORM = (defaultActor: string): MessageFormState => ({
   attachments: '',
 })
 
+function EvidenceIcon({ type }: { type: EotEvidenceType }) {
+  if (type === 'image') return <ImageIcon className="h-4 w-4" />
+  if (type === 'video') return <Video className="h-4 w-4" />
+  return <FileText className="h-4 w-4" />
+}
+
+function IssueCard({
+  issue,
+  active,
+  onEdit,
+}: {
+  issue: EotIssue
+  active: boolean
+  onEdit: (issue: EotIssue) => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={() => onEdit(issue)}
+      className={`w-full rounded-[18px] border px-4 py-4 text-left transition ${
+        active
+          ? 'border-slate-900 bg-slate-900 text-white shadow-[0_16px_40px_rgba(15,23,42,0.22)]'
+          : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
+      }`}
+    >
+      <div className="flex flex-wrap items-center gap-2">
+        <StatusBadge label={formatEnumLabel(issue.severity)} tone={issue.severity} />
+        <StatusBadge label={formatEnumLabel(issue.status)} tone={issue.status} />
+        {issue.recommendation?.decision ? (
+          <StatusBadge
+            label={formatEnumLabel(issue.recommendation.decision)}
+            tone={issue.recommendation.decision}
+          />
+        ) : null}
+      </div>
+      <p className={`mt-3 text-sm font-semibold ${active ? 'text-white' : 'text-slate-950'}`}>
+        {issue.title}
+      </p>
+      <p className={`mt-2 text-sm leading-6 ${active ? 'text-slate-200' : 'text-slate-600'}`}>
+        {issue.description?.trim() || 'No narrative has been added for this issue yet.'}
+      </p>
+      <div className={`mt-3 text-xs uppercase tracking-[0.14em] ${active ? 'text-slate-300' : 'text-slate-400'}`}>
+        {issue.linked_evidence.length} linked evidence item{issue.linked_evidence.length === 1 ? '' : 's'}
+      </div>
+    </button>
+  )
+}
+
 export function EotWorkspaceClient({
   caseId,
-  tenantId,
   defaultActor,
 }: WorkspaceClientProps) {
   const searchParams = useSearchParams()
@@ -104,9 +177,10 @@ export function EotWorkspaceClient({
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const hasLoadedWorkspaceRef = useRef(false)
   const [refreshError, setRefreshError] = useState<string | null>(null)
+  const hasLoadedWorkspaceRef = useRef(false)
 
+  const [selectedEvidenceId, setSelectedEvidenceId] = useState<string | null>(null)
   const [evidenceForm, setEvidenceForm] = useState<EvidenceFormState>(
     DEFAULT_EVIDENCE_FORM(defaultActor)
   )
@@ -126,14 +200,6 @@ export function EotWorkspaceClient({
   }, [defaultActor])
 
   useEffect(() => {
-    const currentTenantId = tenantId
-
-    if (!currentTenantId) {
-      setLoading(false)
-      return
-    }
-    const resolvedTenantId: string = currentTenantId
-
     let cancelled = false
 
     async function loadWorkspace() {
@@ -148,10 +214,11 @@ export function EotWorkspaceClient({
       }
 
       try {
-        const nextWorkspace = await getEotCaseWorkspace(resolvedTenantId, caseId)
+        const nextWorkspace = await getEotCaseWorkspace(caseId)
 
         if (!cancelled) {
           setWorkspace(nextWorkspace)
+          setSelectedEvidenceId((current) => current ?? nextWorkspace.evidence[0]?.id ?? null)
           setError(null)
           setRefreshError(null)
           hasLoadedWorkspaceRef.current = true
@@ -162,7 +229,7 @@ export function EotWorkspaceClient({
             loadError instanceof Error ? loadError.message : 'Unable to load the case workspace.'
 
           if (hasExistingWorkspace) {
-            setRefreshError(`${message} Showing last loaded workspace data.`)
+            setRefreshError(`${message} Showing the last loaded workspace data.`)
           } else {
             setError(message)
           }
@@ -180,59 +247,72 @@ export function EotWorkspaceClient({
     return () => {
       cancelled = true
     }
-  }, [caseId, tenantId])
+  }, [caseId])
 
-  const visibleEvidence =
-    workspace?.evidence.filter((item) => {
-      if (!search) return true
-      return [item.area ?? '', item.type, item.file_url, item.uploaded_by].join(' ').toLowerCase().includes(search)
-    }) ?? []
+  const visibleEvidence = useMemo(() => {
+    return (
+      workspace?.evidence.filter((item) => {
+        if (!search) return true
+        return [item.area ?? '', item.type, item.file_url, item.uploaded_by].join(' ').toLowerCase().includes(search)
+      }) ?? []
+    )
+  }, [search, workspace])
 
-  const visibleIssues =
-    workspace?.issues.filter((item) => {
-      if (!search) return true
-      return [
-        item.title,
-        item.description ?? '',
-        item.severity,
-        item.status,
-        item.recommendation?.decision ?? '',
-      ]
-        .join(' ')
-        .toLowerCase()
-        .includes(search)
-    }) ?? []
+  const visibleIssues = useMemo(() => {
+    return (
+      workspace?.issues.filter((item) => {
+        if (!search) return true
+        return [
+          item.title,
+          item.description ?? '',
+          item.severity,
+          item.status,
+          item.recommendation?.decision ?? '',
+        ]
+          .join(' ')
+          .toLowerCase()
+          .includes(search)
+      }) ?? []
+    )
+  }, [search, workspace])
 
-  const visibleMessages =
-    workspace?.messages.filter((item) => {
-      if (!search) return true
-      return [item.sender_type, item.sender_id, item.content].join(' ').toLowerCase().includes(search)
-    }) ?? []
+  const visibleMessages = useMemo(() => {
+    return (
+      workspace?.messages.filter((item) => {
+        if (!search) return true
+        return [item.sender_type, item.sender_id, item.content].join(' ').toLowerCase().includes(search)
+      }) ?? []
+    )
+  }, [search, workspace])
 
-  const visibleRecommendations =
-    workspace?.recommendations.filter((item) => {
-      if (!search) return true
-      return [
-        item.decision ?? '',
-        item.rationale ?? '',
-        item.estimated_cost ?? '',
-      ]
-        .join(' ')
-        .toLowerCase()
-        .includes(search)
-    }) ?? []
+  const selectedEvidence = useMemo(() => {
+    if (!visibleEvidence.length) return null
+    return (
+      visibleEvidence.find((item) => item.id === selectedEvidenceId) ??
+      visibleEvidence[0] ??
+      null
+    )
+  }, [selectedEvidenceId, visibleEvidence])
 
-  async function refreshWorkspaceNow() {
-    if (!tenantId) {
-      throw new Error('No workspace tenant is configured for this operator.')
+  useEffect(() => {
+    if (!visibleEvidence.length) {
+      setSelectedEvidenceId(null)
+      return
     }
 
+    if (!selectedEvidence) {
+      setSelectedEvidenceId(visibleEvidence[0].id)
+    }
+  }, [selectedEvidence, visibleEvidence])
+
+  async function refreshWorkspaceNow() {
     setRefreshing(true)
     setRefreshError(null)
 
     try {
-      const nextWorkspace = await getEotCaseWorkspace(tenantId, caseId)
+      const nextWorkspace = await getEotCaseWorkspace(caseId)
       setWorkspace(nextWorkspace)
+      setSelectedEvidenceId((current) => current ?? nextWorkspace.evidence[0]?.id ?? null)
       setError(null)
       hasLoadedWorkspaceRef.current = true
       return nextWorkspace
@@ -241,7 +321,7 @@ export function EotWorkspaceClient({
         refreshFailure instanceof Error
           ? refreshFailure.message
           : 'Unable to refresh the case workspace.'
-      setRefreshError(`${message} Showing last loaded workspace data.`)
+      setRefreshError(`${message} Showing the last loaded workspace data.`)
       throw refreshFailure
     } finally {
       setRefreshing(false)
@@ -271,14 +351,7 @@ export function EotWorkspaceClient({
   async function handleEvidenceSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    if (evidencePending) {
-      return
-    }
-
-    if (!tenantId) {
-      setEvidenceError('No workspace tenant is configured for this operator.')
-      return
-    }
+    if (evidencePending) return
 
     if (!evidenceForm.fileUrl.trim()) {
       setEvidenceError('Evidence URL is required.')
@@ -308,7 +381,6 @@ export function EotWorkspaceClient({
     setEvidenceError(null)
 
     const payload: CreateEotEvidenceInput = {
-      tenant_id: tenantId,
       case_id: caseId,
       file_url: evidenceForm.fileUrl.trim(),
       type: evidenceForm.type,
@@ -320,11 +392,7 @@ export function EotWorkspaceClient({
     try {
       await createEotEvidence(payload)
       setEvidenceForm(DEFAULT_EVIDENCE_FORM(defaultActor))
-      try {
-        await refreshWorkspaceNow()
-      } catch {
-        // Keep the saved form state and show the non-destructive refresh banner.
-      }
+      await refreshWorkspaceNow()
     } catch (submitError) {
       setEvidenceError(
         submitError instanceof Error ? submitError.message : 'Unable to register evidence.'
@@ -337,14 +405,7 @@ export function EotWorkspaceClient({
   async function handleIssueSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    if (issuePending) {
-      return
-    }
-
-    if (!tenantId) {
-      setIssueError('No workspace tenant is configured for this operator.')
-      return
-    }
+    if (issuePending) return
 
     if (!issueForm.title.trim()) {
       setIssueError('Issue title is required.')
@@ -355,7 +416,6 @@ export function EotWorkspaceClient({
     setIssueError(null)
 
     const payload: UpsertEotIssueInput = {
-      tenant_id: tenantId,
       case_id: caseId,
       issue_id: issueForm.issueId ?? undefined,
       title: issueForm.title.trim() || undefined,
@@ -373,11 +433,7 @@ export function EotWorkspaceClient({
     try {
       await upsertEotIssue(payload)
       resetIssueForm()
-      try {
-        await refreshWorkspaceNow()
-      } catch {
-        // The issue was saved; keep the last good workspace visible if refresh fails.
-      }
+      await refreshWorkspaceNow()
     } catch (submitError) {
       setIssueError(submitError instanceof Error ? submitError.message : 'Unable to save the issue.')
     } finally {
@@ -388,14 +444,7 @@ export function EotWorkspaceClient({
   async function handleMessageSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    if (messagePending) {
-      return
-    }
-
-    if (!tenantId) {
-      setMessageError('No workspace tenant is configured for this operator.')
-      return
-    }
+    if (messagePending) return
 
     if (!messageForm.senderId.trim()) {
       setMessageError('Sender ID is required.')
@@ -425,7 +474,6 @@ export function EotWorkspaceClient({
     setMessageError(null)
 
     const payload: CreateEotMessageInput = {
-      tenant_id: tenantId,
       case_id: caseId,
       sender_type: messageForm.senderType,
       sender_id: messageForm.senderId.trim(),
@@ -436,11 +484,7 @@ export function EotWorkspaceClient({
     try {
       await createEotMessage(payload)
       setMessageForm(DEFAULT_MESSAGE_FORM(defaultActor))
-      try {
-        await refreshWorkspaceNow()
-      } catch {
-        // The message was sent; keep the last good workspace visible if refresh fails.
-      }
+      await refreshWorkspaceNow()
     } catch (submitError) {
       setMessageError(
         submitError instanceof Error ? submitError.message : 'Unable to send the case message.'
@@ -450,737 +494,798 @@ export function EotWorkspaceClient({
     }
   }
 
-  if (!tenantId) {
-    return (
-      <EotCard className="px-6 py-6 md:px-8">
-        <p className="app-kicker">Workspace configuration</p>
-        <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-900">
-          Tenant ID required
-        </h2>
-        <p className="mt-4 text-sm leading-7 text-stone-600">
-          This operator does not currently resolve to an EOT tenant. Add `tenant_id` to Supabase
-          user metadata or configure `EOT_TENANT_ID` / `NEXT_PUBLIC_EOT_TENANT_ID`.
-        </p>
-      </EotCard>
-    )
-  }
-
   if (loading) {
     return (
-      <EotCard className="px-6 py-10 md:px-8">
-        <p className="text-sm text-stone-500">Loading live case workspace...</p>
-      </EotCard>
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.5fr)_360px]">
+        <div className="space-y-4">
+          <SkeletonPanel />
+          <SkeletonPanel />
+          <SkeletonPanel />
+        </div>
+        <div className="space-y-4">
+          <SkeletonPanel />
+          <SkeletonPanel />
+        </div>
+      </div>
     )
   }
 
   if (error || !workspace) {
     return (
-      <EotCard className="px-6 py-10 md:px-8">
+      <SectionCard className="px-6 py-10">
         <EmptyState
           title="Unable to load workspace"
           body={error ?? 'The case workspace could not be loaded.'}
         />
-      </EotCard>
+      </SectionCard>
     )
   }
+
+  const progress = getCaseProgress(workspace.case.status)
+  const highSeverityOpenIssues = getOpenHighSeverityIssues(workspace.issues)
+  const claimReadiness = getClaimReadiness(workspace)
+  const timelineItems = buildWorkspaceTimeline(workspace)
 
   return (
     <div className="space-y-6">
       {refreshError ? (
-        <div className="rounded-[1.2rem] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+        <div className="rounded-[18px] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
           {refreshError}
         </div>
       ) : null}
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <Link
-          href="/eot"
-          className="inline-flex rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-medium text-stone-700 transition hover:border-stone-300 hover:text-stone-900"
+      <PageHeader
+        eyebrow="Case workspace"
+        title={workspace.property.name}
+        description={workspace.case.summary?.trim() || 'No case summary has been recorded yet.'}
+        actions={
+          <>
+            <Link
+              href="/eot"
+              className="inline-flex items-center gap-2 rounded-[14px] border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:text-slate-950"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to cases
+            </Link>
+            <button
+              type="button"
+              onClick={() => void refreshWorkspaceNow()}
+              className="inline-flex items-center gap-2 rounded-[14px] border border-slate-900 bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
+            >
+              <RefreshCcw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+              Refresh
+            </button>
+          </>
+        }
+      />
+
+      <section className="grid gap-4 xl:grid-cols-[minmax(0,1.55fr)_360px]">
+        <SectionCard className="px-6 py-6">
+          <div className="grid gap-5 xl:grid-cols-[minmax(0,1.3fr)_minmax(280px,0.9fr)]">
+            <div className="space-y-5">
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <StatusBadge label={formatEnumLabel(workspace.case.status)} tone={workspace.case.status} />
+                  <StatusBadge label={formatEnumLabel(workspace.case.priority)} tone={workspace.case.priority} />
+                  <StatusBadge label={claimReadiness.label} tone={claimReadiness.tone === 'ready' ? 'ready_for_claim' : claimReadiness.tone === 'attention' ? 'attention' : 'document'} />
+                </div>
+                <p className="mt-4 text-sm leading-6 text-slate-600">
+                  {workspace.tenancy.tenant_name}
+                  {workspace.tenancy.tenant_email ? ` · ${workspace.tenancy.tenant_email}` : ''}
+                </p>
+              </div>
+
+              <ProgressBar
+                value={progress}
+                label={
+                  <>
+                    <span>Workflow completion</span>
+                    <span>{progress}%</span>
+                  </>
+                }
+              />
+
+              <div className="grid gap-4 md:grid-cols-3">
+                <MetaItem label="Last activity" value={formatDateTime(workspace.case.last_activity_at)} />
+                <MetaItem
+                  label="Deposit"
+                  value={
+                    workspace.tenancy.deposit_amount
+                      ? formatCurrency(workspace.tenancy.deposit_amount)
+                      : 'Not recorded'
+                  }
+                />
+                <MetaItem
+                  label="Property reference"
+                  value={workspace.property.reference || 'Not set'}
+                />
+              </div>
+            </div>
+
+            <DetailPanel
+              title="Operator focus"
+              description="Priority items surfaced from current evidence, issues, and output state."
+            >
+              <KeyValueList
+                items={[
+                  {
+                    label: 'High severity issues',
+                    value: highSeverityOpenIssues.length || 'None',
+                  },
+                  {
+                    label: 'Evidence logged',
+                    value: workspace.evidence.length,
+                  },
+                  {
+                    label: 'Recommendations',
+                    value: workspace.recommendations.length,
+                  },
+                  {
+                    label: 'Claim readiness',
+                    value: claimReadiness.label,
+                  },
+                ]}
+              />
+              <div className="rounded-[18px] border border-slate-200 bg-white px-4 py-4 text-sm leading-6 text-slate-600">
+                {claimReadiness.description}
+              </div>
+            </DetailPanel>
+          </div>
+        </SectionCard>
+
+        <DetailPanel
+          title="Case metadata"
+          description="Property, tenancy, and audit context."
         >
-          Back to case list
-        </Link>
-        <div className="flex items-center gap-3">
-          {refreshing ? <p className="text-sm text-stone-500">Refreshing workspace...</p> : null}
-          <EotBadge label={formatEnumLabel(workspace.case.status)} tone={workspace.case.status} />
-          <EotBadge
-            label={formatEnumLabel(workspace.case.priority)}
-            tone={workspace.case.priority}
+          <KeyValueList
+            items={[
+              { label: 'Case ID', value: workspace.case.id.slice(0, 8) },
+              { label: 'Created', value: formatDate(workspace.case.created_at) },
+              { label: 'Tenancy dates', value: `${formatDate(workspace.tenancy.start_date)} to ${formatDate(workspace.tenancy.end_date)}` },
+              { label: 'Address', value: formatAddress([
+                workspace.property.address_line_1,
+                workspace.property.address_line_2,
+                workspace.property.city,
+                workspace.property.postcode,
+                workspace.property.country_code,
+              ]) },
+            ]}
           />
-        </div>
-      </div>
+          {workspace.tenancy.notes ? (
+            <div className="rounded-[18px] border border-slate-200 bg-white px-4 py-4 text-sm leading-6 text-slate-600">
+              {workspace.tenancy.notes}
+            </div>
+          ) : null}
+        </DetailPanel>
+      </section>
 
-      <EotCard className="px-6 py-6 md:px-8">
-        <div className="grid gap-5 xl:grid-cols-[minmax(0,1.45fr)_minmax(340px,0.95fr)]">
-          <div>
-            <p className="app-kicker">Case header</p>
-            <h2 className="mt-2 text-3xl font-semibold tracking-tight text-stone-900">
-              {workspace.property.name}
-            </h2>
-            <p className="mt-3 text-sm leading-7 text-stone-600">
-              {workspace.case.summary?.trim() || 'No case summary has been recorded yet.'}
-            </p>
-            <p className="mt-4 text-sm text-stone-500">
-              {workspace.tenancy.tenant_name}
-              {workspace.tenancy.tenant_email ? ` · ${workspace.tenancy.tenant_email}` : ''}
-            </p>
-          </div>
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-[1.2rem] border border-stone-200 bg-stone-50/80 px-4 py-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-stone-500">
-                Last activity
-              </p>
-              <p className="mt-2 text-sm font-medium text-stone-900">
-                {formatDateTime(workspace.case.last_activity_at)}
-              </p>
-            </div>
-            <div className="rounded-[1.2rem] border border-stone-200 bg-stone-50/80 px-4 py-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-stone-500">
-                Deposit
-              </p>
-              <p className="mt-2 text-sm font-medium text-stone-900">
-                {workspace.tenancy.deposit_amount
-                  ? formatCurrency(workspace.tenancy.deposit_amount)
-                  : 'Not recorded'}
-              </p>
-            </div>
-            <div className="rounded-[1.2rem] border border-stone-200 bg-stone-50/80 px-4 py-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-stone-500">
-                Property reference
-              </p>
-              <p className="mt-2 text-sm font-medium text-stone-900">
-                {workspace.property.reference || 'Not set'}
-              </p>
-            </div>
-            <div className="rounded-[1.2rem] border border-stone-200 bg-stone-50/80 px-4 py-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-stone-500">
-                Workspace counts
-              </p>
-              <p className="mt-2 text-sm font-medium text-stone-900">
-                {workspace.evidence.length} evidence · {workspace.issues.length} issues
-              </p>
-            </div>
-          </div>
-        </div>
-      </EotCard>
-
-      <div className="grid gap-6 2xl:grid-cols-[minmax(0,1.08fr)_minmax(0,1fr)_minmax(0,0.92fr)]">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.55fr)_360px]">
         <div className="space-y-6">
-          <EotCard className="px-6 py-6">
-            <p className="app-kicker">Tenancy and property</p>
-            <div className="mt-4 grid gap-4 md:grid-cols-2">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-stone-500">
-                  Address
-                </p>
-                <p className="mt-2 text-sm leading-7 text-stone-700">
-                  {formatAddress([
-                    workspace.property.address_line_1,
-                    workspace.property.address_line_2,
-                    workspace.property.city,
-                    workspace.property.postcode,
-                    workspace.property.country_code,
-                  ])}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-stone-500">
-                  Tenancy dates
-                </p>
-                <p className="mt-2 text-sm leading-7 text-stone-700">
-                  {formatDate(workspace.tenancy.start_date)} to {formatDate(workspace.tenancy.end_date)}
-                </p>
-              </div>
-            </div>
-            {workspace.tenancy.notes ? (
-              <div className="mt-4 rounded-[1.2rem] border border-stone-200 bg-stone-50/70 px-4 py-4 text-sm leading-7 text-stone-600">
-                {workspace.tenancy.notes}
-              </div>
-            ) : null}
-          </EotCard>
+          <section className="grid gap-4 md:grid-cols-4">
+            <KPIStatCard label="Evidence" value={workspace.evidence.length} detail="Registered evidence items." />
+            <KPIStatCard label="Open issues" value={workspace.issues.filter((issue) => issue.status !== 'resolved').length} detail="Issues still under operator review." tone="warning" />
+            <KPIStatCard label="Resolved issues" value={workspace.issues.filter((issue) => issue.status === 'resolved').length} detail="Issues already closed out." tone="accent" />
+            <KPIStatCard label="Case notes" value={workspace.messages.length} detail="Logged communication and internal updates." />
+          </section>
 
-          <EotCard className="px-6 py-6">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="app-kicker">Evidence</p>
-                <h3 className="mt-2 text-xl font-semibold tracking-tight text-stone-900">
-                  Case evidence register
-                </h3>
+          <WorkspaceSection
+            title="Evidence review"
+            description="Preview-first evidence workflow with structured metadata and direct intake controls."
+            aside={
+              <div className="flex items-center gap-2">
+                <StatusBadge label={`${visibleEvidence.length} visible`} tone="document" />
+                <StatusBadge label={`${workspace.documents.length} documents`} tone="document" />
               </div>
-              <p className="text-sm text-stone-500">{visibleEvidence.length} visible</p>
-            </div>
-
-            <div className="mt-5 space-y-3">
-              {visibleEvidence.length === 0 ? (
-                <EmptyState
-                  title="No evidence recorded"
-                  body="Register the first evidence item to begin issue assessment."
-                />
-              ) : (
-                visibleEvidence.map((item) => (
-                  <div
-                    key={item.id}
-                    className="rounded-[1.2rem] border border-stone-200 bg-stone-50/70 px-4 py-4"
-                  >
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <EotBadge label={formatEnumLabel(item.type)} tone={item.type} />
-                          {item.area ? <span className="text-sm text-stone-500">{item.area}</span> : null}
-                        </div>
-                        <a
-                          href={item.file_url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="mt-3 block break-all text-sm font-medium text-stone-900 underline decoration-stone-300 underline-offset-2"
-                        >
-                          {item.file_url}
-                        </a>
-                      </div>
-                      <div className="text-right text-xs text-stone-500">
-                        <p>{item.uploaded_by}</p>
-                        <p className="mt-1">{formatDateTime(item.created_at)}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            <form className="mt-6 grid gap-4 border-t border-stone-200 pt-6" onSubmit={handleEvidenceSubmit}>
-              <label className="text-sm">
-                <span className="font-medium text-stone-700">Evidence URL</span>
-                <input
-                  required
-                  value={evidenceForm.fileUrl}
-                  onChange={(event) =>
-                    setEvidenceForm((current) => ({ ...current, fileUrl: event.target.value }))
-                  }
-                  className="mt-2 h-12 w-full rounded-[1rem] border border-stone-300 bg-white px-4 text-stone-900"
-                  placeholder="https://..."
-                />
-              </label>
-              <div className="grid gap-4 md:grid-cols-2">
-                <label className="text-sm">
-                  <span className="font-medium text-stone-700">Type</span>
-                  <select
-                    value={evidenceForm.type}
-                    onChange={(event) =>
-                      setEvidenceForm((current) => ({
-                        ...current,
-                        type: event.target.value as EotEvidenceType,
-                      }))
-                    }
-                    className="mt-2 h-12 w-full rounded-[1rem] border border-stone-300 bg-white px-4 text-stone-900"
-                  >
-                    {(['document', 'image', 'video'] as EotEvidenceType[]).map((type) => (
-                      <option key={type} value={type}>
-                        {formatEnumLabel(type)}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="text-sm">
-                  <span className="font-medium text-stone-700">Area</span>
-                  <input
-                    value={evidenceForm.area}
-                    onChange={(event) =>
-                      setEvidenceForm((current) => ({ ...current, area: event.target.value }))
-                    }
-                    className="mt-2 h-12 w-full rounded-[1rem] border border-stone-300 bg-white px-4 text-stone-900"
-                    placeholder="Kitchen, hallway, deposit docs..."
+            }
+          >
+            <div className="grid gap-5 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+              <div className="space-y-3">
+                {visibleEvidence.length === 0 ? (
+                  <EmptyState
+                    title="No evidence recorded"
+                    body="Register the first evidence item to begin issue assessment."
                   />
-                </label>
-              </div>
-              <label className="text-sm">
-                <span className="font-medium text-stone-700">Uploaded by</span>
-                <input
-                  required
-                  value={evidenceForm.uploadedBy}
-                  onChange={(event) =>
-                    setEvidenceForm((current) => ({ ...current, uploadedBy: event.target.value }))
-                  }
-                  className="mt-2 h-12 w-full rounded-[1rem] border border-stone-300 bg-white px-4 text-stone-900"
-                />
-              </label>
-              <label className="text-sm">
-                <span className="font-medium text-stone-700">Metadata JSON</span>
-                <textarea
-                  value={evidenceForm.metadata}
-                  onChange={(event) =>
-                    setEvidenceForm((current) => ({ ...current, metadata: event.target.value }))
-                  }
-                  className="mt-2 min-h-24 w-full rounded-[1rem] border border-stone-300 bg-white px-4 py-3 text-stone-900"
-                  placeholder='{"source":"inventory","page":"12"}'
-                />
-              </label>
-              {evidenceError ? (
-                <p className="rounded-[1rem] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                  {evidenceError}
-                </p>
-              ) : null}
-              <button
-                type="submit"
-                disabled={evidencePending}
-                className="inline-flex items-center justify-center rounded-[1rem] border border-stone-900 bg-stone-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-stone-800 disabled:opacity-60"
-              >
-                {evidencePending ? 'Saving evidence...' : 'Add evidence'}
-              </button>
-            </form>
-          </EotCard>
-
-          <EotCard className="px-6 py-6">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="app-kicker">Documents</p>
-                <h3 className="mt-2 text-xl font-semibold tracking-tight text-stone-900">
-                  Supporting files
-                </h3>
-              </div>
-              <p className="text-sm text-stone-500">{workspace.documents.length} linked</p>
-            </div>
-            <div className="mt-5 space-y-3">
-              {workspace.documents.length === 0 ? (
-                <EmptyState
-                  title="No supporting documents"
-                  body="This case does not yet have any linked document records."
-                />
-              ) : (
-                workspace.documents.map((document) => (
-                  <div
-                    key={document.id}
-                    className="rounded-[1.2rem] border border-stone-200 bg-stone-50/70 px-4 py-4"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="font-medium text-stone-900">{document.name}</p>
-                        <p className="mt-1 text-sm text-stone-500">
-                          {formatEnumLabel(document.document_type)}
-                        </p>
-                      </div>
-                      <a
-                        href={document.file_url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-sm font-medium text-stone-700 underline decoration-stone-300 underline-offset-2"
-                      >
-                        Open
-                      </a>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </EotCard>
-        </div>
-
-        <div className="space-y-6">
-          <EotCard className="px-6 py-6">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="app-kicker">Issues</p>
-                <h3 className="mt-2 text-xl font-semibold tracking-tight text-stone-900">
-                  Assessment workspace
-                </h3>
-              </div>
-              <p className="text-sm text-stone-500">{visibleIssues.length} visible</p>
-            </div>
-
-            <div className="mt-5 space-y-4">
-              {visibleIssues.length === 0 ? (
-                <EmptyState
-                  title="No issues logged"
-                  body="Create the first issue once evidence has been reviewed."
-                />
-              ) : (
-                visibleIssues.map((issue) => (
-                  <div
-                    key={issue.id}
-                    className="rounded-[1.25rem] border border-stone-200 bg-stone-50/70 px-4 py-4"
-                  >
-                    <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <p className="text-base font-semibold text-stone-900">{issue.title}</p>
-                          <EotBadge label={formatEnumLabel(issue.severity)} tone={issue.severity} />
-                          <EotBadge label={formatEnumLabel(issue.status)} tone={issue.status} />
-                          {issue.recommendation?.decision ? (
-                            <EotBadge
-                              label={formatEnumLabel(issue.recommendation.decision)}
-                              tone={issue.recommendation.decision}
-                            />
-                          ) : null}
-                        </div>
-                        {issue.description ? (
-                          <p className="mt-3 text-sm leading-7 text-stone-600">{issue.description}</p>
-                        ) : null}
-                        <p className="mt-3 text-sm text-stone-500">
-                          Evidence linked: {issue.linked_evidence.length}
-                        </p>
-                        {issue.recommendation?.rationale ? (
-                          <p className="mt-3 rounded-[1rem] border border-stone-200 bg-white px-3 py-3 text-sm leading-6 text-stone-600">
-                            {issue.recommendation.rationale}
-                          </p>
-                        ) : null}
-                      </div>
-                      <div className="text-left md:text-right">
-                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-stone-500">
-                          Estimated cost
-                        </p>
-                        <p className="mt-2 text-xl font-semibold text-stone-900">
-                          {issue.recommendation?.estimated_cost
-                            ? formatCurrency(issue.recommendation.estimated_cost)
-                            : 'Not set'}
-                        </p>
-                        <button
-                          type="button"
-                          onClick={() => startEditingIssue(issue)}
-                          className="mt-4 inline-flex rounded-full border border-stone-200 bg-white px-3 py-2 text-sm font-medium text-stone-700 transition hover:border-stone-300 hover:text-stone-900"
-                        >
-                          Edit issue
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            <form className="mt-6 grid gap-4 border-t border-stone-200 pt-6" onSubmit={handleIssueSubmit}>
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-sm font-semibold text-stone-900">
-                  {issueForm.issueId ? 'Update issue' : 'Create issue'}
-                </p>
-                {issueForm.issueId ? (
-                  <button
-                    type="button"
-                    onClick={resetIssueForm}
-                    className="text-sm font-medium text-stone-500 transition hover:text-stone-900"
-                  >
-                    Clear edit state
-                  </button>
-                ) : null}
-              </div>
-
-              <label className="text-sm">
-                <span className="font-medium text-stone-700">Issue title</span>
-                <input
-                  required
-                  value={issueForm.title}
-                  onChange={(event) =>
-                    setIssueForm((current) => ({ ...current, title: event.target.value }))
-                  }
-                  className="mt-2 h-12 w-full rounded-[1rem] border border-stone-300 bg-white px-4 text-stone-900"
-                />
-              </label>
-              <label className="text-sm">
-                <span className="font-medium text-stone-700">Description</span>
-                <textarea
-                  value={issueForm.description}
-                  onChange={(event) =>
-                    setIssueForm((current) => ({ ...current, description: event.target.value }))
-                  }
-                  className="mt-2 min-h-24 w-full rounded-[1rem] border border-stone-300 bg-white px-4 py-3 text-stone-900"
-                />
-              </label>
-
-              <div className="grid gap-4 md:grid-cols-2">
-                <label className="text-sm">
-                  <span className="font-medium text-stone-700">Severity</span>
-                  <select
-                    value={issueForm.severity}
-                    onChange={(event) =>
-                      setIssueForm((current) => ({
-                        ...current,
-                        severity: event.target.value as EotIssueSeverity,
-                      }))
-                    }
-                    className="mt-2 h-12 w-full rounded-[1rem] border border-stone-300 bg-white px-4 text-stone-900"
-                  >
-                    {(['low', 'medium', 'high'] as EotIssueSeverity[]).map((severity) => (
-                      <option key={severity} value={severity}>
-                        {formatEnumLabel(severity)}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="text-sm">
-                  <span className="font-medium text-stone-700">Status</span>
-                  <select
-                    value={issueForm.status}
-                    onChange={(event) =>
-                      setIssueForm((current) => ({
-                        ...current,
-                        status: event.target.value as EotIssueStatus,
-                      }))
-                    }
-                    className="mt-2 h-12 w-full rounded-[1rem] border border-stone-300 bg-white px-4 text-stone-900"
-                  >
-                    {(['open', 'resolved', 'disputed'] as EotIssueStatus[]).map((status) => (
-                      <option key={status} value={status}>
-                        {formatEnumLabel(status)}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </div>
-
-              <fieldset className="text-sm">
-                <legend className="font-medium text-stone-700">Linked evidence</legend>
-                <div className="mt-3 grid gap-2">
-                  {workspace.evidence.length === 0 ? (
-                    <p className="text-sm text-stone-500">Add evidence before linking it to an issue.</p>
-                  ) : (
-                    workspace.evidence.map((item) => {
-                      const checked = issueForm.evidenceIds.includes(item.id)
-
-                      return (
-                        <label
-                          key={item.id}
-                          className="flex items-start gap-3 rounded-[1rem] border border-stone-200 bg-stone-50/70 px-4 py-3"
-                        >
-                          <input
-                            type="checkbox"
-                            checked={checked}
-                            onChange={(event) =>
-                              setIssueForm((current) => ({
-                                ...current,
-                                evidenceIds: event.target.checked
-                                  ? [...current.evidenceIds, item.id]
-                                  : current.evidenceIds.filter((value) => value !== item.id),
-                              }))
-                            }
-                            className="mt-1"
-                          />
-                          <span>
-                            <span className="block font-medium text-stone-900">
-                              {item.area || formatEnumLabel(item.type)}
-                            </span>
-                            <span className="mt-1 block break-all text-xs text-stone-500">
-                              {item.file_url}
-                            </span>
-                          </span>
-                        </label>
-                      )
-                    })
-                  )}
-                </div>
-              </fieldset>
-
-              <div className="grid gap-4 md:grid-cols-2">
-                <label className="text-sm">
-                  <span className="font-medium text-stone-700">Decision</span>
-                  <select
-                    value={issueForm.decision}
-                    onChange={(event) =>
-                      setIssueForm((current) => ({
-                        ...current,
-                        decision: event.target.value as EotRecommendationDecision | '',
-                      }))
-                    }
-                    className="mt-2 h-12 w-full rounded-[1rem] border border-stone-300 bg-white px-4 text-stone-900"
-                  >
-                    <option value="">Not set</option>
-                    {(['charge', 'partial', 'no_charge'] as EotRecommendationDecision[]).map((decision) => (
-                      <option key={decision} value={decision}>
-                        {formatEnumLabel(decision)}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="text-sm">
-                  <span className="font-medium text-stone-700">Estimated cost</span>
-                  <input
-                    value={issueForm.estimatedCost}
-                    onChange={(event) =>
-                      setIssueForm((current) => ({ ...current, estimatedCost: event.target.value }))
-                    }
-                    className="mt-2 h-12 w-full rounded-[1rem] border border-stone-300 bg-white px-4 text-stone-900"
-                    placeholder="0.00"
-                  />
-                </label>
-              </div>
-
-              <label className="text-sm">
-                <span className="font-medium text-stone-700">Recommendation rationale</span>
-                <textarea
-                  value={issueForm.rationale}
-                  onChange={(event) =>
-                    setIssueForm((current) => ({ ...current, rationale: event.target.value }))
-                  }
-                  className="mt-2 min-h-28 w-full rounded-[1rem] border border-stone-300 bg-white px-4 py-3 text-stone-900"
-                />
-              </label>
-
-              {issueError ? (
-                <p className="rounded-[1rem] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                  {issueError}
-                </p>
-              ) : null}
-
-              <button
-                type="submit"
-                disabled={issuePending}
-                className="inline-flex items-center justify-center rounded-[1rem] border border-stone-900 bg-stone-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-stone-800 disabled:opacity-60"
-              >
-                {issuePending ? 'Saving issue...' : issueForm.issueId ? 'Update issue' : 'Create issue'}
-              </button>
-            </form>
-          </EotCard>
-
-          <EotCard className="px-6 py-6">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="app-kicker">Recommendations and claim</p>
-                <h3 className="mt-2 text-xl font-semibold tracking-tight text-stone-900">
-                  Decision summary
-                </h3>
-              </div>
-              <p className="text-sm text-stone-500">
-                {workspace.claim ? formatCurrency(workspace.claim.total_amount) : 'No claim yet'}
-              </p>
-            </div>
-
-            <div className="mt-5 space-y-3">
-              {visibleRecommendations.length === 0 ? (
-                <EmptyState
-                  title="No recommendation records"
-                  body="Issue recommendations will appear here as assessment decisions are recorded."
-                />
-              ) : (
-                visibleRecommendations.map((recommendation) => {
-                  const issue = workspace.issues.find((item) => item.id === recommendation.issue_id)
-
-                  return (
-                    <div
-                      key={recommendation.id}
-                      className="rounded-[1.2rem] border border-stone-200 bg-stone-50/70 px-4 py-4"
-                    >
-                      <div className="flex items-center justify-between gap-3">
-                        <div>
-                          <p className="font-medium text-stone-900">{issue?.title || 'Linked issue'}</p>
-                          <p className="mt-1 text-sm text-stone-500">
-                            {recommendation.rationale || 'No written rationale yet.'}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <EotBadge
-                            label={formatEnumLabel(recommendation.decision)}
-                            tone={recommendation.decision ?? 'draft'}
-                          />
-                          <p className="mt-2 text-sm font-semibold text-stone-900">
-                            {recommendation.estimated_cost
-                              ? formatCurrency(recommendation.estimated_cost)
-                              : 'No amount'}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )
-                })
-              )}
-            </div>
-
-            <div className="mt-6 rounded-[1.3rem] border border-emerald-200 bg-emerald-50/80 px-5 py-5">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800">
-                    Claim summary
-                  </p>
-                  <p className="mt-2 text-3xl font-semibold tracking-tight text-emerald-950">
-                    {workspace.claim ? formatCurrency(workspace.claim.total_amount) : formatCurrency(0)}
-                  </p>
-                </div>
-                <p className="text-sm text-emerald-900">
-                  Generated {formatDateTime(workspace.claim?.generated_at)}
-                </p>
-              </div>
-
-              <div className="mt-4 space-y-2">
-                {workspace.claim?.breakdown.length ? (
-                  workspace.claim.breakdown.map((lineItem, index) => (
-                    <div
-                      key={`${lineItem.issue_id ?? 'line'}-${index}`}
-                      className="flex items-center justify-between gap-3 rounded-[1rem] border border-emerald-200 bg-white/80 px-4 py-3 text-sm"
-                    >
-                      <div>
-                        <p className="font-medium text-stone-900">
-                          {typeof lineItem.title === 'string' ? lineItem.title : 'Claim line item'}
-                        </p>
-                        <p className="mt-1 text-stone-500">
-                          {typeof lineItem.decision === 'string'
-                            ? formatEnumLabel(lineItem.decision)
-                            : 'Decision pending'}
-                        </p>
-                      </div>
-                      <p className="font-semibold text-stone-900">
-                        {formatCurrency(
-                          typeof lineItem.estimated_cost === 'string'
-                            ? lineItem.estimated_cost
-                            : 0
-                        )}
-                      </p>
-                    </div>
-                  ))
                 ) : (
-                  <p className="text-sm text-emerald-900">
-                    Claim output will build here from issue recommendation decisions.
-                  </p>
+                  visibleEvidence.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => setSelectedEvidenceId(item.id)}
+                      className={`w-full rounded-[18px] border px-4 py-4 text-left transition ${
+                        selectedEvidence?.id === item.id
+                          ? 'border-slate-900 bg-slate-900 text-white shadow-[0_16px_40px_rgba(15,23,42,0.22)]'
+                          : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className={`flex h-9 w-9 items-center justify-center rounded-[12px] ${
+                          selectedEvidence?.id === item.id ? 'bg-white/10 text-white' : 'bg-slate-100 text-slate-600'
+                        }`}>
+                          <EvidenceIcon type={item.type} />
+                        </span>
+                        <div className="min-w-0">
+                          <p className={`text-sm font-semibold ${selectedEvidence?.id === item.id ? 'text-white' : 'text-slate-950'}`}>
+                            {item.area || formatEnumLabel(item.type)}
+                          </p>
+                          <p className={`mt-1 truncate text-sm ${selectedEvidence?.id === item.id ? 'text-slate-200' : 'text-slate-600'}`}>
+                            {item.file_url}
+                          </p>
+                        </div>
+                      </div>
+                      <div className={`mt-3 flex flex-wrap items-center gap-2 text-xs ${selectedEvidence?.id === item.id ? 'text-slate-300' : 'text-slate-400'}`}>
+                        <span>{item.uploaded_by}</span>
+                        <span>•</span>
+                        <span>{formatDateTime(item.created_at)}</span>
+                      </div>
+                    </button>
+                  ))
                 )}
               </div>
+
+              <div className="space-y-4">
+                {selectedEvidence ? (
+                  <SectionCard className="overflow-hidden border-slate-200">
+                    <div className="border-b border-slate-200 px-5 py-4">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <StatusBadge label={formatEnumLabel(selectedEvidence.type)} tone={selectedEvidence.type} />
+                        {selectedEvidence.area ? (
+                          <StatusBadge label={selectedEvidence.area} tone="document" />
+                        ) : null}
+                      </div>
+                      <p className="mt-3 text-sm font-semibold text-slate-950">{selectedEvidence.file_url}</p>
+                    </div>
+
+                    <div className="px-5 py-5">
+                      {selectedEvidence.type === 'image' ? (
+                        <div className="overflow-hidden rounded-[20px] border border-slate-200 bg-slate-100">
+                          {/* Remote evidence URLs are provided by the case system and are not known at build time. */}
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={selectedEvidence.file_url}
+                            alt={selectedEvidence.area || 'Evidence preview'}
+                            className="h-[360px] w-full object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="rounded-[20px] border border-dashed border-slate-300 bg-[#f8fafc] px-5 py-10 text-center">
+                          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-[18px] bg-white text-slate-600 shadow-sm">
+                            <EvidenceIcon type={selectedEvidence.type} />
+                          </div>
+                          <p className="mt-4 text-sm font-semibold text-slate-950">
+                            Preview opens in a new tab
+                          </p>
+                          <p className="mt-2 text-sm leading-6 text-slate-600">
+                            Use the source link for full-size document or media review.
+                          </p>
+                          <a
+                            href={selectedEvidence.file_url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="mt-4 inline-flex items-center gap-2 rounded-[14px] border border-slate-900 bg-slate-900 px-4 py-2.5 text-sm font-medium text-white"
+                          >
+                            Open source
+                            <ExternalLink className="h-4 w-4" />
+                          </a>
+                        </div>
+                      )}
+
+                      <div className="mt-4 grid gap-4 md:grid-cols-2">
+                        <MetaItem label="Uploaded by" value={selectedEvidence.uploaded_by} />
+                        <MetaItem label="Created" value={formatDateTime(selectedEvidence.created_at)} />
+                      </div>
+
+                      {selectedEvidence.metadata ? (
+                        <div className="mt-4 overflow-hidden rounded-[18px] border border-slate-200 bg-slate-950">
+                          <pre className="overflow-x-auto px-4 py-4 text-xs leading-6 text-slate-200">
+                            {JSON.stringify(selectedEvidence.metadata, null, 2)}
+                          </pre>
+                        </div>
+                      ) : null}
+                    </div>
+                  </SectionCard>
+                ) : null}
+
+                <SectionCard className="px-5 py-5">
+                  <div className="flex items-center gap-2">
+                    <Upload className="h-4 w-4 text-slate-500" />
+                    <h3 className="text-sm font-semibold text-slate-950">Add evidence</h3>
+                  </div>
+                  <form className="mt-4 grid gap-4" onSubmit={handleEvidenceSubmit}>
+                    <label className="text-sm">
+                      <span className="font-medium text-slate-700">Evidence URL</span>
+                      <input
+                        required
+                        value={evidenceForm.fileUrl}
+                        onChange={(event) =>
+                          setEvidenceForm((current) => ({ ...current, fileUrl: event.target.value }))
+                        }
+                        className="mt-2 h-11 w-full rounded-[14px] border border-slate-200 bg-[#f8fafc] px-4 text-slate-900"
+                        placeholder="https://..."
+                      />
+                    </label>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <label className="text-sm">
+                        <span className="font-medium text-slate-700">Type</span>
+                        <select
+                          value={evidenceForm.type}
+                          onChange={(event) =>
+                            setEvidenceForm((current) => ({
+                              ...current,
+                              type: event.target.value as EotEvidenceType,
+                            }))
+                          }
+                          className="mt-2 h-11 w-full rounded-[14px] border border-slate-200 bg-[#f8fafc] px-4 text-slate-900"
+                        >
+                          {(['document', 'image', 'video'] as EotEvidenceType[]).map((type) => (
+                            <option key={type} value={type}>
+                              {formatEnumLabel(type)}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <label className="text-sm">
+                        <span className="font-medium text-slate-700">Area</span>
+                        <input
+                          value={evidenceForm.area}
+                          onChange={(event) =>
+                            setEvidenceForm((current) => ({ ...current, area: event.target.value }))
+                          }
+                          className="mt-2 h-11 w-full rounded-[14px] border border-slate-200 bg-[#f8fafc] px-4 text-slate-900"
+                          placeholder="Kitchen, hallway, inventory..."
+                        />
+                      </label>
+                    </div>
+                    <label className="text-sm">
+                      <span className="font-medium text-slate-700">Uploaded by</span>
+                      <input
+                        required
+                        value={evidenceForm.uploadedBy}
+                        onChange={(event) =>
+                          setEvidenceForm((current) => ({ ...current, uploadedBy: event.target.value }))
+                        }
+                        className="mt-2 h-11 w-full rounded-[14px] border border-slate-200 bg-[#f8fafc] px-4 text-slate-900"
+                      />
+                    </label>
+                    <label className="text-sm">
+                      <span className="font-medium text-slate-700">Metadata JSON</span>
+                      <textarea
+                        value={evidenceForm.metadata}
+                        onChange={(event) =>
+                          setEvidenceForm((current) => ({ ...current, metadata: event.target.value }))
+                        }
+                        className="mt-2 min-h-24 w-full rounded-[14px] border border-slate-200 bg-[#f8fafc] px-4 py-3 text-slate-900"
+                        placeholder='{"source":"inventory","page":"12"}'
+                      />
+                    </label>
+                    {evidenceError ? (
+                      <p className="rounded-[14px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                        {evidenceError}
+                      </p>
+                    ) : null}
+                    <button
+                      type="submit"
+                      disabled={evidencePending}
+                      className="inline-flex items-center justify-center rounded-[14px] border border-slate-900 bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:opacity-60"
+                    >
+                      {evidencePending ? 'Saving evidence...' : 'Add evidence'}
+                    </button>
+                  </form>
+                </SectionCard>
+              </div>
             </div>
-          </EotCard>
+          </WorkspaceSection>
+
+          <WorkspaceSection
+            title="Issues and recommendations"
+            description="Link evidence, capture issue responsibility, and record charge recommendations in one review surface."
+            aside={
+              <div className="flex items-center gap-2">
+                <StatusBadge label={`${visibleIssues.length} visible`} tone="document" />
+                {highSeverityOpenIssues.length ? (
+                  <StatusBadge label={`${highSeverityOpenIssues.length} high severity`} tone="risk" />
+                ) : null}
+              </div>
+            }
+          >
+            <div className="grid gap-5 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
+              <div className="space-y-3">
+                {visibleIssues.length === 0 ? (
+                  <EmptyState
+                    title="No issues recorded"
+                    body="Assess evidence and log the first issue to start recommendation review."
+                  />
+                ) : (
+                  visibleIssues.map((issue) => (
+                    <IssueCard
+                      key={issue.id}
+                      issue={issue}
+                      active={issueForm.issueId === issue.id}
+                      onEdit={startEditingIssue}
+                    />
+                  ))
+                )}
+              </div>
+
+              <SectionCard className="px-5 py-5">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h3 className="text-sm font-semibold text-slate-950">
+                    {issueForm.issueId ? 'Edit issue' : 'Add issue'}
+                  </h3>
+                  {issueForm.issueId ? (
+                    <button
+                      type="button"
+                      onClick={resetIssueForm}
+                      className="text-sm font-medium text-slate-500 transition hover:text-slate-900"
+                    >
+                      Clear selection
+                    </button>
+                  ) : null}
+                </div>
+
+                <form className="mt-4 grid gap-4" onSubmit={handleIssueSubmit}>
+                  <label className="text-sm">
+                    <span className="font-medium text-slate-700">Issue title</span>
+                    <input
+                      required
+                      value={issueForm.title}
+                      onChange={(event) =>
+                        setIssueForm((current) => ({ ...current, title: event.target.value }))
+                      }
+                      className="mt-2 h-11 w-full rounded-[14px] border border-slate-200 bg-[#f8fafc] px-4 text-slate-900"
+                      placeholder="Damage, cleaning, missing item..."
+                    />
+                  </label>
+
+                  <label className="text-sm">
+                    <span className="font-medium text-slate-700">Description</span>
+                    <textarea
+                      value={issueForm.description}
+                      onChange={(event) =>
+                        setIssueForm((current) => ({ ...current, description: event.target.value }))
+                      }
+                      className="mt-2 min-h-28 w-full rounded-[14px] border border-slate-200 bg-[#f8fafc] px-4 py-3 text-slate-900"
+                      placeholder="What happened, where, and why does it matter?"
+                    />
+                  </label>
+
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <label className="text-sm">
+                      <span className="font-medium text-slate-700">Severity</span>
+                      <select
+                        value={issueForm.severity}
+                        onChange={(event) =>
+                          setIssueForm((current) => ({
+                            ...current,
+                            severity: event.target.value as EotIssueSeverity,
+                          }))
+                        }
+                        className="mt-2 h-11 w-full rounded-[14px] border border-slate-200 bg-[#f8fafc] px-4 text-slate-900"
+                      >
+                        {(['low', 'medium', 'high'] as EotIssueSeverity[]).map((severity) => (
+                          <option key={severity} value={severity}>
+                            {formatEnumLabel(severity)}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="text-sm">
+                      <span className="font-medium text-slate-700">Status</span>
+                      <select
+                        value={issueForm.status}
+                        onChange={(event) =>
+                          setIssueForm((current) => ({
+                            ...current,
+                            status: event.target.value as EotIssueStatus,
+                          }))
+                        }
+                        className="mt-2 h-11 w-full rounded-[14px] border border-slate-200 bg-[#f8fafc] px-4 text-slate-900"
+                      >
+                        {(['open', 'resolved', 'disputed'] as EotIssueStatus[]).map((status) => (
+                          <option key={status} value={status}>
+                            {formatEnumLabel(status)}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
+
+                  <div className="text-sm">
+                    <span className="font-medium text-slate-700">Link evidence</span>
+                    <div className="mt-2 grid gap-2">
+                      {workspace.evidence.length === 0 ? (
+                        <p className="rounded-[14px] border border-dashed border-slate-300 px-4 py-3 text-sm text-slate-500">
+                          Add evidence first to link it to this issue.
+                        </p>
+                      ) : (
+                        workspace.evidence.map((evidence) => {
+                          const checked = issueForm.evidenceIds.includes(evidence.id)
+
+                          return (
+                            <label
+                              key={evidence.id}
+                              className="flex items-center gap-3 rounded-[14px] border border-slate-200 bg-white px-3 py-3"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={() =>
+                                  setIssueForm((current) => ({
+                                    ...current,
+                                    evidenceIds: checked
+                                      ? current.evidenceIds.filter((id) => id !== evidence.id)
+                                      : [...current.evidenceIds, evidence.id],
+                                  }))
+                                }
+                              />
+                              <div className="min-w-0">
+                                <p className="text-sm font-medium text-slate-900">
+                                  {evidence.area || formatEnumLabel(evidence.type)}
+                                </p>
+                                <p className="truncate text-sm text-slate-500">{evidence.file_url}</p>
+                              </div>
+                            </label>
+                          )
+                        })
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <label className="text-sm">
+                      <span className="font-medium text-slate-700">Recommendation</span>
+                      <select
+                        value={issueForm.decision}
+                        onChange={(event) =>
+                          setIssueForm((current) => ({
+                            ...current,
+                            decision: event.target.value as EotRecommendationDecision | '',
+                          }))
+                        }
+                        className="mt-2 h-11 w-full rounded-[14px] border border-slate-200 bg-[#f8fafc] px-4 text-slate-900"
+                      >
+                        <option value="">No recommendation yet</option>
+                        {(['charge', 'partial', 'no_charge'] as EotRecommendationDecision[]).map(
+                          (decision) => (
+                            <option key={decision} value={decision}>
+                              {formatEnumLabel(decision)}
+                            </option>
+                          )
+                        )}
+                      </select>
+                    </label>
+                    <label className="text-sm">
+                      <span className="font-medium text-slate-700">Estimated cost</span>
+                      <input
+                        value={issueForm.estimatedCost}
+                        onChange={(event) =>
+                          setIssueForm((current) => ({
+                            ...current,
+                            estimatedCost: event.target.value,
+                          }))
+                        }
+                        className="mt-2 h-11 w-full rounded-[14px] border border-slate-200 bg-[#f8fafc] px-4 text-slate-900"
+                        placeholder="250.00"
+                      />
+                    </label>
+                  </div>
+
+                  <label className="text-sm">
+                    <span className="font-medium text-slate-700">Recommendation rationale</span>
+                    <textarea
+                      value={issueForm.rationale}
+                      onChange={(event) =>
+                        setIssueForm((current) => ({ ...current, rationale: event.target.value }))
+                      }
+                      className="mt-2 min-h-24 w-full rounded-[14px] border border-slate-200 bg-[#f8fafc] px-4 py-3 text-slate-900"
+                      placeholder="Explain liability, confidence, and proportionality."
+                    />
+                  </label>
+
+                  {issueError ? (
+                    <p className="rounded-[14px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                      {issueError}
+                    </p>
+                  ) : null}
+
+                  <div className="flex flex-wrap items-center gap-3">
+                    <button
+                      type="submit"
+                      disabled={issuePending}
+                      className="inline-flex items-center justify-center rounded-[14px] border border-slate-900 bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:opacity-60"
+                    >
+                      {issuePending ? 'Saving issue...' : issueForm.issueId ? 'Update issue' : 'Add issue'}
+                    </button>
+                    {issueForm.issueId ? (
+                      <button
+                        type="button"
+                        onClick={resetIssueForm}
+                        className="inline-flex items-center justify-center rounded-[14px] border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700"
+                      >
+                        Cancel
+                      </button>
+                    ) : null}
+                  </div>
+                </form>
+              </SectionCard>
+            </div>
+          </WorkspaceSection>
+
+          <WorkspaceSection
+            title="Claim output review"
+            description="Review the case output in a document-style layout with traceability back to evidence and issue decisions."
+          >
+            {workspace.claim ? (
+              <div className="space-y-5">
+                <div className="rounded-[22px] border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] px-6 py-6">
+                  <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                        Claim output
+                      </p>
+                      <h3 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-slate-950">
+                        {formatCurrency(workspace.claim.total_amount)}
+                      </h3>
+                      <p className="mt-2 text-sm leading-6 text-slate-600">
+                        Generated {formatDateTime(workspace.claim.generated_at)} and updated{' '}
+                        {formatDateTime(workspace.claim.updated_at)}.
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <StatusBadge label="Claim generated" tone="ready_for_claim" />
+                      <StatusBadge label={`${workspace.issues.length} source issues`} tone="document" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
+                  <SectionCard className="overflow-hidden">
+                    <div className="border-b border-slate-200 px-5 py-4">
+                      <h3 className="text-sm font-semibold text-slate-950">Breakdown</h3>
+                    </div>
+                    <div className="overflow-hidden rounded-b-[24px] bg-slate-950">
+                      <pre className="overflow-x-auto px-5 py-5 text-xs leading-6 text-slate-200">
+                        {JSON.stringify(workspace.claim.breakdown, null, 2)}
+                      </pre>
+                    </div>
+                  </SectionCard>
+
+                  <DetailPanel
+                    title="Traceability"
+                    description="Recommended charges and supporting evidence."
+                  >
+                    {workspace.issues.length === 0 ? (
+                      <EmptyState
+                        title="No issue traceability"
+                        body="Issues will appear here once they are linked to the claim package."
+                      />
+                    ) : (
+                      workspace.issues.map((issue) => (
+                        <div key={issue.id} className="rounded-[18px] border border-slate-200 bg-white px-4 py-4">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <StatusBadge label={formatEnumLabel(issue.severity)} tone={issue.severity} />
+                            {issue.recommendation?.decision ? (
+                              <StatusBadge
+                                label={formatEnumLabel(issue.recommendation.decision)}
+                                tone={issue.recommendation.decision}
+                              />
+                            ) : null}
+                          </div>
+                          <p className="mt-3 text-sm font-semibold text-slate-950">{issue.title}</p>
+                          <p className="mt-2 text-sm leading-6 text-slate-600">
+                            {issue.recommendation?.rationale || issue.description || 'No narrative recorded.'}
+                          </p>
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {issue.linked_evidence.map((item) => (
+                              <StatusBadge
+                                key={item.id}
+                                label={item.area || formatEnumLabel(item.type)}
+                                tone={item.type}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </DetailPanel>
+                </div>
+              </div>
+            ) : (
+              <EmptyState
+                title={claimReadiness.label}
+                body={claimReadiness.description}
+                action={
+                  <div className="flex items-center gap-2 text-sm text-slate-600">
+                    <TriangleAlert className="h-4 w-4" />
+                    Track issue recommendations and move the case to ready-for-claim when the file is complete.
+                  </div>
+                }
+              />
+            )}
+          </WorkspaceSection>
         </div>
 
         <div className="space-y-6">
-          <EotCard className="px-6 py-6">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="app-kicker">Inbox</p>
-                <h3 className="mt-2 text-xl font-semibold tracking-tight text-stone-900">
-                  Internal and external messages
-                </h3>
-              </div>
-              <p className="text-sm text-stone-500">{visibleMessages.length} visible</p>
-            </div>
+          <DetailPanel
+            title="Activity timeline"
+            description="Most recent case events across intake, evidence, issue review, and messaging."
+          >
+            <ActivityTimeline
+              items={timelineItems.map((item) => ({
+                id: item.id,
+                title: item.title,
+                detail: item.detail,
+                meta: item.meta,
+                tone: item.tone,
+              }))}
+            />
+          </DetailPanel>
 
-            <div className="mt-5 space-y-3">
+          <DetailPanel
+            title="Supporting documents"
+            description="Linked case documents and document records."
+          >
+            {workspace.documents.length === 0 ? (
+              <EmptyState
+                title="No supporting documents"
+                body="This case does not yet have linked document records."
+              />
+            ) : (
+              workspace.documents.map((document) => (
+                <a
+                  key={document.id}
+                  href={document.file_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block rounded-[18px] border border-slate-200 bg-white px-4 py-4 transition hover:border-slate-300"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-slate-950">{document.name}</p>
+                      <p className="mt-1 text-sm text-slate-500">
+                        {formatEnumLabel(document.document_type)}
+                      </p>
+                    </div>
+                    <ExternalLink className="h-4 w-4 text-slate-400" />
+                  </div>
+                </a>
+              ))
+            )}
+          </DetailPanel>
+
+          <DetailPanel
+            title="Case notes and communication"
+            description="Internal operator updates and outbound case communication log."
+          >
+            <div className="space-y-3">
               {visibleMessages.length === 0 ? (
                 <EmptyState
                   title="No messages yet"
-                  body="Case conversation will appear here once the first message is sent."
+                  body="Case notes and outbound communication will appear here."
                 />
               ) : (
                 visibleMessages.map((message) => (
-                  <div
-                    key={message.id}
-                    className="rounded-[1.2rem] border border-stone-200 bg-stone-50/70 px-4 py-4"
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-2">
-                        <EotBadge
-                          label={formatEnumLabel(message.sender_type)}
-                          tone={message.sender_type}
-                        />
-                        <p className="text-sm font-medium text-stone-900">{message.sender_id}</p>
-                      </div>
-                      <p className="text-xs text-stone-500">{formatDateTime(message.created_at)}</p>
+                  <div key={message.id} className="rounded-[18px] border border-slate-200 bg-white px-4 py-4">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <StatusBadge label={formatEnumLabel(message.sender_type)} tone={message.sender_type} />
+                      <span className="text-xs uppercase tracking-[0.14em] text-slate-400">
+                        {formatDateTime(message.created_at)}
+                      </span>
                     </div>
-                    <p className="mt-3 text-sm leading-7 text-stone-700">{message.content}</p>
-                    {message.attachments.length ? (
-                      <pre className="mt-3 overflow-x-auto rounded-[1rem] border border-stone-200 bg-white px-3 py-3 text-xs text-stone-600">
-                        {JSON.stringify(message.attachments, null, 2)}
-                      </pre>
-                    ) : null}
+                    <p className="mt-3 text-sm leading-6 text-slate-700">{message.content}</p>
                   </div>
                 ))
               )}
             </div>
 
-            <form className="mt-6 grid gap-4 border-t border-stone-200 pt-6" onSubmit={handleMessageSubmit}>
+            <form className="grid gap-4" onSubmit={handleMessageSubmit}>
+              <div className="flex items-center gap-2">
+                <MessageSquareText className="h-4 w-4 text-slate-500" />
+                <h3 className="text-sm font-semibold text-slate-950">Add case note</h3>
+              </div>
+
               <div className="grid gap-4 md:grid-cols-2">
                 <label className="text-sm">
-                  <span className="font-medium text-stone-700">Sender type</span>
+                  <span className="font-medium text-slate-700">Sender type</span>
                   <select
                     value={messageForm.senderType}
                     onChange={(event) =>
@@ -1189,63 +1294,69 @@ export function EotWorkspaceClient({
                         senderType: event.target.value as EotMessageSenderType,
                       }))
                     }
-                    className="mt-2 h-12 w-full rounded-[1rem] border border-stone-300 bg-white px-4 text-stone-900"
+                    className="mt-2 h-11 w-full rounded-[14px] border border-slate-200 bg-white px-4 text-slate-900"
                   >
-                    {(['manager', 'landlord', 'tenant'] as EotMessageSenderType[]).map((type) => (
-                      <option key={type} value={type}>
-                        {formatEnumLabel(type)}
+                    {(['manager', 'landlord', 'tenant'] as EotMessageSenderType[]).map((senderType) => (
+                      <option key={senderType} value={senderType}>
+                        {formatEnumLabel(senderType)}
                       </option>
                     ))}
                   </select>
                 </label>
                 <label className="text-sm">
-                  <span className="font-medium text-stone-700">Sender ID</span>
+                  <span className="font-medium text-slate-700">Sender ID</span>
                   <input
                     required
                     value={messageForm.senderId}
                     onChange={(event) =>
                       setMessageForm((current) => ({ ...current, senderId: event.target.value }))
                     }
-                    className="mt-2 h-12 w-full rounded-[1rem] border border-stone-300 bg-white px-4 text-stone-900"
+                    className="mt-2 h-11 w-full rounded-[14px] border border-slate-200 bg-white px-4 text-slate-900"
                   />
                 </label>
               </div>
+
               <label className="text-sm">
-                <span className="font-medium text-stone-700">Message content</span>
+                <span className="font-medium text-slate-700">Message</span>
                 <textarea
                   required
                   value={messageForm.content}
                   onChange={(event) =>
                     setMessageForm((current) => ({ ...current, content: event.target.value }))
                   }
-                  className="mt-2 min-h-28 w-full rounded-[1rem] border border-stone-300 bg-white px-4 py-3 text-stone-900"
+                  className="mt-2 min-h-24 w-full rounded-[14px] border border-slate-200 bg-white px-4 py-3 text-slate-900"
+                  placeholder="Record an operator note or outbound case update."
                 />
               </label>
+
               <label className="text-sm">
-                <span className="font-medium text-stone-700">Attachments JSON array</span>
+                <span className="font-medium text-slate-700">Attachments JSON</span>
                 <textarea
                   value={messageForm.attachments}
                   onChange={(event) =>
                     setMessageForm((current) => ({ ...current, attachments: event.target.value }))
                   }
-                  className="mt-2 min-h-24 w-full rounded-[1rem] border border-stone-300 bg-white px-4 py-3 text-stone-900"
-                  placeholder='[{"file_url":"https://...","label":"Move-out quote"}]'
+                  className="mt-2 min-h-20 w-full rounded-[14px] border border-slate-200 bg-white px-4 py-3 text-slate-900"
+                  placeholder='[{"name":"invoice.pdf","url":"https://..."}]'
                 />
               </label>
+
               {messageError ? (
-                <p className="rounded-[1rem] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                <p className="rounded-[14px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
                   {messageError}
                 </p>
               ) : null}
+
               <button
                 type="submit"
                 disabled={messagePending}
-                className="inline-flex items-center justify-center rounded-[1rem] border border-stone-900 bg-stone-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-stone-800 disabled:opacity-60"
+                className="inline-flex items-center justify-center gap-2 rounded-[14px] border border-slate-900 bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:opacity-60"
               >
-                {messagePending ? 'Sending message...' : 'Send message'}
+                <Send className="h-4 w-4" />
+                {messagePending ? 'Saving note...' : 'Add case note'}
               </button>
             </form>
-          </EotCard>
+          </DetailPanel>
         </div>
       </div>
     </div>

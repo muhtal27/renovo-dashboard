@@ -82,25 +82,28 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <main className="app-grid min-h-screen px-6 py-8 text-stone-900 md:px-8 md:py-10">
-      <div className="mx-auto max-w-2xl">
-        <section className="app-surface rounded-[2rem] p-8">
+    <main className="marketing-page min-h-screen bg-[#fcfbf9] py-8 text-[#0f0e0d] md:py-10">
+      <div className="marketing-frame max-w-[920px]">
+        <section className="rounded-xl border border-[rgba(15,14,13,0.1)] bg-white p-8 shadow-[0_8px_24px_rgba(0,0,0,0.04)]">
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="app-kicker">Password recovery</p>
-              <h1 className="mt-2 text-3xl font-semibold tracking-tight">Choose a new password</h1>
+              <h1 className="mt-2 text-3xl tracking-tight">Choose a new password</h1>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-[#3d3b37]">
+                Set a new password for your Renovo workspace account, then return to sign-in.
+              </p>
             </div>
-            <Link href="/login" className="app-secondary-button rounded-full px-4 py-2 text-sm font-medium">
+            <Link href="/login" className="app-secondary-button rounded px-4 py-2 text-sm font-medium">
               Back to login
             </Link>
           </div>
 
           {loading ? (
-            <div className="mt-6 text-sm text-stone-600">Checking recovery link...</div>
+            <div className="mt-6 text-sm text-[#3d3b37]">Checking recovery link...</div>
           ) : ready ? (
             <div className="mt-6 space-y-4">
               <label className="block">
-                <span className="mb-2 block text-sm font-medium text-stone-700">New password</span>
+                <span className="mb-2 block text-sm font-medium text-[#3d3b37]">New password</span>
                 <input
                   type="password"
                   autoComplete="new-password"
@@ -111,7 +114,7 @@ export default function ResetPasswordPage() {
               </label>
 
               <label className="block">
-                <span className="mb-2 block text-sm font-medium text-stone-700">Confirm password</span>
+                <span className="mb-2 block text-sm font-medium text-[#3d3b37]">Confirm password</span>
                 <input
                   type="password"
                   autoComplete="new-password"
@@ -125,7 +128,7 @@ export default function ResetPasswordPage() {
                 type="button"
                 onClick={handleUpdatePassword}
                 disabled={saving}
-                className="app-primary-button rounded-2xl px-4 py-3.5 text-sm font-medium disabled:opacity-60"
+                className="app-primary-button rounded px-4 py-3.5 text-sm font-medium disabled:opacity-60"
               >
                 {saving ? 'Updating password...' : 'Update password'}
               </button>
@@ -133,7 +136,7 @@ export default function ResetPasswordPage() {
           ) : null}
 
           {message && (
-            <div className="app-card-muted mt-4 rounded-2xl px-4 py-3 text-sm text-stone-700">
+            <div className="mt-4 rounded-lg border border-[rgba(15,14,13,0.1)] bg-[#fcfbf9] px-4 py-3 text-sm text-[#3d3b37]">
               {message}
             </div>
           )}

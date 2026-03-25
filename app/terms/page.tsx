@@ -40,26 +40,26 @@ export const metadata: Metadata = {
 export default function TermsPage() {
   return (
     <MarketingShell currentPath="/terms">
-      <section className="app-surface rounded-[2rem] p-6 md:p-8">
-        <div className="mx-auto max-w-5xl">
+      <div className="page-shell page-stack">
+        <section className="page-hero">
           <p className="app-kicker">Terms</p>
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-stone-900 md:text-4xl">
-            Website terms
-          </h1>
-          <p className="mt-4 max-w-4xl text-sm leading-7 text-stone-600 md:text-base md:leading-8">
+          <h1 className="page-title">Website terms</h1>
+          <p className="page-copy max-w-4xl">
             These terms apply to your use of the Renovo marketing site, live demo, and early
             access enquiry routes. They do not replace any separate customer agreement for use of
             the live product.
           </p>
+        </section>
 
-          <div className="mt-8 grid gap-4 md:grid-cols-2">
-            {termsSections.map((section) => (
-              <article
+        <section className="page-card">
+          <div className="space-y-6">
+            {termsSections.map((section, index) => (
+              <div
                 key={section.title}
-                className="rounded-[1.45rem] border border-stone-200 bg-white/92 p-5"
+                className={index === termsSections.length - 1 ? '' : 'border-b border-[rgba(15,14,13,0.08)] pb-6'}
               >
-                <h2 className="text-base font-semibold text-stone-900">{section.title}</h2>
-                <p className="mt-3 text-sm leading-7 text-stone-600">
+                <h2 className="text-base">{section.title}</h2>
+                <p className="mt-3 text-sm leading-7 text-[#3d3b37]">
                   {section.title === 'Contact' ? (
                     <>
                       If you have questions about these terms, contact{' '}
@@ -69,26 +69,20 @@ export default function TermsPage() {
                     section.body
                   )}
                 </p>
-              </article>
+              </div>
             ))}
           </div>
 
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link
-              href="/"
-              className="app-secondary-button inline-flex rounded-full px-4 py-2 text-sm font-medium"
-            >
+            <Link href="/" className="app-secondary-button inline-flex rounded px-4 py-2 text-sm font-medium">
               Back to homepage
             </Link>
-            <Link
-              href="/privacy"
-              className="app-primary-button inline-flex rounded-full px-4 py-2 text-sm font-medium"
-            >
+            <Link href="/privacy" className="app-primary-button inline-flex rounded px-4 py-2 text-sm font-medium">
               View privacy notice
             </Link>
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
     </MarketingShell>
   )
 }

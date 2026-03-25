@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { isReasonableText, isValidEmail, rateLimitRequest } from '@/lib/public-route-guard'
 import { getSupabaseServiceRoleClient } from '@/lib/supabase-admin'
 
 const ENQUIRY_TYPES = new Set([
@@ -27,11 +28,23 @@ type ContactPayload = {
   sourcePage?: string
 }
 
-function isValidEmail(value: string) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
-}
-
 export async function POST(request: Request) {
+  const rateLimit = rateLimitRequest(request, {
+    key: 'public-contact',
+    limit: 5,
+    windowMs: 10 * 60 * 1000,
+  })
+
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: 'Too many submissions. Please try again later.' },
+      {
+        status: 429,
+        headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) },
+      }
+    )
+  }
+
   try {
     const payload = (await request.json()) as ContactPayload
     const fullName = payload.fullName?.trim() || ''
@@ -53,6 +66,22 @@ export async function POST(request: Request) {
 
     if (!isValidEmail(workEmail)) {
       return NextResponse.json({ error: 'Invalid email address' }, { status: 400 })
+    }
+
+    if (!isReasonableText(fullName, { min: 2, max: 120 })) {
+      return NextResponse.json({ error: 'Invalid full name' }, { status: 400 })
+    }
+
+    if (companyName && !isReasonableText(companyName, { min: 2, max: 160 })) {
+      return NextResponse.json({ error: 'Invalid company name' }, { status: 400 })
+    }
+
+    if (!isReasonableText(message, { min: 10, max: 4000 })) {
+      return NextResponse.json({ error: 'Message length is invalid' }, { status: 400 })
+    }
+
+    if (sourcePage.length > 200) {
+      return NextResponse.json({ error: 'Invalid source page' }, { status: 400 })
     }
 
     if (!ENQUIRY_TYPES.has(enquiryType)) {

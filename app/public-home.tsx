@@ -1,444 +1,461 @@
 import Link from 'next/link'
-import { HeroDemoPreview } from '@/app/components/HeroDemoPreview'
-import HomepageDemo from '@/app/components/HomepageDemo'
-import { LandingTrustSection } from '@/app/components/LandingTrustSection'
 import { MarketingShell } from '@/app/components/MarketingShell'
 import { PublicWaitlistForm } from '@/app/public-waitlist-form'
 
-const overviewMetrics = [
-  {
-    value: 'Evidence organised',
-    label: 'Check-in, check-out, photos, and notes are kept together by room and item.',
-  },
-  {
-    value: 'Manager sign-off',
-    label: 'Nothing leaves Renovo until someone on your team reviews and approves it.',
-  },
-  {
-    value: 'Claim ready',
-    label: 'Approved issues are compiled into structured output with the evidence already linked.',
-  },
-] as const
-
 const problemCards = [
   {
-    title: 'Manual comparison',
-    body: 'Check-in reports, check-out reports, photos, and notes all need to be cross-checked before anything can be claimed.',
+    title: 'Checkout data goes into a black hole',
+    body: 'Agents complete checkouts in one app, but findings end up buried in email attachments. Nobody has a single view of what was reported, what needs actioning, and what is done.',
+    quote: 'I spend half my morning just finding the right checkout report in my inbox.',
   },
   {
-    title: 'Inconsistent decisions',
-    body: 'Different team members assess damage differently, which creates avoidable disputes and uneven claim quality.',
+    title: 'Deduction letters are written from scratch every time',
+    body: 'Managers re-type issue summaries, pull photos from folders, look up fair wear and tear guidance, and draft letters in Word for every single case.',
+    quote: 'Each letter takes 30-45 minutes. Multiply that by 20 checkouts a month.',
   },
   {
-    title: 'Weak claim preparation',
-    body: 'Good evidence is often lost in a messy write-up, especially when the file has to be assembled quickly.',
-  },
-  {
-    title: 'No clear audit trail',
-    body: 'Claims are harder to defend when the reasoning behind each deduction is not documented.',
+    title: 'Disputes are lost before they start',
+    body: 'When tenants escalate, managers scramble to assemble evidence from five different places. By the time it reaches a scheme, it is incomplete and unstructured.',
+    quote: 'We had the evidence, just not in one place when it mattered.',
   },
 ] as const
 
 const workflowSteps = [
   {
     step: '01',
-    title: 'Upload your reports',
-    body: 'Add the check-in report, check-out report, photos, and supporting documents. Renovo organises the evidence by room and item.',
+    title: 'Schedule the checkout',
+    body: 'Assign an agent, set the date, and link the tenancy. Everyone gets notified automatically.',
   },
   {
     step: '02',
-    title: 'Compare check-in to check-out',
-    body: 'Changes in condition are flagged against the original record, with the relevant evidence attached to each issue.',
+    title: 'Complete the checkout',
+    body: 'Import inventory data, upload findings, and capture evidence in one case workspace.',
   },
   {
     step: '03',
-    title: 'Review recommendations',
-    body: 'Each issue is prepared for review with supporting context, so you can decide what to claim, what to ignore, and what needs a closer look.',
+    title: 'Compare check-in and check-out',
+    body: 'Renovo highlights condition changes and flags potentially chargeable issues.',
   },
   {
     step: '04',
-    title: 'Prepare your claim',
-    body: 'Approved items are compiled into a structured, claim-ready output with the evidence already linked and organised.',
+    title: 'Draft liability assessment',
+    body: 'Generate a structured recommendation with issue context, proposed amounts, and rationale.',
+  },
+  {
+    step: '05',
+    title: 'Manager review and sign-off',
+    body: 'Review, edit, approve, or reject before anything is sent. Full audit trail stays attached.',
+  },
+  {
+    step: '06',
+    title: 'Dispute handling and archive',
+    body: 'If challenged, generate a complete evidence pack quickly and retain outcome history.',
   },
 ] as const
 
-const featureCards = [
+const platformFeatures = [
   {
-    title: 'Linked evidence on every finding',
-    body: 'Each issue stays tied to the relevant photos, report entries, and supporting documents, so the trail is already there when a claim is challenged.',
+    title: 'Unified case workspace',
+    body: 'Timeline, evidence, issues, communications, and dispute history stay connected.',
   },
   {
-    title: 'Fair wear and tear guidance',
-    body: 'Assessments consider the starting condition, tenancy context, and what needs human judgement rather than pretending every case is clear-cut.',
+    title: 'AI liability drafting',
+    body: 'Generate structured deduction letters with recommended charges and rationale in seconds.',
   },
   {
-    title: 'Structured for UK deposit claim workflows',
-    body: 'Claim output is organised in a way that supports UK deposit claim submission, with the evidence prepared alongside each item.',
+    title: 'Checkout scheduling',
+    body: 'Schedule inspections, assign agents, link tenancies, and track completion in one place.',
   },
   {
-    title: 'Room-by-room review',
-    body: 'Findings are grouped by room and item, making the file quicker to review and easier to sense-check before anything is sent.',
+    title: 'Human approval workflow',
+    body: 'AI drafts, your managers decide. Approval happens before any tenant communication.',
   },
   {
-    title: 'Full editorial control',
-    body: 'Edit recommendations, change amounts, add context, or remove items entirely. Renovo does the preparation; your team makes the final call.',
+    title: 'Dispute evidence packs',
+    body: 'Prepare complete evidence output for deposit scheme disputes without rebuilding files.',
   },
   {
-    title: 'Claim-ready output',
-    body: 'Once issues are approved, Renovo compiles them into a structured output so less time is spent assembling paperwork at the end.',
-  },
-] as const
-
-const audienceCards = [
-  {
-    title: 'Solo property managers',
-    body: 'Reduce admin and protect claim quality when one person is handling the whole checkout process from evidence review to final write-up.',
-  },
-  {
-    title: 'Small letting agencies',
-    body: 'Give the team one consistent review workflow, so claims are prepared the same way even when different people pick up the case.',
-  },
-  {
-    title: 'Mid-size agencies',
-    body: 'Standardise end-of-tenancy work across a growing portfolio and reduce avoidable claim loss when volume starts to stretch the team.',
+    title: 'Guidance and consistency',
+    body: 'Operational guidance and reasoned recommendations help teams handle cases consistently.',
   },
 ] as const
 
-const trustPoints = [
-  {
-    title: 'Nothing leaves without sign-off',
-    body: 'Recommendations stay in review until someone on your team approves them. Renovo prepares the work; your managers decide what is sent.',
-  },
-  {
-    title: 'Reasoning stays visible',
-    body: 'Each item keeps its evidence, context, and review notes together, so the basis for a deduction is still visible when the file is revisited later.',
-  },
-  {
-    title: 'Override anything',
-    body: 'Amounts, notes, and recommendations can all be edited before output is prepared. The workflow is there to support judgement, not replace it.',
-  },
+const caseRows = [
+  { address: '14 Marchmont Rd', tenant: 'A. Henderson', status: 'In Review' },
+  { address: '7 Bruntsfield Pl', tenant: 'S. Campbell', status: 'Active' },
+  { address: '32 Leith Walk', tenant: 'M. Patel', status: 'Dispute' },
+  { address: '5 George St', tenant: 'R. Thomson', status: 'Resolved' },
 ] as const
 
-const trustFaqs = [
-  {
-    question: 'Does Renovo make the final decision?',
-    answer: 'No. Renovo prepares the review, but your team decides what to claim, what to change, and what to leave out.',
-  },
-  {
-    question: 'What happens if a claim is challenged?',
-    answer: 'The evidence, reasoning, and review history stay attached to each item, so the case is easier to explain without rebuilding it from email and memory.',
-  },
-  {
-    question: 'Can we adjust or remove recommendations?',
-    answer: 'Yes. Managers can change amounts, rewrite context, remove items, or hold something back for a closer look before claim output is prepared.',
-  },
-  {
-    question: 'Who owns the case data?',
-    answer: 'Your team does. Renovo is there to organise and prepare the work, while the documents, notes, and decisions remain part of your operating record.',
-  },
-] as const
+function statusClass(status: (typeof caseRows)[number]['status']) {
+  if (status === 'In Review') return 'bg-[#fdf6e3] text-[#9e7a2a]'
+  if (status === 'Active') return 'bg-[#e1f5ee] text-[#0f6e56]'
+  if (status === 'Dispute') return 'bg-[#fcebeb] text-[#a32d2d]'
+  return 'bg-[#eaf3de] text-[#3b6d11]'
+}
 
 export function PublicHome() {
   return (
     <MarketingShell currentPath="/" navAriaLabel="Homepage">
-      <section className="overflow-hidden rounded-[2.45rem] border border-stone-200 bg-white p-4 shadow-[0_20px_48px_rgba(55,43,27,0.08)] md:p-6">
-        <div className="relative overflow-hidden rounded-[2rem] border border-stone-200/85 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.99),rgba(255,255,255,0.95)_40%,rgba(243,247,244,0.92)_72%,rgba(245,242,237,0.9)_100%)] px-6 py-7 md:px-10 md:py-10">
-          <div className="pointer-events-none absolute -right-12 top-0 h-72 w-72 rounded-full bg-emerald-200/40 blur-3xl" />
-          <div className="pointer-events-none absolute -left-10 bottom-0 h-64 w-64 rounded-full bg-amber-200/20 blur-3xl" />
+      <section className="bg-[radial-gradient(circle_at_top_left,rgba(241,232,214,0.34),transparent_34%),radial-gradient(circle_at_top_right,rgba(225,245,238,0.18),transparent_24%),linear-gradient(180deg,#fdfcf9_0%,#faf7f1_100%)] py-14 lg:py-20 xl:py-24">
+        <div className="marketing-frame grid gap-14 xl:grid-cols-[minmax(0,1.08fr)_minmax(520px,0.92fr)] xl:items-center">
+          <div className="max-w-[760px]">
+            <p className="inline-flex items-center gap-2 rounded-full bg-[#e1f5ee] px-3 py-1.5 text-xs font-medium uppercase tracking-[0.08em] text-[#0f6e56]">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#0f6e56]" />
+              Built for UK property managers
+            </p>
+            <h1 className="mt-6 max-w-[760px] text-[clamp(2.5rem,5.6vw,5rem)] leading-[0.98] tracking-[-0.04em]">
+              End of tenancy,
+              <br />
+              <em className="not-italic text-[#9e7a2a]">finally automated</em>
+            </h1>
+            <p className="mt-6 max-w-[620px] text-[1.08rem] font-light leading-8 text-[#3d3b37] md:text-[1.15rem]">
+              Renovo handles checkouts, liability assessments, deposit disputes, and manager
+              approvals so your team spends less time on admin and more time running properties.
+            </p>
 
-          <div className="relative flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <p className="app-kicker">Renovo</p>
-              <p className="mt-2 max-w-xl text-sm leading-6 text-stone-600">
-                End-of-tenancy automation for UK property managers and letting agencies.
-              </p>
+            <div className="mt-10 flex flex-wrap gap-3">
+              <Link
+                href="/contact"
+                className="app-primary-button rounded px-7 py-3.5 text-[15px] font-medium"
+              >
+                Request early access
+              </Link>
+              <Link
+                href="/how-it-works"
+                className="app-secondary-button rounded px-7 py-3.5 text-[15px] font-medium"
+              >
+                See how it works
+              </Link>
             </div>
           </div>
 
-          <div className="relative mt-10 grid gap-8 xl:grid-cols-[minmax(0,1.02fr)_minmax(420px,0.98fr)] xl:items-center">
-            <div>
-              <div className="inline-flex rounded-full border border-emerald-200 bg-emerald-50/90 px-4 py-2 text-sm font-medium text-emerald-950/85">
-                End-of-tenancy automation
+          <div className="relative xl:justify-self-end">
+            <div className="overflow-hidden rounded-[1.6rem] border border-[rgba(15,14,13,0.1)] bg-white shadow-[0_18px_56px_rgba(0,0,0,0.08)]">
+              <div className="flex items-center justify-between bg-[#0f0e0d] px-5 py-4">
+                <span className="text-sm text-[rgba(255,255,255,0.9)]">Renovo Dashboard</span>
+                <div className="flex gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-[rgba(255,255,255,0.14)]" />
+                  <span className="h-2 w-2 rounded-full bg-[rgba(255,255,255,0.14)]" />
+                  <span className="h-2 w-2 rounded-full bg-[rgba(255,255,255,0.14)]" />
+                </div>
               </div>
+              <div className="p-5 md:p-6">
+                <div className="mb-5 grid grid-cols-2 gap-2.5 md:grid-cols-4">
+                  {[
+                    ['24', 'Active cases'],
+                    ['8', 'Checkouts due'],
+                    ['5', 'Awaiting approval'],
+                    ['2', 'In dispute'],
+                  ].map(([value, label]) => (
+                    <article
+                      key={label}
+                      className="rounded-xl border border-[rgba(15,14,13,0.1)] bg-[linear-gradient(180deg,#f8f4ed_0%,#f3ede2_100%)] p-3"
+                    >
+                      <p className="text-[22px] leading-none">{value}</p>
+                      <p className="mt-1.5 text-[10px] uppercase tracking-[0.03em] text-[#7a7670]">
+                        {label}
+                      </p>
+                    </article>
+                  ))}
+                </div>
 
-              <h1 className="mt-6 max-w-5xl text-4xl font-semibold tracking-tight md:text-[4.7rem] md:leading-[0.94]">
-                Automate end-of-tenancy work from evidence to claim
-              </h1>
-
-              <p className="mt-6 max-w-3xl text-base leading-8 text-stone-700 md:text-lg">
-                Renovo reviews check-in and check-out evidence, highlights issues, and prepares
-                claim-ready output for your review. You stay in control of every decision.
-              </p>
-
-              <div className="mt-8 flex flex-wrap gap-3">
-                <Link
-                  href="/demo"
-                  className="app-primary-button rounded-2xl px-5 py-3 text-sm font-medium"
-                >
-                  View live demo
-                </Link>
-                <a
-                  href="#waitlist"
-                  className="app-secondary-button rounded-2xl px-5 py-3 text-sm font-medium"
-                >
-                  Request Early Access
-                </a>
-              </div>
-
-              <div className="mt-6 grid gap-2 text-xs font-medium text-stone-600 md:grid-cols-2 md:text-sm">
-                {[
-                  'Built for UK property managers and letting agencies',
-                  'Managers approve every decision',
-                  'Evidence review to claim-ready output',
-                  'Structured for end-of-tenancy work, not generic automation',
-                ].map((item) => (
-                  <div
-                    key={item}
-                    className="rounded-2xl border border-stone-200 bg-white/90 px-4 py-3"
-                  >
-                    <div className="flex items-start gap-2">
-                      <span className="mt-[5px] inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
-                      <span className="flex-1">{item}</span>
+                <p className="mb-2.5 text-[11px] font-medium uppercase tracking-[0.06em] text-[#7a7670]">
+                  Recent cases
+                </p>
+                <div>
+                  {caseRows.map((row) => (
+                    <div
+                      key={row.address}
+                      className="flex items-center justify-between gap-3 border-b border-[rgba(15,14,13,0.1)] py-3 last:border-none"
+                    >
+                      <div>
+                        <p className="text-sm font-medium text-[#0f0e0d]">{row.address}</p>
+                        <p className="text-xs text-[#7a7670]">{row.tenant}</p>
+                      </div>
+                      <span
+                        className={`rounded-full px-2.5 py-1 text-[10px] font-medium ${statusClass(row.status)}`}
+                      >
+                        {row.status}
+                      </span>
                     </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="absolute -bottom-4 right-4 rounded-full border border-[rgba(15,14,13,0.18)] bg-white px-4 py-2 text-sm font-medium text-[#0f0e0d] shadow-[0_4px_20px_rgba(0,0,0,0.1)]">
+              <span className="mr-2 inline-block h-2 w-2 rounded-full bg-[#0f6e56]" />
+              AI drafting liability assessment
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-y border-[rgba(15,14,13,0.1)] bg-[linear-gradient(180deg,#f3eee3_0%,#f8f4ec_100%)] py-5 text-center">
+        <div className="marketing-frame">
+          <p className="mx-auto max-w-[840px] text-sm text-[#3d3b37]">
+            <span className="mr-2 inline-flex rounded-full bg-[#e1f5ee] px-2.5 py-0.5 text-[11px] font-medium uppercase tracking-[0.08em] text-[#0f6e56]">
+              Early access
+            </span>
+            Renovo is currently in early access. We are onboarding a small number of property
+            managers to shape the product with real workflows.
+          </p>
+        </div>
+      </section>
+
+      <section className="bg-[linear-gradient(180deg,#f6f0e6_0%,#fbf7f1_100%)] py-16 md:py-20">
+        <div className="marketing-frame">
+          <div className="mb-12 grid gap-10 xl:grid-cols-[minmax(0,0.9fr)_minmax(600px,1.1fr)] xl:gap-20">
+            <div className="max-w-[620px]">
+              <p className="app-kicker">The problem</p>
+              <h2 className="mt-4 text-[clamp(2rem,4vw,3.1rem)] leading-[1.04]">
+                One checkout.
+                <br />
+                <em className="not-italic text-[#9e7a2a]">Six different tools.</em>
+              </h2>
+              <p className="mt-5 text-[17px] font-light leading-8 text-[#3d3b37]">
+                Many teams still split one end-of-tenancy case across email, spreadsheets,
+                inventory apps, docs, and scheme portals. It does not scale, and it weakens
+                consistency when volume increases.
+              </p>
+            </div>
+
+            <article className="relative overflow-hidden rounded-[1.6rem] border border-[rgba(15,14,13,0.1)] bg-white p-7 shadow-[0_8px_30px_rgba(0,0,0,0.07)]">
+              <div className="absolute inset-x-0 top-0 h-[3px] bg-[linear-gradient(90deg,#0f0e0d_0%,#7a7670_35%,#9e7a2a_65%,#0f6e56_100%)]" />
+              <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#7a7670]">
+                A typical manager toolkit
+              </p>
+              <div className="mt-4 grid grid-cols-2 gap-2 md:grid-cols-3">
+                {[
+                  ['Email', 'Comms & chasing'],
+                  ['Spreadsheet', 'Case tracking'],
+                  ['Inventory app', 'Check-in/out'],
+                  ['Word / Docs', 'Deduction letters'],
+                  ['File storage', 'Photos & evidence'],
+                  ['Deposit portal', 'Scheme dispute'],
+                ].map(([title, subtitle]) => (
+                  <div
+                    key={title}
+                    className="rounded-lg border border-[rgba(15,14,13,0.1)] bg-[linear-gradient(180deg,#faf6ef_0%,#f3ede2_100%)] p-3 text-center"
+                  >
+                    <p className="text-xs font-medium text-[#0f0e0d]">{title}</p>
+                    <p className="mt-1 text-[10px] text-[#7a7670]">{subtitle}</p>
                   </div>
                 ))}
               </div>
-            </div>
 
-            <HeroDemoPreview highlights={overviewMetrics} />
-          </div>
-        </div>
-      </section>
-
-      <section className="rounded-[2rem] bg-[#F9F9F9] px-6 py-8 md:px-8 md:py-10">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-4xl">
-            <p className="app-kicker">Trust bar</p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
-              Built for UK property managers and letting agencies
-            </h2>
-            <p className="mt-4 text-base leading-8 text-stone-700">
-              Start with the end-of-tenancy workflow and keep your current systems around it.
-            </p>
-          </div>
-
-          <Link
-            href="/about"
-            className="text-sm font-medium text-stone-700 underline-offset-4 hover:text-stone-900 hover:underline lg:self-start"
-          >
-            Meet the team behind Renovo →
-          </Link>
-        </div>
-
-        <div className="mt-6 flex flex-wrap gap-3 text-sm text-stone-700">
-          {[
-            'Built for UK workflows',
-            'Evidence-led review',
-            'Works alongside your current setup',
-          ].map((item) => (
-            <div
-              key={item}
-              className="inline-flex rounded-full border border-stone-200 bg-white px-4 py-2"
-            >
-              {item}
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section
-        id="platform"
-        className="scroll-mt-28 rounded-[2rem] border border-emerald-200 bg-[linear-gradient(140deg,rgba(255,255,255,0.99),rgba(243,251,247,0.97)_50%,rgba(233,246,240,0.96)_100%)] p-6 shadow-[0_24px_54px_rgba(47,87,75,0.12)] md:scroll-mt-32 md:p-7"
-      >
-        <div className="flex flex-col gap-4 border-b app-divider pb-5 md:flex-row md:items-end md:justify-between">
-          <div className="max-w-4xl">
-            <p className="app-kicker">Live demo</p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
-              See the workflow before you sign up
-            </h2>
-            <p className="mt-3 max-w-3xl text-sm leading-7 text-stone-700">
-              Explore a read-only Renovo case to see how evidence, issues, recommendations, and
-              claim-ready output are organised in one end-of-tenancy workflow.
-            </p>
-          </div>
-          <Link
-            href="/demo"
-            className="app-primary-button inline-flex rounded-full px-4 py-2 text-sm font-medium"
-          >
-            View full live demo
-          </Link>
-        </div>
-
-        <div className="mt-6">
-          <HomepageDemo variant="compact" />
-        </div>
-      </section>
-
-      <section
-        id="problem"
-        className="app-surface scroll-mt-28 rounded-[2rem] p-6 md:scroll-mt-32 md:p-8"
-      >
-        <div className="max-w-4xl">
-          <p className="app-kicker">Problem</p>
-          <h2 className="mt-2 text-2xl font-semibold text-stone-900 md:text-3xl">
-            Checkout admin is where time and money quietly disappear
-          </h2>
-          <p className="mt-3 max-w-3xl text-sm leading-7 text-stone-600 md:text-base md:leading-8">
-            Every end of tenancy means cross-referencing reports, reviewing photos room by room,
-            judging fair wear and tear, writing up issues, and building a claim that can stand up
-            if challenged. Most property managers still handle this manually across spreadsheets,
-            email, and memory. It works at low volume. It breaks when portfolios grow.
-          </p>
-        </div>
-
-        <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {problemCards.map((card) => (
-            <article
-              key={card.title}
-              className="rounded-[1.45rem] border border-stone-200 bg-white/92 p-5"
-            >
-              <h3 className="text-base font-semibold text-stone-900">{card.title}</h3>
-              <p className="mt-3 text-sm leading-7 text-stone-600">{card.body}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section
-        id="how-it-works"
-        className="scroll-mt-28 rounded-[2rem] border border-stone-200 bg-[linear-gradient(135deg,rgba(245,243,240,0.95),rgba(238,235,229,0.9))] p-6 md:scroll-mt-32 md:p-7"
-      >
-        <div className="max-w-4xl">
-          <p className="app-kicker text-stone-500">How it works</p>
-          <h2 className="mt-3 text-3xl font-semibold tracking-tight text-stone-900 md:text-4xl">
-            Four steps from checkout to claim
-          </h2>
-          <p className="mt-4 text-base leading-8 text-stone-700">
-            Renovo follows the same process an experienced property manager would, with the
-            evidence and reasoning kept together from start to finish.
-          </p>
-        </div>
-
-        <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {workflowSteps.map((item) => (
-            <article key={item.step} className="rounded-[1.45rem] border border-stone-200 bg-white/92 p-5">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-stone-500">
-                Step {item.step}
-              </p>
-              <h3 className="mt-3 text-lg font-semibold text-stone-900">{item.title}</h3>
-              <p className="mt-3 text-sm leading-7 text-stone-600">{item.body}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section
-        id="features"
-        className="scroll-mt-28 rounded-[2rem] border border-stone-100 bg-[linear-gradient(180deg,rgba(250,247,242,0.4),rgba(255,255,255,0.7))] p-6 md:scroll-mt-32 md:p-7"
-      >
-        <div className="max-w-4xl border-b app-divider pb-5">
-          <p className="app-kicker">Features</p>
-          <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
-            Built for the operational work behind every claim
-          </h2>
-          <p className="mt-3 max-w-3xl text-sm leading-7 text-stone-600">
-            Renovo keeps the evidence, reasoning, and claim preparation connected, so your team is
-            not rebuilding the same file in different places.
-          </p>
-        </div>
-
-        <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {featureCards.map((card) => (
-            <article
-              key={card.title}
-              className="rounded-[1.45rem] border border-stone-200 bg-white/92 p-5"
-            >
-              <h3 className="text-base font-semibold text-stone-900">{card.title}</h3>
-              <p className="mt-3 text-sm leading-7 text-stone-600">{card.body}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section
-        id="who-its-for"
-        className="scroll-mt-28 rounded-[2rem] border border-amber-100 bg-[linear-gradient(135deg,rgba(255,251,235,0.9),rgba(255,247,230,0.7))] p-6 md:scroll-mt-32 md:p-7"
-      >
-        <p className="app-kicker">Who it&apos;s for</p>
-        <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
-          Built for teams doing real end-of-tenancy volume
-        </h2>
-        <p className="mt-4 max-w-3xl text-base leading-8 text-stone-700">
-          Whether one person handles every checkout or a wider team is working through volume, the
-          goal is the same: less admin, better consistency, and stronger claim preparation.
-        </p>
-
-        <div className="mt-6 grid gap-4 md:grid-cols-3">
-          {audienceCards.map((card) => (
-            <article className="rounded-[1.45rem] border border-amber-100/80 bg-white/80 p-5" key={card.title}>
-              <h3 className="text-base font-semibold text-stone-900">{card.title}</h3>
-              <p className="mt-2 text-sm leading-7 text-stone-600">{card.body}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <LandingTrustSection points={trustPoints} faqs={trustFaqs} />
-
-      <section className="rounded-[1.9rem] border border-stone-200 bg-white/92 px-6 py-6 md:px-8">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-3xl">
-            <p className="app-kicker">Contact</p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-900 md:text-3xl">
-              Need to talk through your process first?
-            </h2>
-            <p className="mt-3 text-sm leading-7 text-stone-600 md:text-base">
-              Use the contact form for early access, partnerships, investor enquiries, or general
-              questions.
-            </p>
-          </div>
-          <Link
-            href="/contact"
-            className="app-secondary-button inline-flex rounded-full px-4 py-2 text-sm font-medium"
-          >
-            Talk to us
-          </Link>
-        </div>
-      </section>
-
-      <section
-        id="waitlist"
-        className="app-surface-strong scroll-mt-28 rounded-[2.2rem] p-6 md:scroll-mt-32 md:p-8"
-      >
-        <div className="grid gap-6 rounded-[1.8rem] border border-stone-200 bg-[linear-gradient(135deg,rgba(255,255,255,0.97),rgba(240,247,243,0.94))] px-6 py-7 md:px-8 md:py-9 xl:grid-cols-[minmax(0,1fr)_420px]">
-          <div>
-            <p className="app-kicker">Get started</p>
-            <h2 className="mt-3 max-w-4xl text-3xl font-semibold tracking-tight md:text-4xl">
-              Spend less time on checkout admin. Prepare stronger claims with less manual work.
-            </h2>
-            <p className="mt-4 max-w-3xl text-base leading-8 text-stone-700">
-              Renovo is onboarding UK property managers and letting agencies who want a more
-              consistent end-of-tenancy workflow. Request early access to see how it fits your
-              process.
-            </p>
-            <div className="mt-6 rounded-[1.45rem] border border-emerald-200 bg-emerald-50/85 p-5">
-              <p className="text-sm font-semibold text-emerald-950">What happens next</p>
-              <p className="mt-2 text-sm leading-7 text-emerald-950/85">
-                We use these details to arrange early access and onboarding conversations. If you
-                already have access, sign in from the top right.
-              </p>
-              <div className="mt-4">
-                <Link
-                  href="/demo"
-                  className="app-secondary-button inline-flex rounded-full px-4 py-2 text-sm font-medium"
+              <div className="mt-4 overflow-hidden">
+                <svg
+                  viewBox="0 0 400 32"
+                  fill="none"
+                  preserveAspectRatio="none"
+                  className="h-8 w-full"
                 >
-                  View live demo
-                </Link>
+                  <path
+                    d="M50 4 C80 28, 140 8, 200 16"
+                    stroke="#7a7670"
+                    strokeWidth="1"
+                    strokeDasharray="3 3"
+                    opacity="0.5"
+                  />
+                  <path
+                    d="M130 4 C160 24, 240 6, 350 18"
+                    stroke="#9e7a2a"
+                    strokeWidth="1"
+                    strokeDasharray="3 3"
+                    opacity="0.5"
+                  />
+                  <path
+                    d="M200 8 C230 28, 280 4, 340 12"
+                    stroke="#0f6e56"
+                    strokeWidth="1"
+                    strokeDasharray="3 3"
+                    opacity="0.5"
+                  />
+                  <path
+                    d="M70 12 C120 30, 280 2, 320 20"
+                    stroke="#7a7670"
+                    strokeWidth="1"
+                    strokeDasharray="3 3"
+                    opacity="0.35"
+                  />
+                </svg>
               </div>
-            </div>
+
+              <div className="mt-2 grid grid-cols-3 gap-3">
+                {[
+                  ['6+', 'Tools per case'],
+                  ['2-3h', 'Admin per case'],
+                  ['0', 'Audit trail'],
+                ].map(([value, label]) => (
+                  <div
+                    key={label}
+                    className="rounded-lg border border-[rgba(15,14,13,0.18)] bg-[linear-gradient(180deg,#faf6ef_0%,#f3ede2_100%)] px-3 py-3 text-center"
+                  >
+                    <p className="text-[20px] leading-none">{value}</p>
+                    <p className="mt-1 text-[10px] uppercase tracking-[0.03em] text-[#7a7670]">
+                      {label}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </article>
           </div>
 
-          <PublicWaitlistForm />
+          <div className="grid gap-6 xl:grid-cols-3">
+            {problemCards.map((item, index) => (
+              <article
+                key={item.title}
+                className="group relative overflow-hidden rounded-xl border border-[rgba(15,14,13,0.1)] bg-white p-8 shadow-[0_6px_22px_rgba(0,0,0,0.05)] transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_26px_rgba(0,0,0,0.08)]"
+              >
+                <div
+                  className={`absolute inset-x-0 top-0 h-[2px] ${
+                    index === 0
+                      ? 'bg-[#0f0e0d]'
+                      : index === 1
+                        ? 'bg-[#9e7a2a]'
+                        : 'bg-[#0f6e56]'
+                  } opacity-45 transition-opacity group-hover:opacity-100`}
+                />
+                <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#7a7670]">
+                  Problem {String(index + 1).padStart(2, '0')}
+                </p>
+                <h3 className="mt-4 text-[18px] leading-7">{item.title}</h3>
+                <p className="mt-3 text-sm leading-7 text-[#7a7670]">{item.body}</p>
+                <p className="mt-4 border-l-2 border-[#e8e3da] pl-3.5 text-sm italic leading-6 text-[#3d3b37]">
+                  &quot;{item.quote}&quot;
+                </p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-[linear-gradient(180deg,#fffdf9_0%,#fbf8f2_100%)] py-16 md:py-20">
+        <div className="marketing-frame">
+          <div className="max-w-[720px]">
+            <p className="app-kicker">How it works</p>
+            <h2 className="mt-4 text-[clamp(2rem,4vw,3.1rem)] leading-[1.04]">
+              One workflow,
+              <br />
+              <em className="not-italic text-[#9e7a2a]">end to end</em>
+            </h2>
+            <p className="mt-5 text-[17px] font-light leading-8 text-[#3d3b37]">
+              Renovo sits alongside your current setup and keeps evidence, reasoning, and decision
+              output in one routeable workflow.
+            </p>
+          </div>
+
+          <div className="mt-10 grid gap-8 xl:grid-cols-[minmax(0,0.95fr)_minmax(500px,0.8fr)] xl:gap-20">
+            <div className="divide-y divide-[rgba(15,14,13,0.1)]">
+              {workflowSteps.map((item) => (
+                <article key={item.step} className="flex gap-4 py-5">
+                  <span className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[rgba(15,14,13,0.18)] text-sm font-medium text-[#7a7670]">
+                    {Number(item.step)}
+                  </span>
+                  <div>
+                    <h3 className="text-base">{item.title}</h3>
+                    <p className="mt-2 text-sm leading-7 text-[#7a7670]">{item.body}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+
+            <article className="h-fit rounded-[1.6rem] border border-[rgba(15,14,13,0.1)] bg-white shadow-[0_8px_32px_rgba(0,0,0,0.07)] xl:sticky xl:top-28">
+              <div className="flex items-center justify-between border-b border-[rgba(15,14,13,0.1)] px-5 py-4">
+                <p className="text-sm font-medium text-[#0f0e0d]">Checkout - 14 Marchmont Rd</p>
+                <span className="rounded-full bg-[#e1f5ee] px-2.5 py-1 text-[11px] font-medium text-[#0f6e56]">
+                  Scheduled
+                </span>
+              </div>
+              <div className="space-y-3 p-5">
+                {[
+                  ['Agent assigned', 'Sarah Reid - 12 Apr 2025'],
+                  ['Checkout date set', '18 Apr 2025 - 10:00am'],
+                  ['Tenancy linked', 'A. Henderson - 12-month AST'],
+                ].map(([title, detail]) => (
+                  <div
+                    key={title}
+                    className="rounded-lg border border-[rgba(15,14,13,0.1)] bg-[linear-gradient(180deg,#fffdfa_0%,#f7f2ea_100%)] px-3.5 py-3"
+                  >
+                    <p className="text-sm font-medium text-[#0f0e0d]">{title}</p>
+                    <p className="mt-1 text-xs text-[#7a7670]">{detail}</p>
+                  </div>
+                ))}
+                <div className="pt-2">
+                  <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#7a7670]">
+                    Workflow progress
+                  </p>
+                  <div className="mt-2 h-1.5 rounded-full bg-[#e8e3da]">
+                    <div className="h-1.5 w-[34%] rounded-full bg-[#0f6e56]" />
+                  </div>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-y border-[rgba(15,14,13,0.08)] bg-[linear-gradient(180deg,#efe5d8_0%,#f8f2e8_100%)] py-16 md:py-20">
+        <div className="marketing-frame">
+          <div className="max-w-[760px]">
+            <p className="app-kicker">Platform</p>
+            <h2 className="mt-4 text-[clamp(2rem,4vw,3.1rem)] leading-[1.04]">
+              Everything in one
+              <br />
+              <em className="not-italic text-[#9e7a2a]">workspace</em>
+            </h2>
+            <p className="mt-5 text-[17px] font-light leading-8 text-[#3d3b37]">
+              No spreadsheet sidecar. No patchwork handoffs. One routeable product workflow that
+              stays readable from first triage through dispute.
+            </p>
+          </div>
+
+          <div className="mt-10 grid gap-px overflow-hidden rounded-[1.6rem] border border-[rgba(15,14,13,0.08)] bg-[rgba(15,14,13,0.08)] xl:grid-cols-3">
+            {platformFeatures.map((feature) => (
+              <article key={feature.title} className="bg-[linear-gradient(180deg,#fffdf9_0%,#f9f4eb_100%)] p-8">
+                <h3 className="text-lg text-[#0f0e0d]">{feature.title}</h3>
+                <p className="mt-3 text-sm leading-7 text-[#4b4741]">{feature.body}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="waitlist" className="bg-[radial-gradient(circle_at_bottom_right,rgba(225,245,238,0.24),transparent_22%),linear-gradient(180deg,#fffdf9_0%,#faf7f1_100%)] py-16 md:py-20">
+        <div className="marketing-frame">
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="app-kicker">Early access</p>
+            <h2 className="mt-4 text-[clamp(2rem,4vw,3.1rem)] leading-[1.04]">
+              Want to try it
+              <br />
+              <em className="not-italic text-[#9e7a2a]">while we build it?</em>
+            </h2>
+            <p className="mx-auto mt-5 max-w-2xl text-[17px] font-light leading-8 text-[#3d3b37]">
+              We are onboarding a small group of UK property managers and agencies for rollout.
+              Request access and we will reply by email.
+            </p>
+          </div>
+
+          <div className="mx-auto mt-10 max-w-[520px]">
+            <PublicWaitlistForm />
+          </div>
+
+          <div className="mt-8 flex justify-center gap-3">
+            <Link
+              href="/demo"
+              className="app-secondary-button rounded px-5 py-2.5 text-sm font-medium"
+            >
+              View live demo
+            </Link>
+            <Link
+              href="/contact"
+              className="app-primary-button rounded px-5 py-2.5 text-sm font-medium"
+            >
+              Contact Renovo
+            </Link>
+          </div>
         </div>
       </section>
     </MarketingShell>

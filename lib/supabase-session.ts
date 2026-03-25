@@ -5,22 +5,21 @@ export const SUPABASE_SESSION_COOKIE_MAX_AGE = 60 * 60 * 24 * 30
 
 type MinimalSessionCookie = {
   access_token: string
-  refresh_token: string
+  refresh_token?: string
   expires_at?: AuthSession['expires_at']
 }
 
 export function toMinimalSupabaseSession(session: Partial<AuthSession> | null | undefined) {
   if (
     !session ||
-    typeof session.access_token !== 'string' ||
-    typeof session.refresh_token !== 'string'
+    typeof session.access_token !== 'string'
   ) {
     return null
   }
 
   return {
     access_token: session.access_token,
-    refresh_token: session.refresh_token,
+    refresh_token: typeof session.refresh_token === 'string' ? session.refresh_token : undefined,
     expires_at: typeof session.expires_at === 'number' ? session.expires_at : undefined,
   } satisfies MinimalSessionCookie
 }
@@ -65,17 +64,13 @@ export function parseSupabaseSessionCookie(cookieValue: string | null | undefine
   try {
     const parsed = JSON.parse(decodeURIComponent(cookieValue)) as MinimalSessionCookie | null
 
-    if (
-      !parsed ||
-      typeof parsed.access_token !== 'string' ||
-      typeof parsed.refresh_token !== 'string'
-    ) {
+    if (!parsed || typeof parsed.access_token !== 'string') {
       return null
     }
 
     return {
       access_token: parsed.access_token,
-      refresh_token: parsed.refresh_token,
+      refresh_token: typeof parsed.refresh_token === 'string' ? parsed.refresh_token : undefined,
       expires_at: typeof parsed.expires_at === 'number' ? parsed.expires_at : undefined,
     }
   } catch {

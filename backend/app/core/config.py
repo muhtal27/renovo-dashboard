@@ -23,6 +23,14 @@ class Settings(BaseSettings):
         default=None,
         validation_alias="SUPABASE_SERVICE_ROLE_KEY",
     )
+    eot_internal_auth_secret: str | None = Field(
+        default=None,
+        validation_alias="EOT_INTERNAL_AUTH_SECRET",
+    )
+    eot_internal_auth_ttl_seconds: int = Field(
+        default=300,
+        validation_alias="EOT_INTERNAL_AUTH_TTL_SECONDS",
+    )
     supabase_storage_bucket_inspections: str = Field(
         default="inspection-files",
         validation_alias="SUPABASE_STORAGE_BUCKET_INSPECTIONS",
