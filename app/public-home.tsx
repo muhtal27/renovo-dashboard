@@ -246,14 +246,17 @@ export function PublicHome() {
         </div>
       </section>
 
-      <section className="app-surface-strong rounded-[2rem] p-6 md:p-7">
+      <section
+        id="platform"
+        className="scroll-mt-28 rounded-[2rem] border border-emerald-200 bg-[linear-gradient(140deg,rgba(255,255,255,0.99),rgba(243,251,247,0.97)_50%,rgba(233,246,240,0.96)_100%)] p-6 shadow-[0_24px_54px_rgba(47,87,75,0.12)] md:scroll-mt-32 md:p-7"
+      >
         <div className="flex flex-col gap-4 border-b app-divider pb-5 md:flex-row md:items-end md:justify-between">
           <div className="max-w-4xl">
             <p className="app-kicker">Live demo</p>
             <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
               See the workflow before you sign up
             </h2>
-            <p className="mt-3 max-w-3xl text-sm leading-7 text-stone-600">
+            <p className="mt-3 max-w-3xl text-sm leading-7 text-stone-700">
               Explore a read-only Renovo case to see how evidence, issues, recommendations, and
               claim-ready output are organised in one end-of-tenancy workflow.
             </p>
