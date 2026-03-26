@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import type { AuthSession } from '@supabase/supabase-js'
 import { useEffect, useRef, useState } from 'react'
+import { getReturnToFromSearch } from '@/lib/return-to'
 import { supabase } from '@/lib/supabase'
 import {
   clearLegacySupabaseBrowserAuthArtifacts,
@@ -49,8 +50,7 @@ export default function LoginPage() {
   const [returnTo] = useState(() => {
     if (typeof window === 'undefined') return '/eot'
 
-    const nextReturnTo = new URLSearchParams(window.location.search).get('returnTo')
-    return nextReturnTo && nextReturnTo.startsWith('/') ? nextReturnTo : '/eot'
+    return getReturnToFromSearch(window.location.search)
   })
 
   async function establishOperatorSession(session: Partial<AuthSession> | null | undefined) {
@@ -183,7 +183,7 @@ export default function LoginPage() {
         emailRedirectTo:
           typeof window === 'undefined'
             ? undefined
-            : `${window.location.origin}/login?returnTo=${returnTo}`,
+            : `${window.location.origin}/login?returnTo=${encodeURIComponent(returnTo)}`,
         shouldCreateUser: false,
       },
     })

@@ -40,7 +40,7 @@ const processorRows = [
   {
     name: 'Supabase',
     role: 'Core application database, authentication, and document storage',
-    location: 'EU',
+    location: 'London, United Kingdom',
   },
   {
     name: 'PostHog',
@@ -131,9 +131,10 @@ export default function PrivacyPage() {
           <p className="app-kicker">Core storage and processing</p>
           <p className="mt-4 max-w-4xl text-sm leading-7 text-[#3d3b37]">
             Your core customer data, including account information, uploaded documents, and
-            processed results, is stored in the EU via Supabase. Some technical data may be
-            processed through Vercel&apos;s global infrastructure, and specific checkout content is
-            sent to OpenAI when analysis features are used.
+            processed results, is stored in the United Kingdom via our Supabase infrastructure in
+            London. Some technical data may be processed through Vercel&apos;s global
+            infrastructure, and specific checkout content is sent to OpenAI when analysis features
+            are used.
           </p>
         </section>
 
@@ -171,8 +172,9 @@ export default function PrivacyPage() {
                 relationships.
               </p>
               <p>
-                Where data is processed outside the UK or EEA, we rely on appropriate transfer
-                safeguards where required, such as contractual protections and equivalent provider
+                Our primary application database is hosted in London, United Kingdom. Where data
+                is processed outside the UK or EEA, we rely on appropriate transfer safeguards
+                where required, such as contractual protections and equivalent provider
                 commitments.
               </p>
             </div>

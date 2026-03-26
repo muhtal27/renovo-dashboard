@@ -10,6 +10,9 @@ def create_app() -> FastAPI:
         title=settings.project_name,
         debug=settings.debug,
         version="0.1.0",
+        docs_url=None if settings.is_production else "/docs",
+        redoc_url=None if settings.is_production else "/redoc",
+        openapi_url=None if settings.is_production else "/openapi.json",
     )
     app.include_router(api_router, prefix=settings.api_v1_prefix)
     app.include_router(eot_router, prefix="/api/eot", tags=["eot"])

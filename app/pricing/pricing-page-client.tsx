@@ -2,158 +2,255 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { Check, ChevronDown } from 'lucide-react'
+import { Check, Plus } from 'lucide-react'
 import { MarketingShell } from '@/app/components/MarketingShell'
 
 type BillingPeriod = 'monthly' | 'annual'
 
+type ValueProof = {
+  label: string
+  value: string
+  subtext: string
+  tone: 'waste' | 'save'
+}
+
 type Plan = {
-  name: 'Starter' | 'Agency' | 'Studio'
-  tag: string
-  setupFee: number
-  monthlyPrice: number
-  annualPrice: number
-  save: number
+  name: 'Branch' | 'Regional' | 'Group'
+  segment: string
+  monthlyPrice?: number
+  annualPrice?: number
+  annualBillingText?: string
+  vatLabel: string
+  setupFee: string
+  roiText: string
   portfolio: string
   users: string
-  storage: string
+  auditTrail: string
   support: string
   features: string[]
   cta: string
-  highlighted?: boolean
+  href: string
+  tone: 'primary' | 'outline' | 'enterprise'
+  badge?: string
+  effectiveCost: string
+  customPricingText?: string
 }
 
 type ComparisonRow = {
   feature: string
-  starter: string
-  agency: string
-  studio: string
-  muted?: boolean
+  branch: string
+  regional: string
+  group: string
+  allPlansNote?: boolean
 }
+
+const valueProof: ValueProof[] = [
+  {
+    label: 'Monthly salary on checkout admin',
+    value: '£920',
+    subtext: 'Based on £23,500 salary, 30 cases/mo',
+    tone: 'waste',
+  },
+  {
+    label: 'Hours burned per month',
+    value: '75h',
+    subtext: '2.5 hours per checkout × 30',
+    tone: 'waste',
+  },
+  {
+    label: 'Admin time recovered',
+    value: '60%+',
+    subtext: 'Average across early access agencies',
+    tone: 'save',
+  },
+] as const
 
 const plans: Plan[] = [
   {
-    name: 'Starter',
-    tag: 'Solo property managers',
-    setupFee: 199,
-    monthlyPrice: 49,
-    annualPrice: 490,
-    save: 98,
-    portfolio: 'Up to 30 tenancies',
-    users: '1',
-    storage: '2 years audit trail',
-    support: 'Email only',
+    name: 'Branch',
+    segment: 'Letting agencies · 2-10 staff',
+    monthlyPrice: 349,
+    annualPrice: 289,
+    annualBillingText: '£3,468 + VAT billed annually',
+    vatLabel: '+ VAT',
+    setupFee: '£600 + VAT',
+    roiText: '~4x return on investment',
+    portfolio: 'Up to 1,500',
+    users: 'Up to 6',
+    auditTrail: '3 years',
+    support: 'Email, chat, phone',
     features: [
       'Active case workspace',
-      'Evidence upload',
-      'AI-drafted recommendations',
+      'Evidence upload & management',
+      'AI-drafted liability assessments',
       'Manager approval workflow',
       'Audit trail & claim output',
-    ],
-    cta: 'Get Started',
-  },
-  {
-    name: 'Agency',
-    tag: 'Small letting agencies, 2–10 staff',
-    setupFee: 399,
-    monthlyPrice: 119,
-    annualPrice: 1190,
-    save: 238,
-    portfolio: 'Up to 100 tenancies',
-    users: 'Up to 6',
-    storage: '5 years audit trail',
-    support: 'Email + live chat',
-    features: [
-      'Everything in Starter',
       'Priority case tagging',
       'Multi-user access',
       'Branch reporting',
-    ],
-    cta: 'Get Started',
-    highlighted: true,
-  },
-  {
-    name: 'Studio',
-    tag: 'Mid-size agencies, 10–50 staff',
-    setupFee: 799,
-    monthlyPrice: 229,
-    annualPrice: 2290,
-    save: 458,
-    portfolio: 'Up to 300 tenancies',
-    users: 'Up to 20',
-    storage: '7 years audit trail',
-    support: 'Priority + dedicated onboarding call',
-    features: [
-      'Everything in Agency',
       'Custom claim templates',
       'API access',
       'Dedicated account manager',
+      'Phone support',
+      'On-site technical support',
+      'SLA & compliance review',
+      'Multi-branch rollout support',
+      'Custom integrations',
     ],
-    cta: 'Get Started',
+    cta: 'Get started',
+    href: '/contact',
+    tone: 'primary',
+    effectiveCost: '~£5.82',
   },
-]
+  {
+    name: 'Regional',
+    segment: 'Multi-branch agencies · 10-50 staff',
+    monthlyPrice: 799,
+    annualPrice: 669,
+    annualBillingText: '£8,028 + VAT billed annually',
+    vatLabel: '+ VAT',
+    setupFee: '£600 + VAT',
+    roiText: '~5x return on investment',
+    portfolio: 'Up to 5,000',
+    users: 'Up to 20',
+    auditTrail: '5 years',
+    support: 'Priority + phone',
+    features: [
+      'Active case workspace',
+      'Evidence upload & management',
+      'AI-drafted liability assessments',
+      'Manager approval workflow',
+      'Audit trail & claim output',
+      'Priority case tagging',
+      'Multi-user access',
+      'Branch reporting',
+      'Custom claim templates',
+      'API access',
+      'Dedicated account manager',
+      'Phone support',
+      'On-site technical support',
+      'SLA & compliance review',
+      'Multi-branch rollout support',
+      'Custom integrations',
+      'Dedicated onboarding call',
+    ],
+    cta: 'Get started',
+    href: '/contact',
+    tone: 'outline',
+    effectiveCost: '~£4.44',
+  },
+  {
+    name: 'Group',
+    segment: 'Large agencies · 5,000+ managed tenancies',
+    vatLabel: '+ VAT',
+    setupFee: '£1,500 + VAT',
+    roiText: 'ROI scales with volume',
+    portfolio: 'Unlimited',
+    users: 'Unlimited',
+    auditTrail: 'Custom',
+    support: 'Dedicated',
+    features: [
+      'Active case workspace',
+      'Evidence upload & management',
+      'AI-drafted liability assessments',
+      'Manager approval workflow',
+      'Audit trail & claim output',
+      'Priority case tagging',
+      'Multi-user access',
+      'Branch reporting',
+      'Custom claim templates',
+      'API access',
+      'Dedicated account manager',
+      'Phone support',
+      'On-site technical support',
+      'SLA & compliance review',
+      'Multi-branch rollout support',
+      'Custom integrations',
+      'Bespoke onboarding programme',
+    ],
+    cta: 'Talk to us',
+    href: '/contact',
+    tone: 'enterprise',
+    badge: 'Tailored',
+    effectiveCost: 'Contact us',
+    customPricingText: 'Priced around your portfolio and team',
+  },
+] as const
 
 const comparisonRows: ComparisonRow[] = [
-  { feature: 'Active case workspace', starter: '✓', agency: '✓', studio: '✓' },
+  { feature: 'Active case workspace', branch: 'check', regional: 'check', group: 'check' },
+  { feature: 'Evidence upload & management', branch: 'check', regional: 'check', group: 'check' },
   {
-    feature: 'Evidence upload (drag & drop + email)',
-    starter: '✓',
-    agency: '✓',
-    studio: '✓',
+    feature: 'AI-drafted liability assessments',
+    branch: 'check',
+    regional: 'check',
+    group: 'check',
   },
-  { feature: 'AI-drafted recommendations', starter: '✓', agency: '✓', studio: '✓' },
-  { feature: 'Manager approval workflow', starter: '✓', agency: '✓', studio: '✓' },
-  { feature: 'Audit trail & claim output', starter: '✓', agency: '✓', studio: '✓' },
-  { feature: 'Number of users', starter: '1', agency: 'Up to 6', studio: 'Up to 20' },
+  { feature: 'Manager approval workflow', branch: 'check', regional: 'check', group: 'check' },
+  { feature: 'Audit trail & claim output', branch: 'check', regional: 'check', group: 'check' },
+  { feature: 'Priority case tagging', branch: 'check', regional: 'check', group: 'check' },
+  { feature: 'Multi-user access', branch: 'check', regional: 'check', group: 'check' },
+  { feature: 'Branch reporting', branch: 'check', regional: 'check', group: 'check' },
+  { feature: 'Custom claim templates', branch: 'check', regional: 'check', group: 'check' },
+  { feature: 'API access', branch: 'check', regional: 'check', group: 'check' },
+  { feature: 'Dedicated account manager', branch: 'check', regional: 'check', group: 'check' },
+  { feature: 'Phone support', branch: 'check', regional: 'check', group: 'check' },
+  { feature: 'On-site technical support', branch: 'check', regional: 'check', group: 'check' },
+  { feature: 'SLA & compliance review', branch: 'check', regional: 'check', group: 'check' },
   {
-    feature: 'Audit trail storage',
-    starter: '2 years',
-    agency: '5 years',
-    studio: '7 years',
+    feature: 'Multi-branch rollout support',
+    branch: 'check',
+    regional: 'check',
+    group: 'check',
   },
-  { feature: 'Live chat support', starter: '✗', agency: '✓', studio: '✓' },
-  { feature: 'Priority support', starter: '✗', agency: '✗', studio: '✓' },
-  { feature: 'Dedicated onboarding call', starter: '✗', agency: '✗', studio: '✓' },
+  { feature: 'Custom integrations', branch: 'check', regional: 'check', group: 'check' },
+  { feature: 'Number of users', branch: 'Up to 6', regional: 'Up to 20', group: 'Unlimited' },
+  {
+    feature: 'Portfolio capacity',
+    branch: 'Up to 1,500',
+    regional: 'Up to 5,000',
+    group: 'Unlimited',
+  },
+  { feature: 'Audit trail storage', branch: '3 years', regional: '5 years', group: 'Custom' },
+  { feature: 'Setup fee', branch: '£600 + VAT', regional: '£600 + VAT', group: '£1,500 + VAT' },
   {
     feature: 'PMS sync',
-    starter: 'Coming soon',
-    agency: 'Coming soon',
-    studio: 'Coming soon',
-    muted: true,
+    branch: 'Coming soon across all plans',
+    regional: '',
+    group: '',
+    allPlansNote: true,
   },
 ] as const
 
 const faqs = [
   {
+    q: 'How did you calculate the ROI figures?',
+    a: 'Based on a £23,500 property manager salary handling 30 checkouts per month at 2.5 hours each. That is approximately £920 per month in salary spent on checkout admin. Renovo typically saves 60% or more of that time. The ROI figures are conservative and exclude additional value from fewer lost disputes and reduced complaints.',
+  },
+  {
     q: 'What counts as a managed tenancy?',
-    a: 'A managed tenancy is one active tenancy your team is handling inside the platform.',
+    a: 'A managed tenancy is one active tenancy your team is handling inside the platform at any given time.',
+  },
+  {
+    q: 'Is VAT included in the listed prices?',
+    a: 'No. All prices are listed exclusive of VAT. UK VAT at the applicable rate (currently 20%) will be added to your invoice. This applies to both the monthly subscription and the one-time setup fee.',
+  },
+  {
+    q: 'What does the setup fee cover?',
+    a: 'The setup fee covers onboarding, initial configuration, and workspace setup for your team. Enterprise setup includes bespoke configuration, data migration support, and a dedicated onboarding programme.',
   },
   {
     q: 'Is the setup fee refundable?',
-    a: 'No. The setup fee covers onboarding and initial configuration work.',
+    a: 'No. The setup fee is non-refundable as it covers onboarding and configuration work completed during implementation.',
   },
   {
-    q: 'Can I upgrade or downgrade my plan later?',
-    a: 'Yes. Plan changes can be arranged if your team size or portfolio changes.',
+    q: 'Can I upgrade or downgrade later?',
+    a: 'Yes. Plan changes can be arranged at any time. We will pro-rate any differences to your next billing cycle.',
   },
   {
     q: 'What happens if I exceed my tenancy limit?',
-    a: 'We will contact you to move you onto the next plan that fits your portfolio size.',
+    a: 'We will contact you to move you onto the next plan that fits your portfolio size. No surprise charges.',
   },
-  {
-    q: 'Do you offer a free trial?',
-    a: 'No. We currently offer early access instead of a self-serve free trial.',
-  },
-  {
-    q: 'Is there a long-term contract?',
-    a: 'No. The page pricing is set up without a long-term contract.',
-  },
-] as const
-
-const perTenancyStats = [
-  { label: 'Starter', value: '£1.63 / tenancy' },
-  { label: 'Agency', value: '£1.19 / tenancy' },
-  { label: 'Studio', value: '£0.76 / tenancy' },
 ] as const
 
 function formatGBP(value: number) {
@@ -164,236 +261,361 @@ function formatGBP(value: number) {
   }).format(value)
 }
 
-function ComparisonCell({ value, muted = false }: { value: string; muted?: boolean }) {
-  if (muted) {
-    return <span className="text-sm italic text-stone-400">{value}</span>
-  }
-
-  const isSymbol = value === '✓' || value === '✗'
-
+function CheckBadge({ enterprise = false }: { enterprise?: boolean }) {
   return (
     <span
-      className={
-        isSymbol
-          ? 'text-base font-semibold text-stone-900'
-          : 'text-sm font-medium text-stone-900'
-      }
+      className={[
+        'inline-flex h-5 w-5 items-center justify-center rounded-full',
+        enterprise ? 'bg-[rgba(201,169,78,0.16)] text-[#c9a94e]' : 'bg-[#e4f2eb] text-[#1b6b4a]',
+      ].join(' ')}
     >
-      {value}
+      <Check className="h-3 w-3" strokeWidth={2.25} />
     </span>
   )
 }
 
+function ComparisonValue({
+  value,
+  enterprise = false,
+}: {
+  value: string
+  enterprise?: boolean
+}) {
+  if (value === 'check') {
+    return <CheckBadge enterprise={enterprise} />
+  }
+
+  return <span>{value}</span>
+}
+
 export default function PricingPageClient() {
   const [billing, setBilling] = useState<BillingPeriod>('monthly')
-  const [openFaq, setOpenFaq] = useState<number | null>(null)
+  const [openFaq, setOpenFaq] = useState<number | null>(0)
 
   return (
     <MarketingShell currentPath="/pricing">
-      <div className="page-shell page-stack text-stone-900">
-        <section className="page-hero text-center">
-          <p className="app-kicker">Pricing</p>
-          <h1 className="page-title mx-auto max-w-4xl">Simple pricing. Serious time savings.</h1>
-          <p className="page-copy mx-auto max-w-2xl">
-            Set up in a day. No hidden fees. Cancel anytime. Built for letting agencies that want
-            a cleaner end-of-tenancy workflow without a long rollout.
+      <div className="bg-[#f6f5f1] text-[#1a1a18]">
+        <section className="mx-auto max-w-[760px] px-6 pb-0 pt-16 text-center md:px-8 md:pt-24">
+          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-[#8a8a80]">
+            Pricing
           </p>
+          <h1 className="mt-5 text-[clamp(2.4rem,5vw,3.5rem)] leading-[1.08] tracking-[-0.03em] text-[#1a1a18]">
+            Priced on the value <em className="not-italic text-[#1b6b4a]">we create</em>
+          </h1>
+          <p className="mx-auto mt-5 max-w-[640px] text-[15px] font-light leading-8 text-[#5c5c55]">
+            The average property manager spends £920 per month on checkout admin alone. Renovo
+            gives most of that time back and charges a fraction of what it saves.
+          </p>
+        </section>
 
-          <div className="mt-8 inline-flex items-center gap-4 rounded-full border border-[rgba(15,14,13,0.1)] bg-white px-4 py-3">
-            <span
-              className={`text-sm transition-colors ${
-                billing === 'monthly' ? 'text-stone-900' : 'text-stone-400'
-              }`}
+        <section className="mx-auto mt-12 max-w-[1200px] px-6 md:px-8">
+          <div className="grid gap-4 md:grid-cols-3">
+            {valueProof.map((item) => (
+              <article
+                key={item.label}
+                className={[
+                  'rounded-[18px] border px-5 py-5',
+                  item.tone === 'save'
+                    ? 'border-[rgba(27,107,74,0.14)] bg-[rgba(228,242,235,0.72)]'
+                    : 'border-[rgba(0,0,0,0.07)] bg-white',
+                ].join(' ')}
+              >
+                <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[#8a8a80]">
+                  {item.label}
+                </p>
+                <p className="mt-3 text-[2rem] leading-none tracking-[-0.04em] text-[#1a1a18]">
+                  {item.value}
+                </p>
+                <p className="mt-2 text-sm font-light leading-6 text-[#6f6f67]">{item.subtext}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="mx-auto mt-10 flex max-w-[1200px] flex-col items-center px-6 md:px-8">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(0,0,0,0.08)] bg-white p-1.5 shadow-[0_8px_24px_rgba(0,0,0,0.04)]">
+            <button
+              type="button"
+              onClick={() => setBilling('monthly')}
+              className={[
+                'rounded-full px-4 py-2 text-sm transition-colors',
+                billing === 'monthly' ? 'bg-[#1a1a18] text-white' : 'text-[#7a7a72]',
+              ].join(' ')}
             >
               Monthly
-            </span>
-
+            </button>
             <button
               type="button"
               aria-label="Toggle billing period"
               aria-pressed={billing === 'annual'}
               onClick={() =>
-                setBilling((prev) => (prev === 'monthly' ? 'annual' : 'monthly'))
+                setBilling((current) => (current === 'monthly' ? 'annual' : 'monthly'))
               }
-              className="relative h-7 w-14 rounded-full bg-stone-200 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-stone-300"
+              className="relative h-8 w-14 rounded-full bg-[#e7e4de]"
             >
               <span
-                className={`absolute top-1 h-5 w-5 rounded-full bg-stone-900 transition-transform duration-300 ${
-                  billing === 'monthly' ? 'left-1 translate-x-0' : 'left-1 translate-x-7'
-                }`}
+                className={[
+                  'absolute top-1 h-6 w-6 rounded-full bg-[#1b6b4a] transition-transform duration-300',
+                  billing === 'annual' ? 'translate-x-7' : 'translate-x-1',
+                ].join(' ')}
               />
             </button>
-
-            <span
-              className={`text-sm transition-colors ${
-                billing === 'annual' ? 'text-stone-900' : 'text-stone-400'
-              }`}
+            <button
+              type="button"
+              onClick={() => setBilling('annual')}
+              className={[
+                'rounded-full px-4 py-2 text-sm transition-colors',
+                billing === 'annual' ? 'bg-[#1a1a18] text-white' : 'text-[#7a7a72]',
+              ].join(' ')}
             >
               Annual
-            </span>
+            </button>
           </div>
+          <p className="mt-4 text-sm text-[#7a7a72]">Save up to 17%</p>
+        </section>
 
-          <p className="mt-4 text-sm text-stone-500">
-            Annual billing saves from £98 to £458 depending on plan.
+        <section className="mx-auto mt-10 max-w-[1320px] px-6 md:px-8">
+          <div className="grid gap-6 xl:grid-cols-3">
+            {plans.map((plan) => {
+              const isEnterprise = plan.tone === 'enterprise'
+              const hasPrice = typeof plan.monthlyPrice === 'number' && typeof plan.annualPrice === 'number'
+              const displayedPrice =
+                hasPrice && billing === 'annual' ? plan.annualPrice : plan.monthlyPrice
+              const displayedBillingCopy =
+                hasPrice && billing === 'annual' ? '/month' : hasPrice ? '/month' : null
+
+              return (
+                <article
+                  key={plan.name}
+                  className={[
+                    'rounded-[28px] border p-7 md:p-8',
+                    isEnterprise
+                      ? 'border-[rgba(0,0,0,0.06)] bg-[#1a1a18] text-white'
+                      : 'border-[rgba(0,0,0,0.08)] bg-white text-[#1a1a18]',
+                  ].join(' ')}
+                >
+                  {plan.badge ? (
+                    <div className="mb-5 inline-flex rounded-full bg-[rgba(201,169,78,0.14)] px-3 py-1 text-[11px] font-medium uppercase tracking-[0.08em] text-[#c9a94e]">
+                      {plan.badge}
+                    </div>
+                  ) : null}
+
+                  <p
+                    className={[
+                      'text-sm font-light',
+                      isEnterprise ? 'text-[#bdbcb2]' : 'text-[#707068]',
+                    ].join(' ')}
+                  >
+                    {plan.segment}
+                  </p>
+                  <h2 className="mt-3 text-[2.1rem] leading-none tracking-[-0.03em]">{plan.name}</h2>
+
+                  <div className="mt-6 flex items-end gap-2">
+                    {displayedPrice ? (
+                      <>
+                        <span className="text-[3rem] leading-none tracking-[-0.05em]">
+                          {formatGBP(displayedPrice)}
+                        </span>
+                        {displayedBillingCopy ? (
+                          <span
+                            className={[
+                              'pb-1 text-sm',
+                              isEnterprise ? 'text-[#c9c8bf]' : 'text-[#7a7a72]',
+                            ].join(' ')}
+                          >
+                            {displayedBillingCopy}
+                          </span>
+                        ) : null}
+                      </>
+                    ) : (
+                      <span className="text-[3rem] leading-none tracking-[-0.05em]">Custom</span>
+                    )}
+                  </div>
+
+                  <p
+                    className={[
+                      'mt-2 text-sm',
+                      isEnterprise ? 'text-[#c9c8bf]' : 'text-[#7a7a72]',
+                    ].join(' ')}
+                  >
+                    {plan.vatLabel}
+                  </p>
+                  <p
+                    className={[
+                      'mt-2 min-h-6 text-sm',
+                      isEnterprise ? 'text-[#bdbcb2]' : 'text-[#6a6a63]',
+                    ].join(' ')}
+                  >
+                    {billing === 'annual' ? plan.annualBillingText ?? plan.customPricingText ?? '' : plan.customPricingText ?? ''}
+                  </p>
+
+                  <div
+                    className={[
+                      'mt-5 flex items-center gap-2 rounded-lg px-3.5 py-2.5 text-[13px]',
+                      isEnterprise
+                        ? 'bg-[rgba(255,255,255,0.06)] text-[#d5d3cb]'
+                        : 'bg-[#f4f1eb] text-[#5c5c55]',
+                    ].join(' ')}
+                  >
+                    <span className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-current text-[10px]">
+                      i
+                    </span>
+                    <span>One-time setup: {plan.setupFee}</span>
+                  </div>
+
+                  <div
+                    className={[
+                      'mt-4 flex items-center gap-2 rounded-lg px-3.5 py-2.5 text-[13px] font-medium',
+                      isEnterprise
+                        ? 'bg-[rgba(201,169,78,0.12)] text-[#d8bc69]'
+                        : 'bg-[rgba(27,107,74,0.05)] text-[#1b6b4a]',
+                    ].join(' ')}
+                  >
+                    <span className="text-sm">↑</span>
+                    <span>{plan.roiText}</span>
+                  </div>
+
+                  <div
+                    className={[
+                      'mt-6 grid grid-cols-2 gap-4 border-b pb-6',
+                      isEnterprise ? 'border-[rgba(255,255,255,0.08)]' : 'border-[rgba(0,0,0,0.07)]',
+                    ].join(' ')}
+                  >
+                    <div>
+                      <p className={isEnterprise ? 'text-[10px] font-medium uppercase tracking-[0.08em] text-[#8f8e85]' : 'text-[10px] font-medium uppercase tracking-[0.08em] text-[#8a8a80]'}>
+                        Portfolio
+                      </p>
+                      <p className="mt-1 text-sm font-medium">{plan.portfolio}</p>
+                    </div>
+                    <div>
+                      <p className={isEnterprise ? 'text-[10px] font-medium uppercase tracking-[0.08em] text-[#8f8e85]' : 'text-[10px] font-medium uppercase tracking-[0.08em] text-[#8a8a80]'}>
+                        Users
+                      </p>
+                      <p className="mt-1 text-sm font-medium">{plan.users}</p>
+                    </div>
+                    <div>
+                      <p className={isEnterprise ? 'text-[10px] font-medium uppercase tracking-[0.08em] text-[#8f8e85]' : 'text-[10px] font-medium uppercase tracking-[0.08em] text-[#8a8a80]'}>
+                        Audit trail
+                      </p>
+                      <p className="mt-1 text-sm font-medium">{plan.auditTrail}</p>
+                    </div>
+                    <div>
+                      <p className={isEnterprise ? 'text-[10px] font-medium uppercase tracking-[0.08em] text-[#8f8e85]' : 'text-[10px] font-medium uppercase tracking-[0.08em] text-[#8a8a80]'}>
+                        Support
+                      </p>
+                      <p className="mt-1 text-sm font-medium">{plan.support}</p>
+                    </div>
+                  </div>
+
+                  <ul className="mt-6 space-y-2.5">
+                    {plan.features.map((feature) => (
+                      <li
+                        key={feature}
+                        className={[
+                          'flex items-start gap-2.5 text-[13px] font-light leading-6',
+                          isEnterprise ? 'text-[#d0cfc7]' : 'text-[#5c5c55]',
+                        ].join(' ')}
+                      >
+                        <span className="mt-1">
+                          <CheckBadge enterprise={isEnterprise} />
+                        </span>
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <div className="mt-8">
+                    <Link
+                      href={plan.href}
+                      className={[
+                        'block w-full rounded-[10px] px-4 py-3 text-center text-[13px] font-medium tracking-[0.02em] transition-colors',
+                        plan.tone === 'primary'
+                          ? 'bg-[#1b6b4a] text-white hover:bg-[#155c3e]'
+                          : plan.tone === 'enterprise'
+                            ? 'bg-[linear-gradient(135deg,#8b6914,#a07d1c)] text-white hover:opacity-90'
+                            : 'border border-[rgba(0,0,0,0.10)] bg-transparent text-[#1a1a18] hover:bg-[#f9f8f5]',
+                      ].join(' ')}
+                    >
+                      {plan.cta}
+                    </Link>
+                  </div>
+                </article>
+              )
+            })}
+          </div>
+        </section>
+
+        <section className="mx-auto mt-4 max-w-[1200px] px-6 md:px-8">
+          <div className="grid gap-4 lg:grid-cols-3">
+            {plans.map((plan) => (
+              <div
+                key={plan.name}
+                className="rounded-lg border border-[rgba(0,0,0,0.07)] bg-white px-4 py-3 text-center text-xs font-light tracking-[0.02em] text-[#8a8a80]"
+              >
+                Effective cost per checkout:{' '}
+                <strong className="font-medium text-[#1a1a18]">{plan.effectiveCost}</strong>
+              </div>
+            ))}
+          </div>
+          <p className="mt-6 text-center text-xs font-light tracking-[0.02em] text-[#b0b0a6]">
+            All prices exclusive of VAT. VAT charged at the applicable UK rate (currently 20%).
           </p>
         </section>
 
-        <section className="page-grid-3">
-          {plans.map((plan) => {
-            const price = billing === 'monthly' ? plan.monthlyPrice : plan.annualPrice
-            const suffix = billing === 'monthly' ? '/mo' : '/yr'
+        <section className="mx-auto mt-24 max-w-[960px] px-6 md:px-8">
+          <h2 className="text-center text-[36px] leading-none tracking-[-0.03em]">
+            Compare <em className="not-italic text-[#1b6b4a]">every plan</em>
+          </h2>
+          <p className="mt-3 text-center text-sm font-light text-[#8a8a80]">
+            Every plan includes every feature. Higher tiers add scale, users, and onboarding
+            depth.
+          </p>
 
-            return (
-              <article
-                key={plan.name}
-                className={[
-                  'page-card flex h-full flex-col',
-                  plan.highlighted ? 'border-[#cdb78d]' : '',
-                ].join(' ')}
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="app-kicker">{plan.tag}</p>
-                    <h2 className="mt-3 text-[30px] leading-[1.1]">{plan.name}</h2>
-                  </div>
-
-                  {plan.highlighted ? (
-                    <span className="rounded-full border border-[rgba(15,14,13,0.1)] bg-[#fcfbf9] px-3 py-1 text-xs font-medium text-[#7a7670]">
-                      Most popular
-                    </span>
-                  ) : null}
-                </div>
-
-                <div className="mt-8">
-                  <div className="flex items-end gap-2">
-                    <span className="text-4xl tracking-tight text-stone-900">{formatGBP(price)}</span>
-                    <span className="pb-1 text-base text-stone-500">{suffix}</span>
-                  </div>
-                  <p className="mt-3 text-sm text-stone-500">
-                    Setup fee <span className="font-medium text-stone-800">{formatGBP(plan.setupFee)}</span> one-time
-                  </p>
-                </div>
-
-                <div className="mt-8 space-y-3 border-y border-[rgba(15,14,13,0.08)] py-5">
-                  <div className="flex items-center justify-between gap-4 text-sm">
-                    <span className="text-stone-500">Portfolio</span>
-                    <span className="font-medium text-stone-900">{plan.portfolio}</span>
-                  </div>
-                  <div className="flex items-center justify-between gap-4 text-sm">
-                    <span className="text-stone-500">Users</span>
-                    <span className="font-medium text-stone-900">{plan.users}</span>
-                  </div>
-                  <div className="flex items-center justify-between gap-4 text-sm">
-                    <span className="text-stone-500">Storage</span>
-                    <span className="font-medium text-right text-stone-900">{plan.storage}</span>
-                  </div>
-                  <div className="flex items-center justify-between gap-4 text-sm">
-                    <span className="text-stone-500">Support</span>
-                    <span className="font-medium text-right text-stone-900">{plan.support}</span>
-                  </div>
-                </div>
-
-                <ul className="mt-6 space-y-3">
-                  {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-start gap-3 text-sm text-stone-600">
-                      <span className="mt-0.5 inline-flex rounded-full border border-[rgba(15,14,13,0.1)] bg-[#fcfbf9] p-1 text-stone-900">
-                        <Check className="h-3.5 w-3.5" />
-                      </span>
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <div className="mt-8 pt-2">
-                  <Link
-                    href="/contact"
-                    className={[
-                      'inline-flex w-full items-center justify-center rounded px-4 py-3 text-sm font-medium',
-                      plan.highlighted ? 'app-primary-button' : 'app-secondary-button',
-                    ].join(' ')}
-                  >
-                    {plan.cta}
-                  </Link>
-                </div>
-              </article>
-            )
-          })}
-        </section>
-
-        <section className="page-card">
-          <div className="grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)] lg:items-center">
-            <div>
-              <p className="app-kicker">Early access</p>
-              <h2 className="mt-3 text-[clamp(1.9rem,4vw,2.6rem)] leading-[1.12]">
-                Setup fee waived for the first 20 agencies
-              </h2>
-              <p className="mt-4 text-[15px] leading-8 text-[#3d3b37]">
-                Join early access now and save up to £799 on onboarding. If you manage more than
-                300 tenancies, contact us and we&apos;ll price around your portfolio and team size.
-              </p>
-              <div className="mt-6 flex flex-wrap gap-3">
-                <Link href="/contact" className="app-primary-button rounded px-5 py-3 text-sm font-medium">
-                  Claim early access
-                </Link>
-                <Link href="/demo" className="app-secondary-button rounded px-5 py-3 text-sm font-medium">
-                  View live demo
-                </Link>
-              </div>
-            </div>
-
-            <div className="rounded-xl border border-[rgba(15,14,13,0.1)] bg-[#fcfbf9] p-6">
-              <p className="app-kicker">Indicative cost per tenancy</p>
-              <div className="mt-4 space-y-4">
-                {perTenancyStats.map((stat, index) => (
-                  <div
-                    key={stat.label}
-                    className={index === perTenancyStats.length - 1 ? 'flex items-center justify-between gap-4' : 'flex items-center justify-between gap-4 border-b border-[rgba(15,14,13,0.08)] pb-4'}
-                  >
-                    <span className="text-sm text-stone-500">{stat.label}</span>
-                    <span className="text-lg text-stone-900">{stat.value}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="page-card">
-          <div className="flex items-end justify-between gap-4">
-            <div>
-              <p className="app-kicker">Compare plans</p>
-              <h2 className="mt-3 text-[clamp(1.9rem,4vw,2.6rem)] leading-[1.12]">
-                Feature comparison
-              </h2>
-            </div>
-          </div>
-
-          <div className="mt-8 overflow-x-auto rounded-xl border border-[rgba(15,14,13,0.1)] bg-white">
+          <div className="mt-12 overflow-x-auto rounded-[12px] border border-[rgba(0,0,0,0.07)] bg-white">
             <table className="min-w-[760px] w-full border-collapse">
               <thead>
-                <tr className="border-b border-[rgba(15,14,13,0.1)] bg-[#fcfbf9]">
-                  <th className="px-6 py-4 text-left text-sm font-medium text-stone-600">Feature</th>
-                  <th className="px-6 py-4 text-center text-sm font-medium text-stone-900">Starter</th>
-                  <th className="px-6 py-4 text-center text-sm font-medium text-stone-900">Agency</th>
-                  <th className="px-6 py-4 text-center text-sm font-medium text-stone-900">Studio</th>
+                <tr className="bg-[#f9f8f5]">
+                  <th className="border-b border-[rgba(0,0,0,0.10)] px-5 py-4 text-left text-[11px] font-medium uppercase tracking-[0.1em] text-[#8a8a80]">
+                    Feature
+                  </th>
+                  <th className="border-b border-[rgba(0,0,0,0.10)] px-5 py-4 text-center text-[11px] font-medium uppercase tracking-[0.1em] text-[#1a1a18]">
+                    Branch
+                  </th>
+                  <th className="border-b border-[rgba(0,0,0,0.10)] px-5 py-4 text-center text-[11px] font-medium uppercase tracking-[0.1em] text-[#1a1a18]">
+                    Regional
+                  </th>
+                  <th className="border-b border-[rgba(0,0,0,0.10)] px-5 py-4 text-center text-[11px] font-medium uppercase tracking-[0.1em] text-[#1a1a18]">
+                    Group
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {comparisonRows.map((row, index) => (
                   <tr
                     key={row.feature}
-                    className={index !== comparisonRows.length - 1 ? 'border-b border-[rgba(15,14,13,0.08)]' : ''}
+                    className={index < comparisonRows.length - 1 ? 'border-b border-[rgba(0,0,0,0.07)]' : ''}
                   >
-                    <td className="px-6 py-4 text-sm text-stone-600">{row.feature}</td>
-                    <td className="px-6 py-4 text-center">
-                      <ComparisonCell value={row.starter} muted={Boolean(row.muted)} />
-                    </td>
-                    <td className="bg-[#fcfbf9] px-6 py-4 text-center">
-                      <ComparisonCell value={row.agency} muted={Boolean(row.muted)} />
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <ComparisonCell value={row.studio} muted={Boolean(row.muted)} />
-                    </td>
+                    <td className="px-5 py-3.5 text-sm font-light text-[#5c5c55]">{row.feature}</td>
+                    {row.allPlansNote ? (
+                      <td
+                        colSpan={3}
+                        className="px-5 py-3.5 text-center text-[11px] italic text-[#b0b0a6]"
+                      >
+                        {row.branch}
+                      </td>
+                    ) : (
+                      <>
+                        <td className="px-5 py-3.5 text-center text-sm text-[#5c5c55]">
+                          <ComparisonValue value={row.branch} />
+                        </td>
+                        <td className="px-5 py-3.5 text-center text-sm text-[#5c5c55]">
+                          <ComparisonValue value={row.regional} />
+                        </td>
+                        <td className="px-5 py-3.5 text-center text-sm text-[#5c5c55]">
+                          <ComparisonValue value={row.group} enterprise />
+                        </td>
+                      </>
+                    )}
                   </tr>
                 ))}
               </tbody>
@@ -401,67 +623,65 @@ export default function PricingPageClient() {
           </div>
         </section>
 
-        <section className="page-card">
-          <div className="mx-auto max-w-4xl">
-            <p className="app-kicker text-center">FAQ</p>
-            <h2 className="mt-3 text-center text-[clamp(1.9rem,4vw,2.6rem)] leading-[1.12]">
-              Common questions
-            </h2>
+        <section className="mx-auto max-w-[680px] px-6 pb-24 pt-24 md:px-8">
+          <h2 className="text-center text-[36px] leading-none tracking-[-0.03em]">
+            Common questions
+          </h2>
 
-            <div className="mt-8 space-y-4">
-              {faqs.map((item, index) => {
-                const isOpen = openFaq === index
+          <div className="mt-12">
+            {faqs.map((item, index) => {
+              const isOpen = openFaq === index
 
-                return (
-                  <div key={item.q} className="rounded-xl border border-[rgba(15,14,13,0.1)] bg-white">
-                    <button
-                      type="button"
-                      className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left sm:px-6"
-                      onClick={() => setOpenFaq(isOpen ? null : index)}
-                      aria-expanded={isOpen}
-                    >
-                      <span className="text-base font-medium text-stone-900">{item.q}</span>
-                      <ChevronDown
-                        className={`h-5 w-5 shrink-0 text-stone-400 transition-transform duration-300 ${
-                          isOpen ? 'rotate-180' : ''
-                        }`}
-                      />
-                    </button>
-
-                    <div
-                      className={`grid transition-all duration-300 ease-out ${
-                        isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
-                      }`}
-                    >
-                      <div className="overflow-hidden">
-                        <div className="px-5 pb-5 text-sm leading-6 text-stone-600 sm:px-6">
-                          {item.a}
-                        </div>
-                      </div>
+              return (
+                <div key={item.q} className="border-b border-[rgba(0,0,0,0.07)]">
+                  <button
+                    type="button"
+                    className="flex w-full items-center justify-between gap-4 py-5 text-left text-sm text-[#1a1a18] transition-colors hover:text-[#1b6b4a]"
+                    onClick={() => setOpenFaq(isOpen ? null : index)}
+                    aria-expanded={isOpen}
+                  >
+                    <span>{item.q}</span>
+                    <Plus
+                      className={[
+                        'h-[18px] w-[18px] shrink-0 text-[#8a8a80] transition-transform duration-300',
+                        isOpen ? 'rotate-45' : '',
+                      ].join(' ')}
+                    />
+                  </button>
+                  <div
+                    className={[
+                      'grid transition-all duration-300 ease-out',
+                      isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
+                    ].join(' ')}
+                  >
+                    <div className="overflow-hidden">
+                      <p className="pb-5 text-[13px] font-light leading-7 text-[#5c5c55]">
+                        {item.a}
+                      </p>
                     </div>
                   </div>
-                )
-              })}
-            </div>
+                </div>
+              )
+            })}
           </div>
         </section>
 
-        <section className="page-hero text-center">
-          <h2 className="text-[clamp(1.9rem,4vw,2.6rem)] leading-[1.12]">
-            Ready to simplify every end of tenancy?
+        <section className="border-t border-[rgba(0,0,0,0.07)] bg-white px-6 py-[72px] text-center md:px-8">
+          <h2 className="text-[32px] leading-none tracking-[-0.03em]">
+            Ready to get 75 hours back every month?
           </h2>
-          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
             <Link
               href="/contact"
-              className="app-primary-button inline-flex w-full items-center justify-center rounded px-5 py-3 text-sm font-medium sm:w-auto"
+              className="inline-flex items-center justify-center rounded-[8px] bg-[#1b6b4a] px-8 py-3 text-[13px] font-medium text-white transition-colors hover:bg-[#155c3e]"
             >
-              Request early access
+              Request access
             </Link>
             <Link
               href="/demo"
-              className="app-secondary-button inline-flex w-full items-center justify-center rounded px-5 py-3 text-sm font-medium sm:w-auto"
+              className="inline-flex items-center justify-center rounded-[8px] border border-[rgba(0,0,0,0.10)] bg-transparent px-8 py-3 text-[13px] font-medium text-[#1a1a18] transition-colors hover:bg-[#f9f8f5]"
             >
-              Try live demo
+              View demo
             </Link>
           </div>
         </section>

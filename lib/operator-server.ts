@@ -1,9 +1,10 @@
-import { forbidden, redirect } from 'next/navigation'
+import { redirect } from 'next/navigation'
 import type { User } from '@supabase/supabase-js'
 import {
   getActiveTenantFailureDetail,
   resolveActiveTenantMembership,
 } from '@/lib/operator-membership-server'
+import { normalizeReturnTo } from '@/lib/return-to'
 import type { MinimalSessionCookie } from '@/lib/supabase-session'
 import {
   getOperatorProfileForUserId,
@@ -37,7 +38,26 @@ type OperatorContextResult =
       ok: false
       status: 401 | 403
       detail: string
-    }
+  }
+
+function buildLoginRedirect(returnTo: string) {
+  return `/login?returnTo=${encodeURIComponent(normalizeReturnTo(returnTo))}`
+}
+
+function buildWorkspaceAccessRedirect(
+  returnTo: string,
+  reason?: 'membership' | 'forbidden'
+) {
+  const searchParams = new URLSearchParams({
+    returnTo: normalizeReturnTo(returnTo),
+  })
+
+  if (reason) {
+    searchParams.set('reason', reason)
+  }
+
+  return `/workspace-access?${searchParams.toString()}`
+}
 
 async function resolveOperatorContext(): Promise<OperatorContextResult> {
   const authResult = await refreshOperatorSessionIfNeeded()
@@ -89,7 +109,7 @@ export async function requireOperatorSession(returnTo: string) {
   const result = await refreshOperatorSessionIfNeeded()
 
   if (!result.ok) {
-    redirect(`/login?returnTo=${encodeURIComponent(returnTo)}`)
+    redirect(buildLoginRedirect(returnTo))
   }
 
   return {
@@ -114,10 +134,10 @@ export async function requireActiveTenantMembership(
 
   if (!result.ok) {
     if (result.status === 401) {
-      redirect(`/login?returnTo=${encodeURIComponent(returnTo)}`)
+      redirect(buildLoginRedirect(returnTo))
     }
 
-    forbidden()
+    redirect(buildWorkspaceAccessRedirect(returnTo, 'membership'))
   }
 
   return result.context
@@ -127,7 +147,7 @@ export async function requireOperatorRole(returnTo: string, minimumRole: Operato
   const context = await requireOperatorTenant(returnTo)
 
   if (!hasRole(context.role, minimumRole)) {
-    forbidden()
+    redirect(buildWorkspaceAccessRedirect(returnTo, 'forbidden'))
   }
 
   return context
@@ -147,7 +167,7 @@ export async function requireMembershipPermission(
   const context = await requireOperatorTenant(returnTo)
 
   if (!hasPermission(context.role, permission)) {
-    forbidden()
+    redirect(buildWorkspaceAccessRedirect(returnTo, 'forbidden'))
   }
 
   return context

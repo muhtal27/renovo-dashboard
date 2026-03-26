@@ -14,7 +14,7 @@ class Settings(BaseSettings):
 
     project_name: str = Field(default="Renovo Backend", validation_alias="PROJECT_NAME")
     app_env: str = Field(default="local", validation_alias="APP_ENV")
-    debug: bool = Field(default=True, validation_alias="DEBUG")
+    debug: bool = Field(default=False, validation_alias="DEBUG")
     api_v1_prefix: str = Field(default="/api/v1", validation_alias="API_V1_PREFIX")
     database_url: str = Field(validation_alias="DATABASE_URL")
 
@@ -42,6 +42,11 @@ class Settings(BaseSettings):
         return make_url(self.database_url).set(drivername="postgresql+asyncpg").render_as_string(
             hide_password=False
         )
+
+    @computed_field(return_type=bool)
+    @property
+    def is_production(self) -> bool:
+        return self.app_env.strip().lower() in {"prod", "production"}
 
 
 @lru_cache(maxsize=1)
