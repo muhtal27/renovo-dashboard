@@ -5,8 +5,9 @@ import type { ReactNode } from 'react'
 import { useEffect, useMemo, useState } from 'react'
 import { BarChart3, BookOpenText, Menu, Search, Settings as SettingsIcon } from 'lucide-react'
 import { OperatorNav } from '@/app/operator-nav'
+import { hasPermission, OPERATOR_PERMISSIONS } from '@/lib/operator-rbac'
 import { getOperatorLabel } from '@/lib/operator'
-import { supabase } from '@/lib/supabase'
+import { clearLegacySupabaseBrowserAuthArtifacts } from '@/lib/supabase-session'
 import { cn } from '@/lib/ui'
 import { useOperatorGate } from '@/lib/use-operator-gate'
 
@@ -79,7 +80,6 @@ export function OperatorLayout({
   const { operator } = useOperatorGate()
   const operatorLabel = getOperatorLabel(operator)
   const [searchValue, setSearchValue] = useState(initialSearchValue)
-  const [fallbackViewerLabel, setFallbackViewerLabel] = useState('')
   const [signingOut, setSigningOut] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
@@ -88,36 +88,27 @@ export function OperatorLayout({
     setSearchValue(initialSearchValue)
   }, [initialSearchValue])
 
-  useEffect(() => {
-    if (operatorLabel?.trim()) return
-
-    let cancelled = false
-
-    async function loadViewer() {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-
-      if (!cancelled) {
-        setFallbackViewerLabel(session?.user?.email?.trim() || '')
-      }
-    }
-
-    void loadViewer()
-
-    return () => {
-      cancelled = true
-    }
-  }, [operatorLabel])
-
   async function handleSignOut() {
     setSigningOut(true)
-    await supabase.auth.signOut()
+    await fetch('/api/operator/session', {
+      method: 'DELETE',
+      credentials: 'same-origin',
+    })
+    clearLegacySupabaseBrowserAuthArtifacts(process.env.NEXT_PUBLIC_SUPABASE_URL)
     window.location.href = '/login'
   }
 
-  const displayName = operatorLabel?.trim() || fallbackViewerLabel
-  const headerActions = actions ?? DEFAULT_ACTIONS
+  const displayName = operatorLabel?.trim() || operator?.authUser?.email?.trim() || ''
+  const operatorRole = operator?.membership?.role ?? null
+  const headerActions =
+    actions ??
+    DEFAULT_ACTIONS.filter((action) => {
+      if (action.href === '/settings') {
+        return hasPermission(operatorRole, OPERATOR_PERMISSIONS.MANAGE_SETTINGS)
+      }
+
+      return true
+    })
   const searchAction = useMemo(() => {
     const trimmed = searchValue.trim()
     return trimmed ? `${searchTargetPath}?search=${encodeURIComponent(trimmed)}` : searchTargetPath
@@ -128,6 +119,7 @@ export function OperatorLayout({
       <div className="flex min-h-screen">
         <OperatorNav
           viewerName={displayName}
+          role={operatorRole}
           collapsed={sidebarCollapsed}
           mobileOpen={mobileNavOpen}
           onToggleCollapse={() => setSidebarCollapsed((current) => !current)}

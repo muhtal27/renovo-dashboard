@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
 import { OperatorLayout } from '@/app/operator-layout'
 import { EotPortfolioClient } from '@/app/eot/_components/eot-portfolio-client'
-import { requireOperatorTenant } from '@/lib/operator-server'
+import { OPERATOR_PERMISSIONS } from '@/lib/operator-rbac'
+import { requireOperatorPermission } from '@/lib/operator-server'
 
 export const metadata: Metadata = {
   title: 'Reports | Renovo',
@@ -12,7 +13,7 @@ type PageProps = {
 }
 
 export default async function ReportsPage({ searchParams }: PageProps) {
-  await requireOperatorTenant('/reports')
+  await requireOperatorPermission('/reports', OPERATOR_PERMISSIONS.VIEW_REPORTING)
   const resolvedSearchParams = await searchParams
   const searchValue = resolvedSearchParams.search
   const initialSearchValue = Array.isArray(searchValue) ? searchValue[0] ?? '' : searchValue ?? ''

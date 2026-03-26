@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from app.models.case import Case
     from app.models.inspection import Inspection
     from app.models.property import Property
+    from app.models.tenant_membership import TenantMembership
     from app.models.tenancy import Tenancy
 
 
@@ -42,6 +43,10 @@ class Tenant(BaseModel, Base):
         cascade="all, delete-orphan",
     )
     cases: Mapped[list["Case"]] = relationship(
+        back_populates="tenant",
+        cascade="all, delete-orphan",
+    )
+    memberships: Mapped[list["TenantMembership"]] = relationship(
         back_populates="tenant",
         cascade="all, delete-orphan",
     )

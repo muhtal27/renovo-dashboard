@@ -16,10 +16,16 @@ import {
   Sparkles,
   X,
 } from 'lucide-react'
+import {
+  hasPermission,
+  OPERATOR_PERMISSIONS,
+  type OperatorRole,
+} from '@/lib/operator-rbac'
 import { cn } from '@/lib/ui'
 
 type OperatorNavProps = {
   viewerName?: string | null
+  role?: OperatorRole | null
   collapsed: boolean
   mobileOpen: boolean
   onToggleCollapse: () => void
@@ -31,6 +37,7 @@ type NavItem = {
   href: string
   icon: typeof LayoutDashboard
   isActive: (pathname: string) => boolean
+  requiredPermission?: (typeof OPERATOR_PERMISSIONS)[keyof typeof OPERATOR_PERMISSIONS]
 }
 
 const NAV_GROUPS: Array<{
@@ -86,6 +93,7 @@ const NAV_GROUPS: Array<{
         href: '/reports',
         icon: BarChart3,
         isActive: (pathname) => pathname.startsWith('/reports'),
+        requiredPermission: OPERATOR_PERMISSIONS.VIEW_REPORTING,
       },
       {
         label: 'Knowledge',
@@ -109,6 +117,7 @@ const NAV_GROUPS: Array<{
         href: '/settings',
         icon: Settings,
         isActive: (pathname) => pathname.startsWith('/settings'),
+        requiredPermission: OPERATOR_PERMISSIONS.MANAGE_SETTINGS,
       },
     ],
   },
@@ -158,6 +167,7 @@ function NavLink({
 function SidebarContent({
   pathname,
   viewerName,
+  role,
   collapsed,
   onToggleCollapse,
   onNavigate,
@@ -165,11 +175,19 @@ function SidebarContent({
 }: {
   pathname: string
   viewerName?: string | null
+  role?: OperatorRole | null
   collapsed: boolean
   onToggleCollapse: () => void
   onNavigate?: () => void
   mobile?: boolean
 }) {
+  const visibleGroups = NAV_GROUPS.map((group) => ({
+    ...group,
+    items: group.items.filter(
+      (item) => !item.requiredPermission || hasPermission(role, item.requiredPermission)
+    ),
+  })).filter((group) => group.items.length > 0)
+
   return (
     <div className="flex h-full flex-col">
       <div className={cn('flex items-center gap-3', collapsed && !mobile ? 'justify-center' : 'justify-between')}>
@@ -209,7 +227,7 @@ function SidebarContent({
       </div>
 
       <div className="mt-8 space-y-7">
-        {NAV_GROUPS.map((group) => (
+        {visibleGroups.map((group) => (
           <div key={group.label}>
             {!collapsed || mobile ? (
               <p className="px-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
@@ -263,6 +281,7 @@ function SidebarContent({
 
 export function OperatorNav({
   viewerName,
+  role,
   collapsed,
   mobileOpen,
   onToggleCollapse,
@@ -280,11 +299,12 @@ export function OperatorNav({
       >
         <div className="sticky top-0 h-screen px-4 py-4">
           <SidebarContent
-            pathname={pathname}
-            viewerName={viewerName}
-            collapsed={collapsed}
-            onToggleCollapse={onToggleCollapse}
-          />
+              pathname={pathname}
+              viewerName={viewerName}
+              role={role}
+              collapsed={collapsed}
+              onToggleCollapse={onToggleCollapse}
+            />
         </div>
       </aside>
 
@@ -307,6 +327,7 @@ export function OperatorNav({
             <SidebarContent
               pathname={pathname}
               viewerName={viewerName}
+              role={role}
               collapsed={false}
               onToggleCollapse={onCloseMobile}
               onNavigate={onCloseMobile}

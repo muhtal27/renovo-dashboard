@@ -19,16 +19,17 @@ EOT_SIGNATURE_HEADER = "x-renovo-eot-signature"
 
 class SignedOperatorContext(BaseModel):
     version: int
-    user_id: str
+    user_id: UUID
     tenant_id: UUID
+    membership_id: UUID | None = None
     role: str | None = None
     issued_at: int
 
 
 class AuthenticatedOperatorContext(BaseModel):
-    user_id: str
+    user_id: UUID
     tenant_id: UUID
-    role: str | None = None
+    membership_id: UUID | None = None
 
 
 def _decode_base64url(value: str) -> bytes:
@@ -90,5 +91,5 @@ def get_authenticated_operator_context(
     return AuthenticatedOperatorContext(
         user_id=payload.user_id,
         tenant_id=payload.tenant_id,
-        role=payload.role,
+        membership_id=payload.membership_id,
     )

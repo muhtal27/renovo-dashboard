@@ -1,19 +1,17 @@
 import type { AuthSession } from '@supabase/supabase-js'
 
-export const SUPABASE_SESSION_COOKIE = 'renovo-sb-session'
-export const SUPABASE_SESSION_COOKIE_MAX_AGE = 60 * 60 * 24 * 30
+export const SUPABASE_SESSION_COOKIE = 'renovo-operator-session'
+export const LEGACY_SUPABASE_SESSION_COOKIE = 'renovo-sb-session'
+export const SUPABASE_SESSION_COOKIE_MAX_AGE = 60 * 60 * 24 * 14
 
-type MinimalSessionCookie = {
+export type MinimalSessionCookie = {
   access_token: string
   refresh_token?: string
   expires_at?: AuthSession['expires_at']
 }
 
 export function toMinimalSupabaseSession(session: Partial<AuthSession> | null | undefined) {
-  if (
-    !session ||
-    typeof session.access_token !== 'string'
-  ) {
+  if (!session || typeof session.access_token !== 'string') {
     return null
   }
 
@@ -36,13 +34,6 @@ function readCookie(name: string) {
   const match = parts.find((part) => part.startsWith(prefix))
 
   return match ? match.slice(prefix.length) : null
-}
-
-function writeCookie(name: string, value: string) {
-  if (!canUseBrowserStorage()) return
-
-  const secure = window.location.protocol === 'https:' ? '; Secure' : ''
-  document.cookie = `${name}=${value}; Path=/; Max-Age=${SUPABASE_SESSION_COOKIE_MAX_AGE}; SameSite=Lax${secure}`
 }
 
 function clearCookie(name: string) {
@@ -82,59 +73,51 @@ export function serializeSupabaseSessionCookie(session: MinimalSessionCookie) {
   return encodeURIComponent(JSON.stringify(session))
 }
 
-export function syncBrowserSupabaseSessionCookie(session: Partial<AuthSession> | null | undefined) {
-  if (!canUseBrowserStorage()) return
-
-  const minimalSession = toMinimalSupabaseSession(session)
-
-  if (!minimalSession) {
-    clearCookie(SUPABASE_SESSION_COOKIE)
-    return
-  }
-
-  writeCookie(SUPABASE_SESSION_COOKIE, serializeSupabaseSessionCookie(minimalSession))
+export function shouldUseSecureCookies() {
+  return process.env.NODE_ENV === 'production' && process.env.VERCEL !== undefined
 }
 
-export function createBrowserSupabaseStorage(storageKey: string) {
+export function getOperatorSessionCookieOptions(secure = shouldUseSecureCookies()) {
   return {
-    getItem(key: string) {
-      if (!canUseBrowserStorage()) return null
-
-      const localValue = window.localStorage.getItem(key)
-      if (localValue) return localValue
-
-      if (key !== storageKey) return null
-
-      const cookieSession = parseSupabaseSessionCookie(readCookie(SUPABASE_SESSION_COOKIE))
-      return cookieSession ? JSON.stringify(cookieSession) : null
-    },
-    setItem(key: string, value: string) {
-      if (!canUseBrowserStorage()) return
-
-      window.localStorage.setItem(key, value)
-
-      if (key !== storageKey) return
-
-      const minimalSession = toMinimalSessionCookie(value)
-
-      if (minimalSession) {
-        syncBrowserSupabaseSessionCookie(minimalSession)
-      } else {
-        clearCookie(SUPABASE_SESSION_COOKIE)
-      }
-    },
-    removeItem(key: string) {
-      if (!canUseBrowserStorage()) return
-
-      window.localStorage.removeItem(key)
-
-      if (key === storageKey) {
-        clearCookie(SUPABASE_SESSION_COOKIE)
-      }
-    },
+    path: '/',
+    httpOnly: true,
+    sameSite: 'lax' as const,
+    secure,
+    maxAge: SUPABASE_SESSION_COOKIE_MAX_AGE,
   }
 }
 
 export function getSupabaseStorageKey(supabaseUrl: string) {
   return `sb-${new URL(supabaseUrl).hostname.split('.')[0]}-auth-token`
+}
+
+export function clearLegacySupabaseBrowserAuthArtifacts(supabaseUrl?: string | null) {
+  if (!canUseBrowserStorage()) return
+
+  if (supabaseUrl) {
+    try {
+      window.localStorage.removeItem(getSupabaseStorageKey(supabaseUrl))
+    } catch {
+      // Ignore browser storage failures during cleanup.
+    }
+  }
+
+  clearCookie(LEGACY_SUPABASE_SESSION_COOKIE)
+}
+
+export function readLegacyBrowserSupabaseSession(supabaseUrl?: string | null) {
+  if (!canUseBrowserStorage()) return null
+
+  if (supabaseUrl) {
+    try {
+      const localValue = window.localStorage.getItem(getSupabaseStorageKey(supabaseUrl))
+      if (localValue) {
+        return toMinimalSessionCookie(localValue)
+      }
+    } catch {
+      // Ignore browser storage failures during migration.
+    }
+  }
+
+  return parseSupabaseSessionCookie(readCookie(LEGACY_SUPABASE_SESSION_COOKIE))
 }

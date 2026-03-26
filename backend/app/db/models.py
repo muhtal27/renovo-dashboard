@@ -9,9 +9,11 @@ from app.models.property import Property
 from app.models.recommendation import Recommendation
 from app.models.tenancy import Tenancy
 from app.models.tenant import Tenant
+from app.models.tenant_membership import TenantMembership
 
 __all__ = [
     "Tenant",
+    "TenantMembership",
     "Property",
     "Tenancy",
     "Case",

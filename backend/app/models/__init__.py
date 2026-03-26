@@ -9,9 +9,18 @@ from app.models.property import Property
 from app.models.recommendation import Recommendation, RecommendationDecision
 from app.models.tenancy import Tenancy
 from app.models.tenant import Tenant
+from app.models.tenant_membership import (
+    TenantMembership,
+    TenantMembershipRole,
+    TenantMembershipStatus,
+)
+from app.models.user_profile import UserProfile
 
 __all__ = [
     "Tenant",
+    "TenantMembership",
+    "TenantMembershipRole",
+    "TenantMembershipStatus",
     "Property",
     "Tenancy",
     "Case",
@@ -30,4 +39,5 @@ __all__ = [
     "Document",
     "Inspection",
     "InspectionStatus",
+    "UserProfile",
 ]

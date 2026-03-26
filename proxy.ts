@@ -2,10 +2,11 @@ import { createClient } from '@supabase/supabase-js'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import {
+  getOperatorSessionCookieOptions,
+  LEGACY_SUPABASE_SESSION_COOKIE,
   parseSupabaseSessionCookie,
   serializeSupabaseSessionCookie,
   SUPABASE_SESSION_COOKIE,
-  SUPABASE_SESSION_COOKIE_MAX_AGE,
 } from '@/lib/supabase-session'
 
 const PRIMARY_HOST = 'renovoai.co.uk'
@@ -63,20 +64,28 @@ function syncSessionCookie(
   secure: boolean
 ) {
   if (!session) {
+    const options = getOperatorSessionCookieOptions()
     response.cookies.set(SUPABASE_SESSION_COOKIE, '', {
-      path: '/',
+      ...options,
       maxAge: 0,
+    })
+    response.cookies.set(LEGACY_SUPABASE_SESSION_COOKIE, '', {
+      path: '/',
       sameSite: 'lax',
       secure,
+      maxAge: 0,
     })
     return
   }
 
   response.cookies.set(SUPABASE_SESSION_COOKIE, serializeSupabaseSessionCookie(session), {
+    ...getOperatorSessionCookieOptions(secure),
+  })
+  response.cookies.set(LEGACY_SUPABASE_SESSION_COOKIE, '', {
     path: '/',
-    maxAge: SUPABASE_SESSION_COOKIE_MAX_AGE,
     sameSite: 'lax',
     secure,
+    maxAge: 0,
   })
 }
 

@@ -8,6 +8,15 @@ from sqlalchemy import Select, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, selectinload
 
+from app.api.eot.authorization import (
+    AuthorizedOperatorContext,
+    AuthorizationError,
+    Permission,
+    OperatorRole,
+    apply_case_visibility,
+    require_case_access,
+    require_permission,
+)
 from app.models.case import Case
 from app.models.claim import Claim
 from app.models.evidence import Evidence
@@ -15,6 +24,10 @@ from app.models.issue import Issue, IssueSeverity, IssueStatus
 from app.models.property import Property
 from app.models.recommendation import Recommendation, RecommendationDecision
 from app.models.tenancy import Tenancy
+from app.models.tenant_membership import (
+    TenantMembership,
+    TenantMembershipStatus,
+)
 from app.models.tenant import Tenant
 from app.models.message import Message
 from app.schemas.eot import (
@@ -34,7 +47,9 @@ class EOTService:
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
-    async def list_cases(self, tenant_id: UUID) -> list[CaseListItem]:
+    async def list_cases(self, operator: AuthorizedOperatorContext) -> list[CaseListItem]:
+        require_permission(operator, Permission.VIEW_CASE)
+
         evidence_counts = (
             select(Evidence.case_id, func.count(Evidence.id).label("evidence_count"))
             .where(Evidence.deleted_at.is_(None))
@@ -66,13 +81,14 @@ class EOTService:
             .outerjoin(issue_counts, issue_counts.c.case_id == Case.id)
             .outerjoin(evidence_counts, evidence_counts.c.case_id == Case.id)
             .where(
-                Case.tenant_id == tenant_id,
+                Case.tenant_id == operator.tenant_id,
                 Case.deleted_at.is_(None),
                 Tenancy.deleted_at.is_(None),
                 Property.deleted_at.is_(None),
             )
             .order_by(Case.last_activity_at.desc(), Case.created_at.desc())
         )
+        stmt = apply_case_visibility(stmt, operator)
 
         rows = (await self.session.execute(stmt)).all()
         return [
@@ -93,9 +109,13 @@ class EOTService:
             for row in rows
         ]
 
-    async def get_case_workspace(self, tenant_id: UUID, case_id: UUID) -> CaseWorkspaceResponse:
+    async def get_case_workspace(
+        self, operator: AuthorizedOperatorContext, case_id: UUID
+    ) -> CaseWorkspaceResponse:
+        require_permission(operator, Permission.VIEW_CASE)
+
         case = await self._get_case_for_tenant(
-            tenant_id=tenant_id,
+            operator=operator,
             case_id=case_id,
             options=self._workspace_options(),
         )
@@ -103,15 +123,19 @@ class EOTService:
             raise LookupError("Case not found for tenant.")
         return self._workspace_payload(case)
 
-    async def create_case(self, tenant_id: UUID, payload: CaseCreateRequest) -> CaseWorkspaceResponse:
-        tenant = await self.session.get(Tenant, tenant_id)
+    async def create_case(
+        self, operator: AuthorizedOperatorContext, payload: CaseCreateRequest
+    ) -> CaseWorkspaceResponse:
+        require_permission(operator, Permission.CREATE_CASE)
+
+        tenant = await self.session.get(Tenant, operator.tenant_id)
         if tenant is None or tenant.deleted_at is not None:
             raise LookupError("Tenant does not exist.")
 
         property_record = await self.session.scalar(
             select(Property).where(
                 Property.id == payload.property_id,
-                Property.tenant_id == tenant_id,
+                Property.tenant_id == operator.tenant_id,
                 Property.deleted_at.is_(None),
             )
         )
@@ -120,7 +144,7 @@ class EOTService:
 
         activity_at = self._utcnow()
         tenancy = Tenancy(
-            tenant_id=tenant_id,
+            tenant_id=operator.tenant_id,
             property_id=payload.property_id,
             tenant_name=payload.tenancy.tenant_name,
             tenant_email=payload.tenancy.tenant_email,
@@ -133,11 +157,11 @@ class EOTService:
         await self.session.flush()
 
         case = Case(
-            tenant_id=tenant_id,
+            tenant_id=operator.tenant_id,
             tenancy_id=tenancy.id,
             summary=payload.summary,
             status=payload.status,
-            assigned_to=payload.assigned_to,
+            assigned_to=await self._resolve_case_assignee(operator, payload.assigned_to),
             priority=payload.priority,
             last_activity_at=activity_at,
         )
@@ -146,7 +170,7 @@ class EOTService:
 
         self.session.add(
             Claim(
-                tenant_id=tenant_id,
+                tenant_id=operator.tenant_id,
                 case_id=case.id,
                 total_amount=Decimal("0.00"),
                 breakdown=[],
@@ -155,15 +179,19 @@ class EOTService:
         )
         await self.session.commit()
 
-        return await self.get_case_workspace(tenant_id, case.id)
+        return await self.get_case_workspace(operator, case.id)
 
-    async def add_evidence(self, tenant_id: UUID, payload: EvidenceCreateRequest) -> EvidenceResponse:
-        case = await self._get_case_for_tenant(tenant_id=tenant_id, case_id=payload.case_id)
+    async def add_evidence(
+        self, operator: AuthorizedOperatorContext, payload: EvidenceCreateRequest
+    ) -> EvidenceResponse:
+        require_permission(operator, Permission.MANAGE_EVIDENCE)
+
+        case = await self._get_case_for_tenant(operator=operator, case_id=payload.case_id)
         if case is None:
             raise LookupError("Case not found for tenant.")
 
         evidence = Evidence(
-            tenant_id=tenant_id,
+            tenant_id=operator.tenant_id,
             case_id=payload.case_id,
             file_url=payload.file_url,
             type=payload.type,
@@ -177,9 +205,13 @@ class EOTService:
         await self.session.refresh(evidence)
         return EvidenceResponse.model_validate(evidence)
 
-    async def upsert_issue(self, tenant_id: UUID, payload: IssueUpsertRequest) -> IssueResponse:
+    async def upsert_issue(
+        self, operator: AuthorizedOperatorContext, payload: IssueUpsertRequest
+    ) -> IssueResponse:
+        require_permission(operator, Permission.MANAGE_ISSUES)
+
         case = await self._get_case_for_tenant(
-            tenant_id=tenant_id,
+            operator=operator,
             case_id=payload.case_id,
             options=[
                 selectinload(Case.issues).selectinload(Issue.recommendation),
@@ -193,7 +225,7 @@ class EOTService:
             if not payload.title:
                 raise ValueError("title is required when creating an issue.")
             issue = Issue(
-                tenant_id=tenant_id,
+                tenant_id=operator.tenant_id,
                 case_id=payload.case_id,
                 title=payload.title,
                 description=payload.description,
@@ -208,7 +240,7 @@ class EOTService:
                 .where(
                     Issue.id == payload.issue_id,
                     Issue.case_id == payload.case_id,
-                    Issue.tenant_id == tenant_id,
+                    Issue.tenant_id == operator.tenant_id,
                     Issue.deleted_at.is_(None),
                 )
                 .options(selectinload(Issue.recommendation))
@@ -226,7 +258,7 @@ class EOTService:
 
         if payload.evidence_ids is not None:
             issue.evidence_items = await self._load_case_evidence(
-                tenant_id=tenant_id,
+                tenant_id=operator.tenant_id,
                 case_id=payload.case_id,
                 evidence_ids=payload.evidence_ids,
             )
@@ -234,7 +266,7 @@ class EOTService:
         recommendation = issue.recommendation
         if recommendation is None:
             recommendation = Recommendation(
-                tenant_id=tenant_id,
+                tenant_id=operator.tenant_id,
                 issue_id=issue.id,
             )
             self.session.add(recommendation)
@@ -257,13 +289,17 @@ class EOTService:
             raise LookupError("Issue not found after save.")
         return IssueResponse.model_validate(issue)
 
-    async def send_message(self, tenant_id: UUID, payload: MessageCreateRequest) -> MessageResponse:
-        case = await self._get_case_for_tenant(tenant_id=tenant_id, case_id=payload.case_id)
+    async def send_message(
+        self, operator: AuthorizedOperatorContext, payload: MessageCreateRequest
+    ) -> MessageResponse:
+        require_permission(operator, Permission.EDIT_CASE)
+
+        case = await self._get_case_for_tenant(operator=operator, case_id=payload.case_id)
         if case is None:
             raise LookupError("Case not found for tenant.")
 
         message = Message(
-            tenant_id=tenant_id,
+            tenant_id=operator.tenant_id,
             case_id=payload.case_id,
             sender_type=payload.sender_type,
             sender_id=payload.sender_id,
@@ -290,18 +326,22 @@ class EOTService:
     async def _get_case_for_tenant(
         self,
         *,
-        tenant_id: UUID,
+        operator: AuthorizedOperatorContext,
         case_id: UUID,
         options: list | None = None,
     ) -> Case | None:
         stmt: Select[tuple[Case]] = select(Case).where(
             Case.id == case_id,
-            Case.tenant_id == tenant_id,
+            Case.tenant_id == operator.tenant_id,
             Case.deleted_at.is_(None),
         )
         for option in options or []:
             stmt = stmt.options(option)
-        return await self.session.scalar(stmt)
+
+        case = await self.session.scalar(stmt)
+        if case is not None:
+            require_case_access(operator, case.assigned_to)
+        return case
 
     async def _load_case_evidence(
         self,
@@ -326,6 +366,35 @@ class EOTService:
         if len(evidence) != len(set(evidence_ids)):
             raise LookupError("One or more evidence items were not found for the case.")
         return evidence
+
+    async def _resolve_case_assignee(
+        self, operator: AuthorizedOperatorContext, assigned_to: UUID | None
+    ) -> UUID | None:
+        if operator.role == OperatorRole.OPERATOR:
+            if assigned_to is not None and assigned_to != operator.user_id:
+                raise AuthorizationError("Operator is not authorized to assign cases to other users.")
+
+            return operator.user_id
+
+        if assigned_to is not None:
+            require_permission(operator, Permission.REASSIGN_CASE)
+
+        if assigned_to is None:
+            return None
+
+        membership = await self.session.scalar(
+            select(TenantMembership).where(
+                TenantMembership.tenant_id == operator.tenant_id,
+                TenantMembership.user_id == assigned_to,
+                TenantMembership.status == TenantMembershipStatus.ACTIVE,
+                TenantMembership.deleted_at.is_(None),
+            )
+        )
+
+        if membership is None:
+            raise ValueError("Assigned operator must be an active member of the same tenant.")
+
+        return assigned_to
 
     async def _refresh_claim(self, case: Case) -> None:
         issues = list(

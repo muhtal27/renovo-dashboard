@@ -6,6 +6,7 @@ import {
   stripTenantScopeFromPayload,
 } from '@/lib/eot-server'
 import { getOperatorTenantContextForApi } from '@/lib/operator-server'
+import type { OperatorPermission } from '@/lib/operator-rbac'
 
 function buildBackendUrl(requestUrl: string, backendPath: string) {
   const baseUrl = getEotApiBaseUrl()
@@ -56,8 +57,12 @@ async function readSanitizedRequestBody(request: Request) {
   }
 }
 
-export async function proxyEotRequest(request: Request, backendPath: string) {
-  const authResult = await getOperatorTenantContextForApi()
+export async function proxyEotRequest(
+  request: Request,
+  backendPath: string,
+  requiredPermission?: OperatorPermission
+) {
+  const authResult = await getOperatorTenantContextForApi(requiredPermission)
 
   if (!authResult.ok) {
     return NextResponse.json({ detail: authResult.detail }, { status: authResult.status })
@@ -77,6 +82,8 @@ export async function proxyEotRequest(request: Request, backendPath: string) {
       userId: authResult.context.user.id,
       tenantId: authResult.context.tenantId,
       role: authResult.context.role,
+      membershipId: authResult.context.membershipId,
+      membershipStatus: authResult.context.membershipStatus,
     })
   } catch {
     return NextResponse.json(

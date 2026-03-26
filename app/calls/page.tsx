@@ -1,8 +1,9 @@
-'use client'
-
 import { OperatorLayout } from '@/app/operator-layout'
+import { requireOperatorTenant } from '@/lib/operator-server'
 
-export default function CallsPage() {
+export default async function CallsPage() {
+  await requireOperatorTenant('/calls')
+
   return (
     <OperatorLayout
       pageTitle="Inbox"

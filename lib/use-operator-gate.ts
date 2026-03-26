@@ -1,10 +1,9 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import type { User } from '@supabase/supabase-js'
-import { getOperatorProfile, type CurrentOperator } from '@/lib/operator'
-import { supabase } from '@/lib/supabase'
+import { clearLegacySupabaseBrowserAuthArtifacts } from '@/lib/supabase-session'
+import { fetchCurrentOperator, type CurrentOperator } from '@/lib/operator'
 
 type UseOperatorGateOptions = {
   missingProfileMessage?: string
@@ -21,7 +20,6 @@ export function useOperatorGate({
   const [operator, setOperator] = useState<CurrentOperator | null>(null)
   const [authLoading, setAuthLoading] = useState(true)
   const [authError, setAuthError] = useState<string | null>(null)
-  const profileRequestIdRef = useRef(0)
 
   useEffect(() => {
     let cancelled = false
@@ -35,68 +33,20 @@ export function useOperatorGate({
       router.replace(`/login?returnTo=${encodeURIComponent(returnTo)}`)
     }
 
-    async function hydrateOperator(user: User) {
-      const requestId = ++profileRequestIdRef.current
-
+    async function bootstrapAuth() {
       try {
-        const profile = await getOperatorProfile(user.id)
+        clearLegacySupabaseBrowserAuthArtifacts(process.env.NEXT_PUBLIC_SUPABASE_URL)
+        const currentOperator = await fetchCurrentOperator()
 
-        if (cancelled || profileRequestIdRef.current !== requestId) {
-          return
-        }
+        if (cancelled) return
 
-        setOperator((current) =>
-          current?.authUser?.id === user.id
-            ? {
-                authUser: user,
-                profile: profile ?? null,
-              }
-            : current
-        )
-      } catch {
-        if (cancelled || profileRequestIdRef.current !== requestId) {
-          return
-        }
-      }
-    }
-
-    async function applyUser(user: User | null) {
-      if (cancelled) return
-
-      if (!user) {
-        profileRequestIdRef.current += 1
-        setOperator(null)
+        setOperator(currentOperator)
         setAuthError(null)
         setAuthLoading(false)
 
-        if (unauthenticatedMode === 'redirect') {
+        if (!currentOperator?.authUser && unauthenticatedMode === 'redirect') {
           redirectToLogin()
         }
-
-        return
-      }
-
-      setOperator({
-        authUser: user,
-        profile: null,
-      })
-      setAuthError(null)
-      setAuthLoading(false)
-      void hydrateOperator(user)
-    }
-
-    async function bootstrapAuth() {
-      try {
-        const {
-          data: { session },
-          error: sessionError,
-        } = await supabase.auth.getSession()
-
-        if (sessionError) {
-          throw sessionError
-        }
-
-        await applyUser(session?.user ?? null)
       } catch (authError) {
         if (!cancelled) {
           setAuthError(authError instanceof Error ? authError.message : sessionErrorMessage)
@@ -107,15 +57,8 @@ export function useOperatorGate({
 
     void bootstrapAuth()
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      void applyUser(session?.user ?? null)
-    })
-
     return () => {
       cancelled = true
-      subscription.unsubscribe()
     }
   }, [router, sessionErrorMessage, unauthenticatedMode])
 

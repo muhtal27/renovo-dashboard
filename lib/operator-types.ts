@@ -1,16 +1,33 @@
-import type { User } from '@supabase/supabase-js'
+import type { OperatorMembershipStatus, OperatorRole } from '@/lib/operator-rbac'
 
 export type OperatorProfile = {
   id: string
   full_name: string | null
   avatar_url: string | null
   is_active: boolean | null
-  role: string | null
+}
+
+export type OperatorMembership = {
+  id: string
+  user_id: string
+  tenant_id: string
+  role: OperatorRole
+  status: OperatorMembershipStatus
+}
+
+export type OperatorAuthUser = {
+  id: string
+  email: string | null
+  app_metadata: Record<string, unknown> | null
+  user_metadata: Record<string, unknown> | null
 }
 
 export type CurrentOperator = {
-  authUser: User | null
+  authUser: OperatorAuthUser | null
   profile: OperatorProfile | null
+  membership: OperatorMembership | null
+  memberships: OperatorMembership[]
+  requiresTenantSelection: boolean
 }
 
 export function getOperatorLabel(operator: CurrentOperator | null) {

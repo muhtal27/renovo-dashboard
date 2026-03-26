@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import { syncBrowserSupabaseSessionCookie } from '@/lib/supabase-session'
+import { clearLegacySupabaseBrowserAuthArtifacts } from '@/lib/supabase-session'
 
 export default function ResetPasswordPage() {
   const router = useRouter()
@@ -17,11 +17,10 @@ export default function ResetPasswordPage() {
 
   useEffect(() => {
     async function checkRecoverySession() {
+      clearLegacySupabaseBrowserAuthArtifacts(process.env.NEXT_PUBLIC_SUPABASE_URL)
       const {
         data: { session },
       } = await supabase.auth.getSession()
-
-      syncBrowserSupabaseSessionCookie(session)
 
       if (!session?.user) {
         setMessage('This password reset link is invalid or has expired. Request a new one from the login page.')
@@ -38,7 +37,9 @@ export default function ResetPasswordPage() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      syncBrowserSupabaseSessionCookie(session)
+      if (!session?.user) {
+        setReady(false)
+      }
     })
 
     return () => {
@@ -75,6 +76,11 @@ export default function ResetPasswordPage() {
 
     setMessage('Password updated. Redirecting you to sign in...')
     setSaving(false)
+    await fetch('/api/operator/session', {
+      method: 'DELETE',
+      credentials: 'same-origin',
+    })
+    clearLegacySupabaseBrowserAuthArtifacts(process.env.NEXT_PUBLIC_SUPABASE_URL)
     window.setTimeout(() => {
       router.replace('/login')
       router.refresh()

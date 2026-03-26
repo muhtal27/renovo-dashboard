@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "governance:check": "node scripts/check-root-governance.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.99.2",

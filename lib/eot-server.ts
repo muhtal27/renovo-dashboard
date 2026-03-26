@@ -1,5 +1,5 @@
 import { createHmac } from 'node:crypto'
-import type { User } from '@supabase/supabase-js'
+import type { OperatorMembershipStatus, OperatorRole } from '@/lib/operator-rbac'
 
 const TENANT_ID_KEYS = [
   'tenant_id',
@@ -10,9 +10,6 @@ const TENANT_ID_KEYS = [
   'agencyId',
 ] as const
 
-const ROLE_KEYS = ['role', 'operator_role'] as const
-const UUID_PATTERN =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 const TENANT_SCOPE_KEYS = new Set(TENANT_ID_KEYS)
 
 export const EOT_INTERNAL_AUTH_CONTEXT_HEADER = 'x-renovo-eot-context'
@@ -22,46 +19,9 @@ export const EOT_INTERNAL_AUTH_VERSION = 1
 export type EotOperatorContext = {
   userId: string
   tenantId: string
-  role: string | null
-}
-
-function readTenantId(source: unknown): string | null {
-  if (!source || typeof source !== 'object') {
-    return null
-  }
-
-  for (const key of TENANT_ID_KEYS) {
-    const value = (source as Record<string, unknown>)[key]
-    if (typeof value === 'string' && value.trim()) {
-      return value
-    }
-  }
-
-  return null
-}
-
-function readString(source: unknown, keys: readonly string[]) {
-  if (!source || typeof source !== 'object') {
-    return null
-  }
-
-  for (const key of keys) {
-    const value = (source as Record<string, unknown>)[key]
-    if (typeof value === 'string' && value.trim()) {
-      return value.trim()
-    }
-  }
-
-  return null
-}
-
-export function resolveEotTenantId(user: User | null) {
-  const tenantId = readTenantId(user?.app_metadata) ?? readTenantId(user?.user_metadata)
-  return tenantId && UUID_PATTERN.test(tenantId) ? tenantId : null
-}
-
-export function resolveOperatorRole(user: User | null) {
-  return readString(user?.app_metadata, ROLE_KEYS) ?? readString(user?.user_metadata, ROLE_KEYS)
+  role: OperatorRole | null
+  membershipId?: string | null
+  membershipStatus?: OperatorMembershipStatus | null
 }
 
 export function getEotApiBaseUrl() {
@@ -106,6 +66,8 @@ export function buildEotInternalAuthHeaders(context: EotOperatorContext) {
     user_id: context.userId,
     tenant_id: context.tenantId,
     role: context.role,
+    membership_id: context.membershipId ?? null,
+    membership_status: context.membershipStatus ?? null,
     issued_at: Math.floor(Date.now() / 1000),
   })
   const encodedPayload = Buffer.from(payload, 'utf8').toString('base64url')

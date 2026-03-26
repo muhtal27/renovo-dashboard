@@ -1,37 +1,15 @@
 import Link from 'next/link'
-import { cookies } from 'next/headers'
 import type { Metadata } from 'next'
-import { redirect } from 'next/navigation'
 import { OperatorLayout } from '@/app/operator-layout'
-import {
-  parseSupabaseSessionCookie,
-  SUPABASE_SESSION_COOKIE,
-} from '@/lib/supabase-session'
-import { getSupabaseServerAuthClient } from '@/lib/supabase-admin'
+import { OPERATOR_PERMISSIONS } from '@/lib/operator-rbac'
+import { requireOperatorPermission } from '@/lib/operator-server'
 
 export const metadata: Metadata = {
   title: 'Settings | Renovo',
 }
 
 export default async function SettingsPage() {
-  const cookieStore = await cookies()
-  const sessionCookie = parseSupabaseSessionCookie(
-    cookieStore.get(SUPABASE_SESSION_COOKIE)?.value
-  )
-
-  if (!sessionCookie) {
-    redirect('/login?returnTo=/settings')
-  }
-
-  const authClient = getSupabaseServerAuthClient()
-  const {
-    data: { user },
-    error: authError,
-  } = await authClient.auth.getUser(sessionCookie.access_token)
-
-  if (authError || !user) {
-    redirect('/login?returnTo=/settings')
-  }
+  await requireOperatorPermission('/settings', OPERATOR_PERMISSIONS.MANAGE_SETTINGS)
 
   const outboundConfigured = Boolean(process.env.NEXT_PUBLIC_OPERATOR_OUTBOUND_WEBHOOK_URL)
 

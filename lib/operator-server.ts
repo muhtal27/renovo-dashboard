@@ -1,151 +1,73 @@
-import { cookies } from 'next/headers'
 import { forbidden, redirect } from 'next/navigation'
 import type { User } from '@supabase/supabase-js'
-import { getSupabaseServerAuthClient } from '@/lib/supabase-admin'
-import { resolveEotTenantId, resolveOperatorRole } from '@/lib/eot-server'
 import {
-  parseSupabaseSessionCookie,
-  serializeSupabaseSessionCookie,
-  SUPABASE_SESSION_COOKIE,
-  SUPABASE_SESSION_COOKIE_MAX_AGE,
-} from '@/lib/supabase-session'
+  getActiveTenantFailureDetail,
+  resolveActiveTenantMembership,
+} from '@/lib/operator-membership-server'
+import type { MinimalSessionCookie } from '@/lib/supabase-session'
+import {
+  getOperatorProfileForUserId,
+  refreshOperatorSessionIfNeeded,
+} from '@/lib/operator-session-server'
+import {
+  hasPermission,
+  hasRole,
+  type OperatorPermission,
+  type OperatorRole,
+  type OperatorMembershipStatus,
+} from '@/lib/operator-rbac'
+import type { OperatorProfile } from '@/lib/operator-types'
 
 export type OperatorTenantContext = {
   user: User
+  session: MinimalSessionCookie
   tenantId: string
-  role: string | null
+  membershipId: string
+  membershipStatus: OperatorMembershipStatus
+  role: OperatorRole
+  profile: OperatorProfile | null
 }
 
-type OperatorAuthResult =
+type OperatorContextResult =
   | {
       ok: true
-      user: User
+      context: OperatorTenantContext
     }
   | {
       ok: false
-      status: 401
+      status: 401 | 403
       detail: string
     }
 
-async function getVerifiedOperatorUser(): Promise<OperatorAuthResult> {
-  const cookieStore = await cookies()
-  const sessionCookie = parseSupabaseSessionCookie(
-    cookieStore.get(SUPABASE_SESSION_COOKIE)?.value
-  )
-
-  if (!sessionCookie) {
-    return {
-      ok: false,
-      status: 401,
-      detail: 'Operator authentication is required.',
-    }
-  }
-
-  const authClient = getSupabaseServerAuthClient()
-  let activeSession = sessionCookie
-  let userResponse = await authClient.auth.getUser(sessionCookie.access_token)
-
-  if (userResponse.error || !userResponse.data.user) {
-    if (sessionCookie.refresh_token) {
-      const refreshResponse = await authClient.auth.refreshSession({
-        refresh_token: sessionCookie.refresh_token,
-      })
-
-      const refreshedSession = refreshResponse.data.session
-
-      if (!refreshResponse.error && refreshedSession) {
-        activeSession = {
-          access_token: refreshedSession.access_token,
-          refresh_token: refreshedSession.refresh_token,
-          expires_at: refreshedSession.expires_at ?? undefined,
-        }
-
-        cookieStore.set(
-          SUPABASE_SESSION_COOKIE,
-          serializeSupabaseSessionCookie(activeSession),
-          {
-            path: '/',
-            maxAge: SUPABASE_SESSION_COOKIE_MAX_AGE,
-            sameSite: 'lax',
-            secure: process.env.NODE_ENV === 'production',
-          }
-        )
-
-        userResponse = await authClient.auth.getUser(activeSession.access_token)
-      }
-    }
-  }
-
-  if (userResponse.error || !userResponse.data.user) {
-    cookieStore.set(SUPABASE_SESSION_COOKIE, '', {
-      path: '/',
-      maxAge: 0,
-      sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
-    })
-    return {
-      ok: false,
-      status: 401,
-      detail: 'Operator authentication is required.',
-    }
-  }
-
-  return {
-    ok: true,
-    user: userResponse.data.user,
-  }
-}
-
-export async function requireOperatorUser(returnTo: string) {
-  const result = await getVerifiedOperatorUser()
-
-  if (!result.ok) {
-    redirect(`/login?returnTo=${encodeURIComponent(returnTo)}`)
-  }
-
-  return result.user
-}
-
-export async function requireOperatorTenant(returnTo: string): Promise<OperatorTenantContext> {
-  const user = await requireOperatorUser(returnTo)
-  const tenantId = resolveEotTenantId(user)
-
-  if (!tenantId) {
-    forbidden()
-  }
-
-  return {
-    user,
-    tenantId,
-    role: resolveOperatorRole(user),
-  }
-}
-
-export async function getOperatorTenantContextForApi():
-  Promise<
-    | {
-        ok: true
-        context: OperatorTenantContext
-      }
-    | {
-        ok: false
-        status: 401 | 403
-        detail: string
-      }
-  > {
-  const authResult = await getVerifiedOperatorUser()
+async function resolveOperatorContext(): Promise<OperatorContextResult> {
+  const authResult = await refreshOperatorSessionIfNeeded()
 
   if (!authResult.ok) {
-    return authResult
+    return {
+      ok: false,
+      status: 401,
+      detail: 'Operator authentication is required.',
+    }
   }
 
-  const tenantId = resolveEotTenantId(authResult.user)
+  const [profile, membershipResult] = await Promise.all([
+    getOperatorProfileForUserId(authResult.user.id),
+    resolveActiveTenantMembership(authResult.user.id),
+  ])
 
-  if (!tenantId) {
+  if (profile?.is_active === false) {
     return {
       ok: false,
       status: 403,
-      detail: 'Authenticated operator is not bound to an EOT tenant.',
+      detail: 'Operator access is disabled for this account.',
+    }
+  }
+
+  if (!membershipResult.ok) {
+    return {
+      ok: false,
+      status: 403,
+      detail: getActiveTenantFailureDetail(membershipResult.reason),
     }
   }
 
@@ -153,8 +75,102 @@ export async function getOperatorTenantContextForApi():
     ok: true,
     context: {
       user: authResult.user,
-      tenantId,
-      role: resolveOperatorRole(authResult.user),
+      session: authResult.session,
+      tenantId: membershipResult.membership.tenant_id,
+      membershipId: membershipResult.membership.id,
+      membershipStatus: membershipResult.membership.status,
+      role: membershipResult.membership.role,
+      profile,
     },
   }
+}
+
+export async function requireOperatorSession(returnTo: string) {
+  const result = await refreshOperatorSessionIfNeeded()
+
+  if (!result.ok) {
+    redirect(`/login?returnTo=${encodeURIComponent(returnTo)}`)
+  }
+
+  return {
+    user: result.user,
+    session: result.session,
+  }
+}
+
+export async function requireOperatorUser(returnTo: string) {
+  const { user } = await requireOperatorSession(returnTo)
+  return user
+}
+
+export async function requireOperatorTenant(returnTo: string): Promise<OperatorTenantContext> {
+  return requireActiveTenantMembership(returnTo)
+}
+
+export async function requireActiveTenantMembership(
+  returnTo: string
+): Promise<OperatorTenantContext> {
+  const result = await resolveOperatorContext()
+
+  if (!result.ok) {
+    if (result.status === 401) {
+      redirect(`/login?returnTo=${encodeURIComponent(returnTo)}`)
+    }
+
+    forbidden()
+  }
+
+  return result.context
+}
+
+export async function requireOperatorRole(returnTo: string, minimumRole: OperatorRole) {
+  const context = await requireOperatorTenant(returnTo)
+
+  if (!hasRole(context.role, minimumRole)) {
+    forbidden()
+  }
+
+  return context
+}
+
+export async function requireOperatorPermission(
+  returnTo: string,
+  permission: OperatorPermission
+) {
+  return requireMembershipPermission(returnTo, permission)
+}
+
+export async function requireMembershipPermission(
+  returnTo: string,
+  permission: OperatorPermission
+) {
+  const context = await requireOperatorTenant(returnTo)
+
+  if (!hasPermission(context.role, permission)) {
+    forbidden()
+  }
+
+  return context
+}
+
+export async function getOperatorTenantContextForApi(requiredPermission?: OperatorPermission) {
+  return getOperatorMembershipContextForApi(requiredPermission)
+}
+
+export async function getOperatorMembershipContextForApi(requiredPermission?: OperatorPermission) {
+  const result = await resolveOperatorContext()
+
+  if (!result.ok) {
+    return result
+  }
+
+  if (requiredPermission && !hasPermission(result.context.role, requiredPermission)) {
+    return {
+      ok: false as const,
+      status: 403 as const,
+      detail: 'Operator is not authorized for this action.',
+    }
+  }
+
+  return result
 }

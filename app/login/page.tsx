@@ -1,9 +1,14 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import type { AuthSession } from '@supabase/supabase-js'
+import { useEffect, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import { syncBrowserSupabaseSessionCookie } from '@/lib/supabase-session'
+import {
+  clearLegacySupabaseBrowserAuthArtifacts,
+  readLegacyBrowserSupabaseSession,
+  toMinimalSupabaseSession,
+} from '@/lib/supabase-session'
 
 const workflowStages = [
   {
@@ -29,6 +34,7 @@ const workflowStages = [
 ]
 
 export default function LoginPage() {
+  const handledSessionRef = useRef<string | null>(null)
   const [mode, setMode] = useState<'sign_in' | 'sign_up' | 'reset'>('sign_in')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -47,25 +53,75 @@ export default function LoginPage() {
     return nextReturnTo && nextReturnTo.startsWith('/') ? nextReturnTo : '/eot'
   })
 
+  async function establishOperatorSession(session: Partial<AuthSession> | null | undefined) {
+    const minimalSession = toMinimalSupabaseSession(session)
+
+    if (!minimalSession) {
+      return false
+    }
+
+    const sessionKey = `${minimalSession.access_token}:${minimalSession.expires_at ?? ''}`
+
+    if (handledSessionRef.current === sessionKey) {
+      return true
+    }
+
+    const response = await fetch('/api/operator/session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify(minimalSession),
+    })
+
+    if (!response.ok) {
+      return false
+    }
+
+    handledSessionRef.current = sessionKey
+    clearLegacySupabaseBrowserAuthArtifacts(process.env.NEXT_PUBLIC_SUPABASE_URL)
+    return true
+  }
+
   useEffect(() => {
     async function checkSession() {
+      clearLegacySupabaseBrowserAuthArtifacts(process.env.NEXT_PUBLIC_SUPABASE_URL)
+
+      const currentSessionResponse = await fetch('/api/operator/session', {
+        method: 'GET',
+        cache: 'no-store',
+        credentials: 'same-origin',
+      })
+
+      if (currentSessionResponse.ok) {
+        window.location.href = returnTo
+        return
+      }
+
       const {
         data: { session },
       } = await supabase.auth.getSession()
 
-      syncBrowserSupabaseSessionCookie(session)
+      if (session?.user && (await establishOperatorSession(session))) {
+        window.location.href = returnTo
+        return
+      }
 
-      if (!session?.user) return
-
-      window.location.href = returnTo
+      const legacySession = readLegacyBrowserSupabaseSession(process.env.NEXT_PUBLIC_SUPABASE_URL)
+      if (legacySession && (await establishOperatorSession(legacySession))) {
+        window.location.href = returnTo
+      }
     }
 
     void checkSession()
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      syncBrowserSupabaseSessionCookie(session)
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (!session?.user) return
+
+      if (await establishOperatorSession(session)) {
+        window.location.href = returnTo
+      }
     })
 
     return () => {
@@ -101,7 +157,12 @@ export default function LoginPage() {
       return
     }
 
-    syncBrowserSupabaseSessionCookie(data.session)
+    if (!(await establishOperatorSession(data.session))) {
+      setError('Something went wrong. Please try again.')
+      setLoadingPassword(false)
+      return
+    }
+
     window.location.href = returnTo
   }
 
