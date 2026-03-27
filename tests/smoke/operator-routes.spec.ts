@@ -13,9 +13,9 @@ test.describe('operator route smoke', () => {
     await page.goto('/reports')
 
     await expect(page).toHaveURL(/\/reports$/)
-    await expect(page.getByRole('heading', { name: 'Reports / Analytics' })).toBeVisible()
-    await expect(page.getByText('Workflow and risk')).toBeVisible()
-    await expect(page.getByText('Unable to load portfolio')).toHaveCount(0)
+    await expect(page.getByRole('heading', { name: 'Operations analytics' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Workflow and risk' })).toBeVisible()
+    await expect(page.getByText('Unable to load reporting summary')).toHaveCount(0)
   })
 
   test('signed-in knowledge loads all jurisdictions', async ({ page }) => {
