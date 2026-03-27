@@ -101,6 +101,9 @@ jobs:
       - name: Validate local env contract
         run: npm run check:env:local
 
+      - name: Verify frontend/backend release pair
+        run: npm run check:release:pair -- --backend-url http://127.0.0.1:8000 --frontend-url http://127.0.0.1:3000
+
       - name: Run smoke guardrails
         run: npm run smoke:local
 

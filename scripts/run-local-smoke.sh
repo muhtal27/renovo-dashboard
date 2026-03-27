@@ -27,6 +27,7 @@ start_frontend_if_needed
 
 wait_for_url "$(append_url_path "$BACKEND_URL" "/openapi.json")" "Backend" 5 1
 wait_for_url "$(append_url_path "$FRONTEND_URL" "/login")" "Frontend" 5 1
+node "$ROOT_DIR/scripts/check-release-pair.mjs" --backend-url "$BACKEND_URL" --frontend-url "$FRONTEND_URL"
 
 printf '\n'
 printf 'Running Playwright smoke suite against %s\n' "$FRONTEND_URL"

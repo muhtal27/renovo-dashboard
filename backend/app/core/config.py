@@ -23,6 +23,12 @@ class Settings(BaseSettings):
         default=None,
         validation_alias="SUPABASE_SERVICE_ROLE_KEY",
     )
+    vercel_env: str | None = Field(default=None, validation_alias="VERCEL_ENV")
+    vercel_git_commit_sha: str | None = Field(
+        default=None,
+        validation_alias="VERCEL_GIT_COMMIT_SHA",
+    )
+    vercel_url: str | None = Field(default=None, validation_alias="VERCEL_URL")
     eot_internal_auth_secret: str | None = Field(
         default=None,
         validation_alias="EOT_INTERNAL_AUTH_SECRET",

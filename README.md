@@ -30,6 +30,9 @@ These commands automate local file creation, env validation, frontend startup, b
 Operator auth and route-protection rules live in
 [03-engineering/operator-auth-guardrails.md](/Users/retailltd/Code/renovo-dashboard/03-engineering/operator-auth-guardrails.md).
 
+Two-project Vercel release coordination lives in
+[03-engineering/vercel-release-coordination.md](/Users/retailltd/Code/renovo-dashboard/03-engineering/vercel-release-coordination.md).
+
 Secrets that still require a real value if automation cannot source them:
 
 - `NEXT_PUBLIC_SUPABASE_URL`
@@ -59,12 +62,16 @@ npm run check:full
 Release order:
 
 1. `npm run check:full`
-2. deploy preview
-3. run smoke against preview if needed:
-   `PLAYWRIGHT_BASE_URL=https://<preview-url> npm run smoke`
+2. `npm run deploy:preview:coordinated`
+3. run smoke against the coordinated preview pair:
+   `npm run deploy:preview:coordinated:smoke`
 4. do a brief manual browser pass
-5. promote to production
-6. inspect logs for new 500s
+5. `npm run deploy:prod:coordinated`
+6. run smoke against production:
+   `npm run deploy:prod:coordinated:smoke`
+7. inspect logs for new 500s
+
+Do not sign off a Git-generated preview unless it is explicitly paired with the backend instance you intend to ship.
 
 CI always runs `npm run check` plus the protected-route matcher regression test. CI smoke runs when these GitHub secrets are present:
 
@@ -215,7 +222,23 @@ Application schema is managed only through Alembic migrations in `backend/alembi
 
 ## Vercel Deployment
 
-This repo is ready to deploy on Vercel as a standard Next.js app.
+This repo deploys to two linked Vercel projects from the same GitHub repository:
+
+- `renovo-dashboard` from the repo root
+- `renovo-backend` from `backend/`
+
+Both can auto-deploy from pushes to `main`, but they are still independent deployments. That is not enough protection when frontend code depends on new backend routes.
+
+Use the coordinated commands for release work:
+
+```bash
+npm run deploy:preview:coordinated
+npm run deploy:preview:coordinated:smoke
+npm run deploy:prod:coordinated
+npm run deploy:prod:coordinated:smoke
+```
+
+The preview command pins the frontend preview to the matching backend preview using a runtime `EOT_API_BASE_URL` override. The production command deploys the backend first, verifies the backend alias, then deploys the frontend against that production backend alias.
 
 ### Build settings
 
@@ -238,14 +261,12 @@ This repo is ready to deploy on Vercel as a standard Next.js app.
 ### Deployment checklist
 
 1. Import the GitHub repo into Vercel.
-2. Add the required frontend environment variables in Vercel Project Settings.
-3. Separately deploy the Python backend and run Alembic migrations there.
-4. Deploy.
-5. Smoke test:
-   - operator login
-   - knowledge pages
-   - waitlist/contact submission
-   - backend health and migrations
+2. Link both the repo root and `backend/` to their Vercel projects.
+3. Add the required frontend environment variables in `renovo-dashboard`.
+4. Add backend runtime variables and database access in `renovo-backend`.
+5. Run `npm run check:full`.
+6. Use the coordinated preview and production deploy commands above.
+7. Smoke the exact frontend/backend pair that will be signed off.
 
 ## Handy Commands
 
