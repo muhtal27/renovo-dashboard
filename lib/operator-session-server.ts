@@ -229,6 +229,7 @@ export function clearOperatorSession(
   })
 }
 
+// Route handlers and server actions can use this path because cookie writes are allowed there.
 export async function refreshOperatorSessionIfNeeded() {
   const cookieStore = await cookies()
   const sessionCookie = parseSupabaseSessionCookie(cookieStore.get(SUPABASE_SESSION_COOKIE)?.value)
@@ -246,8 +247,26 @@ export async function refreshOperatorSessionIfNeeded() {
   return result
 }
 
+// Server-component callers must stay on the read-only path because Next.js
+// rejects cookie writes during render.
+export async function readOperatorSessionIfNeeded() {
+  const cookieStore = await cookies()
+  const sessionCookie = parseSupabaseSessionCookie(cookieStore.get(SUPABASE_SESSION_COOKIE)?.value)
+  const result = await validateOperatorSession(sessionCookie)
+
+  if (!result.ok) {
+    return result
+  }
+
+  if (result.refreshed) {
+    console.info('Operator session refreshed during server render without cookie persistence.')
+  }
+
+  return result
+}
+
 export async function getCurrentOperatorSessionSnapshot(): Promise<SafeCurrentOperator | null> {
-  const result = await refreshOperatorSessionIfNeeded()
+  const result = await readOperatorSessionIfNeeded()
 
   if (!result.ok) {
     return null

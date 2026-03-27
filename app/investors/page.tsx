@@ -16,15 +16,15 @@ const stageItems = [
 ] as const
 
 const companyPoints = [
-  'Renovo was built from direct operational experience of checkout review, issue assessment, and claim preparation.',
+  'Renovo AI was built from direct operational experience of checkout review, issue assessment, and claim preparation.',
   'The product is focused on one clear problem: turning evidence into structured, reviewable claim work without removing manager judgement.',
   'The company is being built with a practical workflow-first approach rather than a broad horizontal software pitch.',
 ] as const
 
 export const metadata: Metadata = {
-  title: 'Investors | Renovo',
+  title: 'Investors | Renovo AI',
   description:
-    'Learn how Renovo automates end-of-tenancy work for UK property managers and download the company one-pager.',
+    'Learn how Renovo AI automates end-of-tenancy work for UK property managers and download the company one-pager.',
   alternates: {
     canonical: 'https://renovoai.co.uk/investors',
   },
@@ -37,10 +37,10 @@ export default function InvestorsPage() {
         <section className="page-hero">
           <p className="app-kicker">Investors</p>
           <h1 className="page-title max-w-4xl">
-            Renovo automates end-of-tenancy work for UK property managers
+            Renovo AI automates end-of-tenancy work for UK property managers
           </h1>
           <p className="page-copy max-w-3xl">
-            Renovo helps property managers review evidence, assess issues, and prepare claim-ready
+            Renovo AI helps property managers review evidence, assess issues, and prepare claim-ready
             output in one structured workflow.
           </p>
         </section>
@@ -81,7 +81,7 @@ export default function InvestorsPage() {
                 Built from direct operational experience
               </h2>
               <p className="mt-4 text-[15px] leading-8 text-[#3d3b37]">
-                Renovo is focused on the operational layer between checkout evidence and claim
+                Renovo AI is focused on the operational layer between checkout evidence and claim
                 preparation. The product is built, early access is open, and the integrations layer
                 is being shaped around real handoff points rather than broad software sprawl.
               </p>
@@ -118,7 +118,7 @@ export default function InvestorsPage() {
               href="/contact"
               className="app-secondary-button inline-flex items-center justify-center rounded px-5 py-3 text-sm font-medium"
             >
-              Contact Renovo
+              Contact Renovo AI
             </Link>
           </div>
         </section>

@@ -1,19 +1,43 @@
 import { NextResponse } from 'next/server'
 import {
   buildEotInternalAuthHeaders,
-  getEotApiBaseUrl,
+  getEotApiBaseUrlConfig,
   sanitizeEotSearchParams,
   stripTenantScopeFromPayload,
 } from '@/lib/eot-server'
 import { getOperatorTenantContextForApi } from '@/lib/operator-server'
 import type { OperatorPermission } from '@/lib/operator-rbac'
 
-function buildBackendUrl(requestUrl: string, backendPath: string) {
-  const baseUrl = getEotApiBaseUrl()
+function buildBackendUrl(requestUrl: string, backendPath: string, baseUrl: string) {
   const incomingUrl = new URL(requestUrl)
   const backendUrl = new URL(backendPath, baseUrl)
   backendUrl.search = sanitizeEotSearchParams(incomingUrl.searchParams).toString()
   return backendUrl
+}
+
+function getErrorDetail(text: string, contentType: string) {
+  if (!text) {
+    return null
+  }
+
+  if (contentType.includes('application/json')) {
+    try {
+      const payload = JSON.parse(text) as unknown
+
+      if (
+        payload &&
+        typeof payload === 'object' &&
+        'detail' in payload &&
+        typeof payload.detail === 'string'
+      ) {
+        return payload.detail
+      }
+    } catch {
+      return null
+    }
+  }
+
+  return null
 }
 
 async function readSanitizedRequestBody(request: Request) {
@@ -65,10 +89,18 @@ export async function proxyEotRequest(
   const authResult = await getOperatorTenantContextForApi(requiredPermission)
 
   if (!authResult.ok) {
+    console.warn('EOT proxy operator authorization failed', {
+      backendPath,
+      method: request.method,
+      status: authResult.status,
+      detail: authResult.detail,
+      requiredPermission,
+    })
     return NextResponse.json({ detail: authResult.detail }, { status: authResult.status })
   }
 
-  const backendUrl = buildBackendUrl(request.url, backendPath)
+  const backendConfig = getEotApiBaseUrlConfig()
+  const backendUrl = buildBackendUrl(request.url, backendPath, backendConfig.value)
   const requestBody = await readSanitizedRequestBody(request)
 
   if ('invalidJson' in requestBody) {
@@ -86,9 +118,17 @@ export async function proxyEotRequest(
       membershipStatus: authResult.context.membershipStatus,
     })
   } catch {
+    console.error('EOT proxy internal auth configuration missing', {
+      backendPath,
+      method: request.method,
+      tenantId: authResult.context.tenantId,
+      userId: authResult.context.user.id,
+      missingEnv: 'EOT_INTERNAL_AUTH_SECRET',
+    })
     return NextResponse.json(
       {
-        detail: 'EOT internal authentication is not configured.',
+        detail:
+          'Missing EOT_INTERNAL_AUTH_SECRET in the Next.js runtime environment. Set it in .env.local and keep it aligned with the backend EOT_INTERNAL_AUTH_SECRET before calling /api/eot/*.',
       },
       { status: 503 }
     )
@@ -114,12 +154,18 @@ export async function proxyEotRequest(
       backendPath,
       backendUrl: backendUrl.toString(),
       method: request.method,
+      backendUrlSource: backendConfig.source,
       error: error instanceof Error ? error.message : 'unknown_error',
     })
+
+    const detail =
+      backendConfig.source === 'default_local'
+        ? `Unable to reach the EOT backend at ${backendConfig.value}. EOT_API_BASE_URL is not set, so the proxy fell back to the local default. Start the backend on http://127.0.0.1:8000 or set EOT_API_BASE_URL in .env.local.`
+        : `Unable to reach the EOT backend at ${backendConfig.value}. Check that the backend is running and that ${backendConfig.source} points at the FastAPI service root.`
+
     return NextResponse.json(
       {
-        detail:
-          'Unable to reach the EOT backend. Check EOT_API_BASE_URL or NEXT_PUBLIC_EOT_API_BASE_URL.',
+        detail,
       },
       { status: 502 }
     )
@@ -127,13 +173,34 @@ export async function proxyEotRequest(
 
   const text = await response.text()
   const contentType = response.headers.get('content-type') ?? 'application/json'
+  const detail = getErrorDetail(text, contentType)
 
   if (!response.ok) {
+    if (response.status === 503 && detail?.includes('EOT internal authentication is not configured')) {
+      console.error('EOT backend internal auth configuration missing', {
+        backendPath,
+        backendUrl: backendUrl.toString(),
+        method: request.method,
+        backendUrlSource: backendConfig.source,
+        missingEnv: 'EOT_INTERNAL_AUTH_SECRET',
+      })
+    } else if (response.status === 401 && detail === 'Trusted operator context is invalid.') {
+      console.error('EOT backend rejected trusted operator context signature', {
+        backendPath,
+        backendUrl: backendUrl.toString(),
+        method: request.method,
+        backendUrlSource: backendConfig.source,
+        probableCause:
+          'Frontend and backend EOT_INTERNAL_AUTH_SECRET values do not match.',
+      })
+    }
+
     console.error('EOT proxy backend returned non-2xx response', {
       backendPath,
       backendUrl: backendUrl.toString(),
       method: request.method,
       status: response.status,
+      backendUrlSource: backendConfig.source,
       contentType,
       bodyPreview: text.slice(0, 300),
     })

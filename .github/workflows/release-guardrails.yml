@@ -1,0 +1,115 @@
+name: Release Guardrails
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+jobs:
+  quality:
+    name: Lint, Typecheck, Route Guardrails
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run release checks
+        run: npm run check
+
+      - name: Verify protected-route matcher coverage
+        run: npm run test:routes
+
+  smoke:
+    name: Smoke Guardrails
+    needs: quality
+    if: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL != '' && secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY != '' && secrets.SUPABASE_SERVICE_ROLE_KEY != '' && secrets.EOT_INTERNAL_AUTH_SECRET != '' && secrets.DATABASE_URL != '' && secrets.PLAYWRIGHT_ADMIN_EMAIL != '' && secrets.PLAYWRIGHT_ADMIN_PASSWORD != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Install backend dependencies
+        run: |
+          python -m venv backend/.venv
+          backend/.venv/bin/pip install --upgrade pip
+          backend/.venv/bin/pip install -r backend/requirements.txt
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Write frontend env
+        run: |
+          cat > .env.local <<'EOF'
+          NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          EOT_INTERNAL_AUTH_SECRET=${{ secrets.EOT_INTERNAL_AUTH_SECRET }}
+          EOT_API_BASE_URL=http://127.0.0.1:8000
+          NEXT_PUBLIC_SITE_URL=http://127.0.0.1:3000
+          NEXT_PUBLIC_DASHBOARD_SIGN_IN_URL=http://127.0.0.1:3000/login
+          EOF
+
+      - name: Write backend env
+        run: |
+          cat > backend/.env <<'EOF'
+          DATABASE_URL=${{ secrets.DATABASE_URL }}
+          EOT_INTERNAL_AUTH_SECRET=${{ secrets.EOT_INTERNAL_AUTH_SECRET }}
+          APP_ENV=local
+          DEBUG=false
+          PROJECT_NAME=Renovo Backend
+          API_V1_PREFIX=/api/v1
+          EOF
+
+      - name: Write Playwright env
+        run: |
+          cat > .env.playwright <<'EOF'
+          PLAYWRIGHT_BASE_URL=http://localhost:3000
+          PLAYWRIGHT_ADMIN_EMAIL=${{ secrets.PLAYWRIGHT_ADMIN_EMAIL }}
+          PLAYWRIGHT_ADMIN_PASSWORD=${{ secrets.PLAYWRIGHT_ADMIN_PASSWORD }}
+          EOF
+
+      - name: Validate local env contract
+        run: npm run check:env:local
+
+      - name: Run smoke guardrails
+        run: npm run smoke:local
+
+      - name: Upload Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 14

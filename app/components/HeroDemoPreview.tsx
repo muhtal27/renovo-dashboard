@@ -37,7 +37,7 @@ export function HeroDemoPreview({ highlights }: HeroDemoPreviewProps) {
         <div className="relative aspect-[16/10] w-full bg-stone-100">
           <Image
             src="/renovo-dashboard-current.png"
-            alt="Current Renovo dashboard preview showing evidence, issues, and recommendation sections"
+            alt="Current Renovo AI dashboard preview showing evidence, issues, and recommendation sections"
             fill
             priority
             className="object-cover object-top"

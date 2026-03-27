@@ -3,7 +3,12 @@ import 'server-only'
 import type { OperatorTenantContext } from '@/lib/operator-server'
 import { buildEotInternalAuthHeaders, getEotApiBaseUrl } from '@/lib/eot-server'
 import { byLastActivityDesc } from '@/lib/eot-dashboard'
-import type { EotCaseListItem, EotCaseWorkspace } from '@/lib/eot-types'
+import type {
+  EotCaseListItem,
+  EotCaseWorkspace,
+  EotCaseWorkspaceSummary,
+  EotReportSummary,
+} from '@/lib/eot-types'
 
 export type EotPortfolioSnapshot = {
   cases: EotCaseListItem[]
@@ -61,11 +66,18 @@ export async function getEotCaseListSnapshot(context: OperatorTenantContext) {
   return [...cases].sort(byLastActivityDesc)
 }
 
-export async function getEotCaseWorkspaceSnapshot(
+async function getEotCaseWorkspaceSnapshot(
   context: OperatorTenantContext,
   caseId: string
 ) {
   return fetchEotJson<EotCaseWorkspace>(context, `/api/eot/cases/${caseId}`)
+}
+
+export async function getEotCaseWorkspaceSummarySnapshot(
+  context: OperatorTenantContext,
+  caseId: string
+) {
+  return fetchEotJson<EotCaseWorkspaceSummary>(context, `/api/eot/cases/${caseId}/summary`)
 }
 
 export async function getEotPortfolioSnapshot(context: OperatorTenantContext) {
@@ -78,4 +90,8 @@ export async function getEotPortfolioSnapshot(context: OperatorTenantContext) {
     cases,
     workspaces,
   } satisfies EotPortfolioSnapshot
+}
+
+export function getEotReportSummary(context: OperatorTenantContext) {
+  return fetchEotJson<EotReportSummary>(context, '/api/eot/reports/summary')
 }

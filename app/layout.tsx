@@ -23,20 +23,20 @@ const siteUrl =
 
 export const metadata: Metadata = {
   metadataBase: siteUrl ? new URL(siteUrl) : undefined,
-  title: 'Renovo | End-of-Tenancy Automation',
+  title: 'Renovo AI | End-of-Tenancy Automation',
   description:
-    'Renovo automates end-of-tenancy work for UK property managers and letting agencies, from evidence review and issue assessment to claim-ready output.',
+    'Renovo AI automates end-of-tenancy work for UK property managers and letting agencies, from evidence review and issue assessment to claim-ready output.',
   openGraph: {
-    title: 'Renovo | End-of-Tenancy Automation',
+    title: 'Renovo AI | End-of-Tenancy Automation',
     description:
-      'Renovo automates end-of-tenancy work for UK property managers and letting agencies, from evidence review and issue assessment to claim-ready output.',
+      'Renovo AI automates end-of-tenancy work for UK property managers and letting agencies, from evidence review and issue assessment to claim-ready output.',
     url: siteUrl,
-    siteName: 'Renovo',
+    siteName: 'Renovo AI',
     type: 'website',
     images: [{ url: 'https://renovoai.co.uk/og-image.png', width: 1200, height: 630 }],
   },
   twitter: {
-    title: 'Renovo | End-of-Tenancy Automation',
+    title: 'Renovo AI | End-of-Tenancy Automation',
     images: ['https://renovoai.co.uk/og-image.png'],
   },
   icons: {

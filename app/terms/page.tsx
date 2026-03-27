@@ -5,7 +5,7 @@ import { MarketingShell } from '@/app/components/MarketingShell'
 const termsSections = [
   {
     title: 'Use of the website',
-    body: 'The Renovo website is provided for general information about the product, the live demo, and the early access programme. You may browse and use the site for lawful business purposes only.',
+    body: 'The Renovo AI website is provided for general information about the product, the live demo, and the early access programme. You may browse and use the site for lawful business purposes only.',
   },
   {
     title: 'Early access and product availability',
@@ -13,15 +13,15 @@ const termsSections = [
   },
   {
     title: 'Intellectual property',
-    body: 'Unless stated otherwise, the content, branding, interface, and materials on this website belong to Renovo or its licensors. You may not copy, republish, or reuse them beyond normal business evaluation without permission.',
+    body: 'Unless stated otherwise, the content, branding, interface, and materials on this website belong to Renovo AI or its licensors. You may not copy, republish, or reuse them beyond normal business evaluation without permission.',
   },
   {
     title: 'Accuracy and changes',
-    body: 'We aim to keep the website accurate and up to date, but product details may change as Renovo develops. We may update or remove content, routes, or features at any time.',
+    body: 'We aim to keep the website accurate and up to date, but product details may change as Renovo AI develops. We may update or remove content, routes, or features at any time.',
   },
   {
     title: 'Liability',
-    body: 'The website is provided on an as-is basis for general information. To the extent permitted by law, Renovo is not liable for loss arising from reliance on website content alone. Any live customer use of the product is governed by separate commercial terms.',
+    body: 'The website is provided on an as-is basis for general information. To the extent permitted by law, Renovo AI is not liable for loss arising from reliance on website content alone. Any live customer use of the product is governed by separate commercial terms.',
   },
   {
     title: 'Contact',
@@ -30,8 +30,8 @@ const termsSections = [
 ] as const
 
 export const metadata: Metadata = {
-  title: 'Terms | Renovo',
-  description: 'Website terms for the Renovo marketing site, demo, and early access enquiries.',
+  title: 'Terms | Renovo AI',
+  description: 'Website terms for the Renovo AI marketing site, demo, and early access enquiries.',
   alternates: {
     canonical: 'https://renovoai.co.uk/terms',
   },
@@ -45,9 +45,12 @@ export default function TermsPage() {
           <p className="app-kicker">Terms</p>
           <h1 className="page-title">Website terms</h1>
           <p className="page-copy max-w-4xl">
-            These terms apply to your use of the Renovo marketing site, live demo, and early
+            These terms apply to your use of the Renovo AI marketing site, live demo, and early
             access enquiry routes. They do not replace any separate customer agreement for use of
             the live product.
+          </p>
+          <p className="mt-4 text-sm leading-7 text-[#7a7670]">
+            Renovo AI Ltd · Company No. SC833544
           </p>
         </section>
 

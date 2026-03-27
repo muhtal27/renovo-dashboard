@@ -4,9 +4,9 @@ import HomepageDemo from '@/app/components/HomepageDemo'
 import { MarketingShell } from '@/app/components/MarketingShell'
 
 export const metadata: Metadata = {
-  title: 'Live Demo | Renovo',
+  title: 'Live Demo | Renovo AI',
   description:
-    'View a read-only Renovo product walkthrough showing how end-of-tenancy evidence becomes reviewable, claim-ready output.',
+    'View a read-only Renovo AI product walkthrough showing how end-of-tenancy evidence becomes reviewable, claim-ready output.',
   alternates: {
     canonical: 'https://renovoai.co.uk/demo',
   },
@@ -20,7 +20,7 @@ export default function DemoPage() {
           <p className="app-kicker">Live demo</p>
           <h1 className="page-title">Read-only product preview</h1>
           <p className="page-copy">
-            This preview shows how Renovo moves from check-in and check-out evidence to a
+            This preview shows how Renovo AI moves from check-in and check-out evidence to a
             structured, claim-ready output. Review the case, evidence, issues, recommendation, and
             draft claim output without touching live data.
           </p>

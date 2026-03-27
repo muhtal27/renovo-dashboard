@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.eot.authorization import (
@@ -12,17 +12,34 @@ from app.db.session import get_db_session
 from app.schemas.eot import (
     CaseCreateRequest,
     CaseListItem,
+    CaseSubmissionResponse,
+    CaseTimelineItemResponse,
+    CaseWorkspaceSummaryResponse,
+    DocumentPageResponse,
+    DocumentResponse,
+    ReportSummaryResponse,
     CaseWorkspaceResponse,
+    EvidencePageResponse,
     EvidenceCreateRequest,
     EvidenceResponse,
     IssueResponse,
     IssueUpsertRequest,
+    MessagePageResponse,
     MessageCreateRequest,
     MessageResponse,
 )
 from app.services.eot import EOTService
 
 router = APIRouter()
+
+
+@router.get("/reports/summary", response_model=ReportSummaryResponse)
+async def get_report_summary(
+    operator: AuthorizedOperatorContext = Depends(get_authorized_operator_context),
+    session: AsyncSession = Depends(get_db_session),
+) -> ReportSummaryResponse:
+    service = EOTService(session)
+    return await service.get_report_summary(operator)
 
 
 @router.get("/cases", response_model=list[CaseListItem])
@@ -43,6 +60,117 @@ async def get_case_workspace(
     service = EOTService(session)
     try:
         return await service.get_case_workspace(operator, case_id)
+    except LookupError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    except AuthorizationError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
+
+
+@router.get("/cases/{case_id}/summary", response_model=CaseWorkspaceSummaryResponse)
+async def get_case_workspace_summary(
+    case_id: UUID,
+    operator: AuthorizedOperatorContext = Depends(get_authorized_operator_context),
+    session: AsyncSession = Depends(get_db_session),
+) -> CaseWorkspaceSummaryResponse:
+    service = EOTService(session)
+    try:
+        return await service.get_case_workspace_summary(operator, case_id)
+    except LookupError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    except AuthorizationError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
+
+
+@router.get("/cases/{case_id}/evidence", response_model=EvidencePageResponse)
+async def list_case_evidence(
+    case_id: UUID,
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=24, ge=1, le=100),
+    operator: AuthorizedOperatorContext = Depends(get_authorized_operator_context),
+    session: AsyncSession = Depends(get_db_session),
+) -> EvidencePageResponse:
+    service = EOTService(session)
+    try:
+        return await service.list_case_evidence(operator, case_id, offset=offset, limit=limit)
+    except LookupError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    except AuthorizationError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
+
+
+@router.get("/cases/{case_id}/issues", response_model=list[IssueResponse])
+async def list_case_issues(
+    case_id: UUID,
+    operator: AuthorizedOperatorContext = Depends(get_authorized_operator_context),
+    session: AsyncSession = Depends(get_db_session),
+) -> list[IssueResponse]:
+    service = EOTService(session)
+    try:
+        return await service.list_case_issues(operator, case_id)
+    except LookupError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    except AuthorizationError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
+
+
+@router.get("/cases/{case_id}/messages", response_model=MessagePageResponse)
+async def list_case_messages(
+    case_id: UUID,
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=24, ge=1, le=100),
+    operator: AuthorizedOperatorContext = Depends(get_authorized_operator_context),
+    session: AsyncSession = Depends(get_db_session),
+) -> MessagePageResponse:
+    service = EOTService(session)
+    try:
+        return await service.list_case_messages(operator, case_id, offset=offset, limit=limit)
+    except LookupError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    except AuthorizationError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
+
+
+@router.get("/cases/{case_id}/documents", response_model=DocumentPageResponse)
+async def list_case_documents(
+    case_id: UUID,
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=24, ge=1, le=100),
+    operator: AuthorizedOperatorContext = Depends(get_authorized_operator_context),
+    session: AsyncSession = Depends(get_db_session),
+) -> DocumentPageResponse:
+    service = EOTService(session)
+    try:
+        return await service.list_case_documents(operator, case_id, offset=offset, limit=limit)
+    except LookupError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    except AuthorizationError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
+
+
+@router.get("/cases/{case_id}/timeline", response_model=list[CaseTimelineItemResponse])
+async def get_case_timeline(
+    case_id: UUID,
+    operator: AuthorizedOperatorContext = Depends(get_authorized_operator_context),
+    session: AsyncSession = Depends(get_db_session),
+) -> list[CaseTimelineItemResponse]:
+    service = EOTService(session)
+    try:
+        return await service.get_case_timeline(operator, case_id)
+    except LookupError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    except AuthorizationError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
+
+
+@router.get("/cases/{case_id}/submission", response_model=CaseSubmissionResponse)
+async def get_case_submission(
+    case_id: UUID,
+    operator: AuthorizedOperatorContext = Depends(get_authorized_operator_context),
+    session: AsyncSession = Depends(get_db_session),
+) -> CaseSubmissionResponse:
+    service = EOTService(session)
+    try:
+        return await service.get_case_submission(operator, case_id)
     except LookupError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
     except AuthorizationError as exc:

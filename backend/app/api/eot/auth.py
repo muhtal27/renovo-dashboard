@@ -5,6 +5,7 @@ import binascii
 import hashlib
 import hmac
 import json
+import logging
 import time
 from uuid import UUID
 
@@ -15,6 +16,8 @@ from app.core.config import settings
 
 EOT_CONTEXT_HEADER = "x-renovo-eot-context"
 EOT_SIGNATURE_HEADER = "x-renovo-eot-signature"
+
+logger = logging.getLogger(__name__)
 
 
 class SignedOperatorContext(BaseModel):
@@ -54,13 +57,21 @@ def get_authenticated_operator_context(
 
     secret = settings.eot_internal_auth_secret
     if not secret:
+        logger.error(
+            "EOT backend internal auth configuration missing",
+            extra={"missing_env": "EOT_INTERNAL_AUTH_SECRET"},
+        )
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="EOT internal authentication is not configured.",
+            detail=(
+                "EOT internal authentication is not configured on the backend. "
+                "Set EOT_INTERNAL_AUTH_SECRET in backend/.env or the deployed backend environment."
+            ),
         )
 
     expected_signature = _sign_payload(encoded_context, secret)
     if not hmac.compare_digest(signature, expected_signature):
+        logger.warning("EOT backend trusted operator context signature mismatch")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Trusted operator context is invalid.",
@@ -70,12 +81,17 @@ def get_authenticated_operator_context(
         payload_json = _decode_base64url(encoded_context).decode("utf-8")
         payload = SignedOperatorContext.model_validate(json.loads(payload_json))
     except (ValueError, ValidationError, json.JSONDecodeError, UnicodeDecodeError, binascii.Error) as exc:
+        logger.warning("EOT backend trusted operator context payload is malformed")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Trusted operator context is malformed.",
         ) from exc
 
     if payload.version != 1:
+        logger.warning(
+            "EOT backend trusted operator context version is unsupported",
+            extra={"version": payload.version},
+        )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Trusted operator context version is unsupported.",
@@ -83,6 +99,10 @@ def get_authenticated_operator_context(
 
     now = int(time.time())
     if abs(now - payload.issued_at) > settings.eot_internal_auth_ttl_seconds:
+        logger.warning(
+            "EOT backend trusted operator context expired",
+            extra={"issued_at": payload.issued_at, "ttl_seconds": settings.eot_internal_auth_ttl_seconds},
+        )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Trusted operator context has expired.",

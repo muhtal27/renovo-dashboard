@@ -15,6 +15,12 @@ const TENANT_SCOPE_KEYS = new Set(TENANT_ID_KEYS)
 export const EOT_INTERNAL_AUTH_CONTEXT_HEADER = 'x-renovo-eot-context'
 export const EOT_INTERNAL_AUTH_SIGNATURE_HEADER = 'x-renovo-eot-signature'
 export const EOT_INTERNAL_AUTH_VERSION = 1
+export const DEFAULT_LOCAL_EOT_API_BASE_URL = 'http://127.0.0.1:8000'
+
+export type EotApiBaseUrlConfig = {
+  value: string
+  source: 'EOT_API_BASE_URL' | 'NEXT_PUBLIC_EOT_API_BASE_URL' | 'default_local'
+}
 
 export type EotOperatorContext = {
   userId: string
@@ -24,12 +30,33 @@ export type EotOperatorContext = {
   membershipStatus?: OperatorMembershipStatus | null
 }
 
+export function getEotApiBaseUrlConfig(): EotApiBaseUrlConfig {
+  const serverUrl = process.env.EOT_API_BASE_URL?.trim()
+
+  if (serverUrl) {
+    return {
+      value: serverUrl,
+      source: 'EOT_API_BASE_URL',
+    }
+  }
+
+  const publicUrl = process.env.NEXT_PUBLIC_EOT_API_BASE_URL?.trim()
+
+  if (publicUrl) {
+    return {
+      value: publicUrl,
+      source: 'NEXT_PUBLIC_EOT_API_BASE_URL',
+    }
+  }
+
+  return {
+    value: DEFAULT_LOCAL_EOT_API_BASE_URL,
+    source: 'default_local',
+  }
+}
+
 export function getEotApiBaseUrl() {
-  return (
-    process.env.EOT_API_BASE_URL ??
-    process.env.NEXT_PUBLIC_EOT_API_BASE_URL ??
-    'http://127.0.0.1:8000'
-  )
+  return getEotApiBaseUrlConfig().value
 }
 
 export function sanitizeEotSearchParams(searchParams: URLSearchParams) {

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { EotWorkspaceClient } from '@/app/eot/_components/eot-workspace-client'
-import { getEotCaseWorkspaceSnapshot } from '@/lib/eot-server-data'
+import { getEotCaseWorkspaceSummarySnapshot } from '@/lib/eot-server-data'
 import { requireOperatorTenant } from '@/lib/operator-server'
 
 export const metadata: Metadata = {
@@ -16,7 +16,7 @@ type PageProps = {
 export default async function EotCasePage({ params }: PageProps) {
   const context = await requireOperatorTenant('/eot')
   const { caseId } = await params
-  const initialWorkspace = await getEotCaseWorkspaceSnapshot(context, caseId).catch(() => null)
+  const initialWorkspace = await getEotCaseWorkspaceSummarySnapshot(context, caseId).catch(() => null)
 
   return (
     <EotWorkspaceClient

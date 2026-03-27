@@ -4,9 +4,9 @@ import { MarketingShell } from '@/app/components/MarketingShell'
 import { PublicContactForm } from '@/app/public-contact-form'
 
 export const metadata: Metadata = {
-  title: 'Contact | Renovo',
+  title: 'Contact | Renovo AI',
   description:
-    'Contact Renovo about early access, partnerships, investor enquiries, or general questions.',
+    'Contact Renovo AI about early access, partnerships, investor enquiries, or general questions.',
   alternates: {
     canonical: 'https://renovoai.co.uk/contact',
   },
@@ -19,10 +19,13 @@ export default function ContactPage() {
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_460px] xl:items-start">
           <section className="page-hero">
             <p className="app-kicker">Contact</p>
-            <h1 className="page-title">Talk to Renovo</h1>
+            <h1 className="page-title">Talk to Renovo AI</h1>
             <p className="page-copy">
               Get in touch about early access, partnerships, investor enquiries, or general
               questions. We will reply as soon as we can.
+            </p>
+            <p className="mt-4 text-sm leading-7 text-[#7a7670]">
+              Renovo AI Ltd · Company No. SC833544
             </p>
 
             <div className="mt-8 grid gap-3 text-sm leading-7 text-[#3d3b37]">

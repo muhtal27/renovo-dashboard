@@ -10,7 +10,7 @@ const principles = [
   },
   {
     title: 'Built for how it actually works',
-    body: 'Renovo is shaped around real end-of-tenancy handoffs, evidence review, and dispute preparation under operational pressure.',
+    body: 'Renovo AI is shaped around real end-of-tenancy handoffs, evidence review, and dispute preparation under operational pressure.',
   },
   {
     title: 'Fair to both sides',
@@ -19,9 +19,9 @@ const principles = [
 ] as const
 
 export const metadata: Metadata = {
-  title: 'About | Renovo',
+  title: 'About | Renovo AI',
   description:
-    'About Renovo and the founder-led approach to end-of-tenancy workflow automation for UK property managers.',
+    'About Renovo AI and the founder-led approach to end-of-tenancy workflow automation for UK property managers.',
   alternates: {
     canonical: 'https://renovoai.co.uk/about',
   },
@@ -33,7 +33,7 @@ export default function AboutPage() {
       <section className="marketing-frame pb-10 pt-14 md:pt-24">
         <p className="inline-flex items-center gap-2 rounded-full bg-[#e1f5ee] px-3 py-1.5 text-xs font-medium uppercase tracking-[0.08em] text-[#0f6e56]">
           <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#0f6e56]" />
-          About Renovo
+          About Renovo AI
         </p>
         <h1 className="mt-6 max-w-[760px] text-[clamp(2.2rem,4.5vw,3.3rem)] leading-[1.1] tracking-[-0.02em]">
           Built by someone who has
@@ -41,9 +41,12 @@ export default function AboutPage() {
           <em className="not-italic text-[#9e7a2a]">done the work</em>
         </h1>
         <p className="mt-6 max-w-[700px] text-lg font-light leading-8 text-[#3d3b37]">
-          Renovo is built in Edinburgh by a founder with direct end-of-tenancy operational
+          Renovo AI is built in Edinburgh by a founder with direct end-of-tenancy operational
           experience, focused on turning scattered evidence and manual admin into a reviewable,
           defensible workflow.
+        </p>
+        <p className="mt-4 text-sm leading-7 text-[#7a7670]">
+          Renovo AI Ltd · Company No. SC833544
         </p>
       </section>
 
@@ -60,7 +63,7 @@ export default function AboutPage() {
                 evidence trails under deadline pressure.
               </p>
               <p>
-                Renovo exists to centralise that operational layer: evidence intake, issue review,
+                Renovo AI exists to centralise that operational layer: evidence intake, issue review,
                 recommendation drafting, manager sign-off, and claim-ready output in one workspace.
               </p>
             </div>
@@ -72,7 +75,7 @@ export default function AboutPage() {
             </h2>
             <div className="mt-5 space-y-4 text-[15px] leading-8 text-[#3d3b37]">
               <p>
-                Renovo is founded by Muhammad Munawar, based in Edinburgh. The product direction
+                Renovo AI is founded by Muhammad Munawar, based in Edinburgh. The product direction
                 comes from first-hand checkout review, liability assessment, and dispute handling
                 experience.
               </p>
@@ -100,7 +103,7 @@ export default function AboutPage() {
             </div>
             <div className="p-5">
               <p className="text-lg">Muhammad Munawar</p>
-              <p className="mt-1 text-sm text-[#7a7670]">Founder & CEO, Renovo</p>
+              <p className="mt-1 text-sm text-[#7a7670]">Founder & CEO, Renovo AI</p>
             </div>
           </div>
 
@@ -137,7 +140,7 @@ export default function AboutPage() {
             </p>
             <h2 className="mt-5 text-[30px] leading-[1.2]">Based in Edinburgh</h2>
             <p className="mt-4 text-[15px] leading-8 text-[#3d3b37]">
-              Renovo is built in Scotland and focused on UK end-of-tenancy operating realities,
+              Renovo AI is built in Scotland and focused on UK end-of-tenancy operating realities,
               including evidence standards and dispute preparation expectations in local workflows.
             </p>
           </div>
@@ -145,7 +148,7 @@ export default function AboutPage() {
           <article className="overflow-hidden rounded-2xl border border-[rgba(15,14,13,0.1)] bg-white shadow-[0_8px_32px_rgba(0,0,0,0.06)]">
             <div className="h-44 bg-[#e8e3da]" />
             <div className="p-5">
-              <p className="text-base">Renovo HQ</p>
+              <p className="text-base">Renovo AI HQ</p>
               <p className="mt-1 text-sm text-[#7a7670]">Edinburgh, Scotland - renovoai.co.uk</p>
             </div>
           </article>

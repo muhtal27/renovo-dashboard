@@ -120,7 +120,7 @@ export function PublicWaitlistForm() {
           </form>
 
           <p className="mt-4 text-xs leading-6 text-[#7a7670]">
-            We only use these details to contact you about Renovo rollout access.
+            We only use these details to contact you about Renovo AI rollout access.
           </p>
         </>
       )}

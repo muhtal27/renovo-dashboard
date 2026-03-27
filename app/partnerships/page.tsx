@@ -13,18 +13,18 @@ const partnerTypes = [
   },
   {
     title: 'Deposit and dispute workflow partners',
-    body: 'Explore how Renovo could support downstream claim and dispute pathways without forcing teams back into manual file assembly.',
+    body: 'Explore how Renovo AI could support downstream claim and dispute pathways without forcing teams back into manual file assembly.',
   },
   {
     title: 'Strategic channel partners',
-    body: 'Work with Renovo where your customers already deal with checkout admin, evidence review, and end-of-tenancy operations at volume.',
+    body: 'Work with Renovo AI where your customers already deal with checkout admin, evidence review, and end-of-tenancy operations at volume.',
   },
 ] as const
 
 const handoffAreas = [
   {
-    title: 'Where Renovo sits',
-    body: 'Renovo sits between evidence collection and claim preparation. It is designed to organise the operational work that usually happens across reports, photos, spreadsheets, and email.',
+    title: 'Where Renovo AI sits',
+    body: 'Renovo AI sits between evidence collection and claim preparation. It is designed to organise the operational work that usually happens across reports, photos, spreadsheets, and email.',
   },
   {
     title: 'What a partner gets',
@@ -37,9 +37,9 @@ const handoffAreas = [
 ] as const
 
 export const metadata: Metadata = {
-  title: 'Partnerships | Renovo',
+  title: 'Partnerships | Renovo AI',
   description:
-    'Explore partnership discussions with Renovo across inventory systems, property management software, and end-of-tenancy workflow partners.',
+    'Explore partnership discussions with Renovo AI across inventory systems, property management software, and end-of-tenancy workflow partners.',
   alternates: {
     canonical: 'https://renovoai.co.uk/partnerships',
   },
@@ -53,10 +53,10 @@ export default function PartnershipsPage() {
           <section className="rounded-[1.8rem] border border-stone-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,247,243,0.95))] px-6 py-7 md:px-8 md:py-8">
             <p className="app-kicker">Partnerships</p>
             <h1 className="mt-3 text-3xl font-semibold tracking-tight text-stone-900 md:text-4xl">
-              Work with Renovo
+              Work with Renovo AI
             </h1>
             <p className="mt-4 max-w-3xl text-sm leading-7 text-stone-600 md:text-base md:leading-8">
-              Renovo automates end-of-tenancy work for property managers and letting agencies. We
+              Renovo AI automates end-of-tenancy work for property managers and letting agencies. We
               are interested in partnerships where workflow handoff, structured evidence, and
               operational review can fit together cleanly.
             </p>
@@ -65,7 +65,7 @@ export default function PartnershipsPage() {
                 href="/contact"
                 className="app-primary-button rounded-full px-4 py-2 text-sm font-medium"
               >
-                Contact Renovo
+                Contact Renovo AI
               </Link>
               <Link
                 href="/demo"
@@ -92,7 +92,7 @@ export default function PartnershipsPage() {
           </section>
 
           <section>
-            <p className="app-kicker">How Renovo connects</p>
+            <p className="app-kicker">How Renovo AI connects</p>
             <div className="mt-4 grid gap-4 md:grid-cols-3">
               {handoffAreas.map((item) => (
                 <article
@@ -113,14 +113,14 @@ export default function PartnershipsPage() {
               </h2>
               <p className="mx-auto mt-4 max-w-3xl text-base leading-8 text-stone-700">
                 If you&apos;re building for property managers, inventory teams, or end-of-tenancy
-                operations, we&apos;d be happy to explore how Renovo could fit into your workflow.
+                operations, we&apos;d be happy to explore how Renovo AI could fit into your workflow.
               </p>
               <div className="mt-8 flex flex-wrap justify-center gap-3">
                 <Link
                   href="/contact"
                   className="app-primary-button rounded-2xl px-5 py-3 text-sm font-medium"
                 >
-                  Contact Renovo
+                  Contact Renovo AI
                 </Link>
                 <Link
                   href="/demo"

@@ -304,7 +304,7 @@ export default function HomepageDemo({
 
         <SectionCard className="p-5 shadow-sm">
           <p className="text-sm leading-7 text-stone-700">
-            Renovo has reviewed 5 documents, identified 4 issues, and drafted a partial claim
+            Renovo AI has reviewed 5 documents, identified 4 issues, and drafted a partial claim
             recommendation of £640 from a £1,200 deposit. Two issues have high confidence
             photographic evidence. One issue requires manager judgement on fair wear and tear.
             Awaiting your review.
@@ -515,7 +515,7 @@ export default function HomepageDemo({
           <div className="rounded-[1.5rem] border border-emerald-200 bg-emerald-50/80 p-5">
             <p className="app-kicker text-emerald-900">Ready to use this for real cases?</p>
             <p className="mt-3 max-w-3xl text-sm leading-7 text-emerald-950/85">
-              This is a preview of a live end-of-tenancy case. Join the rollout list to use Renovo
+              This is a preview of a live end-of-tenancy case. Join the rollout list to use Renovo AI
               with your own agency&apos;s cases.
             </p>
             <Link
@@ -608,7 +608,7 @@ export default function HomepageDemo({
               <span className="h-2.5 w-2.5 rounded-full bg-amber-300" />
               <span className="h-2.5 w-2.5 rounded-full bg-emerald-300" />
             </div>
-            <p className="app-kicker">Renovo</p>
+            <p className="app-kicker">Renovo AI</p>
           </div>
 
           <p className="min-w-0 flex-1 truncate text-center text-sm font-medium text-[#3d3b37]">

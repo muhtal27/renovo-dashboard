@@ -28,7 +28,7 @@ export function LandingTrustSection({
             Control stays with your team
           </h2>
           <p className="mt-4 text-base leading-8 text-stone-700">
-            Renovo prepares the work, but your team reviews every issue, amount, and explanation
+            Renovo AI prepares the work, but your team reviews every issue, amount, and explanation
             before anything is sent. The reasoning stays visible, the evidence stays linked, and
             the record is there if a claim is challenged later.
           </p>

@@ -225,7 +225,7 @@ const comparisonRows: ComparisonRow[] = [
 const faqs = [
   {
     q: 'How did you calculate the ROI figures?',
-    a: 'Based on a £23,500 property manager salary handling 30 checkouts per month at 2.5 hours each. That is approximately £920 per month in salary spent on checkout admin. Renovo typically saves 60% or more of that time. The ROI figures are conservative and exclude additional value from fewer lost disputes and reduced complaints.',
+    a: 'Based on a £23,500 property manager salary handling 30 checkouts per month at 2.5 hours each. That is approximately £920 per month in salary spent on checkout admin. Renovo AI typically saves 60% or more of that time. The ROI figures are conservative and exclude additional value from fewer lost disputes and reduced complaints.',
   },
   {
     q: 'What counts as a managed tenancy?',
@@ -303,7 +303,7 @@ export default function PricingPageClient() {
             Priced on the value <em className="not-italic text-[#1b6b4a]">we create</em>
           </h1>
           <p className="mx-auto mt-5 max-w-[640px] text-[15px] font-light leading-8 text-[#5c5c55]">
-            The average property manager spends £920 per month on checkout admin alone. Renovo
+            The average property manager spends £920 per month on checkout admin alone. Renovo AI
             gives most of that time back and charges a fraction of what it saves.
           </p>
         </section>

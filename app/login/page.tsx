@@ -265,7 +265,7 @@ export default function LoginPage() {
     <main className="marketing-page min-h-screen bg-[#faf8f5] py-8 text-[#0f0e0d] md:py-10">
       <div className="marketing-frame grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_460px]">
         <section className="rounded-xl border border-[rgba(15,14,13,0.1)] bg-white p-8 shadow-[0_8px_24px_rgba(0,0,0,0.04)] md:p-10">
-          <p className="app-kicker">Renovo</p>
+          <p className="app-kicker">Renovo AI</p>
           <h1 className="mt-4 text-[clamp(2rem,4vw,2.9rem)] leading-[1.08]">
             Workspace sign-in
           </h1>
@@ -307,7 +307,7 @@ export default function LoginPage() {
               href="/"
               className="app-secondary-button rounded px-4 py-2 text-sm font-medium"
             >
-              Back to Renovo
+              Back to Renovo AI
             </Link>
           </div>
 
@@ -348,15 +348,15 @@ export default function LoginPage() {
             <p className="text-sm font-medium text-[#0f0e0d]">
               {mode === 'sign_in' && 'For approved property managers'}
               {mode === 'sign_up' && 'Create a sign-in before your access is linked'}
-              {mode === 'reset' && 'Recover the password for your approved Renovo email'}
+              {mode === 'reset' && 'Recover the password for your approved Renovo AI email'}
             </p>
             <p className="mt-2 text-sm leading-6 text-[#3d3b37]">
               {mode === 'sign_in' &&
-                'If your email is linked correctly, Renovo will send you straight to the right workspace after sign-in.'}
+                'If your email is linked correctly, Renovo AI will send you straight to the right workspace after sign-in.'}
               {mode === 'sign_up' &&
                 'If your agency has not linked your role yet, you will not be able to enter a workspace until they do.'}
               {mode === 'reset' &&
-                'Use the same email that was approved for Renovo access so the reset links back to the correct sign-in.'}
+                'Use the same email that was approved for Renovo AI access so the reset links back to the correct sign-in.'}
             </p>
           </div>
 

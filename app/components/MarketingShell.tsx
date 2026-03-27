@@ -13,6 +13,7 @@ type MarketingShellProps = {
     | '/integrations'
     | '/pricing'
     | '/about'
+    | '/compliance'
     | '/contact'
     | '/privacy'
     | '/terms'
@@ -24,6 +25,7 @@ const headerNavItems = [
   { label: 'Pricing', href: '/pricing' },
   { label: 'Demo', href: '/demo' },
   { label: 'About', href: '/about' },
+  { label: 'Compliance', href: '/compliance' },
   { label: 'Contact', href: '/contact' },
 ] as const
 
@@ -40,6 +42,7 @@ const footerCompanyLinks = [
 ] as const
 
 const footerLegalLinks = [
+  { label: 'Compliance', href: '/compliance' },
   { label: 'Privacy', href: '/privacy' },
   { label: 'Terms', href: '/terms' },
 ] as const
@@ -81,7 +84,7 @@ export function MarketingShell({
     <main className="marketing-page min-h-screen bg-[#faf8f5] text-[#0f0e0d]">
       <header className="sticky top-0 z-30 border-b border-[rgba(15,14,13,0.08)] bg-[rgba(250,248,245,0.94)] backdrop-blur-[14px]">
         <div className="marketing-frame flex min-h-[76px] items-center justify-between gap-4 py-4">
-          <Link href="/" aria-label="Renovo home" className="inline-flex items-center gap-3">
+          <Link href="/" aria-label="Renovo AI home" className="inline-flex items-center gap-3">
             <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#0f0e0d] text-[#faf8f5]">
               <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
                 <path
@@ -93,7 +96,7 @@ export function MarketingShell({
               </svg>
             </span>
             <span className="font-[var(--font-dm-serif)] text-[1.4rem] tracking-[-0.03em]">
-              Renovo
+              Renovo AI
             </span>
           </Link>
 
@@ -146,6 +149,13 @@ export function MarketingShell({
                   Investors
                 </Link>
                 <Link
+                  href="/compliance"
+                  aria-current={currentPath === '/compliance' ? 'page' : undefined}
+                  className="rounded px-3 py-2 text-sm font-medium text-[#4b4741] hover:bg-[#f2efe9] hover:text-[#0f0e0d]"
+                >
+                  Compliance
+                </Link>
+                <Link
                   href="/privacy"
                   aria-current={currentPath === '/privacy' ? 'page' : undefined}
                   className="rounded px-3 py-2 text-sm font-medium text-[#4b4741] hover:bg-[#f2efe9] hover:text-[#0f0e0d]"
@@ -184,7 +194,7 @@ export function MarketingShell({
           <div className="grid gap-10 border-b border-[rgba(255,255,255,0.08)] pb-10 md:grid-cols-2 xl:grid-cols-[2.2fr_1fr_1fr_1fr]">
             <div>
               <p className="font-[var(--font-dm-serif)] text-[1.6rem] tracking-[-0.03em] text-white">
-                Renovo
+                Renovo AI
               </p>
               <p className="mt-3 max-w-[320px] text-sm leading-7">
                 End of tenancy, automated. Built for UK property managers who want a clearer,
@@ -242,7 +252,12 @@ export function MarketingShell({
           </div>
 
           <div className="mt-7 flex flex-col gap-3 text-sm md:flex-row md:items-center md:justify-between">
-            <span>(c) 2026 Renovo - Edinburgh, Scotland</span>
+            <div className="flex flex-col gap-1">
+              <span>Renovo AI Ltd · Company No. SC833544</span>
+              <span className="text-xs text-[rgba(255,255,255,0.5)]">
+                (c) 2026 Renovo AI Ltd - Edinburgh, Scotland
+              </span>
+            </div>
             <span className="inline-flex w-fit items-center gap-2 rounded-full border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.06)] px-3 py-1.5 text-xs text-[rgba(255,255,255,0.55)]">
               <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#0f6e56]" />
               renovoai.co.uk

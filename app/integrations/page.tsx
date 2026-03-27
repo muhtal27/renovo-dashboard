@@ -24,7 +24,7 @@ const plannedAreas = [
 const flowItems = [
   {
     title: 'Data in',
-    body: 'Reports, photos, supporting documents, and case context come into Renovo in a structured way.',
+    body: 'Reports, photos, supporting documents, and case context come into Renovo AI in a structured way.',
   },
   {
     title: 'Processing',
@@ -44,9 +44,9 @@ const futureAccess = [
 ] as const
 
 export const metadata: Metadata = {
-  title: 'Integrations | Renovo',
+  title: 'Integrations | Renovo AI',
   description:
-    'A forward-looking view of the Renovo integrations roadmap for end-of-tenancy workflows.',
+    'A forward-looking view of the Renovo AI integrations roadmap for end-of-tenancy workflows.',
   alternates: {
     canonical: 'https://renovoai.co.uk/integrations',
   },
@@ -60,10 +60,10 @@ export default function IntegrationsPage() {
           <section className="rounded-[1.8rem] border border-stone-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,247,243,0.95))] px-6 py-7 md:px-8 md:py-8">
             <p className="app-kicker">Integrations</p>
             <h1 className="mt-3 text-3xl font-semibold tracking-tight text-stone-900 md:text-4xl">
-              Connect your workflow to Renovo
+              Connect your workflow to Renovo AI
             </h1>
             <p className="mt-4 max-w-3xl text-sm leading-7 text-stone-600 md:text-base md:leading-8">
-              Renovo is being built to support structured workflow handoff around end-of-tenancy
+              Renovo AI is being built to support structured workflow handoff around end-of-tenancy
               operations. The integration framework is in planning and is not yet publicly
               available.
             </p>
@@ -81,7 +81,7 @@ export default function IntegrationsPage() {
               End-of-tenancy workflow alignment
             </h2>
             <p className="mt-4 max-w-4xl text-base leading-8 text-stone-700">
-              Renovo sits between evidence intake, manager review, and claim preparation. Any
+              Renovo AI sits between evidence intake, manager review, and claim preparation. Any
               future integration work is intended to support that operational flow rather than add a
               separate developer platform for its own sake.
             </p>
@@ -103,7 +103,7 @@ export default function IntegrationsPage() {
           </section>
 
           <section>
-            <p className="app-kicker">How data is expected to move through Renovo</p>
+            <p className="app-kicker">How data is expected to move through Renovo AI</p>
             <div className="mt-4 grid gap-4 md:grid-cols-3">
               {flowItems.map((item) => (
                 <article
@@ -138,14 +138,14 @@ export default function IntegrationsPage() {
               </h2>
               <p className="mx-auto mt-4 max-w-3xl text-base leading-8 text-stone-700">
                 We&apos;re happy to speak with inventory platforms, PMS providers, and workflow
-                partners exploring future integration with Renovo.
+                partners exploring future integration with Renovo AI.
               </p>
               <div className="mt-8 flex flex-wrap justify-center gap-3">
                 <Link
                   href="/contact"
                   className="app-primary-button rounded-2xl px-5 py-3 text-sm font-medium"
                 >
-                  Contact Renovo
+                  Contact Renovo AI
                 </Link>
                 <Link
                   href="/demo"

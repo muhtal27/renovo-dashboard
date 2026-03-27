@@ -126,7 +126,7 @@ export default function WorkspaceAccessPage() {
 
   let heading = 'Resolve workspace access'
   let body =
-    'Your account needs an active Renovo workspace context before this page can load.'
+    'Your account needs an active Renovo AI workspace context before this page can load.'
 
   if (reason === 'forbidden') {
     heading = 'Access restricted'
@@ -135,10 +135,10 @@ export default function WorkspaceAccessPage() {
     body = 'Checking your operator session and workspace access now.'
   } else if (!operator?.authUser) {
     heading = 'Sign in required'
-    body = 'You need to sign in before Renovo can open this workspace.'
+    body = 'You need to sign in before Renovo AI can open this workspace.'
   } else if (operator.profile?.is_active === false) {
     heading = 'Account disabled'
-    body = 'This operator account is disabled. Contact Renovo if you need access restored.'
+    body = 'This operator account is disabled. Contact Renovo AI if you need access restored.'
   } else if (operator.requiresTenantSelection) {
     heading = 'Choose a workspace'
     body = 'This account is linked to more than one workspace. Pick the one you want to open.'
@@ -188,7 +188,7 @@ export default function WorkspaceAccessPage() {
                 Sign in
               </Link>
               <Link href="/contact" className="app-secondary-button rounded px-6 py-3 text-sm font-medium">
-                Contact Renovo
+                Contact Renovo AI
               </Link>
             </div>
           ) : null}

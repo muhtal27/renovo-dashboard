@@ -1,11 +1,20 @@
+import logging
+
 from fastapi import FastAPI
 
 from app.api.eot.router import router as eot_router
 from app.api.router import api_router
 from app.core.config import settings
 
+logger = logging.getLogger(__name__)
+
 
 def create_app() -> FastAPI:
+    if not settings.eot_internal_auth_secret:
+        logger.error(
+            "EOT backend internal auth is not configured. Set EOT_INTERNAL_AUTH_SECRET in backend/.env before using /api/eot/* routes."
+        )
+
     app = FastAPI(
         title=settings.project_name,
         debug=settings.debug,

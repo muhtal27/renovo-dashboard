@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react'
 import {
   ArrowLeft,
+  ChevronDown,
   ExternalLink,
   FileText,
   ImageIcon,
@@ -18,24 +19,31 @@ import {
 import {
   createEotEvidence,
   createEotMessage,
-  getEotCaseWorkspace,
+  getEotCaseSubmission,
+  getEotCaseTimeline,
+  getEotCaseWorkspaceSummary,
+  listEotCaseDocuments,
+  listEotCaseEvidence,
+  listEotCaseIssues,
+  listEotCaseMessages,
   upsertEotIssue,
 } from '@/lib/eot-api'
-import {
-  buildWorkspaceTimeline,
-  getClaimReadiness,
-  getOpenHighSeverityIssues,
-} from '@/lib/eot-dashboard'
 import type {
   CreateEotEvidenceInput,
   CreateEotMessageInput,
-  EotCaseWorkspace,
+  EotCaseSubmission,
+  EotCaseTimelineItem,
+  EotCaseWorkspaceSummary,
+  EotDocument,
+  EotEvidence,
   EotEvidenceType,
   EotIssue,
   EotIssueSeverity,
   EotIssueStatus,
+  EotMessage,
   EotMessageSenderType,
   EotRecommendationDecision,
+  EotSectionPage,
   UpsertEotIssueInput,
 } from '@/lib/eot-types'
 import {
@@ -58,11 +66,12 @@ import {
   formatEnumLabel,
   getCaseProgress,
 } from '@/app/eot/_components/eot-ui'
+import { getEotUiErrorMessage } from '@/lib/eot-errors'
 
 type WorkspaceClientProps = {
   caseId: string
   defaultActor: string
-  initialWorkspace?: EotCaseWorkspace | null
+  initialWorkspace?: EotCaseWorkspaceSummary | null
 }
 
 type EvidenceFormState = {
@@ -121,63 +130,269 @@ const DEFAULT_MESSAGE_FORM = (defaultActor: string): MessageFormState => ({
 
 const WORKSPACE_CACHE_TTL_MS = 30_000
 
-const workspaceCache = new Map<string, { workspace: EotCaseWorkspace; cachedAt: number }>()
-const workspaceRequests = new Map<string, Promise<EotCaseWorkspace>>()
+type SectionKey =
+  | 'evidence'
+  | 'issues'
+  | 'submission'
+  | 'timeline'
+  | 'documents'
+  | 'messages'
 
-function primeWorkspaceCache(caseId: string, workspace: EotCaseWorkspace | null | undefined) {
-  if (!workspace) {
+type WorkspaceSectionPayloads = {
+  evidence: EotSectionPage<EotEvidence>
+  issues: EotIssue[]
+  submission: EotCaseSubmission
+  timeline: EotCaseTimelineItem[]
+  documents: EotSectionPage<EotDocument>
+  messages: EotSectionPage<EotMessage>
+}
+
+type WorkspaceSectionState<T> = {
+  data: T | null
+  loading: boolean
+  loadingMore: boolean
+  loaded: boolean
+  error: string | null
+}
+
+type WorkspaceSectionStateMap = {
+  [K in SectionKey]: WorkspaceSectionState<WorkspaceSectionPayloads[K]>
+}
+
+const summaryCache = new Map<string, { summary: EotCaseWorkspaceSummary; cachedAt: number }>()
+const summaryRequests = new Map<string, Promise<EotCaseWorkspaceSummary>>()
+const sectionCache = new Map<string, { data: unknown; cachedAt: number }>()
+const sectionRequests = new Map<string, Promise<unknown>>()
+const SECTION_PAGE_SIZE = 24
+const EMPTY_EVIDENCE: EotEvidence[] = []
+const EMPTY_ISSUES: EotIssue[] = []
+const EMPTY_MESSAGES: EotMessage[] = []
+const EMPTY_DOCUMENTS: EotDocument[] = []
+const EMPTY_TIMELINE: EotCaseTimelineItem[] = []
+const EMPTY_EVIDENCE_PAGE: EotSectionPage<EotEvidence> = {
+  items: EMPTY_EVIDENCE,
+  next_offset: null,
+  has_more: false,
+}
+const EMPTY_MESSAGE_PAGE: EotSectionPage<EotMessage> = {
+  items: EMPTY_MESSAGES,
+  next_offset: null,
+  has_more: false,
+}
+const EMPTY_DOCUMENT_PAGE: EotSectionPage<EotDocument> = {
+  items: EMPTY_DOCUMENTS,
+  next_offset: null,
+  has_more: false,
+}
+
+function isPaginatedSection(section: SectionKey): section is 'evidence' | 'messages' | 'documents' {
+  return section === 'evidence' || section === 'messages' || section === 'documents'
+}
+
+function primeWorkspaceSummaryCache(
+  caseId: string,
+  summary: EotCaseWorkspaceSummary | null | undefined
+) {
+  if (!summary) {
     return
   }
 
-  workspaceCache.set(caseId, {
-    workspace,
+  summaryCache.set(caseId, {
+    summary,
     cachedAt: Date.now(),
   })
 }
 
-function getCachedWorkspace(caseId: string) {
-  const cached = workspaceCache.get(caseId)
+function getCachedWorkspaceSummary(caseId: string) {
+  const cached = summaryCache.get(caseId)
 
   if (!cached) {
     return null
   }
 
   if (Date.now() - cached.cachedAt >= WORKSPACE_CACHE_TTL_MS) {
-    workspaceCache.delete(caseId)
+    summaryCache.delete(caseId)
     return null
   }
 
-  return cached.workspace
+  return cached.summary
 }
 
-async function loadWorkspaceSnapshot(caseId: string, forceRefresh = false) {
-  const cached = getCachedWorkspace(caseId)
+async function loadWorkspaceSummarySnapshot(caseId: string, forceRefresh = false) {
+  const cached = getCachedWorkspaceSummary(caseId)
 
   if (!forceRefresh && cached) {
     return cached
   }
 
   if (!forceRefresh) {
-    const inFlight = workspaceRequests.get(caseId)
+    const inFlight = summaryRequests.get(caseId)
     if (inFlight) {
       return inFlight
     }
   }
 
-  const request = getEotCaseWorkspace(caseId)
-    .then((workspace) => {
-      primeWorkspaceCache(caseId, workspace)
-      return workspace
+  const request = getEotCaseWorkspaceSummary(caseId)
+    .then((summary) => {
+      primeWorkspaceSummaryCache(caseId, summary)
+      return summary
     })
     .finally(() => {
-      if (workspaceRequests.get(caseId) === request) {
-        workspaceRequests.delete(caseId)
+      if (summaryRequests.get(caseId) === request) {
+        summaryRequests.delete(caseId)
       }
     })
 
-  workspaceRequests.set(caseId, request)
-
+  summaryRequests.set(caseId, request)
   return request
+}
+
+function getSectionCacheKey(caseId: string, section: SectionKey) {
+  return `${caseId}:${section}`
+}
+
+function primeWorkspaceSectionCache<K extends SectionKey>(
+  caseId: string,
+  section: K,
+  data: WorkspaceSectionPayloads[K] | null | undefined
+) {
+  if (data == null) {
+    return
+  }
+
+  sectionCache.set(getSectionCacheKey(caseId, section), {
+    data,
+    cachedAt: Date.now(),
+  })
+}
+
+function getCachedWorkspaceSection<K extends SectionKey>(
+  caseId: string,
+  section: K
+): WorkspaceSectionPayloads[K] | null {
+  const cached = sectionCache.get(getSectionCacheKey(caseId, section))
+
+  if (!cached) {
+    return null
+  }
+
+  if (Date.now() - cached.cachedAt >= WORKSPACE_CACHE_TTL_MS) {
+    sectionCache.delete(getSectionCacheKey(caseId, section))
+    return null
+  }
+
+  return cached.data as WorkspaceSectionPayloads[K]
+}
+
+async function fetchWorkspaceSection<K extends SectionKey>(
+  caseId: string,
+  section: K,
+  options?: { offset?: number; limit?: number }
+): Promise<WorkspaceSectionPayloads[K]> {
+  switch (section) {
+    case 'evidence':
+      return listEotCaseEvidence(caseId, options) as Promise<WorkspaceSectionPayloads[K]>
+    case 'issues':
+      return listEotCaseIssues(caseId) as Promise<WorkspaceSectionPayloads[K]>
+    case 'submission':
+      return getEotCaseSubmission(caseId) as Promise<WorkspaceSectionPayloads[K]>
+    case 'timeline':
+      return getEotCaseTimeline(caseId) as Promise<WorkspaceSectionPayloads[K]>
+    case 'documents':
+      return listEotCaseDocuments(caseId, options) as Promise<WorkspaceSectionPayloads[K]>
+    case 'messages':
+      return listEotCaseMessages(caseId, options) as Promise<WorkspaceSectionPayloads[K]>
+  }
+}
+
+async function loadWorkspaceSectionSnapshot<K extends SectionKey>(
+  caseId: string,
+  section: K,
+  options?: { forceRefresh?: boolean; offset?: number; limit?: number }
+): Promise<WorkspaceSectionPayloads[K]> {
+  const forceRefresh = options?.forceRefresh ?? false
+  const cached = getCachedWorkspaceSection(caseId, section)
+
+  const isPageRequest = (options?.offset ?? 0) > 0
+
+  if (!forceRefresh && !isPageRequest && cached) {
+    return cached
+  }
+
+  const requestKey = `${getSectionCacheKey(caseId, section)}:${options?.offset ?? 0}:${options?.limit ?? 'default'}`
+
+  if (!forceRefresh) {
+    const inFlight = sectionRequests.get(requestKey)
+    if (inFlight) {
+      return inFlight as Promise<WorkspaceSectionPayloads[K]>
+    }
+  }
+
+  const request = fetchWorkspaceSection(caseId, section, options)
+    .then((data) => {
+      if (!isPageRequest) {
+        primeWorkspaceSectionCache(caseId, section, data)
+      }
+      return data
+    })
+    .finally(() => {
+      if (sectionRequests.get(requestKey) === request) {
+        sectionRequests.delete(requestKey)
+      }
+    })
+
+  sectionRequests.set(requestKey, request)
+  return request
+}
+
+function createInitialSectionState<K extends SectionKey>(
+  caseId: string,
+  section: K
+): WorkspaceSectionState<WorkspaceSectionPayloads[K]> {
+  const cached = getCachedWorkspaceSection(caseId, section)
+
+  return {
+    data: cached,
+    loading: false,
+    loadingMore: false,
+    loaded: cached != null,
+    error: null,
+  }
+}
+
+function createInitialSectionStates(caseId: string): WorkspaceSectionStateMap {
+  return {
+    evidence: createInitialSectionState(caseId, 'evidence'),
+    issues: createInitialSectionState(caseId, 'issues'),
+    submission: createInitialSectionState(caseId, 'submission'),
+    timeline: createInitialSectionState(caseId, 'timeline'),
+    documents: createInitialSectionState(caseId, 'documents'),
+    messages: createInitialSectionState(caseId, 'messages'),
+  }
+}
+
+function getClaimReadiness(summary: EotCaseWorkspaceSummary) {
+  if (summary.claim) {
+    return {
+      label: 'Claim generated',
+      description: 'Submission pack is available for review and export.',
+      tone: 'ready',
+    } as const
+  }
+
+  if (summary.case.status === 'ready_for_claim') {
+    return {
+      label: 'Awaiting submission',
+      description: 'Checkout is marked ready but a formal claim pack has not been generated.',
+      tone: 'attention',
+    } as const
+  }
+
+  return {
+    label: 'In preparation',
+    description: 'Evidence and issue review are still in progress.',
+    tone: 'default',
+  } as const
 }
 
 function EvidenceIcon({ type }: { type: EotEvidenceType }) {
@@ -228,24 +443,107 @@ function IssueCard({
   )
 }
 
+function SectionBody({
+  isOpen,
+  loading,
+  loadingMore,
+  loaded,
+  error,
+  closedPreview,
+  retryLabel,
+  onRetry,
+  children,
+}: {
+  isOpen: boolean
+  loading: boolean
+  loadingMore: boolean
+  loaded: boolean
+  error: string | null
+  closedPreview: string
+  retryLabel?: string
+  onRetry: () => void
+  children: React.ReactNode
+}) {
+  if (!isOpen) {
+    return <p className="text-sm leading-6 text-slate-600">{closedPreview}</p>
+  }
+
+  if (loading && !loaded) {
+    return <SkeletonPanel />
+  }
+
+  if (error && !loaded) {
+    return (
+      <div className="space-y-3">
+        <p className="rounded-[14px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+          {getEotUiErrorMessage(error)}
+        </p>
+        <button
+          type="button"
+          onClick={onRetry}
+          className="inline-flex items-center justify-center rounded-[14px] border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700"
+        >
+          {retryLabel ?? 'Retry'}
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-4">
+      {error && loaded ? (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-[14px] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          <span>{getEotUiErrorMessage(error)}</span>
+          <button
+            type="button"
+            onClick={onRetry}
+            className="inline-flex items-center justify-center rounded-[12px] border border-amber-300 bg-white px-3 py-2 text-sm font-medium text-amber-900"
+          >
+            {retryLabel ?? 'Retry'}
+          </button>
+        </div>
+      ) : null}
+      {loadingMore ? (
+        <p className="text-sm text-slate-500">Loading more items…</p>
+      ) : null}
+      {children}
+    </div>
+  )
+}
+
 export function EotWorkspaceClient({
   caseId,
   defaultActor,
   initialWorkspace,
 }: WorkspaceClientProps) {
-  primeWorkspaceCache(caseId, initialWorkspace)
+  primeWorkspaceSummaryCache(caseId, initialWorkspace)
 
   const searchParams = useSearchParams()
   const search = searchParams.get('search')?.trim().toLowerCase() ?? ''
 
-  const [workspace, setWorkspace] = useState<EotCaseWorkspace | null>(
-    () => initialWorkspace ?? getCachedWorkspace(caseId)
+  const [summary, setSummary] = useState<EotCaseWorkspaceSummary | null>(
+    () => initialWorkspace ?? getCachedWorkspaceSummary(caseId)
   )
-  const [loading, setLoading] = useState(initialWorkspace == null && getCachedWorkspace(caseId) == null)
+  const [loading, setLoading] = useState(
+    initialWorkspace == null && getCachedWorkspaceSummary(caseId) == null
+  )
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [refreshError, setRefreshError] = useState<string | null>(null)
-  const hasLoadedWorkspaceRef = useRef(Boolean(initialWorkspace ?? getCachedWorkspace(caseId)))
+  const hasLoadedSummaryRef = useRef(Boolean(initialWorkspace ?? getCachedWorkspaceSummary(caseId)))
+
+  const [openSections, setOpenSections] = useState<Record<SectionKey, boolean>>({
+    evidence: false,
+    issues: false,
+    submission: false,
+    timeline: false,
+    documents: false,
+    messages: false,
+  })
+  const [sections, setSections] = useState<WorkspaceSectionStateMap>(() =>
+    createInitialSectionStates(caseId)
+  )
+  const sectionStateRef = useRef(sections)
 
   const [selectedEvidenceId, setSelectedEvidenceId] = useState<string | null>(null)
   const [evidenceForm, setEvidenceForm] = useState<EvidenceFormState>(
@@ -262,20 +560,38 @@ export function EotWorkspaceClient({
   const [messageError, setMessageError] = useState<string | null>(null)
 
   useEffect(() => {
+    sectionStateRef.current = sections
+  }, [sections])
+
+  useEffect(() => {
     setEvidenceForm(DEFAULT_EVIDENCE_FORM(defaultActor))
     setMessageForm(DEFAULT_MESSAGE_FORM(defaultActor))
   }, [defaultActor])
 
   useEffect(() => {
+    setSections(createInitialSectionStates(caseId))
+    setOpenSections({
+      evidence: false,
+      issues: false,
+      submission: false,
+      timeline: false,
+      documents: false,
+      messages: false,
+    })
+    setSelectedEvidenceId(null)
+    setIssueForm(DEFAULT_ISSUE_FORM)
+  }, [caseId])
+
+  useEffect(() => {
     let cancelled = false
 
-    async function loadWorkspace() {
+    async function loadSummary() {
       if (initialWorkspace) {
         return
       }
 
-      const hasExistingWorkspace = hasLoadedWorkspaceRef.current
-      const shouldRefreshInBackground = hasExistingWorkspace
+      const hasExistingSummary = hasLoadedSummaryRef.current
+      const shouldRefreshInBackground = hasExistingSummary
 
       if (shouldRefreshInBackground) {
         setRefreshing(true)
@@ -286,23 +602,22 @@ export function EotWorkspaceClient({
       }
 
       try {
-        const nextWorkspace = shouldRefreshInBackground
-          ? await loadWorkspaceSnapshot(caseId, true)
-          : await loadWorkspaceSnapshot(caseId, false)
+        const nextSummary = shouldRefreshInBackground
+          ? await loadWorkspaceSummarySnapshot(caseId, true)
+          : await loadWorkspaceSummarySnapshot(caseId)
 
         if (!cancelled) {
-          setWorkspace(nextWorkspace)
-          setSelectedEvidenceId((current) => current ?? nextWorkspace.evidence[0]?.id ?? null)
+          setSummary(nextSummary)
           setError(null)
           setRefreshError(null)
-          hasLoadedWorkspaceRef.current = true
+          hasLoadedSummaryRef.current = true
         }
       } catch (loadError) {
         if (!cancelled) {
           const message =
             loadError instanceof Error ? loadError.message : 'Unable to load the checkout workspace.'
 
-          if (hasExistingWorkspace) {
+          if (hasExistingSummary) {
             setRefreshError(`${message} Showing the last loaded workspace data.`)
           } else {
             setError(message)
@@ -316,90 +631,246 @@ export function EotWorkspaceClient({
       }
     }
 
-    void loadWorkspace()
+    void loadSummary()
 
     return () => {
       cancelled = true
     }
   }, [caseId, initialWorkspace])
 
-  const visibleEvidence = useMemo(() => {
-    return (
-      workspace?.evidence.filter((item) => {
-        if (!search) return true
-        return [item.area ?? '', item.type, item.file_url, item.uploaded_by].join(' ').toLowerCase().includes(search)
-      }) ?? []
-    )
-  }, [search, workspace])
+  function mergeSectionState<K extends SectionKey>(
+    section: K,
+    patch: Partial<WorkspaceSectionState<WorkspaceSectionPayloads[K]>>
+  ) {
+    setSections((current) => ({
+      ...current,
+      [section]: {
+        ...current[section],
+        ...patch,
+      },
+    }))
+  }
 
-  const visibleIssues = useMemo(() => {
-    return (
-      workspace?.issues.filter((item) => {
-        if (!search) return true
-        return [
-          item.title,
-          item.description ?? '',
-          item.severity,
-          item.status,
-          item.recommendation?.decision ?? '',
-        ]
-          .join(' ')
-          .toLowerCase()
-          .includes(search)
-      }) ?? []
-    )
-  }, [search, workspace])
+  async function ensureSectionLoaded<K extends SectionKey>(
+    section: K,
+    options?: { forceRefresh?: boolean }
+  ) {
+    const forceRefresh = options?.forceRefresh ?? false
+    const current = sectionStateRef.current[section]
 
-  const visibleMessages = useMemo(() => {
-    return (
-      workspace?.messages.filter((item) => {
-        if (!search) return true
-        return [item.sender_type, item.sender_id, item.content].join(' ').toLowerCase().includes(search)
-      }) ?? []
-    )
-  }, [search, workspace])
+    if (!forceRefresh && current.loaded && current.data != null) {
+      return current.data
+    }
 
-  const selectedEvidence = useMemo(() => {
-    if (!visibleEvidence.length) return null
-    return (
-      visibleEvidence.find((item) => item.id === selectedEvidenceId) ??
-      visibleEvidence[0] ??
-      null
-    )
-  }, [selectedEvidenceId, visibleEvidence])
+    mergeSectionState(section, {
+      loading: true,
+      error: null,
+    })
+
+    try {
+      const data = await loadWorkspaceSectionSnapshot(caseId, section, {
+        forceRefresh,
+        limit:
+          forceRefresh && isPaginatedSection(section) && current.data
+            ? Math.max(
+                SECTION_PAGE_SIZE,
+                Math.min((current.data as EotSectionPage<unknown>).items.length || SECTION_PAGE_SIZE, 100)
+              )
+            : undefined,
+      })
+
+      if (section === 'submission') {
+        const submissionData = data as WorkspaceSectionPayloads['submission']
+        primeWorkspaceSectionCache(caseId, 'issues', submissionData.issues)
+        setSections((currentState) => ({
+          ...currentState,
+          issues: {
+            data: submissionData.issues,
+            loading: false,
+            loadingMore: false,
+            loaded: true,
+            error: null,
+          },
+          submission: {
+            data: submissionData,
+            loading: false,
+            loadingMore: false,
+            loaded: true,
+            error: null,
+          },
+        }))
+        return data
+      }
+
+      mergeSectionState(section, {
+        data,
+        loaded: true,
+        loading: false,
+        loadingMore: false,
+        error: null,
+      })
+
+      return data
+    } catch (loadError) {
+      const message =
+        loadError instanceof Error ? loadError.message : 'Unable to load this checkout section.'
+
+      mergeSectionState(section, {
+        loading: false,
+        loadingMore: false,
+        error: message,
+      })
+
+      throw loadError
+    }
+  }
+
+  async function loadMoreSection(section: 'evidence' | 'messages' | 'documents') {
+    const current = sectionStateRef.current[section]
+
+    if (!current.data || current.loadingMore || !current.data.has_more || current.data.next_offset == null) {
+      return
+    }
+
+    mergeSectionState(section, {
+      loadingMore: true,
+      error: null,
+    })
+
+    try {
+      const nextPage = await loadWorkspaceSectionSnapshot(caseId, section, {
+        offset: current.data.next_offset,
+        limit: SECTION_PAGE_SIZE,
+      })
+
+      const merged = {
+        items: [...current.data.items, ...nextPage.items],
+        next_offset: nextPage.next_offset,
+        has_more: nextPage.has_more,
+      } as WorkspaceSectionPayloads[typeof section]
+
+      primeWorkspaceSectionCache(caseId, section, merged)
+      mergeSectionState(section, {
+        data: merged,
+        loaded: true,
+        loading: false,
+        loadingMore: false,
+        error: null,
+      })
+    } catch (loadError) {
+      const message =
+        loadError instanceof Error ? loadError.message : 'Unable to load more items for this section.'
+
+      mergeSectionState(section, {
+        loadingMore: false,
+        error: message,
+      })
+    }
+  }
 
   useEffect(() => {
-    if (!visibleEvidence.length) {
+    const evidenceItems = sections.evidence.data?.items ?? EMPTY_EVIDENCE
+    if (!evidenceItems.length) {
       setSelectedEvidenceId(null)
       return
     }
 
-    if (!selectedEvidence) {
-      setSelectedEvidenceId(visibleEvidence[0].id)
+    setSelectedEvidenceId((current) =>
+      current && evidenceItems.some((item) => item.id === current) ? current : evidenceItems[0].id
+    )
+  }, [sections.evidence.data])
+
+  const evidencePage = sections.evidence.data ?? EMPTY_EVIDENCE_PAGE
+  const evidence = evidencePage.items
+  const issues = sections.issues.data ?? EMPTY_ISSUES
+  const submission = sections.submission.data
+  const timeline = sections.timeline.data ?? EMPTY_TIMELINE
+  const documentsPage = sections.documents.data ?? EMPTY_DOCUMENT_PAGE
+  const documents = documentsPage.items
+  const messagesPage = sections.messages.data ?? EMPTY_MESSAGE_PAGE
+  const messages = messagesPage.items
+
+  const visibleEvidence = useMemo(() => {
+    if (!search) {
+      return evidence
     }
-  }, [selectedEvidence, visibleEvidence])
+
+    return evidence.filter((item) =>
+      [item.area ?? '', item.type, item.file_url, item.uploaded_by]
+        .join(' ')
+        .toLowerCase()
+        .includes(search)
+    )
+  }, [evidence, search])
+
+  const visibleIssues = useMemo(() => {
+    if (!search) {
+      return issues
+    }
+
+    return issues.filter((item) =>
+      [
+        item.title,
+        item.description ?? '',
+        item.severity,
+        item.status,
+        item.recommendation?.decision ?? '',
+      ]
+        .join(' ')
+        .toLowerCase()
+        .includes(search)
+    )
+  }, [issues, search])
+
+  const visibleMessages = useMemo(() => {
+    if (!search) {
+      return messages
+    }
+
+    return messages.filter((item) =>
+      [item.sender_type, item.sender_id, item.content].join(' ').toLowerCase().includes(search)
+    )
+  }, [messages, search])
+
+  const selectedEvidence = useMemo(() => {
+    if (!visibleEvidence.length) return null
+    return visibleEvidence.find((item) => item.id === selectedEvidenceId) ?? visibleEvidence[0] ?? null
+  }, [selectedEvidenceId, visibleEvidence])
 
   async function refreshWorkspaceNow() {
     setRefreshing(true)
     setRefreshError(null)
 
     try {
-      const nextWorkspace = await loadWorkspaceSnapshot(caseId, true)
-      setWorkspace(nextWorkspace)
-      setSelectedEvidenceId((current) => current ?? nextWorkspace.evidence[0]?.id ?? null)
+      const nextSummary = await loadWorkspaceSummarySnapshot(caseId, true)
+      setSummary(nextSummary)
       setError(null)
-      hasLoadedWorkspaceRef.current = true
-      return nextWorkspace
+      hasLoadedSummaryRef.current = true
+
+      const loadedSections = (Object.entries(sectionStateRef.current) as Array<
+        [SectionKey, WorkspaceSectionState<WorkspaceSectionPayloads[SectionKey]>]
+      >)
+        .filter(([, state]) => state.loaded)
+        .map(([section]) => section)
+
+      await Promise.all(loadedSections.map((section) => ensureSectionLoaded(section, { forceRefresh: true })))
     } catch (refreshFailure) {
       const message =
         refreshFailure instanceof Error
           ? refreshFailure.message
           : 'Unable to refresh the checkout workspace.'
       setRefreshError(`${message} Showing the last loaded workspace data.`)
-      throw refreshFailure
     } finally {
       setRefreshing(false)
     }
+  }
+
+  async function refreshWorkspaceSummaryOnly() {
+    const nextSummary = await loadWorkspaceSummarySnapshot(caseId, true)
+    setSummary(nextSummary)
+    setError(null)
+    hasLoadedSummaryRef.current = true
+    return nextSummary
   }
 
   function resetIssueForm() {
@@ -466,7 +937,11 @@ export function EotWorkspaceClient({
     try {
       await createEotEvidence(payload)
       setEvidenceForm(DEFAULT_EVIDENCE_FORM(defaultActor))
-      await refreshWorkspaceNow()
+      await refreshWorkspaceSummaryOnly()
+      await ensureSectionLoaded('evidence', { forceRefresh: true })
+      if (sectionStateRef.current.timeline.loaded) {
+        await ensureSectionLoaded('timeline', { forceRefresh: true })
+      }
     } catch (submitError) {
       setEvidenceError(
         submitError instanceof Error ? submitError.message : 'Unable to register evidence.'
@@ -507,7 +982,14 @@ export function EotWorkspaceClient({
     try {
       await upsertEotIssue(payload)
       resetIssueForm()
-      await refreshWorkspaceNow()
+      await refreshWorkspaceSummaryOnly()
+      await ensureSectionLoaded('issues', { forceRefresh: true })
+      if (sectionStateRef.current.submission.loaded) {
+        await ensureSectionLoaded('submission', { forceRefresh: true })
+      }
+      if (sectionStateRef.current.timeline.loaded) {
+        await ensureSectionLoaded('timeline', { forceRefresh: true })
+      }
     } catch (submitError) {
       setIssueError(submitError instanceof Error ? submitError.message : 'Unable to save the issue.')
     } finally {
@@ -558,7 +1040,11 @@ export function EotWorkspaceClient({
     try {
       await createEotMessage(payload)
       setMessageForm(DEFAULT_MESSAGE_FORM(defaultActor))
-      await refreshWorkspaceNow()
+      await refreshWorkspaceSummaryOnly()
+      await ensureSectionLoaded('messages', { forceRefresh: true })
+      if (sectionStateRef.current.timeline.loaded) {
+        await ensureSectionLoaded('timeline', { forceRefresh: true })
+      }
     } catch (submitError) {
       setMessageError(
         submitError instanceof Error ? submitError.message : 'Unable to send the checkout message.'
@@ -566,6 +1052,24 @@ export function EotWorkspaceClient({
     } finally {
       setMessagePending(false)
     }
+  }
+
+  function handleToggleSection(section: SectionKey) {
+    setOpenSections((current) => {
+      const nextOpen = !current[section]
+
+      if (nextOpen) {
+        if (section === 'issues' && !sectionStateRef.current.evidence.loaded) {
+          void ensureSectionLoaded('evidence')
+        }
+        void ensureSectionLoaded(section)
+      }
+
+      return {
+        ...current,
+        [section]: nextOpen,
+      }
+    })
   }
 
   if (loading) {
@@ -584,21 +1088,19 @@ export function EotWorkspaceClient({
     )
   }
 
-  if (error || !workspace) {
+  if (error || !summary) {
     return (
       <SectionCard className="px-6 py-10">
         <EmptyState
           title="Unable to load workspace"
-          body={error ?? 'The checkout workspace could not be loaded.'}
+          body={getEotUiErrorMessage(error ?? 'The checkout workspace could not be loaded.')}
         />
       </SectionCard>
     )
   }
 
-  const progress = getCaseProgress(workspace.case.status)
-  const highSeverityOpenIssues = getOpenHighSeverityIssues(workspace.issues)
-  const claimReadiness = getClaimReadiness(workspace)
-  const timelineItems = buildWorkspaceTimeline(workspace)
+  const progress = getCaseProgress(summary.case.status)
+  const claimReadiness = getClaimReadiness(summary)
 
   return (
     <div className="space-y-6">
@@ -610,8 +1112,8 @@ export function EotWorkspaceClient({
 
       <PageHeader
         eyebrow="Checkout workspace"
-        title={workspace.property.name}
-        description={workspace.case.summary?.trim() || 'No checkout summary has been recorded yet.'}
+        title={summary.property.name}
+        description={summary.case.summary?.trim() || 'No checkout summary has been recorded yet.'}
         actions={
           <>
             <Link
@@ -639,13 +1141,22 @@ export function EotWorkspaceClient({
             <div className="space-y-5">
               <div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <StatusBadge label={formatEnumLabel(workspace.case.status)} tone={workspace.case.status} />
-                  <StatusBadge label={formatEnumLabel(workspace.case.priority)} tone={workspace.case.priority} />
-                  <StatusBadge label={claimReadiness.label} tone={claimReadiness.tone === 'ready' ? 'ready_for_claim' : claimReadiness.tone === 'attention' ? 'attention' : 'document'} />
+                  <StatusBadge label={formatEnumLabel(summary.case.status)} tone={summary.case.status} />
+                  <StatusBadge label={formatEnumLabel(summary.case.priority)} tone={summary.case.priority} />
+                  <StatusBadge
+                    label={claimReadiness.label}
+                    tone={
+                      claimReadiness.tone === 'ready'
+                        ? 'ready_for_claim'
+                        : claimReadiness.tone === 'attention'
+                          ? 'attention'
+                          : 'document'
+                    }
+                  />
                 </div>
                 <p className="mt-4 text-sm leading-6 text-slate-600">
-                  {workspace.tenancy.tenant_name}
-                  {workspace.tenancy.tenant_email ? ` · ${workspace.tenancy.tenant_email}` : ''}
+                  {summary.tenancy.tenant_name}
+                  {summary.tenancy.tenant_email ? ` · ${summary.tenancy.tenant_email}` : ''}
                 </p>
               </div>
 
@@ -660,19 +1171,16 @@ export function EotWorkspaceClient({
               />
 
               <div className="grid gap-4 md:grid-cols-3">
-                <MetaItem label="Last activity" value={formatDateTime(workspace.case.last_activity_at)} />
+                <MetaItem label="Last activity" value={formatDateTime(summary.case.last_activity_at)} />
                 <MetaItem
                   label="Deposit"
                   value={
-                    workspace.tenancy.deposit_amount
-                      ? formatCurrency(workspace.tenancy.deposit_amount)
+                    summary.tenancy.deposit_amount
+                      ? formatCurrency(summary.tenancy.deposit_amount)
                       : 'Not recorded'
                   }
                 />
-                <MetaItem
-                  label="Property reference"
-                  value={workspace.property.reference || 'Not set'}
-                />
+                <MetaItem label="Property reference" value={summary.property.reference || 'Not set'} />
               </div>
             </div>
 
@@ -684,15 +1192,15 @@ export function EotWorkspaceClient({
                 items={[
                   {
                     label: 'High severity issues',
-                    value: highSeverityOpenIssues.length || 'None',
+                    value: summary.metrics.high_severity_open_issue_count || 'None',
                   },
                   {
                     label: 'Evidence logged',
-                    value: workspace.evidence.length,
+                    value: summary.metrics.evidence_count,
                   },
                   {
                     label: 'Recommendations',
-                    value: workspace.recommendations.length,
+                    value: summary.metrics.recommendation_count,
                   },
                   {
                     label: 'Claim readiness',
@@ -707,27 +1215,30 @@ export function EotWorkspaceClient({
           </div>
         </SectionCard>
 
-        <DetailPanel
-          title="Checkout metadata"
-          description="Property, tenancy, and audit context."
-        >
+        <DetailPanel title="Checkout metadata" description="Property, tenancy, and audit context.">
           <KeyValueList
             items={[
-              { label: 'Checkout ID', value: workspace.case.id.slice(0, 8) },
-              { label: 'Created', value: formatDate(workspace.case.created_at) },
-              { label: 'Tenancy dates', value: `${formatDate(workspace.tenancy.start_date)} to ${formatDate(workspace.tenancy.end_date)}` },
-              { label: 'Address', value: formatAddress([
-                workspace.property.address_line_1,
-                workspace.property.address_line_2,
-                workspace.property.city,
-                workspace.property.postcode,
-                workspace.property.country_code,
-              ]) },
+              { label: 'Checkout ID', value: summary.case.id.slice(0, 8) },
+              { label: 'Created', value: formatDate(summary.case.created_at) },
+              {
+                label: 'Tenancy dates',
+                value: `${formatDate(summary.tenancy.start_date)} to ${formatDate(summary.tenancy.end_date)}`,
+              },
+              {
+                label: 'Address',
+                value: formatAddress([
+                  summary.property.address_line_1,
+                  summary.property.address_line_2,
+                  summary.property.city,
+                  summary.property.postcode,
+                  summary.property.country_code,
+                ]),
+              },
             ]}
           />
-          {workspace.tenancy.notes ? (
+          {summary.tenancy.notes ? (
             <div className="rounded-[18px] border border-slate-200 bg-white px-4 py-4 text-sm leading-6 text-slate-600">
-              {workspace.tenancy.notes}
+              {summary.tenancy.notes}
             </div>
           ) : null}
         </DetailPanel>
@@ -736,701 +1247,893 @@ export function EotWorkspaceClient({
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.55fr)_360px]">
         <div className="space-y-6">
           <section className="grid gap-4 md:grid-cols-4">
-            <KPIStatCard label="Evidence" value={workspace.evidence.length} detail="Registered evidence items." />
-            <KPIStatCard label="Open issues" value={workspace.issues.filter((issue) => issue.status !== 'resolved').length} detail="Issues still under operator review." tone="warning" />
-            <KPIStatCard label="Resolved issues" value={workspace.issues.filter((issue) => issue.status === 'resolved').length} detail="Issues already closed out." tone="accent" />
-            <KPIStatCard label="Checkout notes" value={workspace.messages.length} detail="Logged communication and internal updates." />
+            <KPIStatCard label="Evidence" value={summary.metrics.evidence_count} detail="Registered evidence items." />
+            <KPIStatCard label="Open issues" value={summary.metrics.open_issue_count} detail="Issues still under operator review." tone="warning" />
+            <KPIStatCard label="Resolved issues" value={summary.metrics.resolved_issue_count} detail="Issues already closed out." tone="accent" />
+            <KPIStatCard label="Checkout notes" value={summary.metrics.message_count} detail="Logged communication and internal updates." />
           </section>
 
           <WorkspaceSection
             title="Evidence review"
             description="Preview-first evidence workflow with structured metadata and direct intake controls."
             aside={
-              <div className="flex items-center gap-2">
-                <StatusBadge label={`${visibleEvidence.length} visible`} tone="document" />
-                <StatusBadge label={`${workspace.documents.length} documents`} tone="document" />
+              <div className="flex flex-wrap items-center gap-2">
+                <StatusBadge
+                  label={`${sections.evidence.loaded ? evidence.length : summary.metrics.evidence_count} loaded`}
+                  tone="document"
+                />
+                <StatusBadge label={`${summary.metrics.document_count} documents`} tone="document" />
+                <button
+                  type="button"
+                  onClick={() => handleToggleSection('evidence')}
+                  className="inline-flex items-center gap-2 rounded-[14px] border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700"
+                >
+                  {openSections.evidence ? 'Hide' : sections.evidence.loaded ? 'Open' : 'Load'}
+                  <ChevronDown className={`h-4 w-4 transition ${openSections.evidence ? 'rotate-180' : ''}`} />
+                </button>
               </div>
             }
           >
-            <div className="grid gap-5 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-              <div className="space-y-3">
-                {visibleEvidence.length === 0 ? (
-                  <EmptyState
-                    title="No evidence recorded"
-                    body="Register the first evidence item to begin issue assessment."
-                  />
-                ) : (
-                  visibleEvidence.map((item) => (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => setSelectedEvidenceId(item.id)}
-                      className={`w-full rounded-[18px] border px-4 py-4 text-left transition ${
-                        selectedEvidence?.id === item.id
-                          ? 'border-slate-900 bg-slate-900 text-white shadow-[0_10px_24px_rgba(15,23,42,0.16)]'
-                          : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className={`flex h-9 w-9 items-center justify-center rounded-[12px] ${
-                          selectedEvidence?.id === item.id ? 'bg-white/10 text-white' : 'bg-slate-100 text-slate-600'
-                        }`}>
-                          <EvidenceIcon type={item.type} />
-                        </span>
-                        <div className="min-w-0">
-                          <p className={`text-sm font-semibold ${selectedEvidence?.id === item.id ? 'text-white' : 'text-slate-950'}`}>
-                            {item.area || formatEnumLabel(item.type)}
-                          </p>
-                          <p className={`mt-1 truncate text-sm ${selectedEvidence?.id === item.id ? 'text-slate-200' : 'text-slate-600'}`}>
-                            {item.file_url}
-                          </p>
+            <SectionBody
+              isOpen={openSections.evidence}
+              loading={sections.evidence.loading}
+              loadingMore={sections.evidence.loadingMore}
+              loaded={sections.evidence.loaded}
+              error={sections.evidence.error}
+              closedPreview="Load this section when you need to review evidence previews or register new files."
+              retryLabel="Reload evidence"
+              onRetry={() => void ensureSectionLoaded('evidence', { forceRefresh: true })}
+            >
+              <div className="grid gap-5 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+                <div className="space-y-3">
+                  {visibleEvidence.length === 0 ? (
+                    <EmptyState
+                      title="No evidence recorded"
+                      body="Register the first evidence item to begin issue assessment."
+                    />
+                  ) : (
+                    visibleEvidence.map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => setSelectedEvidenceId(item.id)}
+                        className={`w-full rounded-[18px] border px-4 py-4 text-left transition ${
+                          selectedEvidence?.id === item.id
+                            ? 'border-slate-900 bg-slate-900 text-white shadow-[0_10px_24px_rgba(15,23,42,0.16)]'
+                            : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className={`flex h-9 w-9 items-center justify-center rounded-[12px] ${
+                            selectedEvidence?.id === item.id ? 'bg-white/10 text-white' : 'bg-slate-100 text-slate-600'
+                          }`}>
+                            <EvidenceIcon type={item.type} />
+                          </span>
+                          <div className="min-w-0">
+                            <p className={`text-sm font-semibold ${selectedEvidence?.id === item.id ? 'text-white' : 'text-slate-950'}`}>
+                              {item.area || formatEnumLabel(item.type)}
+                            </p>
+                            <p className={`mt-1 truncate text-sm ${selectedEvidence?.id === item.id ? 'text-slate-200' : 'text-slate-600'}`}>
+                              {item.file_url}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                      <div className={`mt-3 flex flex-wrap items-center gap-2 text-xs ${selectedEvidence?.id === item.id ? 'text-slate-300' : 'text-slate-400'}`}>
-                        <span>{item.uploaded_by}</span>
-                        <span>•</span>
-                        <span>{formatDateTime(item.created_at)}</span>
-                      </div>
+                        <div className={`mt-3 flex flex-wrap items-center gap-2 text-xs ${selectedEvidence?.id === item.id ? 'text-slate-300' : 'text-slate-400'}`}>
+                          <span>{item.uploaded_by}</span>
+                          <span>•</span>
+                          <span>{formatDateTime(item.created_at)}</span>
+                        </div>
+                      </button>
+                    ))
+                  )}
+                  {sections.evidence.loaded && evidencePage.has_more ? (
+                    <button
+                      type="button"
+                      onClick={() => void loadMoreSection('evidence')}
+                      disabled={sections.evidence.loadingMore}
+                      className="inline-flex items-center justify-center rounded-[14px] border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:border-slate-300 disabled:opacity-60"
+                    >
+                      {sections.evidence.loadingMore ? 'Loading more evidence...' : 'Load more evidence'}
                     </button>
-                  ))
-                )}
-              </div>
+                  ) : null}
+                </div>
 
-              <div className="space-y-4">
-                {selectedEvidence ? (
-                  <SectionCard className="overflow-hidden border-slate-200">
-                    <div className="border-b border-slate-200 px-5 py-4">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <StatusBadge label={formatEnumLabel(selectedEvidence.type)} tone={selectedEvidence.type} />
-                        {selectedEvidence.area ? (
-                          <StatusBadge label={selectedEvidence.area} tone="document" />
+                <div className="space-y-4">
+                  {selectedEvidence ? (
+                    <SectionCard className="overflow-hidden border-slate-200">
+                      <div className="border-b border-slate-200 px-5 py-4">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <StatusBadge label={formatEnumLabel(selectedEvidence.type)} tone={selectedEvidence.type} />
+                          {selectedEvidence.area ? (
+                            <StatusBadge label={selectedEvidence.area} tone="document" />
+                          ) : null}
+                        </div>
+                        <p className="mt-3 text-sm font-semibold text-slate-950">{selectedEvidence.file_url}</p>
+                      </div>
+
+                      <div className="px-5 py-5">
+                        {selectedEvidence.type === 'image' ? (
+                          <div className="overflow-hidden rounded-[20px] border border-slate-200 bg-slate-100">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={selectedEvidence.file_url}
+                              alt={selectedEvidence.area || 'Evidence preview'}
+                              className="h-[360px] w-full object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div className="rounded-[20px] border border-dashed border-slate-300 bg-[#f8fafc] px-5 py-10 text-center">
+                            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-[18px] bg-white text-slate-600 shadow-sm">
+                              <EvidenceIcon type={selectedEvidence.type} />
+                            </div>
+                            <p className="mt-4 text-sm font-semibold text-slate-950">Preview opens in a new tab</p>
+                            <p className="mt-2 text-sm leading-6 text-slate-600">
+                              Use the source link for full-size document or media review.
+                            </p>
+                            <a
+                              href={selectedEvidence.file_url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="mt-4 inline-flex items-center gap-2 rounded-[14px] border border-slate-900 bg-slate-900 px-4 py-2.5 text-sm font-medium text-white"
+                            >
+                              Open source
+                              <ExternalLink className="h-4 w-4" />
+                            </a>
+                          </div>
+                        )}
+
+                        <div className="mt-4 grid gap-4 md:grid-cols-2">
+                          <MetaItem label="Uploaded by" value={selectedEvidence.uploaded_by} />
+                          <MetaItem label="Created" value={formatDateTime(selectedEvidence.created_at)} />
+                        </div>
+
+                        {selectedEvidence.metadata ? (
+                          <div className="mt-4 overflow-hidden rounded-[18px] border border-slate-200 bg-slate-950">
+                            <pre className="overflow-x-auto px-4 py-4 text-xs leading-6 text-slate-200">
+                              {JSON.stringify(selectedEvidence.metadata, null, 2)}
+                            </pre>
+                          </div>
                         ) : null}
                       </div>
-                      <p className="mt-3 text-sm font-semibold text-slate-950">{selectedEvidence.file_url}</p>
+                    </SectionCard>
+                  ) : null}
+
+                  <SectionCard className="px-5 py-5">
+                    <div className="flex items-center gap-2">
+                      <Upload className="h-4 w-4 text-slate-500" />
+                      <h3 className="text-sm font-semibold text-slate-950">Add evidence</h3>
                     </div>
-
-                    <div className="px-5 py-5">
-                      {selectedEvidence.type === 'image' ? (
-                        <div className="overflow-hidden rounded-[20px] border border-slate-200 bg-slate-100">
-                          {/* Remote evidence URLs are provided by the case system and are not known at build time. */}
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={selectedEvidence.file_url}
-                            alt={selectedEvidence.area || 'Evidence preview'}
-                            className="h-[360px] w-full object-cover"
-                          />
-                        </div>
-                      ) : (
-                        <div className="rounded-[20px] border border-dashed border-slate-300 bg-[#f8fafc] px-5 py-10 text-center">
-                          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-[18px] bg-white text-slate-600 shadow-sm">
-                            <EvidenceIcon type={selectedEvidence.type} />
-                          </div>
-                          <p className="mt-4 text-sm font-semibold text-slate-950">
-                            Preview opens in a new tab
-                          </p>
-                          <p className="mt-2 text-sm leading-6 text-slate-600">
-                            Use the source link for full-size document or media review.
-                          </p>
-                          <a
-                            href={selectedEvidence.file_url}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="mt-4 inline-flex items-center gap-2 rounded-[14px] border border-slate-900 bg-slate-900 px-4 py-2.5 text-sm font-medium text-white"
-                          >
-                            Open source
-                            <ExternalLink className="h-4 w-4" />
-                          </a>
-                        </div>
-                      )}
-
-                      <div className="mt-4 grid gap-4 md:grid-cols-2">
-                        <MetaItem label="Uploaded by" value={selectedEvidence.uploaded_by} />
-                        <MetaItem label="Created" value={formatDateTime(selectedEvidence.created_at)} />
-                      </div>
-
-                      {selectedEvidence.metadata ? (
-                        <div className="mt-4 overflow-hidden rounded-[18px] border border-slate-200 bg-slate-950">
-                          <pre className="overflow-x-auto px-4 py-4 text-xs leading-6 text-slate-200">
-                            {JSON.stringify(selectedEvidence.metadata, null, 2)}
-                          </pre>
-                        </div>
-                      ) : null}
-                    </div>
-                  </SectionCard>
-                ) : null}
-
-                <SectionCard className="px-5 py-5">
-                  <div className="flex items-center gap-2">
-                    <Upload className="h-4 w-4 text-slate-500" />
-                    <h3 className="text-sm font-semibold text-slate-950">Add evidence</h3>
-                  </div>
-                  <form className="mt-4 grid gap-4" onSubmit={handleEvidenceSubmit}>
-                    <label className="text-sm">
-                      <span className="font-medium text-slate-700">Evidence URL</span>
-                      <input
-                        required
-                        value={evidenceForm.fileUrl}
-                        onChange={(event) =>
-                          setEvidenceForm((current) => ({ ...current, fileUrl: event.target.value }))
-                        }
-                        className="mt-2 h-11 w-full rounded-[14px] border border-slate-200 bg-[#f8fafc] px-4 text-slate-900"
-                        placeholder="https://..."
-                      />
-                    </label>
-                    <div className="grid gap-4 md:grid-cols-2">
+                    <form className="mt-4 grid gap-4" onSubmit={handleEvidenceSubmit}>
                       <label className="text-sm">
-                        <span className="font-medium text-slate-700">Type</span>
-                        <select
-                          value={evidenceForm.type}
-                          onChange={(event) =>
-                            setEvidenceForm((current) => ({
-                              ...current,
-                              type: event.target.value as EotEvidenceType,
-                            }))
-                          }
-                          className="mt-2 h-11 w-full rounded-[14px] border border-slate-200 bg-[#f8fafc] px-4 text-slate-900"
-                        >
-                          {(['document', 'image', 'video'] as EotEvidenceType[]).map((type) => (
-                            <option key={type} value={type}>
-                              {formatEnumLabel(type)}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-                      <label className="text-sm">
-                        <span className="font-medium text-slate-700">Area</span>
+                        <span className="font-medium text-slate-700">Evidence URL</span>
                         <input
-                          value={evidenceForm.area}
+                          required
+                          value={evidenceForm.fileUrl}
                           onChange={(event) =>
-                            setEvidenceForm((current) => ({ ...current, area: event.target.value }))
+                            setEvidenceForm((current) => ({ ...current, fileUrl: event.target.value }))
                           }
                           className="mt-2 h-11 w-full rounded-[14px] border border-slate-200 bg-[#f8fafc] px-4 text-slate-900"
-                          placeholder="Kitchen, hallway, inventory..."
+                          placeholder="https://..."
                         />
                       </label>
-                    </div>
-                    <label className="text-sm">
-                      <span className="font-medium text-slate-700">Uploaded by</span>
-                      <input
-                        required
-                        value={evidenceForm.uploadedBy}
-                        onChange={(event) =>
-                          setEvidenceForm((current) => ({ ...current, uploadedBy: event.target.value }))
-                        }
-                        className="mt-2 h-11 w-full rounded-[14px] border border-slate-200 bg-[#f8fafc] px-4 text-slate-900"
-                      />
-                    </label>
-                    <label className="text-sm">
-                      <span className="font-medium text-slate-700">Metadata JSON</span>
-                      <textarea
-                        value={evidenceForm.metadata}
-                        onChange={(event) =>
-                          setEvidenceForm((current) => ({ ...current, metadata: event.target.value }))
-                        }
-                        className="mt-2 min-h-24 w-full rounded-[14px] border border-slate-200 bg-[#f8fafc] px-4 py-3 text-slate-900"
-                        placeholder='{"source":"inventory","page":"12"}'
-                      />
-                    </label>
-                    {evidenceError ? (
-                      <p className="rounded-[14px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-                        {evidenceError}
-                      </p>
-                    ) : null}
-                    <button
-                      type="submit"
-                      disabled={evidencePending}
-                      className="inline-flex items-center justify-center rounded-[14px] border border-slate-900 bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:opacity-60"
-                    >
-                      {evidencePending ? 'Saving evidence...' : 'Add evidence'}
-                    </button>
-                  </form>
-                </SectionCard>
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <label className="text-sm">
+                          <span className="font-medium text-slate-700">Type</span>
+                          <select
+                            value={evidenceForm.type}
+                            onChange={(event) =>
+                              setEvidenceForm((current) => ({
+                                ...current,
+                                type: event.target.value as EotEvidenceType,
+                              }))
+                            }
+                            className="mt-2 h-11 w-full rounded-[14px] border border-slate-200 bg-[#f8fafc] px-4 text-slate-900"
+                          >
+                            {(['document', 'image', 'video'] as EotEvidenceType[]).map((type) => (
+                              <option key={type} value={type}>
+                                {formatEnumLabel(type)}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                        <label className="text-sm">
+                          <span className="font-medium text-slate-700">Area</span>
+                          <input
+                            value={evidenceForm.area}
+                            onChange={(event) =>
+                              setEvidenceForm((current) => ({ ...current, area: event.target.value }))
+                            }
+                            className="mt-2 h-11 w-full rounded-[14px] border border-slate-200 bg-[#f8fafc] px-4 text-slate-900"
+                            placeholder="Kitchen, hallway, inventory..."
+                          />
+                        </label>
+                      </div>
+                      <label className="text-sm">
+                        <span className="font-medium text-slate-700">Uploaded by</span>
+                        <input
+                          required
+                          value={evidenceForm.uploadedBy}
+                          onChange={(event) =>
+                            setEvidenceForm((current) => ({ ...current, uploadedBy: event.target.value }))
+                          }
+                          className="mt-2 h-11 w-full rounded-[14px] border border-slate-200 bg-[#f8fafc] px-4 text-slate-900"
+                        />
+                      </label>
+                      <label className="text-sm">
+                        <span className="font-medium text-slate-700">Metadata JSON</span>
+                        <textarea
+                          value={evidenceForm.metadata}
+                          onChange={(event) =>
+                            setEvidenceForm((current) => ({ ...current, metadata: event.target.value }))
+                          }
+                          className="mt-2 min-h-24 w-full rounded-[14px] border border-slate-200 bg-[#f8fafc] px-4 py-3 text-slate-900"
+                          placeholder='{"source":"inventory","page":"12"}'
+                        />
+                      </label>
+                      {evidenceError ? (
+                        <p className="rounded-[14px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                          {evidenceError}
+                        </p>
+                      ) : null}
+                      <button
+                        type="submit"
+                        disabled={evidencePending}
+                        className="inline-flex items-center justify-center rounded-[14px] border border-slate-900 bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:opacity-60"
+                      >
+                        {evidencePending ? 'Saving evidence...' : 'Add evidence'}
+                      </button>
+                    </form>
+                  </SectionCard>
+                </div>
               </div>
-            </div>
+            </SectionBody>
           </WorkspaceSection>
 
           <WorkspaceSection
             title="Issues and recommendations"
             description="Link evidence, capture issue responsibility, and record charge recommendations in one review surface."
             aside={
-              <div className="flex items-center gap-2">
-                <StatusBadge label={`${visibleIssues.length} visible`} tone="document" />
-                {highSeverityOpenIssues.length ? (
-                  <StatusBadge label={`${highSeverityOpenIssues.length} high severity`} tone="risk" />
+              <div className="flex flex-wrap items-center gap-2">
+                <StatusBadge
+                  label={`${sections.issues.loaded ? visibleIssues.length : summary.metrics.issue_count} visible`}
+                  tone="document"
+                />
+                {summary.metrics.high_severity_open_issue_count ? (
+                  <StatusBadge
+                    label={`${summary.metrics.high_severity_open_issue_count} high severity`}
+                    tone="risk"
+                  />
                 ) : null}
+                <button
+                  type="button"
+                  onClick={() => handleToggleSection('issues')}
+                  className="inline-flex items-center gap-2 rounded-[14px] border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700"
+                >
+                  {openSections.issues ? 'Hide' : sections.issues.loaded ? 'Open' : 'Load'}
+                  <ChevronDown className={`h-4 w-4 transition ${openSections.issues ? 'rotate-180' : ''}`} />
+                </button>
               </div>
             }
           >
-            <div className="grid gap-5 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
-              <div className="space-y-3">
-                {visibleIssues.length === 0 ? (
-                  <EmptyState
-                    title="No issues recorded"
-                    body="Assess evidence and log the first issue to start recommendation review."
-                  />
-                ) : (
-                  visibleIssues.map((issue) => (
-                    <IssueCard
-                      key={issue.id}
-                      issue={issue}
-                      active={issueForm.issueId === issue.id}
-                      onEdit={startEditingIssue}
+            <SectionBody
+              isOpen={openSections.issues}
+              loading={sections.issues.loading}
+              loadingMore={sections.issues.loadingMore}
+              loaded={sections.issues.loaded}
+              error={sections.issues.error}
+              closedPreview="Load this section when you need to assess issues, link evidence, or capture recommendation decisions."
+              retryLabel="Reload issues"
+              onRetry={() => {
+                void ensureSectionLoaded('evidence', { forceRefresh: true })
+                void ensureSectionLoaded('issues', { forceRefresh: true })
+              }}
+            >
+              <div className="grid gap-5 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
+                <div className="space-y-3">
+                  {visibleIssues.length === 0 ? (
+                    <EmptyState
+                      title="No issues recorded"
+                      body="Assess evidence and log the first issue to start recommendation review."
                     />
-                  ))
-                )}
-              </div>
-
-              <SectionCard className="px-5 py-5">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <h3 className="text-sm font-semibold text-slate-950">
-                    {issueForm.issueId ? 'Edit issue' : 'Add issue'}
-                  </h3>
-                  {issueForm.issueId ? (
-                    <button
-                      type="button"
-                      onClick={resetIssueForm}
-                      className="text-sm font-medium text-slate-500 transition hover:text-slate-900"
-                    >
-                      Clear selection
-                    </button>
-                  ) : null}
+                  ) : (
+                    visibleIssues.map((issue) => (
+                      <IssueCard
+                        key={issue.id}
+                        issue={issue}
+                        active={issueForm.issueId === issue.id}
+                        onEdit={startEditingIssue}
+                      />
+                    ))
+                  )}
                 </div>
 
-                <form className="mt-4 grid gap-4" onSubmit={handleIssueSubmit}>
-                  <label className="text-sm">
-                    <span className="font-medium text-slate-700">Issue title</span>
-                    <input
-                      required
-                      value={issueForm.title}
-                      onChange={(event) =>
-                        setIssueForm((current) => ({ ...current, title: event.target.value }))
-                      }
-                      className="mt-2 h-11 w-full rounded-[14px] border border-slate-200 bg-[#f8fafc] px-4 text-slate-900"
-                      placeholder="Damage, cleaning, missing item..."
-                    />
-                  </label>
-
-                  <label className="text-sm">
-                    <span className="font-medium text-slate-700">Description</span>
-                    <textarea
-                      value={issueForm.description}
-                      onChange={(event) =>
-                        setIssueForm((current) => ({ ...current, description: event.target.value }))
-                      }
-                      className="mt-2 min-h-28 w-full rounded-[14px] border border-slate-200 bg-[#f8fafc] px-4 py-3 text-slate-900"
-                      placeholder="What happened, where, and why does it matter?"
-                    />
-                  </label>
-
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <label className="text-sm">
-                      <span className="font-medium text-slate-700">Severity</span>
-                      <select
-                        value={issueForm.severity}
-                        onChange={(event) =>
-                          setIssueForm((current) => ({
-                            ...current,
-                            severity: event.target.value as EotIssueSeverity,
-                          }))
-                        }
-                        className="mt-2 h-11 w-full rounded-[14px] border border-slate-200 bg-[#f8fafc] px-4 text-slate-900"
-                      >
-                        {(['low', 'medium', 'high'] as EotIssueSeverity[]).map((severity) => (
-                          <option key={severity} value={severity}>
-                            {formatEnumLabel(severity)}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                    <label className="text-sm">
-                      <span className="font-medium text-slate-700">Status</span>
-                      <select
-                        value={issueForm.status}
-                        onChange={(event) =>
-                          setIssueForm((current) => ({
-                            ...current,
-                            status: event.target.value as EotIssueStatus,
-                          }))
-                        }
-                        className="mt-2 h-11 w-full rounded-[14px] border border-slate-200 bg-[#f8fafc] px-4 text-slate-900"
-                      >
-                        {(['open', 'resolved', 'disputed'] as EotIssueStatus[]).map((status) => (
-                          <option key={status} value={status}>
-                            {formatEnumLabel(status)}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                  </div>
-
-                  <div className="text-sm">
-                    <span className="font-medium text-slate-700">Link evidence</span>
-                    <div className="mt-2 grid gap-2">
-                      {workspace.evidence.length === 0 ? (
-                        <p className="rounded-[14px] border border-dashed border-slate-300 px-4 py-3 text-sm text-slate-500">
-                          Add evidence first to link it to this issue.
-                        </p>
-                      ) : (
-                        workspace.evidence.map((evidence) => {
-                          const checked = issueForm.evidenceIds.includes(evidence.id)
-
-                          return (
-                            <label
-                              key={evidence.id}
-                              className="flex items-center gap-3 rounded-[14px] border border-slate-200 bg-white px-3 py-3"
-                            >
-                              <input
-                                type="checkbox"
-                                checked={checked}
-                                onChange={() =>
-                                  setIssueForm((current) => ({
-                                    ...current,
-                                    evidenceIds: checked
-                                      ? current.evidenceIds.filter((id) => id !== evidence.id)
-                                      : [...current.evidenceIds, evidence.id],
-                                  }))
-                                }
-                              />
-                              <div className="min-w-0">
-                                <p className="text-sm font-medium text-slate-900">
-                                  {evidence.area || formatEnumLabel(evidence.type)}
-                                </p>
-                                <p className="truncate text-sm text-slate-500">{evidence.file_url}</p>
-                              </div>
-                            </label>
-                          )
-                        })
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <label className="text-sm">
-                      <span className="font-medium text-slate-700">Recommendation</span>
-                      <select
-                        value={issueForm.decision}
-                        onChange={(event) =>
-                          setIssueForm((current) => ({
-                            ...current,
-                            decision: event.target.value as EotRecommendationDecision | '',
-                          }))
-                        }
-                        className="mt-2 h-11 w-full rounded-[14px] border border-slate-200 bg-[#f8fafc] px-4 text-slate-900"
-                      >
-                        <option value="">No recommendation yet</option>
-                        {(['charge', 'partial', 'no_charge'] as EotRecommendationDecision[]).map(
-                          (decision) => (
-                            <option key={decision} value={decision}>
-                              {formatEnumLabel(decision)}
-                            </option>
-                          )
-                        )}
-                      </select>
-                    </label>
-                    <label className="text-sm">
-                      <span className="font-medium text-slate-700">Estimated cost</span>
-                      <input
-                        value={issueForm.estimatedCost}
-                        onChange={(event) =>
-                          setIssueForm((current) => ({
-                            ...current,
-                            estimatedCost: event.target.value,
-                          }))
-                        }
-                        className="mt-2 h-11 w-full rounded-[14px] border border-slate-200 bg-[#f8fafc] px-4 text-slate-900"
-                        placeholder="250.00"
-                      />
-                    </label>
-                  </div>
-
-                  <label className="text-sm">
-                    <span className="font-medium text-slate-700">Recommendation rationale</span>
-                    <textarea
-                      value={issueForm.rationale}
-                      onChange={(event) =>
-                        setIssueForm((current) => ({ ...current, rationale: event.target.value }))
-                      }
-                      className="mt-2 min-h-24 w-full rounded-[14px] border border-slate-200 bg-[#f8fafc] px-4 py-3 text-slate-900"
-                      placeholder="Explain liability, confidence, and proportionality."
-                    />
-                  </label>
-
-                  {issueError ? (
-                    <p className="rounded-[14px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-                      {issueError}
-                    </p>
-                  ) : null}
-
-                  <div className="flex flex-wrap items-center gap-3">
-                    <button
-                      type="submit"
-                      disabled={issuePending}
-                      className="inline-flex items-center justify-center rounded-[14px] border border-slate-900 bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:opacity-60"
-                    >
-                      {issuePending ? 'Saving issue...' : issueForm.issueId ? 'Update issue' : 'Add issue'}
-                    </button>
+                <SectionCard className="px-5 py-5">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <h3 className="text-sm font-semibold text-slate-950">
+                      {issueForm.issueId ? 'Edit issue' : 'Add issue'}
+                    </h3>
                     {issueForm.issueId ? (
                       <button
                         type="button"
                         onClick={resetIssueForm}
-                        className="inline-flex items-center justify-center rounded-[14px] border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700"
+                        className="text-sm font-medium text-slate-500 transition hover:text-slate-900"
                       >
-                        Cancel
+                        Clear selection
                       </button>
                     ) : null}
                   </div>
-                </form>
-              </SectionCard>
-            </div>
+
+                  <form className="mt-4 grid gap-4" onSubmit={handleIssueSubmit}>
+                    <label className="text-sm">
+                      <span className="font-medium text-slate-700">Issue title</span>
+                      <input
+                        required
+                        value={issueForm.title}
+                        onChange={(event) =>
+                          setIssueForm((current) => ({ ...current, title: event.target.value }))
+                        }
+                        className="mt-2 h-11 w-full rounded-[14px] border border-slate-200 bg-[#f8fafc] px-4 text-slate-900"
+                        placeholder="Damage, cleaning, missing item..."
+                      />
+                    </label>
+
+                    <label className="text-sm">
+                      <span className="font-medium text-slate-700">Description</span>
+                      <textarea
+                        value={issueForm.description}
+                        onChange={(event) =>
+                          setIssueForm((current) => ({ ...current, description: event.target.value }))
+                        }
+                        className="mt-2 min-h-28 w-full rounded-[14px] border border-slate-200 bg-[#f8fafc] px-4 py-3 text-slate-900"
+                        placeholder="What happened, where, and why does it matter?"
+                      />
+                    </label>
+
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <label className="text-sm">
+                        <span className="font-medium text-slate-700">Severity</span>
+                        <select
+                          value={issueForm.severity}
+                          onChange={(event) =>
+                            setIssueForm((current) => ({
+                              ...current,
+                              severity: event.target.value as EotIssueSeverity,
+                            }))
+                          }
+                          className="mt-2 h-11 w-full rounded-[14px] border border-slate-200 bg-[#f8fafc] px-4 text-slate-900"
+                        >
+                          {(['low', 'medium', 'high'] as EotIssueSeverity[]).map((severity) => (
+                            <option key={severity} value={severity}>
+                              {formatEnumLabel(severity)}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <label className="text-sm">
+                        <span className="font-medium text-slate-700">Status</span>
+                        <select
+                          value={issueForm.status}
+                          onChange={(event) =>
+                            setIssueForm((current) => ({
+                              ...current,
+                              status: event.target.value as EotIssueStatus,
+                            }))
+                          }
+                          className="mt-2 h-11 w-full rounded-[14px] border border-slate-200 bg-[#f8fafc] px-4 text-slate-900"
+                        >
+                          {(['open', 'resolved', 'disputed'] as EotIssueStatus[]).map((status) => (
+                            <option key={status} value={status}>
+                              {formatEnumLabel(status)}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    </div>
+
+                    <div className="text-sm">
+                      <span className="font-medium text-slate-700">Link evidence</span>
+                      <div className="mt-2 grid gap-2">
+                        {sections.evidence.loading && !sections.evidence.loaded ? (
+                          <p className="rounded-[14px] border border-slate-200 bg-[#f8fafc] px-4 py-3 text-sm text-slate-500">
+                            Loading evidence options...
+                          </p>
+                        ) : evidence.length === 0 ? (
+                          <p className="rounded-[14px] border border-dashed border-slate-300 px-4 py-3 text-sm text-slate-500">
+                            Add evidence first to link it to this issue.
+                          </p>
+                        ) : (
+                          evidence.map((evidenceItem) => {
+                            const checked = issueForm.evidenceIds.includes(evidenceItem.id)
+
+                            return (
+                              <label
+                                key={evidenceItem.id}
+                                className="flex items-center gap-3 rounded-[14px] border border-slate-200 bg-white px-3 py-3"
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={checked}
+                                  onChange={() =>
+                                    setIssueForm((current) => ({
+                                      ...current,
+                                      evidenceIds: checked
+                                        ? current.evidenceIds.filter((id) => id !== evidenceItem.id)
+                                        : [...current.evidenceIds, evidenceItem.id],
+                                    }))
+                                  }
+                                />
+                                <div className="min-w-0">
+                                  <p className="text-sm font-medium text-slate-900">
+                                    {evidenceItem.area || formatEnumLabel(evidenceItem.type)}
+                                  </p>
+                                  <p className="truncate text-sm text-slate-500">{evidenceItem.file_url}</p>
+                                </div>
+                              </label>
+                            )
+                          })
+                        )}
+                        {sections.evidence.loaded && evidencePage.has_more ? (
+                          <button
+                            type="button"
+                            onClick={() => void loadMoreSection('evidence')}
+                            disabled={sections.evidence.loadingMore}
+                            className="inline-flex items-center justify-center rounded-[14px] border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:border-slate-300 disabled:opacity-60"
+                          >
+                            {sections.evidence.loadingMore
+                              ? 'Loading more evidence options...'
+                              : 'Load more evidence options'}
+                          </button>
+                        ) : null}
+                      </div>
+                    </div>
+
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <label className="text-sm">
+                        <span className="font-medium text-slate-700">Recommendation</span>
+                        <select
+                          value={issueForm.decision}
+                          onChange={(event) =>
+                            setIssueForm((current) => ({
+                              ...current,
+                              decision: event.target.value as EotRecommendationDecision | '',
+                            }))
+                          }
+                          className="mt-2 h-11 w-full rounded-[14px] border border-slate-200 bg-[#f8fafc] px-4 text-slate-900"
+                        >
+                          <option value="">No recommendation yet</option>
+                          {(['charge', 'partial', 'no_charge'] as EotRecommendationDecision[]).map(
+                            (decision) => (
+                              <option key={decision} value={decision}>
+                                {formatEnumLabel(decision)}
+                              </option>
+                            )
+                          )}
+                        </select>
+                      </label>
+                      <label className="text-sm">
+                        <span className="font-medium text-slate-700">Estimated cost</span>
+                        <input
+                          value={issueForm.estimatedCost}
+                          onChange={(event) =>
+                            setIssueForm((current) => ({
+                              ...current,
+                              estimatedCost: event.target.value,
+                            }))
+                          }
+                          className="mt-2 h-11 w-full rounded-[14px] border border-slate-200 bg-[#f8fafc] px-4 text-slate-900"
+                          placeholder="250.00"
+                        />
+                      </label>
+                    </div>
+
+                    <label className="text-sm">
+                      <span className="font-medium text-slate-700">Recommendation rationale</span>
+                      <textarea
+                        value={issueForm.rationale}
+                        onChange={(event) =>
+                          setIssueForm((current) => ({ ...current, rationale: event.target.value }))
+                        }
+                        className="mt-2 min-h-24 w-full rounded-[14px] border border-slate-200 bg-[#f8fafc] px-4 py-3 text-slate-900"
+                        placeholder="Explain liability, confidence, and proportionality."
+                      />
+                    </label>
+
+                    {issueError ? (
+                      <p className="rounded-[14px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                        {issueError}
+                      </p>
+                    ) : null}
+
+                    <div className="flex flex-wrap items-center gap-3">
+                      <button
+                        type="submit"
+                        disabled={issuePending}
+                        className="inline-flex items-center justify-center rounded-[14px] border border-slate-900 bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:opacity-60"
+                      >
+                        {issuePending ? 'Saving issue...' : issueForm.issueId ? 'Update issue' : 'Add issue'}
+                      </button>
+                      {issueForm.issueId ? (
+                        <button
+                          type="button"
+                          onClick={resetIssueForm}
+                          className="inline-flex items-center justify-center rounded-[14px] border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700"
+                        >
+                          Cancel
+                        </button>
+                      ) : null}
+                    </div>
+                  </form>
+                </SectionCard>
+              </div>
+            </SectionBody>
           </WorkspaceSection>
 
           <WorkspaceSection
             title="Submission review"
             description="Review the checkout submission in a document-style layout with traceability back to evidence and issue decisions."
-          >
-            {workspace.claim ? (
-              <div className="space-y-5">
-                <div className="rounded-[22px] border border-slate-200 bg-white px-6 py-6 shadow-[0_8px_24px_rgba(15,23,42,0.03)]">
-                  <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                    <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                        Submission
-                      </p>
-                      <h3 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-slate-950">
-                        {formatCurrency(workspace.claim.total_amount)}
-                      </h3>
-                      <p className="mt-2 text-sm leading-6 text-slate-600">
-                        Generated {formatDateTime(workspace.claim.generated_at)} and updated{' '}
-                        {formatDateTime(workspace.claim.updated_at)}.
-                      </p>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      <StatusBadge label="Claim generated" tone="ready_for_claim" />
-                      <StatusBadge label={`${workspace.issues.length} source issues`} tone="document" />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
-                  <SectionCard className="overflow-hidden">
-                    <div className="border-b border-slate-200 px-5 py-4">
-                      <h3 className="text-sm font-semibold text-slate-950">Breakdown</h3>
-                    </div>
-                    <div className="overflow-hidden rounded-b-[24px] bg-slate-950">
-                      <pre className="overflow-x-auto px-5 py-5 text-xs leading-6 text-slate-200">
-                        {JSON.stringify(workspace.claim.breakdown, null, 2)}
-                      </pre>
-                    </div>
-                  </SectionCard>
-
-                  <DetailPanel
-                    title="Traceability"
-                    description="Recommended charges and supporting evidence."
-                  >
-                    {workspace.issues.length === 0 ? (
-                      <EmptyState
-                        title="No issue traceability"
-                        body="Issues will appear here once they are linked to the claim package."
-                      />
-                    ) : (
-                      workspace.issues.map((issue) => (
-                        <div key={issue.id} className="rounded-[18px] border border-slate-200 bg-white px-4 py-4">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <StatusBadge label={formatEnumLabel(issue.severity)} tone={issue.severity} />
-                            {issue.recommendation?.decision ? (
-                              <StatusBadge
-                                label={formatEnumLabel(issue.recommendation.decision)}
-                                tone={issue.recommendation.decision}
-                              />
-                            ) : null}
-                          </div>
-                          <p className="mt-3 text-sm font-semibold text-slate-950">{issue.title}</p>
-                          <p className="mt-2 text-sm leading-6 text-slate-600">
-                            {issue.recommendation?.rationale || issue.description || 'No narrative recorded.'}
-                          </p>
-                          <div className="mt-3 flex flex-wrap gap-2">
-                            {issue.linked_evidence.map((item) => (
-                              <StatusBadge
-                                key={item.id}
-                                label={item.area || formatEnumLabel(item.type)}
-                                tone={item.type}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </DetailPanel>
-                </div>
+            aside={
+              <div className="flex flex-wrap items-center gap-2">
+                {summary.claim ? (
+                  <StatusBadge label="Claim generated" tone="ready_for_claim" />
+                ) : (
+                  <StatusBadge label={claimReadiness.label} tone="document" />
+                )}
+                <button
+                  type="button"
+                  onClick={() => handleToggleSection('submission')}
+                  className="inline-flex items-center gap-2 rounded-[14px] border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700"
+                >
+                  {openSections.submission ? 'Hide' : sections.submission.loaded ? 'Open' : 'Load'}
+                  <ChevronDown className={`h-4 w-4 transition ${openSections.submission ? 'rotate-180' : ''}`} />
+                </button>
               </div>
-            ) : (
-              <EmptyState
-                title={claimReadiness.label}
-                body={claimReadiness.description}
-                action={
-                  <div className="flex items-center gap-2 text-sm text-slate-600">
-                    <TriangleAlert className="h-4 w-4" />
-                    Track issue recommendations and move the case to ready-for-claim when the file is complete.
+            }
+          >
+            <SectionBody
+              isOpen={openSections.submission}
+              loading={sections.submission.loading}
+              loadingMore={sections.submission.loadingMore}
+              loaded={sections.submission.loaded}
+              error={sections.submission.error}
+              closedPreview="Load this section when you need the claim breakdown and issue traceability."
+              retryLabel="Reload submission"
+              onRetry={() => void ensureSectionLoaded('submission', { forceRefresh: true })}
+            >
+              {submission?.claim ? (
+                <div className="space-y-5">
+                  <div className="rounded-[22px] border border-slate-200 bg-white px-6 py-6 shadow-[0_8px_24px_rgba(15,23,42,0.03)]">
+                    <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                      <div>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                          Submission
+                        </p>
+                        <h3 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-slate-950">
+                          {formatCurrency(submission.claim.total_amount)}
+                        </h3>
+                        <p className="mt-2 text-sm leading-6 text-slate-600">
+                          Generated {formatDateTime(submission.claim.generated_at)} and updated{' '}
+                          {formatDateTime(submission.claim.updated_at)}.
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <StatusBadge label="Claim generated" tone="ready_for_claim" />
+                        <StatusBadge label={`${submission.issues.length} source issues`} tone="document" />
+                      </div>
+                    </div>
                   </div>
-                }
-              />
-            )}
+
+                  <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
+                    <SectionCard className="overflow-hidden">
+                      <div className="border-b border-slate-200 px-5 py-4">
+                        <h3 className="text-sm font-semibold text-slate-950">Breakdown</h3>
+                      </div>
+                      <div className="overflow-hidden rounded-b-[24px] bg-slate-950">
+                        <pre className="overflow-x-auto px-5 py-5 text-xs leading-6 text-slate-200">
+                          {JSON.stringify(submission.claim.breakdown, null, 2)}
+                        </pre>
+                      </div>
+                    </SectionCard>
+
+                    <DetailPanel title="Traceability" description="Recommended charges and supporting evidence.">
+                      {submission.issues.length === 0 ? (
+                        <EmptyState
+                          title="No issue traceability"
+                          body="Issues will appear here once they are linked to the claim package."
+                        />
+                      ) : (
+                        submission.issues.map((issue) => (
+                          <div key={issue.id} className="rounded-[18px] border border-slate-200 bg-white px-4 py-4">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <StatusBadge label={formatEnumLabel(issue.severity)} tone={issue.severity} />
+                              {issue.recommendation?.decision ? (
+                                <StatusBadge
+                                  label={formatEnumLabel(issue.recommendation.decision)}
+                                  tone={issue.recommendation.decision}
+                                />
+                              ) : null}
+                            </div>
+                            <p className="mt-3 text-sm font-semibold text-slate-950">{issue.title}</p>
+                            <p className="mt-2 text-sm leading-6 text-slate-600">
+                              {issue.recommendation?.rationale || issue.description || 'No narrative recorded.'}
+                            </p>
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              {issue.linked_evidence.map((item) => (
+                                <StatusBadge
+                                  key={item.id}
+                                  label={item.area || formatEnumLabel(item.type)}
+                                  tone={item.type}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </DetailPanel>
+                  </div>
+                </div>
+              ) : (
+                <EmptyState
+                  title={claimReadiness.label}
+                  body={claimReadiness.description}
+                  action={
+                    <div className="flex items-center gap-2 text-sm text-slate-600">
+                      <TriangleAlert className="h-4 w-4" />
+                      Track issue recommendations and move the case to ready-for-claim when the file is complete.
+                    </div>
+                  }
+                />
+              )}
+            </SectionBody>
           </WorkspaceSection>
         </div>
 
         <div className="space-y-6">
-          <DetailPanel
+          <WorkspaceSection
             title="Activity timeline"
             description="Most recent case events across intake, evidence, issue review, and messaging."
+            aside={
+              <button
+                type="button"
+                onClick={() => handleToggleSection('timeline')}
+                className="inline-flex items-center gap-2 rounded-[14px] border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700"
+              >
+                {openSections.timeline ? 'Hide' : sections.timeline.loaded ? 'Open' : 'Load'}
+                <ChevronDown className={`h-4 w-4 transition ${openSections.timeline ? 'rotate-180' : ''}`} />
+              </button>
+            }
           >
-            <ActivityTimeline
-              items={timelineItems.map((item) => ({
-                id: item.id,
-                title: item.title,
-                detail: item.detail,
-                meta: item.meta,
-                tone: item.tone,
-              }))}
-            />
-          </DetailPanel>
+            <SectionBody
+              isOpen={openSections.timeline}
+              loading={sections.timeline.loading}
+              loadingMore={sections.timeline.loadingMore}
+              loaded={sections.timeline.loaded}
+              error={sections.timeline.error}
+              closedPreview="Load this section when you need the recent case event stream."
+              retryLabel="Reload timeline"
+              onRetry={() => void ensureSectionLoaded('timeline', { forceRefresh: true })}
+            >
+              <ActivityTimeline
+                items={timeline.map((item) => ({
+                  id: item.id,
+                  title: item.title,
+                  detail: item.detail,
+                  meta: item.meta,
+                  tone: item.tone as 'accent' | 'default' | 'warning' | 'danger',
+                }))}
+              />
+            </SectionBody>
+          </WorkspaceSection>
 
-          <DetailPanel
+          <WorkspaceSection
             title="Supporting documents"
             description="Linked checkout documents and document records."
-          >
-            {workspace.documents.length === 0 ? (
-              <EmptyState
-                title="No supporting documents"
-                body="This checkout does not yet have linked document records."
-              />
-            ) : (
-              workspace.documents.map((document) => (
-                <a
-                  key={document.id}
-                  href={document.file_url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="block rounded-[18px] border border-slate-200 bg-white px-4 py-4 transition hover:border-slate-300"
+            aside={
+              <div className="flex items-center gap-2">
+                <StatusBadge label={`${summary.metrics.document_count} documents`} tone="document" />
+                <button
+                  type="button"
+                  onClick={() => handleToggleSection('documents')}
+                  className="inline-flex items-center gap-2 rounded-[14px] border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700"
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-semibold text-slate-950">{document.name}</p>
-                      <p className="mt-1 text-sm text-slate-500">
-                        {formatEnumLabel(document.document_type)}
-                      </p>
-                    </div>
-                    <ExternalLink className="h-4 w-4 text-slate-400" />
-                  </div>
-                </a>
-              ))
-            )}
-          </DetailPanel>
-
-          <DetailPanel
-            title="Checkout notes and communication"
-            description="Internal operator updates and outbound checkout communication log."
+                  {openSections.documents ? 'Hide' : sections.documents.loaded ? 'Open' : 'Load'}
+                  <ChevronDown className={`h-4 w-4 transition ${openSections.documents ? 'rotate-180' : ''}`} />
+                </button>
+              </div>
+            }
           >
-            <div className="space-y-3">
-              {visibleMessages.length === 0 ? (
+            <SectionBody
+              isOpen={openSections.documents}
+              loading={sections.documents.loading}
+              loadingMore={sections.documents.loadingMore}
+              loaded={sections.documents.loaded}
+              error={sections.documents.error}
+              closedPreview="Load this section when you need linked checkout documents."
+              retryLabel="Reload documents"
+              onRetry={() => void ensureSectionLoaded('documents', { forceRefresh: true })}
+            >
+              {documents.length === 0 ? (
                 <EmptyState
-                  title="No messages yet"
-                  body="Checkout notes and outbound communication will appear here."
+                  title="No supporting documents"
+                  body="This checkout does not yet have linked document records."
                 />
               ) : (
-                visibleMessages.map((message) => (
-                  <div key={message.id} className="rounded-[18px] border border-slate-200 bg-white px-4 py-4">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <StatusBadge label={formatEnumLabel(message.sender_type)} tone={message.sender_type} />
-                      <span className="text-xs uppercase tracking-[0.14em] text-slate-400">
-                        {formatDateTime(message.created_at)}
-                      </span>
-                    </div>
-                    <p className="mt-3 text-sm leading-6 text-slate-700">{message.content}</p>
-                  </div>
-                ))
+                <div className="space-y-3">
+                  {documents.map((document) => (
+                    <a
+                      key={document.id}
+                      href={document.file_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="block rounded-[18px] border border-slate-200 bg-white px-4 py-4 transition hover:border-slate-300"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-semibold text-slate-950">{document.name}</p>
+                          <p className="mt-1 text-sm text-slate-500">
+                            {formatEnumLabel(document.document_type)}
+                          </p>
+                        </div>
+                        <ExternalLink className="h-4 w-4 text-slate-400" />
+                      </div>
+                    </a>
+                  ))}
+                  {sections.documents.loaded && documentsPage.has_more ? (
+                    <button
+                      type="button"
+                      onClick={() => void loadMoreSection('documents')}
+                      disabled={sections.documents.loadingMore}
+                      className="inline-flex items-center justify-center rounded-[14px] border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:border-slate-300 disabled:opacity-60"
+                    >
+                      {sections.documents.loadingMore ? 'Loading more documents...' : 'Load more documents'}
+                    </button>
+                  ) : null}
+                </div>
               )}
-            </div>
+            </SectionBody>
+          </WorkspaceSection>
 
-            <form className="grid gap-4" onSubmit={handleMessageSubmit}>
+          <WorkspaceSection
+            title="Checkout notes and communication"
+            description="Internal operator updates and outbound checkout communication log."
+            aside={
               <div className="flex items-center gap-2">
-                <MessageSquareText className="h-4 w-4 text-slate-500" />
-                <h3 className="text-sm font-semibold text-slate-950">Add checkout note</h3>
+                <StatusBadge
+                  label={`${sections.messages.loaded ? messages.length : summary.metrics.message_count} loaded`}
+                  tone="document"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleToggleSection('messages')}
+                  className="inline-flex items-center gap-2 rounded-[14px] border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700"
+                >
+                  {openSections.messages ? 'Hide' : sections.messages.loaded ? 'Open' : 'Load'}
+                  <ChevronDown className={`h-4 w-4 transition ${openSections.messages ? 'rotate-180' : ''}`} />
+                </button>
+              </div>
+            }
+          >
+            <SectionBody
+              isOpen={openSections.messages}
+              loading={sections.messages.loading}
+              loadingMore={sections.messages.loadingMore}
+              loaded={sections.messages.loaded}
+              error={sections.messages.error}
+              closedPreview="Load this section when you need the communication history or want to add a new note."
+              retryLabel="Reload notes"
+              onRetry={() => void ensureSectionLoaded('messages', { forceRefresh: true })}
+            >
+              <div className="space-y-3">
+                {visibleMessages.length === 0 ? (
+                  <EmptyState
+                    title="No messages yet"
+                    body="Checkout notes and outbound communication will appear here."
+                  />
+                ) : (
+                  visibleMessages.map((message) => (
+                    <div key={message.id} className="rounded-[18px] border border-slate-200 bg-white px-4 py-4">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <StatusBadge label={formatEnumLabel(message.sender_type)} tone={message.sender_type} />
+                        <span className="text-xs uppercase tracking-[0.14em] text-slate-400">
+                          {formatDateTime(message.created_at)}
+                        </span>
+                      </div>
+                      <p className="mt-3 text-sm leading-6 text-slate-700">{message.content}</p>
+                    </div>
+                  ))
+                )}
+                {sections.messages.loaded && messagesPage.has_more ? (
+                  <button
+                    type="button"
+                    onClick={() => void loadMoreSection('messages')}
+                    disabled={sections.messages.loadingMore}
+                    className="inline-flex items-center justify-center rounded-[14px] border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:border-slate-300 disabled:opacity-60"
+                  >
+                    {sections.messages.loadingMore ? 'Loading more notes...' : 'Load more notes'}
+                  </button>
+                ) : null}
               </div>
 
-              <div className="grid gap-4 md:grid-cols-2">
+              <form className="mt-4 grid gap-4" onSubmit={handleMessageSubmit}>
+                <div className="flex items-center gap-2">
+                  <MessageSquareText className="h-4 w-4 text-slate-500" />
+                  <h3 className="text-sm font-semibold text-slate-950">Add checkout note</h3>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <label className="text-sm">
+                    <span className="font-medium text-slate-700">Sender type</span>
+                    <select
+                      value={messageForm.senderType}
+                      onChange={(event) =>
+                        setMessageForm((current) => ({
+                          ...current,
+                          senderType: event.target.value as EotMessageSenderType,
+                        }))
+                      }
+                      className="mt-2 h-11 w-full rounded-[14px] border border-slate-200 bg-white px-4 text-slate-900"
+                    >
+                      {(['manager', 'landlord', 'tenant'] as EotMessageSenderType[]).map((senderType) => (
+                        <option key={senderType} value={senderType}>
+                          {formatEnumLabel(senderType)}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="text-sm">
+                    <span className="font-medium text-slate-700">Sender ID</span>
+                    <input
+                      required
+                      value={messageForm.senderId}
+                      onChange={(event) =>
+                        setMessageForm((current) => ({ ...current, senderId: event.target.value }))
+                      }
+                      className="mt-2 h-11 w-full rounded-[14px] border border-slate-200 bg-white px-4 text-slate-900"
+                    />
+                  </label>
+                </div>
+
                 <label className="text-sm">
-                  <span className="font-medium text-slate-700">Sender type</span>
-                  <select
-                    value={messageForm.senderType}
-                    onChange={(event) =>
-                      setMessageForm((current) => ({
-                        ...current,
-                        senderType: event.target.value as EotMessageSenderType,
-                      }))
-                    }
-                    className="mt-2 h-11 w-full rounded-[14px] border border-slate-200 bg-white px-4 text-slate-900"
-                  >
-                    {(['manager', 'landlord', 'tenant'] as EotMessageSenderType[]).map((senderType) => (
-                      <option key={senderType} value={senderType}>
-                        {formatEnumLabel(senderType)}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="text-sm">
-                  <span className="font-medium text-slate-700">Sender ID</span>
-                  <input
+                  <span className="font-medium text-slate-700">Message</span>
+                  <textarea
                     required
-                    value={messageForm.senderId}
+                    value={messageForm.content}
                     onChange={(event) =>
-                      setMessageForm((current) => ({ ...current, senderId: event.target.value }))
+                      setMessageForm((current) => ({ ...current, content: event.target.value }))
                     }
-                    className="mt-2 h-11 w-full rounded-[14px] border border-slate-200 bg-white px-4 text-slate-900"
+                    className="mt-2 min-h-24 w-full rounded-[14px] border border-slate-200 bg-white px-4 py-3 text-slate-900"
+                    placeholder="Record an operator note or outbound case update."
                   />
                 </label>
-              </div>
 
-              <label className="text-sm">
-                <span className="font-medium text-slate-700">Message</span>
-                <textarea
-                  required
-                  value={messageForm.content}
-                  onChange={(event) =>
-                    setMessageForm((current) => ({ ...current, content: event.target.value }))
-                  }
-                  className="mt-2 min-h-24 w-full rounded-[14px] border border-slate-200 bg-white px-4 py-3 text-slate-900"
-                  placeholder="Record an operator note or outbound case update."
-                />
-              </label>
+                <label className="text-sm">
+                  <span className="font-medium text-slate-700">Attachments JSON</span>
+                  <textarea
+                    value={messageForm.attachments}
+                    onChange={(event) =>
+                      setMessageForm((current) => ({ ...current, attachments: event.target.value }))
+                    }
+                    className="mt-2 min-h-20 w-full rounded-[14px] border border-slate-200 bg-white px-4 py-3 text-slate-900"
+                    placeholder='[{"name":"invoice.pdf","url":"https://..."}]'
+                  />
+                </label>
 
-              <label className="text-sm">
-                <span className="font-medium text-slate-700">Attachments JSON</span>
-                <textarea
-                  value={messageForm.attachments}
-                  onChange={(event) =>
-                    setMessageForm((current) => ({ ...current, attachments: event.target.value }))
-                  }
-                  className="mt-2 min-h-20 w-full rounded-[14px] border border-slate-200 bg-white px-4 py-3 text-slate-900"
-                  placeholder='[{"name":"invoice.pdf","url":"https://..."}]'
-                />
-              </label>
+                {messageError ? (
+                  <p className="rounded-[14px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                    {messageError}
+                  </p>
+                ) : null}
 
-              {messageError ? (
-                <p className="rounded-[14px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-                  {messageError}
-                </p>
-              ) : null}
-
-              <button
-                type="submit"
-                disabled={messagePending}
-                className="inline-flex items-center justify-center gap-2 rounded-[14px] border border-slate-900 bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:opacity-60"
-              >
-                <Send className="h-4 w-4" />
-                {messagePending ? 'Saving note...' : 'Add case note'}
-              </button>
-            </form>
-          </DetailPanel>
+                <button
+                  type="submit"
+                  disabled={messagePending}
+                  className="inline-flex items-center justify-center gap-2 rounded-[14px] border border-slate-900 bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:opacity-60"
+                >
+                  <Send className="h-4 w-4" />
+                  {messagePending ? 'Saving note...' : 'Add case note'}
+                </button>
+              </form>
+            </SectionBody>
+          </WorkspaceSection>
         </div>
       </div>
     </div>

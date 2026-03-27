@@ -24,6 +24,14 @@ export type KnowledgeArticle = {
   sourceHref: string
 }
 
+type KnowledgeArticleRecord = {
+  article: KnowledgeArticle
+  regionLabel: string
+  summaryReadingTime: string
+  contentReadingTime: string
+  searchIndex: string
+}
+
 const LAST_REVIEWED = 'March 2026'
 
 const REGION_OPTIONS: Array<{
@@ -218,75 +226,105 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
   const [regionFilter, setRegionFilter] = useState<RegionFilter>('all')
   const [categoryFilter, setCategoryFilter] = useState('All')
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedArticle, setSelectedArticle] = useState<KnowledgeArticle | null>(null)
+  const [selectedArticleTitle, setSelectedArticleTitle] = useState<string | null>(null)
 
   const deferredSearchQuery = useDeferredValue(searchQuery)
+  const articleRecords = useMemo<KnowledgeArticleRecord[]>(
+    () =>
+      articles.map((article) => {
+        const regionLabel = getRegionLabel(article.regions)
+
+        return {
+          article,
+          regionLabel,
+          summaryReadingTime: getReadingTime(article.summary),
+          contentReadingTime: getReadingTime(article.content),
+          searchIndex: [
+            article.title,
+            article.summary,
+            article.category,
+            article.content,
+            regionLabel,
+          ]
+            .join(' ')
+            .toLowerCase(),
+        }
+      }),
+    [articles]
+  )
 
   const regionCounts = useMemo(() => {
     return Object.fromEntries(
       REGION_OPTIONS.map((region) => [
         region.value,
-        articles.filter((article) => isArticleInRegion(article, region.value)).length,
+        articleRecords.filter(({ article }) => isArticleInRegion(article, region.value)).length,
       ])
     ) as Record<RegionFilter, number>
-  }, [articles])
+  }, [articleRecords])
 
-  const baseArticles = useMemo(
-    () => articles.filter((article) => isArticleInRegion(article, regionFilter)),
-    [articles, regionFilter]
+  const baseArticleRecords = useMemo(
+    () => articleRecords.filter(({ article }) => isArticleInRegion(article, regionFilter)),
+    [articleRecords, regionFilter]
   )
 
   const categoryFilters = useMemo(() => {
-    const dynamicCategories = Array.from(new Set(baseArticles.map((article) => article.category))).sort()
+    const dynamicCategories = Array.from(
+      new Set(baseArticleRecords.map(({ article }) => article.category))
+    ).sort()
     return ['All', ...dynamicCategories]
-  }, [baseArticles])
+  }, [baseArticleRecords])
 
   const categoryCounts = useMemo(() => {
-    const counts = new Map<string, number>([['All', baseArticles.length]])
+    const counts = new Map<string, number>([['All', baseArticleRecords.length]])
 
     for (const category of categoryFilters.slice(1)) {
       counts.set(
         category,
-        baseArticles.filter((article) => article.category === category).length
+        baseArticleRecords.filter(({ article }) => article.category === category).length
       )
     }
 
     return counts
-  }, [baseArticles, categoryFilters])
+  }, [baseArticleRecords, categoryFilters])
   const activeCategoryFilter = categoryFilters.includes(categoryFilter) ? categoryFilter : 'All'
   const activeSelectedArticle =
-    selectedArticle && isArticleInRegion(selectedArticle, regionFilter) ? selectedArticle : null
+    selectedArticleTitle == null
+      ? null
+      : articleRecords.find(
+          ({ article }) =>
+            article.title === selectedArticleTitle && isArticleInRegion(article, regionFilter)
+        ) ?? null
 
-  const visibleArticles = useMemo(() => {
+  const visibleArticleRecords = useMemo(() => {
     const normalizedQuery = deferredSearchQuery.trim().toLowerCase()
 
-    return baseArticles.filter((article) => {
+    return baseArticleRecords.filter((record) => {
       const matchesCategory =
-        activeCategoryFilter === 'All' ? true : article.category === activeCategoryFilter
+        activeCategoryFilter === 'All'
+          ? true
+          : record.article.category === activeCategoryFilter
       const matchesSearch =
         normalizedQuery.length === 0
           ? true
-          : [article.title, article.summary, article.category, article.content, getRegionLabel(article.regions)]
-              .join(' ')
-              .toLowerCase()
-              .includes(normalizedQuery)
+          : record.searchIndex.includes(normalizedQuery)
 
       return matchesCategory && matchesSearch
     })
-  }, [activeCategoryFilter, baseArticles, deferredSearchQuery])
+  }, [activeCategoryFilter, baseArticleRecords, deferredSearchQuery])
 
-  const relatedArticles = useMemo(() => {
+  const relatedArticleRecords = useMemo(() => {
     if (!activeSelectedArticle) {
       return []
     }
 
-    return articles
+    return articleRecords
       .filter(
-        (article) =>
-          article.category === activeSelectedArticle.category && article.title !== activeSelectedArticle.title
+        ({ article }) =>
+          article.category === activeSelectedArticle.article.category &&
+          article.title !== activeSelectedArticle.article.title
       )
       .slice(0, 3)
-  }, [activeSelectedArticle, articles])
+  }, [activeSelectedArticle, articleRecords])
 
   function clearSearch() {
     setSearchQuery('')
@@ -394,7 +432,7 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
               Visible articles
             </p>
             <p className="mt-2 text-sm font-medium leading-6 text-slate-900">
-              {visibleArticles.length} matching article{visibleArticles.length === 1 ? '' : 's'}
+              {visibleArticleRecords.length} matching article{visibleArticleRecords.length === 1 ? '' : 's'}
             </p>
           </div>
           <div className="rounded-[18px] border border-slate-200 bg-slate-50/70 px-4 py-4">
@@ -409,11 +447,9 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
         </DetailPanel>
       </section>
 
-      {visibleArticles.length > 0 ? (
+      {visibleArticleRecords.length > 0 ? (
         <section className="grid gap-4 xl:grid-cols-2">
-          {visibleArticles.map((article) => {
-            const summaryReadingTime = getReadingTime(article.summary)
-            const regionLabel = getRegionLabel(article.regions)
+          {visibleArticleRecords.map(({ article, regionLabel, summaryReadingTime }) => {
 
             return (
               <SectionCard key={article.title} className="px-6 py-6">
@@ -463,7 +499,7 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
                   </a>
                   <button
                     type="button"
-                    onClick={() => setSelectedArticle(article)}
+                    onClick={() => setSelectedArticleTitle(article.title)}
                     className="inline-flex items-center rounded-[14px] border border-slate-900 bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
                   >
                     Read article
@@ -499,7 +535,7 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
         <div className="fixed inset-0 z-50 flex justify-end bg-slate-950/35">
           <button
             type="button"
-            onClick={() => setSelectedArticle(null)}
+            onClick={() => setSelectedArticleTitle(null)}
             className="flex-1 cursor-default"
             aria-label="Close article panel"
           />
@@ -509,21 +545,21 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                      {activeSelectedArticle.category}
+                      {activeSelectedArticle.article.category}
                     </span>
                     <span
                       className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-medium ${getRegionChipTone(
-                        activeSelectedArticle.regions
+                        activeSelectedArticle.article.regions
                       )}`}
                     >
-                      {getRegionLabel(activeSelectedArticle.regions)}
+                      {activeSelectedArticle.regionLabel}
                     </span>
                   </div>
                   <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
-                    {activeSelectedArticle.title}
+                    {activeSelectedArticle.article.title}
                   </h2>
                   <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-slate-500">
-                    <span>{getReadingTime(activeSelectedArticle.content)}</span>
+                    <span>{activeSelectedArticle.contentReadingTime}</span>
                     <span className="text-slate-300">•</span>
                     <span>Last reviewed {LAST_REVIEWED}</span>
                   </div>
@@ -538,7 +574,7 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
                   </button>
                   <button
                     type="button"
-                    onClick={() => setSelectedArticle(null)}
+                    onClick={() => setSelectedArticleTitle(null)}
                     className="text-sm font-medium text-slate-500 hover:text-slate-900"
                   >
                     Close
@@ -550,12 +586,12 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
             <div className="flex-1 overflow-y-auto px-6 py-6">
               <div className="flex flex-wrap items-center gap-2">
                 <span
-                  className={`rounded-full px-3 py-1 text-xs font-semibold ${getSourceTone(activeSelectedArticle.sourceLabel)}`}
+                  className={`rounded-full px-3 py-1 text-xs font-semibold ${getSourceTone(activeSelectedArticle.article.sourceLabel)}`}
                 >
-                  {activeSelectedArticle.sourceLabel}
+                  {activeSelectedArticle.article.sourceLabel}
                 </span>
                 <a
-                  href={activeSelectedArticle.sourceHref}
+                  href={activeSelectedArticle.article.sourceHref}
                   target="_blank"
                   rel="noreferrer"
                   className="text-sm font-medium text-slate-500 underline decoration-slate-300 underline-offset-4 hover:text-slate-700"
@@ -564,11 +600,11 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
                 </a>
               </div>
 
-              <p className="mt-5 text-base leading-8 text-slate-700">{activeSelectedArticle.summary}</p>
+              <p className="mt-5 text-base leading-8 text-slate-700">{activeSelectedArticle.article.summary}</p>
 
-              <div className="mt-6 space-y-5">{renderContent(activeSelectedArticle.content)}</div>
+              <div className="mt-6 space-y-5">{renderContent(activeSelectedArticle.article.content)}</div>
 
-              {relatedArticles.length > 0 ? (
+              {relatedArticleRecords.length > 0 ? (
                 <>
                   <div className="my-6 border-t border-slate-200" />
                   <div>
@@ -576,11 +612,11 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
                       More in this category
                     </h3>
                     <div className="mt-4 grid gap-3">
-                      {relatedArticles.map((article) => (
+                      {relatedArticleRecords.map(({ article }) => (
                         <button
                           key={article.title}
                           type="button"
-                          onClick={() => setSelectedArticle(article)}
+                          onClick={() => setSelectedArticleTitle(article.title)}
                           className="rounded-[18px] border border-slate-200 bg-slate-50/70 px-4 py-4 text-left transition hover:border-slate-300 hover:bg-white"
                         >
                           <div className="flex items-center justify-between gap-3">

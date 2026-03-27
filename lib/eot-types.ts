@@ -142,6 +142,86 @@ export type EotCaseWorkspace = {
   documents: EotDocument[]
 }
 
+export type EotClaimSummary = {
+  id: string
+  case_id: string
+  total_amount: string
+  generated_at: string
+  updated_at: string
+}
+
+export type EotCaseWorkspaceMetrics = {
+  evidence_count: number
+  issue_count: number
+  open_issue_count: number
+  resolved_issue_count: number
+  high_severity_open_issue_count: number
+  recommendation_count: number
+  message_count: number
+  document_count: number
+}
+
+export type EotCaseWorkspaceSummary = {
+  case: EotCase
+  tenancy: EotTenancy
+  property: EotProperty
+  metrics: EotCaseWorkspaceMetrics
+  claim: EotClaimSummary | null
+}
+
+export type EotSectionPage<T> = {
+  items: T[]
+  next_offset: number | null
+  has_more: boolean
+}
+
+export type EotCaseTimelineItem = {
+  id: string
+  timestamp: string
+  title: string
+  detail: string
+  meta: string
+  tone: string
+}
+
+export type EotCaseSubmission = {
+  claim: EotClaim | null
+  issues: EotIssue[]
+}
+
+export type EotReportSummaryStats = {
+  total_cases: number
+  active_cases: number
+  ready_for_claim: number
+  disputed: number
+  total_evidence: number
+  average_evidence_per_case: number
+  total_issues: number
+  resolved_issues: number
+  claim_amount: string
+  recommendation_count: number
+  generated_claim_count: number
+}
+
+export type EotReportPerformanceRow = {
+  case_id: string
+  property_name: string
+  tenant_name: string
+  status: EotCaseStatus
+  priority: EotCasePriority
+  evidence_count: number
+  issue_count: number
+  claim_total_amount: string | null
+  last_activity_at: string
+}
+
+export type EotReportSummary = {
+  stats: EotReportSummaryStats
+  status_breakdown: Record<string, number>
+  issue_severity_breakdown: Record<string, number>
+  performance_rows: EotReportPerformanceRow[]
+}
+
 export type CreateEotCaseInput = {
   property_id: string
   summary: string | null

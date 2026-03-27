@@ -71,6 +71,14 @@ type CreateCaseFormState = {
 
 type SavedView = 'all' | 'attention' | 'ready' | 'disputed' | 'recent'
 
+type PreparedCaseRow = {
+  caseItem: EotCaseListItem
+  attention: ReturnType<typeof getCaseAttentionTone>
+  progress: number
+  searchableText: string
+  isRecentlyActive: boolean
+}
+
 const DEFAULT_FORM_STATE: CreateCaseFormState = {
   propertyId: '',
   summary: '',
@@ -184,21 +192,36 @@ export function EotCaseListClient({
     setSelectedIds((current) => current.filter((id) => cases.some((caseItem) => caseItem.id === id)))
   }, [cases])
 
-  const visibleCases = useMemo(() => {
-    return cases.filter((caseItem) => {
-      if (search) {
-        const haystack = [
-          caseItem.property.name,
-          caseItem.property.reference ?? '',
-          caseItem.tenant_name,
-          caseItem.status,
-          caseItem.priority,
-          caseItem.id,
-        ]
-          .join(' ')
-          .toLowerCase()
+  const preparedCaseRows = useMemo<PreparedCaseRow[]>(() => {
+    const recentThresholdMs = 1000 * 60 * 60 * 24 * 2
 
-        if (!haystack.includes(search)) {
+    return cases.map((caseItem) => ({
+      caseItem,
+      attention: getCaseAttentionTone({
+        priority: caseItem.priority,
+        status: caseItem.status,
+        lastActivityAt: caseItem.last_activity_at,
+      }),
+      progress: getCaseProgress(caseItem.status),
+      searchableText: [
+        caseItem.property.name,
+        caseItem.property.reference ?? '',
+        caseItem.tenant_name,
+        caseItem.status,
+        caseItem.priority,
+        caseItem.id,
+      ]
+        .join(' ')
+        .toLowerCase(),
+      isRecentlyActive:
+        Date.now() - new Date(caseItem.last_activity_at).getTime() <= recentThresholdMs,
+    }))
+  }, [cases])
+
+  const visibleCaseRows = useMemo(() => {
+    return preparedCaseRows.filter(({ attention, caseItem, isRecentlyActive, searchableText }) => {
+      if (search) {
+        if (!searchableText.includes(search)) {
           return false
         }
       }
@@ -210,12 +233,6 @@ export function EotCaseListClient({
       if (priorityFilter !== 'all' && caseItem.priority !== priorityFilter) {
         return false
       }
-
-      const attention = getCaseAttentionTone({
-        priority: caseItem.priority,
-        status: caseItem.status,
-        lastActivityAt: caseItem.last_activity_at,
-      })
 
       if (savedView === 'attention' && attention.label !== 'High attention') {
         return false
@@ -230,37 +247,31 @@ export function EotCaseListClient({
       }
 
       if (savedView === 'recent') {
-        const ageInMs = Date.now() - new Date(caseItem.last_activity_at).getTime()
-        const twoDays = 1000 * 60 * 60 * 24 * 2
-        if (ageInMs > twoDays) {
+        if (!isRecentlyActive) {
           return false
         }
       }
 
       return true
     })
-  }, [cases, priorityFilter, savedView, search, statusFilter])
+  }, [preparedCaseRows, priorityFilter, savedView, search, statusFilter])
 
   const stats = useMemo(() => {
-    const readyForClaim = cases.filter((caseItem) => caseItem.status === 'ready_for_claim').length
-    const highPriority = cases.filter((caseItem) => caseItem.priority === 'high').length
-    const requiringAttention = cases.filter((caseItem) => {
-      return (
-        getCaseAttentionTone({
-          priority: caseItem.priority,
-          status: caseItem.status,
-          lastActivityAt: caseItem.last_activity_at,
-        }).label === 'High attention'
-      )
-    }).length
+    const readyForClaim = preparedCaseRows.filter(
+      ({ caseItem }) => caseItem.status === 'ready_for_claim'
+    ).length
+    const highPriority = preparedCaseRows.filter(({ caseItem }) => caseItem.priority === 'high').length
+    const requiringAttention = preparedCaseRows.filter(
+      ({ attention }) => attention.label === 'High attention'
+    ).length
 
     return {
-      total: cases.length,
+      total: preparedCaseRows.length,
       readyForClaim,
       highPriority,
       requiringAttention,
     }
-  }, [cases])
+  }, [preparedCaseRows])
 
   async function refreshCases() {
     setRefreshing(true)
@@ -337,12 +348,12 @@ export function EotCaseListClient({
   }
 
   function toggleSelectAll() {
-    if (selectedIds.length === visibleCases.length) {
+    if (selectedIds.length === visibleCaseRows.length) {
       setSelectedIds([])
       return
     }
 
-    setSelectedIds(visibleCases.map((caseItem) => caseItem.id))
+    setSelectedIds(visibleCaseRows.map(({ caseItem }) => caseItem.id))
   }
 
   async function handleCopySelection() {
@@ -659,7 +670,7 @@ export function EotCaseListClient({
             </div>
           ) : error ? (
             <EmptyState title="Unable to load checkouts" body={error} />
-          ) : visibleCases.length === 0 ? (
+          ) : visibleCaseRows.length === 0 ? (
             <EmptyState
               title={cases.length === 0 ? 'No live checkouts yet' : 'No checkouts match this view'}
               body={
@@ -676,7 +687,7 @@ export function EotCaseListClient({
                     <th className="px-4 py-3">
                       <input
                         type="checkbox"
-                        checked={visibleCases.length > 0 && selectedIds.length === visibleCases.length}
+                        checked={visibleCaseRows.length > 0 && selectedIds.length === visibleCaseRows.length}
                         onChange={toggleSelectAll}
                         aria-label="Select all visible checkouts"
                       />
@@ -690,13 +701,8 @@ export function EotCaseListClient({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200 bg-white">
-                  {visibleCases.map((caseItem) => {
+                  {visibleCaseRows.map(({ attention, caseItem, progress }) => {
                     const selected = selectedIds.includes(caseItem.id)
-                    const attention = getCaseAttentionTone({
-                      priority: caseItem.priority,
-                      status: caseItem.status,
-                      lastActivityAt: caseItem.last_activity_at,
-                    })
 
                     return (
                       <tr
@@ -743,11 +749,11 @@ export function EotCaseListClient({
                               />
                             </div>
                             <ProgressBar
-                              value={getCaseProgress(caseItem.status)}
+                              value={progress}
                               label={
                                 <>
                                   <span>Progress</span>
-                                  <span>{getCaseProgress(caseItem.status)}%</span>
+                                  <span>{progress}%</span>
                                 </>
                               }
                             />

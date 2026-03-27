@@ -2,6 +2,10 @@ import { createClient } from '@supabase/supabase-js'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import {
+  shouldNoIndexPath,
+  shouldProtectPath,
+} from '@/lib/operator-route-protection'
+import {
   getOperatorSessionCookieOptions,
   LEGACY_SUPABASE_SESSION_COOKIE,
   parseSupabaseSessionCookie,
@@ -14,27 +18,6 @@ const LEGACY_HOST = 'www.renovoai.co.uk'
 const NOINDEX_HEADER_VALUE = 'noindex, nofollow'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-function shouldNoIndex(pathname: string) {
-  return (
-    pathname === '/eot' ||
-    pathname.startsWith('/eot/') ||
-    pathname === '/calls' ||
-    pathname === '/knowledge' ||
-    pathname.startsWith('/cases/') ||
-    pathname.startsWith('/api/')
-  )
-}
-
-function shouldProtect(pathname: string) {
-  return (
-    pathname === '/eot' ||
-    pathname.startsWith('/eot/') ||
-    pathname === '/calls' ||
-    pathname === '/knowledge' ||
-    pathname.startsWith('/cases/')
-  )
-}
 
 function createServerClient() {
   if (!supabaseUrl || !supabaseAnonKey) {
@@ -53,7 +36,7 @@ function createServerClient() {
 }
 
 function applyNoIndexHeader(pathname: string, response: NextResponse) {
-  if (shouldNoIndex(pathname)) {
+  if (shouldNoIndexPath(pathname)) {
     response.headers.set('X-Robots-Tag', NOINDEX_HEADER_VALUE)
   }
 }
@@ -111,7 +94,7 @@ export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname
   const secure = request.nextUrl.protocol === 'https:'
 
-  if (!shouldProtect(pathname)) {
+  if (!shouldProtectPath(pathname)) {
     const response = NextResponse.next()
     applyNoIndexHeader(pathname, response)
     return response

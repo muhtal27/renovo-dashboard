@@ -89,6 +89,66 @@ class CaseListItem(BaseModel):
     last_activity_at: datetime
 
 
+class ReportSummaryStats(BaseModel):
+    total_cases: int
+    active_cases: int
+    ready_for_claim: int
+    disputed: int
+    total_evidence: int
+    average_evidence_per_case: float
+    total_issues: int
+    resolved_issues: int
+    claim_amount: Decimal
+    recommendation_count: int
+    generated_claim_count: int
+
+
+class ReportPerformanceRow(BaseModel):
+    case_id: UUID
+    property_name: str
+    tenant_name: str
+    status: CaseStatus
+    priority: CasePriority
+    evidence_count: int
+    issue_count: int
+    claim_total_amount: Decimal | None = None
+    last_activity_at: datetime
+
+
+class ReportSummaryResponse(BaseModel):
+    stats: ReportSummaryStats
+    status_breakdown: dict[str, int]
+    issue_severity_breakdown: dict[str, int]
+    performance_rows: list[ReportPerformanceRow]
+
+
+class ClaimSummaryResponse(ORMModel):
+    id: UUID
+    case_id: UUID
+    total_amount: Decimal
+    generated_at: datetime
+    updated_at: datetime
+
+
+class CaseWorkspaceMetricsResponse(BaseModel):
+    evidence_count: int
+    issue_count: int
+    open_issue_count: int
+    resolved_issue_count: int
+    high_severity_open_issue_count: int
+    recommendation_count: int
+    message_count: int
+    document_count: int
+
+
+class CaseWorkspaceSummaryResponse(BaseModel):
+    case: CaseDetailResponse
+    tenancy: TenancyResponse
+    property: PropertySummaryResponse
+    metrics: CaseWorkspaceMetricsResponse
+    claim: ClaimSummaryResponse | None
+
+
 class EvidenceCreateRequest(BaseModel):
     case_id: UUID
     file_url: str
@@ -107,6 +167,12 @@ class EvidenceResponse(ORMModel):
     uploaded_by: str
     metadata: dict[str, Any] | None = Field(default=None, validation_alias="metadata_json")
     created_at: datetime
+
+
+class EvidencePageResponse(BaseModel):
+    items: list[EvidenceResponse]
+    next_offset: int | None
+    has_more: bool
 
 
 class RecommendationUpsertRequest(BaseModel):
@@ -176,6 +242,12 @@ class MessageResponse(ORMModel):
     created_at: datetime
 
 
+class MessagePageResponse(BaseModel):
+    items: list[MessageResponse]
+    next_offset: int | None
+    has_more: bool
+
+
 class DocumentResponse(ORMModel):
     id: UUID
     case_id: UUID
@@ -185,6 +257,26 @@ class DocumentResponse(ORMModel):
     metadata: dict[str, Any] | None = Field(default=None, validation_alias="metadata_json")
     created_at: datetime
     updated_at: datetime
+
+
+class DocumentPageResponse(BaseModel):
+    items: list[DocumentResponse]
+    next_offset: int | None
+    has_more: bool
+
+
+class CaseTimelineItemResponse(BaseModel):
+    id: str
+    timestamp: datetime
+    title: str
+    detail: str
+    meta: str
+    tone: str
+
+
+class CaseSubmissionResponse(BaseModel):
+    claim: ClaimResponse | None
+    issues: list[IssueResponse]
 
 
 class CaseWorkspaceResponse(BaseModel):

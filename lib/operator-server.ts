@@ -9,6 +9,7 @@ import { normalizeReturnTo } from '@/lib/return-to'
 import type { MinimalSessionCookie } from '@/lib/supabase-session'
 import {
   getOperatorProfileForUserId,
+  readOperatorSessionIfNeeded,
   refreshOperatorSessionIfNeeded,
   toSafeOperatorAuthUser,
 } from '@/lib/operator-session-server'
@@ -62,9 +63,9 @@ function buildWorkspaceAccessRedirect(
   return `/workspace-access?${searchParams.toString()}`
 }
 
-const resolveOperatorContext = cache(async (): Promise<OperatorContextResult> => {
-  const authResult = await refreshOperatorSessionIfNeeded()
-
+async function buildOperatorContextResult(
+  authResult: Awaited<ReturnType<typeof readOperatorSessionIfNeeded>>
+): Promise<OperatorContextResult> {
   if (!authResult.ok) {
     return {
       ok: false,
@@ -106,10 +107,27 @@ const resolveOperatorContext = cache(async (): Promise<OperatorContextResult> =>
       profile,
     },
   }
+}
+
+const resolveOperatorContext = cache(async (): Promise<OperatorContextResult> => {
+  const authResult = await readOperatorSessionIfNeeded()
+  return buildOperatorContextResult(authResult)
 })
 
+async function resolveOperatorApiContext(): Promise<OperatorContextResult> {
+  const authResult = await refreshOperatorSessionIfNeeded()
+
+  if (!authResult.ok) {
+    console.warn('Operator API authentication failed.', {
+      status: 401,
+      reason: authResult.reason,
+    })
+  }
+  return buildOperatorContextResult(authResult)
+}
+
 export async function requireOperatorSession(returnTo: string) {
-  const result = await refreshOperatorSessionIfNeeded()
+  const result = await readOperatorSessionIfNeeded()
 
   if (!result.ok) {
     redirect(buildLoginRedirect(returnTo))
@@ -181,13 +199,19 @@ export async function getOperatorTenantContextForApi(requiredPermission?: Operat
 }
 
 export async function getOperatorMembershipContextForApi(requiredPermission?: OperatorPermission) {
-  const result = await resolveOperatorContext()
+  const result = await resolveOperatorApiContext()
 
   if (!result.ok) {
     return result
   }
 
   if (requiredPermission && !hasPermission(result.context.role, requiredPermission)) {
+    console.warn('Operator API permission denied.', {
+      requiredPermission,
+      role: result.context.role,
+      tenantId: result.context.tenantId,
+      userId: result.context.user.id,
+    })
     return {
       ok: false as const,
       status: 403 as const,

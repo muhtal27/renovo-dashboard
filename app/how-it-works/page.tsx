@@ -9,11 +9,11 @@ const dataCards = [
   },
   {
     title: 'Forward from email',
-    body: 'Forward documents from your inbox to a dedicated Renovo address. The file is attached to the right case automatically. Useful if documents arrive by email already.',
+    body: 'Forward documents from your inbox to a dedicated Renovo AI address. The file is attached to the right case automatically. Useful if documents arrive by email already.',
   },
   {
     title: 'Connect your PMS (coming)',
-    body: 'Later, Renovo can pull tenancy end dates and documents directly from your property management system. This is on the roadmap — manual upload works in the meantime.',
+    body: 'Later, Renovo AI can pull tenancy end dates and documents directly from your property management system. This is on the roadmap — manual upload works in the meantime.',
     badge: 'Coming soon',
   },
 ]
@@ -22,7 +22,7 @@ const walkthroughSteps = [
   {
     step: '01',
     title: 'Case opened and documents uploaded',
-    body: 'A tenant gives notice on a 14-month AST. The manager opens a case, adds the move-out date and deposit amount, then uploads the check-in, check-out, and photos. Renovo extracts the key facts automatically.',
+    body: 'A tenant gives notice on a 14-month AST. The manager opens a case, adds the move-out date and deposit amount, then uploads the check-in, check-out, and photos. Renovo AI extracts the key facts automatically.',
   },
   {
     step: '02',
@@ -32,7 +32,7 @@ const walkthroughSteps = [
   {
     step: '03',
     title: 'Recommendation drafted',
-    body: 'Renovo drafts a recommendation using the documents, issues, and evidence links, then writes a rationale for each proposed amount and flags any fair wear and tear judgement calls.',
+    body: 'Renovo AI drafts a recommendation using the documents, issues, and evidence links, then writes a rationale for each proposed amount and flags any fair wear and tear judgement calls.',
   },
   {
     step: '04',
@@ -42,7 +42,7 @@ const walkthroughSteps = [
   {
     step: '05',
     title: 'Claim submitted',
-    body: 'Renovo turns the approved recommendation into claim-ready output. If the tenant challenges, the evidence and decision trail are already assembled.',
+    body: 'Renovo AI turns the approved recommendation into claim-ready output. If the tenant challenges, the evidence and decision trail are already assembled.',
   },
 ]
 
@@ -68,9 +68,9 @@ const dataSignals = [
 ]
 
 export const metadata: Metadata = {
-  title: 'How Renovo Works | End-of-Tenancy Decision Tool',
+  title: 'How Renovo AI Works | End-of-Tenancy Decision Tool',
   description:
-    'See exactly how Renovo fits into your letting agency — no software replacement required. Manual upload, email intake, and step-by-step decision workflow explained.',
+    'See exactly how Renovo AI fits into your letting agency — no software replacement required. Manual upload, email intake, and step-by-step decision workflow explained.',
   alternates: {
     canonical: 'https://renovoai.co.uk/how-it-works',
   },
@@ -83,10 +83,10 @@ export default function HowItWorksPage() {
         <section className="page-hero">
           <p className="app-kicker">How it works</p>
           <h1 className="page-title max-w-5xl">
-            You don&apos;t need to change your current system. Here&apos;s how Renovo fits in.
+            You don&apos;t need to change your current system. Here&apos;s how Renovo AI fits in.
           </h1>
           <p className="page-copy max-w-3xl">
-            Renovo sits alongside your existing property management software. Documents come in via
+            Renovo AI sits alongside your existing property management software. Documents come in via
             manual upload or email. Nothing in your current setup changes in week one.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
@@ -103,7 +103,7 @@ export default function HowItWorksPage() {
           <div className="max-w-4xl">
             <p className="app-kicker">Getting data in</p>
             <h2 className="mt-3 text-[clamp(1.9rem,4vw,2.6rem)] leading-[1.12]">
-              How does Renovo get the documents and information it needs?
+              How does Renovo AI get the documents and information it needs?
             </h2>
           </div>
 
@@ -136,7 +136,7 @@ export default function HowItWorksPage() {
           <div className="max-w-4xl">
             <p className="app-kicker">A real scenario</p>
             <h2 className="mt-3 text-[clamp(1.9rem,4vw,2.6rem)] leading-[1.12]">
-              What a typical end-of-tenancy review looks like in Renovo
+              What a typical end-of-tenancy review looks like in Renovo AI
             </h2>
             <p className="mt-4 text-base leading-8 text-[#3d3b37]">
               This is not a case study. It is a realistic walkthrough of the same five steps shown
@@ -170,7 +170,7 @@ export default function HowItWorksPage() {
               </h2>
               <div className="mt-4 space-y-4 text-base leading-8 text-[#3d3b37]">
                 <p>
-                  Renovo drafts a recommendation with reasoning. A manager reads it, changes what
+                  Renovo AI drafts a recommendation with reasoning. A manager reads it, changes what
                   they disagree with, and approves or rejects it. The audit trail records exactly
                   what changed and why, including every edit, note, and approval.
                 </p>
@@ -216,7 +216,7 @@ export default function HowItWorksPage() {
         <section className="page-hero text-center">
           <h2 className="text-[clamp(1.9rem,4vw,2.6rem)] leading-[1.12]">Ready to try it with a real case?</h2>
           <p className="mx-auto mt-4 max-w-3xl text-base leading-8 text-[#3d3b37]">
-            Join the rollout list. We are opening Renovo carefully with agencies that want a more
+            Join the rollout list. We are opening Renovo AI carefully with agencies that want a more
             reviewable end-of-tenancy workflow. No commitment required.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">

@@ -34,7 +34,7 @@ const workflowSteps = [
   {
     step: '03',
     title: 'Compare check-in and check-out',
-    body: 'Renovo highlights condition changes and flags potentially chargeable issues.',
+    body: 'Renovo AI highlights condition changes and flags potentially chargeable issues.',
   },
   {
     step: '04',
@@ -110,7 +110,7 @@ export function PublicHome() {
               <em className="not-italic text-[#9e7a2a]">finally automated</em>
             </h1>
             <p className="mt-6 max-w-[620px] text-[1.08rem] font-light leading-8 text-[#3d3b37] md:text-[1.15rem]">
-              Renovo handles checkouts, liability assessments, deposit disputes, and manager
+              Renovo AI handles checkouts, liability assessments, deposit disputes, and manager
               approvals so your team spends less time on admin and more time running properties.
             </p>
 
@@ -133,7 +133,7 @@ export function PublicHome() {
           <div className="relative xl:justify-self-end">
             <div className="overflow-hidden rounded-[1.6rem] border border-[rgba(15,14,13,0.1)] bg-white shadow-[0_18px_56px_rgba(0,0,0,0.08)]">
               <div className="flex items-center justify-between bg-[#0f0e0d] px-5 py-4">
-                <span className="text-sm text-[rgba(255,255,255,0.9)]">Renovo Dashboard</span>
+                <span className="text-sm text-[rgba(255,255,255,0.9)]">Renovo AI Dashboard</span>
                 <div className="flex gap-1.5">
                   <span className="h-2 w-2 rounded-full bg-[rgba(255,255,255,0.14)]" />
                   <span className="h-2 w-2 rounded-full bg-[rgba(255,255,255,0.14)]" />
@@ -198,7 +198,7 @@ export function PublicHome() {
             <span className="mr-2 inline-flex rounded-full bg-[#e1f5ee] px-2.5 py-0.5 text-[11px] font-medium uppercase tracking-[0.08em] text-[#0f6e56]">
               Early access
             </span>
-            Renovo is currently in early access. We are onboarding a small number of property
+            Renovo AI is currently in early access. We are onboarding a small number of property
             managers to shape the product with real workflows.
           </p>
         </div>
@@ -342,7 +342,7 @@ export function PublicHome() {
               <em className="not-italic text-[#9e7a2a]">end to end</em>
             </h2>
             <p className="mt-5 text-[17px] font-light leading-8 text-[#3d3b37]">
-              Renovo sits alongside your current setup and keeps evidence, reasoning, and decision
+              Renovo AI sits alongside your current setup and keeps evidence, reasoning, and decision
               output in one routeable workflow.
             </p>
           </div>
@@ -453,7 +453,7 @@ export function PublicHome() {
               href="/contact"
               className="app-primary-button rounded px-5 py-2.5 text-sm font-medium"
             >
-              Contact Renovo
+              Contact Renovo AI
             </Link>
           </div>
         </div>

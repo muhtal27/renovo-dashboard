@@ -35,6 +35,7 @@ import {
   formatEnumLabel,
 } from '@/app/eot/_components/eot-ui'
 import { useEotPortfolioData } from '@/app/eot/_components/use-eot-portfolio-data'
+import { getEotUiErrorMessage } from '@/lib/eot-errors'
 import type { EotPortfolioSnapshot } from '@/lib/eot-server-data'
 
 type PortfolioViewMode =
@@ -93,15 +94,42 @@ export function EotPortfolioClient({
   const { cases, workspaces, loading, error, hasData } = useEotPortfolioData(initialSnapshot)
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null)
   const [recommendationView, setRecommendationView] = useState<'all' | 'charge' | 'partial' | 'no_charge'>('all')
+  const needsAttentionQueue = mode === 'overview'
+  const needsRecentActivity = mode === 'overview'
+  const needsStatusBreakdown = mode === 'overview' || mode === 'reports'
+  const needsIssueSeverityBreakdown = mode === 'reports'
+  const needsEvidenceTypeBreakdown = mode === 'overview'
+  const needsIssues = mode === 'disputes'
+  const needsRecommendationItems = mode === 'recommendations'
+  const needsTenancyItems = mode === 'tenancy'
 
   const stats = useMemo(() => getPortfolioStats(cases, workspaces), [cases, workspaces])
-  const attentionQueue = useMemo(() => getCasesRequiringAttention(workspaces, 6), [workspaces])
-  const recentActivity = useMemo(() => buildRecentActivity(workspaces, 8), [workspaces])
-  const statusBreakdown = useMemo(() => buildStatusBreakdown(cases), [cases])
-  const issueSeverityBreakdown = useMemo(() => buildIssueSeverityBreakdown(workspaces), [workspaces])
-  const evidenceTypeBreakdown = useMemo(() => buildEvidenceTypeBreakdown(workspaces), [workspaces])
+  const attentionQueue = useMemo(
+    () => (needsAttentionQueue ? getCasesRequiringAttention(workspaces, 6) : []),
+    [needsAttentionQueue, workspaces]
+  )
+  const recentActivity = useMemo(
+    () => (needsRecentActivity ? buildRecentActivity(workspaces, 8) : []),
+    [needsRecentActivity, workspaces]
+  )
+  const statusBreakdown = useMemo(
+    () => (needsStatusBreakdown ? buildStatusBreakdown(cases) : {}),
+    [cases, needsStatusBreakdown]
+  )
+  const issueSeverityBreakdown = useMemo(
+    () => (needsIssueSeverityBreakdown ? buildIssueSeverityBreakdown(workspaces) : {}),
+    [needsIssueSeverityBreakdown, workspaces]
+  )
+  const evidenceTypeBreakdown = useMemo(
+    () => (needsEvidenceTypeBreakdown ? buildEvidenceTypeBreakdown(workspaces) : {}),
+    [needsEvidenceTypeBreakdown, workspaces]
+  )
 
   const issues = useMemo(() => {
+    if (!needsIssues) {
+      return []
+    }
+
     return flattenIssues(workspaces)
       .filter((issue) => {
         if (!search) return true
@@ -118,9 +146,24 @@ export function EotPortfolioClient({
           .includes(search)
       })
       .sort((left, right) => new Date(right.updated_at).getTime() - new Date(left.updated_at).getTime())
-  }, [search, workspaces])
+  }, [needsIssues, search, workspaces])
+
+  const recommendationCount = useMemo(
+    () =>
+      workspaces.reduce(
+        (count, workspace) =>
+          count +
+          workspace.issues.filter((issue) => issue.recommendation).length,
+        0
+      ),
+    [workspaces]
+  )
 
   const recommendations = useMemo(() => {
+    if (!needsRecommendationItems) {
+      return []
+    }
+
     return flattenRecommendations(workspaces)
       .filter((item) => {
         if (recommendationView !== 'all' && item.recommendation.decision !== recommendationView) {
@@ -141,9 +184,13 @@ export function EotPortfolioClient({
           .includes(search)
       })
       .sort((left, right) => new Date(right.recommendation.updated_at).getTime() - new Date(left.recommendation.updated_at).getTime())
-  }, [recommendationView, search, workspaces])
+  }, [needsRecommendationItems, recommendationView, search, workspaces])
 
   const tenancyItems = useMemo(() => {
+    if (!needsTenancyItems) {
+      return []
+    }
+
     return workspaces
       .filter((workspace) => {
         if (!search) return true
@@ -163,7 +210,7 @@ export function EotPortfolioClient({
         (left, right) =>
           new Date(right.case.last_activity_at).getTime() - new Date(left.case.last_activity_at).getTime()
       )
-  }, [search, workspaces])
+  }, [needsTenancyItems, search, workspaces])
 
   const selectedTenancy = useMemo(() => {
     if (!tenancyItems.length) return null
@@ -171,10 +218,14 @@ export function EotPortfolioClient({
   }, [selectedItemId, tenancyItems])
 
   const disputeItems = useMemo(() => {
+    if (!needsIssues) {
+      return []
+    }
+
     return issues
       .filter((issue) => issue.caseStatus === 'disputed' || issue.status === 'disputed')
       .sort((left, right) => new Date(right.updated_at).getTime() - new Date(left.updated_at).getTime())
-  }, [issues])
+  }, [issues, needsIssues])
 
   const selectedDispute = useMemo(() => {
     if (!disputeItems.length) return null
@@ -195,7 +246,7 @@ export function EotPortfolioClient({
   if (error) {
     return (
       <SectionCard className="px-6 py-10">
-        <EmptyState title="Unable to load portfolio" body={error} />
+        <EmptyState title="Unable to load portfolio" body={getEotUiErrorMessage(error)} />
       </SectionCard>
     )
   }
@@ -336,7 +387,7 @@ export function EotPortfolioClient({
               <MetaItem label="Issue resolution rate" value={`${stats.totalIssues ? Math.round((stats.resolvedIssues / stats.totalIssues) * 100) : 0}%`} />
               <MetaItem label="Claim total" value={formatCurrency(stats.claimAmount)} />
               <MetaItem label="Evidence / checkout" value={stats.averageEvidencePerCase.toFixed(1)} />
-              <MetaItem label="Recommendations" value={recommendations.length} />
+              <MetaItem label="Recommendations" value={recommendationCount} />
             </div>
           </SectionCard>
         </div>
@@ -663,7 +714,7 @@ export function EotPortfolioClient({
           <KPIStatCard label="Generated claims" value={workspaces.filter((workspace) => workspace.claim).length} detail="Submission packs already created." tone="accent" />
           <KPIStatCard label="Awaiting submission" value={workspaces.filter((workspace) => workspace.case.status === 'ready_for_claim' && !workspace.claim).length} detail="Checkouts ready but not yet generated." tone="warning" />
           <KPIStatCard label="Claim value" value={formatCurrency(stats.claimAmount)} detail="Current generated claim total." />
-          <KPIStatCard label="Recommendations" value={recommendations.length} detail="Supporting recommendation set." />
+          <KPIStatCard label="Recommendations" value={recommendationCount} detail="Supporting recommendation set." />
         </section>
 
         <SectionCard className="px-6 py-6">
@@ -763,10 +814,10 @@ export function EotPortfolioClient({
           description="Current live signals relevant to final submission generation."
         >
           <MetaItem label="Ready for submission" value={stats.readyForClaim} />
-          <MetaItem label="Recommendations recorded" value={recommendations.length} />
+          <MetaItem label="Recommendations recorded" value={recommendationCount} />
           <MetaItem label="Generated claims" value={workspaces.filter((workspace) => workspace.claim).length} />
           <div className="rounded-[18px] border border-slate-200 bg-white px-4 py-4 text-sm leading-6 text-slate-600">
-            Existing OpenAI-backed checkout workflows remain intact. These analytics views sit on top of the live checkout and workspace data only.
+            Submission readiness remains live and operator-facing. These analytics are derived directly from the active checkout portfolio.
           </div>
         </DetailPanel>
       </div>

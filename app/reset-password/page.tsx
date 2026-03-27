@@ -96,7 +96,7 @@ export default function ResetPasswordPage() {
               <p className="app-kicker">Password recovery</p>
               <h1 className="mt-2 text-3xl tracking-tight">Choose a new password</h1>
               <p className="mt-3 max-w-2xl text-sm leading-7 text-[#3d3b37]">
-                Set a new password for your Renovo workspace account, then return to sign-in.
+                Set a new password for your Renovo AI workspace account, then return to sign-in.
               </p>
             </div>
             <Link href="/login" className="app-secondary-button rounded px-4 py-2 text-sm font-medium">
