@@ -38,12 +38,6 @@
     }
   ],
   "functions": {
-    "app/api/eot/recommend/route.ts": {
-      "regions": ["lhr1"]
-    },
-    "app/api/eot/generate-claim/route.ts": {
-      "regions": ["lhr1"]
-    },
     "app/api/waitlist/route.ts": {
       "regions": ["lhr1"]
     }

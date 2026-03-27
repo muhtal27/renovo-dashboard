@@ -28,10 +28,10 @@ npm run smoke:local
 These commands automate local file creation, env validation, frontend startup, backend startup, and local smoke execution.
 
 Operator auth and route-protection rules live in
-[03-engineering/operator-auth-guardrails.md](/Users/retailltd/Code/renovo-dashboard/03-engineering/operator-auth-guardrails.md).
+[03-engineering/operator-auth-guardrails.md](03-engineering/operator-auth-guardrails.md).
 
 Two-project Vercel release coordination lives in
-[03-engineering/vercel-release-coordination.md](/Users/retailltd/Code/renovo-dashboard/03-engineering/vercel-release-coordination.md).
+[03-engineering/vercel-release-coordination.md](03-engineering/vercel-release-coordination.md).
 
 Secrets that still require a real value if automation cannot source them:
 
@@ -226,6 +226,11 @@ This repo deploys to two linked Vercel projects from the same GitHub repository:
 
 - `renovo-dashboard` from the repo root
 - `renovo-backend` from `backend/`
+
+Required Vercel Root Directory settings:
+
+- `renovo-dashboard`: repo root
+- `renovo-backend`: `backend`
 
 Both can auto-deploy from pushes to `main`, but they are still independent deployments. That is not enough protection when frontend code depends on new backend routes.
 

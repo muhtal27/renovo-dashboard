@@ -7,6 +7,13 @@ Renovo is deployed as two Vercel projects from the same Git repo:
 
 Both projects can auto-deploy from Git, but they do so independently. That means a frontend deploy can go live before the backend alias has the API routes it expects, or a preview frontend can point at a stale backend. Treat them as one release unit whenever API contracts change.
 
+Required Vercel dashboard setting:
+
+- `renovo-dashboard` Root Directory: repo root
+- `renovo-backend` Root Directory: `backend`
+
+If `renovo-backend` is left at the repo root, Vercel reads the frontend `vercel.json` during Git deploys and can fail on frontend-only function rules.
+
 ## Current Contract
 
 - Frontend and backend are one release unit for operator and EOT changes.
