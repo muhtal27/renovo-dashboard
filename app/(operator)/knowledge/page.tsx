@@ -1,12 +1,18 @@
+import type { Metadata } from 'next'
 import KnowledgeClient, {
   type KnowledgeArticle,
 } from '@/app/knowledge/knowledge-client'
+import { requireOperatorTenant } from '@/lib/operator-server'
+
+export const metadata: Metadata = {
+  title: 'Guidance | Renovo',
+}
 
 const GUIDANCE_ARTICLES: KnowledgeArticle[] = [
   {
     title: 'Fair wear and tear',
     category: 'Dispute Handling',
-    regions: ['all', 'england-wales', 'scotland'],
+    regions: ['all', 'england', 'wales', 'scotland'],
     summary:
       'Normal deterioration from reasonable use should not be treated as tenant-caused damage. Age, quality, tenancy length, and occupancy all matter when deciding whether a mark, worn surface, or faded finish is ordinary use or a compensable loss.',
     content: `**Practical summary**
@@ -36,7 +42,7 @@ Normal wear from everyday living is not usually recoverable from the deposit. Ma
   {
     title: 'Betterment',
     category: 'Deposit Schemes',
-    regions: ['all', 'england-wales', 'scotland'],
+    regions: ['all', 'england', 'wales', 'scotland'],
     summary:
       'A deduction should put the landlord back in the position they should reasonably have been in, not leave them with something newer or better at the tenant’s expense. Older items usually justify a reduced, proportionate award rather than full replacement cost.',
     content: `**Practical summary**
@@ -66,7 +72,7 @@ Betterment means improving the landlord's position beyond the condition they cou
   {
     title: 'Evidence checklist',
     category: 'Evidence and Documentation',
-    regions: ['all', 'england-wales', 'scotland'],
+    regions: ['all', 'england', 'wales', 'scotland'],
     summary:
       'Strong deposit decisions are usually document-led. Schemes expect evidence that is specific to the disputed issue and easy to match back to the tenancy, the item, and the claimed amount.',
     content: `**Practical summary**
@@ -96,7 +102,7 @@ Good evidence is specific, dated, and easy to follow. Managers should organise t
   {
     title: 'Deposit dispute process',
     category: 'Deposit Schemes',
-    regions: ['england-wales'],
+    regions: ['england', 'wales'],
     summary:
       'In England and Wales, deposit schemes offer free dispute resolution when the parties cannot agree on deductions. The decision turns heavily on the written evidence, so a thin file is usually harder to defend than a well-linked case pack.',
     content: `**Practical summary**
@@ -126,7 +132,7 @@ Scheme adjudication is usually a document-based process. Once the parties cannot
   {
     title: 'Compliance basics',
     category: 'Deposit Schemes',
-    regions: ['england-wales'],
+    regions: ['england'],
     summary:
       'Deposit protection details are not just admin. In England and Wales the deposit must be protected promptly and the tenant must receive the prescribed information, including scheme details and how disputes are handled.',
     content: `**Practical summary**
@@ -345,7 +351,7 @@ Scottish letting agents must comply with the relevant registration and Code of P
   {
     title: 'Betterment — How to Apply It to Deposit Claims',
     category: 'Deposit Schemes',
-    regions: ['all', 'england-wales', 'scotland'],
+    regions: ['all', 'england', 'wales', 'scotland'],
     summary:
       'How betterment works in practice, with examples for carpets, decorating, and appliances.',
     content: `**Practical summary**
@@ -372,7 +378,7 @@ Betterment means awarding more than the landlord's reasonable loss. Full replace
   {
     title: 'Check In Reports — What Makes a Strong One',
     category: 'Evidence and Documentation',
-    regions: ['all', 'england-wales', 'scotland'],
+    regions: ['all', 'england', 'wales', 'scotland'],
     summary:
       'What a thorough check in report should include and why it is often the most important document in a deposit dispute.',
     content: `**Practical summary**
@@ -401,7 +407,7 @@ The check in report is often the most important document in a deposit dispute be
   {
     title: 'Check Out Reports — What to Include and How to Compare',
     category: 'Evidence and Documentation',
-    regions: ['all', 'england-wales', 'scotland'],
+    regions: ['all', 'england', 'wales', 'scotland'],
     summary:
       'How to produce a check out report that directly supports a deposit claim by comparing end condition clearly against the check in record.',
     content: `**Practical summary**
@@ -429,7 +435,7 @@ The check out report should compare the end condition back to the opening record
   {
     title: 'Communicating Deposit Deductions to Tenants',
     category: 'Dispute Handling',
-    regions: ['all', 'england-wales', 'scotland'],
+    regions: ['all', 'england', 'wales', 'scotland'],
     summary:
       'How to explain proposed deductions clearly and professionally so disputes are less likely to escalate.',
     content: `**Practical summary**
@@ -459,8 +465,145 @@ Proposed deductions should be communicated early, clearly, and in a professional
     sourceHref:
       'https://custodial.tenancydepositscheme.com/tools-and-guides/user-guides/all-users/deposit-deductions-template',
   },
+  {
+    title: 'Northern Ireland tenancy deposit protection',
+    category: 'Deposit Schemes',
+    regions: ['northern-ireland'],
+    summary:
+      'In Northern Ireland, deposits for private tenancies must be protected in an approved tenancy deposit scheme within 28 days, and the tenant must receive the required written information within 35 days.',
+    content: `**Practical summary**
+Northern Ireland has its own tenancy deposit protection timetable. A landlord or agent must protect the deposit in an approved scheme within 28 days of receiving it and must then give the tenant the required written information within 35 days.
+
+**What the written information should cover**
+- the protected deposit amount
+- the tenancy address
+- landlord and agent contact details
+- the scheme administrator details and how disputes are raised
+- the reasons part or all of the deposit could be withheld
+- what happens if the tenant cannot be contacted at tenancy end
+
+**Operational impact**
+- Deposit protection timing should be checked before any end-of-tenancy deduction is escalated.
+- The scheme record, dates, and information pack should sit in the same evidence file as the tenancy documents.
+- If the protection position is unclear, fix that first before assuming the dispute file is ready.
+
+**What to remember**
+1. Northern Ireland uses a 28-day protection deadline and a 35-day information deadline.
+2. Missing scheme paperwork weakens the tenancy-end file immediately.
+3. Deposit compliance should be verified before the operator starts formal deduction handling.`,
+    sourceLabel: 'nidirect',
+    sourceHref: 'https://www.nidirect.gov.uk/articles/tenancy-deposit-scheme-information-tenants',
+  },
+  {
+    title: 'Renting Homes (Wales) occupation contracts',
+    category: 'Dispute Handling',
+    regions: ['wales'],
+    summary:
+      'Wales now operates under the Renting Homes framework, so operators should treat occupation contracts, written statements, and notice rules as Wales-specific rather than assuming the England process applies.',
+    content: `**Practical summary**
+The Renting Homes (Wales) Act changed the tenancy framework in Wales. Most new arrangements are now occupation contracts, and the written statement, possession notices, and contract-holder protections should be treated as Wales-specific.
+
+**Why this matters at tenancy end**
+- The legal framework is no longer aligned neatly enough with England to keep Wales as a hidden sub-case.
+- Operators should separate the deposit evidence question from the occupation contract and notice question.
+- The file should include the written statement and any contract variation record where those documents affect the dispute context.
+
+**Operational checks**
+- confirm whether the agreement is an occupation contract
+- make sure the written statement is available in the file
+- avoid relying on England-only terminology when explaining the tenancy position
+
+**What to remember**
+1. Wales should be treated as its own top-level jurisdiction in the guidance model.
+2. Occupation contract rules can materially affect how tenancy-end issues are framed.
+3. Keep the deduction evidence analysis and the contract-law analysis clearly separated.`,
+    sourceLabel: 'GOV.WALES',
+    sourceHref: 'https://www.gov.wales/renting-homes-frequently-asked-questions-tenants',
+  },
+  {
+    title: 'Northern Ireland deposit disputes and repayment',
+    category: 'Dispute Handling',
+    regions: ['northern-ireland'],
+    summary:
+      'Approved tenancy deposit schemes in Northern Ireland have their own dispute resolution process for disagreements over repayment at the end of the tenancy.',
+    content: `**Practical summary**
+If the landlord and tenant disagree about how much deposit should be returned, an approved Northern Ireland scheme can send the case into its dispute resolution mechanism. Managers should assume the file will be judged on documents, timings, and line-by-line clarity rather than narrative alone.
+
+**What to prepare before escalating**
+- a clean deduction schedule with each amount broken out
+- the tenancy agreement and any scheme paperwork
+- check in and check out evidence tied to the same rooms or items
+- invoices, quotes, rent statements, or communication records relevant to the disputed sum
+
+**Practical approach**
+- Narrow weak items before the dispute is raised.
+- Keep each claimed amount tied to one clear evidence path.
+- Make sure the submission explains why the figure is proportionate and not betterment.
+
+**What to remember**
+1. Northern Ireland scheme disputes still turn heavily on document quality.
+2. A concise, evidence-linked schedule is stronger than a broad narrative bundle.
+3. Scheme repayment disagreements should be prepared before the case is pushed into formal dispute handling.`,
+    sourceLabel: 'nidirect',
+    sourceHref: 'https://www.nidirect.gov.uk/articles/sorting-out-disputes',
+  },
+  {
+    title: 'Northern Ireland tenancy notices and possession basics',
+    category: 'Dispute Handling',
+    regions: ['northern-ireland'],
+    summary:
+      'Northern Ireland private tenancies have their own notice to quit rules, tenancy information requirements, and due-process protections, all of which matter when an end-of-tenancy dispute escalates.',
+    content: `**Practical summary**
+Northern Ireland private tenancies operate under a different legal framework from England, Wales, and Scotland. Notice to quit periods depend on the length of the tenancy, and landlords must follow due process of law if possession is contested.
+
+**Operational implications**
+- Tenancy Information Notices should be checked as part of the core tenancy file.
+- Notice assumptions from England, Wales, or Scotland should not be applied automatically.
+- If the tenancy-end position might move into possession or eviction territory, operators should separate the legal process question from the deposit evidence question.
+
+**Notice points to keep in mind**
+- landlord notice periods increase with tenancy length
+- tenants also have minimum notice obligations
+- due process still matters if the tenant does not leave voluntarily
+
+**What to remember**
+1. Northern Ireland notice rules are jurisdiction-specific.
+2. Deposit evidence and possession process should be assessed separately.
+3. Check the tenancy file for the Tenancy Information Notice and the correct notice position before escalating a contested exit.`,
+    sourceLabel: 'nidirect',
+    sourceHref: 'https://www.nidirect.gov.uk/articles/private-rent-and-tenancies',
+  },
+  {
+    title: 'Northern Ireland landlord registration and problem escalation',
+    category: 'Evidence and Documentation',
+    regions: ['northern-ireland'],
+    summary:
+      'Northern Ireland private landlords must be registered, and councils can investigate certain private rented housing problems including deposit and tenancy information failures.',
+    content: `**Practical summary**
+Northern Ireland landlords letting private tenancies must register, and tenants can ask the council to investigate where key legal duties are not being met. For end-of-tenancy operations, this means registration and compliance checks should be treated as part of the file quality review.
+
+**When this matters**
+- the landlord registration position is unclear
+- the deposit was not protected properly
+- tenancy information was not given on time
+- the case may need escalation beyond ordinary repayment negotiation
+
+**Operational approach**
+- Confirm the landlord identity and registration position early.
+- Keep a record of scheme compliance, tenancy information, and any complaints or council contact.
+- If the dispute may widen into broader housing compliance issues, note that separately from the deduction evidence schedule.
+
+**What to remember**
+1. Registration and compliance checks strengthen the operator file in Northern Ireland.
+2. Local councils may become relevant where tenancy duties have not been met.
+3. Treat regulatory issues as a separate track from the deduction evidence analysis.`,
+    sourceLabel: 'nidirect',
+    sourceHref: 'https://www.nidirect.gov.uk/articles/getting-help-problems-private-rented-housing',
+  },
 ]
 
-export default function KnowledgePage() {
+export default async function KnowledgePage() {
+  await requireOperatorTenant('/knowledge')
+
   return <KnowledgeClient articles={GUIDANCE_ARTICLES} />
 }

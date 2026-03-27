@@ -6,6 +6,11 @@ import {
   getSupabaseServerAuthClient,
   getSupabaseServiceRoleClient,
 } from '@/lib/supabase-admin'
+import {
+  getOptionalBoolean,
+  getOptionalString,
+  isMissingColumnError,
+} from '@/lib/operator-schema-compat'
 import type {
   OperatorAuthUser,
   OperatorMembership,
@@ -64,21 +69,76 @@ export function toSafeOperatorAuthUser(user: User): OperatorAuthUser {
 export async function getOperatorProfileForUserId(userId: string) {
   try {
     const supabase = getSupabaseServiceRoleClient()
-    const { data: profile, error } = await supabase
-      .from('users_profiles')
-      .select('id, full_name, avatar_url, is_active')
-      .eq('auth_user_id', userId)
-      .is('deleted_at', null)
-      .maybeSingle()
 
-    if (error || !profile) {
-      return null
+    const identifierColumns: Array<'auth_user_id' | 'user_id'> = ['auth_user_id', 'user_id']
+
+    for (const column of identifierColumns) {
+      const activeResult = await supabase
+        .from('users_profiles')
+        .select('*')
+        .eq(column, userId)
+        .is('deleted_at', null)
+        .maybeSingle()
+
+      if (activeResult.error) {
+        if (isMissingColumnError(activeResult.error, column)) {
+          continue
+        }
+
+        if (!isMissingColumnError(activeResult.error, 'deleted_at')) {
+          return null
+        }
+
+        const legacyResult = await supabase
+          .from('users_profiles')
+          .select('*')
+          .eq(column, userId)
+          .maybeSingle()
+
+        if (legacyResult.error) {
+          if (isMissingColumnError(legacyResult.error, column)) {
+            continue
+          }
+
+          return null
+        }
+
+        if (!legacyResult.data || typeof legacyResult.data !== 'object') {
+          continue
+        }
+
+        const rawLegacyProfile = legacyResult.data as Record<string, unknown>
+
+        return {
+          id:
+            getOptionalString(rawLegacyProfile, 'id', 'auth_user_id', 'user_id') ??
+            userId,
+          full_name: getOptionalString(rawLegacyProfile, 'full_name', 'name'),
+          avatar_url: getOptionalString(rawLegacyProfile, 'avatar_url'),
+          is_active: getOptionalBoolean(rawLegacyProfile, 'is_active'),
+        } satisfies OperatorProfile
+      }
+
+      if (!activeResult.data || typeof activeResult.data !== 'object') {
+        continue
+      }
+
+      const rawProfile = activeResult.data as Record<string, unknown>
+
+      return {
+        id:
+          getOptionalString(rawProfile, 'id', 'auth_user_id', 'user_id') ??
+          userId,
+        full_name: getOptionalString(rawProfile, 'full_name', 'name'),
+        avatar_url: getOptionalString(rawProfile, 'avatar_url'),
+        is_active: getOptionalBoolean(rawProfile, 'is_active'),
+      } satisfies OperatorProfile
     }
-
-    return profile as OperatorProfile
   } catch {
     return null
   }
+
+  return null
 }
 
 export async function getCurrentOperatorSnapshotForUser(

@@ -178,15 +178,15 @@ export function getClaimReadiness(workspace: EotCaseWorkspace) {
   if (workspace.claim) {
     return {
       label: 'Claim generated',
-      description: 'Output pack is available for review and export.',
+      description: 'Submission pack is available for review and export.',
       tone: 'ready',
     } as const
   }
 
   if (workspace.case.status === 'ready_for_claim') {
     return {
-      label: 'Awaiting output',
-      description: 'Case is marked ready but a formal claim pack has not been generated.',
+      label: 'Awaiting submission',
+      description: 'Checkout is marked ready but a formal claim pack has not been generated.',
       tone: 'attention',
     } as const
   }

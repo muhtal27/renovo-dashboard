@@ -17,7 +17,7 @@ export function PageHeader({
   return (
     <div
       className={cn(
-        'flex flex-col gap-4 rounded-[24px] border border-[rgba(15,23,42,0.08)] bg-white px-6 py-6 shadow-[0_20px_60px_rgba(15,23,42,0.06)]',
+        'flex flex-col gap-4 rounded-[24px] border border-slate-200/80 bg-white px-6 py-6 shadow-[0_10px_30px_rgba(15,23,42,0.04)]',
         'md:px-7',
         'xl:flex-row xl:items-start xl:justify-between',
         className
@@ -51,7 +51,7 @@ export function SectionCard({
   return (
     <section
       className={cn(
-        'rounded-[24px] border border-[rgba(15,23,42,0.08)] bg-white shadow-[0_18px_50px_rgba(15,23,42,0.05)]',
+        'rounded-[24px] border border-slate-200/80 bg-white shadow-[0_10px_30px_rgba(15,23,42,0.04)]',
         className
       )}
     >
@@ -106,17 +106,17 @@ export function KPIStatCard({
 }) {
   const toneClasses =
     tone === 'accent'
-      ? 'bg-[linear-gradient(180deg,#f8fbff_0%,#f2f8ff_100%)]'
+      ? 'border-emerald-200 bg-emerald-50/70'
       : tone === 'danger'
-        ? 'bg-[linear-gradient(180deg,#fff8f7_0%,#fff2f0_100%)]'
+        ? 'border-rose-200 bg-rose-50/70'
         : tone === 'warning'
-          ? 'bg-[linear-gradient(180deg,#fffaf3_0%,#fff6e7_100%)]'
-          : 'bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)]'
+          ? 'border-amber-200 bg-amber-50/75'
+          : 'border-slate-200 bg-slate-50/70'
 
   return (
     <div
       className={cn(
-        'rounded-[20px] border border-[rgba(15,23,42,0.08)] px-5 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]',
+        'rounded-[20px] border px-5 py-5 shadow-[0_6px_18px_rgba(15,23,42,0.03)]',
         toneClasses,
         className
       )}
@@ -148,7 +148,7 @@ export function ToolbarPill({
         'inline-flex min-h-9 items-center rounded-full border px-3.5 py-2 text-sm font-medium transition',
         active
           ? 'border-slate-900 bg-slate-900 text-white'
-          : 'border-slate-200 bg-white text-slate-600',
+          : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900',
         className
       )}
     >
@@ -167,7 +167,7 @@ export function FilterToolbar({
   return (
     <div
       className={cn(
-        'flex flex-col gap-4 rounded-[20px] border border-[rgba(15,23,42,0.08)] bg-[#f8fafc] px-4 py-4',
+        'flex flex-col gap-4 rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-4',
         'lg:flex-row lg:items-center lg:justify-between',
         className
       )}
@@ -191,7 +191,7 @@ export function DetailPanel({
   return (
     <aside
       className={cn(
-        'rounded-[22px] border border-[rgba(15,23,42,0.08)] bg-[#fbfcfe] px-5 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]',
+        'rounded-[22px] border border-slate-200 bg-white px-5 py-5 shadow-[0_8px_24px_rgba(15,23,42,0.03)]',
         className
       )}
     >
@@ -216,7 +216,7 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        'rounded-[20px] border border-dashed border-slate-300 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] px-5 py-6',
+        'rounded-[20px] border border-dashed border-slate-300 bg-slate-50/70 px-5 py-6',
         className
       )}
     >
@@ -235,7 +235,7 @@ export function DataTable({
   className?: string
 }) {
   return (
-    <div className={cn('overflow-hidden rounded-[24px] border border-[rgba(15,23,42,0.08)] bg-white', className)}>
+    <div className={cn('overflow-hidden rounded-[24px] border border-slate-200/80 bg-white', className)}>
       <div className="overflow-x-auto">{children}</div>
     </div>
   )
@@ -304,7 +304,7 @@ export function ProgressBar({
       {label ? <div className="flex items-center justify-between gap-3 text-sm text-slate-600">{label}</div> : null}
       <div className="h-2.5 overflow-hidden rounded-full bg-slate-100">
         <div
-          className="h-full rounded-full bg-[linear-gradient(90deg,#0f172a_0%,#1d4ed8_100%)]"
+          className="h-full rounded-full bg-slate-900"
           style={{ width: `${clamped}%` }}
         />
       </div>
@@ -320,7 +320,7 @@ export function SkeletonPanel({
   return (
     <div
       className={cn(
-        'animate-pulse rounded-[24px] border border-[rgba(15,23,42,0.08)] bg-white px-6 py-6',
+        'animate-pulse rounded-[24px] border border-slate-200/80 bg-white px-6 py-6 shadow-[0_8px_24px_rgba(15,23,42,0.03)]',
         className
       )}
     >

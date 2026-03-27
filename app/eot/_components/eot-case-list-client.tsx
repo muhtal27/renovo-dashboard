@@ -41,6 +41,21 @@ const CASE_STATUSES: EotCaseStatus[] = [
   'resolved',
 ]
 
+const CASE_LIST_CACHE_TTL_MS = 30_000
+
+let cachedCaseList: EotCaseListItem[] | null = null
+let cachedCaseListAt = 0
+let inFlightCaseListRequest: Promise<EotCaseListItem[]> | null = null
+
+function primeCaseListCache(cases: EotCaseListItem[] | null | undefined) {
+  if (!cases?.length) {
+    return
+  }
+
+  cachedCaseList = cases
+  cachedCaseListAt = Date.now()
+}
+
 type CreateCaseFormState = {
   propertyId: string
   summary: string
@@ -69,13 +84,48 @@ const DEFAULT_FORM_STATE: CreateCaseFormState = {
   notes: '',
 }
 
-export function EotCaseListClient() {
+async function loadCaseList(forceRefresh = false) {
+  const now = Date.now()
+
+  if (!forceRefresh && cachedCaseList && now - cachedCaseListAt < CASE_LIST_CACHE_TTL_MS) {
+    return cachedCaseList
+  }
+
+  if (!forceRefresh && inFlightCaseListRequest) {
+    return inFlightCaseListRequest
+  }
+
+  const request = listEotCases()
+    .then((nextCases) => {
+      const sortedCases = [...nextCases].sort(byLastActivityDesc)
+      cachedCaseList = sortedCases
+      cachedCaseListAt = Date.now()
+      return sortedCases
+    })
+    .finally(() => {
+      if (inFlightCaseListRequest === request) {
+        inFlightCaseListRequest = null
+      }
+    })
+
+  inFlightCaseListRequest = request
+
+  return request
+}
+
+export function EotCaseListClient({
+  initialCases,
+}: {
+  initialCases?: EotCaseListItem[] | null
+}) {
+  primeCaseListCache(initialCases)
+
   const router = useRouter()
   const searchParams = useSearchParams()
   const search = searchParams.get('search')?.trim().toLowerCase() ?? ''
 
-  const [cases, setCases] = useState<EotCaseListItem[]>([])
-  const [loading, setLoading] = useState(true)
+  const [cases, setCases] = useState<EotCaseListItem[]>(() => initialCases ?? cachedCaseList ?? [])
+  const [loading, setLoading] = useState(initialCases == null && cachedCaseList === null)
   const [error, setError] = useState<string | null>(null)
   const [refreshing, setRefreshing] = useState(false)
   const [createOpen, setCreateOpen] = useState(false)
@@ -92,14 +142,23 @@ export function EotCaseListClient() {
     let cancelled = false
 
     async function loadCases() {
-      setLoading(true)
-      setError(null)
+      if (initialCases) {
+        return
+      }
+
+      const shouldRefreshInBackground = Boolean(cachedCaseList)
+
+      if (!shouldRefreshInBackground) {
+        setLoading(true)
+        setError(null)
+      }
 
       try {
-        const nextCases = await listEotCases()
+        const nextCases = await loadCaseList(shouldRefreshInBackground)
 
         if (!cancelled) {
-          setCases([...nextCases].sort(byLastActivityDesc))
+          setCases(nextCases)
+          setError(null)
         }
       } catch (loadError) {
         if (!cancelled) {
@@ -119,7 +178,7 @@ export function EotCaseListClient() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [initialCases])
 
   useEffect(() => {
     setSelectedIds((current) => current.filter((id) => cases.some((caseItem) => caseItem.id === id)))
@@ -207,8 +266,8 @@ export function EotCaseListClient() {
     setRefreshing(true)
 
     try {
-      const nextCases = await listEotCases()
-      setCases([...nextCases].sort(byLastActivityDesc))
+      const nextCases = await loadCaseList(true)
+      setCases(nextCases)
       setError(null)
     } catch (refreshError) {
       setError(refreshError instanceof Error ? refreshError.message : 'Unable to refresh cases.')
@@ -253,6 +312,9 @@ export function EotCaseListClient() {
 
     try {
       const workspace = await createEotCase(payload)
+      cachedCaseList = null
+      cachedCaseListAt = 0
+      inFlightCaseListRequest = null
       setFormState(DEFAULT_FORM_STATE)
       setCreateOpen(false)
       router.push(`/eot/${workspace.case.id}`)
@@ -261,7 +323,7 @@ export function EotCaseListClient() {
       if (createCaseError instanceof EotApiError) {
         setCreateError(createCaseError.message)
       } else {
-        setCreateError('Unable to create the case right now.')
+        setCreateError('Unable to create the checkout right now.')
       }
     } finally {
       setCreatePending(false)
@@ -293,9 +355,9 @@ export function EotCaseListClient() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Cases"
-        title="Operational case pipeline"
-        description="Track active end-of-tenancy cases, prioritise risk, and move operators into the correct workspace with fewer clicks."
+        eyebrow="Checkouts"
+        title="Operational checkout pipeline"
+        description="Track active end-of-tenancy checkouts, prioritise dispute risk, and move operators into the correct workspace with fewer clicks."
         actions={
           <>
             <button
@@ -304,7 +366,7 @@ export function EotCaseListClient() {
               className="inline-flex items-center gap-2 rounded-[14px] border border-slate-900 bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
             >
               <Plus className="h-4 w-4" />
-              {createOpen ? 'Close intake' : 'New case'}
+              {createOpen ? 'Close intake' : 'New checkout'}
             </button>
             <button
               type="button"
@@ -320,26 +382,26 @@ export function EotCaseListClient() {
 
       <section className="grid gap-4 xl:grid-cols-4">
         <KPIStatCard
-          label="Active cases"
+          label="Active checkouts"
           value={stats.total}
-          detail="Live cases in the operational queue."
+          detail="Live checkouts in the operational queue."
         />
         <KPIStatCard
           label="Needs attention"
           value={stats.requiringAttention}
-          detail="High-priority, disputed, or stale cases."
+          detail="High-priority, disputed, or stale checkouts."
           tone="danger"
         />
         <KPIStatCard
-          label="Ready for claim"
+          label="Ready for submission"
           value={stats.readyForClaim}
-          detail="Cases at final review or output stage."
+          detail="Checkouts at final review or submission stage."
           tone="accent"
         />
         <KPIStatCard
-          label="High priority"
+          label="High risk"
           value={stats.highPriority}
-          detail="Escalated cases with greater operational risk."
+          detail="Checkouts with elevated dispute risk."
           tone="warning"
         />
       </section>
@@ -348,8 +410,8 @@ export function EotCaseListClient() {
         <SectionCard className="px-6 py-6">
           <PageHeader
             eyebrow="Intake"
-            title="Create a new case"
-            description="Create the live case record and tenancy context. New cases open directly into the workspace."
+            title="Create a new checkout"
+            description="Create the live checkout record and tenancy context. New checkouts open directly into the workspace."
             className="border-none bg-transparent px-0 py-0 shadow-none"
           />
 
@@ -465,14 +527,14 @@ export function EotCaseListClient() {
             </div>
 
             <label className="text-sm">
-              <span className="font-medium text-slate-700">Case summary</span>
+              <span className="font-medium text-slate-700">Checkout summary</span>
               <textarea
                 value={formState.summary}
                 onChange={(event) =>
                   setFormState((current) => ({ ...current, summary: event.target.value }))
                 }
                 className="mt-2 min-h-28 w-full rounded-[16px] border border-slate-200 bg-[#f8fafc] px-4 py-3 text-slate-900"
-                placeholder="What is the tenancy-end context for this case?"
+                placeholder="What is the tenancy-end context for this checkout?"
               />
             </label>
 
@@ -500,10 +562,10 @@ export function EotCaseListClient() {
                 disabled={createPending}
                 className="inline-flex items-center justify-center rounded-[14px] border border-slate-900 bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:opacity-60"
               >
-                {createPending ? 'Creating case...' : 'Create case'}
+                {createPending ? 'Creating checkout...' : 'Create checkout'}
               </button>
               <p className="text-sm text-slate-500">
-                New cases are created against the live tenant and immediately open the workspace.
+                New checkouts are created against the live tenant and immediately open the workspace.
               </p>
             </div>
           </form>
@@ -515,9 +577,9 @@ export function EotCaseListClient() {
           <FilterToolbar>
             <div className="flex flex-wrap items-center gap-2">
               {[
-                { value: 'all' as const, label: 'All cases' },
+                { value: 'all' as const, label: 'All checkouts' },
                 { value: 'attention' as const, label: 'Needs attention' },
-                { value: 'ready' as const, label: 'Ready for claim' },
+                { value: 'ready' as const, label: 'Ready for submission' },
                 { value: 'disputed' as const, label: 'Disputed' },
                 { value: 'recent' as const, label: 'Recently active' },
               ].map((view) => (
@@ -560,7 +622,7 @@ export function EotCaseListClient() {
           {selectedIds.length ? (
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-[18px] border border-slate-200 bg-[#f8fafc] px-4 py-3">
               <p className="text-sm text-slate-700">
-                {selectedIds.length} case{selectedIds.length === 1 ? '' : 's'} selected
+                {selectedIds.length} checkout{selectedIds.length === 1 ? '' : 's'} selected
               </p>
               <div className="flex flex-wrap items-center gap-2">
                 <button
@@ -596,13 +658,13 @@ export function EotCaseListClient() {
               <SkeletonPanel />
             </div>
           ) : error ? (
-            <EmptyState title="Unable to load cases" body={error} />
+            <EmptyState title="Unable to load checkouts" body={error} />
           ) : visibleCases.length === 0 ? (
             <EmptyState
-              title={cases.length === 0 ? 'No live cases yet' : 'No cases match this view'}
+              title={cases.length === 0 ? 'No live checkouts yet' : 'No checkouts match this view'}
               body={
                 cases.length === 0
-                  ? 'Create the first case to start the operational workflow.'
+                  ? 'Create the first checkout to start the operational workflow.'
                   : 'Adjust the saved view or filters to widen the queue.'
               }
             />
@@ -616,10 +678,10 @@ export function EotCaseListClient() {
                         type="checkbox"
                         checked={visibleCases.length > 0 && selectedIds.length === visibleCases.length}
                         onChange={toggleSelectAll}
-                        aria-label="Select all visible cases"
+                        aria-label="Select all visible checkouts"
                       />
                     </th>
-                    <th className="px-4 py-3">Case</th>
+                    <th className="px-4 py-3">Checkout</th>
                     <th className="px-4 py-3">Workflow</th>
                     <th className="px-4 py-3">Attention</th>
                     <th className="px-4 py-3">Coverage</th>
@@ -642,12 +704,12 @@ export function EotCaseListClient() {
                         className={selected ? 'bg-slate-50/90' : 'hover:bg-slate-50/70'}
                       >
                         <td className="px-4 py-4 align-top">
-                          <input
-                            type="checkbox"
-                            checked={selected}
-                            onChange={() => toggleSelection(caseItem.id)}
-                            aria-label={`Select case ${caseItem.id}`}
-                          />
+                            <input
+                              type="checkbox"
+                              checked={selected}
+                              onChange={() => toggleSelection(caseItem.id)}
+                              aria-label={`Select checkout ${caseItem.id}`}
+                            />
                         </td>
                         <td className="px-4 py-4 align-top">
                           <div className="space-y-2">
@@ -696,7 +758,7 @@ export function EotCaseListClient() {
                             <StatusBadge label={attention.label} tone={attention.tone} />
                             <p className="text-sm leading-6 text-slate-600">
                               {caseItem.status === 'ready_for_claim'
-                                ? 'Ready for final operator review.'
+                                ? 'Ready for final review and submission.'
                                 : caseItem.status === 'disputed'
                                   ? 'Requires dispute handling and audit trace.'
                                   : 'Normal workflow progression.'}
@@ -728,7 +790,7 @@ export function EotCaseListClient() {
                             <p className="text-sm font-medium text-slate-950">
                               {formatDateTime(caseItem.last_activity_at)}
                             </p>
-                            <p className="mt-1 text-sm text-slate-500">Latest case activity</p>
+                            <p className="mt-1 text-sm text-slate-500">Latest checkout activity</p>
                           </div>
                         </td>
                         <td className="px-4 py-4 align-top text-right">

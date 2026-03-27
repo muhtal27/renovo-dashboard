@@ -11,6 +11,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
 from app.models.base import TenantScopedModel
+from app.models.enum_values import enum_values
 
 if TYPE_CHECKING:
     from app.models.issue import Issue
@@ -42,6 +43,7 @@ class Recommendation(TenantScopedModel, Base):
         Enum(
             RecommendationDecision,
             name="recommendation_decision",
+            values_callable=enum_values,
             native_enum=False,
             create_constraint=True,
             validate_strings=True,

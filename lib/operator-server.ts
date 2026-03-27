@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import { redirect } from 'next/navigation'
 import type { User } from '@supabase/supabase-js'
 import {
@@ -9,6 +10,7 @@ import type { MinimalSessionCookie } from '@/lib/supabase-session'
 import {
   getOperatorProfileForUserId,
   refreshOperatorSessionIfNeeded,
+  toSafeOperatorAuthUser,
 } from '@/lib/operator-session-server'
 import {
   hasPermission,
@@ -18,6 +20,7 @@ import {
   type OperatorMembershipStatus,
 } from '@/lib/operator-rbac'
 import type { OperatorProfile } from '@/lib/operator-types'
+import type { CurrentOperator } from '@/lib/operator-types'
 
 export type OperatorTenantContext = {
   user: User
@@ -59,7 +62,7 @@ function buildWorkspaceAccessRedirect(
   return `/workspace-access?${searchParams.toString()}`
 }
 
-async function resolveOperatorContext(): Promise<OperatorContextResult> {
+const resolveOperatorContext = cache(async (): Promise<OperatorContextResult> => {
   const authResult = await refreshOperatorSessionIfNeeded()
 
   if (!authResult.ok) {
@@ -103,7 +106,7 @@ async function resolveOperatorContext(): Promise<OperatorContextResult> {
       profile,
     },
   }
-}
+})
 
 export async function requireOperatorSession(returnTo: string) {
   const result = await refreshOperatorSessionIfNeeded()
@@ -193,4 +196,34 @@ export async function getOperatorMembershipContextForApi(requiredPermission?: Op
   }
 
   return result
+}
+
+export async function getCurrentOperatorForLayout(): Promise<CurrentOperator | null> {
+  const result = await resolveOperatorContext()
+
+  if (!result.ok) {
+    return null
+  }
+
+  return {
+    authUser: toSafeOperatorAuthUser(result.context.user),
+    profile: result.context.profile,
+    membership: {
+      id: result.context.membershipId,
+      user_id: result.context.user.id,
+      tenant_id: result.context.tenantId,
+      role: result.context.role,
+      status: result.context.membershipStatus,
+    },
+    memberships: [
+      {
+        id: result.context.membershipId,
+        user_id: result.context.user.id,
+        tenant_id: result.context.tenantId,
+        role: result.context.role,
+        status: result.context.membershipStatus,
+      },
+    ],
+    requiresTenantSelection: false,
+  }
 }

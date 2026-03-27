@@ -10,6 +10,7 @@ from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
+from app.models.enum_values import enum_values
 from app.models.base import TenantScopedModel
 
 if TYPE_CHECKING:
@@ -62,6 +63,7 @@ class Case(TenantScopedModel, Base):
         Enum(
             CaseStatus,
             name="case_status",
+            values_callable=enum_values,
             native_enum=False,
             create_constraint=True,
             validate_strings=True,
@@ -74,6 +76,7 @@ class Case(TenantScopedModel, Base):
         Enum(
             CasePriority,
             name="case_priority",
+            values_callable=enum_values,
             native_enum=False,
             create_constraint=True,
             validate_strings=True,

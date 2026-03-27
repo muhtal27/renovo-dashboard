@@ -62,6 +62,7 @@ import {
 type WorkspaceClientProps = {
   caseId: string
   defaultActor: string
+  initialWorkspace?: EotCaseWorkspace | null
 }
 
 type EvidenceFormState = {
@@ -118,6 +119,67 @@ const DEFAULT_MESSAGE_FORM = (defaultActor: string): MessageFormState => ({
   attachments: '',
 })
 
+const WORKSPACE_CACHE_TTL_MS = 30_000
+
+const workspaceCache = new Map<string, { workspace: EotCaseWorkspace; cachedAt: number }>()
+const workspaceRequests = new Map<string, Promise<EotCaseWorkspace>>()
+
+function primeWorkspaceCache(caseId: string, workspace: EotCaseWorkspace | null | undefined) {
+  if (!workspace) {
+    return
+  }
+
+  workspaceCache.set(caseId, {
+    workspace,
+    cachedAt: Date.now(),
+  })
+}
+
+function getCachedWorkspace(caseId: string) {
+  const cached = workspaceCache.get(caseId)
+
+  if (!cached) {
+    return null
+  }
+
+  if (Date.now() - cached.cachedAt >= WORKSPACE_CACHE_TTL_MS) {
+    workspaceCache.delete(caseId)
+    return null
+  }
+
+  return cached.workspace
+}
+
+async function loadWorkspaceSnapshot(caseId: string, forceRefresh = false) {
+  const cached = getCachedWorkspace(caseId)
+
+  if (!forceRefresh && cached) {
+    return cached
+  }
+
+  if (!forceRefresh) {
+    const inFlight = workspaceRequests.get(caseId)
+    if (inFlight) {
+      return inFlight
+    }
+  }
+
+  const request = getEotCaseWorkspace(caseId)
+    .then((workspace) => {
+      primeWorkspaceCache(caseId, workspace)
+      return workspace
+    })
+    .finally(() => {
+      if (workspaceRequests.get(caseId) === request) {
+        workspaceRequests.delete(caseId)
+      }
+    })
+
+  workspaceRequests.set(caseId, request)
+
+  return request
+}
+
 function EvidenceIcon({ type }: { type: EotEvidenceType }) {
   if (type === 'image') return <ImageIcon className="h-4 w-4" />
   if (type === 'video') return <Video className="h-4 w-4" />
@@ -139,7 +201,7 @@ function IssueCard({
       onClick={() => onEdit(issue)}
       className={`w-full rounded-[18px] border px-4 py-4 text-left transition ${
         active
-          ? 'border-slate-900 bg-slate-900 text-white shadow-[0_16px_40px_rgba(15,23,42,0.22)]'
+          ? 'border-slate-900 bg-slate-900 text-white shadow-[0_10px_24px_rgba(15,23,42,0.16)]'
           : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
       }`}
     >
@@ -169,16 +231,21 @@ function IssueCard({
 export function EotWorkspaceClient({
   caseId,
   defaultActor,
+  initialWorkspace,
 }: WorkspaceClientProps) {
+  primeWorkspaceCache(caseId, initialWorkspace)
+
   const searchParams = useSearchParams()
   const search = searchParams.get('search')?.trim().toLowerCase() ?? ''
 
-  const [workspace, setWorkspace] = useState<EotCaseWorkspace | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [workspace, setWorkspace] = useState<EotCaseWorkspace | null>(
+    () => initialWorkspace ?? getCachedWorkspace(caseId)
+  )
+  const [loading, setLoading] = useState(initialWorkspace == null && getCachedWorkspace(caseId) == null)
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [refreshError, setRefreshError] = useState<string | null>(null)
-  const hasLoadedWorkspaceRef = useRef(false)
+  const hasLoadedWorkspaceRef = useRef(Boolean(initialWorkspace ?? getCachedWorkspace(caseId)))
 
   const [selectedEvidenceId, setSelectedEvidenceId] = useState<string | null>(null)
   const [evidenceForm, setEvidenceForm] = useState<EvidenceFormState>(
@@ -203,9 +270,14 @@ export function EotWorkspaceClient({
     let cancelled = false
 
     async function loadWorkspace() {
-      const hasExistingWorkspace = hasLoadedWorkspaceRef.current
+      if (initialWorkspace) {
+        return
+      }
 
-      if (hasExistingWorkspace) {
+      const hasExistingWorkspace = hasLoadedWorkspaceRef.current
+      const shouldRefreshInBackground = hasExistingWorkspace
+
+      if (shouldRefreshInBackground) {
         setRefreshing(true)
         setRefreshError(null)
       } else {
@@ -214,7 +286,9 @@ export function EotWorkspaceClient({
       }
 
       try {
-        const nextWorkspace = await getEotCaseWorkspace(caseId)
+        const nextWorkspace = shouldRefreshInBackground
+          ? await loadWorkspaceSnapshot(caseId, true)
+          : await loadWorkspaceSnapshot(caseId, false)
 
         if (!cancelled) {
           setWorkspace(nextWorkspace)
@@ -226,7 +300,7 @@ export function EotWorkspaceClient({
       } catch (loadError) {
         if (!cancelled) {
           const message =
-            loadError instanceof Error ? loadError.message : 'Unable to load the case workspace.'
+            loadError instanceof Error ? loadError.message : 'Unable to load the checkout workspace.'
 
           if (hasExistingWorkspace) {
             setRefreshError(`${message} Showing the last loaded workspace data.`)
@@ -247,7 +321,7 @@ export function EotWorkspaceClient({
     return () => {
       cancelled = true
     }
-  }, [caseId])
+  }, [caseId, initialWorkspace])
 
   const visibleEvidence = useMemo(() => {
     return (
@@ -310,7 +384,7 @@ export function EotWorkspaceClient({
     setRefreshError(null)
 
     try {
-      const nextWorkspace = await getEotCaseWorkspace(caseId)
+      const nextWorkspace = await loadWorkspaceSnapshot(caseId, true)
       setWorkspace(nextWorkspace)
       setSelectedEvidenceId((current) => current ?? nextWorkspace.evidence[0]?.id ?? null)
       setError(null)
@@ -320,7 +394,7 @@ export function EotWorkspaceClient({
       const message =
         refreshFailure instanceof Error
           ? refreshFailure.message
-          : 'Unable to refresh the case workspace.'
+          : 'Unable to refresh the checkout workspace.'
       setRefreshError(`${message} Showing the last loaded workspace data.`)
       throw refreshFailure
     } finally {
@@ -487,7 +561,7 @@ export function EotWorkspaceClient({
       await refreshWorkspaceNow()
     } catch (submitError) {
       setMessageError(
-        submitError instanceof Error ? submitError.message : 'Unable to send the case message.'
+        submitError instanceof Error ? submitError.message : 'Unable to send the checkout message.'
       )
     } finally {
       setMessagePending(false)
@@ -515,7 +589,7 @@ export function EotWorkspaceClient({
       <SectionCard className="px-6 py-10">
         <EmptyState
           title="Unable to load workspace"
-          body={error ?? 'The case workspace could not be loaded.'}
+          body={error ?? 'The checkout workspace could not be loaded.'}
         />
       </SectionCard>
     )
@@ -535,9 +609,9 @@ export function EotWorkspaceClient({
       ) : null}
 
       <PageHeader
-        eyebrow="Case workspace"
+        eyebrow="Checkout workspace"
         title={workspace.property.name}
-        description={workspace.case.summary?.trim() || 'No case summary has been recorded yet.'}
+        description={workspace.case.summary?.trim() || 'No checkout summary has been recorded yet.'}
         actions={
           <>
             <Link
@@ -545,7 +619,7 @@ export function EotWorkspaceClient({
               className="inline-flex items-center gap-2 rounded-[14px] border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:text-slate-950"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back to cases
+              Back to checkouts
             </Link>
             <button
               type="button"
@@ -634,12 +708,12 @@ export function EotWorkspaceClient({
         </SectionCard>
 
         <DetailPanel
-          title="Case metadata"
+          title="Checkout metadata"
           description="Property, tenancy, and audit context."
         >
           <KeyValueList
             items={[
-              { label: 'Case ID', value: workspace.case.id.slice(0, 8) },
+              { label: 'Checkout ID', value: workspace.case.id.slice(0, 8) },
               { label: 'Created', value: formatDate(workspace.case.created_at) },
               { label: 'Tenancy dates', value: `${formatDate(workspace.tenancy.start_date)} to ${formatDate(workspace.tenancy.end_date)}` },
               { label: 'Address', value: formatAddress([
@@ -665,7 +739,7 @@ export function EotWorkspaceClient({
             <KPIStatCard label="Evidence" value={workspace.evidence.length} detail="Registered evidence items." />
             <KPIStatCard label="Open issues" value={workspace.issues.filter((issue) => issue.status !== 'resolved').length} detail="Issues still under operator review." tone="warning" />
             <KPIStatCard label="Resolved issues" value={workspace.issues.filter((issue) => issue.status === 'resolved').length} detail="Issues already closed out." tone="accent" />
-            <KPIStatCard label="Case notes" value={workspace.messages.length} detail="Logged communication and internal updates." />
+            <KPIStatCard label="Checkout notes" value={workspace.messages.length} detail="Logged communication and internal updates." />
           </section>
 
           <WorkspaceSection
@@ -693,7 +767,7 @@ export function EotWorkspaceClient({
                       onClick={() => setSelectedEvidenceId(item.id)}
                       className={`w-full rounded-[18px] border px-4 py-4 text-left transition ${
                         selectedEvidence?.id === item.id
-                          ? 'border-slate-900 bg-slate-900 text-white shadow-[0_16px_40px_rgba(15,23,42,0.22)]'
+                          ? 'border-slate-900 bg-slate-900 text-white shadow-[0_10px_24px_rgba(15,23,42,0.16)]'
                           : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
                       }`}
                     >
@@ -1111,16 +1185,16 @@ export function EotWorkspaceClient({
           </WorkspaceSection>
 
           <WorkspaceSection
-            title="Claim output review"
-            description="Review the case output in a document-style layout with traceability back to evidence and issue decisions."
+            title="Submission review"
+            description="Review the checkout submission in a document-style layout with traceability back to evidence and issue decisions."
           >
             {workspace.claim ? (
               <div className="space-y-5">
-                <div className="rounded-[22px] border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] px-6 py-6">
+                <div className="rounded-[22px] border border-slate-200 bg-white px-6 py-6 shadow-[0_8px_24px_rgba(15,23,42,0.03)]">
                   <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                     <div>
                       <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                        Claim output
+                        Submission
                       </p>
                       <h3 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-slate-950">
                         {formatCurrency(workspace.claim.total_amount)}
@@ -1222,12 +1296,12 @@ export function EotWorkspaceClient({
 
           <DetailPanel
             title="Supporting documents"
-            description="Linked case documents and document records."
+            description="Linked checkout documents and document records."
           >
             {workspace.documents.length === 0 ? (
               <EmptyState
                 title="No supporting documents"
-                body="This case does not yet have linked document records."
+                body="This checkout does not yet have linked document records."
               />
             ) : (
               workspace.documents.map((document) => (
@@ -1253,14 +1327,14 @@ export function EotWorkspaceClient({
           </DetailPanel>
 
           <DetailPanel
-            title="Case notes and communication"
-            description="Internal operator updates and outbound case communication log."
+            title="Checkout notes and communication"
+            description="Internal operator updates and outbound checkout communication log."
           >
             <div className="space-y-3">
               {visibleMessages.length === 0 ? (
                 <EmptyState
                   title="No messages yet"
-                  body="Case notes and outbound communication will appear here."
+                  body="Checkout notes and outbound communication will appear here."
                 />
               ) : (
                 visibleMessages.map((message) => (
@@ -1280,7 +1354,7 @@ export function EotWorkspaceClient({
             <form className="grid gap-4" onSubmit={handleMessageSubmit}>
               <div className="flex items-center gap-2">
                 <MessageSquareText className="h-4 w-4 text-slate-500" />
-                <h3 className="text-sm font-semibold text-slate-950">Add case note</h3>
+                <h3 className="text-sm font-semibold text-slate-950">Add checkout note</h3>
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">

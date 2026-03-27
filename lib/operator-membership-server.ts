@@ -3,17 +3,17 @@ import {
   normalizeOperatorMembershipStatus,
   normalizeOperatorRole,
 } from '@/lib/operator-rbac'
+import {
+  getOptionalString,
+  getOptionalTimestamp,
+  hasNonNullValue,
+  isMissingColumnError,
+} from '@/lib/operator-schema-compat'
 import { getSupabaseServiceRoleClient } from '@/lib/supabase-admin'
 
 export const ACTIVE_TENANT_SELECTION_COOKIE = 'renovo-active-tenant-membership'
 
-type RawOperatorMembership = {
-  id: string
-  tenant_id: string
-  user_id: string
-  role: string | null
-  status: string | null
-}
+type RawOperatorMembership = Record<string, unknown>
 
 type CookieTarget = {
   set: (name: string, value: string, options: Record<string, unknown>) => unknown
@@ -57,20 +57,56 @@ function getActiveTenantSelectionCookieOptions(secure = false) {
 function normalizeMembership(
   rawMembership: RawOperatorMembership
 ): ActiveTenantMembership | null {
-  const role = normalizeOperatorRole(rawMembership.role)
-  const status = normalizeOperatorMembershipStatus(rawMembership.status)
-
-  if (!role || status !== 'active') {
+  if (hasNonNullValue(rawMembership, 'deleted_at')) {
     return null
   }
 
+  const status = normalizeOperatorMembershipStatus(
+    getOptionalString(rawMembership, 'status')
+  )
+
+  if (status !== 'active') {
+    return null
+  }
+
+  const role = normalizeOperatorRole(getOptionalString(rawMembership, 'role'))
+
+  if (!role) {
+    throw new Error('Invalid active tenant membership role.')
+  }
+
+  const id = getOptionalString(rawMembership, 'id')
+  const tenantId = getOptionalString(rawMembership, 'tenant_id')
+  const userId = getOptionalString(rawMembership, 'user_id')
+
+  if (!id || !tenantId || !userId) {
+    throw new Error('Invalid active tenant membership row.')
+  }
+
   return {
-    id: rawMembership.id,
-    tenant_id: rawMembership.tenant_id,
-    user_id: rawMembership.user_id,
+    id,
+    tenant_id: tenantId,
+    user_id: userId,
     role,
     status,
   }
+}
+
+function compareMembershipOrder(
+  left: RawOperatorMembership,
+  right: RawOperatorMembership
+) {
+  const leftTimestamp = getOptionalTimestamp(left, 'created_at', 'updated_at') ?? 0
+  const rightTimestamp = getOptionalTimestamp(right, 'created_at', 'updated_at') ?? 0
+
+  if (leftTimestamp !== rightTimestamp) {
+    return leftTimestamp - rightTimestamp
+  }
+
+  const leftId = getOptionalString(left, 'id') ?? ''
+  const rightId = getOptionalString(right, 'id') ?? ''
+
+  return leftId.localeCompare(rightId)
 }
 
 export function getActiveTenantFailureDetail(
@@ -91,25 +127,31 @@ export async function listActiveTenantMembershipsForUser(
   userId: string
 ): Promise<ActiveTenantMembership[]> {
   const supabase = getSupabaseServiceRoleClient()
-  const { data, error } = await supabase
+
+  let result = await supabase
     .from('tenant_memberships')
-    .select('id, tenant_id, user_id, role, status')
+    .select('*')
     .eq('user_id', userId)
-    .eq('status', 'active')
-    .is('deleted_at', null)
     .order('created_at', { ascending: true })
 
-  if (error) {
-    throw error
+  if (result.error && isMissingColumnError(result.error, 'created_at')) {
+    result = await supabase
+      .from('tenant_memberships')
+      .select('*')
+      .eq('user_id', userId)
   }
 
-  const memberships = (data ?? []).map((membership) =>
-    normalizeMembership(membership as RawOperatorMembership)
-  )
-
-  if (memberships.some((membership) => membership === null)) {
-    throw new Error('Invalid active tenant membership row.')
+  if (result.error) {
+    throw result.error
   }
+
+  const memberships = [...(result.data ?? [])]
+    .filter(
+      (membership): membership is RawOperatorMembership =>
+        typeof membership === 'object' && membership !== null
+    )
+    .sort(compareMembershipOrder)
+    .map((membership) => normalizeMembership(membership))
 
   const normalizedMemberships = memberships.filter(
     (membership): membership is ActiveTenantMembership => membership !== null

@@ -35,6 +35,7 @@ import {
   formatEnumLabel,
 } from '@/app/eot/_components/eot-ui'
 import { useEotPortfolioData } from '@/app/eot/_components/use-eot-portfolio-data'
+import type { EotPortfolioSnapshot } from '@/lib/eot-server-data'
 
 type PortfolioViewMode =
   | 'overview'
@@ -82,12 +83,14 @@ function DistributionBar({
 
 export function EotPortfolioClient({
   mode,
+  initialSnapshot,
 }: {
   mode: PortfolioViewMode
+  initialSnapshot?: EotPortfolioSnapshot | null
 }) {
   const searchParams = useSearchParams()
   const search = searchParams.get('search')?.trim().toLowerCase() ?? ''
-  const { cases, workspaces, loading, error, hasData } = useEotPortfolioData()
+  const { cases, workspaces, loading, error, hasData } = useEotPortfolioData(initialSnapshot)
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null)
   const [recommendationView, setRecommendationView] = useState<'all' | 'charge' | 'partial' | 'no_charge'>('all')
 
@@ -201,14 +204,14 @@ export function EotPortfolioClient({
     return (
       <SectionCard className="px-6 py-10">
         <EmptyState
-          title="No live cases yet"
-          body="Create the first end-of-tenancy case to populate the operations portfolio."
+          title="No live checkouts yet"
+          body="Create the first end-of-tenancy checkout to populate the operations portfolio."
           action={
             <Link
               href="/eot"
               className="inline-flex items-center rounded-[14px] border border-slate-900 bg-slate-900 px-4 py-2.5 text-sm font-medium text-white"
             >
-              Open cases
+              Open checkouts
             </Link>
           }
         />
@@ -222,14 +225,14 @@ export function EotPortfolioClient({
         <PageHeader
           eyebrow="Overview"
           title="Portfolio command view"
-          description="A live executive summary of case load, operating risk, workflow throughput, and the cases that need action next."
+          description="A live executive summary of checkout volume, dispute risk, workflow throughput, and the checkouts that need action next."
         />
 
         <section className="grid gap-4 xl:grid-cols-5">
-          <KPIStatCard label="Active cases" value={stats.activeCases} detail={`${stats.totalCases} total live cases`} />
-          <KPIStatCard label="Ready for claim" value={stats.readyForClaim} detail="Queue for final output review." tone="accent" />
-          <KPIStatCard label="Disputed" value={stats.disputed} detail="Cases currently in dispute handling." tone="danger" />
-          <KPIStatCard label="Evidence logged" value={stats.totalEvidence} detail={`Avg ${stats.averageEvidencePerCase.toFixed(1)} per case`} />
+          <KPIStatCard label="Active checkouts" value={stats.activeCases} detail={`${stats.totalCases} total live checkouts`} />
+          <KPIStatCard label="Ready for submission" value={stats.readyForClaim} detail="Queue for final submission review." tone="accent" />
+          <KPIStatCard label="Disputed" value={stats.disputed} detail="Checkouts currently in dispute handling." tone="danger" />
+          <KPIStatCard label="Evidence logged" value={stats.totalEvidence} detail={`Avg ${stats.averageEvidencePerCase.toFixed(1)} per checkout`} />
           <KPIStatCard label="Resolved issues" value={stats.resolvedIssues} detail={`${stats.totalIssues} issues assessed overall`} tone="warning" />
         </section>
 
@@ -237,7 +240,7 @@ export function EotPortfolioClient({
           <SectionCard className="px-6 py-6">
             <SectionHeading
               eyebrow="Attention queue"
-              title="Cases requiring operator focus"
+              title="Checkouts requiring operator focus"
               description="High-priority, disputed, or stalled files surfaced from the live workspace data."
             />
             <div className="mt-5 space-y-3">
@@ -286,7 +289,7 @@ export function EotPortfolioClient({
                     <p className="text-sm font-semibold text-slate-950">{workspace.property.name}</p>
                     <p className="mt-1 text-sm leading-6 text-slate-600">
                       {workspace.case.status === 'ready_for_claim'
-                        ? 'Ready for output review and operator sign-off.'
+                        ? 'Ready for submission review and operator sign-off.'
                         : workspace.case.status === 'disputed'
                           ? 'Dispute handling needs a clear evidence-backed narrative.'
                           : 'Review evidence quality and move the case forward.'}
@@ -303,7 +306,7 @@ export function EotPortfolioClient({
             <SectionHeading
               eyebrow="Pipeline"
               title="Status breakdown"
-              description="Distribution of active cases across the end-of-tenancy workflow."
+              description="Distribution of active checkouts across the end-of-tenancy workflow."
             />
             <div className="mt-5">
               <DistributionBar
@@ -327,12 +330,12 @@ export function EotPortfolioClient({
             <SectionHeading
               eyebrow="Productivity"
               title="Operator throughput snapshot"
-              description="Evidence intake, issue assessment, and recommendation mix from the current portfolio."
+              description="Evidence intake, issue assessment, and recommendation mix across the current operator workload."
             />
             <div className="mt-5 grid gap-4 md:grid-cols-2">
               <MetaItem label="Issue resolution rate" value={`${stats.totalIssues ? Math.round((stats.resolvedIssues / stats.totalIssues) * 100) : 0}%`} />
               <MetaItem label="Claim total" value={formatCurrency(stats.claimAmount)} />
-              <MetaItem label="Evidence / case" value={stats.averageEvidencePerCase.toFixed(1)} />
+              <MetaItem label="Evidence / checkout" value={stats.averageEvidencePerCase.toFixed(1)} />
               <MetaItem label="Recommendations" value={recommendations.length} />
             </div>
           </SectionCard>
@@ -343,7 +346,7 @@ export function EotPortfolioClient({
             <SectionHeading
               eyebrow="Recent activity"
               title="Latest portfolio movement"
-              description="Live activity stream across case workspaces."
+              description="Live activity stream across checkout workspaces."
             />
             <div className="mt-5">
               <ActivityTimeline
@@ -360,7 +363,7 @@ export function EotPortfolioClient({
 
           <DetailPanel
             title="Evidence mix"
-            description="Current media and document composition across active cases."
+            description="Current media and document composition across active checkouts."
           >
             <DistributionBar
               items={Object.entries(evidenceTypeBreakdown).map(([label, value]) => ({
@@ -385,10 +388,10 @@ export function EotPortfolioClient({
         />
 
         <section className="grid gap-4 xl:grid-cols-4">
-          <KPIStatCard label="Active tenancies" value={tenancyItems.length} detail="Tenancy records currently attached to live cases." />
-          <KPIStatCard label="Deposits captured" value={workspaces.filter((workspace) => workspace.tenancy.deposit_amount).length} detail="Cases with deposit values already recorded." tone="accent" />
+          <KPIStatCard label="Active tenancies" value={tenancyItems.length} detail="Tenancy records currently attached to live checkouts." />
+          <KPIStatCard label="Deposits captured" value={workspaces.filter((workspace) => workspace.tenancy.deposit_amount).length} detail="Checkouts with deposit values already recorded." tone="accent" />
           <KPIStatCard label="References present" value={workspaces.filter((workspace) => workspace.property.reference).length} detail="Properties with a usable internal reference." />
-          <KPIStatCard label="Ready for claim" value={workspaces.filter((workspace) => workspace.case.status === 'ready_for_claim').length} detail="Tenancies ready for final output work." tone="warning" />
+          <KPIStatCard label="Ready for submission" value={workspaces.filter((workspace) => workspace.case.status === 'ready_for_claim').length} detail="Tenancies ready for final submission work." tone="warning" />
         </section>
 
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_360px]">
@@ -470,7 +473,7 @@ export function EotPortfolioClient({
                 href={`/eot/${selectedTenancy.case.id}`}
                 className="inline-flex items-center gap-2 rounded-[14px] border border-slate-900 bg-slate-900 px-4 py-2.5 text-sm font-medium text-white"
               >
-                Open case workspace
+                Open checkout workspace
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </DetailPanel>
@@ -486,11 +489,11 @@ export function EotPortfolioClient({
         <PageHeader
           eyebrow="Disputes"
           title="Dispute review queue"
-          description="Review disputed cases, contested issues, linked evidence, and recommendation rationale before final resolution."
+          description="Review disputed checkouts, contested issues, linked evidence, and recommendation rationale before final resolution."
         />
 
         <section className="grid gap-4 xl:grid-cols-4">
-          <KPIStatCard label="Disputed cases" value={workspaces.filter((workspace) => workspace.case.status === 'disputed').length} detail="Cases currently marked disputed." tone="danger" />
+          <KPIStatCard label="Disputed checkouts" value={workspaces.filter((workspace) => workspace.case.status === 'disputed').length} detail="Checkouts currently marked disputed." tone="danger" />
           <KPIStatCard label="Disputed issues" value={disputeItems.length} detail="Issue records needing dispute handling." tone="warning" />
           <KPIStatCard label="Charge recommendations" value={disputeItems.filter((issue) => issue.recommendation?.decision === 'charge').length} detail="Disputes with a full charge position." />
           <KPIStatCard label="Evidence links" value={disputeItems.reduce((sum, issue) => sum + issue.linked_evidence.length, 0)} detail="Evidence items attached to disputed issues." />
@@ -510,7 +513,7 @@ export function EotPortfolioClient({
                   onClick={() => setSelectedItemId(issue.id)}
                   className={`rounded-[18px] border px-4 py-4 text-left transition ${
                     selectedDispute?.id === issue.id
-                      ? 'border-slate-900 bg-slate-900 text-white shadow-[0_16px_40px_rgba(15,23,42,0.22)]'
+                      ? 'border-slate-900 bg-slate-900 text-white shadow-[0_10px_24px_rgba(15,23,42,0.16)]'
                       : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
                   }`}
                 >
@@ -550,7 +553,7 @@ export function EotPortfolioClient({
               <MetaItem label="Property" value={selectedDispute.propertyName} />
               <MetaItem label="Tenant" value={selectedDispute.tenantName} />
               <MetaItem label="Linked evidence" value={selectedDispute.linked_evidence.length} />
-              <MetaItem label="Case status" value={formatEnumLabel(selectedDispute.caseStatus)} />
+              <MetaItem label="Checkout status" value={formatEnumLabel(selectedDispute.caseStatus)} />
               {selectedDispute.recommendation?.estimated_cost ? (
                 <MetaItem
                   label="Estimated cost"
@@ -575,7 +578,7 @@ export function EotPortfolioClient({
                 href={`/eot/${selectedDispute.caseId}`}
                 className="inline-flex items-center gap-2 rounded-[14px] border border-slate-900 bg-slate-900 px-4 py-2.5 text-sm font-medium text-white"
               >
-                Open case workspace
+                Open checkout workspace
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </DetailPanel>
@@ -591,7 +594,7 @@ export function EotPortfolioClient({
         <PageHeader
           eyebrow="Recommendations"
           title="Charge recommendation review"
-          description="Review recommendation decisions, cost estimates, and supporting rationale before claim generation."
+          description="Review recommendation decisions, cost estimates, and supporting rationale before submission generation."
         />
 
         <SectionCard className="px-6 py-6">
@@ -635,7 +638,7 @@ export function EotPortfolioClient({
                     href={`/eot/${item.caseId}`}
                     className="inline-flex items-center gap-2 text-sm font-medium text-slate-700 transition hover:text-slate-950"
                   >
-                    Open case
+                    Open checkout
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                 </div>
@@ -651,22 +654,22 @@ export function EotPortfolioClient({
     return (
       <div className="space-y-6">
         <PageHeader
-          eyebrow="Claims / Outputs"
-          title="Claim output desk"
-          description="Monitor generated claim packs, cases waiting for output, and the traceability needed for operator sign-off."
+          eyebrow="Submissions"
+          title="Submission desk"
+          description="Monitor generated claim packs, checkouts waiting for submission, and the traceability needed for operator sign-off."
         />
 
         <section className="grid gap-4 xl:grid-cols-4">
-          <KPIStatCard label="Generated claims" value={workspaces.filter((workspace) => workspace.claim).length} detail="Output packs already created." tone="accent" />
-          <KPIStatCard label="Awaiting output" value={workspaces.filter((workspace) => workspace.case.status === 'ready_for_claim' && !workspace.claim).length} detail="Cases ready but not yet generated." tone="warning" />
+          <KPIStatCard label="Generated claims" value={workspaces.filter((workspace) => workspace.claim).length} detail="Submission packs already created." tone="accent" />
+          <KPIStatCard label="Awaiting submission" value={workspaces.filter((workspace) => workspace.case.status === 'ready_for_claim' && !workspace.claim).length} detail="Checkouts ready but not yet generated." tone="warning" />
           <KPIStatCard label="Claim value" value={formatCurrency(stats.claimAmount)} detail="Current generated claim total." />
           <KPIStatCard label="Recommendations" value={recommendations.length} detail="Supporting recommendation set." />
         </section>
 
         <SectionCard className="px-6 py-6">
           <SectionHeading
-            title="Claim readiness by case"
-            description="Generated claims, pending outputs, and the cases still being prepared."
+            title="Submission readiness by checkout"
+            description="Generated claims, pending submissions, and the checkouts still being prepared."
           />
           <div className="mt-5 grid gap-4 xl:grid-cols-2">
             {workspaces.map((workspace) => {
@@ -692,7 +695,7 @@ export function EotPortfolioClient({
                       href={`/eot/${workspace.case.id}`}
                       className="inline-flex items-center gap-2 text-sm font-medium text-slate-700 transition hover:text-slate-950"
                     >
-                      Open case
+                      Open checkout
                       <ArrowRight className="h-4 w-4" />
                     </Link>
                   </div>
@@ -710,18 +713,18 @@ export function EotPortfolioClient({
       <PageHeader
         eyebrow="Reports"
         title="Operations analytics"
-        description="Portfolio-level reporting on workflow mix, issue severity, evidence composition, and generated output value."
+        description="Portfolio-level reporting on workflow mix, issue severity, evidence composition, and generated claim value."
       />
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
         <SectionCard className="px-6 py-6">
           <SectionHeading
             title="Workflow and risk"
-            description="Case distribution and issue severity across the live portfolio."
+            description="Checkout distribution and issue severity across the live portfolio."
           />
           <div className="mt-5 grid gap-6 xl:grid-cols-2">
             <div>
-              <p className="mb-3 text-sm font-semibold text-slate-950">Case statuses</p>
+              <p className="mb-3 text-sm font-semibold text-slate-950">Checkout statuses</p>
               <DistributionBar
                 items={Object.entries(statusBreakdown).map(([label, value]) => ({
                   label: formatEnumLabel(label),
@@ -756,22 +759,22 @@ export function EotPortfolioClient({
         </SectionCard>
 
         <DetailPanel
-          title="AI-assisted output readiness"
-          description="Current live signals relevant to final case generation."
+          title="AI-assisted submission readiness"
+          description="Current live signals relevant to final submission generation."
         >
-          <MetaItem label="Ready for claim" value={stats.readyForClaim} />
+          <MetaItem label="Ready for submission" value={stats.readyForClaim} />
           <MetaItem label="Recommendations recorded" value={recommendations.length} />
           <MetaItem label="Generated claims" value={workspaces.filter((workspace) => workspace.claim).length} />
           <div className="rounded-[18px] border border-slate-200 bg-white px-4 py-4 text-sm leading-6 text-slate-600">
-            Existing OpenAI-backed case workflows remain intact. These analytics views sit on top of the live case and workspace data only.
+            Existing OpenAI-backed checkout workflows remain intact. These analytics views sit on top of the live checkout and workspace data only.
           </div>
         </DetailPanel>
       </div>
 
       <SectionCard className="px-6 py-6">
         <SectionHeading
-          title="Case performance table"
-          description="Operational comparison of the full live case portfolio."
+          title="Checkout performance table"
+          description="Operational comparison of the full live checkout portfolio."
         />
         <div className="mt-5">
           <DataTable>

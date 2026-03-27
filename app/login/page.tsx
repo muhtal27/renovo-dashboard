@@ -29,8 +29,8 @@ const workflowStages = [
   },
   {
     step: '04',
-    title: 'Claim output',
-    body: 'Approved decisions turn into claim ready line items.',
+    title: 'Submission',
+    body: 'Approved decisions turn into submission-ready line items.',
   },
 ]
 

@@ -109,7 +109,13 @@ export async function proxyEotRequest(
       body: requestBody.body,
       cache: 'no-store',
     })
-  } catch {
+  } catch (error) {
+    console.error('EOT proxy backend request failed', {
+      backendPath,
+      backendUrl: backendUrl.toString(),
+      method: request.method,
+      error: error instanceof Error ? error.message : 'unknown_error',
+    })
     return NextResponse.json(
       {
         detail:
@@ -121,6 +127,17 @@ export async function proxyEotRequest(
 
   const text = await response.text()
   const contentType = response.headers.get('content-type') ?? 'application/json'
+
+  if (!response.ok) {
+    console.error('EOT proxy backend returned non-2xx response', {
+      backendPath,
+      backendUrl: backendUrl.toString(),
+      method: request.method,
+      status: response.status,
+      contentType,
+      bodyPreview: text.slice(0, 300),
+    })
+  }
 
   return new Response(text, {
     status: response.status,

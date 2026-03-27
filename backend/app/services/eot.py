@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from datetime import datetime, timezone
 from decimal import Decimal
 from uuid import UUID
@@ -41,6 +42,8 @@ from app.schemas.eot import (
     MessageCreateRequest,
     MessageResponse,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class EOTService:
@@ -90,7 +93,19 @@ class EOTService:
         )
         stmt = apply_case_visibility(stmt, operator)
 
-        rows = (await self.session.execute(stmt)).all()
+        try:
+            rows = (await self.session.execute(stmt)).all()
+        except Exception:
+            logger.exception(
+                "EOT list_cases failed",
+                extra={
+                    "tenant_id": str(operator.tenant_id),
+                    "user_id": str(operator.user_id),
+                    "membership_id": str(operator.membership_id),
+                    "role": operator.role.value,
+                },
+            )
+            raise
         return [
             CaseListItem(
                 id=row.id,

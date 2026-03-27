@@ -10,6 +10,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
 from app.models.base import TenantScopedModel
+from app.models.enum_values import enum_values
 
 if TYPE_CHECKING:
     from app.models.case import Case
@@ -36,6 +37,7 @@ class Message(TenantScopedModel, Base):
         Enum(
             MessageSenderType,
             name="message_sender_type",
+            values_callable=enum_values,
             native_enum=False,
             create_constraint=True,
             validate_strings=True,

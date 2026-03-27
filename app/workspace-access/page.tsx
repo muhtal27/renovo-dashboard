@@ -256,7 +256,7 @@ export default function WorkspaceAccessPage() {
                 Continue to workspace
               </Link>
               <Link href="/eot" className="app-secondary-button rounded px-6 py-3 text-sm font-medium">
-                Open cases
+                Open checkouts
               </Link>
             </div>
           ) : null}
@@ -264,7 +264,7 @@ export default function WorkspaceAccessPage() {
           {!loading && operator?.membership && reason === 'forbidden' ? (
             <div className="mt-8 flex flex-wrap gap-3">
               <Link href="/eot" className="app-primary-button rounded px-6 py-3 text-sm font-medium">
-                Open cases
+                Open checkouts
               </Link>
               <Link href="/overview" className="app-secondary-button rounded px-6 py-3 text-sm font-medium">
                 Go to overview

@@ -37,6 +37,13 @@ tenant_membership_status = sa.Enum(
 
 
 def upgrade() -> None:
+    existing_table = op.get_bind().execute(
+        sa.text("SELECT to_regclass('public.tenant_memberships')")
+    ).scalar()
+
+    if existing_table is not None:
+        return
+
     op.create_table(
         "tenant_memberships",
         sa.Column("user_id", postgresql.UUID(as_uuid=True), nullable=False),
