@@ -1,27 +1,33 @@
 import type { Metadata } from 'next'
-import Image from 'next/image'
 import Link from 'next/link'
 import { MarketingShell } from '@/app/components/MarketingShell'
 
 const principles = [
   {
     title: 'AI assists, humans decide',
-    body: 'Every AI-generated recommendation goes through manager approval. Automation reduces admin, but judgement remains with your team.',
+    body: 'Renovo drafts liability assessments and supporting reasoning. Property managers decide what is approved, amended, or rejected.',
   },
   {
-    title: 'Built for how it actually works',
-    body: 'Renovo AI is shaped around real end-of-tenancy handoffs, evidence review, and dispute preparation under operational pressure.',
+    title: 'Built for operational use',
+    body: 'The product is shaped around checkouts, deduction letters, evidence review, and dispute preparation under live portfolio pressure.',
   },
   {
-    title: 'Fair to both sides',
-    body: 'Good deposit handling means reasoned, evidenced, and proportionate decisions that can be explained clearly when challenged.',
+    title: 'Defensible output matters',
+    body: 'A workable checkout decision needs evidence, proportionality, fair wear and tear reasoning, and a trail that can be reviewed later.',
   },
+] as const
+
+const companyFacts = [
+  ['Head office', 'Edinburgh, Scotland'],
+  ['Company', 'Renovo AI Ltd'],
+  ['Company number', 'SC833544'],
+  ['VAT', 'GB483379648'],
 ] as const
 
 export const metadata: Metadata = {
   title: 'About | Renovo AI',
   description:
-    'About Renovo AI and the founder-led approach to end-of-tenancy workflow automation for UK property managers.',
+    'Corporate overview of Renovo AI, the company focus, operating principles, and product approach for UK letting agencies.',
   alternates: {
     canonical: 'https://renovoai.co.uk/about',
   },
@@ -30,150 +36,109 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <MarketingShell currentPath="/about">
-      <section className="marketing-frame pb-10 pt-14 md:pt-24">
-        <p className="inline-flex items-center gap-2 rounded-full bg-[#e1f5ee] px-3 py-1.5 text-xs font-medium uppercase tracking-[0.08em] text-[#0f6e56]">
-          <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#0f6e56]" />
-          About Renovo AI
-        </p>
-        <h1 className="mt-6 max-w-[760px] text-[clamp(2.2rem,4.5vw,3.3rem)] leading-[1.1] tracking-[-0.02em]">
-          Built by someone who has
-          <br />
-          <em className="not-italic text-[#9e7a2a]">done the work</em>
-        </h1>
-        <p className="mt-6 max-w-[700px] text-lg font-light leading-8 text-[#3d3b37]">
-          Renovo AI is built in Edinburgh by a founder with direct end-of-tenancy operational
-          experience, focused on turning scattered evidence and manual admin into a reviewable,
-          defensible workflow.
-        </p>
-        <p className="mt-4 text-sm leading-7 text-[#7a7670]">
-          Renovo AI Ltd · Company No. SC833544
-        </p>
-      </section>
+      <div className="page-shell page-stack">
+        <section className="page-hero">
+          <p className="app-kicker">About</p>
+          <h1 className="page-title max-w-[920px]">
+            Renovo AI is building enterprise software for structured end-of-tenancy operations.
+          </h1>
+          <p className="page-copy max-w-[820px]">
+            Renovo AI is based in Edinburgh and focused on a narrow operational problem inside UK
+            letting agencies: turning checkout evidence into reviewable liability assessments,
+            deduction letters, landlord decisions, tenant responses, and dispute packs.
+          </p>
+        </section>
 
-      <section className="marketing-frame border-t border-[rgba(15,14,13,0.1)] py-14">
-        <div className="grid gap-10 lg:grid-cols-2 lg:gap-20">
-          <div>
-            <h2 className="text-[30px] leading-[1.2]">
-              Why <em className="not-italic text-[#9e7a2a]">this</em> exists
+        <section className="page-section">
+          <div className="grid gap-8 lg:grid-cols-[minmax(0,1.2fr)_320px]">
+            <div>
+              <p className="app-kicker">Company profile</p>
+              <h2 className="mt-4 text-[clamp(2rem,4vw,3rem)] leading-[1.08] text-zinc-950">
+                Built around a specific <em>workflow category</em>
+              </h2>
+              <div className="mt-5 space-y-4 text-base leading-8 text-zinc-600">
+                <p>
+                  Renovo was shaped by direct experience in end-of-tenancy property management,
+                  where evidence is often fragmented, deduction reasoning is manually rebuilt, and
+                  dispute outcomes depend on whether the file is complete when it reaches a deposit
+                  scheme.
+                </p>
+                <p>
+                  The company is not positioning itself as a broad property platform. Renovo is
+                  focused on the operational layer between checkout evidence and documented
+                  decisions, with human approval remaining central to the process.
+                </p>
+                <p>
+                  That focus informs the product, the commercial model, and the way the company
+                  engages with agencies, integration partners, and internal compliance teams.
+                </p>
+              </div>
+            </div>
+
+            <div className="page-sidebar-card h-fit">
+              <p className="app-kicker">Company details</p>
+              <dl className="mt-4 space-y-4">
+                {companyFacts.map(([label, value]) => (
+                  <div key={label}>
+                    <dt className="text-xs font-semibold uppercase tracking-[0.08em] text-zinc-400">
+                      {label}
+                    </dt>
+                    <dd className="mt-1 text-sm text-zinc-700">{value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          </div>
+        </section>
+
+        <section className="page-section">
+          <div className="max-w-[900px]">
+            <p className="app-kicker">Principles</p>
+            <h2 className="mt-4 text-[clamp(2rem,4vw,3rem)] leading-[1.08] text-zinc-950">
+              Principles, not <em>buzzwords</em>
             </h2>
-            <div className="mt-5 space-y-4 text-[15px] leading-8 text-[#3d3b37]">
-              <p>
-                End-of-tenancy is one of the highest-admin, highest-stakes parts of property
-                management. Teams still copy data between apps, draft letters manually, and rebuild
-                evidence trails under deadline pressure.
-              </p>
-              <p>
-                Renovo AI exists to centralise that operational layer: evidence intake, issue review,
-                recommendation drafting, manager sign-off, and claim-ready output in one workspace.
-              </p>
-            </div>
           </div>
 
-          <div>
-            <h2 className="text-[30px] leading-[1.2]">
-              Who is <em className="not-italic text-[#9e7a2a]">building</em> it
-            </h2>
-            <div className="mt-5 space-y-4 text-[15px] leading-8 text-[#3d3b37]">
-              <p>
-                Renovo AI is founded by Muhammad Munawar, based in Edinburgh. The product direction
-                comes from first-hand checkout review, liability assessment, and dispute handling
-                experience.
-              </p>
-              <p>
-                The company is early-stage and building with direct feedback from UK property
-                managers and letting agencies.
+          <div className="page-rule-list">
+            {principles.map((item) => (
+              <div key={item.title} className="grid gap-3 py-6 md:grid-cols-[280px_minmax(0,1fr)]">
+                <h3 className="text-base font-semibold text-zinc-950">{item.title}</h3>
+                <p className="text-sm leading-7 text-zinc-600">{item.body}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="page-section">
+          <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+            <div>
+              <p className="app-kicker">Next step</p>
+              <h2 className="mt-4 text-[clamp(2rem,4vw,3rem)] leading-[1.08] text-zinc-950">
+                Review the product and discuss your <em>checkout operation</em>
+              </h2>
+              <p className="mt-4 max-w-[760px] text-base leading-8 text-zinc-600">
+                Start with the demo, then speak to us about evidence handling, liability
+                assessments, deduction letters, and dispute preparation inside your agency.
               </p>
             </div>
-          </div>
-        </div>
-      </section>
 
-      <section className="marketing-frame border-t border-[rgba(15,14,13,0.1)] py-14">
-        <div className="grid gap-8 lg:grid-cols-[320px_1fr] lg:items-start">
-          <div className="overflow-hidden rounded-2xl border border-[rgba(15,14,13,0.1)] bg-white shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
-            <div className="relative aspect-[4/5]">
-              <Image
-                src="/muhammad-munawar-headshot.jpg"
-                alt="Muhammad Munawar"
-                fill
-                className="object-cover"
-                sizes="(min-width: 1024px) 320px, 100vw"
-                priority
-              />
-            </div>
-            <div className="p-5">
-              <p className="text-lg">Muhammad Munawar</p>
-              <p className="mt-1 text-sm text-[#7a7670]">Founder & CEO, Renovo AI</p>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/contact"
+                className="app-primary-button rounded-md px-6 py-3 text-sm font-medium"
+              >
+                Get started →
+              </Link>
+              <Link
+                href="/demo"
+                className="app-secondary-button rounded-md px-6 py-3 text-sm font-medium"
+              >
+                View demo
+              </Link>
             </div>
           </div>
-
-          <div>
-            <p className="app-kicker">What we believe</p>
-            <h2 className="mt-4 text-[clamp(1.9rem,4vw,2.8rem)] leading-[1.12]">
-              Principles, not
-              <br />
-              <em className="not-italic text-[#9e7a2a]">buzzwords</em>
-            </h2>
-            <div className="mt-8 grid gap-5 md:grid-cols-3">
-              {principles.map((item, index) => (
-                <article
-                  key={item.title}
-                  className="rounded-xl border border-[rgba(15,14,13,0.1)] bg-white p-6"
-                >
-                  <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-[#0f6e56]">
-                    {String(index + 1).padStart(2, '0')}
-                  </p>
-                  <h3 className="mt-3 text-lg">{item.title}</h3>
-                  <p className="mt-3 text-sm leading-7 text-[#7a7670]">{item.body}</p>
-                </article>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="marketing-frame border-t border-[rgba(15,14,13,0.1)] py-14">
-        <div className="grid gap-8 lg:grid-cols-2 lg:items-center lg:gap-20">
-          <div>
-            <p className="inline-flex items-center gap-2 rounded-full border border-[rgba(15,14,13,0.1)] bg-[#f2efe9] px-3 py-1.5 text-xs font-medium text-[#7a7670]">
-              Edinburgh, Scotland
-            </p>
-            <h2 className="mt-5 text-[30px] leading-[1.2]">Based in Edinburgh</h2>
-            <p className="mt-4 text-[15px] leading-8 text-[#3d3b37]">
-              Renovo AI is built in Scotland and focused on UK end-of-tenancy operating realities,
-              including evidence standards and dispute preparation expectations in local workflows.
-            </p>
-          </div>
-
-          <article className="overflow-hidden rounded-2xl border border-[rgba(15,14,13,0.1)] bg-white shadow-[0_8px_32px_rgba(0,0,0,0.06)]">
-            <div className="h-44 bg-[#e8e3da]" />
-            <div className="p-5">
-              <p className="text-base">Renovo AI HQ</p>
-              <p className="mt-1 text-sm text-[#7a7670]">Edinburgh, Scotland - renovoai.co.uk</p>
-            </div>
-          </article>
-        </div>
-      </section>
-
-      <section className="marketing-frame border-t border-[rgba(15,14,13,0.1)] py-14 text-center">
-        <h2 className="text-[30px] leading-[1.2]">
-          Want to help shape
-          <br />
-          <em className="not-italic text-[#9e7a2a]">what we build next?</em>
-        </h2>
-        <p className="mx-auto mt-4 max-w-[700px] text-[15px] leading-8 text-[#3d3b37]">
-          We are onboarding a small number of property managers and agencies for early access and
-          feedback-led rollout.
-        </p>
-        <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <Link href="/contact" className="app-primary-button rounded px-6 py-3 text-sm font-medium">
-            Request early access
-          </Link>
-          <Link href="/investors" className="app-secondary-button rounded px-6 py-3 text-sm font-medium">
-            Investor information
-          </Link>
-        </div>
-      </section>
+        </section>
+      </div>
     </MarketingShell>
   )
 }

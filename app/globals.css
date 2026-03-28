@@ -1,20 +1,20 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fbfaf7;
-  --foreground: #0f0e0d;
-  --panel: rgba(255, 255, 255, 0.94);
+  --background: #ffffff;
+  --foreground: #18181b;
+  --panel: rgba(255, 255, 255, 0.96);
   --panel-strong: #ffffff;
-  --line: rgba(15, 14, 13, 0.1);
-  --line-strong: rgba(15, 14, 13, 0.18);
-  --muted: #7a7670;
-  --accent: #0f6e56;
-  --accent-strong: #0c5946;
-  --accent-soft: #e1f5ee;
-  --accent-mist: rgba(15, 110, 86, 0.09);
-  --warm-soft: #f6f3ed;
-  --warm-strong: #ebe3d6;
-  --gold: #9e7a2a;
+  --line: #e4e4e7;
+  --line-strong: #d4d4d8;
+  --muted: #52525b;
+  --accent: #18181b;
+  --accent-strong: #09090b;
+  --accent-soft: #f4f4f5;
+  --accent-mist: rgba(24, 24, 27, 0.06);
+  --warm-soft: #fafafa;
+  --warm-strong: #f4f4f5;
+  --gold: #18181b;
   --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.06);
   --shadow-strong: 0 16px 44px rgba(0, 0, 0, 0.08);
 }
@@ -23,6 +23,7 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-dm-sans), "Segoe UI", sans-serif;
+  --font-serif: var(--font-instrument-serif), Georgia, serif;
   --font-mono: "SFMono-Regular", "SF Mono", "Menlo", monospace;
 }
 
@@ -36,10 +37,7 @@ html {
 
 body {
   color-scheme: light;
-  background:
-    radial-gradient(circle at top left, rgba(241, 232, 214, 0.42), transparent 34%),
-    radial-gradient(circle at top right, rgba(225, 245, 238, 0.28), transparent 28%),
-    linear-gradient(180deg, #fdfcf9 0%, #fbfaf7 38%, #f8f5ef 100%);
+  background: #ffffff;
   color: var(--foreground);
   font-family: var(--font-dm-sans), "Segoe UI", sans-serif;
   line-height: 1.5;
@@ -52,16 +50,18 @@ h1,
 h2,
 h3,
 h4 {
-  font-family: var(--font-dm-serif), Georgia, serif;
-  color: #0f0e0d;
-  letter-spacing: -0.025em;
-  font-weight: 400;
+  font-family: var(--font-dm-sans), "Segoe UI", sans-serif;
+  color: #18181b;
+  letter-spacing: -0.03em;
+  font-weight: 600;
 }
 
-.marketing-page h1.font-semibold,
-.marketing-page h2.font-semibold,
-.marketing-page h3.font-semibold,
-.marketing-page h4.font-semibold {
+h1 em,
+h2 em,
+h3 em,
+h4 em {
+  font-family: var(--font-instrument-serif), Georgia, serif;
+  font-style: italic;
   font-weight: 400;
 }
 
@@ -163,10 +163,10 @@ a:focus-visible {
 
 .app-primary-button {
   align-items: center;
-  background: #0f0e0d;
-  border: 1px solid #0f0e0d;
+  background: #18181b;
+  border: 1px solid #18181b;
   box-shadow: none;
-  color: #faf8f5;
+  color: #ffffff;
   display: inline-flex;
   justify-content: center;
   line-height: 1.15;
@@ -176,8 +176,8 @@ a:focus-visible {
 }
 
 .app-primary-button:hover {
-  background: #3d3b37;
-  border-color: #3d3b37;
+  background: #27272a;
+  border-color: #27272a;
 }
 
 .app-primary-button:disabled {
@@ -187,8 +187,8 @@ a:focus-visible {
 .app-secondary-button {
   align-items: center;
   background: transparent;
-  border: 1px solid var(--line-strong);
-  color: #0f0e0d;
+  border: 1px solid #e4e4e7;
+  color: #18181b;
   box-shadow: none;
   display: inline-flex;
   justify-content: center;
@@ -199,8 +199,8 @@ a:focus-visible {
 }
 
 .app-secondary-button:hover {
-  background: #f8f6f2;
-  border-color: #0f0e0d;
+  background: #fafafa;
+  border-color: #d4d4d8;
 }
 
 .app-tertiary-button {
@@ -279,13 +279,13 @@ a:focus-visible {
 
 .app-field::placeholder,
 .app-textarea::placeholder {
-  color: #7a7670;
+  color: #71717a;
 }
 
 .app-field:hover,
 .app-select:hover,
 .app-textarea:hover {
-  border-color: #0f0e0d;
+  border-color: #d4d4d8;
 }
 
 .app-field:disabled,
@@ -348,53 +348,76 @@ a:focus-visible {
 }
 
 .marketing-frame {
-  width: min(100%, 1600px);
+  width: min(100%, 1180px);
   margin: 0 auto;
-  padding-left: 24px;
-  padding-right: 24px;
+  padding-left: 28px;
+  padding-right: 28px;
 }
 
 .marketing-page .page-shell {
-  width: min(100%, 1600px);
+  width: min(100%, 1180px);
   margin: 0 auto;
-  padding: 56px 24px 72px;
+  padding: 56px 28px 64px;
 }
 
 .marketing-page .page-stack {
   display: grid;
-  gap: 24px;
+  gap: 56px;
 }
 
 .marketing-page .page-hero {
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(250, 247, 241, 0.94) 100%);
-  padding: 32px 28px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+  padding: 0;
 }
 
 .marketing-page .page-card {
   border: 1px solid var(--line);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.94);
-  padding: 28px 24px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.98);
+  padding: 32px;
+}
+
+.marketing-page .page-section {
+  border-top: 1px solid var(--line);
+  padding-top: 48px;
+  padding-bottom: 48px;
+}
+
+.marketing-page .page-section-compact {
+  border-top: 1px solid var(--line);
+  padding-top: 40px;
+  padding-bottom: 40px;
+}
+
+.marketing-page .page-sidebar-card {
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  background: #fafafa;
+  padding: 24px;
+}
+
+.marketing-page .page-rule-list {
+  margin-top: 24px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.marketing-page .page-rule-list > * + * {
+  border-top: 1px solid var(--line);
 }
 
 .marketing-page .page-title {
-  margin-top: 12px;
-  font-size: clamp(2rem, 4vw, 3rem);
+  margin-top: 16px;
+  font-size: clamp(2.25rem, 4.8vw, 3.75rem);
   line-height: 1.08;
 }
 
 .marketing-page .page-copy {
   margin-top: 16px;
   max-width: 760px;
-  font-size: 17px;
-  font-weight: 300;
-  line-height: 1.8;
-  color: #3d3b37;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.75;
+  color: #52525b;
 }
 
 .marketing-page .page-grid-2 {
@@ -409,16 +432,12 @@ a:focus-visible {
 
 @media (min-width: 768px) {
   .marketing-frame {
-    padding-left: 40px;
-    padding-right: 40px;
+    padding-left: 28px;
+    padding-right: 28px;
   }
 
   .marketing-page .page-shell {
-    padding: 72px 40px 88px;
-  }
-
-  .marketing-page .page-hero {
-    padding: 40px 36px;
+    padding: 64px 28px;
   }
 
   .marketing-page .page-grid-2 {

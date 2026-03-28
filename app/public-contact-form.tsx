@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from 'react'
 
-type EnquiryType = 'Early access' | 'Partnerships' | 'Investor enquiry' | 'General enquiry'
+type EnquiryType = 'Product enquiry' | 'Partnerships' | 'Investor enquiry' | 'General enquiry'
 type PortfolioSize =
   | 'Solo / independent'
   | '1-100 properties'
@@ -31,7 +31,7 @@ const INITIAL_FORM_STATE: FormState = {
 }
 
 const ENQUIRY_OPTIONS: EnquiryType[] = [
-  'Early access',
+  'Product enquiry',
   'Partnerships',
   'Investor enquiry',
   'General enquiry',
@@ -120,17 +120,15 @@ export function PublicContactForm({
   }
 
   return (
-    <section className="rounded-xl border border-[rgba(15,14,13,0.1)] bg-white p-5 shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
+    <section className="rounded-xl border border-zinc-200 bg-white p-6 shadow-[0_8px_24px_rgba(0,0,0,0.04)]">
       <p className="app-kicker">Contact form</p>
-      <h2 className="mt-3 text-2xl tracking-tight text-[#0f0e0d]">
-        Send us a message
-      </h2>
+      <h2 className="mt-3 text-2xl tracking-tight text-zinc-950">Send us a message</h2>
 
       {status === 'success' ? (
-        <div className="mt-5 rounded-xl border border-[#b9e3d7] bg-[#e1f5ee] px-5 py-6 text-center text-[#0c5946]">
+        <div className="mt-5 rounded-lg border border-zinc-200 bg-zinc-50 px-5 py-6 text-center text-zinc-900">
           <p className="text-2xl">✓</p>
           <p className="mt-3 text-lg">Message received</p>
-          <p className="mt-2 text-sm leading-6 text-emerald-900/85">
+          <p className="mt-2 text-sm leading-6 text-zinc-600">
             Thanks for getting in touch. We&apos;ll reply as soon as we can.
           </p>
         </div>
@@ -152,8 +150,8 @@ export function PublicContactForm({
 
             <div className="grid gap-4 md:grid-cols-2">
               <label className="block">
-                <span className="mb-2 block text-sm font-medium text-[#3d3b37]">
-                  Full name <span className="text-[#7a7670]">(required)</span>
+                <span className="mb-2 block text-sm font-medium text-zinc-700">
+                  Full name <span className="text-zinc-500">(required)</span>
                 </span>
                 <input
                   type="text"
@@ -167,8 +165,8 @@ export function PublicContactForm({
               </label>
 
               <label className="block">
-                <span className="mb-2 block text-sm font-medium text-[#3d3b37]">
-                  Work email <span className="text-[#7a7670]">(required)</span>
+                <span className="mb-2 block text-sm font-medium text-zinc-700">
+                  Work email <span className="text-zinc-500">(required)</span>
                 </span>
                 <input
                   type="email"
@@ -184,8 +182,8 @@ export function PublicContactForm({
 
             <div className="grid gap-4 md:grid-cols-2">
               <label className="block">
-                <span className="mb-2 block text-sm font-medium text-[#3d3b37]">
-                  Company / agency name <span className="text-[#7a7670]">(optional)</span>
+                <span className="mb-2 block text-sm font-medium text-zinc-700">
+                  Company / agency name <span className="text-zinc-500">(optional)</span>
                 </span>
                 <input
                   type="text"
@@ -199,8 +197,8 @@ export function PublicContactForm({
               </label>
 
               <label className="block">
-                <span className="mb-2 block text-sm font-medium text-[#3d3b37]">
-                  Enquiry type <span className="text-[#7a7670]">(required)</span>
+                <span className="mb-2 block text-sm font-medium text-zinc-700">
+                  Enquiry type <span className="text-zinc-500">(required)</span>
                 </span>
                 <select
                   value={form.enquiryType}
@@ -223,8 +221,8 @@ export function PublicContactForm({
             </div>
 
             <label className="block">
-              <span className="mb-2 block text-sm font-medium text-[#3d3b37]">
-                Portfolio size <span className="text-[#7a7670]">(optional)</span>
+              <span className="mb-2 block text-sm font-medium text-zinc-700">
+                Portfolio size <span className="text-zinc-500">(optional)</span>
               </span>
               <select
                 value={form.portfolioSize}
@@ -246,8 +244,8 @@ export function PublicContactForm({
             </label>
 
             <label className="block">
-              <span className="mb-2 block text-sm font-medium text-[#3d3b37]">
-                Message <span className="text-[#7a7670]">(required)</span>
+              <span className="mb-2 block text-sm font-medium text-zinc-700">
+                Message <span className="text-zinc-500">(required)</span>
               </span>
               <textarea
                 value={form.message}
@@ -261,13 +259,13 @@ export function PublicContactForm({
             </label>
 
             {fieldError ? (
-              <div className="rounded-lg border border-[#ead8a9] bg-[#fdf6e3] px-4 py-3 text-sm text-[#7f611f]">
+              <div className="border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
                 {fieldError}
               </div>
             ) : null}
 
             {status === 'error' ? (
-              <div className="rounded-lg border border-[#efc7c7] bg-[#fcebeb] px-4 py-3 text-sm text-[#8d2e2e]">
+              <div className="border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900">
                 Something went wrong. Please try again or email hello@renovoai.co.uk.
               </div>
             ) : null}
@@ -281,9 +279,9 @@ export function PublicContactForm({
             </button>
           </form>
 
-          <p className="mt-4 text-xs leading-6 text-[#7a7670]">
+          <p className="mt-4 border-t border-zinc-200 pt-4 text-xs leading-6 text-zinc-500">
             We only use these details to respond to your enquiry. See our{' '}
-            <a href="/privacy" className="underline decoration-[rgba(15,14,13,0.18)] underline-offset-4">
+            <a href="/privacy" className="underline decoration-zinc-300 underline-offset-4">
               privacy notice
             </a>
             .

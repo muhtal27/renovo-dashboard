@@ -123,7 +123,7 @@ export default function IntegrationsPage() {
               <ul className="space-y-3 text-sm leading-7 text-stone-600">
                 {futureAccess.map((item) => (
                   <li key={item} className="flex items-start gap-2">
-                    <span className="mt-[10px] h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
+                    <span className="mt-[10px] h-1.5 w-1.5 shrink-0 rounded-full bg-zinc-950" />
                     <span>{item}</span>
                   </li>
                 ))}
@@ -143,15 +143,15 @@ export default function IntegrationsPage() {
               <div className="mt-8 flex flex-wrap justify-center gap-3">
                 <Link
                   href="/contact"
-                  className="app-primary-button rounded-2xl px-5 py-3 text-sm font-medium"
+                  className="app-primary-button rounded-md px-5 py-3 text-sm font-medium"
                 >
                   Contact Renovo AI
                 </Link>
                 <Link
                   href="/demo"
-                  className="app-secondary-button rounded-2xl px-5 py-3 text-sm font-medium"
+                  className="app-secondary-button rounded-md px-5 py-3 text-sm font-medium"
                 >
-                  View live demo
+                  View demo
                 </Link>
               </div>
             </div>

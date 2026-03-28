@@ -203,7 +203,7 @@ const WORKFLOW_STEPS = [
 const ROLE_BADGE_STYLES: Record<DocumentRole, string> = {
   check_in: 'bg-sky-100 text-sky-800 border-sky-200',
   check_out: 'bg-amber-100 text-amber-800 border-amber-200',
-  photo: 'bg-violet-100 text-violet-800 border-violet-200',
+  photo: 'bg-zinc-100 text-zinc-700 border-zinc-200',
 }
 
 const ROLE_LABELS: Record<DocumentRole, string> = {
@@ -215,8 +215,8 @@ const ROLE_LABELS: Record<DocumentRole, string> = {
 const ISSUE_TYPE_STYLES: Record<IssueType, string> = {
   damage: 'bg-red-100 text-red-800 border-red-200',
   repair: 'bg-amber-100 text-amber-800 border-amber-200',
-  redecoration: 'bg-violet-100 text-violet-800 border-violet-200',
-  missing_item: 'bg-stone-100 text-stone-700 border-stone-200',
+  redecoration: 'bg-zinc-100 text-zinc-700 border-zinc-200',
+  missing_item: 'bg-zinc-100 text-zinc-700 border-zinc-200',
 }
 
 const ISSUE_TYPE_LABELS: Record<IssueType, string> = {
@@ -229,7 +229,7 @@ const ISSUE_TYPE_LABELS: Record<IssueType, string> = {
 const SEVERITY_STYLES: Record<IssueSeverity, string> = {
   high: 'bg-red-100 text-red-800 border-red-200',
   medium: 'bg-amber-100 text-amber-800 border-amber-200',
-  low: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+  low: 'bg-sky-100 text-sky-800 border-sky-200',
 }
 
 const RESPONSIBILITY_STYLES: Record<IssueResponsibility, string> = {
@@ -267,11 +267,7 @@ function SectionCard({
   children: React.ReactNode
   className?: string
 }) {
-  return (
-    <div className={`rounded-xl border border-[rgba(15,14,13,0.1)] bg-white ${className}`}>
-      {children}
-    </div>
-  )
+  return <div className={`rounded-xl border border-zinc-200 bg-white ${className}`}>{children}</div>
 }
 
 export default function HomepageDemo({
@@ -293,17 +289,17 @@ export default function HomepageDemo({
             { label: 'Draft confidence', value: `${AI_CONFIDENCE}%` },
           ].map((item) => (
             <SectionCard key={item.label} className="p-4 shadow-sm">
-              <p className="text-sm text-stone-500">{item.label}</p>
-              <p className="mt-3 text-2xl font-semibold tracking-tight text-stone-900">
+              <p className="text-sm text-zinc-500">{item.label}</p>
+              <p className="mt-3 text-2xl font-semibold tracking-tight text-zinc-950">
                 {item.value}
               </p>
-              {item.meta ? <p className="mt-2 text-sm text-stone-600">{item.meta}</p> : null}
+              {item.meta ? <p className="mt-2 text-sm text-zinc-600">{item.meta}</p> : null}
             </SectionCard>
           ))}
         </div>
 
         <SectionCard className="p-5 shadow-sm">
-          <p className="text-sm leading-7 text-stone-700">
+          <p className="text-sm leading-7 text-zinc-700">
             Renovo AI has reviewed 5 documents, identified 4 issues, and drafted a partial claim
             recommendation of £640 from a £1,200 deposit. Two issues have high confidence
             photographic evidence. One issue requires manager judgement on fair wear and tear.
@@ -321,12 +317,12 @@ export default function HomepageDemo({
                 <div key={step.label} className="flex items-start gap-3 md:flex-col md:gap-4">
                   <div className="flex items-center gap-3 md:w-full">
                     <div
-                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-sm font-semibold ${
+                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-sm font-semibold ${
                         isComplete
-                          ? 'border-emerald-200 bg-emerald-100 text-emerald-800'
+                          ? 'border-sky-200 bg-sky-100 text-sky-800'
                           : isCurrent
                             ? 'border-amber-200 bg-amber-100 text-amber-800'
-                            : 'border-stone-200 bg-stone-100 text-stone-500'
+                            : 'border-zinc-200 bg-zinc-100 text-zinc-500'
                       }`}
                     >
                       {isComplete ? '✓' : index + 1}
@@ -334,7 +330,7 @@ export default function HomepageDemo({
                     {index < WORKFLOW_STEPS.length - 1 ? (
                       <div
                         className={`hidden h-1 flex-1 rounded-full md:block ${
-                          isComplete ? 'bg-emerald-200' : isCurrent ? 'bg-amber-200' : 'bg-stone-200'
+                          isComplete ? 'bg-sky-200' : isCurrent ? 'bg-amber-200' : 'bg-zinc-200'
                         }`}
                       />
                     ) : null}
@@ -342,10 +338,10 @@ export default function HomepageDemo({
                   <p
                     className={`text-sm font-medium ${
                       isComplete
-                        ? 'text-emerald-900'
+                        ? 'text-sky-900'
                         : isCurrent
                           ? 'text-amber-900'
-                          : 'text-stone-500'
+                          : 'text-zinc-500'
                     }`}
                   >
                     {step.label}
@@ -364,9 +360,9 @@ export default function HomepageDemo({
       <div className="space-y-4">
         <SectionCard className="overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-stone-200">
-              <thead className="bg-stone-50/90">
-                <tr className="text-left text-xs font-semibold uppercase tracking-[0.16em] text-stone-500">
+            <table className="min-w-full divide-y divide-zinc-200">
+              <thead className="bg-zinc-50">
+                <tr className="text-left text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">
                   <th className="px-4 py-3">Document name</th>
                   <th className="px-4 py-3">Role</th>
                   <th className="px-4 py-3">Format</th>
@@ -374,10 +370,10 @@ export default function HomepageDemo({
                   <th className="px-4 py-3">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-stone-200 bg-white">
+              <tbody className="divide-y divide-zinc-200 bg-white">
                 {DEMO_DOCUMENTS.map((document) => (
-                  <tr key={document.id} className="text-sm text-stone-700">
-                    <td className="px-4 py-4 font-medium text-stone-900">{document.name}</td>
+                  <tr key={document.id} className="text-sm text-zinc-700">
+                    <td className="px-4 py-4 font-medium text-zinc-950">{document.name}</td>
                     <td className="px-4 py-4">
                       <DemoBadge
                         label={ROLE_LABELS[document.role]}
@@ -389,7 +385,7 @@ export default function HomepageDemo({
                     <td className="px-4 py-4">
                       <DemoBadge
                         label="Extracted ✓"
-                        className="border-emerald-200 bg-emerald-100 text-emerald-800"
+                        className="border-sky-200 bg-sky-100 text-sky-800"
                       />
                     </td>
                   </tr>
@@ -399,7 +395,7 @@ export default function HomepageDemo({
           </div>
         </SectionCard>
 
-        <p className="text-sm leading-7 text-stone-500">
+        <p className="text-sm leading-7 text-zinc-500">
           All 5 documents have been extracted and cross-referenced. Facts compared across check in
           and check out reports.
         </p>
@@ -415,7 +411,7 @@ export default function HomepageDemo({
             <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="text-lg font-semibold text-stone-900">
+                  <h3 className="text-lg font-semibold text-zinc-950">
                     {issue.title} — {issue.area}
                   </h3>
                   <DemoBadge
@@ -431,14 +427,14 @@ export default function HomepageDemo({
                     className={RESPONSIBILITY_STYLES[issue.responsibility]}
                   />
                 </div>
-                <p className="mt-3 text-sm leading-7 text-stone-600">{issue.description}</p>
-                <p className="mt-3 text-sm italic text-stone-500">Evidence: {issue.evidence}</p>
+                <p className="mt-3 text-sm leading-7 text-zinc-600">{issue.description}</p>
+                <p className="mt-3 text-sm italic text-zinc-500">Evidence: {issue.evidence}</p>
               </div>
               <div className="shrink-0 text-left md:text-right">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-stone-500">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">
                   Proposed amount
                 </p>
-                <p className="mt-2 text-2xl font-semibold text-stone-900">
+                <p className="mt-2 text-2xl font-semibold text-zinc-950">
                   {formatMoney(issue.amount)}
                 </p>
               </div>
@@ -446,8 +442,8 @@ export default function HomepageDemo({
           </SectionCard>
         ))}
 
-        <div className="flex justify-end border-t border-stone-200 pt-4">
-          <p className="text-sm font-semibold text-stone-900">
+        <div className="flex justify-end border-t border-zinc-200 pt-4">
+          <p className="text-sm font-semibold text-zinc-950">
             Total proposed: {formatMoney(RECOMMENDED_TOTAL)}
           </p>
         </div>
@@ -458,17 +454,17 @@ export default function HomepageDemo({
   function renderRecommendationTab() {
     return (
       <div className="space-y-4">
-        <SectionCard className="border-emerald-200 bg-emerald-50/85 p-5 shadow-sm">
+        <SectionCard className="bg-zinc-50 p-5 shadow-sm">
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
-              <p className="app-kicker !text-emerald-700">Recommendation</p>
-              <h3 className="mt-3 text-3xl font-semibold tracking-tight text-emerald-950">
+              <p className="app-kicker !text-zinc-600">Recommendation</p>
+              <h3 className="mt-3 text-3xl font-semibold tracking-tight text-zinc-950">
                 {RECOMMENDATION.outcomeLabel}
               </h3>
-              <p className="mt-3 text-4xl font-semibold tracking-tight text-emerald-950">
+              <p className="mt-3 text-4xl font-semibold tracking-tight text-zinc-950">
                 {formatMoney(RECOMMENDATION.totalRecommended)}
               </p>
-              <p className="mt-2 text-sm text-emerald-900/85">
+              <p className="mt-2 text-sm text-zinc-600">
                 from {formatMoney(DEPOSIT_TOTAL)} deposit · 4 of 4 issues upheld
               </p>
             </div>
@@ -479,13 +475,13 @@ export default function HomepageDemo({
           </div>
 
           <div className="mt-5">
-            <div className="flex items-center justify-between text-sm text-emerald-900">
+            <div className="flex items-center justify-between text-sm text-zinc-700">
               <span>Confidence</span>
               <span className="font-semibold">{RECOMMENDATION.confidence}%</span>
             </div>
             <div className="mt-2 h-3 rounded-full bg-white/80">
               <div
-                className="h-3 rounded-full bg-emerald-500 transition-all"
+                className="h-3 rounded-full bg-zinc-950 transition-all"
                 style={{ width: `${RECOMMENDATION.confidence}%` }}
               />
             </div>
@@ -493,13 +489,13 @@ export default function HomepageDemo({
         </SectionCard>
 
         <SectionCard className="p-5 shadow-sm">
-          <h3 className="text-lg font-semibold text-stone-900">Recommendation rationale</h3>
-          <p className="mt-4 text-sm leading-7 text-stone-700">{RECOMMENDATION.rationale}</p>
+          <h3 className="text-lg font-semibold text-zinc-950">Recommendation rationale</h3>
+          <p className="mt-4 text-sm leading-7 text-zinc-700">{RECOMMENDATION.rationale}</p>
           <div className="mt-4 flex flex-wrap gap-2">
             {RECOMMENDATION.sources.map((source) => (
               <span
                 key={source}
-                className="inline-flex rounded-full border border-stone-200 bg-stone-100 px-3 py-1 text-xs font-medium text-stone-700"
+                className="inline-flex rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs font-medium text-zinc-700"
               >
                 {source}
               </span>
@@ -507,22 +503,22 @@ export default function HomepageDemo({
           </div>
         </SectionCard>
 
-        <div className="rounded-[1.2rem] border border-stone-200 bg-stone-50/70 px-4 py-3 text-sm text-stone-600">
+        <div className="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-600">
           Read-only preview. Manager actions are available in the live product.
         </div>
 
         {isCompact ? null : (
-          <div className="rounded-[1.5rem] border border-emerald-200 bg-emerald-50/80 p-5">
-            <p className="app-kicker text-emerald-900">Ready to use this for real cases?</p>
-            <p className="mt-3 max-w-3xl text-sm leading-7 text-emerald-950/85">
-              This is a preview of a live end-of-tenancy case. Join the rollout list to use Renovo AI
-              with your own agency&apos;s cases.
+          <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-5">
+            <p className="app-kicker">Read-only preview</p>
+            <p className="mt-3 max-w-3xl text-sm leading-7 text-zinc-700">
+              This is a preview of a live end-of-tenancy case. Contact us to discuss how Renovo AI
+              would fit your agency&apos;s checkout workflow.
             </p>
             <Link
-              href="/#waitlist"
-              className="mt-4 inline-flex text-sm font-semibold text-emerald-900 transition hover:text-emerald-950"
+              href="/contact"
+              className="app-primary-button mt-4 inline-flex rounded-md px-5 py-2.5 text-sm font-medium"
             >
-              Join the rollout list →
+              Get started →
             </Link>
           </div>
         )}
@@ -533,50 +529,50 @@ export default function HomepageDemo({
   function renderClaimTab() {
     return (
       <div className="space-y-4">
-        <SectionCard className="border-emerald-200 bg-emerald-50/85 p-5 shadow-sm">
+        <SectionCard className="bg-zinc-50 p-5 shadow-sm">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="text-sm font-semibold text-emerald-900">Partial claim · Draft</p>
-              <p className="mt-3 text-3xl font-semibold tracking-tight text-emerald-950">
+              <p className="text-sm font-semibold text-zinc-700">Partial claim · Draft</p>
+              <p className="mt-3 text-3xl font-semibold tracking-tight text-zinc-950">
                 {formatMoney(RECOMMENDED_TOTAL)} of {formatMoney(DEPOSIT_TOTAL)} deposit
               </p>
-              <p className="mt-2 text-sm text-emerald-900/85">
+              <p className="mt-2 text-sm text-zinc-600">
                 Draft claim reference · {CLAIM_REFERENCE}
               </p>
             </div>
             <DemoBadge
               label="Ready to submit"
-              className="border-emerald-200 bg-emerald-100 text-emerald-800"
+              className="border-zinc-200 bg-zinc-100 text-zinc-800"
             />
           </div>
         </SectionCard>
 
         <SectionCard className="overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-stone-200">
-              <thead className="bg-stone-50/90">
-                <tr className="text-left text-xs font-semibold uppercase tracking-[0.16em] text-stone-500">
+            <table className="min-w-full divide-y divide-zinc-200">
+              <thead className="bg-zinc-50">
+                <tr className="text-left text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">
                   <th className="px-4 py-3">Description</th>
                   <th className="px-4 py-3">Category</th>
                   <th className="px-4 py-3 text-right">Amount</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-stone-200 bg-white">
+              <tbody className="divide-y divide-zinc-200 bg-white">
                 {CLAIM_LINE_ITEMS.map((item) => (
-                  <tr key={item.id} className="text-sm text-stone-700">
-                    <td className="px-4 py-4 font-medium text-stone-900">{item.description}</td>
+                  <tr key={item.id} className="text-sm text-zinc-700">
+                    <td className="px-4 py-4 font-medium text-zinc-950">{item.description}</td>
                     <td className="px-4 py-4">
                       <DemoBadge
                         label={ISSUE_TYPE_LABELS[item.category]}
                         className={ISSUE_TYPE_STYLES[item.category]}
                       />
                     </td>
-                    <td className="px-4 py-4 text-right font-semibold text-stone-900">
+                    <td className="px-4 py-4 text-right font-semibold text-zinc-950">
                       {formatMoney(item.amount)}
                     </td>
                   </tr>
                 ))}
-                <tr className="bg-stone-50/60 text-sm font-semibold text-stone-900">
+                <tr className="bg-zinc-50 text-sm font-semibold text-zinc-950">
                   <td className="px-4 py-4" colSpan={2}>
                     Total
                   </td>
@@ -587,7 +583,7 @@ export default function HomepageDemo({
           </div>
         </SectionCard>
 
-        <div className="rounded-[1.2rem] border border-stone-200 bg-stone-50/70 px-4 py-3 text-sm text-stone-600">
+        <div className="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-600">
           Read-only preview. Submission and export controls are hidden here.
         </div>
       </div>
@@ -596,33 +592,33 @@ export default function HomepageDemo({
 
   return (
     <div
-      className={`overflow-hidden rounded-xl border border-[rgba(15,14,13,0.1)] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.06)] ${
+      className={`overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-[0_8px_24px_rgba(0,0,0,0.06)] ${
         isCompact ? '' : 'min-h-[520px]'
       }`}
     >
-      <div className="border-b border-[rgba(15,14,13,0.1)] bg-[#f2efe9] px-4 py-3 md:px-5">
+      <div className="border-b border-zinc-200 bg-zinc-50 px-4 py-3 md:px-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="hidden items-center gap-1.5 sm:flex">
               <span className="h-2.5 w-2.5 rounded-full bg-red-300" />
               <span className="h-2.5 w-2.5 rounded-full bg-amber-300" />
-              <span className="h-2.5 w-2.5 rounded-full bg-emerald-300" />
+              <span className="h-2.5 w-2.5 rounded-full bg-sky-300" />
             </div>
             <p className="app-kicker">Renovo AI</p>
           </div>
 
-          <p className="min-w-0 flex-1 truncate text-center text-sm font-medium text-[#3d3b37]">
-            {CASE_REFERENCE} - Ashgrove House
+          <p className="min-w-0 flex-1 truncate text-center text-sm font-medium text-zinc-700">
+            {CASE_REFERENCE} · Ashgrove House
           </p>
 
           <DemoBadge
             label="Read-only preview"
-            className="border-emerald-200 bg-emerald-100 text-emerald-800"
+            className="border-zinc-200 bg-zinc-100 text-zinc-800"
           />
         </div>
       </div>
 
-      <div className="border-b border-[rgba(15,14,13,0.1)] bg-white px-3 py-2 md:px-4">
+      <div className="border-b border-zinc-200 bg-white px-3 py-2 md:px-4">
         <div className="flex gap-2 overflow-x-auto pb-1">
           {DEMO_TABS.map((tab) => {
             const active = tab.id === activeTab
@@ -634,8 +630,8 @@ export default function HomepageDemo({
                 onClick={() => setActiveTab(tab.id)}
                 className={`whitespace-nowrap rounded px-4 py-2 text-sm font-medium transition ${
                   active
-                    ? 'bg-stone-900 text-white shadow-sm'
-                    : 'border border-[rgba(15,14,13,0.1)] bg-[#f2efe9] text-[#3d3b37] hover:bg-white hover:text-stone-900'
+                    ? 'bg-zinc-950 text-white shadow-sm'
+                    : 'border border-zinc-200 bg-zinc-50 text-zinc-600 hover:bg-white hover:text-zinc-950'
                 }`}
               >
                 {tab.label}
@@ -645,46 +641,42 @@ export default function HomepageDemo({
         </div>
       </div>
 
-      <div
-        className={`bg-[#faf8f5] ${
-          isCompact ? 'space-y-4 p-4' : 'space-y-5 p-4 md:p-5'
-        }`}
-      >
+      <div className={`bg-zinc-50 ${isCompact ? 'space-y-4 p-4' : 'space-y-5 p-4 md:p-5'}`}>
         <SectionCard className={isCompact ? 'p-4 shadow-sm' : 'p-5 shadow-sm'}>
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-stone-500">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">
                 Case context
               </p>
               <h3
-                className={`mt-2 tracking-tight text-stone-900 ${
+                className={`mt-2 tracking-tight text-zinc-950 ${
                   isCompact ? 'text-xl md:text-2xl' : 'text-2xl'
                 }`}
               >
                 {PROPERTY_ADDRESS}
               </h3>
-              <p className="mt-3 text-sm leading-7 text-stone-600">
+              <p className="mt-3 text-sm leading-7 text-zinc-600">
                 Tenant: {TENANT_NAME} · Landlord: {LANDLORD_NAME} · Move-out date: {MOVE_OUT_DATE}
               </p>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
-              <div className="rounded-[1.1rem] border border-stone-200 bg-stone-50/80 px-4 py-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-stone-500">
+              <div className="rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">
                   Tenancy
                 </p>
-                <p className="mt-2 text-sm font-medium text-stone-900">{TENANCY_DURATION}</p>
+                <p className="mt-2 text-sm font-medium text-zinc-950">{TENANCY_DURATION}</p>
               </div>
-              <div className="rounded-[1.1rem] border border-stone-200 bg-stone-50/80 px-4 py-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-stone-500">
+              <div className="rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">
                   Deposit
                 </p>
-                <p className="mt-2 text-sm font-medium text-stone-900">{DEPOSIT_DISPLAY}</p>
+                <p className="mt-2 text-sm font-medium text-zinc-950">{DEPOSIT_DISPLAY}</p>
               </div>
-              <div className="rounded-[1.1rem] border border-stone-200 bg-stone-50/80 px-4 py-3 sm:col-span-2">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-stone-500">
+              <div className="rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3 sm:col-span-2">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">
                   Rent
                 </p>
-                <p className="mt-2 text-sm font-medium text-stone-900">{RENT_DISPLAY}</p>
+                <p className="mt-2 text-sm font-medium text-zinc-950">{RENT_DISPLAY}</p>
               </div>
             </div>
           </div>

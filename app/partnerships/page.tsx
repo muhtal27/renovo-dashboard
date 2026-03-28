@@ -63,15 +63,15 @@ export default function PartnershipsPage() {
             <div className="mt-6 flex flex-wrap gap-3">
               <Link
                 href="/contact"
-                className="app-primary-button rounded-full px-4 py-2 text-sm font-medium"
+                className="app-primary-button rounded-md px-4 py-2 text-sm font-medium"
               >
                 Contact Renovo AI
               </Link>
               <Link
                 href="/demo"
-                className="app-secondary-button rounded-full px-4 py-2 text-sm font-medium"
+                className="app-secondary-button rounded-md px-4 py-2 text-sm font-medium"
               >
-                View live demo
+                View demo
               </Link>
             </div>
           </section>
@@ -118,15 +118,15 @@ export default function PartnershipsPage() {
               <div className="mt-8 flex flex-wrap justify-center gap-3">
                 <Link
                   href="/contact"
-                  className="app-primary-button rounded-2xl px-5 py-3 text-sm font-medium"
+                  className="app-primary-button rounded-md px-5 py-3 text-sm font-medium"
                 >
                   Contact Renovo AI
                 </Link>
                 <Link
                   href="/demo"
-                  className="app-secondary-button rounded-2xl px-5 py-3 text-sm font-medium"
+                  className="app-secondary-button rounded-md px-5 py-3 text-sm font-medium"
                 >
-                  View live demo
+                  View demo
                 </Link>
               </div>
             </div>

@@ -6,7 +6,7 @@ import { PublicContactForm } from '@/app/public-contact-form'
 export const metadata: Metadata = {
   title: 'Contact | Renovo AI',
   description:
-    'Contact Renovo AI about early access, partnerships, investor enquiries, or general questions.',
+    'Contact Renovo AI about product enquiries, partnerships, investor discussions, or general questions.',
   alternates: {
     canonical: 'https://renovoai.co.uk/contact',
   },
@@ -16,46 +16,49 @@ export default function ContactPage() {
   return (
     <MarketingShell currentPath="/contact">
       <div className="page-shell page-stack">
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_460px] xl:items-start">
+        <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_460px] xl:items-start">
           <section className="page-hero">
             <p className="app-kicker">Contact</p>
-            <h1 className="page-title">Talk to Renovo AI</h1>
-            <p className="page-copy">
-              Get in touch about early access, partnerships, investor enquiries, or general
-              questions. We will reply as soon as we can.
-            </p>
-            <p className="mt-4 text-sm leading-7 text-[#7a7670]">
-              Renovo AI Ltd · Company No. SC833544
+            <h1 className="page-title max-w-[720px]">
+              Talk to Renovo AI about your <em>checkout workflow</em>
+            </h1>
+            <p className="page-copy max-w-[720px]">
+              Use the form for product enquiries, partnerships, investor conversations, or general
+              questions. If you are reviewing how your team handles deduction letters, liability
+              assessments, or dispute packs, include that context and we&apos;ll reply directly.
             </p>
 
-            <div className="mt-8 grid gap-3 text-sm leading-7 text-[#3d3b37]">
+            <div className="mt-8 grid gap-3 text-sm leading-7 text-zinc-600">
               {[
-                'Early access for UK property managers and letting agencies',
-                'Partnership conversations welcome',
-                'Investor and strategic enquiries can use the same form',
+                'Product enquiries for UK property managers and letting agencies',
+                'Partnership conversations across inventory, CRM, and workflow tooling',
+                'Investor and strategic discussions through the same route',
               ].map((item) => (
                 <div key={item} className="flex items-start gap-3">
-                  <span className="mt-[10px] h-1.5 w-1.5 shrink-0 rounded-full bg-[#0f6e56]" />
+                  <span className="mt-[10px] h-1.5 w-1.5 shrink-0 rounded-full bg-zinc-950" />
                   <span>{item}</span>
                 </div>
               ))}
             </div>
 
-            <div className="mt-8 rounded-xl border border-[rgba(15,14,13,0.1)] bg-[#fcfbf9] px-5 py-5">
+            <div className="page-section-compact mt-8 pb-0">
               <p className="app-kicker">Email</p>
-              <p className="mt-3 text-sm leading-7 text-[#3d3b37]">
-                If you prefer, you can also email{' '}
+              <p className="mt-3 max-w-[560px] text-sm leading-7 text-zinc-600">
+                Prefer email? Contact{' '}
                 <a
                   href="mailto:hello@renovoai.co.uk"
-                  className="underline decoration-[rgba(15,14,13,0.18)] underline-offset-4"
+                  className="underline decoration-zinc-300 underline-offset-4"
                 >
                   hello@renovoai.co.uk
                 </a>
                 .
               </p>
               <div className="mt-5">
-                <Link href="/demo" className="app-secondary-button rounded px-4 py-2 text-sm font-medium">
-                  View live demo
+                <Link
+                  href="/demo"
+                  className="app-secondary-button rounded-md px-4 py-2 text-sm font-medium"
+                >
+                  View demo
                 </Link>
               </div>
             </div>

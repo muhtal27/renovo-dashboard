@@ -3,7 +3,7 @@ import { isReasonableText, isValidEmail, rateLimitRequest } from '@/lib/public-r
 import { getSupabaseServiceRoleClient } from '@/lib/supabase-admin'
 
 const ENQUIRY_TYPES = new Set([
-  'Early access',
+  'Product enquiry',
   'Partnerships',
   'Investor enquiry',
   'General enquiry',

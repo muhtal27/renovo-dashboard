@@ -1,6 +1,6 @@
 import './globals.css'
 import type { Metadata } from 'next'
-import { DM_Sans, DM_Serif_Display } from 'next/font/google'
+import { DM_Sans, Instrument_Serif } from 'next/font/google'
 
 const dmSans = DM_Sans({
   subsets: ['latin'],
@@ -8,9 +8,9 @@ const dmSans = DM_Sans({
   weight: ['300', '400', '500', '600', '700'],
 })
 
-const dmSerif = DM_Serif_Display({
+const instrumentSerif = Instrument_Serif({
   subsets: ['latin'],
-  variable: '--font-dm-serif',
+  variable: '--font-instrument-serif',
   weight: ['400'],
 })
 
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     images: ['https://renovoai.co.uk/og-image.png'],
   },
   icons: {
-    icon: '/favicon.ico',
+    icon: '/logo-new.svg',
   },
 }
 
@@ -51,7 +51,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${dmSans.variable} ${dmSerif.variable}`}>{children}</body>
+      <body className={`${dmSans.variable} ${instrumentSerif.variable}`}>{children}</body>
     </html>
   )
 }

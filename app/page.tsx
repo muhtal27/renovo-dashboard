@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
-import HomePageClient from '@/app/home-page-client'
+import { redirect } from 'next/navigation'
+import { PublicHome } from '@/app/public-home'
+import { readOperatorSessionIfNeeded } from '@/lib/operator-session-server'
 
 export const metadata: Metadata = {
   title: 'Renovo AI | End-of-Tenancy Automation',
@@ -25,6 +27,12 @@ export const metadata: Metadata = {
   },
 }
 
-export default function HomePage() {
-  return <HomePageClient />
+export default async function HomePage() {
+  const operatorSession = await readOperatorSessionIfNeeded()
+
+  if (operatorSession.ok) {
+    redirect('/eot')
+  }
+
+  return <PublicHome />
 }
