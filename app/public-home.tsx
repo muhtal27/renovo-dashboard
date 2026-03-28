@@ -1,20 +1,7 @@
-import Image from 'next/image'
 import Link from 'next/link'
 import { MarketingShell } from '@/app/components/MarketingShell'
 
-const headlineStats = [
-  { value: '80%', label: 'Less admin time per checkout' },
-  { value: '<2 min', label: 'AI liability draft' },
-  { value: '100%', label: 'Human-approved decisions' },
-  { value: '1-click', label: 'Dispute evidence packs' },
-] as const
-
-const workflowSteps: Array<{
-  step: string
-  title: string
-  body: string
-  badge?: string
-}> = [
+const workflowSteps = [
   {
     step: '1',
     title: 'Checkout scheduled and report fetched',
@@ -218,7 +205,7 @@ const trustItems = [
 export function PublicHome() {
   return (
     <MarketingShell currentPath="/" navAriaLabel="Homepage">
-      <section className="py-14 md:py-16 xl:py-18">
+      <section className="py-14 md:py-16 xl:py-20">
         <div className="marketing-frame grid gap-10 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] xl:items-center">
           <div className="max-w-[680px]">
             <p className="app-kicker">End-of-tenancy automation</p>
@@ -267,25 +254,18 @@ export function PublicHome() {
           </div>
 
           <div className="overflow-hidden rounded-[1.5rem] bg-white shadow-[0_12px_36px_rgba(0,0,0,0.08)]">
-            <div className="relative aspect-[2940/1912] w-full bg-zinc-100">
-              <Image
-                src="/renovo-dashboard-overview-20260327-185330.jpg"
-                alt="Renovo AI dashboard showing checkout evidence, liability assessment, and recommendation workflow"
-                fill
-                priority
-                sizes="(min-width: 1280px) 560px, (min-width: 768px) 44vw, 92vw"
-                className="object-cover object-top"
+            <div
+              className="relative w-full overflow-hidden rounded-[1.5rem]"
+              style={{ aspectRatio: '1920 / 1022' }}
+            >
+              <iframe
+                src="https://www.loom.com/embed/0f57f8bf75a248dfb7762a4556988bd2"
+                title="Renovo product demo"
+                className="absolute inset-0 h-full w-full border-0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                loading="lazy"
               />
-            </div>
-            <div className="grid grid-cols-2 gap-px bg-zinc-200 md:grid-cols-4">
-              {headlineStats.map((item) => (
-                <div key={item.label} className="bg-white px-5 py-6 text-center">
-                  <p className="text-2xl font-semibold tracking-[-0.03em] text-zinc-950">
-                    {item.value}
-                  </p>
-                  <p className="mt-2 text-xs text-zinc-500">{item.label}</p>
-                </div>
-              ))}
             </div>
           </div>
         </div>
@@ -371,8 +351,8 @@ export function PublicHome() {
               ['Word / Docs', 'Letters'],
               ['Cloud storage', 'Evidence'],
               ['TDS / DPS', 'Disputes'],
-            ].map(([title, detail]) => (
-              <div key={title} className="rounded-lg border border-zinc-200 bg-white px-4 py-5 text-center">
+            ].map(([title, detail], index) => (
+              <div key={`tool-${index}`} className="rounded-lg border border-zinc-200 bg-white px-4 py-5 text-center">
                 <p className="text-sm font-semibold text-zinc-950">{title}</p>
                 <p className="mt-1 text-xs text-zinc-500">{detail}</p>
               </div>
@@ -384,8 +364,8 @@ export function PublicHome() {
               ['6+', 'Tools per checkout'],
               ['2-3 hrs', 'Admin per case'],
               ['0', 'Audit trail'],
-            ].map(([value, label]) => (
-              <div key={label} className="rounded-lg border border-zinc-200 bg-white px-5 py-5 text-center">
+            ].map(([value, label], index) => (
+              <div key={`stat-${index}`} className="rounded-lg border border-zinc-200 bg-white px-5 py-5 text-center">
                 <p className="text-2xl font-semibold tracking-[-0.03em] text-zinc-950">{value}</p>
                 <p className="mt-1 text-sm text-zinc-500">{label}</p>
               </div>
@@ -441,10 +421,13 @@ export function PublicHome() {
                     </div>
                   </div>
                   <div className="flex flex-none items-center gap-2 self-center sm:self-start">
-                    <span className="hidden text-[11px] font-medium uppercase tracking-[0.08em] text-zinc-400 sm:inline">
+                    <span className="hidden text-[11px] font-medium uppercase tracking-[0.08em] text-zinc-400 group-open:!hidden sm:inline">
                       Expand
                     </span>
-                    <span className="text-sm text-zinc-400">⌄</span>
+                    <span className="hidden text-[11px] font-medium uppercase tracking-[0.08em] text-zinc-400 group-open:sm:inline">
+                      Collapse
+                    </span>
+                    <span className="text-sm text-zinc-400 transition-transform group-open:rotate-180">⌄</span>
                   </div>
                 </summary>
                 <div className="border-t border-zinc-200 px-5 py-4">
@@ -540,10 +523,13 @@ export function PublicHome() {
                     </span>
                   </div>
                   <div className="flex flex-none items-center gap-2 self-center sm:self-start">
-                    <span className="hidden text-[11px] font-medium uppercase tracking-[0.08em] text-zinc-400 sm:inline">
+                    <span className="hidden text-[11px] font-medium uppercase tracking-[0.08em] text-zinc-400 group-open:!hidden sm:inline">
                       Expand
                     </span>
-                    <span className="text-sm text-zinc-400">⌄</span>
+                    <span className="hidden text-[11px] font-medium uppercase tracking-[0.08em] text-zinc-400 group-open:sm:inline">
+                      Collapse
+                    </span>
+                    <span className="text-sm text-zinc-400 transition-transform group-open:rotate-180">⌄</span>
                   </div>
                 </summary>
                 <div className="grid gap-3 px-6 pb-6 md:grid-cols-[minmax(0,1fr)_36px_minmax(0,1fr)] md:items-stretch">
