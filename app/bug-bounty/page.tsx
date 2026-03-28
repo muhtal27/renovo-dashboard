@@ -1,6 +1,6 @@
-import type { Metadata } from 'next'
 import Link from 'next/link'
 import { MarketingShell } from '@/app/components/MarketingShell'
+import { createMarketingMetadata } from '@/lib/marketing-metadata'
 
 const reportItems = [
   'A clear summary of the issue and the affected area',
@@ -31,14 +31,12 @@ const disclosureGuidelines = [
   'Stop testing and contact us immediately if you believe you have reached sensitive live data.',
 ] as const
 
-export const metadata: Metadata = {
+export const metadata = createMarketingMetadata({
   title: 'Bug Bounty | Renovo AI',
   description:
     'Responsible disclosure policy for Renovo AI, including reporting instructions, scope, disclosure expectations, and discretionary compensation guidance.',
-  alternates: {
-    canonical: 'https://renovoai.co.uk/bug-bounty',
-  },
-}
+  path: '/bug-bounty',
+})
 
 export default function BugBountyPage() {
   return (

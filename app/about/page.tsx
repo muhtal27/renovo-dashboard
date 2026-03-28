@@ -1,6 +1,10 @@
-import type { Metadata } from 'next'
 import Link from 'next/link'
 import { MarketingShell } from '@/app/components/MarketingShell'
+import {
+  createMarketingMetadata,
+  createWebPageJsonLd,
+  serializeJsonLd,
+} from '@/lib/marketing-metadata'
 
 const principles = [
   {
@@ -24,19 +28,33 @@ const companyFacts = [
   ['VAT', 'GB483379648'],
 ] as const
 
-export const metadata: Metadata = {
-  title: 'About | Renovo AI',
-  description:
-    'Corporate overview of Renovo AI, the company focus, operating principles, and product approach for UK letting agencies.',
-  alternates: {
-    canonical: 'https://renovoai.co.uk/about',
-  },
-}
+const title = 'About | Renovo AI'
+const description =
+  'Corporate overview of Renovo AI, the company focus, operating principles, and product approach for UK letting agencies.'
+
+export const metadata = createMarketingMetadata({
+  title,
+  description,
+  path: '/about',
+})
 
 export default function AboutPage() {
   return (
-    <MarketingShell currentPath="/about">
-      <div className="page-shell page-stack">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: serializeJsonLd([
+            createWebPageJsonLd({
+              path: '/about',
+              title,
+              description,
+            }),
+          ]),
+        }}
+      />
+      <MarketingShell currentPath="/about">
+        <div className="page-shell page-stack">
         <section className="page-hero">
           <p className="app-kicker">About</p>
           <h1 className="page-title max-w-[920px]">
@@ -138,7 +156,8 @@ export default function AboutPage() {
             </div>
           </div>
         </section>
-      </div>
-    </MarketingShell>
+        </div>
+      </MarketingShell>
+    </>
   )
 }

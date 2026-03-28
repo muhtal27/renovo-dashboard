@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { KeyboardEvent, useId, useState } from 'react'
 
 type DemoTab = 'overview' | 'evidence' | 'issues' | 'recommendation' | 'claim'
 type DocumentRole = 'check_in' | 'check_out' | 'photo'
@@ -275,8 +275,44 @@ export default function HomepageDemo({
 }: {
   variant?: 'full' | 'compact'
 }) {
+  const tabGroupId = useId()
   const [activeTab, setActiveTab] = useState<DemoTab>('recommendation')
   const isCompact = variant === 'compact'
+
+  function getTabId(tabId: DemoTab) {
+    return `${tabGroupId}-${tabId}-tab`
+  }
+
+  function getPanelId(tabId: DemoTab) {
+    return `${tabGroupId}-${tabId}-panel`
+  }
+
+  function handleTabKeyDown(event: KeyboardEvent<HTMLButtonElement>, tabId: DemoTab) {
+    const currentIndex = DEMO_TABS.findIndex((tab) => tab.id === tabId)
+
+    if (currentIndex === -1) {
+      return
+    }
+
+    const moveBy =
+      event.key === 'ArrowRight' || event.key === 'ArrowDown'
+        ? 1
+        : event.key === 'ArrowLeft' || event.key === 'ArrowUp'
+          ? -1
+          : 0
+
+    if (moveBy === 0) {
+      return
+    }
+
+    event.preventDefault()
+    const nextIndex = (currentIndex + moveBy + DEMO_TABS.length) % DEMO_TABS.length
+    const nextTab = DEMO_TABS[nextIndex]
+    setActiveTab(nextTab.id)
+
+    const nextButton = document.getElementById(getTabId(nextTab.id))
+    nextButton?.focus()
+  }
 
   function renderOverviewTab() {
     return (
@@ -619,15 +655,25 @@ export default function HomepageDemo({
       </div>
 
       <div className="border-b border-zinc-200 bg-white px-3 py-2 md:px-4">
-        <div className="flex gap-2 overflow-x-auto pb-1">
+        <div
+          role="tablist"
+          aria-label="Read-only demo sections"
+          className="flex gap-2 overflow-x-auto pb-1"
+        >
           {DEMO_TABS.map((tab) => {
             const active = tab.id === activeTab
 
             return (
               <button
+                id={getTabId(tab.id)}
                 key={tab.id}
                 type="button"
+                role="tab"
+                aria-selected={active}
+                aria-controls={getPanelId(tab.id)}
+                tabIndex={active ? 0 : -1}
                 onClick={() => setActiveTab(tab.id)}
+                onKeyDown={(event) => handleTabKeyDown(event, tab.id)}
                 className={`whitespace-nowrap rounded px-4 py-2 text-sm font-medium transition ${
                   active
                     ? 'bg-zinc-950 text-white shadow-sm'
@@ -682,11 +728,46 @@ export default function HomepageDemo({
           </div>
         </SectionCard>
 
-        {activeTab === 'overview' ? renderOverviewTab() : null}
-        {activeTab === 'evidence' ? renderEvidenceTab() : null}
-        {activeTab === 'issues' ? renderIssuesTab() : null}
-        {activeTab === 'recommendation' ? renderRecommendationTab() : null}
-        {activeTab === 'claim' ? renderClaimTab() : null}
+        <div
+          id={getPanelId('overview')}
+          role="tabpanel"
+          aria-labelledby={getTabId('overview')}
+          hidden={activeTab !== 'overview'}
+        >
+          {activeTab === 'overview' ? renderOverviewTab() : null}
+        </div>
+        <div
+          id={getPanelId('evidence')}
+          role="tabpanel"
+          aria-labelledby={getTabId('evidence')}
+          hidden={activeTab !== 'evidence'}
+        >
+          {activeTab === 'evidence' ? renderEvidenceTab() : null}
+        </div>
+        <div
+          id={getPanelId('issues')}
+          role="tabpanel"
+          aria-labelledby={getTabId('issues')}
+          hidden={activeTab !== 'issues'}
+        >
+          {activeTab === 'issues' ? renderIssuesTab() : null}
+        </div>
+        <div
+          id={getPanelId('recommendation')}
+          role="tabpanel"
+          aria-labelledby={getTabId('recommendation')}
+          hidden={activeTab !== 'recommendation'}
+        >
+          {activeTab === 'recommendation' ? renderRecommendationTab() : null}
+        </div>
+        <div
+          id={getPanelId('claim')}
+          role="tabpanel"
+          aria-labelledby={getTabId('claim')}
+          hidden={activeTab !== 'claim'}
+        >
+          {activeTab === 'claim' ? renderClaimTab() : null}
+        </div>
       </div>
     </div>
   )

@@ -92,7 +92,7 @@ const plans: Plan[] = [
   },
 ] as const
 
-const faqs = [
+export const pricingFaqs = [
   {
     q: 'How are the ROI examples calculated?',
     a: 'They are based on a £23,500 property manager salary handling 30 checkouts per month at 2.5 hours each. That equates to around £920 per month of salary time spent on manual checkout administration before considering dispute rework.',
@@ -195,7 +195,7 @@ export default function PricingPageClient() {
           </div>
 
           <div className="mt-8 divide-y divide-zinc-200 rounded-xl border border-zinc-200">
-            {faqs.map((item) => (
+            {pricingFaqs.map((item) => (
               <details key={item.q} className="group bg-white px-5 py-4">
                 <summary className="cursor-pointer list-none text-sm font-medium text-zinc-950">
                   {item.q}
@@ -226,6 +226,29 @@ export default function PricingPageClient() {
               className="app-secondary-button rounded-md px-6 py-3 text-sm font-medium"
             >
               View demo
+            </Link>
+          </div>
+          <p className="mt-4 text-sm text-zinc-500">
+            Renovo AI Ltd · SC833544 · VAT GB483379648
+          </p>
+          <div className="mt-3 flex flex-wrap justify-center gap-3 text-sm">
+            <Link
+              href="/compliance"
+              className="text-zinc-600 underline decoration-zinc-300 underline-offset-4"
+            >
+              Compliance
+            </Link>
+            <Link
+              href="/privacy"
+              className="text-zinc-600 underline decoration-zinc-300 underline-offset-4"
+            >
+              Privacy
+            </Link>
+            <Link
+              href="/contact"
+              className="text-zinc-600 underline decoration-zinc-300 underline-offset-4"
+            >
+              Contact Renovo AI
             </Link>
           </div>
         </section>

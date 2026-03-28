@@ -244,21 +244,36 @@ export function PublicHome() {
                 View demo
               </Link>
             </div>
-            <div className="mt-3">
-              <span className="inline-flex items-center rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs font-medium text-zinc-600">
+            <div className="mt-3 flex flex-wrap items-center gap-2.5 text-xs text-zinc-600">
+              <span className="inline-flex items-center rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 font-medium">
                 GDPR Compliance
               </span>
+              <span className="inline-flex items-center rounded-full border border-zinc-200 bg-white px-3 py-1">
+                Renovo AI Ltd · SC833544 · VAT GB483379648
+              </span>
+              <Link
+                href="/compliance"
+                className="underline decoration-zinc-300 underline-offset-4"
+              >
+                Compliance
+              </Link>
+              <Link
+                href="/bug-bounty"
+                className="underline decoration-zinc-300 underline-offset-4"
+              >
+                Security
+              </Link>
             </div>
           </div>
 
           <div className="overflow-hidden rounded-[1.5rem] bg-white shadow-[0_12px_36px_rgba(0,0,0,0.08)]">
             <div className="relative aspect-[2940/1912] w-full bg-zinc-100">
               <Image
-                src="/renovo-dashboard-overview-20260327-185330.png"
+                src="/renovo-dashboard-overview-20260327-185330.jpg"
                 alt="Renovo AI dashboard showing checkout evidence, liability assessment, and recommendation workflow"
                 fill
                 priority
-                sizes="(min-width: 1280px) 560px, (min-width: 768px) 44vw, 100vw"
+                sizes="(min-width: 1280px) 560px, (min-width: 768px) 44vw, 92vw"
                 className="object-cover object-top"
               />
             </div>
@@ -648,6 +663,26 @@ export function PublicHome() {
               className="app-primary-button rounded-md px-6 py-3 text-sm font-medium"
             >
               Get started →
+            </Link>
+          </div>
+          <div className="mt-4 flex flex-wrap justify-center gap-3 text-sm">
+            <Link
+              href="/compliance"
+              className="text-zinc-600 underline decoration-zinc-300 underline-offset-4"
+            >
+              Compliance
+            </Link>
+            <Link
+              href="/privacy"
+              className="text-zinc-600 underline decoration-zinc-300 underline-offset-4"
+            >
+              Privacy
+            </Link>
+            <Link
+              href="/contact"
+              className="text-zinc-600 underline decoration-zinc-300 underline-offset-4"
+            >
+              Contact Renovo AI
             </Link>
           </div>
           <p className="mt-6 text-center text-sm text-zinc-500">

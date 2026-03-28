@@ -1,6 +1,6 @@
-import type { Metadata } from 'next'
 import Link from 'next/link'
 import { MarketingShell } from '@/app/components/MarketingShell'
+import { createMarketingMetadata } from '@/lib/marketing-metadata'
 
 const workflowSteps = [
   {
@@ -65,14 +65,12 @@ const integrationAreas = [
   },
 ] as const
 
-export const metadata: Metadata = {
+export const metadata = createMarketingMetadata({
   title: 'How It Works | Renovo AI',
   description:
     'See how Renovo AI moves a checkout from evidence intake to liability assessment, landlord review, deposit release, and dispute pack generation.',
-  alternates: {
-    canonical: 'https://renovoai.co.uk/how-it-works',
-  },
-}
+  path: '/how-it-works',
+})
 
 export default function HowItWorksPage() {
   return (

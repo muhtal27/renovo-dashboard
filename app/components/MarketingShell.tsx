@@ -89,7 +89,10 @@ export function MarketingShell({
   navAriaLabel = 'Marketing',
 }: MarketingShellProps) {
   return (
-    <main className="marketing-page min-h-screen bg-white text-zinc-900">
+    <div className="marketing-page min-h-screen bg-white text-zinc-900">
+      <a href="#main-content" className="skip-link">
+        Skip to content
+      </a>
       <header className="sticky top-0 z-30 border-b border-zinc-200 bg-white/95 backdrop-blur">
         <div className="marketing-frame flex min-h-[60px] items-center justify-between gap-3 py-2.5 lg:min-h-[64px] lg:gap-6">
           <Link
@@ -170,7 +173,9 @@ export function MarketingShell({
         </div>
       </header>
 
-      <div>{children}</div>
+      <main id="main-content" tabIndex={-1}>
+        {children}
+      </main>
 
       <footer className="border-t border-zinc-200 bg-white py-10 text-zinc-500">
         <div className="marketing-frame">
@@ -244,6 +249,6 @@ export function MarketingShell({
           </div>
         </div>
       </footer>
-    </main>
+    </div>
   )
 }

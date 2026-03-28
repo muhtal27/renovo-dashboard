@@ -1,6 +1,6 @@
-import type { Metadata } from 'next'
 import Link from 'next/link'
 import { MarketingShell } from '@/app/components/MarketingShell'
+import { createMarketingMetadata } from '@/lib/marketing-metadata'
 
 const termsSections = [
   {
@@ -29,13 +29,11 @@ const termsSections = [
   },
 ] as const
 
-export const metadata: Metadata = {
+export const metadata = createMarketingMetadata({
   title: 'Terms | Renovo AI',
   description: 'Website terms for the Renovo AI marketing site, demo, and product enquiry routes.',
-  alternates: {
-    canonical: 'https://renovoai.co.uk/terms',
-  },
-}
+  path: '/terms',
+})
 
 export default function TermsPage() {
   return (

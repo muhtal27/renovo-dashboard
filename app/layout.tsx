@@ -1,6 +1,12 @@
 import './globals.css'
 import type { Metadata } from 'next'
 import { DM_Sans, Instrument_Serif } from 'next/font/google'
+import {
+  defaultDescription,
+  ogImagePath,
+  siteName,
+  siteUrl,
+} from '@/lib/marketing-metadata'
 
 const dmSans = DM_Sans({
   subsets: ['latin'],
@@ -14,33 +20,29 @@ const instrumentSerif = Instrument_Serif({
   weight: ['400'],
 })
 
-const defaultSiteUrl = 'https://renovoai.co.uk'
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ??
-  (process.env.VERCEL_PROJECT_PRODUCTION_URL
-    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-    : defaultSiteUrl)
-
 export const metadata: Metadata = {
-  metadataBase: siteUrl ? new URL(siteUrl) : undefined,
+  metadataBase: new URL(siteUrl),
   title: 'Renovo AI | End-of-Tenancy Automation',
-  description:
-    'Renovo AI automates end-of-tenancy work for UK property managers and letting agencies, from evidence review and issue assessment to claim-ready output.',
+  description: defaultDescription,
+  applicationName: siteName,
   openGraph: {
     title: 'Renovo AI | End-of-Tenancy Automation',
-    description:
-      'Renovo AI automates end-of-tenancy work for UK property managers and letting agencies, from evidence review and issue assessment to claim-ready output.',
+    description: defaultDescription,
     url: siteUrl,
-    siteName: 'Renovo AI',
+    siteName,
+    locale: 'en_GB',
     type: 'website',
-    images: [{ url: 'https://renovoai.co.uk/og-image.png', width: 1200, height: 630 }],
+    images: [{ url: ogImagePath, width: 1200, height: 630, alt: `${siteName} marketing preview` }],
   },
   twitter: {
     title: 'Renovo AI | End-of-Tenancy Automation',
-    images: ['https://renovoai.co.uk/og-image.png'],
+    description: defaultDescription,
+    card: 'summary_large_image',
+    images: [ogImagePath],
   },
-  icons: {
-    icon: '/logo-new.svg',
+  robots: {
+    index: true,
+    follow: true,
   },
 }
 

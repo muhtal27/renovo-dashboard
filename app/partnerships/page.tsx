@@ -1,6 +1,6 @@
-import type { Metadata } from 'next'
 import Link from 'next/link'
 import { MarketingShell } from '@/app/components/MarketingShell'
+import { createMarketingMetadata } from '@/lib/marketing-metadata'
 
 const partnerTypes = [
   {
@@ -36,14 +36,12 @@ const handoffAreas = [
   },
 ] as const
 
-export const metadata: Metadata = {
+export const metadata = createMarketingMetadata({
   title: 'Partnerships | Renovo AI',
   description:
     'Explore partnership discussions with Renovo AI across inventory systems, property management software, and end-of-tenancy workflow partners.',
-  alternates: {
-    canonical: 'https://renovoai.co.uk/partnerships',
-  },
-}
+  path: '/partnerships',
+})
 
 export default function PartnershipsPage() {
   return (

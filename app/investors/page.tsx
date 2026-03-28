@@ -1,6 +1,6 @@
-import type { Metadata } from 'next'
 import Link from 'next/link'
 import { MarketingShell } from '@/app/components/MarketingShell'
+import { createMarketingMetadata } from '@/lib/marketing-metadata'
 
 const whyItMatters = [
   'Checkout administration is still handled manually across reports, photos, email, and memory in many agencies.',
@@ -14,14 +14,12 @@ const companyPoints = [
   'The company is being built with a narrow operational scope rather than a broad property software platform pitch.',
 ] as const
 
-export const metadata: Metadata = {
+export const metadata = createMarketingMetadata({
   title: 'Investors | Renovo AI',
   description:
     'Investor overview for Renovo AI, including the workflow problem, product focus, and company one-pager.',
-  alternates: {
-    canonical: 'https://renovoai.co.uk/investors',
-  },
-}
+  path: '/investors',
+})
 
 export default function InvestorsPage() {
   return (

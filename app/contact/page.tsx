@@ -1,21 +1,41 @@
-import type { Metadata } from 'next'
 import Link from 'next/link'
 import { MarketingShell } from '@/app/components/MarketingShell'
 import { PublicContactForm } from '@/app/public-contact-form'
+import {
+  createContactPageJsonLd,
+  createMarketingMetadata,
+  createWebPageJsonLd,
+  serializeJsonLd,
+} from '@/lib/marketing-metadata'
 
-export const metadata: Metadata = {
-  title: 'Contact | Renovo AI',
-  description:
-    'Contact Renovo AI about product enquiries, partnerships, investor discussions, or general questions.',
-  alternates: {
-    canonical: 'https://renovoai.co.uk/contact',
-  },
-}
+const title = 'Contact | Renovo AI'
+const description =
+  'Contact Renovo AI about product enquiries, partnerships, investor discussions, or general questions.'
+
+export const metadata = createMarketingMetadata({
+  title,
+  description,
+  path: '/contact',
+})
 
 export default function ContactPage() {
   return (
-    <MarketingShell currentPath="/contact">
-      <div className="page-shell page-stack">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: serializeJsonLd([
+            createContactPageJsonLd(),
+            createWebPageJsonLd({
+              path: '/contact',
+              title,
+              description,
+            }),
+          ]),
+        }}
+      />
+      <MarketingShell currentPath="/contact">
+        <div className="page-shell page-stack">
         <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_460px] xl:items-start">
           <section className="page-hero">
             <p className="app-kicker">Contact</p>
@@ -62,11 +82,40 @@ export default function ContactPage() {
                 </Link>
               </div>
             </div>
+
+            <div className="mt-8 rounded-xl border border-zinc-200 bg-zinc-50 p-5">
+              <p className="app-kicker">Company details</p>
+              <div className="mt-4 space-y-2 text-sm leading-7 text-zinc-600">
+                <p>Renovo AI Ltd · SC833544 · VAT GB483379648</p>
+                <p>Edinburgh, Scotland</p>
+              </div>
+              <div className="mt-4 flex flex-wrap gap-3 text-sm">
+                <Link
+                  href="/compliance"
+                  className="text-zinc-600 underline decoration-zinc-300 underline-offset-4"
+                >
+                  Compliance
+                </Link>
+                <Link
+                  href="/privacy"
+                  className="text-zinc-600 underline decoration-zinc-300 underline-offset-4"
+                >
+                  Privacy
+                </Link>
+                <Link
+                  href="/bug-bounty"
+                  className="text-zinc-600 underline decoration-zinc-300 underline-offset-4"
+                >
+                  Security
+                </Link>
+              </div>
+            </div>
           </section>
 
           <PublicContactForm sourcePage="/contact" />
         </div>
-      </div>
-    </MarketingShell>
+        </div>
+      </MarketingShell>
+    </>
   )
 }

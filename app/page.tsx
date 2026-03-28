@@ -1,38 +1,40 @@
-import type { Metadata } from 'next'
-import { redirect } from 'next/navigation'
 import { PublicHome } from '@/app/public-home'
-import { readOperatorSessionIfNeeded } from '@/lib/operator-session-server'
+import {
+  createMarketingMetadata,
+  createOrganizationJsonLd,
+  createWebPageJsonLd,
+  createWebsiteJsonLd,
+  serializeJsonLd,
+} from '@/lib/marketing-metadata'
 
-export const metadata: Metadata = {
-  title: 'Renovo AI | End-of-Tenancy Automation',
-  description:
-    'Renovo AI automates end-of-tenancy work for UK property managers and letting agencies, from evidence review and issue assessment to claim-ready output.',
-  alternates: {
-    canonical: 'https://renovoai.co.uk/',
-  },
-  openGraph: {
-    title: 'Renovo AI | End-of-Tenancy Automation',
-    description:
-      'Renovo AI automates end-of-tenancy work for UK property managers and letting agencies, from evidence review and issue assessment to claim-ready output.',
-    url: 'https://renovoai.co.uk/',
-    siteName: 'Renovo AI',
-    type: 'website',
-    images: [{ url: 'https://renovoai.co.uk/og-image.png', width: 1200, height: 630 }],
-  },
-  twitter: {
-    title: 'Renovo AI | End-of-Tenancy Automation',
-    description:
-      'Renovo AI automates end-of-tenancy work for UK property managers and letting agencies, from evidence review and issue assessment to claim-ready output.',
-    images: ['https://renovoai.co.uk/og-image.png'],
-  },
-}
+const title = 'Renovo AI | End-of-Tenancy Automation'
+const description =
+  'Renovo AI automates end-of-tenancy work for UK property managers and letting agencies, from evidence review and issue assessment to claim-ready output.'
 
-export default async function HomePage() {
-  const operatorSession = await readOperatorSessionIfNeeded()
+export const metadata = createMarketingMetadata({
+  title,
+  description,
+  path: '/',
+})
 
-  if (operatorSession.ok) {
-    redirect('/eot')
-  }
-
-  return <PublicHome />
+export default function HomePage() {
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: serializeJsonLd([
+            createOrganizationJsonLd(),
+            createWebsiteJsonLd(),
+            createWebPageJsonLd({
+              path: '/',
+              title,
+              description,
+            }),
+          ]),
+        }}
+      />
+      <PublicHome />
+    </>
+  )
 }

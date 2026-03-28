@@ -1,21 +1,39 @@
-import type { Metadata } from 'next'
 import Link from 'next/link'
 import HomepageDemo from '@/app/components/HomepageDemo'
 import { MarketingShell } from '@/app/components/MarketingShell'
+import {
+  createMarketingMetadata,
+  createWebPageJsonLd,
+  serializeJsonLd,
+} from '@/lib/marketing-metadata'
 
-export const metadata: Metadata = {
-  title: 'Demo | Renovo AI',
-  description:
-    'View the Renovo AI read-only demo showing how checkout evidence becomes a liability assessment, deduction letter, and dispute-ready pack.',
-  alternates: {
-    canonical: 'https://renovoai.co.uk/demo',
-  },
-}
+const title = 'Demo | Renovo AI'
+const description =
+  'View the Renovo AI read-only demo showing how checkout evidence becomes a liability assessment, deduction letter, and dispute-ready pack.'
+
+export const metadata = createMarketingMetadata({
+  title,
+  description,
+  path: '/demo',
+})
 
 export default function DemoPage() {
   return (
-    <MarketingShell currentPath="/demo">
-      <div className="page-shell page-stack">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: serializeJsonLd([
+            createWebPageJsonLd({
+              path: '/demo',
+              title,
+              description,
+            }),
+          ]),
+        }}
+      />
+      <MarketingShell currentPath="/demo">
+        <div className="page-shell page-stack">
         <section className="page-hero">
           <p className="app-kicker">Demo</p>
           <h1 className="page-title max-w-[820px]">
@@ -47,7 +65,8 @@ export default function DemoPage() {
         </section>
 
         <HomepageDemo />
-      </div>
-    </MarketingShell>
+        </div>
+      </MarketingShell>
+    </>
   )
 }

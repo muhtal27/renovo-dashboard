@@ -1,6 +1,6 @@
-import type { Metadata } from 'next'
 import Link from 'next/link'
 import { MarketingShell } from '@/app/components/MarketingShell'
+import { createMarketingMetadata } from '@/lib/marketing-metadata'
 
 const controls = [
   {
@@ -29,14 +29,12 @@ const controls = [
   },
 ] as const
 
-export const metadata: Metadata = {
+export const metadata = createMarketingMetadata({
   title: 'Compliance | Renovo AI',
   description:
     'Overview of Renovo AI compliance, privacy, hosting, access control, audit trail, and information handling practices.',
-  alternates: {
-    canonical: 'https://renovoai.co.uk/compliance',
-  },
-}
+  path: '/compliance',
+})
 
 export default function CompliancePage() {
   return (

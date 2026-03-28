@@ -94,7 +94,8 @@ a:focus-visible,
 button:focus-visible,
 input:focus-visible,
 textarea:focus-visible,
-select:focus-visible {
+select:focus-visible,
+summary:focus-visible {
   box-shadow:
     0 0 0 2px rgba(255, 253, 249, 0.98),
     0 0 0 5px rgba(47, 87, 75, 0.3);
@@ -102,6 +103,10 @@ select:focus-visible {
 
 a:focus-visible,
 button:focus-visible {
+  border-radius: 0.9rem;
+}
+
+summary:focus-visible {
   border-radius: 0.9rem;
 }
 
@@ -113,6 +118,25 @@ a:focus-visible {
 ::selection {
   background: rgba(31, 107, 88, 0.18);
   color: var(--foreground);
+}
+
+.skip-link {
+  left: 1rem;
+  position: fixed;
+  top: 1rem;
+  transform: translateY(-200%);
+  z-index: 60;
+  background: #18181b;
+  color: #ffffff;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
 }
 
 .app-surface {
@@ -265,6 +289,13 @@ a:focus-visible {
   box-shadow: none;
 }
 
+.app-field[aria-invalid='true'],
+.app-select[aria-invalid='true'],
+.app-textarea[aria-invalid='true'] {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 1px rgba(220, 38, 38, 0.14);
+}
+
 .app-field,
 .app-select {
   min-height: 3.25rem;
@@ -293,6 +324,20 @@ a:focus-visible {
 .app-textarea:disabled {
   background: rgba(244, 239, 231, 0.72);
   color: #8b8072;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 .app-card-muted {
