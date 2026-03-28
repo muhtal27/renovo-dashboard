@@ -1,7 +1,14 @@
 import Link from 'next/link'
 import { MarketingShell } from '@/app/components/MarketingShell'
 
-const workflowSteps = [
+type WorkflowStep = {
+  step: string
+  title: string
+  body: string
+  badge?: string
+}
+
+const workflowSteps: readonly WorkflowStep[] = [
   {
     step: '1',
     title: 'Checkout scheduled and report fetched',
@@ -37,7 +44,7 @@ const workflowSteps = [
     body: 'If escalated to TDS, DPS, or mydeposits, Renovo produces the evidence pack with the timeline, reasoning, references, and supporting files already assembled.',
     badge: 'One-click pack',
   },
-] as const
+]
 
 const integrationItems = [
   { name: 'Reapit', type: 'Property CRM' },
