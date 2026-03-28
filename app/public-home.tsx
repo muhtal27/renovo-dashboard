@@ -218,8 +218,8 @@ const trustItems = [
 export function PublicHome() {
   return (
     <MarketingShell currentPath="/" navAriaLabel="Homepage">
-      <section className="py-16 md:py-20">
-        <div className="marketing-frame grid gap-12 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] xl:items-center">
+      <section className="py-14 md:py-16 xl:py-18">
+        <div className="marketing-frame grid gap-10 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] xl:items-center">
           <div className="max-w-[680px]">
             <p className="app-kicker">End-of-tenancy automation</p>
             <h1 className="mt-4 text-[clamp(2.5rem,5vw,4.1rem)] leading-[1.03] tracking-[-0.04em] text-zinc-950">
@@ -243,6 +243,11 @@ export function PublicHome() {
               >
                 View demo
               </Link>
+            </div>
+            <div className="mt-3">
+              <span className="inline-flex items-center rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs font-medium text-zinc-600">
+                GDPR Compliance
+              </span>
             </div>
           </div>
 
@@ -271,7 +276,7 @@ export function PublicHome() {
         </div>
       </section>
 
-      <section className="py-16">
+      <section className="py-14 md:py-16">
         <div className="marketing-frame grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.95fr)] lg:items-center">
           <div>
             <p className="app-kicker">Regulatory change</p>
@@ -330,7 +335,7 @@ export function PublicHome() {
         </div>
       </section>
 
-      <section className="border-y border-zinc-200 bg-zinc-50 py-16">
+      <section className="border-y border-zinc-200 bg-zinc-50 py-14 md:py-16">
         <div className="marketing-frame">
           <div className="mx-auto max-w-[620px] text-center">
             <p className="app-kicker">The problem</p>
@@ -384,7 +389,7 @@ export function PublicHome() {
         </div>
       </section>
 
-      <section className="py-16">
+      <section className="py-14 md:py-16">
         <div className="marketing-frame">
           <div className="mx-auto max-w-[720px] text-center">
             <p className="app-kicker">How it works</p>
@@ -397,20 +402,20 @@ export function PublicHome() {
             </p>
           </div>
 
-          <div className="mx-auto mt-12 flex max-w-[780px] flex-col gap-3">
+          <div className="mx-auto mt-10 flex max-w-[780px] flex-col gap-3">
             {workflowSteps.map((item, index) => (
               <details
                 key={item.step}
                 className="group rounded-xl border border-zinc-200 bg-white open:border-zinc-300"
                 open={index === 0}
               >
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 marker:content-none">
-                  <div className="flex min-w-0 items-center gap-4">
+                <summary className="flex cursor-pointer list-none items-start justify-between gap-4 px-5 py-4 marker:content-none">
+                  <div className="flex min-w-0 items-start gap-4">
                     <div className="flex h-10 w-10 flex-none items-center justify-center rounded-lg bg-zinc-950 text-sm font-semibold text-white">
                       {item.step}
                     </div>
                     <div className="min-w-0">
-                      <h3 className="text-left text-base font-semibold text-zinc-950">
+                      <h3 className="text-left text-base font-semibold leading-6 text-zinc-950">
                         {item.title}
                       </h3>
                       {item.badge ? (
@@ -420,7 +425,7 @@ export function PublicHome() {
                       ) : null}
                     </div>
                   </div>
-                  <div className="flex flex-none items-center gap-3">
+                  <div className="flex flex-none items-center gap-2 self-center sm:self-start">
                     <span className="hidden text-[11px] font-medium uppercase tracking-[0.08em] text-zinc-400 sm:inline">
                       Expand
                     </span>
@@ -436,7 +441,7 @@ export function PublicHome() {
         </div>
       </section>
 
-      <section className="py-16">
+      <section className="py-14 md:py-16">
         <div className="marketing-frame">
           <div className="mx-auto max-w-[720px] text-center">
             <p className="app-kicker">Integrations</p>
@@ -466,7 +471,7 @@ export function PublicHome() {
         </div>
       </section>
 
-      <section className="border-y border-zinc-200 bg-zinc-50 py-16">
+      <section className="border-y border-zinc-200 bg-zinc-50 py-14 md:py-16">
         <div className="marketing-frame">
           <div className="text-center">
             <p className="app-kicker">The platform</p>
@@ -494,7 +499,7 @@ export function PublicHome() {
         </div>
       </section>
 
-      <section className="py-16">
+      <section className="py-14 md:py-16">
         <div className="marketing-frame">
           <div className="mx-auto max-w-[620px] text-center">
             <p className="app-kicker">Before and after</p>
@@ -510,14 +515,16 @@ export function PublicHome() {
                 className="group rounded-xl border border-zinc-200 bg-white open:border-zinc-300"
                 open={index === 0}
               >
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-6 py-5 marker:content-none">
-                  <div className="flex items-center gap-4">
+                <summary className="flex cursor-pointer list-none items-start justify-between gap-4 px-6 py-5 marker:content-none">
+                  <div className="flex min-w-0 items-start gap-4">
                     <span className="font-serif text-3xl italic leading-none text-zinc-300">
                       {item.number}
                     </span>
-                    <span className="text-base font-semibold text-zinc-950">{item.title}</span>
+                    <span className="min-w-0 text-base font-semibold leading-6 text-zinc-950">
+                      {item.title}
+                    </span>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-none items-center gap-2 self-center sm:self-start">
                     <span className="hidden text-[11px] font-medium uppercase tracking-[0.08em] text-zinc-400 sm:inline">
                       Expand
                     </span>
@@ -547,7 +554,7 @@ export function PublicHome() {
         </div>
       </section>
 
-      <section className="border-t border-zinc-200 py-16">
+      <section className="border-t border-zinc-200 py-14 md:py-16">
         <div className="marketing-frame grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.95fr)] lg:items-center">
           <div>
             <p className="app-kicker">Human control</p>
@@ -604,9 +611,9 @@ export function PublicHome() {
         </div>
       </section>
 
-      <section className="border-t border-zinc-200 py-16">
+      <section className="border-t border-zinc-200 py-12 md:py-14">
         <div className="marketing-frame">
-          <div className="flex flex-wrap justify-center gap-4 xl:gap-10">
+          <div className="flex flex-wrap justify-center gap-x-6 gap-y-4 xl:gap-x-10">
             {trustItems.map((item) => (
               <article key={item.title} className="flex items-center gap-3">
                 <div className="flex h-7 w-7 items-center justify-center rounded-md bg-zinc-100 text-xs font-semibold text-zinc-500">
@@ -622,7 +629,7 @@ export function PublicHome() {
         </div>
       </section>
 
-      <section id="get-started" className="py-16">
+      <section id="get-started" className="py-14 md:py-16">
         <div className="marketing-frame">
           <div className="mx-auto max-w-[560px] text-center">
             <p className="app-kicker">Get started</p>

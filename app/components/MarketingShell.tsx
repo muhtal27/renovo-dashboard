@@ -71,8 +71,8 @@ function SignInLink({
 
 function navLinkClass(active: boolean) {
   return active
-    ? 'text-sm font-medium text-zinc-950'
-    : 'text-sm font-medium text-zinc-500 hover:text-zinc-950'
+    ? 'inline-flex items-center whitespace-nowrap text-sm font-medium text-zinc-950'
+    : 'inline-flex items-center whitespace-nowrap text-sm font-medium text-zinc-500 hover:text-zinc-950'
 }
 
 const mobileNavLinks = [
@@ -91,7 +91,7 @@ export function MarketingShell({
   return (
     <main className="marketing-page min-h-screen bg-white text-zinc-900">
       <header className="sticky top-0 z-30 border-b border-zinc-200 bg-white/95 backdrop-blur">
-        <div className="marketing-frame flex min-h-[64px] items-center justify-between gap-4 py-3">
+        <div className="marketing-frame flex min-h-[60px] items-center justify-between gap-3 py-2.5 lg:min-h-[64px] lg:gap-6">
           <Link
             href="/"
             aria-label="Renovo AI home"
@@ -100,15 +100,18 @@ export function MarketingShell({
             <Image
               src="/logo-new.svg"
               alt="Renovo AI"
-              width={118}
-              height={24}
+              width={112}
+              height={22}
               priority
-              sizes="(max-width: 767px) 112px, 118px"
-              className="h-auto w-[112px] md:w-[118px]"
+              sizes="(max-width: 1023px) 108px, 112px"
+              className="h-auto w-[108px] lg:w-[112px]"
             />
           </Link>
 
-          <nav className="hidden items-center gap-7 xl:flex" aria-label={navAriaLabel}>
+          <nav
+            className="hidden min-w-0 flex-1 items-center justify-center gap-6 px-4 lg:flex xl:gap-8"
+            aria-label={navAriaLabel}
+          >
             {headerNavItems.map((item) => (
               <Link
                 key={item.label}
@@ -121,20 +124,20 @@ export function MarketingShell({
             ))}
           </nav>
 
-          <div className="hidden items-center gap-3 md:flex">
-            <SignInLink className="rounded-md px-3 py-2 text-sm font-medium text-zinc-500 hover:text-zinc-950">
+          <div className="hidden shrink-0 items-center gap-2.5 lg:flex">
+            <SignInLink className="inline-flex items-center rounded-md px-3 py-2 text-sm font-medium text-zinc-500 hover:text-zinc-950">
               Sign in
             </SignInLink>
             <Link
               href="/contact"
-              className="app-primary-button rounded-md px-4 py-2 text-sm font-medium"
+              className="app-primary-button rounded-md px-4 py-2 text-sm font-medium whitespace-nowrap"
             >
               Get started
             </Link>
           </div>
 
-          <details className="group relative md:hidden">
-            <summary className="inline-flex list-none items-center rounded-md border border-zinc-200 px-3 py-2 text-sm font-medium text-zinc-950 [&::-webkit-details-marker]:hidden">
+          <details className="group relative lg:hidden">
+            <summary className="inline-flex min-h-10 list-none items-center rounded-md border border-zinc-200 px-3.5 py-2 text-sm font-medium text-zinc-950 [&::-webkit-details-marker]:hidden">
               Menu
             </summary>
             <div className="absolute right-0 mt-2 w-[min(86vw,22rem)] rounded-xl border border-zinc-200 bg-white p-4 shadow-[0_12px_30px_rgba(0,0,0,0.08)]">
@@ -166,14 +169,6 @@ export function MarketingShell({
           </details>
         </div>
       </header>
-
-      <div className="border-b border-zinc-100 bg-zinc-50/80">
-        <div className="marketing-frame flex min-h-9 items-center justify-center py-2">
-          <p className="text-center text-[11px] font-medium uppercase tracking-[0.12em] text-zinc-500">
-            GDPR Compliance
-          </p>
-        </div>
-      </div>
 
       <div>{children}</div>
 

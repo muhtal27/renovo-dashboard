@@ -127,7 +127,7 @@ export default function PricingPageClient() {
           </p>
         </section>
 
-        <section className="border-y border-zinc-200 bg-zinc-50 py-16">
+        <section className="border-y border-zinc-200 bg-zinc-50 py-14 md:py-16">
           <div className="grid gap-4 md:grid-cols-3">
             {valueProof.map((item) => (
               <article key={item.label} className="rounded-xl border border-zinc-200 bg-white p-6">
@@ -144,7 +144,7 @@ export default function PricingPageClient() {
         </section>
 
         <section className="page-card">
-          <div className="grid gap-6 xl:grid-cols-3">
+          <div className="grid gap-6 lg:grid-cols-3">
             {plans.map((plan) => (
               <article
                 key={plan.name}
@@ -152,7 +152,9 @@ export default function PricingPageClient() {
               >
                 <p className="text-sm text-zinc-500">{plan.segment}</p>
                 <h2 className="mt-3 text-3xl font-semibold tracking-[-0.03em]">{plan.name}</h2>
-                <p className="mt-5 text-4xl font-semibold tracking-[-0.05em]">{plan.price}</p>
+                <p className="mt-5 text-[clamp(2rem,3.4vw,2.75rem)] font-semibold leading-[1.08] tracking-[-0.05em]">
+                  {plan.price}
+                </p>
                 <p className="mt-2 text-sm font-medium text-zinc-500">{plan.billingNote}</p>
                 <p className="mt-3 rounded-lg bg-zinc-50 px-4 py-3 text-sm text-zinc-600">
                   One-time setup: {plan.setupFee}
