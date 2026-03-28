@@ -236,6 +236,7 @@ function OperatorSearchForm({
         />
         <Link
           href={searchAction}
+          prefetch={false}
           className="absolute right-2 top-2 inline-flex h-8 items-center rounded-[12px] bg-slate-900 px-4 text-sm font-medium text-white transition hover:bg-slate-800"
         >
           Search
@@ -309,7 +310,11 @@ export function OperatorLayout({ children, operator }: OperatorLayoutProps) {
                           {breadcrumbs.map((breadcrumb, index) => (
                             <div key={`${breadcrumb.label}-${index}`} className="flex items-center gap-2">
                               {breadcrumb.href ? (
-                                <Link href={breadcrumb.href} className="transition hover:text-slate-900">
+                                <Link
+                                  href={breadcrumb.href}
+                                  prefetch={false}
+                                  className="transition hover:text-slate-900"
+                                >
                                   {breadcrumb.label}
                                 </Link>
                               ) : (
@@ -366,6 +371,7 @@ export function OperatorLayout({ children, operator }: OperatorLayoutProps) {
                       <Link
                         key={`${action.href}-${action.label}`}
                         href={action.href}
+                        prefetch={false}
                         className={cn(
                           'inline-flex items-center gap-2 rounded-[14px] border px-4 py-2.5 text-sm font-medium transition',
                           action.tone === 'primary'

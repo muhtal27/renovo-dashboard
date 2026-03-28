@@ -138,6 +138,7 @@ function NavLink({
   return (
     <Link
       href={item.href}
+      prefetch={false}
       onClick={onNavigate}
       title={collapsed ? item.label : undefined}
       className={cn(
@@ -190,6 +191,7 @@ function SidebarContent({
       <div className={cn('flex items-center gap-3', collapsed && !mobile ? 'justify-center' : 'justify-between')}>
         <Link
           href="/overview"
+          prefetch={false}
           onClick={onNavigate}
           className={cn(
             'rounded-[22px] border border-slate-200 bg-white px-4 py-4 shadow-[0_8px_24px_rgba(15,23,42,0.04)]',
