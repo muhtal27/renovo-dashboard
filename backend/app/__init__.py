@@ -1,1 +1,0 @@
-"""Renovo backend application package."""
