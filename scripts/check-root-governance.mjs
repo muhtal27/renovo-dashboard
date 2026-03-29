@@ -6,6 +6,7 @@ const rootDir = process.cwd()
 
 const allowedRootDirectories = new Set([
   '.git',
+  '.github',
   '.next',
   '.vercel',
   '00-inbox',
@@ -21,6 +22,7 @@ const allowedRootDirectories = new Set([
   'backend',
   'lib',
   'node_modules',
+  'playwright',
   'public',
   'scripts',
   'supabase',
@@ -32,7 +34,10 @@ const allowedRootFiles = new Set([
   '.env',
   '.env.example',
   '.env.local',
+  '.env.local.example',
   '.env.local.save',
+  '.env.playwright',
+  '.env.playwright.example',
   '.gitignore',
   'AGENTS.md',
   'README.md',
@@ -42,6 +47,7 @@ const allowedRootFiles = new Set([
   'next.config.ts',
   'package-lock.json',
   'package.json',
+  'playwright.config.ts',
   'postcss.config.mjs',
   'proxy.ts',
   'tsconfig.json',
@@ -52,7 +58,10 @@ const informationalLocalFiles = new Set([
   '.env',
   '.env.example',
   '.env.local',
+  '.env.local.example',
   '.env.local.save',
+  '.env.playwright',
+  '.env.playwright.example',
 ])
 
 function classifyName(name) {

@@ -239,26 +239,6 @@ export function PublicHome() {
                 View demo
               </Link>
             </div>
-            <div className="mt-3 flex flex-wrap items-center gap-2.5 text-xs text-zinc-600">
-              <span className="inline-flex items-center rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 font-medium">
-                GDPR Compliance
-              </span>
-              <span className="inline-flex items-center rounded-full border border-zinc-200 bg-white px-3 py-1">
-                Renovo AI Ltd · SC833544 · VAT GB483379648
-              </span>
-              <Link
-                href="/compliance"
-                className="underline decoration-zinc-300 underline-offset-4"
-              >
-                Compliance
-              </Link>
-              <Link
-                href="/bug-bounty"
-                className="underline decoration-zinc-300 underline-offset-4"
-              >
-                Security
-              </Link>
-            </div>
           </div>
 
           <div className="overflow-hidden rounded-[1.5rem] bg-white shadow-[0_12px_36px_rgba(0,0,0,0.08)]">

@@ -1,6 +1,10 @@
 #!/usr/bin/env node
 
+import { execFile } from 'node:child_process'
+import { promisify } from 'node:util'
+
 const args = process.argv.slice(2)
+const execFileAsync = promisify(execFile)
 
 const options = {
   attempts: 24,
@@ -35,10 +39,6 @@ for (let index = 0; index < args.length; index += 1) {
   }
 
   throw new Error(`Unknown argument: ${argument}`)
-}
-
-if (!options.backendUrl) {
-  throw new Error('Missing required --backend-url argument.')
 }
 
 const REQUIRED_BACKEND_CAPABILITIES = [
@@ -102,6 +102,11 @@ async function fetchTextWithRetry(url, label, attempts, delayMs) {
 
       if (!response.ok) {
         const body = await response.text()
+
+        if ((response.status === 401 || response.status === 403) && isProtectedVercelPreview(url)) {
+          return await fetchProtectedVercelPreview(url, label)
+        }
+
         throw new Error(`${label} returned ${response.status}${body ? `: ${body}` : ''}`)
       }
 
@@ -116,6 +121,50 @@ async function fetchTextWithRetry(url, label, attempts, delayMs) {
   }
 
   throw lastError ?? new Error(`Unable to fetch ${label}.`)
+}
+
+function isProtectedVercelPreview(url) {
+  try {
+    const parsed = new URL(url)
+    return parsed.hostname.endsWith('.vercel.app')
+  } catch {
+    return false
+  }
+}
+
+async function fetchProtectedVercelPreview(url, label) {
+  const parsed = new URL(url)
+  const path = `${parsed.pathname}${parsed.search}`
+
+  try {
+    const { stdout } = await execFileAsync(
+      'vercel',
+      [
+        'curl',
+        path || '/',
+        '--deployment',
+        parsed.origin,
+        '--',
+        '--silent',
+        '--show-error',
+        '--fail',
+      ],
+      {
+        maxBuffer: 1024 * 1024 * 5,
+      }
+    )
+
+    return stdout
+  } catch (error) {
+    const details =
+      error instanceof Error && 'stderr' in error && typeof error.stderr === 'string'
+        ? error.stderr.trim()
+        : ''
+
+    throw new Error(
+      `${label} is protected by Vercel authentication and vercel curl failed${details ? `: ${details}` : '.'}`
+    )
+  }
 }
 
 function assertBackendCapabilities(releasePayload) {
@@ -143,25 +192,33 @@ async function main() {
   const backendUrl = normalizeUrl(options.backendUrl)
   const frontendUrl = normalizeUrl(options.frontendUrl)
 
-  const backendHealth = await fetchJsonWithRetry(
-    `${backendUrl}/api/v1/health`,
-    'backend health endpoint',
-    options.attempts,
-    options.delayMs
-  )
-
-  if (!backendHealth || backendHealth.status !== 'ok') {
-    throw new Error('Backend health endpoint did not report status=ok.')
+  if (!backendUrl && !frontendUrl) {
+    throw new Error('Provide --frontend-url, --backend-url, or both.')
   }
 
-  const backendRelease = await fetchJsonWithRetry(
-    `${backendUrl}/api/v1/release`,
-    'backend release endpoint',
-    options.attempts,
-    options.delayMs
-  )
+  let backendRelease = null
 
-  assertBackendCapabilities(backendRelease)
+  if (backendUrl) {
+    const backendHealth = await fetchJsonWithRetry(
+      `${backendUrl}/api/v1/health`,
+      'backend health endpoint',
+      options.attempts,
+      options.delayMs
+    )
+
+    if (!backendHealth || backendHealth.status !== 'ok') {
+      throw new Error('Backend health endpoint did not report status=ok.')
+    }
+
+    backendRelease = await fetchJsonWithRetry(
+      `${backendUrl}/api/v1/release`,
+      'backend release endpoint',
+      options.attempts,
+      options.delayMs
+    )
+
+    assertBackendCapabilities(backendRelease)
+  }
 
   if (frontendUrl) {
     await fetchTextWithRetry(
@@ -174,9 +231,9 @@ async function main() {
 
   process.stdout.write(
     [
-      'Release pair verified.',
-      `Backend: ${backendUrl}`,
-      `Backend git SHA: ${backendRelease.git_sha ?? 'unknown'}`,
+      backendUrl && frontendUrl ? 'Release pair verified.' : 'Release target verified.',
+      backendUrl ? `Backend: ${backendUrl}` : null,
+      backendRelease ? `Backend git SHA: ${backendRelease.git_sha ?? 'unknown'}` : null,
       frontendUrl ? `Frontend: ${frontendUrl}` : null,
     ]
       .filter(Boolean)
