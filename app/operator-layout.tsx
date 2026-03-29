@@ -66,6 +66,20 @@ const OPERATOR_ROUTE_CONFIG: Array<{
   config: ShellRouteConfig
 }> = [
   {
+    matches: (pathname) => pathname.startsWith('/operator/cases/'),
+    config: {
+      pageTitle: 'Case workspace',
+      pageDescription:
+        'Single-case operator review across evidence, issues, decision rationale, and submission readiness.',
+      searchPlaceholder: 'Search this case by issue, evidence, recommendation, or message',
+      breadcrumbs: [
+        { label: 'Overview', href: '/overview' },
+        { label: 'Checkouts', href: '/eot' },
+        { label: 'Case workspace' },
+      ],
+    },
+  },
+  {
     matches: (pathname) => pathname.startsWith('/overview'),
     config: {
       pageTitle: 'Overview',

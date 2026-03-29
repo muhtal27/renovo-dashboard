@@ -301,7 +301,7 @@ export function EotPortfolioClient({
                 return (
                   <Link
                     key={workspace.case.id}
-                    href={`/eot/${workspace.case.id}`}
+                    href={`/operator/cases/${workspace.case.id}`}
                     className="block rounded-[20px] border border-slate-200 bg-white px-5 py-5 transition hover:border-slate-300 hover:bg-slate-50"
                   >
                     <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
@@ -521,7 +521,7 @@ export function EotPortfolioClient({
                 }
               />
               <Link
-                href={`/eot/${selectedTenancy.case.id}`}
+                href={`/operator/cases/${selectedTenancy.case.id}`}
                 className="inline-flex items-center gap-2 rounded-[14px] border border-slate-900 bg-slate-900 px-4 py-2.5 text-sm font-medium text-white"
               >
                 Open checkout workspace
@@ -626,7 +626,7 @@ export function EotPortfolioClient({
                 ))}
               </div>
               <Link
-                href={`/eot/${selectedDispute.caseId}`}
+                href={`/operator/cases/${selectedDispute.caseId}`}
                 className="inline-flex items-center gap-2 rounded-[14px] border border-slate-900 bg-slate-900 px-4 py-2.5 text-sm font-medium text-white"
               >
                 Open checkout workspace
@@ -686,7 +686,7 @@ export function EotPortfolioClient({
                       : 'No estimate'}
                   </p>
                   <Link
-                    href={`/eot/${item.caseId}`}
+                    href={`/operator/cases/${item.caseId}`}
                     className="inline-flex items-center gap-2 text-sm font-medium text-slate-700 transition hover:text-slate-950"
                   >
                     Open checkout
@@ -743,7 +743,7 @@ export function EotPortfolioClient({
                       {workspace.claim ? formatCurrency(workspace.claim.total_amount) : 'No claim total yet'}
                     </p>
                     <Link
-                      href={`/eot/${workspace.case.id}`}
+                      href={`/operator/cases/${workspace.case.id}`}
                       className="inline-flex items-center gap-2 text-sm font-medium text-slate-700 transition hover:text-slate-950"
                     >
                       Open checkout

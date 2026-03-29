@@ -802,7 +802,7 @@ export function EotCaseListClient({
                         <td className="px-4 py-4 align-top text-right">
                           <div className="flex flex-col items-end gap-2">
                             <Link
-                              href={`/eot/${caseItem.id}`}
+                              href={`/operator/cases/${caseItem.id}`}
                               className="inline-flex items-center rounded-[12px] border border-slate-900 bg-slate-900 px-3 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
                             >
                               Open workspace
