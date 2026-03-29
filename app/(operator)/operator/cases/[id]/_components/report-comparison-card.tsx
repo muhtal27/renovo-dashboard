@@ -7,10 +7,12 @@ import { ExternalLink, FileText, Loader2, Trash2, Upload } from 'lucide-react'
 import { EmptyState } from '@/app/operator-ui'
 import { StatusBadge, formatDate, formatEnumLabel } from '@/app/eot/_components/eot-ui'
 import type { EditableCoreDocumentKind } from '@/lib/operator-core-documents'
+import { getInspectionsStorageBucketName } from '@/lib/operator-core-documents'
 import type {
   CaseWorkspaceReportDocument,
   OperatorCaseWorkspaceData,
 } from '@/lib/operator-case-workspace-types'
+import { getSupabaseBrowserClient } from '@/lib/supabase-browser'
 
 type MutationState = {
   pending: boolean
@@ -103,10 +105,6 @@ function ManageableReportDocumentPane({
   }
 
   async function uploadDocument(file: File) {
-    const formData = new FormData()
-    formData.append('documentKind', kind)
-    formData.append('file', file)
-
     setMutationState({
       pending: true,
       error: null,
@@ -114,15 +112,60 @@ function ManageableReportDocumentPane({
     })
 
     try {
-      const response = await fetch(`/api/operator/cases/${caseId}/core-documents`, {
+      const initResponse = await fetch(`/api/operator/cases/${caseId}/core-documents`, {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          documentKind: kind,
+          fileName: file.name,
+          fileSize: file.size,
+          contentType: file.type,
+        }),
       })
 
-      const payload = (await response.json().catch(() => null)) as { error?: string } | null
+      const initPayload = (await initResponse.json().catch(() => null)) as {
+        error?: string
+        token?: string
+        storagePath?: string
+        bucketName?: string
+      } | null
 
-      if (!response.ok) {
-        throw new Error(payload?.error || 'Upload failed.')
+      if (!initResponse.ok || !initPayload?.token || !initPayload.storagePath) {
+        throw new Error(initPayload?.error || 'Upload failed.')
+      }
+
+      const supabase = getSupabaseBrowserClient()
+      const bucketName = initPayload.bucketName || getInspectionsStorageBucketName()
+      const uploadResult = await supabase.storage
+        .from(bucketName)
+        .uploadToSignedUrl(initPayload.storagePath, initPayload.token, file, {
+          contentType: 'application/pdf',
+          upsert: false,
+        })
+
+      if (uploadResult.error) {
+        throw new Error(uploadResult.error.message || 'Upload failed.')
+      }
+
+      const finalizeResponse = await fetch(`/api/operator/cases/${caseId}/core-documents`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          documentKind: kind,
+          fileName: file.name,
+          storagePath: initPayload.storagePath,
+        }),
+      })
+      const finalizePayload = (await finalizeResponse.json().catch(() => null)) as {
+        error?: string
+      } | null
+
+      if (!finalizeResponse.ok) {
+        throw new Error(finalizePayload?.error || 'Upload failed.')
       }
 
       await refreshWorkspace()

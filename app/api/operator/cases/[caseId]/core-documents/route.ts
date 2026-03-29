@@ -27,6 +27,19 @@ type DocumentRow = {
   metadata: Record<string, unknown> | null
 }
 
+type UploadRequestPayload = {
+  documentKind?: unknown
+  fileName?: unknown
+  fileSize?: unknown
+  contentType?: unknown
+}
+
+type FinalizeRequestPayload = {
+  documentKind?: unknown
+  fileName?: unknown
+  storagePath?: unknown
+}
+
 function jsonError(message: string, status: number) {
   return NextResponse.json({ error: message }, { status })
 }
@@ -191,40 +204,99 @@ export async function POST(request: Request, context: RouteContext) {
     return authorization.response
   }
 
-  const formData = await request.formData()
-  const documentKind = formData.get('documentKind')
-  const file = formData.get('file')
+  const payload = (await request.json().catch(() => null)) as UploadRequestPayload | null
+  const documentKind = payload?.documentKind
+  const fileName = typeof payload?.fileName === 'string' ? payload.fileName.trim() : ''
+  const fileSize = typeof payload?.fileSize === 'number' ? payload.fileSize : NaN
+  const contentType = typeof payload?.contentType === 'string' ? payload.contentType.trim() : ''
 
   if (!isEditableCoreDocumentKind(documentKind)) {
     return jsonError('Invalid document type.', 400)
   }
 
-  if (!(file instanceof File) || file.size === 0) {
+  if (!fileName) {
     return jsonError('A PDF file is required.', 400)
   }
 
-  const isPdf =
-    file.type === 'application/pdf' || file.name.trim().toLowerCase().endsWith('.pdf')
+  const isPdf = contentType === 'application/pdf' || fileName.toLowerCase().endsWith('.pdf')
 
   if (!isPdf) {
     return jsonError('Only PDF reports are supported.', 400)
   }
 
-  if (file.size > MAX_CORE_DOCUMENT_SIZE_BYTES) {
+  if (!Number.isFinite(fileSize) || fileSize <= 0) {
+    return jsonError('File size is invalid.', 400)
+  }
+
+  if (fileSize > MAX_CORE_DOCUMENT_SIZE_BYTES) {
     return jsonError('File is too large. Maximum size is 25 MB.', 400)
   }
 
   const { auth, supabase } = authorization
-  const spec = getEditableCoreDocumentSpec(documentKind)
   const bucketName = getInspectionsStorageBucketName()
   const storagePath = buildManagedCoreDocumentPath({
     tenantId: auth.tenantId,
     caseId,
     kind: documentKind,
-    fileName: file.name,
+    fileName,
   })
 
-  let uploadedStoragePath: string | null = null
+  try {
+    const signedUploadResult = await supabase.storage
+      .from(bucketName)
+      .createSignedUploadUrl(storagePath)
+
+    if (signedUploadResult.error || !signedUploadResult.data?.token) {
+      console.error('Core document signed upload init failed', {
+        caseId,
+        tenantId: auth.tenantId,
+        documentKind,
+        error: signedUploadResult.error?.message ?? 'missing_token',
+      })
+      return jsonError('Unable to prepare this upload right now.', 500)
+    }
+
+    return NextResponse.json({
+      success: true,
+      bucketName,
+      storagePath,
+      token: signedUploadResult.data.token,
+    })
+  } catch (error) {
+    console.error('Core document upload init failed', {
+      caseId,
+      tenantId: auth.tenantId,
+      documentKind,
+      error: error instanceof Error ? error.message : 'unknown_error',
+    })
+    return jsonError('Unable to prepare this upload right now.', 500)
+  }
+}
+
+export async function PUT(request: Request, context: RouteContext) {
+  const { caseId } = await context.params
+  const authorization = await requireAuthorizedCase(caseId)
+
+  if (!authorization.ok) {
+    return authorization.response
+  }
+
+  const payload = (await request.json().catch(() => null)) as FinalizeRequestPayload | null
+  const documentKind = payload?.documentKind
+  const fileName = typeof payload?.fileName === 'string' ? payload.fileName.trim() : ''
+  const storagePath = typeof payload?.storagePath === 'string' ? payload.storagePath.trim() : ''
+
+  if (!isEditableCoreDocumentKind(documentKind)) {
+    return jsonError('Invalid document type.', 400)
+  }
+
+  if (!fileName || !storagePath) {
+    return jsonError('Uploaded file details are missing.', 400)
+  }
+
+  const { auth, supabase } = authorization
+  const spec = getEditableCoreDocumentSpec(documentKind)
+  const bucketName = getInspectionsStorageBucketName()
 
   try {
     const existingDocuments = await getActiveCoreDocuments({
@@ -235,24 +307,6 @@ export async function POST(request: Request, context: RouteContext) {
     })
     const [primaryDocument, ...duplicateDocuments] = existingDocuments
 
-    const uploadResult = await supabase.storage
-      .from(bucketName)
-      .upload(storagePath, Buffer.from(await file.arrayBuffer()), {
-        contentType: 'application/pdf',
-        upsert: false,
-      })
-
-    if (uploadResult.error) {
-      console.error('Core document upload failed', {
-        caseId,
-        tenantId: auth.tenantId,
-        documentType: spec.documentType,
-        error: uploadResult.error.message,
-      })
-      return jsonError('Upload failed. Please try again.', 500)
-    }
-
-    uploadedStoragePath = storagePath
     const publicUrlResult = supabase.storage.from(bucketName).getPublicUrl(storagePath)
     const now = new Date().toISOString()
     const metadata = {
@@ -261,14 +315,14 @@ export async function POST(request: Request, context: RouteContext) {
       uploaded_from: 'operator_case_workspace',
       storage_bucket: bucketName,
       storage_path: storagePath,
-      original_file_name: file.name,
+      original_file_name: fileName,
     }
 
     if (primaryDocument) {
       const updateResult = await supabase
         .from('documents')
         .update({
-          name: file.name,
+          name: fileName,
           file_url: publicUrlResult.data.publicUrl,
           metadata,
           updated_at: now,
@@ -287,7 +341,7 @@ export async function POST(request: Request, context: RouteContext) {
           id: randomUUID(),
           tenant_id: auth.tenantId,
           case_id: caseId,
-          name: file.name,
+          name: fileName,
           document_type: spec.documentType,
           file_url: publicUrlResult.data.publicUrl,
           metadata,
@@ -312,22 +366,18 @@ export async function POST(request: Request, context: RouteContext) {
     revalidatePath(`/operator/cases/${caseId}`)
     return NextResponse.json({ success: true })
   } catch (error) {
-    if (uploadedStoragePath) {
-      const { error: cleanupError } = await supabase.storage
-        .from(bucketName)
-        .remove([uploadedStoragePath])
+    const { error: cleanupError } = await supabase.storage.from(bucketName).remove([storagePath])
 
-      if (cleanupError) {
-        console.warn('Core document cleanup failed after upload error', {
-          caseId,
-          tenantId: auth.tenantId,
-          path: uploadedStoragePath,
-          error: cleanupError.message,
-        })
-      }
+    if (cleanupError) {
+      console.warn('Core document cleanup failed after finalize error', {
+        caseId,
+        tenantId: auth.tenantId,
+        path: storagePath,
+        error: cleanupError.message,
+      })
     }
 
-    console.error('Core document save failed', {
+    console.error('Core document finalize failed', {
       caseId,
       tenantId: auth.tenantId,
       documentType: spec.documentType,
