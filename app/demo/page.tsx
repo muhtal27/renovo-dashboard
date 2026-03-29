@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import HomepageDemo from '@/app/components/HomepageDemo'
 import { MarketingShell } from '@/app/components/MarketingShell'
 import {
   createMarketingMetadata,
@@ -64,7 +63,21 @@ export default function DemoPage() {
           </p>
         </section>
 
-        <HomepageDemo />
+        <section className="rounded-[2rem] border border-zinc-200 bg-white p-3 shadow-[0_18px_48px_rgba(24,24,27,0.08)] md:p-4">
+          <div
+            className="relative w-full overflow-hidden rounded-[1.5rem] bg-zinc-950"
+            style={{ aspectRatio: '16 / 9' }}
+          >
+            <iframe
+              src="https://www.loom.com/embed/0f57f8bf75a248dfb7762a4556988bd2"
+              title="Renovo demo walkthrough"
+              className="absolute inset-0 h-full w-full border-0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+              loading="lazy"
+            />
+          </div>
+        </section>
         </div>
       </MarketingShell>
     </>

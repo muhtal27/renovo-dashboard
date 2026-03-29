@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import { MarketingShell } from '@/app/components/MarketingShell'
 
@@ -263,15 +264,15 @@ export function PublicHome() {
           <div className="overflow-hidden rounded-[1.5rem] bg-white shadow-[0_12px_36px_rgba(0,0,0,0.08)]">
             <div
               className="relative w-full overflow-hidden rounded-[1.5rem]"
-              style={{ aspectRatio: '1920 / 1022' }}
+              style={{ aspectRatio: '1680 / 1055' }}
             >
-              <iframe
-                src="https://www.loom.com/embed/0f57f8bf75a248dfb7762a4556988bd2"
-                title="Renovo product demo"
-                className="absolute inset-0 h-full w-full border-0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-                loading="lazy"
+              <Image
+                src="/dashboard-preview.png"
+                alt="Renovo dashboard preview"
+                fill
+                priority
+                sizes="(min-width: 1280px) 48vw, 100vw"
+                className="object-cover object-top"
               />
             </div>
           </div>
