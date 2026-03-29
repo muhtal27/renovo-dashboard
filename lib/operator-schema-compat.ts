@@ -37,6 +37,35 @@ export function isMissingColumnError(
   return false
 }
 
+export function isMissingRelationError(
+  error: PostgrestErrorLike | null | undefined,
+  ...relationNames: string[]
+) {
+  if (!error) {
+    return false
+  }
+
+  const errorText = toErrorText(error)
+
+  if (!errorText) {
+    return false
+  }
+
+  const isMissingRelation =
+    (errorText.includes('relation') || errorText.includes('table')) &&
+    errorText.includes('does not exist')
+
+  if (!isMissingRelation) {
+    return false
+  }
+
+  if (relationNames.length === 0) {
+    return true
+  }
+
+  return relationNames.some((relationName) => errorText.includes(relationName.toLowerCase()))
+}
+
 export function getOptionalString(
   row: Record<string, unknown>,
   ...keys: string[]
