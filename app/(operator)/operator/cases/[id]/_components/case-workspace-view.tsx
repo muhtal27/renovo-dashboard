@@ -1,13 +1,15 @@
 'use client'
 
 import { useState } from 'react'
-import { WorkspaceSection } from '@/app/eot/_components/eot-ui'
+import { useRouter } from 'next/navigation'
+import { SectionCard, SectionHeading } from '@/app/operator-ui'
 import { ClaimSummaryCard } from '@/app/(operator)/operator/cases/[id]/_components/claim-summary-card'
 import { IssueList } from '@/app/(operator)/operator/cases/[id]/_components/issue-list'
 import { MessageThreadCard } from '@/app/(operator)/operator/cases/[id]/_components/message-thread-card'
 import { RecommendationDetailCard } from '@/app/(operator)/operator/cases/[id]/_components/recommendation-detail-card'
 import { ReportComparisonCard } from '@/app/(operator)/operator/cases/[id]/_components/report-comparison-card'
 import { CaseStatusBadge } from '@/app/(operator)/operator/cases/[id]/_components/case-status-badge'
+import { SupportingDocumentsPanel } from '@/app/(operator)/operator/cases/[id]/_components/supporting-documents-panel'
 import type { OperatorCaseWorkspaceData } from '@/lib/operator-case-workspace-types'
 
 function getSubmissionState(workspace: OperatorCaseWorkspaceData) {
@@ -34,97 +36,87 @@ function getSubmissionState(workspace: OperatorCaseWorkspaceData) {
   } as const
 }
 
-function SubmissionActions() {
-  return (
-    <div className="flex flex-wrap items-center gap-2">
-      <button
-        type="button"
-        disabled
-        className="inline-flex h-10 items-center justify-center rounded-[14px] border border-slate-200 bg-slate-100 px-4 text-sm font-medium text-slate-500"
-      >
-        Approve claim
-      </button>
-      <button
-        type="button"
-        disabled
-        className="inline-flex h-10 items-center justify-center rounded-[14px] border border-slate-200 bg-slate-100 px-4 text-sm font-medium text-slate-500"
-      >
-        Export claim
-      </button>
-    </div>
-  )
-}
-
 export function CaseWorkspaceView({
   workspace,
 }: {
   workspace: OperatorCaseWorkspaceData
 }) {
+  const router = useRouter()
   const [selectedIssueId, setSelectedIssueId] = useState<string | null>(workspace.issues[0]?.id ?? null)
   const selectedIssue = workspace.issues.find((issue) => issue.id === selectedIssueId) ?? null
   const submissionState = getSubmissionState(workspace)
 
   return (
-    <div className="space-y-6">
-      <WorkspaceSection
-        title="Evidence"
-        description="Anchor the operator review in tenancy metadata and the check-in versus check-out file."
-      >
-        <ReportComparisonCard workspace={workspace} />
-      </WorkspaceSection>
-
-      <div className="grid gap-6 2xl:grid-cols-[minmax(0,1.2fr)_minmax(420px,0.8fr)]">
-        <WorkspaceSection
-          className="min-w-0"
-          title="Issues"
-          description="Select an issue to inspect the live recommendation and deduction outcome."
-        >
-          <IssueList
-            issues={workspace.issues}
-            selectedIssueId={selectedIssueId}
-            onSelectIssue={setSelectedIssueId}
+    <SectionCard className="overflow-hidden">
+      <section className="px-6 py-6 md:px-7">
+        <SectionHeading
+          title="Evidence"
+          description="Keep the analysis inputs and supporting tenancy records together in one operational area."
+        />
+        <div className="mt-5 space-y-5">
+          <ReportComparisonCard workspace={workspace} />
+          <SupportingDocumentsPanel
+            caseId={workspace.case.id}
+            documents={workspace.supportingDocuments}
+            onRefresh={() => router.refresh()}
           />
-        </WorkspaceSection>
+        </div>
+      </section>
 
-        <WorkspaceSection
-          className="min-w-0 2xl:sticky 2xl:top-6 2xl:self-start"
-          title="Decision"
-          description="Recommendation detail and current claim position for the selected issue."
-        >
-          <div className="space-y-5">
-            <RecommendationDetailCard issue={selectedIssue} />
-            <ClaimSummaryCard workspace={workspace} />
-          </div>
-        </WorkspaceSection>
-      </div>
-
-      <WorkspaceSection
-        title="Submission"
-        description="Check claim readiness and review the attached communication trail before sign-off."
-      >
-        <div className="space-y-5">
-          <div className="flex flex-col gap-4 border-b border-slate-200 pb-5 md:flex-row md:items-start md:justify-between">
-            <div className="min-w-0">
-              <CaseStatusBadge status={submissionState.tone} />
-              <p className="mt-3 text-sm font-semibold text-slate-950">{submissionState.label}</p>
-              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 [overflow-wrap:anywhere]">
-                {submissionState.description}
-              </p>
-            </div>
-            <SubmissionActions />
-          </div>
-
-          <div>
-            <p className="text-sm font-semibold tracking-[-0.02em] text-slate-950">Message thread</p>
-            <p className="mt-2 text-sm leading-6 text-slate-600">
-              Operator, tenant, and landlord communication attached to this case.
-            </p>
+      <section className="border-t border-slate-200 px-6 py-6 md:px-7">
+        <div className="grid gap-6 2xl:grid-cols-[minmax(0,1.25fr)_minmax(420px,0.75fr)]">
+          <div className="min-w-0">
+            <SectionHeading
+              title="Issues"
+              description="Select an issue to inspect the live recommendation and deduction outcome."
+            />
             <div className="mt-5">
-              <MessageThreadCard workspace={workspace} />
+              <IssueList
+                issues={workspace.issues}
+                selectedIssueId={selectedIssueId}
+                onSelectIssue={setSelectedIssueId}
+              />
+            </div>
+          </div>
+
+          <div className="min-w-0 2xl:sticky 2xl:top-6 2xl:self-start">
+            <SectionHeading
+              title="Decision"
+              description="Review the selected issue, current claim position, and the amount that remains in dispute."
+            />
+            <div className="mt-5 space-y-5">
+              <RecommendationDetailCard issue={selectedIssue} />
+              <ClaimSummaryCard workspace={workspace} />
             </div>
           </div>
         </div>
-      </WorkspaceSection>
-    </div>
+      </section>
+
+      <section className="border-t border-slate-200 px-6 py-6 md:px-7">
+        <div className="flex flex-col gap-4 border-b border-slate-200 pb-5">
+          <SectionHeading
+            title="Submission"
+            description="Check claim readiness and review the attached communication trail before sign-off."
+          />
+          <div className="min-w-0">
+            <CaseStatusBadge status={submissionState.tone} />
+            <p className="mt-3 text-sm font-semibold text-slate-950">{submissionState.label}</p>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 [overflow-wrap:anywhere]">
+              {submissionState.description}
+            </p>
+          </div>
+        </div>
+
+        <div className="pt-5">
+          <p className="text-sm font-semibold tracking-[-0.02em] text-slate-950">Message thread</p>
+          <p className="mt-2 text-sm leading-6 text-slate-600">
+            Operator, tenant, and landlord communication attached to this case.
+          </p>
+          <div className="mt-5">
+            <MessageThreadCard workspace={workspace} />
+          </div>
+        </div>
+      </section>
+    </SectionCard>
   )
 }

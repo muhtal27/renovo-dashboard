@@ -1,6 +1,7 @@
 import 'server-only'
 
 import { buildEotInternalAuthHeaders, getEotApiBaseUrl } from '@/lib/eot-server'
+import { isCoreCaseDocumentType } from '@/lib/operator-core-documents'
 import type { EotCaseWorkspace, EotDocument, EotEvidence } from '@/lib/eot-types'
 import { requireOperatorTenant } from '@/lib/operator-server'
 import type {
@@ -9,6 +10,7 @@ import type {
   CaseWorkspaceReportDocument,
   CaseWorkspaceReportDocumentKind,
   OperatorCaseWorkspaceData,
+  SupportingCaseDocument,
 } from '@/lib/operator-case-workspace-types'
 
 class OperatorCaseWorkspaceError extends Error {
@@ -161,6 +163,20 @@ function getProposedDeductions(workspace: EotCaseWorkspace) {
   }, 0)
 }
 
+function getDisputedAmount(workspace: EotCaseWorkspace) {
+  return workspace.issues.reduce((sum, issue) => {
+    if (issue.status !== 'disputed') {
+      return sum
+    }
+
+    if (!issue.recommendation || issue.recommendation.decision === 'no_charge') {
+      return sum
+    }
+
+    return sum + (toNumber(issue.recommendation.estimated_cost) ?? 0)
+  }, 0)
+}
+
 function normalizeIssue(issue: EotCaseWorkspace['issues'][number]): CaseWorkspaceIssue {
   const areas = Array.from(
     new Set(
@@ -204,6 +220,31 @@ function normalizeClaimBreakdown(
             : null,
     }
   })
+}
+
+function normalizeSupportingDocuments(documents: EotDocument[]): SupportingCaseDocument[] {
+  return documents
+    .filter((document) => !isCoreCaseDocumentType(document.document_type))
+    .map((document) => {
+      const metadata = document.metadata
+      const label =
+        typeof metadata?.label === 'string' && metadata.label.trim()
+          ? metadata.label.trim()
+          : document.name
+
+      return {
+        ...document,
+        label,
+        canManage: metadata?.source === 'operator_supporting_document',
+        contentType:
+          typeof metadata?.content_type === 'string' && metadata.content_type.trim()
+            ? metadata.content_type.trim()
+            : null,
+      } satisfies SupportingCaseDocument
+    })
+    .sort((left, right) => {
+      return new Date(right.created_at).getTime() - new Date(left.created_at).getTime()
+    })
 }
 
 async function fetchWorkspace(caseId: string) {
@@ -255,9 +296,12 @@ export async function getEotCaseWorkspace(caseId: string): Promise<OperatorCaseW
   const issues = workspace.issues.map(normalizeIssue)
   const depositAmount = toNumber(workspace.tenancy.deposit_amount)
   const proposedDeductions = getProposedDeductions(workspace)
+  const disputedAmount = getDisputedAmount(workspace)
+  const returnToLandlord = proposedDeductions
   const remainingDeposit =
     depositAmount == null ? null : Math.max(0, Number((depositAmount - proposedDeductions).toFixed(2)))
   const claimBreakdown = normalizeClaimBreakdown(workspace.claim)
+  const supportingDocuments = normalizeSupportingDocuments(workspace.documents)
 
   return {
     case: workspace.case,
@@ -269,6 +313,7 @@ export async function getEotCaseWorkspace(caseId: string): Promise<OperatorCaseW
     },
     property: workspace.property,
     documents: workspace.documents,
+    supportingDocuments,
     evidence: workspace.evidence,
     issues,
     recommendations: workspace.recommendations,
@@ -288,7 +333,10 @@ export async function getEotCaseWorkspace(caseId: string): Promise<OperatorCaseW
     claimBreakdown,
     totals: {
       depositAmount,
+      totalClaimed: proposedDeductions,
       proposedDeductions,
+      returnToLandlord,
+      disputedAmount,
       remainingDeposit,
       returnToTenant: remainingDeposit,
     },

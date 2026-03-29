@@ -1,5 +1,8 @@
 export type EditableCoreDocumentKind = 'check_in' | 'check_out'
 
+export const CORE_CASE_DOCUMENT_TYPES = ['check_in_report', 'check_out_report'] as const
+export const SUPPORTING_DOCUMENT_TYPE = 'supporting_document'
+
 type EditableCoreDocumentSpec = {
   kind: EditableCoreDocumentKind
   label: string
@@ -29,6 +32,12 @@ export function getEditableCoreDocumentSpec(kind: EditableCoreDocumentKind) {
   return CORE_DOCUMENT_SPECS[kind]
 }
 
+export function isCoreCaseDocumentType(value: string | null | undefined) {
+  return CORE_CASE_DOCUMENT_TYPES.includes(
+    value as (typeof CORE_CASE_DOCUMENT_TYPES)[number]
+  )
+}
+
 export function getInspectionsStorageBucketName() {
   return process.env.SUPABASE_STORAGE_BUCKET_INSPECTIONS?.trim() || 'inspection-files'
 }
@@ -54,6 +63,27 @@ export function buildManagedCoreDocumentPath({
   const normalizedFileName = safeName || `${kind}.pdf`
   const uniquePrefix = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
   return `tenants/${tenantId}/cases/${caseId}/core-documents/${kind}/${uniquePrefix}-${normalizedFileName}`
+}
+
+export function buildManagedSupportingDocumentPath({
+  tenantId,
+  caseId,
+  fileName,
+}: {
+  tenantId: string
+  caseId: string
+  fileName: string
+}) {
+  const safeName = fileName
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]+/g, '-')
+    .replace(/-{2,}/g, '-')
+    .replace(/^-|-$/g, '')
+
+  const normalizedFileName = safeName || 'supporting-document'
+  const uniquePrefix = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+  return `tenants/${tenantId}/cases/${caseId}/supporting-documents/${uniquePrefix}-${normalizedFileName}`
 }
 
 export function resolveManagedStorageObject(

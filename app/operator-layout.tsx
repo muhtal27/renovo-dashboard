@@ -4,10 +4,9 @@ import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 import type { ReactNode } from 'react'
 import { useMemo, useState } from 'react'
-import { BarChart3, BookOpenText, Menu, Search, Settings as SettingsIcon } from 'lucide-react'
+import { BarChart3, BookOpenText, Menu, Search } from 'lucide-react'
 import { OperatorNav } from '@/app/operator-nav'
 import { getOperatorLabel, type CurrentOperator } from '@/lib/operator-types'
-import { hasPermission, OPERATOR_PERMISSIONS } from '@/lib/operator-rbac'
 import { clearLegacySupabaseBrowserAuthArtifacts } from '@/lib/supabase-session'
 import { cn } from '@/lib/ui'
 
@@ -47,12 +46,6 @@ const DEFAULT_ACTIONS: HeaderAction[] = [
     label: 'Guidance',
     href: '/knowledge',
     icon: <BookOpenText className="h-4 w-4" strokeWidth={2} />,
-    tone: 'secondary',
-  },
-  {
-    label: 'Settings',
-    href: '/settings',
-    icon: <SettingsIcon className="h-4 w-4" strokeWidth={2} />,
     tone: 'secondary',
   },
 ]
@@ -284,13 +277,7 @@ export function OperatorLayout({ children, operator }: OperatorLayoutProps) {
 
   const displayName = operatorLabel?.trim() || operator.authUser?.email?.trim() || ''
   const operatorRole = operator.membership?.role ?? null
-  const headerActions = DEFAULT_ACTIONS.filter((action) => {
-    if (action.href === '/settings') {
-      return hasPermission(operatorRole, OPERATOR_PERMISSIONS.MANAGE_SETTINGS)
-    }
-
-    return true
-  })
+  const headerActions = DEFAULT_ACTIONS
 
   return (
     <main className="operator-app min-h-screen bg-[#f4f7fb] text-slate-900">
@@ -301,6 +288,8 @@ export function OperatorLayout({ children, operator }: OperatorLayoutProps) {
           mobileOpen={mobileNavOpen}
           onToggleCollapse={() => setSidebarCollapsed((current) => !current)}
           onCloseMobile={() => setMobileNavOpen(false)}
+          signingOut={signingOut}
+          onSignOut={() => void handleSignOut()}
         />
 
         <div className="min-w-0 flex-1">
@@ -398,19 +387,8 @@ export function OperatorLayout({ children, operator }: OperatorLayoutProps) {
                       </Link>
                     ))}
                   </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 md:hidden">
-                      {getInitials(displayName)}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleSignOut}
-                      disabled={signingOut}
-                      className="inline-flex h-10 items-center rounded-[14px] border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:text-slate-950 disabled:opacity-60"
-                    >
-                      {signingOut ? 'Signing out...' : 'Sign out'}
-                    </button>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 md:hidden">
+                    {getInitials(displayName)}
                   </div>
                 </div>
               </div>

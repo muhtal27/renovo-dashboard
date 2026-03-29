@@ -32,6 +32,12 @@ export type CaseWorkspaceReportDocument = {
   fileUrl: string
 }
 
+export type SupportingCaseDocument = EotDocument & {
+  label: string
+  canManage: boolean
+  contentType: string | null
+}
+
 export type CaseWorkspaceClaimBreakdownItem = {
   id: string
   title: string
@@ -41,7 +47,10 @@ export type CaseWorkspaceClaimBreakdownItem = {
 
 export type CaseWorkspaceTotals = {
   depositAmount: number | null
+  totalClaimed: number
   proposedDeductions: number
+  returnToLandlord: number
+  disputedAmount: number
   remainingDeposit: number | null
   returnToTenant: number | null
 }
@@ -52,6 +61,7 @@ export type OperatorCaseWorkspaceData = {
   tenant: CaseWorkspaceTenant
   property: EotProperty
   documents: EotDocument[]
+  supportingDocuments: SupportingCaseDocument[]
   evidence: EotEvidence[]
   issues: CaseWorkspaceIssue[]
   recommendations: EotRecommendation[]

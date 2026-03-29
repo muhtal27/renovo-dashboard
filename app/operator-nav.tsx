@@ -10,6 +10,7 @@ import {
   FileSearch,
   FolderKanban,
   LayoutDashboard,
+  LogOut,
   MessageSquareMore,
   Settings,
   ShieldCheck,
@@ -29,6 +30,8 @@ type OperatorNavProps = {
   mobileOpen: boolean
   onToggleCollapse: () => void
   onCloseMobile: () => void
+  signingOut?: boolean
+  onSignOut?: () => void
 }
 
 type NavItem = {
@@ -164,6 +167,38 @@ function NavLink({
   )
 }
 
+function NavActionButton({
+  label,
+  icon: Icon,
+  collapsed,
+  pending = false,
+  onClick,
+}: {
+  label: string
+  icon: typeof LayoutDashboard
+  collapsed: boolean
+  pending?: boolean
+  onClick?: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={pending}
+      title={collapsed ? label : undefined}
+      className={cn(
+        'group flex w-full items-center gap-3 rounded-[18px] border border-transparent px-3 py-3 text-sm font-medium text-slate-600 transition hover:border-slate-200 hover:bg-white hover:text-slate-950 disabled:cursor-not-allowed disabled:opacity-60',
+        collapsed && 'justify-center px-2'
+      )}
+    >
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] border border-slate-200 bg-slate-100 text-slate-500 transition group-hover:border-slate-300 group-hover:bg-white group-hover:text-slate-700">
+        <Icon className="h-4 w-4" strokeWidth={2} />
+      </span>
+      {!collapsed ? <span className="truncate">{pending ? 'Signing out...' : label}</span> : null}
+    </button>
+  )
+}
+
 function SidebarContent({
   pathname,
   role,
@@ -171,6 +206,8 @@ function SidebarContent({
   onToggleCollapse,
   onNavigate,
   mobile,
+  signingOut,
+  onSignOut,
 }: {
   pathname: string
   role?: OperatorRole | null
@@ -178,6 +215,8 @@ function SidebarContent({
   onToggleCollapse: () => void
   onNavigate?: () => void
   mobile?: boolean
+  signingOut?: boolean
+  onSignOut?: () => void
 }) {
   const visibleGroups = NAV_GROUPS.map((group) => ({
     ...group,
@@ -243,6 +282,15 @@ function SidebarContent({
                   onNavigate={onNavigate}
                 />
               ))}
+              {group.label === 'Workspace' && onSignOut ? (
+                <NavActionButton
+                  label="Sign out"
+                  icon={LogOut}
+                  collapsed={collapsed && !mobile}
+                  pending={signingOut}
+                  onClick={onSignOut}
+                />
+              ) : null}
             </div>
           </div>
         ))}
@@ -257,6 +305,8 @@ export function OperatorNav({
   mobileOpen,
   onToggleCollapse,
   onCloseMobile,
+  signingOut,
+  onSignOut,
 }: OperatorNavProps) {
   const pathname = usePathname()
 
@@ -274,6 +324,8 @@ export function OperatorNav({
             role={role}
             collapsed={collapsed}
             onToggleCollapse={onToggleCollapse}
+            signingOut={signingOut}
+            onSignOut={onSignOut}
           />
         </div>
       </aside>
@@ -301,6 +353,8 @@ export function OperatorNav({
               onToggleCollapse={onCloseMobile}
               onNavigate={onCloseMobile}
               mobile
+              signingOut={signingOut}
+              onSignOut={onSignOut}
             />
           </aside>
         </div>

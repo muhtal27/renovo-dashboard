@@ -8,18 +8,6 @@ import { formatAddress, formatCurrency, formatDate } from '@/app/eot/_components
 import { CaseStatusBadge } from '@/app/(operator)/operator/cases/[id]/_components/case-status-badge'
 import type { OperatorCaseWorkspaceData } from '@/lib/operator-case-workspace-types'
 
-function SecondaryStubButton({ label }: { label: string }) {
-  return (
-    <button
-      type="button"
-      disabled
-      className="inline-flex h-10 items-center justify-center rounded-[14px] border border-slate-200 bg-slate-100 px-4 text-sm font-medium text-slate-500"
-    >
-      {label}
-    </button>
-  )
-}
-
 function getDepositField(
   workspace: OperatorCaseWorkspaceData,
   field: 'scheme' | 'certificate'
@@ -152,8 +140,6 @@ export function CaseWorkspaceHeader({
               {isAnalysing ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
               {isAnalysing ? 'Analysing...' : 'Analyse'}
             </button>
-            <SecondaryStubButton label="Approve Claim" />
-            <SecondaryStubButton label="Export Claim" />
           </div>
           {analysisSuccess ? (
             <p className="max-w-md text-sm leading-6 text-emerald-700 [overflow-wrap:anywhere]">
