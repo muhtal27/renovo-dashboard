@@ -1,10 +1,28 @@
-import { ExternalLink, FileText } from 'lucide-react'
+'use client'
+
+import type { ChangeEvent } from 'react'
+import { useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { ExternalLink, FileText, Loader2, Trash2, Upload } from 'lucide-react'
 import { EmptyState } from '@/app/operator-ui'
 import { StatusBadge, formatDate, formatEnumLabel } from '@/app/eot/_components/eot-ui'
+import type { EditableCoreDocumentKind } from '@/lib/operator-core-documents'
 import type {
   CaseWorkspaceReportDocument,
   OperatorCaseWorkspaceData,
 } from '@/lib/operator-case-workspace-types'
+
+type MutationState = {
+  pending: boolean
+  error: string | null
+  action: 'upload' | 'delete' | null
+}
+
+const INITIAL_MUTATION_STATE: MutationState = {
+  pending: false,
+  error: null,
+  action: null,
+}
 
 function ReportDocumentPane({
   label,
@@ -26,7 +44,7 @@ function ReportDocumentPane({
           disabled
           className="mt-4 inline-flex h-10 items-center justify-center rounded-[14px] border border-slate-200 bg-slate-100 px-4 text-sm font-medium text-slate-500"
         >
-          Preview
+          Open
         </button>
       </div>
     )
@@ -50,23 +68,212 @@ function ReportDocumentPane({
       <p className="mt-4 text-sm text-slate-600">Created {formatDate(document.createdAt)}</p>
 
       <div className="mt-5 flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          disabled
-          className="inline-flex h-10 items-center justify-center rounded-[14px] border border-slate-200 bg-slate-100 px-4 text-sm font-medium text-slate-500"
-        >
-          Preview
-        </button>
         <a
           href={document.fileUrl}
           target="_blank"
           rel="noreferrer"
           className="inline-flex h-10 items-center justify-center gap-2 rounded-[14px] border border-slate-900 bg-slate-900 px-4 text-sm font-medium text-white transition hover:bg-slate-800"
         >
-          Download
+          Open
           <ExternalLink className="h-4 w-4" />
         </a>
       </div>
+    </div>
+  )
+}
+
+function ManageableReportDocumentPane({
+  caseId,
+  label,
+  kind,
+  document,
+}: {
+  caseId: string
+  label: string
+  kind: EditableCoreDocumentKind
+  document: CaseWorkspaceReportDocument | null
+}) {
+  const router = useRouter()
+  const inputRef = useRef<HTMLInputElement | null>(null)
+  const [mutationState, setMutationState] = useState<MutationState>(INITIAL_MUTATION_STATE)
+  const canRemove = document?.source === 'document'
+
+  async function refreshWorkspace() {
+    router.refresh()
+  }
+
+  async function uploadDocument(file: File) {
+    const formData = new FormData()
+    formData.append('documentKind', kind)
+    formData.append('file', file)
+
+    setMutationState({
+      pending: true,
+      error: null,
+      action: 'upload',
+    })
+
+    try {
+      const response = await fetch(`/api/operator/cases/${caseId}/core-documents`, {
+        method: 'POST',
+        body: formData,
+      })
+
+      const payload = (await response.json().catch(() => null)) as { error?: string } | null
+
+      if (!response.ok) {
+        throw new Error(payload?.error || 'Upload failed.')
+      }
+
+      await refreshWorkspace()
+      setMutationState(INITIAL_MUTATION_STATE)
+    } catch (error) {
+      setMutationState({
+        pending: false,
+        error: error instanceof Error ? error.message : 'Upload failed.',
+        action: 'upload',
+      })
+    }
+  }
+
+  async function removeDocument() {
+    setMutationState({
+      pending: true,
+      error: null,
+      action: 'delete',
+    })
+
+    try {
+      const response = await fetch(`/api/operator/cases/${caseId}/core-documents`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ documentKind: kind }),
+      })
+      const payload = (await response.json().catch(() => null)) as { error?: string } | null
+
+      if (!response.ok) {
+        throw new Error(payload?.error || 'Remove failed.')
+      }
+
+      await refreshWorkspace()
+      setMutationState(INITIAL_MUTATION_STATE)
+    } catch (error) {
+      setMutationState({
+        pending: false,
+        error: error instanceof Error ? error.message : 'Remove failed.',
+        action: 'delete',
+      })
+    }
+  }
+
+  function handleSelectFile(event: ChangeEvent<HTMLInputElement>) {
+    const selectedFile = event.target.files?.[0]
+
+    if (!selectedFile) {
+      return
+    }
+
+    void uploadDocument(selectedFile)
+    event.target.value = ''
+  }
+
+  const isUploading = mutationState.pending && mutationState.action === 'upload'
+  const isDeleting = mutationState.pending && mutationState.action === 'delete'
+
+  if (!document) {
+    return (
+      <div className="rounded-[18px] border border-dashed border-slate-300 bg-slate-50/70 px-5 py-5">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">{label}</p>
+        <p className="mt-3 text-sm font-semibold text-slate-950">Document not available</p>
+        <p className="mt-2 text-sm leading-6 text-slate-600">
+          Upload the current {label.toLowerCase()} so this case is ready for evidence review and backend analysis.
+        </p>
+        <input
+          ref={inputRef}
+          type="file"
+          accept=".pdf,application/pdf"
+          className="hidden"
+          onChange={handleSelectFile}
+        />
+        <button
+          type="button"
+          disabled={mutationState.pending}
+          onClick={() => inputRef.current?.click()}
+          className="mt-4 inline-flex h-10 items-center justify-center gap-2 rounded-[14px] border border-slate-900 bg-slate-900 px-4 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-500"
+        >
+          {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+          {isUploading ? 'Uploading...' : 'Upload PDF'}
+        </button>
+        {mutationState.error ? (
+          <p className="mt-3 text-sm leading-6 text-rose-700 [overflow-wrap:anywhere]">{mutationState.error}</p>
+        ) : null}
+      </div>
+    )
+  }
+
+  return (
+    <div className="rounded-[18px] border border-slate-200 px-5 py-5">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">{label}</p>
+          <p className="mt-3 text-sm font-semibold text-slate-950 [overflow-wrap:anywhere]">{document.fileName}</p>
+        </div>
+        <FileText className="mt-1 h-4 w-4 shrink-0 text-slate-400" />
+      </div>
+
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <StatusBadge label={formatEnumLabel(document.documentType)} tone="document" />
+        <StatusBadge label={formatEnumLabel(document.source)} tone="document" />
+      </div>
+
+      <p className="mt-4 text-sm text-slate-600">Created {formatDate(document.createdAt)}</p>
+
+      <div className="mt-5 flex flex-wrap items-center gap-2">
+        <a
+          href={document.fileUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex h-10 items-center justify-center gap-2 rounded-[14px] border border-slate-900 bg-slate-900 px-4 text-sm font-medium text-white transition hover:bg-slate-800"
+        >
+          Open
+          <ExternalLink className="h-4 w-4" />
+        </a>
+        <input
+          ref={inputRef}
+          type="file"
+          accept=".pdf,application/pdf"
+          className="hidden"
+          onChange={handleSelectFile}
+        />
+        <button
+          type="button"
+          disabled={mutationState.pending}
+          onClick={() => inputRef.current?.click()}
+          className="inline-flex h-10 items-center justify-center gap-2 rounded-[14px] border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-500"
+        >
+          {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+          {isUploading ? 'Replacing...' : 'Replace'}
+        </button>
+        <button
+          type="button"
+          disabled={mutationState.pending || !canRemove}
+          onClick={() => void removeDocument()}
+          className="inline-flex h-10 items-center justify-center gap-2 rounded-[14px] border border-rose-200 bg-white px-4 text-sm font-medium text-rose-700 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-500"
+        >
+          {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+          {isDeleting ? 'Removing...' : 'Remove'}
+        </button>
+      </div>
+      {!canRemove ? (
+        <p className="mt-3 text-sm leading-6 text-slate-500">
+          This file is currently linked from evidence. Upload a dedicated report to manage this slot directly.
+        </p>
+      ) : null}
+      {mutationState.error ? (
+        <p className="mt-3 text-sm leading-6 text-rose-700 [overflow-wrap:anywhere]">{mutationState.error}</p>
+      ) : null}
     </div>
   )
 }
@@ -98,8 +305,18 @@ export function ReportComparisonCard({
           label="Tenancy agreement"
           document={workspace.reportDocuments.tenancyAgreement}
         />
-        <ReportDocumentPane label="Check-in document" document={workspace.reportDocuments.checkIn} />
-        <ReportDocumentPane label="Check-out document" document={workspace.reportDocuments.checkOut} />
+        <ManageableReportDocumentPane
+          caseId={workspace.case.id}
+          label="Check-in report"
+          kind="check_in"
+          document={workspace.reportDocuments.checkIn}
+        />
+        <ManageableReportDocumentPane
+          caseId={workspace.case.id}
+          label="Check-out report"
+          kind="check_out"
+          document={workspace.reportDocuments.checkOut}
+        />
       </div>
 
       {workspace.documents.length === 0 && workspace.evidence.length === 0 ? (
