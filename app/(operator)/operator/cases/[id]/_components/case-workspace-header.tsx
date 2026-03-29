@@ -1,9 +1,14 @@
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { Loader2 } from 'lucide-react'
 import { SectionCard } from '@/app/operator-ui'
 import { formatAddress, formatCurrency, formatDate } from '@/app/eot/_components/eot-ui'
 import { CaseStatusBadge } from '@/app/(operator)/operator/cases/[id]/_components/case-status-badge'
 import type { OperatorCaseWorkspaceData } from '@/lib/operator-case-workspace-types'
 
-function ActionStubButton({ label }: { label: string }) {
+function SecondaryStubButton({ label }: { label: string }) {
   return (
     <button
       type="button"
@@ -64,6 +69,10 @@ export function CaseWorkspaceHeader({
 }: {
   workspace: OperatorCaseWorkspaceData
 }) {
+  const router = useRouter()
+  const [isAnalysing, setIsAnalysing] = useState(false)
+  const [analysisError, setAnalysisError] = useState<string | null>(null)
+  const [analysisSuccess, setAnalysisSuccess] = useState<string | null>(null)
   const propertyAddress = formatAddress([
     workspace.property.address_line_1,
     workspace.property.address_line_2,
@@ -73,6 +82,45 @@ export function CaseWorkspaceHeader({
   ])
   const depositScheme = getDepositField(workspace, 'scheme')
   const certificateNumber = getDepositField(workspace, 'certificate')
+
+  async function handleAnalyse() {
+    if (isAnalysing) {
+      return
+    }
+
+    setIsAnalysing(true)
+    setAnalysisError(null)
+    setAnalysisSuccess(null)
+
+    try {
+      const response = await fetch(`/api/operator/cases/${workspace.case.id}/analyse`, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+        },
+      })
+      const payload = (await response.json().catch(() => null)) as
+        | {
+            detail?: string
+            error?: string
+            success?: boolean
+          }
+        | null
+
+      if (!response.ok) {
+        throw new Error(payload?.detail || payload?.error || 'Unable to analyse this case right now.')
+      }
+
+      setAnalysisSuccess('Analysis complete. Workspace refreshed with the latest results.')
+      router.refresh()
+    } catch (error) {
+      setAnalysisError(
+        error instanceof Error ? error.message : 'Unable to analyse this case right now.'
+      )
+    } finally {
+      setIsAnalysing(false)
+    }
+  }
 
   return (
     <SectionCard className="px-6 py-6 md:px-7">
@@ -93,10 +141,30 @@ export function CaseWorkspaceHeader({
           </p>
         </div>
 
-        <div className="flex shrink-0 flex-wrap items-center gap-2 xl:justify-end">
-          <ActionStubButton label="Analyse" />
-          <ActionStubButton label="Approve Claim" />
-          <ActionStubButton label="Export Claim" />
+        <div className="flex shrink-0 flex-col items-start gap-3 xl:items-end">
+          <div className="flex flex-wrap items-center gap-2 xl:justify-end">
+            <button
+              type="button"
+              disabled={isAnalysing}
+              onClick={() => void handleAnalyse()}
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-[14px] border border-slate-900 bg-slate-900 px-4 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-500"
+            >
+              {isAnalysing ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+              {isAnalysing ? 'Analysing...' : 'Analyse'}
+            </button>
+            <SecondaryStubButton label="Approve Claim" />
+            <SecondaryStubButton label="Export Claim" />
+          </div>
+          {analysisSuccess ? (
+            <p className="max-w-md text-sm leading-6 text-emerald-700 [overflow-wrap:anywhere]">
+              {analysisSuccess}
+            </p>
+          ) : null}
+          {analysisError ? (
+            <p className="max-w-md text-sm leading-6 text-rose-700 [overflow-wrap:anywhere]">
+              {analysisError}
+            </p>
+          ) : null}
         </div>
       </div>
 
