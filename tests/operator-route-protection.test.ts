@@ -20,6 +20,7 @@ test('critical operator routes stay protected by middleware', () => {
 test('operator sub-routes stay protected by middleware', () => {
   assert.equal(shouldProtectPath('/eot/123'), true)
   assert.equal(shouldProtectPath('/cases/123'), true)
+  assert.equal(shouldProtectPath('/operator/cases/123'), true)
 })
 
 test('api routes stay noindex even when not middleware-protected', () => {
