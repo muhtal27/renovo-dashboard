@@ -1,3 +1,4 @@
+import { revalidatePath } from 'next/cache'
 import { proxyEotRequest } from '@/lib/eot-proxy'
 import { OPERATOR_PERMISSIONS } from '@/lib/operator-rbac'
 
@@ -9,9 +10,15 @@ type RouteContext = {
 
 export async function POST(request: Request, context: RouteContext) {
   const { caseId } = await context.params
-  return proxyEotRequest(
+  const response = await proxyEotRequest(
     request,
     `/operator/cases/${caseId}/analyse`,
     OPERATOR_PERMISSIONS.GENERATE_CLAIM_OUTPUT
   )
+
+  if (response.ok) {
+    revalidatePath(`/operator/cases/${caseId}`)
+  }
+
+  return response
 }
