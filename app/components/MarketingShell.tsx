@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
+import { MarketingButton } from '@/app/components/marketing-ui'
 import { DASHBOARD_SIGN_IN_EXTERNAL, DASHBOARD_SIGN_IN_URL } from '@/lib/marketing-links'
 
 type MarketingShellProps = {
@@ -72,7 +73,7 @@ function SignInLink({
 function navLinkClass(active: boolean) {
   return active
     ? 'inline-flex items-center whitespace-nowrap text-sm font-medium text-zinc-950'
-    : 'inline-flex items-center whitespace-nowrap text-sm font-medium text-zinc-500 hover:text-zinc-950'
+    : 'inline-flex items-center whitespace-nowrap text-sm font-medium text-zinc-500 transition hover:text-zinc-950'
 }
 
 const mobileNavLinks = [
@@ -89,12 +90,12 @@ export function MarketingShell({
   navAriaLabel = 'Marketing',
 }: MarketingShellProps) {
   return (
-    <div className="marketing-page min-h-screen bg-white text-zinc-900">
+    <div className="marketing-page min-h-screen text-zinc-900">
       <a href="#main-content" className="skip-link">
         Skip to content
       </a>
-      <header className="sticky top-0 z-30 border-b border-zinc-200 bg-white/95 backdrop-blur">
-        <div className="marketing-frame flex min-h-[60px] items-center justify-between gap-3 py-2.5 lg:min-h-[64px] lg:gap-6">
+      <header className="sticky top-0 z-30 border-b border-black/6 bg-white/88 backdrop-blur-xl">
+        <div className="marketing-frame flex min-h-[64px] items-center justify-between gap-3 py-2.5 lg:min-h-[72px] lg:gap-6">
           <Link
             href="/"
             aria-label="Renovo AI home"
@@ -106,8 +107,7 @@ export function MarketingShell({
               width={112}
               height={22}
               priority
-              sizes="(max-width: 1023px) 108px, 112px"
-              className="h-auto w-[108px] lg:w-[112px]"
+              className="h-auto w-[112px]"
             />
           </Link>
 
@@ -131,26 +131,23 @@ export function MarketingShell({
             <SignInLink className="inline-flex items-center rounded-md px-3 py-2 text-sm font-medium text-zinc-500 hover:text-zinc-950">
               Sign in
             </SignInLink>
-            <Link
-              href="/contact"
-              className="app-primary-button rounded-md px-4 py-2 text-sm font-medium whitespace-nowrap"
-            >
-              Get started
-            </Link>
+            <MarketingButton href="/contact" size="sm" className="whitespace-nowrap rounded-xl">
+              Talk to us
+            </MarketingButton>
           </div>
 
           <details className="group relative lg:hidden">
-            <summary className="inline-flex min-h-10 list-none items-center rounded-md border border-zinc-200 px-3.5 py-2 text-sm font-medium text-zinc-950 [&::-webkit-details-marker]:hidden">
+            <summary className="inline-flex min-h-10 list-none items-center rounded-xl border border-zinc-200 bg-white/95 px-3.5 py-2 text-sm font-medium text-zinc-950 shadow-[0_10px_24px_rgba(17,24,39,0.05)] [&::-webkit-details-marker]:hidden">
               Menu
             </summary>
-            <div className="absolute right-0 mt-2 w-[min(86vw,22rem)] rounded-xl border border-zinc-200 bg-white p-4 shadow-[0_12px_30px_rgba(0,0,0,0.08)]">
+            <div className="absolute right-0 mt-2 w-[min(86vw,22rem)] rounded-[1.25rem] border border-black/8 bg-white/98 p-4 shadow-[0_24px_48px_rgba(17,24,39,0.12)]">
               <nav className="grid gap-1" aria-label="Mobile marketing navigation">
                 {mobileNavLinks.map((item) => (
                   <Link
                     key={item.label}
                     href={item.href}
                     aria-current={currentPath === item.href ? 'page' : undefined}
-                    className="rounded-md px-3 py-2 text-sm font-medium text-zinc-500 hover:bg-zinc-50 hover:text-zinc-950"
+                    className="rounded-xl px-3 py-2 text-sm font-medium text-zinc-500 hover:bg-zinc-50 hover:text-zinc-950"
                   >
                     {item.label}
                   </Link>
@@ -161,12 +158,9 @@ export function MarketingShell({
                 <SignInLink className="rounded-md px-3 py-2 text-sm font-medium text-zinc-500 hover:bg-zinc-50 hover:text-zinc-950">
                   Sign in
                 </SignInLink>
-                <Link
-                  href="/contact"
-                  className="app-primary-button rounded-md px-4 py-2 text-center text-sm font-medium"
-                >
-                  Get started
-                </Link>
+                <MarketingButton href="/contact" size="sm" className="w-full rounded-xl">
+                  Talk to us
+                </MarketingButton>
               </div>
             </div>
           </details>
@@ -177,14 +171,14 @@ export function MarketingShell({
         {children}
       </main>
 
-      <footer className="border-t border-zinc-200 bg-white py-10 text-zinc-500">
+      <footer className="border-t border-black/6 bg-[rgba(255,255,255,0.94)] py-10 text-zinc-500">
         <div className="marketing-frame">
           <div className="grid gap-10 border-b border-zinc-100 pb-10 md:grid-cols-2 xl:grid-cols-[2fr_1fr_1fr_1fr]">
             <div>
               <p className="text-base font-semibold tracking-[-0.02em] text-zinc-950">Renovo AI</p>
-              <p className="mt-3 max-w-[320px] text-sm leading-6">
-                End-of-tenancy automation for UK letting agencies. Checkouts, claims, and disputes
-                in one workflow.
+              <p className="mt-3 max-w-[360px] text-sm leading-6">
+                End-of-tenancy automation for UK letting agencies. Checkout evidence, liability
+                decisions, and dispute packs in one operational workflow.
               </p>
             </div>
 
@@ -244,8 +238,8 @@ export function MarketingShell({
           </div>
 
           <div className="mt-7 flex flex-col gap-2 text-xs text-zinc-400 md:flex-row md:items-center md:justify-between">
-            <span>Renovo AI Ltd · SC833544 · VAT GB483379648</span>
-            <span>© 2026 Renovo AI Ltd — Edinburgh, Scotland</span>
+            <span>Renovo AI Ltd - SC833544 - VAT GB483379648</span>
+            <span>(c) 2026 Renovo AI Ltd - Edinburgh, Scotland</span>
           </div>
         </div>
       </footer>

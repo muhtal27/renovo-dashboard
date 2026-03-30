@@ -1,4 +1,9 @@
-import Link from 'next/link'
+import {
+  MarketingButton,
+  MarketingCard,
+  MarketingIntro,
+  MarketingSection,
+} from '@/app/components/marketing-ui'
 import { MarketingShell } from '@/app/components/MarketingShell'
 import { PublicContactForm } from '@/app/public-contact-form'
 import {
@@ -35,86 +40,94 @@ export default function ContactPage() {
         }}
       />
       <MarketingShell currentPath="/contact">
-        <div className="page-shell page-stack">
-        <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_460px] xl:items-start">
-          <section className="page-hero">
-            <p className="app-kicker">Contact</p>
-            <h1 className="page-title max-w-[720px]">
-              Talk to Renovo AI about your <em>checkout workflow</em>
-            </h1>
-            <p className="page-copy max-w-[720px]">
-              Use the form for product enquiries, partnerships, investor conversations, or general
-              questions. If you are reviewing how your team handles deduction letters, liability
-              assessments, or dispute packs, include that context and we&apos;ll reply directly.
-            </p>
+        <MarketingSection>
+          <div className="grid gap-10 xl:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] xl:items-start">
+            <div className="space-y-6">
+              <MarketingIntro
+                titleAs="h1"
+                eyebrow="Contact"
+                title={
+                  <>
+                    Talk to Renovo AI about your <em>checkout workflow</em>
+                  </>
+                }
+                description="Use the form for product enquiries, partnerships, investor conversations, or general questions. If you are reviewing deduction letters, liability assessments, or dispute packs, include that context and we&apos;ll reply directly."
+              />
 
-            <div className="mt-8 grid gap-3 text-sm leading-7 text-zinc-600">
-              {[
-                'Product enquiries for UK property managers and letting agencies',
-                'Partnership conversations across inventory, CRM, and workflow tooling',
-                'Investor and strategic discussions through the same route',
-              ].map((item) => (
-                <div key={item} className="flex items-start gap-3">
-                  <span className="mt-[10px] h-1.5 w-1.5 shrink-0 rounded-full bg-zinc-950" />
-                  <span>{item}</span>
+              <MarketingCard className="rounded-[1.75rem]">
+                <p className="marketing-eyebrow">Best for</p>
+                <div className="mt-5 grid gap-3">
+                  {[
+                    'Product enquiries from UK letting agencies and property operations teams',
+                    'Partnership conversations across inventory, CRM, and workflow tooling',
+                    'Investor and strategic discussions through the same route',
+                  ].map((item) => (
+                    <div
+                      key={item}
+                      className="rounded-[1rem] border border-black/6 bg-[var(--surface-subtle)] px-4 py-3 text-sm leading-7 text-[var(--text-body)]"
+                    >
+                      {item}
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </MarketingCard>
 
-            <div className="page-section-compact mt-8 pb-0">
-              <p className="app-kicker">Email</p>
-              <p className="mt-3 max-w-[560px] text-sm leading-7 text-zinc-600">
-                Prefer email? Contact{' '}
-                <a
-                  href="mailto:hello@renovoai.co.uk"
-                  className="underline decoration-zinc-300 underline-offset-4"
-                >
-                  hello@renovoai.co.uk
-                </a>
-                .
-              </p>
-              <div className="mt-5">
-                <Link
-                  href="/demo"
-                  className="app-secondary-button rounded-md px-4 py-2 text-sm font-medium"
-                >
-                  View demo
-                </Link>
+              <div className="grid gap-5 md:grid-cols-2">
+                <MarketingCard className="h-full rounded-[1.75rem]">
+                  <p className="marketing-eyebrow">Direct email</p>
+                  <p className="mt-4 text-lg leading-7 text-[var(--text-strong)]">
+                    Prefer email?
+                  </p>
+                  <p className="mt-3 text-sm leading-7 text-[var(--text-body)]">
+                    Contact{' '}
+                    <a
+                      href="mailto:hello@renovoai.co.uk"
+                      className="underline decoration-zinc-300 underline-offset-4"
+                    >
+                      hello@renovoai.co.uk
+                    </a>
+                    .
+                  </p>
+                  <div className="mt-6">
+                    <MarketingButton href="/demo" variant="secondary">
+                      View demo
+                    </MarketingButton>
+                  </div>
+                </MarketingCard>
+
+                <MarketingCard className="h-full rounded-[1.75rem]">
+                  <p className="marketing-eyebrow">Company details</p>
+                  <div className="mt-4 space-y-2 text-sm leading-7 text-[var(--text-body)]">
+                    <p>Renovo AI Ltd - SC833544 - VAT GB483379648</p>
+                    <p>Edinburgh, Scotland</p>
+                  </div>
+                  <div className="mt-5 flex flex-wrap gap-3 text-sm">
+                    <a
+                      href="/compliance"
+                      className="underline decoration-zinc-300 underline-offset-4 text-[var(--text-body)]"
+                    >
+                      Compliance
+                    </a>
+                    <a
+                      href="/privacy"
+                      className="underline decoration-zinc-300 underline-offset-4 text-[var(--text-body)]"
+                    >
+                      Privacy
+                    </a>
+                    <a
+                      href="/bug-bounty"
+                      className="underline decoration-zinc-300 underline-offset-4 text-[var(--text-body)]"
+                    >
+                      Security
+                    </a>
+                  </div>
+                </MarketingCard>
               </div>
             </div>
 
-            <div className="mt-8 rounded-xl border border-zinc-200 bg-zinc-50 p-5">
-              <p className="app-kicker">Company details</p>
-              <div className="mt-4 space-y-2 text-sm leading-7 text-zinc-600">
-                <p>Renovo AI Ltd · SC833544 · VAT GB483379648</p>
-                <p>Edinburgh, Scotland</p>
-              </div>
-              <div className="mt-4 flex flex-wrap gap-3 text-sm">
-                <Link
-                  href="/compliance"
-                  className="text-zinc-600 underline decoration-zinc-300 underline-offset-4"
-                >
-                  Compliance
-                </Link>
-                <Link
-                  href="/privacy"
-                  className="text-zinc-600 underline decoration-zinc-300 underline-offset-4"
-                >
-                  Privacy
-                </Link>
-                <Link
-                  href="/bug-bounty"
-                  className="text-zinc-600 underline decoration-zinc-300 underline-offset-4"
-                >
-                  Security
-                </Link>
-              </div>
-            </div>
-          </section>
-
-          <PublicContactForm sourcePage="/contact" />
-        </div>
-        </div>
+            <PublicContactForm sourcePage="/contact" />
+          </div>
+        </MarketingSection>
       </MarketingShell>
     </>
   )

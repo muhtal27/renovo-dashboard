@@ -28,7 +28,12 @@ export default function PricingPage() {
               title,
               description,
             }),
-            createFaqPageJsonLd(pricingFaqs),
+            createFaqPageJsonLd(
+              pricingFaqs.map((faq) => ({
+                q: faq.question,
+                a: faq.answer,
+              }))
+            ),
           ]),
         }}
       />

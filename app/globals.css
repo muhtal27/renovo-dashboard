@@ -3,15 +3,28 @@
 :root {
   --background: #ffffff;
   --foreground: #18181b;
+  --surface: #ffffff;
+  --surface-subtle: #fbfbf9;
+  --surface-muted: #f5f5f4;
+  --surface-tint: #eef5f1;
+  --surface-dark: #111827;
+  --surface-dark-strong: #090d16;
   --panel: rgba(255, 255, 255, 0.96);
   --panel-strong: #ffffff;
   --line: #e4e4e7;
   --line-strong: #d4d4d8;
   --muted: #52525b;
+  --text-strong: #18181b;
+  --text-body: #3f3f46;
+  --text-muted: #71717a;
+  --text-soft: #a1a1aa;
   --accent: #18181b;
   --accent-strong: #09090b;
   --accent-soft: #f4f4f5;
   --accent-mist: rgba(24, 24, 27, 0.06);
+  --accent-emerald: #178f69;
+  --accent-emerald-strong: #0f6e56;
+  --accent-emerald-soft: rgba(23, 143, 105, 0.12);
   --warm-soft: #fafafa;
   --warm-strong: #f4f4f5;
   --gold: #18181b;
@@ -141,16 +154,16 @@ a:focus-visible {
 
 .app-surface {
   background: rgba(255, 255, 255, 0.92);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  box-shadow: var(--shadow-soft);
+  border: 1px solid rgba(24, 24, 27, 0.08);
+  border-radius: 24px;
+  box-shadow: 0 24px 54px rgba(17, 24, 39, 0.06);
 }
 
 .app-surface-strong {
-  background: var(--panel-strong);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  box-shadow: var(--shadow-strong);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(247, 248, 246, 0.96) 100%);
+  border: 1px solid rgba(24, 24, 27, 0.08);
+  border-radius: 28px;
+  box-shadow: 0 28px 60px rgba(17, 24, 39, 0.06);
 }
 
 .app-pill {
@@ -392,87 +405,341 @@ a:focus-visible {
   background: rgba(37, 99, 235, 0.16);
 }
 
+.marketing-page {
+  background:
+    radial-gradient(circle at top right, rgba(23, 143, 105, 0.06), transparent 28rem),
+    linear-gradient(180deg, #fafaf9 0%, #ffffff 10rem, #ffffff 100%);
+  color: var(--text-strong);
+}
+
 .marketing-frame {
-  width: min(100%, 1180px);
+  width: min(100%, 1200px);
   margin: 0 auto;
   padding-left: 20px;
   padding-right: 20px;
 }
 
+.marketing-section {
+  position: relative;
+  padding: clamp(3.75rem, 7vw, 6rem) 0;
+}
+
+.marketing-section-inner {
+  display: grid;
+  gap: 1.75rem;
+}
+
+.marketing-section-tint,
+.section-tinted {
+  background: linear-gradient(180deg, rgba(238, 245, 241, 0.72) 0%, rgba(246, 249, 247, 0.92) 100%);
+  border-top: 1px solid rgba(24, 24, 27, 0.08);
+  border-bottom: 1px solid rgba(24, 24, 27, 0.08);
+}
+
+.marketing-section-dark {
+  background:
+    linear-gradient(180deg, rgba(9, 13, 22, 0.96) 0%, rgba(17, 24, 39, 1) 100%);
+  color: #ffffff;
+}
+
+.marketing-hero-glow,
+.renovo-glow {
+  background: radial-gradient(circle, rgba(23, 143, 105, 0.2) 0%, transparent 68%);
+  animation: renovo-pulse 8s ease-in-out infinite;
+}
+
+.marketing-intro {
+  max-width: 46rem;
+}
+
+.marketing-eyebrow,
+.app-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--accent-emerald-strong);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.marketing-title,
+.marketing-page .page-title {
+  margin-top: 1rem;
+  max-width: 58rem;
+  font-size: clamp(2.5rem, 5vw, 4.9rem);
+  line-height: 0.98;
+  letter-spacing: -0.055em;
+  color: var(--text-strong);
+}
+
+.marketing-title em,
+.marketing-page .page-title em {
+  color: var(--text-muted);
+}
+
+.marketing-copy,
+.marketing-page .page-copy {
+  margin-top: 1.2rem;
+  max-width: 42rem;
+  font-size: clamp(1rem, 1.2vw, 1.08rem);
+  line-height: 1.85;
+  color: var(--text-body);
+}
+
+.marketing-actions {
+  margin-top: 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.marketing-button,
+.app-primary-button,
+.app-secondary-button,
+.app-accent-button,
+.app-outline-white {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.95rem;
+  border: 1px solid transparent;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease;
+}
+
+.marketing-button:hover,
+.app-primary-button:hover,
+.app-secondary-button:hover,
+.app-accent-button:hover,
+.app-outline-white:hover {
+  transform: translateY(-1px);
+}
+
+.marketing-button-primary,
+.app-primary-button {
+  background: linear-gradient(180deg, #1f2937 0%, #111827 100%);
+  border-color: #111827;
+  color: #ffffff;
+  box-shadow: 0 18px 32px rgba(17, 24, 39, 0.14);
+}
+
+.marketing-button-primary:hover,
+.app-primary-button:hover {
+  background: linear-gradient(180deg, #272f3a 0%, #151c29 100%);
+  border-color: #151c29;
+}
+
+.marketing-button-secondary,
+.app-secondary-button {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(24, 24, 27, 0.12);
+  color: var(--text-strong);
+  box-shadow: 0 10px 24px rgba(24, 24, 27, 0.05);
+}
+
+.marketing-button-secondary:hover,
+.app-secondary-button:hover {
+  background: #ffffff;
+  border-color: rgba(24, 24, 27, 0.18);
+}
+
+.marketing-button-inverse,
+.app-accent-button {
+  background: linear-gradient(135deg, #26b383 0%, #0f8a63 100%);
+  border-color: rgba(12, 112, 81, 0.8);
+  color: #04140e;
+  box-shadow: 0 18px 36px rgba(15, 138, 99, 0.26);
+}
+
+.marketing-button-inverse:hover,
+.app-accent-button:hover {
+  background: linear-gradient(135deg, #2bc08d 0%, #129069 100%);
+}
+
+.marketing-button-ghost,
+.app-outline-white {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+}
+
+.marketing-button-ghost:hover,
+.app-outline-white:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.24);
+}
+
+.marketing-card,
+.marketing-page .page-card,
+.marketing-page .page-sidebar-card {
+  border: 1px solid rgba(24, 24, 27, 0.08);
+  border-radius: 1.5rem;
+  background: rgba(255, 255, 255, 0.96);
+  padding: clamp(1.25rem, 2vw, 1.75rem);
+  box-shadow: 0 24px 54px rgba(17, 24, 39, 0.06);
+}
+
+.marketing-card-muted,
+.app-card-muted,
+.marketing-page .page-sidebar-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(247, 248, 246, 0.96) 100%);
+}
+
+.marketing-card-dark {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: linear-gradient(180deg, rgba(21, 29, 44, 0.94) 0%, rgba(14, 20, 31, 0.98) 100%);
+  color: #ffffff;
+  box-shadow: none;
+}
+
+.marketing-rule-list,
+.marketing-page .page-rule-list {
+  margin-top: 1.75rem;
+  border-top: 1px solid rgba(24, 24, 27, 0.1);
+  border-bottom: 1px solid rgba(24, 24, 27, 0.1);
+}
+
+.marketing-rule-list > * + *,
+.marketing-page .page-rule-list > * + * {
+  border-top: 1px solid rgba(24, 24, 27, 0.08);
+}
+
+.marketing-checklist {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.marketing-checklist-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  color: var(--text-body);
+  font-size: 0.94rem;
+  line-height: 1.75;
+}
+
+.marketing-checklist-icon {
+  margin-top: 0.1rem;
+  display: inline-flex;
+  height: 1.5rem;
+  width: 1.5rem;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--accent-emerald-soft);
+  color: var(--accent-emerald-strong);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
 .marketing-page .page-shell {
-  width: min(100%, 1180px);
+  width: min(100%, 1200px);
   margin: 0 auto;
-  padding: 40px 20px 52px;
+  padding: 32px 20px 64px;
 }
 
 .marketing-page .page-stack {
   display: grid;
-  gap: 32px;
+  gap: 0;
 }
 
 .marketing-page .page-hero {
-  padding: 0;
-}
-
-.marketing-page .page-card {
-  border: 1px solid var(--line);
-  border-radius: 0.75rem;
-  background: rgba(255, 255, 255, 0.98);
-  padding: 24px;
+  padding: clamp(2.5rem, 5vw, 4.5rem) 0 clamp(1.5rem, 3vw, 2rem);
 }
 
 .marketing-page .page-section {
-  border-top: 1px solid var(--line);
-  padding-top: 32px;
-  padding-bottom: 32px;
+  border-top: 1px solid rgba(24, 24, 27, 0.08);
+  padding-top: clamp(3.75rem, 6vw, 5rem);
+  padding-bottom: clamp(3.75rem, 6vw, 5rem);
 }
 
 .marketing-page .page-section-compact {
-  border-top: 1px solid var(--line);
-  padding-top: 24px;
-  padding-bottom: 24px;
-}
-
-.marketing-page .page-sidebar-card {
-  border: 1px solid var(--line);
-  border-radius: 0.75rem;
-  background: #fafafa;
-  padding: 20px;
-}
-
-.marketing-page .page-rule-list {
-  margin-top: 20px;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-}
-
-.marketing-page .page-rule-list > * + * {
-  border-top: 1px solid var(--line);
-}
-
-.marketing-page .page-title {
-  margin-top: 16px;
-  font-size: clamp(2.25rem, 4.8vw, 3.75rem);
-  line-height: 1.08;
-}
-
-.marketing-page .page-copy {
-  margin-top: 16px;
-  max-width: 760px;
-  font-size: 1rem;
-  font-weight: 400;
-  line-height: 1.75;
-  color: #52525b;
+  border-top: 1px solid rgba(24, 24, 27, 0.08);
+  padding-top: clamp(2rem, 4vw, 2.5rem);
+  padding-bottom: clamp(2rem, 4vw, 2.5rem);
 }
 
 .marketing-page .page-grid-2 {
   display: grid;
-  gap: 24px;
+  gap: 1.5rem;
 }
 
 .marketing-page .page-grid-3 {
   display: grid;
-  gap: 24px;
+  gap: 1.5rem;
+}
+
+.renovo-highlight {
+  background: linear-gradient(135deg, rgba(23, 143, 105, 0.1), rgba(23, 143, 105, 0.02));
+  border: 1px solid rgba(23, 143, 105, 0.2);
+}
+
+.app-field,
+.app-select,
+.app-textarea {
+  width: 100%;
+  border-radius: 1rem;
+  border: 1px solid rgba(24, 24, 27, 0.12);
+  background: var(--surface-subtle);
+  color: var(--text-strong);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.66);
+}
+
+.app-field,
+.app-select {
+  min-height: 3.5rem;
+  padding: 0.95rem 1rem;
+}
+
+.app-textarea {
+  min-height: 10rem;
+  padding: 1rem;
+  resize: vertical;
+}
+
+.app-field::placeholder,
+.app-textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.app-field:hover,
+.app-select:hover,
+.app-textarea:hover {
+  border-color: rgba(24, 24, 27, 0.18);
+}
+
+.app-field:focus,
+.app-select:focus,
+.app-textarea:focus {
+  border-color: rgba(15, 110, 86, 0.45);
+  box-shadow:
+    0 0 0 4px rgba(15, 110, 86, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.75);
+}
+
+.app-field[aria-invalid='true'],
+.app-select[aria-invalid='true'],
+.app-textarea[aria-invalid='true'] {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.08);
+}
+
+.app-field:disabled,
+.app-select:disabled,
+.app-textarea:disabled {
+  background: rgba(245, 245, 244, 0.78);
+  color: #a1a1aa;
 }
 
 @media (min-width: 768px) {
@@ -482,29 +749,7 @@ a:focus-visible {
   }
 
   .marketing-page .page-shell {
-    padding: 52px 24px 60px;
-  }
-
-  .marketing-page .page-stack {
-    gap: 40px;
-  }
-
-  .marketing-page .page-card {
-    padding: 28px;
-  }
-
-  .marketing-page .page-section {
-    padding-top: 36px;
-    padding-bottom: 36px;
-  }
-
-  .marketing-page .page-section-compact {
-    padding-top: 28px;
-    padding-bottom: 28px;
-  }
-
-  .marketing-page .page-sidebar-card {
-    padding: 22px;
+    padding: 40px 24px 72px;
   }
 
   .marketing-page .page-grid-2 {
@@ -528,73 +773,17 @@ a:focus-visible {
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-
-  *,
-  *::before,
-  *::after {
-    animation: none !important;
-    transition: none !important;
-  }
-}
-/* ─── RENOVO THEME ADDITIONS ───
-   Paste this at the END of your globals.css file.
-   These additions support the dark hero, emerald accent system,
-   and section patterns used across the redesigned pages.
-   ────────────────────────────────────────────────────── */
-
-/* Glow animation for hero badge dot */
 @keyframes renovo-pulse {
-  0%, 100% { opacity: 0.35; }
-  50% { opacity: 0.7; }
-}
-.renovo-pulse { animation: renovo-pulse 2s ease-in-out infinite; }
+  0%,
+  100% {
+    opacity: 0.38;
+  }
 
-/* Hero radial glow */
-.renovo-glow {
-  background: radial-gradient(circle, rgba(16,185,129,0.12) 0%, transparent 65%);
-  animation: renovo-pulse 7s ease-in-out infinite;
-}
-
-/* Emerald accent button */
-.app-accent-button {
-  display: inline-block;
-  font-weight: 600;
-  color: #0a0e1a;
-  background: #10b981;
-  transition: all 0.2s;
-}
-.app-accent-button:hover {
-  background: #0ea472;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 24px rgba(16,185,129, 0.25);
+  50% {
+    opacity: 0.78;
+  }
 }
 
-/* Outline button on dark backgrounds */
-.app-outline-white {
-  display: inline-block;
-  font-weight: 500;
-  color: #fff;
-  border: 1px solid rgba(255,255,255,0.18);
-  transition: all 0.2s;
-}
-.app-outline-white:hover {
-  border-color: rgba(255,255,255,0.45);
-  background: rgba(255,255,255,0.04);
-}
-
-/* Section alternation helper */
-.section-tinted {
-  background: #f8fafc;
-  border-top: 1px solid #e2e8f0;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-/* Regulatory highlight box */
-.renovo-highlight {
-  background: linear-gradient(135deg, rgba(16,185,129,0.08), rgba(16,185,129,0.01));
-  border: 1px solid rgba(16,185,129,0.18);
+.renovo-pulse {
+  animation: renovo-pulse 2s ease-in-out infinite;
 }

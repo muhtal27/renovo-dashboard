@@ -157,7 +157,7 @@ export default function PrivacyPage() {
                 href="/contact"
                 className="app-primary-button rounded-md px-6 py-3 text-sm font-medium"
               >
-                Get started →
+                Talk to us
               </Link>
               <Link
                 href="/compliance"
