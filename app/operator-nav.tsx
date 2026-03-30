@@ -7,7 +7,6 @@ import {
   BookOpenText,
   ChevronLeft,
   ClipboardCheck,
-  FileSearch,
   FolderKanban,
   LayoutDashboard,
   LogOut,
@@ -50,7 +49,7 @@ const NAV_GROUPS: Array<{
     label: 'Operations',
     items: [
       {
-        label: 'Overview',
+        label: 'Admin',
         href: '/overview',
         icon: LayoutDashboard,
         isActive: (pathname) => pathname.startsWith('/overview'),
@@ -62,10 +61,10 @@ const NAV_GROUPS: Array<{
         isActive: (pathname) => pathname === '/eot' || pathname.startsWith('/eot/'),
       },
       {
-        label: 'Tenancy',
-        href: '/tenancy',
-        icon: FileSearch,
-        isActive: (pathname) => pathname.startsWith('/tenancy') || pathname.startsWith('/evidence'),
+        label: 'Inventory feedback',
+        href: '/inventory-feedback',
+        icon: MessageSquareMore,
+        isActive: (pathname) => pathname.startsWith('/inventory-feedback'),
       },
       {
         label: 'Disputes',
@@ -74,7 +73,7 @@ const NAV_GROUPS: Array<{
         isActive: (pathname) => pathname.startsWith('/disputes') || pathname.startsWith('/issues'),
       },
       {
-        label: 'Recommendations',
+        label: 'Compliance',
         href: '/recommendations',
         icon: Sparkles,
         isActive: (pathname) => pathname.startsWith('/recommendations'),

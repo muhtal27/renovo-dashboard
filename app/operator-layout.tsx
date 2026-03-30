@@ -66,7 +66,7 @@ const OPERATOR_ROUTE_CONFIG: Array<{
         'Single-case operator review across evidence, issues, decision rationale, and submission readiness.',
       searchPlaceholder: 'Search this case by issue, evidence, recommendation, or message',
       breadcrumbs: [
-        { label: 'Overview', href: '/overview' },
+        { label: 'Admin', href: '/overview' },
         { label: 'Checkouts', href: '/eot' },
         { label: 'Case workspace' },
       ],
@@ -75,12 +75,12 @@ const OPERATOR_ROUTE_CONFIG: Array<{
   {
     matches: (pathname) => pathname.startsWith('/overview'),
     config: {
-      pageTitle: 'Overview',
+      pageTitle: 'Admin',
       pageDescription:
         'Executive summary of the live end-of-tenancy portfolio, workflow pressure, and operator attention queue.',
       searchPlaceholder: 'Search portfolio activity, properties, tenants, or workflow states',
       searchTargetPath: '/overview',
-      breadcrumbs: [{ label: 'Overview' }],
+      breadcrumbs: [{ label: 'Admin' }],
     },
   },
   {
@@ -91,7 +91,7 @@ const OPERATOR_ROUTE_CONFIG: Array<{
         'Operational checkout queue with live end-of-tenancy workflow state, dispute signals, and fast access into the workspace.',
       searchPlaceholder: 'Search live checkouts by property, tenant, status, priority, or checkout ID',
       searchTargetPath: '/eot',
-      breadcrumbs: [{ label: 'Overview', href: '/overview' }, { label: 'Checkouts' }],
+      breadcrumbs: [{ label: 'Admin', href: '/overview' }, { label: 'Checkouts' }],
     },
   },
   {
@@ -102,7 +102,7 @@ const OPERATOR_ROUTE_CONFIG: Array<{
         'Review live evidence, issues, recommendations, claim structure, and communication in a single operator workspace.',
       searchPlaceholder: 'Filter this checkout by issue, evidence, recommendation, or message',
       breadcrumbs: [
-        { label: 'Overview', href: '/overview' },
+        { label: 'Admin', href: '/overview' },
         { label: 'Checkouts', href: '/eot' },
         { label: 'Checkout workspace' },
       ],
@@ -116,7 +116,16 @@ const OPERATOR_ROUTE_CONFIG: Array<{
         'Cross-checkout tenancy view covering residents, deposits, property references, and checkout readiness.',
       searchPlaceholder: 'Search tenancy records by property, tenant, reference, or checkout state',
       searchTargetPath: '/tenancy',
-      breadcrumbs: [{ label: 'Overview', href: '/overview' }, { label: 'Tenancy' }],
+      breadcrumbs: [{ label: 'Admin', href: '/overview' }, { label: 'Tenancy' }],
+    },
+  },
+  {
+    matches: (pathname) => pathname.startsWith('/inventory-feedback'),
+    config: {
+      pageTitle: 'Inventory feedback',
+      pageDescription:
+        'Placeholder workspace for inventory feedback capture, review, and future operator workflows.',
+      breadcrumbs: [{ label: 'Admin', href: '/overview' }, { label: 'Inventory feedback' }],
     },
   },
   {
@@ -127,18 +136,18 @@ const OPERATOR_ROUTE_CONFIG: Array<{
         'Review disputed checkouts, contested issues, and the evidence-backed narratives needed for resolution.',
       searchPlaceholder: 'Search disputes by property, tenant, issue, severity, or dispute state',
       searchTargetPath: '/disputes',
-      breadcrumbs: [{ label: 'Overview', href: '/overview' }, { label: 'Disputes' }],
+      breadcrumbs: [{ label: 'Admin', href: '/overview' }, { label: 'Disputes' }],
     },
   },
   {
     matches: (pathname) => pathname.startsWith('/recommendations'),
     config: {
-      pageTitle: 'Recommendations',
+      pageTitle: 'Compliance',
       pageDescription:
         'Review charge decisions, rationale, and estimated cost across the live checkout portfolio.',
       searchPlaceholder: 'Search recommendation rationale, issue titles, properties, or tenants',
       searchTargetPath: '/recommendations',
-      breadcrumbs: [{ label: 'Overview', href: '/overview' }, { label: 'Recommendations' }],
+      breadcrumbs: [{ label: 'Admin', href: '/overview' }, { label: 'Compliance' }],
     },
   },
   {
@@ -149,7 +158,7 @@ const OPERATOR_ROUTE_CONFIG: Array<{
         'Monitor claim pack generation, pending submissions, and the final operator review queue.',
       searchPlaceholder: 'Search submissions, property, tenant, or readiness state',
       searchTargetPath: '/claims',
-      breadcrumbs: [{ label: 'Overview', href: '/overview' }, { label: 'Submissions' }],
+      breadcrumbs: [{ label: 'Admin', href: '/overview' }, { label: 'Submissions' }],
     },
   },
   {
@@ -161,7 +170,7 @@ const OPERATOR_ROUTE_CONFIG: Array<{
       searchPlaceholder: 'Search reports by property, tenant, workflow state, or recommendation',
       searchTargetPath: '/reports',
       breadcrumbs: [
-        { label: 'Overview', href: '/overview' },
+        { label: 'Admin', href: '/overview' },
         { label: 'Reports / Analytics' },
       ],
     },
@@ -172,7 +181,7 @@ const OPERATOR_ROUTE_CONFIG: Array<{
       pageTitle: 'Inbox',
       pageDescription:
         'Central queue for case notes, outbound communication, and operator follow-up.',
-      breadcrumbs: [{ label: 'Overview', href: '/overview' }, { label: 'Inbox' }],
+      breadcrumbs: [{ label: 'Admin', href: '/overview' }, { label: 'Inbox' }],
     },
   },
   {
@@ -183,7 +192,7 @@ const OPERATOR_ROUTE_CONFIG: Array<{
         'Authoritative scheme, evidence, and deduction guidance for end-of-tenancy operators.',
       searchPlaceholder: 'Search the guidance library',
       searchTargetPath: '/knowledge',
-      breadcrumbs: [{ label: 'Overview', href: '/overview' }, { label: 'Guidance' }],
+      breadcrumbs: [{ label: 'Admin', href: '/overview' }, { label: 'Guidance' }],
     },
   },
   {

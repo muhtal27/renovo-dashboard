@@ -8,6 +8,7 @@ import { IssueList } from '@/app/(operator)/operator/cases/[id]/_components/issu
 import { MessageThreadCard } from '@/app/(operator)/operator/cases/[id]/_components/message-thread-card'
 import { RecommendationDetailCard } from '@/app/(operator)/operator/cases/[id]/_components/recommendation-detail-card'
 import { ReportComparisonCard } from '@/app/(operator)/operator/cases/[id]/_components/report-comparison-card'
+import { CaseWorkspaceOverviewDetails } from '@/app/(operator)/operator/cases/[id]/_components/case-workspace-overview-details'
 import { CaseStatusBadge } from '@/app/(operator)/operator/cases/[id]/_components/case-status-badge'
 import { SupportingDocumentsPanel } from '@/app/(operator)/operator/cases/[id]/_components/supporting-documents-panel'
 import type { OperatorCaseWorkspaceData } from '@/lib/operator-case-workspace-types'
@@ -76,10 +77,6 @@ export function CaseWorkspaceView({
 
   const metadataItems = [
     {
-      label: 'Tenant',
-      value: workspace.tenant.email ? `${workspace.tenant.name} · ${workspace.tenant.email}` : workspace.tenant.name,
-    },
-    {
       label: 'Status',
       value: submissionState.label,
     },
@@ -131,6 +128,15 @@ export function CaseWorkspaceView({
             ))}
           </dl>
         </header>
+
+        <div className="border-b border-slate-200" />
+
+        <Section
+          title="Overview"
+          description="Commercial tenancy detail, tenant contacts, and landlord ownership context for operator review."
+        >
+          <CaseWorkspaceOverviewDetails workspace={workspace} />
+        </Section>
 
         <div className="border-b border-slate-200" />
 

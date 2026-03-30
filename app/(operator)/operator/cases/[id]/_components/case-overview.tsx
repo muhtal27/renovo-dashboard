@@ -1,6 +1,7 @@
 'use client'
 
 import { ActivityTimeline, DetailPanel, EmptyState, SectionCard } from '@/app/operator-ui'
+import { CaseWorkspaceOverviewDetails } from '@/app/(operator)/operator/cases/[id]/_components/case-workspace-overview-details'
 import {
   ConditionBadge,
   WorkspaceBadge,
@@ -325,7 +326,7 @@ export function CaseOverview({ data }: { data: OperatorCheckoutWorkspaceData }) 
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
         <SectionCard className="px-6 py-6 md:px-7">
-          <WorkspaceSectionTitle>Case snapshot</WorkspaceSectionTitle>
+          <WorkspaceSectionTitle>Overview</WorkspaceSectionTitle>
           <div className="mt-4 flex flex-wrap items-center gap-2">
             <WorkspaceBadge label={checkoutStatus.label} tone={checkoutStatus.tone} />
             <WorkspaceBadge
@@ -348,13 +349,15 @@ export function CaseOverview({ data }: { data: OperatorCheckoutWorkspaceData }) 
             )}
           </p>
 
+          <div className="mt-6 border-t border-slate-200 pt-6">
+            <CaseWorkspaceOverviewDetails
+              workspace={data.workspace}
+              fallbackLandlordEmail={data.checkoutCase?.landlordEmail}
+              fallbackTenantEmail={data.checkoutCase?.tenantEmail}
+            />
+          </div>
+
           <dl className="mt-6 grid gap-x-6 gap-y-3 border-t border-slate-200 pt-6 md:grid-cols-2">
-            <div className="flex items-start justify-between gap-4 border-b border-slate-200 pb-3">
-              <dt className="text-sm text-slate-500">Tenancy dates</dt>
-              <dd className="min-w-0 text-right text-sm font-medium text-slate-950">
-                {formatDate(data.workspace.tenancy.start_date)} to {formatDate(data.workspace.tenancy.end_date)}
-              </dd>
-            </div>
             <div className="flex items-start justify-between gap-4 border-b border-slate-200 pb-3">
               <dt className="text-sm text-slate-500">Checkout date</dt>
               <dd className="min-w-0 text-right text-sm font-medium text-slate-950">
@@ -369,8 +372,14 @@ export function CaseOverview({ data }: { data: OperatorCheckoutWorkspaceData }) 
             </div>
             <div className="flex items-start justify-between gap-4 border-b border-slate-200 pb-3">
               <dt className="text-sm text-slate-500">Property reference</dt>
-              <dd className="min-w-0 text-right text-sm font-medium text-slate-950 [overflow-wrap:anywhere]">
+              <dd className="min-w-0 text-right text-sm font-medium text-slate-950">
                 {formatTextValue(data.workspace.property.reference)}
+              </dd>
+            </div>
+            <div className="flex items-start justify-between gap-4 border-b border-slate-200 pb-3">
+              <dt className="text-sm text-slate-500">Case reference</dt>
+              <dd className="min-w-0 text-right text-sm font-medium text-slate-950 [overflow-wrap:anywhere]">
+                {data.checkoutCase?.caseReference ?? data.workspace.case.id.slice(0, 8).toUpperCase()}
               </dd>
             </div>
             <div className="flex items-start justify-between gap-4 border-b border-slate-200 pb-3">
@@ -397,28 +406,7 @@ export function CaseOverview({ data }: { data: OperatorCheckoutWorkspaceData }) 
                 {formatDateTime(data.workspace.case.last_activity_at)}
               </dd>
             </div>
-            <div className="flex items-start justify-between gap-4 border-b border-slate-200 pb-3">
-              <dt className="text-sm text-slate-500">Tenant email</dt>
-              <dd className="min-w-0 text-right text-sm font-medium text-slate-950 [overflow-wrap:anywhere]">
-                {formatTextValue(data.checkoutCase?.tenantEmail ?? data.workspace.tenant.email)}
-              </dd>
-            </div>
-            <div className="flex items-start justify-between gap-4 border-b border-slate-200 pb-3">
-              <dt className="text-sm text-slate-500">Landlord email</dt>
-              <dd className="min-w-0 text-right text-sm font-medium text-slate-950 [overflow-wrap:anywhere]">
-                {formatTextValue(data.checkoutCase?.landlordEmail)}
-              </dd>
-            </div>
           </dl>
-
-          {data.workspace.tenancy.notes ? (
-            <div className="mt-6 border-t border-slate-200 pt-6">
-              <WorkspaceSectionTitle className="mb-3">Tenancy notes</WorkspaceSectionTitle>
-              <p className="text-sm leading-6 text-slate-600 [overflow-wrap:anywhere]">
-                {data.workspace.tenancy.notes}
-              </p>
-            </div>
-          ) : null}
         </SectionCard>
 
         <DetailPanel

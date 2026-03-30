@@ -4,7 +4,7 @@ import { getEotCaseListSnapshot } from '@/lib/eot-server-data'
 import { requireOperatorTenant } from '@/lib/operator-server'
 
 export const metadata: Metadata = {
-  title: 'Overview | Renovo',
+  title: 'Admin | Renovo',
 }
 
 export default async function OverviewPage() {

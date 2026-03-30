@@ -16,6 +16,22 @@ export type CaseWorkspaceTenant = {
   email: string | null
 }
 
+export type CaseWorkspaceParty = {
+  id: string
+  fullName: string | null
+  email: string | null
+  phone: string | null
+  isLead: boolean
+  ownershipLabel: string | null
+}
+
+export type CaseWorkspaceOverviewData = {
+  monthlyRent: number | null
+  rentArrears: number | null
+  tenants: CaseWorkspaceParty[]
+  landlords: CaseWorkspaceParty[]
+}
+
 export type CaseWorkspaceIssue = EotIssue & {
   area: string | null
 }
@@ -59,6 +75,7 @@ export type OperatorCaseWorkspaceData = {
   case: EotCase
   tenancy: EotTenancy
   tenant: CaseWorkspaceTenant
+  overview: CaseWorkspaceOverviewData
   property: EotProperty
   documents: EotDocument[]
   supportingDocuments: SupportingCaseDocument[]
