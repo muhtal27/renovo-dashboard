@@ -434,7 +434,7 @@ a:focus-visible {
 }
 
 .marketing-hero-glow {
-  background: radial-gradient(circle, rgba(23, 143, 105, 0.2) 0%, transparent 68%);
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.16) 0%, transparent 66%);
   animation: marketing-pulse 8s ease-in-out infinite;
 }
 
@@ -451,6 +451,13 @@ a:focus-visible {
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
+}
+
+.marketing-hero-eyebrow {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 0.45rem 0.9rem;
 }
 
 .marketing-title {
@@ -485,6 +492,13 @@ a:focus-visible {
   color: var(--accent-emerald);
 }
 
+.marketing-accent-gradient {
+  background: linear-gradient(135deg, #10b981 0%, #6ee7b7 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
 .marketing-dark-copy {
   color: rgba(255, 255, 255, 0.72);
 }
@@ -501,50 +515,93 @@ a:focus-visible {
   color: rgba(255, 255, 255, 0.72);
 }
 
-.marketing-hero-stat {
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 1.25rem;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 1rem;
+.marketing-media-glow {
+  background: linear-gradient(180deg, rgba(16, 185, 129, 0.2), transparent 72%);
+  filter: blur(34px);
 }
 
-.marketing-hero-stat-value {
-  color: #ffffff;
-  font-size: 1.875rem;
-  font-weight: 600;
+.marketing-hero-frame {
+  border-radius: 1.25rem;
+  background: linear-gradient(180deg, rgba(16, 185, 129, 0.16), rgba(16, 185, 129, 0) 28%);
+  padding: 1px;
+}
+
+.marketing-hero-frame-shell {
+  overflow: hidden;
+  border-radius: 1rem;
+  background: #111827;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.45);
+}
+
+.marketing-hero-meta-grid {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem 0.25rem 0;
+}
+
+.marketing-stats-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2.5rem;
+}
+
+.marketing-stat-block {
+  min-width: 7rem;
+}
+
+.marketing-stat-value {
+  color: var(--accent-emerald);
+  font-size: clamp(2.5rem, 4vw, 3rem);
+  font-weight: 700;
   letter-spacing: -0.05em;
 }
 
-.marketing-hero-stat-label {
+.marketing-stat-label {
   margin-top: 0.25rem;
-  color: rgba(255, 255, 255, 0.58);
-  font-size: 0.875rem;
+  color: var(--text-body);
+  font-size: 0.82rem;
+  font-weight: 500;
 }
 
-.marketing-media-glow {
-  border-radius: 2rem;
-  background: linear-gradient(180deg, rgba(38, 179, 131, 0.18), transparent 72%);
-  filter: blur(32px);
+.marketing-plain-grid {
+  display: grid;
+  gap: 2.5rem;
 }
 
-.marketing-media-panel {
-  overflow: hidden;
-  border-radius: 2rem;
-  border-color: rgba(255, 255, 255, 0.1);
-  background: rgba(16, 24, 39, 0.9);
-  padding: 0.75rem;
+.marketing-plain-feature {
+  position: relative;
 }
 
-.marketing-media-screen {
-  overflow: hidden;
+.marketing-plain-kicker {
+  color: var(--accent-emerald);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.marketing-decision-panel {
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 1.5rem;
-  background: #0b1220;
+  background: #0a0e1a;
 }
 
-.marketing-media-meta {
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 1.25rem 0.5rem 0.5rem;
+.marketing-chip-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  align-items: flex-start;
+}
+
+.marketing-chip {
+  width: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  border: 1px solid rgba(24, 24, 27, 0.1);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 0.75rem 1rem;
+  box-shadow: 0 10px 24px rgba(17, 24, 39, 0.04);
 }
 
 .marketing-dark-flow-row {
@@ -774,6 +831,19 @@ a:focus-visible {
   .marketing-frame {
     padding-left: 24px;
     padding-right: 24px;
+  }
+
+  .marketing-hero-frame {
+    border-radius: 1.5rem;
+  }
+
+  .marketing-hero-frame-shell {
+    border-radius: 1.25rem;
+  }
+
+  .marketing-hero-meta-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    padding: 1.25rem 0.5rem 0;
   }
 }
 

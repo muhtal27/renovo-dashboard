@@ -1,6 +1,9 @@
+'use client'
+
 import Image from 'next/image'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
+import { useEffect, useState } from 'react'
 import { MarketingButton } from '@/app/components/marketing-ui'
 import { DASHBOARD_SIGN_IN_EXTERNAL, DASHBOARD_SIGN_IN_URL } from '@/lib/marketing-links'
 
@@ -21,6 +24,7 @@ type MarketingShellProps = {
     | '/privacy'
     | '/terms'
   navAriaLabel?: string
+  headerTone?: 'light' | 'dark-overlay'
 }
 
 const headerNavItems = [
@@ -70,7 +74,13 @@ function SignInLink({
   )
 }
 
-function navLinkClass(active: boolean) {
+function navLinkClass(active: boolean, dark: boolean) {
+  if (dark) {
+    return active
+      ? 'inline-flex items-center whitespace-nowrap text-sm font-medium text-white'
+      : 'inline-flex items-center whitespace-nowrap text-sm font-medium text-white/58 transition hover:text-white'
+  }
+
   return active
     ? 'inline-flex items-center whitespace-nowrap text-sm font-medium text-zinc-950'
     : 'inline-flex items-center whitespace-nowrap text-sm font-medium text-zinc-500 transition hover:text-zinc-950'
@@ -88,18 +98,46 @@ export function MarketingShell({
   children,
   currentPath,
   navAriaLabel = 'Marketing',
+  headerTone = 'light',
 }: MarketingShellProps) {
+  const prefersDarkOverlay = headerTone === 'dark-overlay'
+  const [isScrolled, setIsScrolled] = useState(false)
+
+  useEffect(() => {
+    if (!prefersDarkOverlay) return
+
+    const syncScrollState = () => {
+      setIsScrolled(window.scrollY > 32)
+    }
+
+    syncScrollState()
+    window.addEventListener('scroll', syncScrollState, { passive: true })
+
+    return () => window.removeEventListener('scroll', syncScrollState)
+  }, [prefersDarkOverlay])
+
+  const darkHeader = prefersDarkOverlay
+  const overlayHeader = prefersDarkOverlay && !isScrolled
+
   return (
     <div className="marketing-page min-h-screen text-zinc-900">
       <a href="#main-content" className="skip-link">
         Skip to content
       </a>
-      <header className="sticky top-0 z-30 border-b border-black/6 bg-white/88 backdrop-blur-xl">
+      <header
+        className={
+          overlayHeader
+            ? 'sticky top-0 z-30 border-b border-transparent bg-transparent text-white transition-colors duration-300'
+            : darkHeader
+              ? 'sticky top-0 z-30 border-b border-white/10 bg-[rgba(10,14,26,0.92)] text-white backdrop-blur-xl transition-colors duration-300'
+              : 'sticky top-0 z-30 border-b border-black/6 bg-white/88 text-zinc-900 backdrop-blur-xl transition-colors duration-300'
+        }
+      >
         <div className="marketing-frame flex min-h-[64px] items-center justify-between gap-3 py-2.5 lg:min-h-[72px] lg:gap-6">
           <Link
             href="/"
             aria-label="Renovo AI home"
-            className="inline-flex shrink-0 items-center text-base font-semibold tracking-[-0.02em] text-zinc-950"
+            className="inline-flex shrink-0 items-center text-base font-semibold tracking-[-0.02em]"
           >
             <Image
               src="/logo-new.svg"
@@ -107,7 +145,7 @@ export function MarketingShell({
               width={112}
               height={22}
               priority
-              className="h-auto w-[112px]"
+              className={darkHeader ? 'h-auto w-[112px] brightness-0 invert' : 'h-auto w-[112px]'}
             />
           </Link>
 
@@ -120,7 +158,7 @@ export function MarketingShell({
                 key={item.label}
                 href={item.href}
                 aria-current={currentPath === item.href ? 'page' : undefined}
-                className={navLinkClass(currentPath === item.href)}
+                className={navLinkClass(currentPath === item.href, darkHeader)}
               >
                 {item.label}
               </Link>
@@ -128,37 +166,75 @@ export function MarketingShell({
           </nav>
 
           <div className="hidden shrink-0 items-center gap-2.5 lg:flex">
-            <SignInLink className="inline-flex items-center rounded-md px-3 py-2 text-sm font-medium text-zinc-500 hover:text-zinc-950">
+            <SignInLink
+              className={
+                darkHeader
+                  ? 'inline-flex items-center rounded-md px-3 py-2 text-sm font-medium text-white/58 hover:text-white'
+                  : 'inline-flex items-center rounded-md px-3 py-2 text-sm font-medium text-zinc-500 hover:text-zinc-950'
+              }
+            >
               Sign in
             </SignInLink>
-            <MarketingButton href="/contact" size="sm" className="whitespace-nowrap rounded-xl">
+            <MarketingButton
+              href="/contact"
+              size="sm"
+              variant={darkHeader ? 'inverse' : 'primary'}
+              className="whitespace-nowrap rounded-xl"
+            >
               Talk to us
             </MarketingButton>
           </div>
 
           <details className="group relative lg:hidden">
-            <summary className="inline-flex min-h-10 list-none items-center rounded-xl border border-zinc-200 bg-white/95 px-3.5 py-2 text-sm font-medium text-zinc-950 shadow-[0_10px_24px_rgba(17,24,39,0.05)] [&::-webkit-details-marker]:hidden">
+            <summary
+              className={
+                darkHeader
+                  ? 'inline-flex min-h-10 list-none items-center rounded-xl border border-white/12 bg-white/5 px-3.5 py-2 text-sm font-medium text-white shadow-[0_14px_30px_rgba(0,0,0,0.18)] [&::-webkit-details-marker]:hidden'
+                  : 'inline-flex min-h-10 list-none items-center rounded-xl border border-zinc-200 bg-white/95 px-3.5 py-2 text-sm font-medium text-zinc-950 shadow-[0_10px_24px_rgba(17,24,39,0.05)] [&::-webkit-details-marker]:hidden'
+              }
+            >
               Menu
             </summary>
-            <div className="absolute right-0 mt-2 w-[min(86vw,22rem)] rounded-[1.25rem] border border-black/8 bg-white/98 p-4 shadow-[0_24px_48px_rgba(17,24,39,0.12)]">
+            <div
+              className={
+                darkHeader
+                  ? 'absolute right-0 mt-2 w-[min(86vw,22rem)] rounded-[1.25rem] border border-white/10 bg-[rgba(10,14,26,0.98)] p-4 shadow-[0_24px_48px_rgba(0,0,0,0.28)]'
+                  : 'absolute right-0 mt-2 w-[min(86vw,22rem)] rounded-[1.25rem] border border-black/8 bg-white/98 p-4 shadow-[0_24px_48px_rgba(17,24,39,0.12)]'
+              }
+            >
               <nav className="grid gap-1" aria-label="Mobile marketing navigation">
                 {mobileNavLinks.map((item) => (
                   <Link
                     key={item.label}
                     href={item.href}
                     aria-current={currentPath === item.href ? 'page' : undefined}
-                    className="rounded-xl px-3 py-2 text-sm font-medium text-zinc-500 hover:bg-zinc-50 hover:text-zinc-950"
+                    className={
+                      darkHeader
+                        ? 'rounded-xl px-3 py-2 text-sm font-medium text-white/68 hover:bg-white/6 hover:text-white'
+                        : 'rounded-xl px-3 py-2 text-sm font-medium text-zinc-500 hover:bg-zinc-50 hover:text-zinc-950'
+                    }
                   >
                     {item.label}
                   </Link>
                 ))}
               </nav>
 
-              <div className="mt-3 grid gap-2 border-t border-zinc-200 pt-3">
-                <SignInLink className="rounded-md px-3 py-2 text-sm font-medium text-zinc-500 hover:bg-zinc-50 hover:text-zinc-950">
+              <div className={darkHeader ? 'mt-3 grid gap-2 border-t border-white/10 pt-3' : 'mt-3 grid gap-2 border-t border-zinc-200 pt-3'}>
+                <SignInLink
+                  className={
+                    darkHeader
+                      ? 'rounded-md px-3 py-2 text-sm font-medium text-white/68 hover:bg-white/6 hover:text-white'
+                      : 'rounded-md px-3 py-2 text-sm font-medium text-zinc-500 hover:bg-zinc-50 hover:text-zinc-950'
+                  }
+                >
                   Sign in
                 </SignInLink>
-                <MarketingButton href="/contact" size="sm" className="w-full rounded-xl">
+                <MarketingButton
+                  href="/contact"
+                  size="sm"
+                  variant={darkHeader ? 'inverse' : 'primary'}
+                  className="w-full rounded-xl"
+                >
                   Talk to us
                 </MarketingButton>
               </div>
