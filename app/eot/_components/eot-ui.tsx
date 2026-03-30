@@ -173,6 +173,7 @@ export function formatDate(value: string | null | undefined) {
   return new Intl.DateTimeFormat('en-GB', {
     day: 'numeric',
     month: 'short',
+    timeZone: 'Europe/London',
     year: 'numeric',
   }).format(new Date(value))
 }
@@ -186,6 +187,7 @@ export function formatDateTime(value: string | null | undefined) {
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
+    timeZone: 'Europe/London',
   }).format(new Date(value))
 }
 

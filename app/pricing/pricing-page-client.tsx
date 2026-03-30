@@ -235,7 +235,7 @@ export default function PricingPageClient() {
               Optional <em>add-ons</em>
             </h2>
             <p className="mt-3 text-base leading-8 text-zinc-600">
-              Available on any plan. Add what your team needs, skip what it doesn't.
+              Available on any plan. Add what your team needs, skip what it doesn&apos;t.
             </p>
           </div>
 
@@ -336,7 +336,7 @@ export default function PricingPageClient() {
             Ready to simplify your <em>checkout workflow</em>?
           </h2>
           <p className="mx-auto mt-4 max-w-[760px] text-base leading-8 text-zinc-600">
-            Tell us about your team and portfolio. We'll help you find the right setup.
+            Tell us about your team and portfolio. We&apos;ll help you find the right setup.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link
