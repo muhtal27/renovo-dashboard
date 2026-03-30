@@ -36,7 +36,7 @@ const enterpriseFeatures = [
 const addons = [
   {
     title: 'SSO (Single Sign-On)',
-    desc: 'Sign in via your agency's identity provider. Supports Microsoft Entra ID and SAML-based providers.',
+    desc: "Sign in via your agency's identity provider. Supports Microsoft Entra ID and SAML-based providers.",
   },
   {
     title: 'On-site technical support',
