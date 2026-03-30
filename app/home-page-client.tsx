@@ -159,12 +159,12 @@ export default function HomePageClient() {
                 <>
                   Checkout reports in.
                   <br />
-                  <span className="marketing-accent-text">Deposit decisions out.</span>
+                  <span className="text-[var(--accent-emerald)]">Deposit decisions out.</span>
                 </>
               }
               description="AI-powered liability comparison, deduction drafting, evidence management, and dispute pack preparation, with manager approval at every stage."
               titleClassName="max-w-[12ch] text-white"
-              descriptionClassName="max-w-[34rem] marketing-dark-copy"
+              descriptionClassName="max-w-[34rem] text-white/72"
               actions={
                 <>
                   <MarketingButton href="/contact" variant="inverse" size="lg">
@@ -183,18 +183,21 @@ export default function HomePageClient() {
                 ['2-3h', 'Admin per case'],
                 ['0', 'Audit trail'],
               ] as const).map(([value, label]) => (
-                <div key={label} className="marketing-hero-stat">
-                  <p className="marketing-hero-stat-value">{value}</p>
-                  <p className="marketing-hero-stat-label">{label}</p>
+                <div key={label} className="rounded-[1.25rem] border border-white/10 bg-white/5 px-4 py-4">
+                  <p className="text-3xl font-semibold tracking-[-0.05em] text-white">{value}</p>
+                  <p className="mt-1 text-sm text-white/58">{label}</p>
                 </div>
               ))}
             </div>
           </div>
 
           <div className="relative">
-            <div className="marketing-media-glow absolute inset-0" />
-            <MarketingCard tone="dark" className="marketing-media-panel relative md:p-4">
-              <div className="marketing-media-screen">
+            <div className="absolute inset-0 rounded-[2rem] bg-[linear-gradient(180deg,rgba(38,179,131,0.18),transparent_72%)] blur-2xl" />
+            <MarketingCard
+              tone="dark"
+              className="relative overflow-hidden rounded-[2rem] border-white/10 bg-[rgba(16,24,39,0.9)] p-3 md:p-4"
+            >
+              <div className="overflow-hidden rounded-[1.5rem] border border-white/8 bg-[#0b1220]">
                 <Image
                   src="/dashboard-preview.png"
                   alt="Renovo AI checkout case workspace"
@@ -204,13 +207,13 @@ export default function HomePageClient() {
                   className="block h-auto w-full"
                 />
               </div>
-              <div className="marketing-media-meta grid gap-3 sm:grid-cols-3">
+              <div className="grid gap-3 border-t border-white/8 px-2 pb-2 pt-5 sm:grid-cols-3">
                 {[
                   'Room-by-room evidence review',
                   'Drafted liability recommendation',
                   'Manager approval before release',
                 ].map((item) => (
-                  <p key={item} className="marketing-dark-copy-soft text-sm leading-6">
+                  <p key={item} className="text-sm leading-6 text-white/64">
                     {item}
                   </p>
                 ))}
@@ -332,7 +335,7 @@ export default function HomePageClient() {
           </div>
 
           <MarketingCard tone="dark" className="rounded-[2rem]">
-            <p className="marketing-eyebrow marketing-dark-eyebrow">Decision flow</p>
+            <p className="marketing-eyebrow text-white/72">Decision flow</p>
             <div className="mt-6 space-y-3">
               {[
                 ['AI', 'Drafts liability assessment and landlord recommendation'],
@@ -341,9 +344,14 @@ export default function HomePageClient() {
                 ['PM', 'Negotiates from the documented case file'],
                 ['OK', 'Deposit released or dispute evidence pack generated'],
               ].map(([tag, label]) => (
-                <div key={label} className="marketing-dark-flow-row">
-                  <span className="marketing-dark-flow-tag">{tag}</span>
-                  <p className="marketing-dark-copy text-sm leading-6">{label}</p>
+                <div
+                  key={label}
+                  className="flex items-center gap-4 rounded-[1rem] border border-white/8 bg-white/4 px-4 py-3"
+                >
+                  <span className="inline-flex h-8 min-w-8 items-center justify-center rounded-full bg-[rgba(38,179,131,0.15)] px-2 text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-[var(--accent-emerald)]">
+                    {tag}
+                  </span>
+                  <p className="text-sm leading-6 text-white/70">{label}</p>
                 </div>
               ))}
             </div>
