@@ -139,26 +139,26 @@ export default function PricingPageClient() {
 
             {/* PAY AS YOU GO */}
             <article className="rounded-xl border border-zinc-200 bg-white p-7 text-zinc-950">
-              <p className="inline-block rounded-full bg-zinc-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-600">
+              <p className="inline-block rounded-full bg-emerald-500/[0.08] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-600">
                 Flexible
               </p>
               <h2 className="mt-4 text-3xl font-semibold tracking-[-0.03em]">Pay As You Go</h2>
-              <p className="mt-3 text-sm leading-7 text-zinc-500">
+              <p className="mt-3 text-sm leading-7 text-slate-500">
                 Full platform access with usage-based billing. No contracts, no
                 minimum commitment. Scale up or down as your portfolio moves.
               </p>
-              <p className="mt-4 rounded-lg bg-zinc-50 px-4 py-3 text-sm text-zinc-600">
+              <p className="mt-4 rounded-lg bg-emerald-500/[0.06] px-4 py-3 text-sm text-slate-600">
                 One-time setup: £500 + VAT
               </p>
 
               <div className="mt-6 border-t border-zinc-200 pt-6">
-                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-zinc-400">
+                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-slate-400">
                   Platform
                 </p>
                 <ul className="mt-4 space-y-3">
                   {payAsYouGoFeatures.platform.map((f) => (
-                    <li key={f} className="flex items-start gap-3 text-sm leading-7 text-zinc-600">
-                      <span className="mt-1.5 text-sm font-semibold text-zinc-400">✓</span>
+                    <li key={f} className="flex items-start gap-3 text-sm leading-7 text-slate-600">
+                      <span className="mt-1.5 text-sm font-semibold text-emerald-500">✓</span>
                       <span>{f}</span>
                     </li>
                   ))}
@@ -166,13 +166,13 @@ export default function PricingPageClient() {
               </div>
 
               <div className="mt-6 border-t border-zinc-200 pt-6">
-                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-zinc-400">
+                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-slate-400">
                   Team
                 </p>
                 <ul className="mt-4 space-y-3">
                   {payAsYouGoFeatures.team.map((f) => (
-                    <li key={f} className="flex items-start gap-3 text-sm leading-7 text-zinc-600">
-                      <span className="mt-1.5 text-sm font-semibold text-zinc-400">✓</span>
+                    <li key={f} className="flex items-start gap-3 text-sm leading-7 text-slate-600">
+                      <span className="mt-1.5 text-sm font-semibold text-emerald-500">✓</span>
                       <span>{f}</span>
                     </li>
                   ))}
@@ -183,31 +183,31 @@ export default function PricingPageClient() {
                 <Link href="/contact" className="app-primary-button w-full rounded-md px-4 py-3 text-sm font-medium">
                   Get started →
                 </Link>
-                <p className="mt-3 text-center text-xs text-zinc-400">
+                <p className="mt-3 text-center text-xs text-slate-400">
                   Billed per completed checkout.
                 </p>
               </div>
             </article>
 
             {/* ENTERPRISE */}
-            <article className="rounded-xl border border-zinc-300 bg-zinc-100 p-7 text-zinc-950">
-              <p className="inline-block rounded-full bg-zinc-200 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-600">
+            <article className="rounded-xl border border-zinc-300 bg-slate-50 p-7 text-zinc-950">
+              <p className="inline-block rounded-full bg-emerald-500/[0.08] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-600">
                 Tailored
               </p>
               <h2 className="mt-4 text-3xl font-semibold tracking-[-0.03em]">Enterprise</h2>
-              <p className="mt-3 text-sm leading-7 text-zinc-500">
+              <p className="mt-3 text-sm leading-7 text-slate-500">
                 For multi-branch agencies and portfolios above 5,000 tenancies.
                 Dedicated onboarding, custom integrations, and SLA-backed support.
               </p>
 
               <div className="mt-6 border-t border-zinc-300 pt-6">
-                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-zinc-400">
+                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-slate-400">
                   Everything in Pay As You Go, plus
                 </p>
                 <ul className="mt-4 space-y-3">
                   {enterpriseFeatures.map((f) => (
-                    <li key={f} className="flex items-start gap-3 text-sm leading-7 text-zinc-700">
-                      <span className="mt-1.5 text-sm font-semibold text-zinc-500">✓</span>
+                    <li key={f} className="flex items-start gap-3 text-sm leading-7 text-slate-700">
+                      <span className="mt-1.5 text-sm font-semibold text-emerald-500">✓</span>
                       <span>{f}</span>
                     </li>
                   ))}
@@ -218,7 +218,7 @@ export default function PricingPageClient() {
                 <Link href="/contact" className="app-primary-button w-full rounded-md px-4 py-3 text-sm font-medium">
                   Talk to us →
                 </Link>
-                <p className="mt-3 text-center text-xs text-zinc-500">
+                <p className="mt-3 text-center text-xs text-slate-500">
                   Annual agreement. Priced around your portfolio.
                 </p>
               </div>
@@ -228,51 +228,49 @@ export default function PricingPageClient() {
         </section>
 
         {/* ── ADD-ONS ── */}
-        <section className="page-card">
-          <div className="max-w-[760px]">
+        <section className="section-tinted">
+          <div className="mx-auto max-w-[1080px] px-6 py-24">
             <p className="app-kicker">Add-ons</p>
-            <h2 className="mt-4 text-[clamp(2rem,4vw,3rem)] leading-[1.08] text-zinc-950">
-              Optional <em>add-ons</em>
+            <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
+              Optional <em className="text-slate-400">add-ons</em>
             </h2>
-            <p className="mt-3 text-base leading-8 text-zinc-600">
-              Available on any plan. Add what your team needs, skip what it doesn&apos;t.
+            <p className="mt-3 text-base leading-8 text-slate-500">
+              Available on any plan. Add what your team needs.
             </p>
-          </div>
 
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
-            {addons.map((a) => (
-              <article key={a.title} className="rounded-xl border border-zinc-200 bg-white p-6">
-                <h3 className="text-sm font-semibold text-zinc-950">{a.title}</h3>
-                <p className="mt-2 text-sm leading-7 text-zinc-500">{a.desc}</p>
-              </article>
-            ))}
+            <div className="mt-10 grid gap-10 md:grid-cols-3">
+              {addons.map((a) => (
+                <div key={a.title}>
+                  <h3 className="text-[15px] font-semibold text-zinc-950">{a.title}</h3>
+                  <p className="mt-2 text-sm leading-7 text-slate-500">{a.desc}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
         {/* ── COMPARE TABLE ── */}
-        <section className="page-card">
-          <div className="max-w-[760px]">
-            <p className="app-kicker">Compare</p>
-            <h2 className="mt-4 text-[clamp(2rem,4vw,3rem)] leading-[1.08] text-zinc-950">
-              Compare <em>plans</em>
-            </h2>
-            <p className="mt-3 text-base leading-8 text-zinc-600">
-              Both plans include the full Renovo AI workflow. Enterprise adds scale,
-              dedicated support, and custom configuration.
-            </p>
-          </div>
+        <section className="mx-auto max-w-[1080px] px-6 py-24">
+          <p className="app-kicker">Compare</p>
+          <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
+            Compare <em className="text-slate-400">plans</em>
+          </h2>
+          <p className="mt-3 text-base leading-8 text-slate-500">
+            Both plans include the full Renovo AI workflow. Enterprise adds scale,
+            dedicated support, and custom configuration.
+          </p>
 
           <div className="mt-8 overflow-x-auto rounded-xl border border-zinc-200">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b-2 border-zinc-200 bg-zinc-50">
-                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-[0.06em] text-zinc-500">
+                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-[0.06em] text-slate-500">
                     Feature
                   </th>
-                  <th className="px-5 py-3 text-center text-xs font-semibold uppercase tracking-[0.06em] text-zinc-500">
+                  <th className="px-5 py-3 text-center text-xs font-semibold uppercase tracking-[0.06em] text-slate-500">
                     Pay As You Go
                   </th>
-                  <th className="px-5 py-3 text-center text-xs font-semibold uppercase tracking-[0.06em] text-zinc-500">
+                  <th className="px-5 py-3 text-center text-xs font-semibold uppercase tracking-[0.06em] text-slate-500">
                     Enterprise
                   </th>
                 </tr>
@@ -290,14 +288,14 @@ export default function PricingPageClient() {
                     </tr>
                   ) : (
                     <tr key={i} className="border-t border-zinc-100 bg-white">
-                      <td className="px-5 py-3 text-zinc-700">{row.feature}</td>
+                      <td className="px-5 py-3 text-slate-700">{row.feature}</td>
                       <td className="px-5 py-3 text-center">
-                        <span className={row.payg === '✓' ? 'font-semibold text-zinc-900' : row.payg === '—' ? 'text-zinc-300' : 'text-zinc-600'}>
+                        <span className={row.payg === '✓' ? 'font-semibold text-emerald-500' : row.payg === '—' ? 'text-slate-300' : 'text-slate-500'}>
                           {row.payg}
                         </span>
                       </td>
                       <td className="px-5 py-3 text-center">
-                        <span className={row.ent === '✓' ? 'font-semibold text-zinc-900' : row.ent === '—' ? 'text-zinc-300' : 'text-zinc-600'}>
+                        <span className={row.ent === '✓' ? 'font-semibold text-emerald-500' : row.ent === '—' ? 'text-slate-300' : 'text-slate-500'}>
                           {row.ent}
                         </span>
                       </td>
@@ -310,33 +308,33 @@ export default function PricingPageClient() {
         </section>
 
         {/* ── FAQ ── */}
-        <section className="page-card">
-          <div className="max-w-[760px]">
+        <section className="section-tinted">
+          <div className="mx-auto max-w-[680px] px-6 py-24">
             <p className="app-kicker">FAQ</p>
-            <h2 className="mt-4 text-[clamp(2rem,4vw,3rem)] leading-[1.08] text-zinc-950">
-              Common <em>questions</em>
+            <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
+              Common <em className="text-slate-400">questions</em>
             </h2>
-          </div>
 
-          <div className="mt-8 divide-y divide-zinc-200 rounded-xl border border-zinc-200">
-            {pricingFaqs.map((item) => (
-              <details key={item.q} className="group bg-white px-5 py-4 first:rounded-t-xl last:rounded-b-xl">
-                <summary className="cursor-pointer list-none text-sm font-medium text-zinc-950">
-                  {item.q}
-                </summary>
-                <p className="mt-3 pr-6 text-sm leading-7 text-zinc-600">{item.a}</p>
-              </details>
-            ))}
+            <div className="mt-10 divide-y divide-slate-200">
+              {pricingFaqs.map((item) => (
+                <details key={item.q} className="group py-5">
+                  <summary className="cursor-pointer list-none text-sm font-medium text-zinc-950">
+                    {item.q}
+                  </summary>
+                  <p className="mt-3 text-sm leading-7 text-slate-500">{item.a}</p>
+                </details>
+              ))}
+            </div>
           </div>
         </section>
 
         {/* ── CTA ── */}
         <section className="page-hero text-center">
-          <h2 className="text-[clamp(2rem,4vw,3rem)] leading-[1.08] text-zinc-950">
-            Ready to simplify your <em>checkout workflow</em>?
+          <h2 className="text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
+            Ready to simplify your <em className="text-slate-400">checkout workflow</em>?
           </h2>
-          <p className="mx-auto mt-4 max-w-[760px] text-base leading-8 text-zinc-600">
-            Tell us about your team and portfolio. We&apos;ll help you find the right setup.
+          <p className="mx-auto mt-4 max-w-[460px] text-base leading-8 text-slate-500">
+            Tell us about your team and portfolio. We will help you find the right setup.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link
