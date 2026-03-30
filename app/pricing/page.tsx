@@ -1,19 +1,19 @@
-import PricingPageClient, { pricingFaqs } from '@/app/pricing/pricing-page-client'
+import PricingPageClient, { pricingFaqs } from "@/app/pricing/pricing-page-client"
 import {
   createFaqPageJsonLd,
   createMarketingMetadata,
   createWebPageJsonLd,
   serializeJsonLd,
-} from '@/lib/marketing-metadata'
+} from "@/lib/marketing-metadata"
 
-const title = 'Pricing | Renovo AI'
+const title = "Pricing | Renovo AI"
 const description =
-  'Simple pricing for letting agencies using Renovo AI to prepare end-of-tenancy deposit claims.'
+  "Simple pricing for letting agencies using Renovo AI to prepare end-of-tenancy deposit claims."
 
 export const metadata = createMarketingMetadata({
   title,
   description,
-  path: '/pricing',
+  path: "/pricing",
 })
 
 export default function PricingPage() {
@@ -24,7 +24,7 @@ export default function PricingPage() {
         dangerouslySetInnerHTML={{
           __html: serializeJsonLd([
             createWebPageJsonLd({
-              path: '/pricing',
+              path: "/pricing",
               title,
               description,
             }),
