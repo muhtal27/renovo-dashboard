@@ -56,7 +56,7 @@ export default function IntegrationsPage() {
       <section className="app-surface rounded-[2rem] p-6 md:p-8">
         <div className="mx-auto max-w-6xl space-y-10">
           <section className="rounded-[1.8rem] border border-stone-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,247,243,0.95))] px-6 py-7 md:px-8 md:py-8">
-            <p className="app-kicker">Integrations</p>
+            <p className="marketing-eyebrow">Integrations</p>
             <h1 className="mt-3 text-3xl font-semibold tracking-tight text-stone-900 md:text-4xl">
               Connect your workflow to Renovo AI
             </h1>
@@ -74,7 +74,7 @@ export default function IntegrationsPage() {
           </section>
 
           <section>
-            <p className="app-kicker">What integrations are being built for</p>
+            <p className="marketing-eyebrow">What integrations are being built for</p>
             <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
               End-of-tenancy workflow alignment
             </h2>
@@ -86,7 +86,7 @@ export default function IntegrationsPage() {
           </section>
 
           <section>
-            <p className="app-kicker">Planned integration areas</p>
+            <p className="marketing-eyebrow">Planned integration areas</p>
             <div className="mt-4 grid gap-4 md:grid-cols-2">
               {plannedAreas.map((item) => (
                 <article
@@ -101,7 +101,7 @@ export default function IntegrationsPage() {
           </section>
 
           <section>
-            <p className="app-kicker">How data is expected to move through Renovo AI</p>
+            <p className="marketing-eyebrow">How data is expected to move through Renovo AI</p>
             <div className="mt-4 grid gap-4 md:grid-cols-3">
               {flowItems.map((item) => (
                 <article
@@ -116,7 +116,7 @@ export default function IntegrationsPage() {
           </section>
 
           <section>
-            <p className="app-kicker">Future partner access</p>
+            <p className="marketing-eyebrow">Future partner access</p>
             <div className="mt-4 rounded-[1.6rem] border border-stone-200 bg-white/92 p-6">
               <ul className="space-y-3 text-sm leading-7 text-stone-600">
                 {futureAccess.map((item) => (

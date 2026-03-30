@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import { MarketingButton, MarketingCard, MarketingIntro, MarketingSection } from '@/app/components/marketing-ui'
 import { MarketingShell } from '@/app/components/MarketingShell'
 import { createMarketingMetadata } from '@/lib/marketing-metadata'
 
@@ -38,30 +38,50 @@ export const metadata = createMarketingMetadata({
   path: '/bug-bounty',
 })
 
+function BulletList({
+  items,
+  muted = false,
+}: {
+  items: readonly string[]
+  muted?: boolean
+}) {
+  return (
+    <ul className="mt-6 space-y-4">
+      {items.map((item) => (
+        <li key={item} className="flex items-start gap-3 text-sm leading-7 text-[var(--text-body)]">
+          <span
+            className={`mt-[11px] h-1.5 w-1.5 shrink-0 rounded-full ${muted ? 'bg-zinc-300' : 'bg-[var(--text-strong)]'}`}
+          />
+          <span>{item}</span>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
 export default function BugBountyPage() {
   return (
     <MarketingShell currentPath="/bug-bounty">
-      <div className="page-shell page-stack">
-        <section className="page-hero">
-          <Link
-            href="/"
-            className="inline-flex items-center text-sm font-medium text-zinc-500 hover:text-zinc-950"
-          >
-            Back to Home
-          </Link>
-          <p className="app-kicker mt-8">Security</p>
-          <h1 className="page-title">Bug Bounty</h1>
-          <p className="page-copy max-w-[760px]">
-            Renovo AI welcomes responsible disclosure and good-faith security research. If you
-            identify a vulnerability in systems we control, we want to hear about it quickly and
-            clearly so we can investigate and respond appropriately.
-          </p>
-        </section>
+      <MarketingSection>
+        <MarketingButton href="/" variant="secondary" size="sm">
+          Back to Home
+        </MarketingButton>
+        <MarketingIntro
+          titleAs="h1"
+          eyebrow="Security"
+          title="Bug Bounty"
+          description="Renovo AI welcomes responsible disclosure and good-faith security research. If you identify a vulnerability in systems we control, we want to hear about it quickly and clearly so we can investigate and respond appropriately."
+          className="mt-8"
+        />
+      </MarketingSection>
 
-        <div className="mx-auto w-full max-w-[780px]">
-          <section className="page-section">
-            <h2 className="text-[clamp(1.5rem,3vw,2rem)] leading-[1.12] text-zinc-950">Overview</h2>
-            <div className="mt-5 space-y-4 text-base leading-8 text-zinc-600">
+      <MarketingSection>
+        <div className="mx-auto w-full max-w-[780px] space-y-12">
+          <section>
+            <h2 className="text-[clamp(1.5rem,3vw,2rem)] leading-[1.12] tracking-[-0.04em] text-[var(--text-strong)]">
+              Overview
+            </h2>
+            <div className="mt-5 space-y-4 text-base leading-8 text-[var(--text-body)]">
               <p>
                 This page explains how to report security issues affecting Renovo AI. We value
                 precise, responsible reports that help us understand the issue, reproduce it, and
@@ -74,63 +94,44 @@ export default function BugBountyPage() {
             </div>
           </section>
 
-          <section className="page-section">
-            <h2 className="text-[clamp(1.5rem,3vw,2rem)] leading-[1.12] text-zinc-950">
+          <section>
+            <h2 className="text-[clamp(1.5rem,3vw,2rem)] leading-[1.12] tracking-[-0.04em] text-[var(--text-strong)]">
               How to Report
             </h2>
-            <div className="mt-6 rounded-xl border border-zinc-200 bg-zinc-50 p-6">
-              <p className="text-sm font-semibold text-zinc-950">Email</p>
+            <MarketingCard className="mt-6 rounded-[1.75rem]">
+              <p className="text-sm font-semibold text-[var(--text-strong)]">Email</p>
               <a
                 href="mailto:security@renovoai.co.uk"
-                className="mt-2 inline-block text-base font-medium text-zinc-950 underline decoration-zinc-300 underline-offset-4"
+                className="mt-2 inline-block text-base font-medium text-[var(--text-strong)] underline decoration-zinc-300 underline-offset-4"
               >
                 security@renovoai.co.uk
               </a>
-              <p className="mt-4 text-sm leading-7 text-zinc-600">
+              <p className="mt-4 text-sm leading-7 text-[var(--text-body)]">
                 Please include enough detail for the report to be triaged without follow-up guesswork.
               </p>
-              <ul className="mt-4 space-y-3">
-                {reportItems.map((item) => (
-                  <li key={item} className="flex items-start gap-3 text-sm leading-7 text-zinc-600">
-                    <span className="mt-[11px] h-1.5 w-1.5 shrink-0 rounded-full bg-zinc-950" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+              <BulletList items={reportItems} />
+            </MarketingCard>
           </section>
 
-          <section className="page-section">
-            <h2 className="text-[clamp(1.5rem,3vw,2rem)] leading-[1.12] text-zinc-950">Scope</h2>
-            <ul className="mt-6 space-y-4">
-              {scopeItems.map((item) => (
-                <li key={item} className="flex items-start gap-3 text-sm leading-7 text-zinc-600">
-                  <span className="mt-[11px] h-1.5 w-1.5 shrink-0 rounded-full bg-zinc-950" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
+          <section>
+            <h2 className="text-[clamp(1.5rem,3vw,2rem)] leading-[1.12] tracking-[-0.04em] text-[var(--text-strong)]">
+              Scope
+            </h2>
+            <BulletList items={scopeItems} />
           </section>
 
-          <section className="page-section">
-            <h2 className="text-[clamp(1.5rem,3vw,2rem)] leading-[1.12] text-zinc-950">
+          <section>
+            <h2 className="text-[clamp(1.5rem,3vw,2rem)] leading-[1.12] tracking-[-0.04em] text-[var(--text-strong)]">
               Out of Scope
             </h2>
-            <ul className="mt-6 space-y-4">
-              {outOfScopeItems.map((item) => (
-                <li key={item} className="flex items-start gap-3 text-sm leading-7 text-zinc-600">
-                  <span className="mt-[11px] h-1.5 w-1.5 shrink-0 rounded-full bg-zinc-300" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
+            <BulletList items={outOfScopeItems} muted />
           </section>
 
-          <section className="page-section">
-            <h2 className="text-[clamp(1.5rem,3vw,2rem)] leading-[1.12] text-zinc-950">
+          <section>
+            <h2 className="text-[clamp(1.5rem,3vw,2rem)] leading-[1.12] tracking-[-0.04em] text-[var(--text-strong)]">
               Compensation
             </h2>
-            <div className="mt-5 space-y-4 text-base leading-8 text-zinc-600">
+            <div className="mt-5 space-y-4 text-base leading-8 text-[var(--text-body)]">
               <p>
                 Renovo may offer compensation for qualifying reports where the finding is original,
                 actionable, and materially improves the security of the platform.
@@ -143,25 +144,18 @@ export default function BugBountyPage() {
             </div>
           </section>
 
-          <section className="page-section">
-            <h2 className="text-[clamp(1.5rem,3vw,2rem)] leading-[1.12] text-zinc-950">
+          <section>
+            <h2 className="text-[clamp(1.5rem,3vw,2rem)] leading-[1.12] tracking-[-0.04em] text-[var(--text-strong)]">
               Responsible Disclosure Guidelines
             </h2>
-            <ul className="mt-6 space-y-4">
-              {disclosureGuidelines.map((item) => (
-                <li key={item} className="flex items-start gap-3 text-sm leading-7 text-zinc-600">
-                  <span className="mt-[11px] h-1.5 w-1.5 shrink-0 rounded-full bg-zinc-950" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
+            <BulletList items={disclosureGuidelines} />
           </section>
 
-          <section className="page-section">
-            <h2 className="text-[clamp(1.5rem,3vw,2rem)] leading-[1.12] text-zinc-950">
+          <section>
+            <h2 className="text-[clamp(1.5rem,3vw,2rem)] leading-[1.12] tracking-[-0.04em] text-[var(--text-strong)]">
               Our Commitment
             </h2>
-            <div className="mt-5 space-y-4 text-base leading-8 text-zinc-600">
+            <div className="mt-5 space-y-4 text-base leading-8 text-[var(--text-body)]">
               <p>
                 We will review credible reports in a timely way, communicate with researchers in
                 good faith, and work to validate, prioritise, and remediate legitimate security issues.
@@ -173,29 +167,24 @@ export default function BugBountyPage() {
             </div>
           </section>
 
-          <section className="page-section-compact pb-0">
-            <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-6">
-              <p className="app-kicker">Report a security issue</p>
-              <h2 className="mt-4 text-[clamp(1.5rem,3vw,2rem)] leading-[1.12] text-zinc-950">
-                Send responsible disclosure reports to <em>security@renovoai.co.uk</em>
-              </h2>
-              <p className="mt-4 max-w-[640px] text-sm leading-7 text-zinc-600">
-                Please include reproduction steps, affected endpoints or routes, and the security
-                impact. Compensation, where offered, is discretionary and based on severity,
-                impact, and report quality.
-              </p>
-              <div className="mt-6">
-                <a
-                  href="mailto:security@renovoai.co.uk"
-                  className="app-primary-button rounded-md px-6 py-3 text-sm font-medium"
-                >
-                  Email security@renovoai.co.uk
-                </a>
-              </div>
+          <MarketingCard className="rounded-[1.75rem]">
+            <p className="marketing-eyebrow">Report a security issue</p>
+            <h2 className="mt-4 text-[clamp(1.5rem,3vw,2rem)] leading-[1.12] tracking-[-0.04em] text-[var(--text-strong)]">
+              Send responsible disclosure reports to <em>security@renovoai.co.uk</em>
+            </h2>
+            <p className="mt-4 max-w-[40rem] text-sm leading-7 text-[var(--text-body)]">
+              Please include reproduction steps, affected endpoints or routes, and the security
+              impact. Compensation, where offered, is discretionary and based on severity, impact,
+              and report quality.
+            </p>
+            <div className="mt-6">
+              <MarketingButton href="mailto:security@renovoai.co.uk">
+                Email security@renovoai.co.uk
+              </MarketingButton>
             </div>
-          </section>
+          </MarketingCard>
         </div>
-      </div>
+      </MarketingSection>
     </MarketingShell>
   )
 }

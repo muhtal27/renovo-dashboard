@@ -1,61 +1,61 @@
-import Link from "next/link"
-import { MarketingShell } from "@/app/components/MarketingShell"
+import { MarketingFinalCta, MarketingIntro, MarketingRuleList, MarketingSection } from '@/app/components/marketing-ui'
+import { MarketingShell } from '@/app/components/MarketingShell'
 
 const sections = [
   {
-    kicker: "Infrastructure",
-    title: "Data hosting and",
-    em: "residency",
+    eyebrow: 'Infrastructure',
+    title: 'Data hosting and',
+    emphasis: 'residency',
     rows: [
-      { l: "Hosting region", d: "All production data hosted in London, United Kingdom. No tenancy or case data leaves the UK." },
-      { l: "Infrastructure", d: "Cloud infrastructure managed through Supabase (AWS eu-west-2) with encryption at rest and in transit." },
-      { l: "Application hosting", d: "Frontend and API services deployed on Vercel with London region routing (lhr1)." },
-      { l: "Backups", d: "Automated daily backups with point-in-time recovery. Backup data remains within the same hosting region." },
+      { label: 'Hosting region', detail: 'All production data hosted in London, United Kingdom. No tenancy or case data leaves the UK.' },
+      { label: 'Infrastructure', detail: 'Cloud infrastructure managed through Supabase (AWS eu-west-2) with encryption at rest and in transit.' },
+      { label: 'Application hosting', detail: 'Frontend and API services deployed on Vercel with London region routing (lhr1).' },
+      { label: 'Backups', detail: 'Automated daily backups with point-in-time recovery. Backup data remains within the same hosting region.' },
     ],
   },
   {
-    kicker: "Access control",
-    title: "Authentication and",
-    em: "authorisation",
+    eyebrow: 'Access control',
+    title: 'Authentication and',
+    emphasis: 'authorisation',
     rows: [
-      { l: "Authentication", d: "SSO via Microsoft Entra ID (Azure AD). Staff sign in with existing agency credentials. No separate passwords." },
-      { l: "Role-based access", d: "Platform permissions scoped by role and branch. Operators see assigned cases. Managers see portfolio-level data." },
-      { l: "Session management", d: "Sessions are time-limited with automatic expiry. Re-authentication required after inactivity." },
-      { l: "SSO add-on", d: "SAML-based identity providers supported as an optional add-on for agencies not on Microsoft 365." },
+      { label: 'Authentication', detail: 'SSO via Microsoft Entra ID (Azure AD). Staff sign in with existing agency credentials. No separate passwords.' },
+      { label: 'Role-based access', detail: 'Platform permissions scoped by role and branch. Operators see assigned cases. Managers see portfolio-level data.' },
+      { label: 'Session management', detail: 'Sessions are time-limited with automatic expiry. Re-authentication required after inactivity.' },
+      { label: 'SSO add-on', detail: 'SAML-based identity providers supported as an optional add-on for agencies not on Microsoft 365.' },
     ],
   },
   {
-    kicker: "Privacy",
-    title: "UK GDPR and",
-    em: "data protection",
+    eyebrow: 'Privacy',
+    title: 'UK GDPR and',
+    emphasis: 'data protection',
     rows: [
-      { l: "Legal basis", d: "Personal data processed under legitimate interest and contractual necessity for the letting agency as data controller." },
-      { l: "Data categories", d: "Tenant names, tenancy addresses, deposit amounts, checkout evidence (photographs, reports), and case decisions." },
-      { l: "AI processing", d: "Tenancy data processed by AI to draft liability assessments. Not used to train models or shared with third parties." },
-      { l: "Subject rights", d: "Data subject access, erasure, and portability requests handled within statutory timescales." },
-      { l: "Privacy notice", d: "Full privacy notice at renovoai.co.uk/privacy. Data protection enquiries to hello@renovoai.co.uk." },
+      { label: 'Legal basis', detail: 'Personal data processed under legitimate interest and contractual necessity for the letting agency as data controller.' },
+      { label: 'Data categories', detail: 'Tenant names, tenancy addresses, deposit amounts, checkout evidence (photographs, reports), and case decisions.' },
+      { label: 'AI processing', detail: 'Tenancy data processed by AI to draft liability assessments. Not used to train models or shared with third parties.' },
+      { label: 'Subject rights', detail: 'Data subject access, erasure, and portability requests handled within statutory timescales.' },
+      { label: 'Privacy notice', detail: 'Full privacy notice at renovoai.co.uk/privacy. Data protection enquiries to hello@renovoai.co.uk.' },
     ],
   },
   {
-    kicker: "Audit and retention",
-    title: "Traceability and",
-    em: "record keeping",
+    eyebrow: 'Audit and retention',
+    title: 'Traceability and',
+    emphasis: 'record keeping',
     rows: [
-      { l: "Audit trail", d: "Every case action, edit, approval, rejection, and note logged with a timestamp and the name of the person." },
-      { l: "Immutability", d: "Audit records cannot be edited or deleted by platform users. Supports scheme-level scrutiny if disputed." },
-      { l: "Retention", d: "Standard retention is 3 years. Enterprise customers can configure custom retention periods." },
-      { l: "Deletion", d: "On contract termination, customer data deleted within 90 days unless a longer period is required by law." },
+      { label: 'Audit trail', detail: 'Every case action, edit, approval, rejection, and note logged with a timestamp and the name of the person.' },
+      { label: 'Immutability', detail: 'Audit records cannot be edited or deleted by platform users. Supports scheme-level scrutiny if disputed.' },
+      { label: 'Retention', detail: 'Standard retention is 3 years. Enterprise customers can configure custom retention periods.' },
+      { label: 'Deletion', detail: 'On contract termination, customer data deleted within 90 days unless a longer period is required by law.' },
     ],
   },
   {
-    kicker: "Subprocessors",
-    title: "Third-party",
-    em: "services",
+    eyebrow: 'Subprocessors',
+    title: 'Third-party',
+    emphasis: 'services',
     rows: [
-      { l: "Supabase", d: "Database hosting, authentication, and file storage. London region (eu-west-2)." },
-      { l: "Vercel", d: "Application hosting and edge delivery. London region (lhr1)." },
-      { l: "Anthropic", d: "AI processing for liability assessment drafting. Data processed under DPA. Not used for model training." },
-      { l: "Microsoft", d: "Identity provider for SSO authentication via Entra ID." },
+      { label: 'Supabase', detail: 'Database hosting, authentication, and file storage. London region (eu-west-2).' },
+      { label: 'Vercel', detail: 'Application hosting and edge delivery. London region (lhr1).' },
+      { label: 'Anthropic', detail: 'AI processing for liability assessment drafting. Data processed under DPA. Not used for model training.' },
+      { label: 'Microsoft', detail: 'Identity provider for SSO authentication via Entra ID.' },
     ],
   },
 ] as const
@@ -63,66 +63,73 @@ const sections = [
 export default function ComplianceClient() {
   return (
     <MarketingShell currentPath="/compliance">
-      <div className="page-shell page-stack">
+      <MarketingSection>
+        <MarketingIntro
+          titleAs="h1"
+          eyebrow="Compliance"
+          title={
+            <>
+              Security, privacy, and <em>data handling</em>
+            </>
+          }
+          description="Renovo AI processes tenancy evidence, liability assessments, and deposit decisions. This page outlines how that data is hosted, accessed, retained, and protected."
+        />
+      </MarketingSection>
 
-        {/* HERO */}
-        <section className="page-hero">
-          <p className="text-[13px] font-semibold uppercase tracking-[0.1em] text-emerald-500">Compliance</p>
-          <h1 className="page-title mt-4 max-w-[820px]">Security, privacy, and <em>data handling</em></h1>
-          <p className="page-copy mt-4 max-w-[640px]">Renovo AI processes tenancy evidence, liability assessments, and deposit decisions. This page outlines how that data is hosted, accessed, retained, and protected.</p>
-        </section>
-
-        {/* SECTIONS */}
-        {sections.map((s, idx) => (
-          <section key={s.kicker} className={idx % 2 === 0 ? "section-tinted" : ""}>
-            <div className="mx-auto max-w-[1080px] px-6 py-24">
-              <p className="text-[13px] font-semibold uppercase tracking-[0.1em] text-emerald-500">{s.kicker}</p>
-              <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">{s.title} <em className="text-zinc-400">{s.em}</em></h2>
-              <div className="mt-14 divide-y divide-zinc-200">
-                {s.rows.map((r) => (
-                  <div key={r.l} className="grid gap-2 py-5 md:grid-cols-[180px_1fr]">
-                    <p className="text-sm font-semibold text-zinc-950">{r.l}</p>
-                    <p className="text-sm leading-7 text-zinc-500">{r.d}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-        ))}
-
-        {/* COMPANY DETAILS */}
-        <section className="mx-auto max-w-[1080px] px-6 py-24">
-          <p className="text-[13px] font-semibold uppercase tracking-[0.1em] text-emerald-500">Company details</p>
-          <div className="mt-8 grid grid-cols-2 gap-y-8 md:grid-cols-4">
-            {[
-              { l: "Company", v: "Renovo AI Ltd" },
-              { l: "Registered", v: "Edinburgh, Scotland" },
-              { l: "Company number", v: "SC833544" },
-              { l: "VAT", v: "GB483379648" },
-            ].map((d) => (
-              <div key={d.l}>
-                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-zinc-400">{d.l}</p>
-                <p className="mt-2 text-sm text-zinc-700">{d.v}</p>
+      {sections.map((section, index) => (
+        <MarketingSection key={section.eyebrow} variant={index % 2 === 0 ? 'tint' : 'default'}>
+          <div className="max-w-[56rem]">
+            <p className="marketing-eyebrow">{section.eyebrow}</p>
+            <h2 className="mt-4 text-[clamp(2rem,4vw,3rem)] leading-[1.08] tracking-[-0.045em] text-[var(--text-strong)]">
+              {section.title} <em>{section.emphasis}</em>
+            </h2>
+          </div>
+          <MarketingRuleList>
+            {section.rows.map((row) => (
+              <div key={row.label} className="grid gap-3 py-5 md:grid-cols-[180px_minmax(0,1fr)] md:gap-6">
+                <p className="text-sm font-semibold text-[var(--text-strong)]">{row.label}</p>
+                <p className="text-sm leading-7 text-[var(--text-body)]">{row.detail}</p>
               </div>
             ))}
-          </div>
-          <p className="mt-8 text-sm text-zinc-500">
-            For procurement, onboarding, or compliance enquiries contact{" "}
-            <a href="mailto:hello@renovoai.co.uk" className="text-emerald-500 hover:underline">hello@renovoai.co.uk</a>
-          </p>
-        </section>
+          </MarketingRuleList>
+        </MarketingSection>
+      ))}
 
-        {/* CTA */}
-        <section className="page-hero text-center">
-          <h2 className="text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">Need compliance detail for <em className="text-zinc-400">internal review</em>?</h2>
-          <p className="mx-auto mt-4 max-w-[500px] text-base leading-8 text-zinc-500">Contact us for DPA documentation, security questionnaire responses, or additional technical detail.</p>
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Link href="/contact" className="app-primary-button rounded-md px-6 py-3 text-sm font-medium">Talk to us</Link>
-            <a href="mailto:hello@renovoai.co.uk?subject=Compliance%20enquiry" className="app-secondary-button rounded-md px-6 py-3 text-sm font-medium">Email Renovo AI</a>
-          </div>
-        </section>
+      <MarketingSection>
+        <div className="grid gap-8 md:grid-cols-4">
+          {[
+            { label: 'Company', value: 'Renovo AI Ltd' },
+            { label: 'Registered', value: 'Edinburgh, Scotland' },
+            { label: 'Company number', value: 'SC833544' },
+            { label: 'VAT', value: 'GB483379648' },
+          ].map((detail) => (
+            <div key={detail.label}>
+              <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--text-soft)]">{detail.label}</p>
+              <p className="mt-2 text-sm text-[var(--text-strong)]">{detail.value}</p>
+            </div>
+          ))}
+        </div>
+        <p className="mt-8 text-sm text-[var(--text-body)]">
+          For procurement, onboarding, or compliance enquiries contact{' '}
+          <a href="mailto:hello@renovoai.co.uk" className="text-[var(--accent-emerald-strong)] hover:underline">
+            hello@renovoai.co.uk
+          </a>
+        </p>
+      </MarketingSection>
 
-      </div>
+      <MarketingFinalCta
+        eyebrow="Internal review"
+        title={
+          <>
+            Need compliance detail for <em>internal review</em>?
+          </>
+        }
+        description="Contact us for DPA documentation, security questionnaire responses, or additional technical detail."
+        primaryHref="/contact"
+        primaryLabel="Talk to us"
+        secondaryHref="mailto:hello@renovoai.co.uk?subject=Compliance%20enquiry"
+        secondaryLabel="Email Renovo AI"
+      />
     </MarketingShell>
   )
 }

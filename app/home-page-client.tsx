@@ -151,7 +151,7 @@ export default function HomePageClient() {
               titleAs="h1"
               eyebrow={
                 <>
-                  <span className="renovo-pulse inline-block h-2 w-2 rounded-full bg-[var(--accent-emerald)]" />
+                  <span className="marketing-pulse inline-block h-2 w-2 rounded-full bg-[var(--accent-emerald)]" />
                   End-of-tenancy automation
                 </>
               }
@@ -370,7 +370,7 @@ export default function HomePageClient() {
           description="Evidence standards are rising. Agents need a cleaner, more reviewable route from checkout evidence to a defensible decision."
         />
 
-        <div className="renovo-highlight mt-10 rounded-[1.75rem] px-6 py-6 md:px-8">
+        <div className="marketing-highlight mt-10 rounded-[1.75rem] px-6 py-6 md:px-8">
           <p className="text-[0.96rem] leading-8 text-[var(--text-body)]">
             Section 21 is abolished. All assured shorthold tenancies become periodic. Prescribed
             information obligations are tightening. Agents in England who fail to comply risk{' '}

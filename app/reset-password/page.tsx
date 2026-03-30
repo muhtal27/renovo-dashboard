@@ -93,7 +93,7 @@ export default function ResetPasswordPage() {
         <section className="rounded-xl border border-[rgba(15,14,13,0.1)] bg-white p-8 shadow-[0_8px_24px_rgba(0,0,0,0.04)]">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="app-kicker">Password recovery</p>
+              <p className="marketing-eyebrow">Password recovery</p>
               <h1 className="mt-2 text-3xl tracking-tight">Choose a new password</h1>
               <p className="mt-3 max-w-2xl text-sm leading-7 text-[#3d3b37]">
                 Set a new password for your Renovo AI workspace account, then return to sign-in.

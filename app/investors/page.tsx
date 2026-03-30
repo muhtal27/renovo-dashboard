@@ -1,4 +1,10 @@
-import Link from 'next/link'
+import {
+  MarketingButton,
+  MarketingCard,
+  MarketingIntro,
+  MarketingRuleList,
+  MarketingSection,
+} from '@/app/components/marketing-ui'
 import { MarketingShell } from '@/app/components/MarketingShell'
 import { createMarketingMetadata } from '@/lib/marketing-metadata'
 
@@ -24,98 +30,85 @@ export const metadata = createMarketingMetadata({
 export default function InvestorsPage() {
   return (
     <MarketingShell currentPath="/investors">
-      <div className="page-shell page-stack">
-        <section className="page-hero">
-          <p className="app-kicker">Investors</p>
-          <h1 className="page-title max-w-[920px]">
-            Renovo AI is building the operating layer between checkout evidence and defensible
-            deduction decisions.
-          </h1>
-          <p className="page-copy max-w-[820px]">
-            Renovo AI gives letting agencies a structured route from checkout report to liability
-            assessment, deduction letter, landlord review, and dispute pack preparation.
-          </p>
-        </section>
+      <MarketingSection>
+        <MarketingIntro
+          titleAs="h1"
+          eyebrow="Investors"
+          title="Renovo AI is building the operating layer between checkout evidence and defensible deduction decisions."
+          description="Renovo AI gives letting agencies a structured route from checkout report to liability assessment, deduction letter, landlord review, and dispute pack preparation."
+        />
+      </MarketingSection>
 
-        <section className="page-section">
-          <div className="grid gap-8 lg:grid-cols-[minmax(0,1.15fr)_320px]">
-            <div>
-              <p className="app-kicker">Why this matters</p>
-              <h2 className="mt-4 text-[clamp(2rem,4vw,3rem)] leading-[1.08] text-zinc-950">
-                A workflow category with <em>high operational drag</em>
-              </h2>
-              <div className="page-rule-list">
-                {whyItMatters.map((item) => (
-                  <p key={item} className="py-5 text-sm leading-7 text-zinc-600">
-                    {item}
-                  </p>
-                ))}
-              </div>
-            </div>
-
-            <div className="page-sidebar-card h-fit">
-              <p className="app-kicker">Current focus</p>
-              <div className="mt-4 space-y-4 text-sm leading-7 text-zinc-600">
-                <p>Product built around the live end-of-tenancy workflow.</p>
-                <p>Founder-led commercial discussions with agencies and workflow partners.</p>
-                <p>
-                  Integration planning shaped by operational handoff points rather than generic
-                  platform breadth.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="page-section">
-          <div className="max-w-[920px]">
-            <p className="app-kicker">Company</p>
-            <h2 className="mt-4 text-[clamp(2rem,4vw,3rem)] leading-[1.08] text-zinc-950">
-              Built from direct <em>operational exposure</em>
+      <MarketingSection>
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1.15fr)_320px]">
+          <div>
+            <p className="marketing-eyebrow">Why this matters</p>
+            <h2 className="mt-4 text-[clamp(2rem,4vw,3rem)] leading-[1.08] tracking-[-0.045em] text-[var(--text-strong)]">
+              A workflow category with <em>high operational drag</em>
             </h2>
+            <MarketingRuleList>
+              {whyItMatters.map((item) => (
+                <p key={item} className="py-5 text-sm leading-7 text-[var(--text-body)]">
+                  {item}
+                </p>
+              ))}
+            </MarketingRuleList>
           </div>
 
-          <div className="page-rule-list">
-            {companyPoints.map((item) => (
-              <p key={item} className="py-5 text-sm leading-7 text-zinc-600">
-                {item}
-              </p>
-            ))}
-          </div>
-        </section>
-
-        <section className="page-section">
-          <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
-            <div>
-              <p className="app-kicker">Next step</p>
-              <h2 className="mt-4 text-[clamp(2rem,4vw,3rem)] leading-[1.08] text-zinc-950">
-                Download the one-pager or <em>contact us directly</em>
-              </h2>
-              <p className="mt-4 max-w-[760px] text-base leading-8 text-zinc-600">
-                The one-pager covers the workflow problem, product scope, and current company
-                focus. For investor or strategic discussions, use the contact route and we&apos;ll
-                reply directly.
+          <MarketingCard className="h-fit">
+            <p className="marketing-eyebrow">Current focus</p>
+            <div className="mt-4 space-y-4 text-sm leading-7 text-[var(--text-body)]">
+              <p>Product built around the live end-of-tenancy workflow.</p>
+              <p>Founder-led commercial discussions with agencies and workflow partners.</p>
+              <p>
+                Integration planning shaped by operational handoff points rather than generic
+                platform breadth.
               </p>
             </div>
+          </MarketingCard>
+        </div>
+      </MarketingSection>
 
-            <div className="flex flex-wrap gap-3">
-              <a
-                href="/renovo-company-one-pager.pdf"
-                download
-                className="app-primary-button rounded-md px-6 py-3 text-sm font-medium"
-              >
-                Download company one-pager
-              </a>
-              <Link
-                href="/contact"
-                className="app-secondary-button rounded-md px-6 py-3 text-sm font-medium"
-              >
-                Contact Renovo AI
-              </Link>
-            </div>
+      <MarketingSection variant="tint">
+        <div className="max-w-[58rem]">
+          <p className="marketing-eyebrow">Company</p>
+          <h2 className="mt-4 text-[clamp(2rem,4vw,3rem)] leading-[1.08] tracking-[-0.045em] text-[var(--text-strong)]">
+            Built from direct <em>operational exposure</em>
+          </h2>
+        </div>
+
+        <MarketingRuleList>
+          {companyPoints.map((item) => (
+            <p key={item} className="py-5 text-sm leading-7 text-[var(--text-body)]">
+              {item}
+            </p>
+          ))}
+        </MarketingRuleList>
+      </MarketingSection>
+
+      <MarketingSection>
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+          <div>
+            <p className="marketing-eyebrow">Next step</p>
+            <h2 className="mt-4 text-[clamp(2rem,4vw,3rem)] leading-[1.08] tracking-[-0.045em] text-[var(--text-strong)]">
+              Download the one-pager or <em>contact us directly</em>
+            </h2>
+            <p className="mt-4 max-w-[48rem] text-base leading-8 text-[var(--text-body)]">
+              The one-pager covers the workflow problem, product scope, and current company focus.
+              For investor or strategic discussions, use the contact route and we&apos;ll reply directly.
+            </p>
           </div>
-        </section>
-      </div>
+
+          <div className="flex flex-wrap gap-3">
+            <MarketingButton href="/renovo-company-one-pager.pdf" download>
+              Download company one-pager
+            </MarketingButton>
+            <MarketingButton href="/contact" variant="secondary">
+              Contact Renovo AI
+            </MarketingButton>
+          </div>
+        </div>
+      </MarketingSection>
     </MarketingShell>
   )
 }
