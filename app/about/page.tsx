@@ -3,16 +3,16 @@ import {
   createMarketingMetadata,
   createWebPageJsonLd,
   serializeJsonLd,
-} from "@/lib/marketing-metadata"
+} from '@/lib/marketing-metadata'
 
-const title = "About | Renovo AI"
+const title = 'About | Renovo AI'
 const description =
-  "Corporate overview of Renovo AI, the company focus, operating principles, and product approach for UK letting agencies."
+  'Corporate overview of Renovo AI, the company focus, operating principles, and product approach for UK letting agencies.'
 
 export const metadata = createMarketingMetadata({
   title,
   description,
-  path: "/about",
+  path: '/about',
 })
 
 export default function AboutPage() {
@@ -23,7 +23,7 @@ export default function AboutPage() {
         dangerouslySetInnerHTML={{
           __html: serializeJsonLd([
             createWebPageJsonLd({
-              path: "/about",
+              path: '/about',
               title,
               description,
             }),
