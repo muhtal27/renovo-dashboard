@@ -3,10 +3,10 @@
 import Image from 'next/image'
 import {
   MarketingButton,
+  MarketingCard,
   MarketingChecklist,
   MarketingFinalCta,
   MarketingIntro,
-  MarketingRuleList,
   MarketingSection,
 } from '@/app/components/marketing-ui'
 import { MarketingShell } from '@/app/components/MarketingShell'
@@ -142,10 +142,10 @@ const integrationNames = [
 
 export default function HomePageClient() {
   return (
-    <MarketingShell currentPath="/" headerTone="dark-overlay">
-      <MarketingSection variant="dark" bleed className="overflow-hidden pb-20 pt-0 md:pb-24">
-        <div className="marketing-hero-glow pointer-events-none absolute right-[-6rem] top-[-16rem] h-[42rem] w-[42rem] md:right-[-8rem] md:top-[-18rem] md:h-[50rem] md:w-[50rem]" />
-        <div className="marketing-frame relative grid gap-12 pt-[7.5rem] md:pt-[8.75rem] lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-center lg:gap-14 lg:pt-[9.5rem]">
+    <MarketingShell currentPath="/">
+      <MarketingSection variant="dark" bleed className="overflow-hidden pb-20 pt-0">
+        <div className="marketing-hero-glow pointer-events-none absolute right-[-8rem] top-[-18rem] h-[44rem] w-[44rem]" />
+        <div className="marketing-frame relative grid gap-12 pt-16 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-center lg:gap-14 lg:pt-24">
           <div>
             <MarketingIntro
               titleAs="h1"
@@ -155,15 +155,14 @@ export default function HomePageClient() {
                   End-of-tenancy automation
                 </>
               }
-              eyebrowClassName="marketing-hero-eyebrow marketing-dark-eyebrow"
               title={
                 <>
                   Checkout reports in.
                   <br />
-                  <span className="marketing-accent-gradient">Deposit decisions out.</span>
+                  <span className="marketing-accent-text">Deposit decisions out.</span>
                 </>
               }
-              description="AI-powered liability comparison, deduction drafting, evidence management, and dispute pack preparation. Manager-approved at every stage."
+              description="AI-powered liability comparison, deduction drafting, evidence management, and dispute pack preparation, with manager approval at every stage."
               titleClassName="max-w-[12ch] text-white"
               descriptionClassName="max-w-[34rem] marketing-dark-copy"
               actions={
@@ -177,12 +176,25 @@ export default function HomePageClient() {
                 </>
               }
             />
+
+            <div className="mt-10 grid gap-4 sm:grid-cols-3">
+              {([
+                ['6+', 'Tools per checkout'],
+                ['2-3h', 'Admin per case'],
+                ['0', 'Audit trail'],
+              ] as const).map(([value, label]) => (
+                <div key={label} className="marketing-hero-stat">
+                  <p className="marketing-hero-stat-value">{value}</p>
+                  <p className="marketing-hero-stat-label">{label}</p>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="relative">
-            <div className="marketing-media-glow absolute inset-0 rounded-[1.5rem]" />
-            <div className="marketing-hero-frame relative">
-              <div className="marketing-hero-frame-shell">
+            <div className="marketing-media-glow absolute inset-0" />
+            <MarketingCard tone="dark" className="marketing-media-panel relative md:p-4">
+              <div className="marketing-media-screen">
                 <Image
                   src="/dashboard-preview.png"
                   alt="Renovo AI checkout case workspace"
@@ -192,7 +204,7 @@ export default function HomePageClient() {
                   className="block h-auto w-full"
                 />
               </div>
-              <div className="marketing-hero-meta-grid">
+              <div className="marketing-media-meta grid gap-3 sm:grid-cols-3">
                 {[
                   'Room-by-room evidence review',
                   'Drafted liability recommendation',
@@ -203,7 +215,7 @@ export default function HomePageClient() {
                   </p>
                 ))}
               </div>
-            </div>
+            </MarketingCard>
           </div>
         </div>
       </MarketingSection>
@@ -219,28 +231,15 @@ export default function HomePageClient() {
           description="Letting agents still manage end-of-tenancy across email threads, inventory apps, shared drives, Word documents, spreadsheets, and deposit portals."
         />
 
-        <div className="marketing-stats-row mt-12">
-          {([
-            ['6+', 'Tools per checkout'],
-            ['2-3h', 'Admin per case'],
-            ['0', 'Audit trail'],
-          ] as const).map(([value, label]) => (
-            <div key={label} className="marketing-stat-block">
-              <p className="marketing-stat-value">{value}</p>
-              <p className="marketing-stat-label">{label}</p>
-            </div>
-          ))}
-        </div>
-
-        <div className="marketing-plain-grid mt-14 md:grid-cols-3">
+        <div className="mt-14 grid gap-5 md:grid-cols-3">
           {problemPoints.map((item) => (
-            <div key={item.number} className="marketing-plain-feature">
-              <p className="marketing-plain-kicker">{item.number}</p>
-              <h3 className="mt-3 text-[1.02rem] font-semibold leading-7 text-[var(--text-strong)]">
-                {item.heading}
-              </h3>
-              <p className="mt-2 text-sm leading-7 text-[var(--text-body)]">{item.body}</p>
-            </div>
+            <MarketingCard key={item.number} className="h-full">
+              <p className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-[var(--accent-emerald-strong)]">
+                {item.number}
+              </p>
+              <h3 className="mt-4 text-xl leading-7 text-[var(--text-strong)]">{item.heading}</h3>
+              <p className="mt-3 text-sm leading-7 text-[var(--text-body)]">{item.body}</p>
+            </MarketingCard>
           ))}
         </div>
       </MarketingSection>
@@ -261,7 +260,7 @@ export default function HomePageClient() {
           }
         />
 
-        <MarketingRuleList className="mt-12">
+        <div className="marketing-rule-list mt-12">
           {workflowSteps.map((step) => (
             <div
               key={step.number}
@@ -279,7 +278,7 @@ export default function HomePageClient() {
               </div>
             </div>
           ))}
-        </MarketingRuleList>
+        </div>
       </MarketingSection>
 
       <MarketingSection>
@@ -292,7 +291,7 @@ export default function HomePageClient() {
           }
         />
 
-        <MarketingRuleList className="mt-12">
+        <div className="marketing-rule-list mt-12">
           {improvementRows.map((row) => (
             <div
               key={row.label}
@@ -307,7 +306,7 @@ export default function HomePageClient() {
               </p>
             </div>
           ))}
-        </MarketingRuleList>
+        </div>
       </MarketingSection>
 
       <MarketingSection variant="tint">
@@ -322,19 +321,17 @@ export default function HomePageClient() {
               }
               description="Every liability assessment, deduction letter, and landlord recommendation requires manager approval. Nothing is sent without sign-off."
             />
-            <div className="marketing-plain-grid mt-10">
+            <div className="mt-10 grid gap-4">
               {controlPoints.map((item) => (
-                <div key={item.heading} className="marketing-plain-feature">
-                  <h3 className="text-[1.02rem] font-semibold leading-7 text-[var(--text-strong)]">
-                    {item.heading}
-                  </h3>
+                <MarketingCard key={item.heading} className="rounded-[1.35rem]">
+                  <h3 className="text-lg leading-7 text-[var(--text-strong)]">{item.heading}</h3>
                   <p className="mt-3 text-sm leading-7 text-[var(--text-body)]">{item.body}</p>
-                </div>
+                </MarketingCard>
               ))}
             </div>
           </div>
 
-          <div className="marketing-decision-panel rounded-[1.75rem] p-6 md:p-7">
+          <MarketingCard tone="dark" className="rounded-[2rem]">
             <p className="marketing-eyebrow marketing-dark-eyebrow">Decision flow</p>
             <div className="mt-6 space-y-3">
               {[
@@ -350,7 +347,7 @@ export default function HomePageClient() {
                 </div>
               ))}
             </div>
-          </div>
+          </MarketingCard>
         </div>
       </MarketingSection>
 
@@ -376,7 +373,7 @@ export default function HomePageClient() {
           </p>
         </div>
 
-        <div className="marketing-plain-grid mt-10 md:grid-cols-3">
+        <div className="mt-10 grid gap-5 md:grid-cols-3">
           {[
             {
               heading: 'Higher evidence thresholds',
@@ -391,12 +388,10 @@ export default function HomePageClient() {
               body: 'Structured assessment logic applied to every case, regardless of which property manager handles it.',
             },
           ].map((item) => (
-            <div key={item.heading} className="marketing-plain-feature">
-              <h3 className="text-[1.02rem] font-semibold leading-7 text-[var(--text-strong)]">
-                {item.heading}
-              </h3>
+            <MarketingCard key={item.heading} className="h-full">
+              <h3 className="text-lg leading-7 text-[var(--text-strong)]">{item.heading}</h3>
               <p className="mt-3 text-sm leading-7 text-[var(--text-body)]">{item.body}</p>
-            </div>
+            </MarketingCard>
           ))}
         </div>
       </MarketingSection>
@@ -417,14 +412,12 @@ export default function HomePageClient() {
           }
         />
 
-        <div className="marketing-plain-grid mt-12 md:grid-cols-2">
+        <div className="mt-12 grid gap-5 md:grid-cols-2">
           {platformPoints.map((item) => (
-            <div key={item.heading} className="marketing-plain-feature">
-              <h3 className="text-[1.02rem] font-semibold leading-7 text-[var(--text-strong)]">
-                {item.heading}
-              </h3>
+            <MarketingCard key={item.heading} className="h-full">
+              <h3 className="text-lg leading-7 text-[var(--text-strong)]">{item.heading}</h3>
               <p className="mt-3 text-sm leading-7 text-[var(--text-body)]">{item.body}</p>
-            </div>
+            </MarketingCard>
           ))}
         </div>
       </MarketingSection>
@@ -441,15 +434,17 @@ export default function HomePageClient() {
             description="Designed around the CRM, inventory, and maintenance systems UK letting agents already use."
           />
 
-          <MarketingChecklist
-            items={[
-              ...integrationNames,
-              'Custom integrations for larger agencies and enterprise rollouts',
-            ]}
-            className="marketing-chip-cloud"
-            itemClassName="marketing-chip"
-            iconClassName="bg-transparent text-[var(--accent-emerald-strong)]"
-          />
+          <MarketingCard className="rounded-[1.75rem]">
+            <MarketingChecklist
+              items={[
+                ...integrationNames,
+                'Custom integrations for larger agencies and enterprise rollouts',
+              ]}
+              className="grid gap-3 sm:grid-cols-2"
+              itemClassName="rounded-[1rem] border border-black/6 bg-[var(--surface-subtle)] px-4 py-3"
+              iconClassName="bg-transparent text-[var(--accent-emerald-strong)]"
+            />
+          </MarketingCard>
         </div>
       </MarketingSection>
 
