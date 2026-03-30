@@ -1,12 +1,6 @@
-import {
-  MarketingFinalCta,
-  MarketingIntro,
-  MarketingRuleList,
-  MarketingSection,
-} from '@/app/components/marketing-ui'
+import Link from 'next/link'
 import { MarketingShell } from '@/app/components/MarketingShell'
 import { createMarketingMetadata } from '@/lib/marketing-metadata'
-import type { ReactNode } from 'react'
 
 const informationCategories = [
   {
@@ -80,90 +74,101 @@ export const metadata = createMarketingMetadata({
   path: '/privacy',
 })
 
-function PrivacyList({
-  eyebrow,
-  title,
-  items,
-}: {
-  eyebrow: string
-  title: ReactNode
-  items: readonly { title: string; body: string }[]
-}) {
-  return (
-    <MarketingSection>
-      <div className="max-w-[56rem]">
-        <p className="marketing-eyebrow">{eyebrow}</p>
-        <h2 className="mt-4 text-[clamp(2rem,4vw,3rem)] leading-[1.08] tracking-[-0.045em] text-[var(--text-strong)]">
-          {title}
-        </h2>
-      </div>
-      <MarketingRuleList>
-        {items.map((item) => (
-          <div key={item.title} className="grid gap-3 py-6 md:grid-cols-[280px_minmax(0,1fr)]">
-            <h3 className="text-base font-semibold text-[var(--text-strong)]">{item.title}</h3>
-            <p className="text-sm leading-7 text-[var(--text-body)]">{item.body}</p>
-          </div>
-        ))}
-      </MarketingRuleList>
-    </MarketingSection>
-  )
-}
-
 export default function PrivacyPage() {
   return (
     <MarketingShell currentPath="/privacy">
-      <MarketingSection>
-        <MarketingIntro
-          titleAs="h1"
-          eyebrow="Privacy"
-          title="Privacy"
-          description="Renovo AI is committed to handling personal and operational information responsibly. We aim to use data carefully, securely, and only where it supports the delivery and improvement of the service."
-        />
-      </MarketingSection>
+      <div className="page-shell page-stack">
+        <section className="page-hero">
+          <p className="app-kicker">Privacy</p>
+          <h1 className="page-title">Privacy</h1>
+          <p className="page-copy max-w-[820px]">
+            Renovo AI is committed to handling personal and operational information responsibly. We
+            aim to use data carefully, securely, and only where it supports the delivery and
+            improvement of the service.
+          </p>
+        </section>
 
-      <PrivacyList
-        eyebrow="Information we handle"
-        title={
-          <>
-            The main categories of information used to <em>operate the service</em>
-          </>
-        }
-        items={informationCategories}
-      />
+        <section className="page-section">
+          <div className="max-w-[900px]">
+            <p className="app-kicker">Information we handle</p>
+            <h2 className="mt-4 text-[clamp(2rem,4vw,3rem)] leading-[1.08] text-zinc-950">
+              The main categories of information used to <em>operate the service</em>
+            </h2>
+          </div>
+          <div className="page-rule-list">
+            {informationCategories.map((item) => (
+              <div key={item.title} className="grid gap-3 py-6 md:grid-cols-[280px_minmax(0,1fr)]">
+                <h2 className="text-base font-semibold text-zinc-950">{item.title}</h2>
+                <p className="text-sm leading-7 text-zinc-600">{item.body}</p>
+              </div>
+            ))}
+          </div>
+        </section>
 
-      <PrivacyList
-        eyebrow="How information is used"
-        title={
-          <>
-            Information use is tied to <em>service delivery and support</em>
-          </>
-        }
-        items={usageCategories}
-      />
+        <section className="page-section">
+          <div className="max-w-[900px]">
+            <p className="app-kicker">How information is used</p>
+            <h2 className="mt-4 text-[clamp(2rem,4vw,3rem)] leading-[1.08] text-zinc-950">
+              Information use is tied to <em>service delivery and support</em>
+            </h2>
+          </div>
+          <div className="page-rule-list">
+            {usageCategories.map((item) => (
+              <div key={item.title} className="grid gap-3 py-6 md:grid-cols-[280px_minmax(0,1fr)]">
+                <h2 className="text-base font-semibold text-zinc-950">{item.title}</h2>
+                <p className="text-sm leading-7 text-zinc-600">{item.body}</p>
+              </div>
+            ))}
+          </div>
+        </section>
 
-      <PrivacyList
-        eyebrow="Data handling principles"
-        title={
-          <>
-            The privacy posture is designed to stay <em>practical and reviewable</em>
-          </>
-        }
-        items={handlingPrinciples}
-      />
+        <section className="page-section">
+          <div className="max-w-[900px]">
+            <p className="app-kicker">Data handling principles</p>
+            <h2 className="mt-4 text-[clamp(2rem,4vw,3rem)] leading-[1.08] text-zinc-950">
+              The privacy posture is designed to stay <em>practical and reviewable</em>
+            </h2>
+          </div>
+          <div className="page-rule-list">
+            {handlingPrinciples.map((item) => (
+              <div key={item.title} className="grid gap-3 py-6 md:grid-cols-[280px_minmax(0,1fr)]">
+                <h2 className="text-base font-semibold text-zinc-950">{item.title}</h2>
+                <p className="text-sm leading-7 text-zinc-600">{item.body}</p>
+              </div>
+            ))}
+          </div>
+        </section>
 
-      <MarketingFinalCta
-        eyebrow="Privacy enquiries"
-        title={
-          <>
-            Need more detail on privacy or the wider <em>control posture</em>?
-          </>
-        }
-        description="Privacy is supported by the wider approach Renovo takes to compliance, access control, hosting, audit trail design, and responsible information handling."
-        primaryHref="/contact"
-        primaryLabel="Talk to us"
-        secondaryHref="/compliance"
-        secondaryLabel="View compliance"
-      />
+        <section className="page-section">
+          <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+            <div>
+              <p className="app-kicker">Privacy enquiries</p>
+              <h2 className="mt-4 text-[clamp(2rem,4vw,3rem)] leading-[1.08] text-zinc-950">
+                Need more detail on privacy or the wider <em>control posture</em>?
+              </h2>
+              <p className="mt-4 max-w-[760px] text-base leading-8 text-zinc-600">
+                Privacy is supported by the wider approach Renovo takes to compliance, access
+                control, hosting, audit trail design, and responsible information handling. Contact
+                us directly or review the compliance overview.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/contact"
+                className="app-primary-button rounded-md px-6 py-3 text-sm font-medium"
+              >
+                Talk to us
+              </Link>
+              <Link
+                href="/compliance"
+                className="app-secondary-button rounded-md px-5 py-3 text-sm font-medium"
+              >
+                View compliance
+              </Link>
+            </div>
+          </div>
+        </section>
+      </div>
     </MarketingShell>
   )
 }

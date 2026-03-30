@@ -1,4 +1,4 @@
-import { MarketingButton, MarketingIntro, MarketingRuleList, MarketingSection } from '@/app/components/marketing-ui'
+import Link from 'next/link'
 import { MarketingShell } from '@/app/components/MarketingShell'
 import { createMarketingMetadata } from '@/lib/marketing-metadata'
 
@@ -38,54 +38,64 @@ export const metadata = createMarketingMetadata({
 export default function TermsPage() {
   return (
     <MarketingShell currentPath="/terms">
-      <MarketingSection>
-        <MarketingIntro
-          titleAs="h1"
-          eyebrow="Terms"
-          title="Website terms"
-          description="These terms apply to your use of the Renovo AI marketing site, live demo, and contact routes. They do not replace any separate customer agreement for live product use."
-        />
-      </MarketingSection>
+      <div className="page-shell page-stack">
+        <section className="page-hero">
+          <p className="app-kicker">Terms</p>
+          <h1 className="page-title">Website terms</h1>
+          <p className="page-copy max-w-[820px]">
+            These terms apply to your use of the Renovo AI marketing site, live demo, and contact
+            routes. They do not replace any separate customer agreement for live product use.
+          </p>
+        </section>
 
-      <MarketingSection>
-        <MarketingRuleList>
-          {termsSections.map((section, index) => (
-            <div key={section.title} className="grid gap-3 py-6 md:grid-cols-[220px_minmax(0,1fr)]">
-              <div className="flex items-start gap-3">
-                <span className="text-sm font-semibold text-[var(--text-soft)]">
-                  {String(index + 1).padStart(2, '0')}
-                </span>
-                <h2 className="text-base font-semibold text-[var(--text-strong)]">{section.title}</h2>
+        <section className="page-section">
+          <div className="page-rule-list">
+            {termsSections.map((section, index) => (
+              <div key={section.title} className="grid gap-3 py-6 md:grid-cols-[220px_minmax(0,1fr)]">
+                <div className="flex items-start gap-3">
+                  <span className="text-sm font-semibold text-zinc-400">
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+                  <h2 className="text-base font-semibold text-zinc-950">{section.title}</h2>
+                </div>
+                <p className="text-sm leading-7 text-zinc-600">
+                  {section.title === 'Contact' ? (
+                    <>
+                      If you have questions about these terms, contact{' '}
+                      <a
+                        href="mailto:hello@renovoai.co.uk"
+                        className="underline decoration-zinc-300 underline-offset-4"
+                      >
+                        hello@renovoai.co.uk
+                      </a>
+                      .
+                    </>
+                  ) : (
+                    section.body
+                  )}
+                </p>
               </div>
-              <p className="text-sm leading-7 text-[var(--text-body)]">
-                {section.title === 'Contact' ? (
-                  <>
-                    If you have questions about these terms, contact{' '}
-                    <a
-                      href="mailto:hello@renovoai.co.uk"
-                      className="underline decoration-zinc-300 underline-offset-4"
-                    >
-                      hello@renovoai.co.uk
-                    </a>
-                    .
-                  </>
-                ) : (
-                  section.body
-                )}
-              </p>
-            </div>
-          ))}
-        </MarketingRuleList>
-      </MarketingSection>
+            ))}
+          </div>
+        </section>
 
-      <MarketingSection>
-        <div className="flex flex-wrap gap-3">
-          <MarketingButton href="/" variant="secondary">
-            Back to homepage
-          </MarketingButton>
-          <MarketingButton href="/privacy">View privacy notice</MarketingButton>
-        </div>
-      </MarketingSection>
+        <section className="page-section-compact">
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/"
+              className="app-secondary-button rounded-md px-5 py-3 text-sm font-medium"
+            >
+              Back to homepage
+            </Link>
+            <Link
+              href="/privacy"
+              className="app-primary-button rounded-md px-5 py-3 text-sm font-medium"
+            >
+              View privacy notice
+            </Link>
+          </div>
+        </section>
+      </div>
     </MarketingShell>
   )
 }

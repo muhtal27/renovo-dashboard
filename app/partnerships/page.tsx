@@ -49,7 +49,7 @@ export default function PartnershipsPage() {
       <section className="app-surface rounded-[2rem] p-6 md:p-8">
         <div className="mx-auto max-w-6xl space-y-10">
           <section className="rounded-[1.8rem] border border-stone-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,247,243,0.95))] px-6 py-7 md:px-8 md:py-8">
-            <p className="marketing-eyebrow">Partnerships</p>
+            <p className="app-kicker">Partnerships</p>
             <h1 className="mt-3 text-3xl font-semibold tracking-tight text-stone-900 md:text-4xl">
               Work with Renovo AI
             </h1>
@@ -75,7 +75,7 @@ export default function PartnershipsPage() {
           </section>
 
           <section>
-            <p className="marketing-eyebrow">Who we work with</p>
+            <p className="app-kicker">Who we work with</p>
             <div className="mt-4 grid gap-4 md:grid-cols-2">
               {partnerTypes.map((item) => (
                 <article
@@ -90,7 +90,7 @@ export default function PartnershipsPage() {
           </section>
 
           <section>
-            <p className="marketing-eyebrow">How Renovo AI connects</p>
+            <p className="app-kicker">How Renovo AI connects</p>
             <div className="mt-4 grid gap-4 md:grid-cols-3">
               {handoffAreas.map((item) => (
                 <article

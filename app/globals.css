@@ -271,6 +271,14 @@ a:focus-visible {
   color: var(--accent-strong);
 }
 
+.app-kicker {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
 .app-muted {
   color: var(--muted);
 }
@@ -421,7 +429,8 @@ a:focus-visible {
   gap: 1.75rem;
 }
 
-.marketing-section-tint {
+.marketing-section-tint,
+.section-tinted {
   background: linear-gradient(180deg, rgba(238, 245, 241, 0.72) 0%, rgba(246, 249, 247, 0.92) 100%);
   border-top: 1px solid rgba(24, 24, 27, 0.08);
   border-bottom: 1px solid rgba(24, 24, 27, 0.08);
@@ -433,16 +442,18 @@ a:focus-visible {
   color: #ffffff;
 }
 
-.marketing-hero-glow {
+.marketing-hero-glow,
+.renovo-glow {
   background: radial-gradient(circle, rgba(23, 143, 105, 0.2) 0%, transparent 68%);
-  animation: marketing-pulse 8s ease-in-out infinite;
+  animation: renovo-pulse 8s ease-in-out infinite;
 }
 
 .marketing-intro {
   max-width: 46rem;
 }
 
-.marketing-eyebrow {
+.marketing-eyebrow,
+.app-kicker {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -453,7 +464,8 @@ a:focus-visible {
   text-transform: uppercase;
 }
 
-.marketing-title {
+.marketing-title,
+.marketing-page .page-title {
   margin-top: 1rem;
   max-width: 58rem;
   font-size: clamp(2.5rem, 5vw, 4.9rem);
@@ -462,11 +474,13 @@ a:focus-visible {
   color: var(--text-strong);
 }
 
-.marketing-title em {
+.marketing-title em,
+.marketing-page .page-title em {
   color: var(--text-muted);
 }
 
-.marketing-copy {
+.marketing-copy,
+.marketing-page .page-copy {
   margin-top: 1.2rem;
   max-width: 42rem;
   font-size: clamp(1rem, 1.2vw, 1.08rem);
@@ -483,7 +497,9 @@ a:focus-visible {
 
 .marketing-button,
 .app-primary-button,
-.app-secondary-button {
+.app-secondary-button,
+.app-accent-button,
+.app-outline-white {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -503,7 +519,9 @@ a:focus-visible {
 
 .marketing-button:hover,
 .app-primary-button:hover,
-.app-secondary-button:hover {
+.app-secondary-button:hover,
+.app-accent-button:hover,
+.app-outline-white:hover {
   transform: translateY(-1px);
 }
 
@@ -535,29 +553,35 @@ a:focus-visible {
   border-color: rgba(24, 24, 27, 0.18);
 }
 
-.marketing-button-inverse {
+.marketing-button-inverse,
+.app-accent-button {
   background: linear-gradient(135deg, #26b383 0%, #0f8a63 100%);
   border-color: rgba(12, 112, 81, 0.8);
   color: #04140e;
   box-shadow: 0 18px 36px rgba(15, 138, 99, 0.26);
 }
 
-.marketing-button-inverse:hover {
+.marketing-button-inverse:hover,
+.app-accent-button:hover {
   background: linear-gradient(135deg, #2bc08d 0%, #129069 100%);
 }
 
-.marketing-button-ghost {
+.marketing-button-ghost,
+.app-outline-white {
   background: rgba(255, 255, 255, 0.03);
   border-color: rgba(255, 255, 255, 0.14);
   color: #ffffff;
 }
 
-.marketing-button-ghost:hover {
+.marketing-button-ghost:hover,
+.app-outline-white:hover {
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.24);
 }
 
-.marketing-card {
+.marketing-card,
+.marketing-page .page-card,
+.marketing-page .page-sidebar-card {
   border: 1px solid rgba(24, 24, 27, 0.08);
   border-radius: 1.5rem;
   background: rgba(255, 255, 255, 0.96);
@@ -566,7 +590,8 @@ a:focus-visible {
 }
 
 .marketing-card-muted,
-.app-card-muted {
+.app-card-muted,
+.marketing-page .page-sidebar-card {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(247, 248, 246, 0.96) 100%);
 }
 
@@ -577,13 +602,15 @@ a:focus-visible {
   box-shadow: none;
 }
 
-.marketing-rule-list {
+.marketing-rule-list,
+.marketing-page .page-rule-list {
   margin-top: 1.75rem;
   border-top: 1px solid rgba(24, 24, 27, 0.1);
   border-bottom: 1px solid rgba(24, 24, 27, 0.1);
 }
 
-.marketing-rule-list > * + * {
+.marketing-rule-list > * + *,
+.marketing-page .page-rule-list > * + * {
   border-top: 1px solid rgba(24, 24, 27, 0.08);
 }
 
@@ -616,7 +643,44 @@ a:focus-visible {
   font-weight: 700;
 }
 
-.marketing-highlight {
+.marketing-page .page-shell {
+  width: min(100%, 1200px);
+  margin: 0 auto;
+  padding: 32px 20px 64px;
+}
+
+.marketing-page .page-stack {
+  display: grid;
+  gap: 0;
+}
+
+.marketing-page .page-hero {
+  padding: clamp(2.5rem, 5vw, 4.5rem) 0 clamp(1.5rem, 3vw, 2rem);
+}
+
+.marketing-page .page-section {
+  border-top: 1px solid rgba(24, 24, 27, 0.08);
+  padding-top: clamp(3.75rem, 6vw, 5rem);
+  padding-bottom: clamp(3.75rem, 6vw, 5rem);
+}
+
+.marketing-page .page-section-compact {
+  border-top: 1px solid rgba(24, 24, 27, 0.08);
+  padding-top: clamp(2rem, 4vw, 2.5rem);
+  padding-bottom: clamp(2rem, 4vw, 2.5rem);
+}
+
+.marketing-page .page-grid-2 {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.marketing-page .page-grid-3 {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.renovo-highlight {
   background: linear-gradient(135deg, rgba(23, 143, 105, 0.1), rgba(23, 143, 105, 0.02));
   border: 1px solid rgba(23, 143, 105, 0.2);
 }
@@ -683,6 +747,18 @@ a:focus-visible {
     padding-left: 24px;
     padding-right: 24px;
   }
+
+  .marketing-page .page-shell {
+    padding: 40px 24px 72px;
+  }
+
+  .marketing-page .page-grid-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .marketing-page .page-grid-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 @media (min-width: 1024px) {
@@ -690,9 +766,14 @@ a:focus-visible {
     padding-left: 28px;
     padding-right: 28px;
   }
+
+  .marketing-page .page-shell {
+    padding-left: 28px;
+    padding-right: 28px;
+  }
 }
 
-@keyframes marketing-pulse {
+@keyframes renovo-pulse {
   0%,
   100% {
     opacity: 0.38;
@@ -703,6 +784,6 @@ a:focus-visible {
   }
 }
 
-.marketing-pulse {
-  animation: marketing-pulse 2s ease-in-out infinite;
+.renovo-pulse {
+  animation: renovo-pulse 2s ease-in-out infinite;
 }

@@ -265,7 +265,7 @@ export default function LoginPage() {
     <main className="marketing-page min-h-screen bg-[#faf8f5] py-8 text-[#0f0e0d] md:py-10">
       <div className="marketing-frame grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_460px]">
         <section className="rounded-xl border border-[rgba(15,14,13,0.1)] bg-white p-8 shadow-[0_8px_24px_rgba(0,0,0,0.04)] md:p-10">
-          <p className="marketing-eyebrow">Renovo AI</p>
+          <p className="app-kicker">Renovo AI</p>
           <h1 className="mt-4 text-[clamp(2rem,4vw,2.9rem)] leading-[1.08]">
             Workspace sign-in
           </h1>
@@ -274,7 +274,7 @@ export default function LoginPage() {
           </p>
 
           <div className="mt-8 rounded-xl border border-[rgba(15,14,13,0.1)] bg-[#fcfbf9] p-5">
-            <p className="marketing-eyebrow">Inside the workspace</p>
+            <p className="app-kicker">Inside the workspace</p>
             <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {workflowStages.map((item) => (
               <div key={item.step} className="border-l border-[rgba(15,14,13,0.12)] pl-4 first:border-l-0 first:pl-0">
@@ -292,7 +292,7 @@ export default function LoginPage() {
         <section className="rounded-xl border border-[rgba(15,14,13,0.1)] bg-white p-8 shadow-[0_8px_24px_rgba(0,0,0,0.04)]">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="marketing-eyebrow">
+              <p className="app-kicker">
                 {mode === 'sign_in' ? 'Sign In' : mode === 'sign_up' ? 'Sign Up' : 'Reset Password'}
               </p>
               <h2 className="mt-2 text-3xl tracking-tight md:text-[2.6rem]">
