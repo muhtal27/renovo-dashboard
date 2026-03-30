@@ -1,163 +1,93 @@
-import {
-  MarketingCard,
-  MarketingFinalCta,
-  MarketingIntro,
-  MarketingRuleList,
-  MarketingSection,
-} from '@/app/components/marketing-ui'
-import { MarketingShell } from '@/app/components/MarketingShell'
-
-const companyFacts = [
-  { label: 'Company', value: 'Renovo AI Ltd' },
-  { label: 'Registered', value: 'Edinburgh, Scotland' },
-  { label: 'Company number', value: 'SC833544' },
-  { label: 'VAT', value: 'GB483379648' },
-] as const
-
-const workflowFocus = [
-  {
-    label: 'Liability comparison',
-    detail:
-      'AI compares check-in and checkout evidence room by room, flags discrepancies, and prepares a structured assessment against the schedule of condition.',
-  },
-  {
-    label: 'Deduction drafting',
-    detail:
-      'Fair wear and tear reasoning, betterment context, evidence references, and recommended deduction positions drafted automatically for manager review.',
-  },
-  {
-    label: 'Evidence assembly',
-    detail:
-      'Photos, reports, notes, and timeline linked to a single case record throughout the checkout lifecycle.',
-  },
-  {
-    label: 'Dispute preparation',
-    detail:
-      'If a tenant escalates to TDS, DPS, mydeposits, or SafeDeposits Scotland, the adjudication-ready evidence pack is already assembled.',
-  },
-  {
-    label: 'Human approval',
-    detail:
-      'Every recommendation requires manager sign-off. Nothing is sent without explicit approval from a named property manager.',
-  },
-] as const
-
-const principles = [
-  {
-    heading: 'AI assists, humans decide',
-    body: 'Renovo drafts. Property managers approve, amend, or reject.',
-  },
-  {
-    heading: 'Built for operational use',
-    body: 'Shaped around live portfolio pressure, not theoretical workflows.',
-  },
-  {
-    heading: 'Defensible output matters',
-    body: 'Evidence, proportionality, and a reviewable trail at every step.',
-  },
-] as const
+import Link from "next/link"
+import { MarketingShell } from "@/app/components/MarketingShell"
 
 export default function AboutClient() {
   return (
     <MarketingShell currentPath="/about">
-      <MarketingSection>
-        <MarketingIntro
-          titleAs="h1"
-          eyebrow="About"
-          title={
-            <>
-              Enterprise software for <em>end-of-tenancy operations</em>
-            </>
-          }
-          description="Renovo AI automates the operational layer between checkout evidence and documented deposit decisions for UK letting agencies."
-        />
+      <div className="page-shell page-stack">
 
-        <div className="mt-12 grid gap-10 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-start">
-          <div className="space-y-5 text-[1.02rem] leading-8 text-[var(--text-body)]">
-            <p>
-              Renovo AI was founded by a practising end-of-tenancy property manager who saw the
-              same problem across every agency: checkout evidence scattered across six tools,
-              deduction reasoning rebuilt from memory, and dispute outcomes decided by whether the
-              file was complete when it reached the deposit scheme.
-            </p>
-            <p>
-              The company is focused on one workflow category, turning checkout evidence into
-              reviewable, defensible deposit decisions, with human approval at every stage.
-            </p>
+        {/* HERO */}
+        <section className="page-hero">
+          <p className="text-[13px] font-semibold uppercase tracking-[0.1em] text-emerald-500">About</p>
+          <h1 className="page-title mt-4 max-w-[820px]">Enterprise software for <em>end-of-tenancy operations</em></h1>
+          <p className="page-copy mt-4 max-w-[640px]">Renovo AI automates the operational layer between checkout evidence and documented deposit decisions for UK letting agencies.</p>
+        </section>
+
+        {/* THE COMPANY */}
+        <section className="mx-auto max-w-[1080px] px-6 py-24">
+          <p className="text-[13px] font-semibold uppercase tracking-[0.1em] text-emerald-500">The company</p>
+          <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">Built from direct <em className="text-zinc-400">operational experience</em></h2>
+          <p className="mt-4 max-w-[640px] text-base leading-8 text-zinc-500">Renovo AI was founded by a practising end-of-tenancy property manager who saw the same problem across every agency: checkout evidence scattered across six tools, deduction reasoning rebuilt from memory, and dispute outcomes decided by whether the file was complete when it reached the deposit scheme.</p>
+          <p className="mt-4 max-w-[640px] text-base leading-8 text-zinc-500">The company is focused on one workflow category — turning checkout evidence into reviewable, defensible deposit decisions — with human approval at every stage.</p>
+
+          <div className="mt-14 grid grid-cols-2 gap-y-8 md:grid-cols-4">
+            {[
+              { l: "Company", v: "Renovo AI Ltd" },
+              { l: "Registered", v: "Edinburgh, Scotland" },
+              { l: "Company number", v: "SC833544" },
+              { l: "VAT", v: "GB483379648" },
+            ].map((d) => (
+              <div key={d.l}>
+                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-zinc-400">{d.l}</p>
+                <p className="mt-2 text-sm text-zinc-700">{d.v}</p>
+              </div>
+            ))}
           </div>
+        </section>
 
-          <MarketingCard className="rounded-[1.75rem]">
-            <div className="grid gap-5 sm:grid-cols-2">
-              {companyFacts.map((item) => (
-                <div key={item.label}>
-                  <p className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-[var(--text-soft)]">
-                    {item.label}
-                  </p>
-                  <p className="mt-2 text-sm leading-7 text-[var(--text-strong)]">{item.value}</p>
+        {/* PRODUCT FOCUS */}
+        <section className="section-tinted">
+          <div className="mx-auto max-w-[1080px] px-6 py-24">
+            <p className="text-[13px] font-semibold uppercase tracking-[0.1em] text-emerald-500">Product focus</p>
+            <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">One workflow. <em className="text-zinc-400">Done properly.</em></h2>
+
+            <div className="mt-14 divide-y divide-zinc-200">
+              {[
+                { l: "Liability comparison", d: "AI compares check-in and checkout evidence room by room, flags discrepancies, and prepares a structured assessment against the schedule of condition." },
+                { l: "Deduction drafting", d: "Fair wear and tear reasoning, betterment context, evidence references, and recommended deduction positions drafted automatically for manager review." },
+                { l: "Evidence assembly", d: "Photos, reports, notes, and timeline linked to a single case record throughout the checkout lifecycle." },
+                { l: "Dispute preparation", d: "If a tenant escalates to TDS, DPS, mydeposits, or SafeDeposits Scotland, the adjudication-ready evidence pack is already assembled." },
+                { l: "Human approval", d: "Every recommendation requires manager sign-off. Nothing is sent without explicit approval from a named property manager." },
+              ].map((r) => (
+                <div key={r.l} className="grid gap-2 py-5 md:grid-cols-[180px_1fr]">
+                  <p className="text-sm font-semibold text-zinc-950">{r.l}</p>
+                  <p className="text-sm leading-7 text-zinc-500">{r.d}</p>
                 </div>
               ))}
             </div>
-          </MarketingCard>
-        </div>
-      </MarketingSection>
+          </div>
+        </section>
 
-      <MarketingSection variant="tint">
-        <MarketingIntro
-          eyebrow="Product focus"
-          title={
-            <>
-              One workflow. <em>Done properly.</em>
-            </>
-          }
-          description="Renovo is deliberately narrow: a serious operational product for the handoff between checkout evidence, deduction reasoning, and dispute readiness."
-        />
+        {/* PRINCIPLES */}
+        <section className="mx-auto max-w-[1080px] px-6 py-24">
+          <p className="text-[13px] font-semibold uppercase tracking-[0.1em] text-emerald-500">Principles</p>
+          <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">How we <em className="text-zinc-400">operate</em></h2>
 
-        <MarketingRuleList className="mt-12">
-          {workflowFocus.map((item) => (
-            <div
-              key={item.label}
-              className="grid gap-3 py-5 md:grid-cols-[190px_minmax(0,1fr)] md:gap-6"
-            >
-              <p className="text-sm font-semibold text-[var(--text-strong)]">{item.label}</p>
-              <p className="text-sm leading-7 text-[var(--text-body)]">{item.detail}</p>
-            </div>
-          ))}
-        </MarketingRuleList>
-      </MarketingSection>
+          <div className="mt-14 grid gap-10 md:grid-cols-3">
+            {[
+              { h: "AI assists, humans decide", p: "Renovo drafts. Property managers approve, amend, or reject." },
+              { h: "Built for operational use", p: "Shaped around live portfolio pressure, not theoretical workflows." },
+              { h: "Defensible output matters", p: "Evidence, proportionality, and a reviewable trail at every step." },
+            ].map((c) => (
+              <div key={c.h}>
+                <h3 className="text-[15px] font-semibold text-zinc-950">{c.h}</h3>
+                <p className="mt-2 text-sm leading-7 text-zinc-500">{c.p}</p>
+              </div>
+            ))}
+          </div>
+        </section>
 
-      <MarketingSection>
-        <MarketingIntro
-          eyebrow="Principles"
-          title={
-            <>
-              How we <em>operate</em>
-            </>
-          }
-        />
+        {/* CTA */}
+        <section className="page-hero text-center">
+          <h2 className="text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">Review the product and discuss your <em className="text-zinc-400">checkout operation</em></h2>
+          <p className="mx-auto mt-4 max-w-[500px] text-base leading-8 text-zinc-500">Start with the demo, then speak to us about how Renovo fits your agency.</p>
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <Link href="/contact" className="app-primary-button rounded-md px-6 py-3 text-sm font-medium">Get started &rarr;</Link>
+            <Link href="/demo" className="app-secondary-button rounded-md px-6 py-3 text-sm font-medium">View demo</Link>
+          </div>
+        </section>
 
-        <div className="mt-12 grid gap-5 md:grid-cols-3">
-          {principles.map((item) => (
-            <MarketingCard key={item.heading} className="h-full">
-              <h3 className="text-lg leading-7 text-[var(--text-strong)]">{item.heading}</h3>
-              <p className="mt-3 text-sm leading-7 text-[var(--text-body)]">{item.body}</p>
-            </MarketingCard>
-          ))}
-        </div>
-      </MarketingSection>
-
-      <MarketingFinalCta
-        eyebrow="Next step"
-        title={
-          <>
-            Review the product and discuss your <em>checkout operation</em>
-          </>
-        }
-        description="Start with the demo, then speak to us about how Renovo fits your agency."
-        primaryHref="/contact"
-        primaryLabel="Talk to us"
-        secondaryHref="/demo"
-        secondaryLabel="View demo"
-      />
+      </div>
     </MarketingShell>
   )
 }

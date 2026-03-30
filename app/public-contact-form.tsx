@@ -56,27 +56,6 @@ function getDescribedBy(...ids: Array<string | undefined | false>) {
   return value.length > 0 ? value : undefined
 }
 
-function FieldLabel({
-  htmlFor,
-  label,
-  required,
-}: {
-  htmlFor: string
-  label: string
-  required?: boolean
-}) {
-  return (
-    <label htmlFor={htmlFor} className="block">
-      <span className="mb-2 block text-sm font-medium text-[var(--text-strong)]">
-        {label}{' '}
-        <span className="font-normal text-[var(--text-muted)]">
-          {required ? '(required)' : '(optional)'}
-        </span>
-      </span>
-    </label>
-  )
-}
-
 export function PublicContactForm({
   sourcePage = '/contact',
 }: {
@@ -162,36 +141,26 @@ export function PublicContactForm({
   }
 
   return (
-    <section className="marketing-card rounded-[2rem] p-6 md:p-8">
-      <p className="marketing-eyebrow">Contact form</p>
-      <h2 className="mt-4 text-[clamp(1.75rem,3vw,2.4rem)] leading-[1.05] tracking-[-0.05em] text-[var(--text-strong)]">
-        Tell us about your agency and workflow.
-      </h2>
-      <p className="mt-4 max-w-[34rem] text-sm leading-7 text-[var(--text-body)]">
-        We use this information to understand team size, enquiry type, and where Renovo would fit
-        into your end-of-tenancy process.
-      </p>
+    <section className="rounded-xl border border-zinc-200 bg-white p-6 shadow-[0_8px_24px_rgba(0,0,0,0.04)]">
+      <p className="app-kicker">Contact form</p>
+      <h2 className="mt-3 text-2xl tracking-tight text-zinc-950">Send us a message</h2>
 
       {status === 'success' ? (
         <div
           id={formStatusId}
           role="status"
           aria-live="polite"
-          className="mt-6 rounded-[1.5rem] border border-[rgba(23,143,105,0.18)] bg-[rgba(23,143,105,0.08)] px-5 py-6 text-left"
+          className="mt-5 rounded-lg border border-zinc-200 bg-zinc-50 px-5 py-6 text-center text-zinc-900"
         >
-          <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--accent-emerald-strong)]">
-            Message received
-          </p>
-          <p className="mt-3 text-lg text-[var(--text-strong)]">
-            Thanks for getting in touch.
-          </p>
-          <p className="mt-2 text-sm leading-7 text-[var(--text-body)]">
-            We&apos;ll review the details and reply as soon as we can.
+          <p className="text-2xl">✓</p>
+          <p className="mt-3 text-lg">Message received</p>
+          <p className="mt-2 text-sm leading-6 text-zinc-600">
+            Thanks for getting in touch. We&apos;ll reply as soon as we can.
           </p>
         </div>
       ) : (
         <>
-          <form className="mt-6 space-y-6" noValidate onSubmit={handleSubmit}>
+          <form className="mt-5 space-y-4" noValidate onSubmit={handleSubmit}>
             <input
               type="text"
               name="website"
@@ -210,17 +179,17 @@ export function PublicContactForm({
                 id={formErrorId}
                 role="alert"
                 aria-live="assertive"
-                className="rounded-[1.25rem] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"
+                className="border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"
               >
                 Check the highlighted fields and try again.
               </div>
             ) : null}
 
-            <fieldset className="grid gap-4 md:grid-cols-2">
-              <legend className="sr-only">Contact details</legend>
-
-              <div>
-                <FieldLabel htmlFor={`${baseId}-full-name`} label="Full name" required />
+            <div className="grid gap-4 md:grid-cols-2">
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium text-zinc-700">
+                  Full name <span className="text-zinc-500">(required)</span>
+                </span>
                 <input
                   id={`${baseId}-full-name`}
                   type="text"
@@ -241,10 +210,12 @@ export function PublicContactForm({
                     {fieldErrors.fullName}
                   </p>
                 ) : null}
-              </div>
+              </label>
 
-              <div>
-                <FieldLabel htmlFor={`${baseId}-work-email`} label="Work email" required />
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium text-zinc-700">
+                  Work email <span className="text-zinc-500">(required)</span>
+                </span>
                 <input
                   id={`${baseId}-work-email`}
                   type="email"
@@ -265,14 +236,14 @@ export function PublicContactForm({
                     {fieldErrors.workEmail}
                   </p>
                 ) : null}
-              </div>
-            </fieldset>
+              </label>
+            </div>
 
-            <fieldset className="grid gap-4 md:grid-cols-2">
-              <legend className="sr-only">Company details</legend>
-
-              <div>
-                <FieldLabel htmlFor={`${baseId}-company-name`} label="Company / agency name" />
+            <div className="grid gap-4 md:grid-cols-2">
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium text-zinc-700">
+                  Company / agency name <span className="text-zinc-500">(optional)</span>
+                </span>
                 <input
                   id={`${baseId}-company-name`}
                   type="text"
@@ -285,10 +256,12 @@ export function PublicContactForm({
                   autoComplete="organization"
                   className="app-field text-sm outline-none"
                 />
-              </div>
+              </label>
 
-              <div>
-                <FieldLabel htmlFor={`${baseId}-enquiry-type`} label="Enquiry type" required />
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium text-zinc-700">
+                  Enquiry type <span className="text-zinc-500">(required)</span>
+                </span>
                 <select
                   id={`${baseId}-enquiry-type`}
                   name="enquiryType"
@@ -316,11 +289,13 @@ export function PublicContactForm({
                     {fieldErrors.enquiryType}
                   </p>
                 ) : null}
-              </div>
-            </fieldset>
+              </label>
+            </div>
 
-            <div>
-              <FieldLabel htmlFor={`${baseId}-portfolio-size`} label="Portfolio size" />
+            <label className="block">
+              <span className="mb-2 block text-sm font-medium text-zinc-700">
+                Portfolio size <span className="text-zinc-500">(optional)</span>
+              </span>
               <select
                 id={`${baseId}-portfolio-size`}
                 name="portfolioSize"
@@ -336,14 +311,16 @@ export function PublicContactForm({
                 <option value="">Select portfolio size</option>
                 {PORTFOLIO_OPTIONS.map((option) => (
                   <option key={option} value={option}>
-                    {option.replace(/-/g, ' to ')}
+                    {option.replace(/-/g, '–')}
                   </option>
                 ))}
               </select>
-            </div>
+            </label>
 
-            <div>
-              <FieldLabel htmlFor={`${baseId}-message`} label="Message" required />
+            <label className="block">
+              <span className="mb-2 block text-sm font-medium text-zinc-700">
+                Message <span className="text-zinc-500">(required)</span>
+              </span>
               <textarea
                 id={`${baseId}-message`}
                 name="message"
@@ -352,7 +329,7 @@ export function PublicContactForm({
                   setForm((current) => ({ ...current, message: event.target.value }))
                 }
                 rows={7}
-                placeholder="Tell us a little about your current process, team setup, or what you want to review."
+                placeholder="Tell us a little about what you need."
                 autoComplete="off"
                 required
                 aria-invalid={fieldErrors.message ? true : undefined}
@@ -368,39 +345,38 @@ export function PublicContactForm({
                   {fieldErrors.message}
                 </p>
               ) : null}
-            </div>
+            </label>
 
             {status === 'error' ? (
               <div
                 id={formStatusId}
                 role="alert"
                 aria-live="assertive"
-                className="rounded-[1.25rem] border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900"
+                className="border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900"
               >
                 Something went wrong. Please try again or email hello@renovoai.co.uk.
               </div>
             ) : null}
 
-            <div className="flex flex-col gap-4 border-t border-black/6 pt-5">
-              <button
-                type="submit"
-                disabled={submitting}
-                className="app-primary-button min-h-[3.25rem] w-full rounded-[1rem] px-4 py-3 text-sm font-medium disabled:opacity-60"
-              >
-                {submitting ? 'Sending...' : 'Send message'}
-              </button>
-              <p
-                id={privacyHintId}
-                className="text-xs leading-6 text-[var(--text-muted)]"
-              >
-                We only use these details to respond to your enquiry. See our{' '}
-                <a href="/privacy" className="underline decoration-zinc-300 underline-offset-4">
-                  privacy notice
-                </a>
-                .
-              </p>
-            </div>
+            <button
+              type="submit"
+              disabled={submitting}
+              className="app-primary-button w-full rounded px-4 py-3 text-sm font-medium disabled:opacity-60"
+            >
+              {submitting ? 'Sending...' : 'Send message'}
+            </button>
           </form>
+
+          <p
+            id={privacyHintId}
+            className="mt-4 border-t border-zinc-200 pt-4 text-xs leading-6 text-zinc-500"
+          >
+            We only use these details to respond to your enquiry. See our{' '}
+            <a href="/privacy" className="underline decoration-zinc-300 underline-offset-4">
+              privacy notice
+            </a>
+            .
+          </p>
         </>
       )}
     </section>

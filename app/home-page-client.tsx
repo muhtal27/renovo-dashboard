@@ -1,474 +1,317 @@
-'use client'
+"use client"
 
-import Image from 'next/image'
-import {
-  MarketingButton,
-  MarketingCard,
-  MarketingChecklist,
-  MarketingFinalCta,
-  MarketingIntro,
-  MarketingSection,
-} from '@/app/components/marketing-ui'
-import { MarketingShell } from '@/app/components/MarketingShell'
+import { useEffect } from "react"
+import Link from "next/link"
+import Image from "next/image"
 
-const problemPoints = [
-  {
-    number: '01',
-    heading: 'No single case record',
-    body: 'The checkout report sits in one system, move-out photos in another, and the schedule of condition buried in an inbox. No single source of truth.',
-  },
-  {
-    number: '02',
-    heading: 'Deduction letters written from scratch',
-    body: 'Every case means reopening the inventory, pulling photos from folders, checking fair wear and tear, and manually drafting a letter.',
-  },
-  {
-    number: '03',
-    heading: 'Dispute outcomes depend on the file',
-    body: 'When a tenant refers the case to TDS, DPS, mydeposits, or SafeDeposits Scotland, the adjudicator decides based on the evidence pack.',
-  },
+/* ── NAV ITEMS ── */
+const navLinks = [
+  { href: "/how-it-works", label: "How it works" },
+  { href: "/pricing", label: "Pricing" },
+  { href: "/demo", label: "Demo" },
+  { href: "/about", label: "About" },
 ] as const
 
-const workflowSteps = [
-  {
-    number: '1',
-    label: 'Automated intake',
-    heading: 'Case opened, checkout report ingested',
-    body: 'When a checkout is booked, Renovo opens a case file and pulls in the checkout report, move-out photographs, and supporting documents.',
-  },
-  {
-    number: '2',
-    label: 'AI comparison',
-    heading: 'Check-in inventory vs checkout report',
-    body: 'Both reports are compared room by room, condition changes are flagged, and missing evidence is highlighted before a deduction position is drafted.',
-  },
-  {
-    number: '3',
-    label: 'AI draft',
-    heading: 'Liability assessment with reasoning',
-    body: 'Fair wear and tear reasoning, betterment context, evidence references, and a proportionate deduction recommendation are prepared per item.',
-  },
-  {
-    number: '4',
-    label: 'Manager review',
-    heading: 'Reviewed, amended, and approved',
-    body: 'The property manager reads the draft, adjusts positions, adds notes, and approves. Every edit is logged with a name and timestamp.',
-  },
-  {
-    number: '5',
-    label: 'Resolution',
-    heading: 'Deposit released through the scheme',
-    body: 'Case closed with a full decision trail. Deposit released via TDS, DPS, mydeposits, or SafeDeposits Scotland.',
-  },
-  {
-    number: '6',
-    label: 'If disputed',
-    heading: 'Adjudication-ready evidence pack',
-    body: 'Evidence bundle with timeline, reasoning, photographs, and supporting references assembled during the workflow, not after escalation.',
-  },
-] as const
-
-const improvementRows = [
-  {
-    label: 'Deduction letters',
-    before: '30-45 min each, retyped from the inventory every time',
-    after: 'Structured draft with evidence references in under 2 minutes',
-  },
-  {
-    label: 'Evidence trail',
-    before: 'Photos, reports, and notes scattered across five systems',
-    after: 'Linked case record from checkout through to deposit release',
-  },
-  {
-    label: 'Audit',
-    before: 'Reasoning rebuilt from memory when challenged',
-    after: 'Every decision documented before the position is disputed',
-  },
-  {
-    label: 'Dispute packs',
-    before: 'Assembled under scheme deadline pressure',
-    after: 'Adjudication-ready pack built during the checkout workflow',
-  },
-  {
-    label: 'Consistency',
-    before: 'Different property manager, different judgement',
-    after: 'Structured logic and proportionate reasoning on every case',
-  },
-] as const
-
-const controlPoints = [
-  {
-    heading: 'Manager sign-off required',
-    body: 'No claim output leaves the platform without explicit approval from a named property manager.',
-  },
-  {
-    heading: 'Immutable audit trail',
-    body: 'Every edit, note, approval, and rejection is logged with a timestamp. The trail cannot be altered after the fact.',
-  },
-  {
-    heading: 'Scheme-ready output',
-    body: 'When an adjudicator at TDS, DPS, or mydeposits opens the file, the reasoning and evidence are already there.',
-  },
-] as const
-
-const platformPoints = [
-  {
-    heading: 'Portfolio command view',
-    body: 'Live status across active checkouts, pending deduction letters, open disputes, and evidence gaps.',
-  },
-  {
-    heading: 'Attention queue',
-    body: 'Stalled cases, overdue responses, and incomplete evidence flagged automatically.',
-  },
-  {
-    heading: 'Operational reporting',
-    body: 'Checkout volumes, average resolution times, dispute referral rates, and team workload.',
-  },
-  {
-    heading: 'Guidance hub',
-    body: 'Fair wear and tear tables, betterment calculations, and scheme-ready wording inside the workflow.',
-  },
-] as const
-
-const integrationNames = [
-  'Reapit',
-  'Arthur Online',
-  'SME Professional',
-  'Fixflo',
-  'InventoryBase',
-  'No Letting Go',
-  'HelloReport',
-] as const
+/* ── FOOTER COLUMNS ── */
+const footerCols = {
+  Product: [
+    { href: "/how-it-works", label: "How it works" },
+    { href: "/pricing", label: "Pricing" },
+    { href: "/demo", label: "Demo" },
+  ],
+  Company: [
+    { href: "/about", label: "About" },
+    { href: "/contact", label: "Contact" },
+    { href: "/investors", label: "Investors" },
+    { href: "/login", label: "Sign in" },
+  ],
+  Legal: [
+    { href: "/compliance", label: "Compliance" },
+    { href: "/privacy", label: "Privacy" },
+    { href: "/terms", label: "Terms" },
+  ],
+} as const
 
 export default function HomePageClient() {
+  useEffect(() => {
+    const nav = document.getElementById("rn-nav")
+    if (!nav) return
+    const handler = () => nav.classList.toggle("scrolled", window.scrollY > 40)
+    window.addEventListener("scroll", handler, { passive: true })
+    return () => window.removeEventListener("scroll", handler)
+  }, [])
+
   return (
-    <MarketingShell currentPath="/">
-      <MarketingSection variant="dark" bleed className="overflow-hidden pb-20 pt-0">
-        <div className="marketing-hero-glow pointer-events-none absolute right-[-8rem] top-[-18rem] h-[44rem] w-[44rem]" />
-        <div className="marketing-frame relative grid gap-12 pt-16 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-center lg:gap-14 lg:pt-24">
-          <div>
-            <MarketingIntro
-              titleAs="h1"
-              eyebrow={
-                <>
-                  <span className="renovo-pulse inline-block h-2 w-2 rounded-full bg-[var(--accent-emerald)]" />
-                  End-of-tenancy automation
-                </>
-              }
-              title={
-                <>
-                  Checkout reports in.
-                  <br />
-                  <span className="text-[var(--accent-emerald)]">Deposit decisions out.</span>
-                </>
-              }
-              description="AI-powered liability comparison, deduction drafting, evidence management, and dispute pack preparation, with manager approval at every stage."
-              titleClassName="max-w-[12ch] text-white"
-              descriptionClassName="max-w-[34rem] text-white/72"
-              actions={
-                <>
-                  <MarketingButton href="/contact" variant="inverse" size="lg">
-                    Talk to us
-                  </MarketingButton>
-                  <MarketingButton href="/demo" variant="ghost" size="lg">
-                    View demo
-                  </MarketingButton>
-                </>
-              }
-            />
+    <div className="min-h-screen bg-white text-slate-900">
 
-            <div className="mt-10 grid gap-4 sm:grid-cols-3">
-              {([
-                ['6+', 'Tools per checkout'],
-                ['2-3h', 'Admin per case'],
-                ['0', 'Audit trail'],
-              ] as const).map(([value, label]) => (
-                <div key={label} className="rounded-[1.25rem] border border-white/10 bg-white/5 px-4 py-4">
-                  <p className="text-3xl font-semibold tracking-[-0.05em] text-white">{value}</p>
-                  <p className="mt-1 text-sm text-white/58">{label}</p>
-                </div>
-              ))}
+      {/* ── NAV ── */}
+      <nav
+        id="rn-nav"
+        className="fixed inset-x-0 top-0 z-50 border-b border-transparent transition-all duration-300 [&.scrolled]:border-[#1e293b] [&.scrolled]:bg-[#0a0e1a]/95 [&.scrolled]:backdrop-blur-xl"
+      >
+        <div className="mx-auto flex h-[72px] max-w-[1280px] items-center justify-between px-8">
+          <Link href="/" className="text-lg font-bold tracking-tight text-white">Renovo AI</Link>
+          <div className="hidden gap-9 lg:flex">
+            {navLinks.map((l) => (
+              <Link key={l.href} href={l.href} className="text-sm font-medium text-white/50 transition-colors hover:text-white">{l.label}</Link>
+            ))}
+          </div>
+          <div className="flex items-center gap-3">
+            <Link href="/login" className="hidden text-sm font-medium text-white/50 transition-colors hover:text-white lg:block">Sign in</Link>
+            <Link href="/contact" className="app-accent-button rounded-lg px-5 py-2.5 text-sm">Get started</Link>
+          </div>
+        </div>
+      </nav>
+
+      {/* ── HERO ── */}
+      <section className="relative overflow-hidden bg-[#0a0e1a] px-8 pb-20 pt-[140px]">
+        <div className="renovo-glow pointer-events-none absolute -right-[100px] -top-[300px] h-[900px] w-[900px]" />
+        <div className="relative z-10 mx-auto grid max-w-[1280px] items-center gap-14 lg:grid-cols-[1fr_1.15fr]">
+          {/* Text */}
+          <div>
+            <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-[#1e293b] bg-white/[0.025] px-4 py-1.5 text-[13px] font-medium text-emerald-500">
+              <span className="renovo-pulse h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              End-of-tenancy automation
+            </div>
+            <h1 className="text-[clamp(32px,4.5vw,52px)] font-bold leading-[1.08] tracking-[-0.035em] text-white">
+              Checkout reports in.
+              <br />
+              <span className="bg-gradient-to-br from-emerald-500 to-emerald-300 bg-clip-text text-transparent">Deposit decisions out.</span>
+            </h1>
+            <p className="mt-5 max-w-[460px] text-[17px] leading-[1.75] text-slate-400">
+              AI-powered liability comparison, deduction drafting, evidence management, and dispute pack preparation. Manager-approved at every stage.
+            </p>
+            <div className="mt-9 flex flex-wrap gap-3">
+              <Link href="/contact" className="app-accent-button rounded-lg px-6 py-3 text-sm">Get started &rarr;</Link>
+              <Link href="/demo" className="app-outline-white rounded-lg px-6 py-3 text-sm">View demo</Link>
             </div>
           </div>
-
+          {/* Dashboard */}
           <div className="relative">
-            <div className="absolute inset-0 rounded-[2rem] bg-[linear-gradient(180deg,rgba(38,179,131,0.18),transparent_72%)] blur-2xl" />
-            <MarketingCard
-              tone="dark"
-              className="relative overflow-hidden rounded-[2rem] border-white/10 bg-[rgba(16,24,39,0.9)] p-3 md:p-4"
-            >
-              <div className="overflow-hidden rounded-[1.5rem] border border-white/8 bg-[#0b1220]">
-                <Image
-                  src="/dashboard-preview.png"
-                  alt="Renovo AI checkout case workspace"
-                  width={1920}
-                  height={1080}
-                  priority
-                  className="block h-auto w-full"
-                />
-              </div>
-              <div className="grid gap-3 border-t border-white/8 px-2 pb-2 pt-5 sm:grid-cols-3">
-                {[
-                  'Room-by-room evidence review',
-                  'Drafted liability recommendation',
-                  'Manager approval before release',
-                ].map((item) => (
-                  <p key={item} className="text-sm leading-6 text-white/64">
-                    {item}
-                  </p>
-                ))}
-              </div>
-            </MarketingCard>
-          </div>
-        </div>
-      </MarketingSection>
-
-      <MarketingSection>
-        <MarketingIntro
-          eyebrow="The problem"
-          title={
-            <>
-              One checkout. <em>Six tools. No audit trail.</em>
-            </>
-          }
-          description="Letting agents still manage end-of-tenancy across email threads, inventory apps, shared drives, Word documents, spreadsheets, and deposit portals."
-        />
-
-        <div className="mt-14 grid gap-5 md:grid-cols-3">
-          {problemPoints.map((item) => (
-            <MarketingCard key={item.number} className="h-full">
-              <p className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-[var(--accent-emerald-strong)]">
-                {item.number}
-              </p>
-              <h3 className="mt-4 text-xl leading-7 text-[var(--text-strong)]">{item.heading}</h3>
-              <p className="mt-3 text-sm leading-7 text-[var(--text-body)]">{item.body}</p>
-            </MarketingCard>
-          ))}
-        </div>
-      </MarketingSection>
-
-      <MarketingSection variant="tint">
-        <MarketingIntro
-          eyebrow="How it works"
-          title={
-            <>
-              Checkout scheduled to <em>deposit released</em>
-            </>
-          }
-          description="The Renovo workflow. Automated where the task is repeatable. Manager-reviewed where judgement matters."
-          actions={
-            <MarketingButton href="/how-it-works" variant="secondary">
-              Full workflow walkthrough
-            </MarketingButton>
-          }
-        />
-
-        <div className="marketing-rule-list mt-12">
-          {workflowSteps.map((step) => (
-            <div
-              key={step.number}
-              className="grid gap-4 px-1 py-6 md:grid-cols-[56px_140px_minmax(0,1fr)]"
-            >
-              <div className="flex h-11 w-11 items-center justify-center rounded-[1rem] bg-[var(--accent-emerald-soft)] text-sm font-semibold text-[var(--accent-emerald-strong)]">
-                {step.number}
-              </div>
-              <p className="pt-2 text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-[var(--accent-emerald-strong)]">
-                {step.label}
-              </p>
-              <div>
-                <h3 className="text-lg leading-7 text-[var(--text-strong)]">{step.heading}</h3>
-                <p className="mt-2 text-sm leading-7 text-[var(--text-body)]">{step.body}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </MarketingSection>
-
-      <MarketingSection>
-        <MarketingIntro
-          eyebrow="Before and after"
-          title={
-            <>
-              What changes on <em>day one</em>
-            </>
-          }
-        />
-
-        <div className="marketing-rule-list mt-12">
-          {improvementRows.map((row) => (
-            <div
-              key={row.label}
-              className="grid gap-3 py-5 md:grid-cols-[160px_minmax(0,1fr)_minmax(0,1fr)] md:gap-6"
-            >
-              <p className="text-sm font-semibold text-[var(--text-strong)]">{row.label}</p>
-              <p className="text-sm leading-7 text-[var(--text-muted)] line-through decoration-[rgba(24,24,27,0.18)]">
-                {row.before}
-              </p>
-              <p className="border-l-2 border-[var(--accent-emerald)] pl-4 text-sm leading-7 text-[var(--text-strong)]">
-                {row.after}
-              </p>
-            </div>
-          ))}
-        </div>
-      </MarketingSection>
-
-      <MarketingSection variant="tint">
-        <div className="grid gap-12 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-start">
-          <div>
-            <MarketingIntro
-              eyebrow="Human control"
-              title={
-                <>
-                  AI drafts. Your team <em>decides.</em>
-                </>
-              }
-              description="Every liability assessment, deduction letter, and landlord recommendation requires manager approval. Nothing is sent without sign-off."
-            />
-            <div className="mt-10 grid gap-4">
-              {controlPoints.map((item) => (
-                <MarketingCard key={item.heading} className="rounded-[1.35rem]">
-                  <h3 className="text-lg leading-7 text-[var(--text-strong)]">{item.heading}</h3>
-                  <p className="mt-3 text-sm leading-7 text-[var(--text-body)]">{item.body}</p>
-                </MarketingCard>
-              ))}
+            <div className="absolute -inset-0.5 z-0 rounded-[14px] bg-gradient-to-b from-emerald-500/20 to-transparent" />
+            <div className="relative z-10 overflow-hidden rounded-xl bg-[#111827] shadow-[0_24px_64px_rgba(0,0,0,.45)]">
+              <Image src="/dashboard-preview.png" alt="Renovo AI checkout case workspace" width={1920} height={1080} className="block w-full" priority />
             </div>
           </div>
+        </div>
+      </section>
 
-          <MarketingCard tone="dark" className="rounded-[2rem]">
-            <p className="marketing-eyebrow text-white/72">Decision flow</p>
-            <div className="mt-6 space-y-3">
-              {[
-                ['AI', 'Drafts liability assessment and landlord recommendation'],
-                ['PM', 'Reviews the proposed deduction position'],
-                ['PM', 'Approves full claim, partial settlement, or waiver'],
-                ['PM', 'Negotiates from the documented case file'],
-                ['OK', 'Deposit released or dispute evidence pack generated'],
-              ].map(([tag, label]) => (
-                <div
-                  key={label}
-                  className="flex items-center gap-4 rounded-[1rem] border border-white/8 bg-white/4 px-4 py-3"
-                >
-                  <span className="inline-flex h-8 min-w-8 items-center justify-center rounded-full bg-[rgba(38,179,131,0.15)] px-2 text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-[var(--accent-emerald)]">
-                    {tag}
-                  </span>
-                  <p className="text-sm leading-6 text-white/70">{label}</p>
+      {/* ── PROBLEM ── */}
+      <section className="mx-auto max-w-[1080px] px-8 py-24">
+        <p className="text-[13px] font-semibold uppercase tracking-[0.1em] text-emerald-500">The problem</p>
+        <h2 className="mt-3.5 text-[clamp(26px,3.5vw,42px)] font-bold leading-[1.1] tracking-[-0.03em]">One checkout. <em className="not-italic text-slate-400">Six tools. No audit trail.</em></h2>
+        <p className="mt-3.5 max-w-[560px] text-base leading-[1.85] text-slate-500">Letting agents still manage end-of-tenancy across email threads, inventory apps, shared drives, Word documents, spreadsheets, and deposit portals. Nothing links together.</p>
+
+        <div className="mt-12 flex flex-wrap gap-14">
+          {([["6+", "Tools per checkout"], ["2-3h", "Admin per case"], ["0", "Audit trail"]] as const).map(([v, l]) => (
+            <div key={l}><p className="text-5xl font-bold tracking-tight text-emerald-500">{v}</p><p className="mt-1 text-[13px] font-medium text-slate-500">{l}</p></div>
+          ))}
+        </div>
+
+        <div className="mt-14 grid gap-10 md:grid-cols-3">
+          {[
+            { n: "01", h: "No single case record", p: "The checkout report sits in one system, move-out photos in another, and the schedule of condition buried in an inbox. No single source of truth." },
+            { n: "02", h: "Deduction letters written from scratch", p: "Every case means reopening the inventory, pulling photos from folders, checking fair wear and tear, and manually drafting a letter." },
+            { n: "03", h: "Dispute outcomes depend on the file", p: "When a tenant refers the case to TDS, DPS, mydeposits, or SafeDeposits Scotland, the adjudicator decides based on the evidence pack." },
+          ].map((i) => (
+            <div key={i.n}>
+              <p className="text-xs font-bold tracking-wider text-emerald-500">{i.n}</p>
+              <h3 className="mt-2 text-[15px] font-semibold">{i.h}</h3>
+              <p className="mt-1.5 text-sm leading-[1.8] text-slate-500">{i.p}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── HOW IT WORKS ── */}
+      <section className="section-tinted">
+        <div className="mx-auto max-w-[1080px] px-8 py-24">
+          <p className="text-[13px] font-semibold uppercase tracking-[0.1em] text-emerald-500">How it works</p>
+          <h2 className="mt-3.5 text-[clamp(26px,3.5vw,42px)] font-bold leading-[1.1] tracking-[-0.03em]">Checkout scheduled to <em className="not-italic text-slate-400">deposit released</em></h2>
+          <p className="mt-3.5 max-w-[560px] text-base leading-[1.85] text-slate-500">The Renovo workflow. Automated where the task is repeatable. Manager-reviewed where judgement matters.</p>
+
+          <div className="mt-14 space-y-0 divide-y divide-slate-200">
+            {[
+              { n: "1", t: "Automated", h: "Case opened, checkout report ingested", p: "When a checkout is booked, Renovo opens a case file and pulls in the checkout report, move-out photographs, and any supporting documents." },
+              { n: "2", t: "AI comparison", h: "Check-in inventory vs checkout report", p: "Both reports compared room by room. Condition changes flagged. Missing evidence highlighted. Each item mapped against the schedule of condition." },
+              { n: "3", t: "AI draft", h: "Liability assessment with reasoning", p: "Fair wear and tear reasoning, betterment context, evidence references, and a proportionate deduction recommendation per item." },
+              { n: "4", t: "Manager review", h: "Reviewed, amended, and approved", p: "The property manager reads the draft, adjusts positions, adds notes, and approves. Every edit logged with a name and timestamp." },
+              { n: "5", t: "Resolution", h: "Deposit released through the scheme", p: "Case closed with a full decision trail. Deposit released via TDS, DPS, mydeposits, or SafeDeposits Scotland." },
+              { n: "6", t: "If disputed", h: "Adjudication-ready evidence pack", p: "Evidence bundle with timeline, reasoning, photographs, and supporting references assembled during the workflow, not after escalation." },
+            ].map((s) => (
+              <div key={s.n} className="grid grid-cols-[52px_1fr] gap-5 py-6 md:grid-cols-[52px_120px_1fr]">
+                <div className="flex h-10 w-10 items-center justify-center rounded-[10px] border border-emerald-500/[0.18] bg-emerald-500/[0.08] text-sm font-bold text-emerald-500">{s.n}</div>
+                <p className="hidden pt-2.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-500 md:block">{s.t}</p>
+                <div>
+                  <h3 className="text-[15px] font-semibold">{s.h}</h3>
+                  <p className="mt-1 text-sm leading-[1.8] text-slate-500">{s.p}</p>
                 </div>
-              ))}
-            </div>
-          </MarketingCard>
+              </div>
+            ))}
+          </div>
+          <div className="mt-7"><Link href="/how-it-works" className="text-sm font-medium text-emerald-500 hover:underline">Full workflow walkthrough &rarr;</Link></div>
         </div>
-      </MarketingSection>
+      </section>
 
-      <MarketingSection>
-        <MarketingIntro
-          eyebrow="Regulatory change"
-          title={
-            <>
-              Renters&apos; Rights Act <em>live from 1 May 2026</em>
-            </>
-          }
-          description="Evidence standards are rising. Agents need a cleaner, more reviewable route from checkout evidence to a defensible decision."
-        />
+      {/* ── BEFORE AND AFTER ── */}
+      <section className="mx-auto max-w-[1080px] px-8 py-24">
+        <p className="text-[13px] font-semibold uppercase tracking-[0.1em] text-emerald-500">Before and after</p>
+        <h2 className="mt-3.5 text-[clamp(26px,3.5vw,42px)] font-bold leading-[1.1] tracking-[-0.03em]">What changes on <em className="not-italic text-slate-400">day one</em></h2>
 
-        <div className="renovo-highlight mt-10 rounded-[1.75rem] px-6 py-6 md:px-8">
-          <p className="text-[0.96rem] leading-8 text-[var(--text-body)]">
-            Section 21 is abolished. All assured shorthold tenancies become periodic. Prescribed
-            information obligations are tightening. Agents in England who fail to comply risk{' '}
-            <strong className="font-semibold text-[var(--text-strong)]">
-              civil penalties up to GBP 7,000
-            </strong>
-            . Evidence standards for deposit deductions are rising across all four schemes.
+        <div className="mt-14 divide-y divide-slate-200">
+          {[
+            { l: "Deduction letters", b: "30-45 min each, retyped from the inventory every time", a: "Structured draft with evidence references in under 2 minutes" },
+            { l: "Evidence trail", b: "Photos, reports, and notes scattered across five systems", a: "Linked case record from checkout through to deposit release" },
+            { l: "Audit", b: "Reasoning rebuilt from memory when challenged", a: "Every decision documented before the position is disputed" },
+            { l: "Dispute packs", b: "Assembled under scheme deadline pressure", a: "Adjudication-ready pack built during the checkout workflow" },
+            { l: "Consistency", b: "Different property manager, different judgement", a: "Structured logic and proportionate reasoning on every case" },
+          ].map((r) => (
+            <div key={r.l} className="grid gap-2 py-5 md:grid-cols-[130px_1fr_1fr] md:gap-5">
+              <p className="text-sm font-semibold">{r.l}</p>
+              <p className="text-sm leading-[1.8] text-slate-400 line-through decoration-slate-300">{r.b}</p>
+              <p className="border-l-2 border-emerald-500 pl-4 text-sm leading-[1.8] text-slate-800">{r.a}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── HUMAN CONTROL ── */}
+      <section className="section-tinted">
+        <div className="mx-auto max-w-[1080px] px-8 py-24">
+          <p className="text-[13px] font-semibold uppercase tracking-[0.1em] text-emerald-500">Human control</p>
+          <h2 className="mt-3.5 text-[clamp(26px,3.5vw,42px)] font-bold leading-[1.1] tracking-[-0.03em]">AI drafts. Your team <em className="not-italic text-slate-400">decides.</em></h2>
+          <p className="mt-3.5 max-w-[560px] text-base leading-[1.85] text-slate-500">Every liability assessment, deduction letter, and landlord recommendation requires manager approval. Nothing is sent without sign-off.</p>
+
+          <div className="mt-14 grid gap-10 md:grid-cols-3">
+            {[
+              { h: "Manager sign-off required", p: "No claim output leaves the platform without explicit approval from a named property manager." },
+              { h: "Immutable audit trail", p: "Every edit, note, approval, and rejection logged with a timestamp. The trail cannot be altered after the fact." },
+              { h: "Scheme-ready output", p: "When an adjudicator at TDS, DPS, or mydeposits opens the file, the reasoning and evidence are already there." },
+            ].map((c) => (
+              <div key={c.h}>
+                <h3 className="text-[15px] font-semibold">{c.h}</h3>
+                <p className="mt-2 text-sm leading-[1.8] text-slate-500">{c.p}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-12 rounded-xl bg-[#0a0e1a] p-7">
+            {[
+              { t: "AI", d: "Drafts liability assessment and landlord recommendation" },
+              { t: "PM", d: "Tenant reviews the proposed deduction position" },
+              { t: "PM", d: "Landlord approves full claim, partial, or waives" },
+              { t: "PM", d: "Manager negotiates from the documented case file" },
+              { t: "OK", d: "Deposit released or dispute evidence pack generated" },
+            ].map((w) => (
+              <div key={w.d} className="flex items-center gap-4 py-2">
+                <span className="w-8 shrink-0 text-center text-[11px] font-bold text-emerald-500">{w.t}</span>
+                <p className="text-sm text-white/60">{w.d}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── REGULATORY ── */}
+      <section className="mx-auto max-w-[1080px] px-8 py-24">
+        <p className="text-[13px] font-semibold uppercase tracking-[0.1em] text-emerald-500">Regulatory change</p>
+        <h2 className="mt-3.5 max-w-[700px] text-[clamp(26px,3.5vw,42px)] font-bold leading-[1.1] tracking-[-0.03em]">{"Renters' Rights Act"} <em className="not-italic text-slate-400">live from 1 May 2026</em></h2>
+
+        <div className="renovo-highlight mt-7 rounded-xl p-7">
+          <p className="text-[15px] leading-[1.85] text-slate-500">
+            Section 21 is abolished. All assured shorthold tenancies become periodic. Prescribed information obligations are tightening. Agents in England who fail to comply risk <strong className="font-semibold text-slate-800">civil penalties up to &pound;7,000</strong>. Evidence standards for deposit deductions are rising across all four schemes.
           </p>
         </div>
 
-        <div className="mt-10 grid gap-5 md:grid-cols-3">
+        <div className="mt-10 grid gap-10 md:grid-cols-3">
           {[
-            {
-              heading: 'Higher evidence thresholds',
-              body: 'Every proposed deduction must be backed by documented reasoning, timestamped evidence, and a clear audit trail.',
-            },
-            {
-              heading: 'Fair wear and tear built in',
-              body: 'Guidance on fair wear and tear, betterment, and tenancy-length-adjusted charges embedded in the review workflow.',
-            },
-            {
-              heading: 'Repeatable, defensible output',
-              body: 'Structured assessment logic applied to every case, regardless of which property manager handles it.',
-            },
-          ].map((item) => (
-            <MarketingCard key={item.heading} className="h-full">
-              <h3 className="text-lg leading-7 text-[var(--text-strong)]">{item.heading}</h3>
-              <p className="mt-3 text-sm leading-7 text-[var(--text-body)]">{item.body}</p>
-            </MarketingCard>
+            { h: "Higher evidence thresholds", p: "Every proposed deduction must be backed by documented reasoning, timestamped evidence, and a clear audit trail." },
+            { h: "Fair wear and tear built in", p: "Guidance on fair wear and tear, betterment, and tenancy-length-adjusted charges embedded in the review workflow." },
+            { h: "Repeatable, defensible output", p: "Structured assessment logic applied to every case, regardless of which property manager handles it." },
+          ].map((c) => (
+            <div key={c.h}>
+              <h3 className="text-[15px] font-semibold">{c.h}</h3>
+              <p className="mt-2 text-sm leading-[1.8] text-slate-500">{c.p}</p>
+            </div>
           ))}
         </div>
-      </MarketingSection>
+      </section>
 
-      <MarketingSection variant="tint">
-        <MarketingIntro
-          eyebrow="The platform"
-          title={
-            <>
-              Built for how letting agencies <em>actually operate</em>
-            </>
-          }
-          description="Live portfolio visibility, attention management, reporting, and embedded guidance in the same product surface."
-          actions={
-            <MarketingButton href="/demo" variant="secondary">
-              View demo
-            </MarketingButton>
-          }
-        />
+      {/* ── PLATFORM ── */}
+      <section className="section-tinted">
+        <div className="mx-auto max-w-[1080px] px-8 py-24">
+          <p className="text-[13px] font-semibold uppercase tracking-[0.1em] text-emerald-500">The platform</p>
+          <h2 className="mt-3.5 text-[clamp(26px,3.5vw,42px)] font-bold leading-[1.1] tracking-[-0.03em]">Built for how letting agencies <em className="not-italic text-slate-400">actually operate</em></h2>
 
-        <div className="mt-12 grid gap-5 md:grid-cols-2">
-          {platformPoints.map((item) => (
-            <MarketingCard key={item.heading} className="h-full">
-              <h3 className="text-lg leading-7 text-[var(--text-strong)]">{item.heading}</h3>
-              <p className="mt-3 text-sm leading-7 text-[var(--text-body)]">{item.body}</p>
-            </MarketingCard>
+          <div className="mt-14 grid gap-10 md:grid-cols-2">
+            {[
+              { h: "Portfolio command view", p: "Live status across active checkouts, pending deduction letters, open disputes, and evidence gaps." },
+              { h: "Attention queue", p: "Stalled cases, overdue responses, and incomplete evidence flagged automatically." },
+              { h: "Operational reporting", p: "Checkout volumes, average resolution times, dispute referral rates, and team workload." },
+              { h: "Guidance hub", p: "Fair wear and tear tables, betterment calculations, and scheme-ready wording inside the workflow." },
+            ].map((f) => (
+              <div key={f.h}>
+                <h3 className="text-[15px] font-semibold">{f.h}</h3>
+                <p className="mt-2 text-sm leading-[1.8] text-slate-500">{f.p}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-7"><Link href="/demo" className="text-sm font-medium text-emerald-500 hover:underline">View demo &rarr;</Link></div>
+        </div>
+      </section>
+
+      {/* ── INTEGRATIONS ── */}
+      <section className="mx-auto max-w-[1080px] px-8 py-24">
+        <p className="text-[13px] font-semibold uppercase tracking-[0.1em] text-emerald-500">Integrations</p>
+        <h2 className="mt-3.5 text-[clamp(26px,3.5vw,42px)] font-bold leading-[1.1] tracking-[-0.03em]">Connects to your <em className="not-italic text-slate-400">existing agency software</em></h2>
+        <p className="mt-3.5 max-w-[560px] text-base leading-[1.85] text-slate-500">Designed around the CRM, inventory, and maintenance systems UK letting agents already use.</p>
+
+        <div className="mt-12 flex flex-wrap gap-2.5">
+          {["Reapit", "Arthur Online", "SME Professional", "Fixflo", "InventoryBase", "No Letting Go", "HelloReport"].map((n) => (
+            <span key={n} className="rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium transition-all hover:border-emerald-500 hover:bg-emerald-500/[0.08] hover:text-emerald-600">{n}</span>
           ))}
+          <span className="rounded-full border border-dashed border-slate-300 px-5 py-2.5 text-sm font-medium text-slate-400">+ Custom integrations</span>
         </div>
-      </MarketingSection>
+      </section>
 
-      <MarketingSection>
-        <div className="grid gap-10 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:items-end">
-          <MarketingIntro
-            eyebrow="Integrations"
-            title={
-              <>
-                Connects to your <em>existing agency software</em>
-              </>
-            }
-            description="Designed around the CRM, inventory, and maintenance systems UK letting agents already use."
-          />
-
-          <MarketingCard className="rounded-[1.75rem]">
-            <MarketingChecklist
-              items={[
-                ...integrationNames,
-                'Custom integrations for larger agencies and enterprise rollouts',
-              ]}
-              className="grid gap-3 sm:grid-cols-2"
-              itemClassName="rounded-[1rem] border border-black/6 bg-[var(--surface-subtle)] px-4 py-3"
-              iconClassName="bg-transparent text-[var(--accent-emerald-strong)]"
-            />
-          </MarketingCard>
+      {/* ── CTA ── */}
+      <section className="relative overflow-hidden bg-[#0a0e1a] px-8 py-24 text-center">
+        <div className="renovo-glow pointer-events-none absolute -bottom-[120px] left-1/2 h-[700px] w-[700px] -translate-x-1/2" />
+        <div className="relative z-10 mx-auto max-w-[560px]">
+          <h2 className="text-[clamp(26px,3.5vw,42px)] font-bold leading-[1.1] tracking-[-0.03em] text-white">See it with a <span className="text-emerald-500">real case</span></h2>
+          <p className="mx-auto mt-4 max-w-[420px] text-base leading-[1.85] text-slate-400">Tell us how your team handles checkouts, deduction letters, and disputes today. We will show you how Renovo fits your operation.</p>
+          <div className="mt-9 flex flex-wrap justify-center gap-3">
+            <Link href="/contact" className="app-accent-button rounded-lg px-6 py-3 text-sm">Get started &rarr;</Link>
+            <Link href="/demo" className="app-outline-white rounded-lg px-6 py-3 text-sm">View demo</Link>
+          </div>
         </div>
-      </MarketingSection>
+      </section>
 
-      <MarketingFinalCta
-        eyebrow="Next step"
-        title={
-          <>
-            See it with a <em>real case</em>
-          </>
-        }
-        description="Tell us how your team handles checkouts, deduction letters, and disputes today. We'll show you how Renovo fits your operation."
-        primaryHref="/contact"
-        primaryLabel="Talk to us"
-        secondaryHref="/demo"
-        secondaryLabel="View demo"
-      />
-    </MarketingShell>
+      {/* ── FOOTER ── */}
+      <footer className="border-t border-[#1e293b] bg-[#0a0e1a] px-8 py-14">
+        <div className="mx-auto max-w-[1280px]">
+          <div className="grid gap-10 md:grid-cols-2 xl:grid-cols-[2fr_1fr_1fr_1fr]">
+            <div>
+              <Link href="/" className="text-lg font-bold tracking-tight text-white">Renovo AI</Link>
+              <p className="mt-3 max-w-[260px] text-[13px] leading-[1.7] text-slate-400">End-of-tenancy automation for UK letting agencies. Checkouts, claims, and disputes in one workflow.</p>
+            </div>
+            {Object.entries(footerCols).map(([title, links]) => (
+              <div key={title}>
+                <h4 className="text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-400">{title}</h4>
+                <nav className="mt-4 grid gap-0.5">
+                  {links.map((l) => (
+                    <Link key={l.href} href={l.href} className="text-[13px] leading-[2.3] text-white/35 transition-colors hover:text-white">{l.label}</Link>
+                  ))}
+                </nav>
+              </div>
+            ))}
+          </div>
+          <div className="mt-10 flex flex-col gap-2 border-t border-[#1e293b] pt-6 text-xs text-white/20 md:flex-row md:justify-between">
+            <span>Renovo AI Ltd &middot; SC833544 &middot; VAT GB483379648</span>
+            <span>&copy; 2026 Renovo AI Ltd &mdash; Edinburgh, Scotland</span>
+          </div>
+        </div>
+      </footer>
+    </div>
   )
 }
