@@ -236,16 +236,10 @@ export function WorkspaceMetricCard({
   const valueClassName = tone === 'default' ? 'text-zinc-950' : METRIC_STYLES[tone].split(' ').at(-1) ?? 'text-zinc-950'
 
   return (
-    <div
-      className={cn(
-        'border px-4 py-4',
-        tone === 'default' ? METRIC_STYLES.default : METRIC_STYLES[tone],
-        className
-      )}
-    >
-      <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">{label}</p>
-      <div className={cn('mt-3 text-[1.55rem] font-semibold tracking-[-0.04em]', valueClassName)}>{value}</div>
-      {detail ? <div className="mt-2 text-sm leading-6 text-zinc-600">{detail}</div> : null}
+    <div className={cn('py-2', className)}>
+      <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-400">{label}</p>
+      <div className={cn('mt-0.5 text-xl font-semibold tabular-nums leading-tight', valueClassName)}>{value}</div>
+      {detail ? <div className="mt-0.5 text-xs text-zinc-500">{detail}</div> : null}
     </div>
   )
 }

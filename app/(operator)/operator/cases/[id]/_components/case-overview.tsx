@@ -1,6 +1,6 @@
 'use client'
 
-import { ActivityTimeline, DetailPanel, EmptyState, SectionCard } from '@/app/operator-ui'
+import { ActivityTimeline, EmptyState } from '@/app/operator-ui'
 import { CaseWorkspaceOverviewDetails } from '@/app/(operator)/operator/cases/[id]/_components/case-workspace-overview-details'
 import {
   ConditionBadge,
@@ -276,7 +276,7 @@ export function CaseOverview({ data }: { data: OperatorCheckoutWorkspaceData }) 
     depositHeld != null && data.workspace.totals.proposedDeductions > depositHeld
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {overviewNotice ? (
         <WorkspaceNotice
           body={overviewNotice.body}
@@ -285,225 +285,111 @@ export function CaseOverview({ data }: { data: OperatorCheckoutWorkspaceData }) 
         />
       ) : null}
 
-      <section className="grid gap-4 md:grid-cols-2 2xl:grid-cols-4">
+      <div className="flex items-end gap-8 border-b border-zinc-200 pb-3">
         <WorkspaceMetricCard
-          detail={formatTextValue(data.checkoutCase?.depositScheme ? formatEnumLabel(data.checkoutCase.depositScheme) : null)}
           label="Deposit held"
           tone={depositHeld == null ? 'warning' : 'default'}
           value={formatCurrencyValue(depositHeld)}
+          detail={formatTextValue(data.checkoutCase?.depositScheme ? formatEnumLabel(data.checkoutCase.depositScheme) : null)}
         />
         <WorkspaceMetricCard
-          detail={`${openIssues} open issues${disputedIssues > 0 ? ` · ${disputedIssues} disputed` : ''}`}
           label="Proposed deductions"
-          tone={
-            claimExceedsDeposit
-              ? 'danger'
-              : data.workspace.totals.proposedDeductions > 0
-                ? 'warning'
-                : 'success'
-          }
+          tone={claimExceedsDeposit ? 'danger' : data.workspace.totals.proposedDeductions > 0 ? 'warning' : 'success'}
           value={formatCurrency(data.workspace.totals.proposedDeductions)}
+          detail={`${openIssues} open${disputedIssues > 0 ? ` · ${disputedIssues} disputed` : ''}`}
         />
         <WorkspaceMetricCard
-          detail={`${data.documents.length} structured docs · ${totalPhotos} photos noted`}
-          label="Structured capture"
+          label="Rooms captured"
           tone={data.rooms.length > 0 ? 'info' : 'warning'}
-          value={`${data.rooms.length} rooms`}
+          value={data.rooms.length}
+          detail={`${data.documents.length} docs · ${totalPhotos} photos`}
         />
         <WorkspaceMetricCard
-          detail={`${reviewedDefects}/${data.defects.length || 0} defects reviewed`}
-          label="Handover readiness"
-          tone={
-            handoverChecklistValue >= 5
-              ? 'success'
-              : handoverChecklistValue >= 3
-                ? 'warning'
-                : 'default'
-          }
+          label="Handover"
+          tone={handoverChecklistValue >= 5 ? 'success' : handoverChecklistValue >= 3 ? 'warning' : 'default'}
           value={`${handoverChecklistValue}/6`}
+          detail={`${reviewedDefects}/${data.defects.length || 0} defects reviewed`}
         />
-      </section>
+      </div>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
-        <SectionCard className="px-6 py-6 md:px-7">
-          <WorkspaceSectionTitle>Overview</WorkspaceSectionTitle>
-          <div className="mt-4 flex flex-wrap items-center gap-2">
-            <WorkspaceBadge label={checkoutStatus.label} tone={checkoutStatus.tone} />
-            <WorkspaceBadge
-              label={`Operator case: ${formatEnumLabel(data.workspace.case.status)}`}
-              tone={data.workspace.case.status === 'disputed' ? 'disputed' : 'review'}
-            />
-            <WorkspaceBadge label={negotiationStatus.label} tone={negotiationStatus.tone} />
-            {data.checkoutCase?.submissionType ? (
-              <WorkspaceBadge
-                label={`Submission: ${formatEnumLabel(data.checkoutCase.submissionType)}`}
-                tone={data.checkoutCase.submissionType === 'dispute' ? 'disputed' : 'submitted'}
-              />
+      <div className="flex flex-wrap items-center gap-2 border-b border-zinc-200 pb-3">
+        <WorkspaceBadge label={checkoutStatus.label} tone={checkoutStatus.tone} />
+        <WorkspaceBadge label={`Case: ${formatEnumLabel(data.workspace.case.status)}`} tone={data.workspace.case.status === 'disputed' ? 'disputed' : 'review'} />
+        <WorkspaceBadge label={negotiationStatus.label} tone={negotiationStatus.tone} />
+        {data.checkoutCase?.submissionType ? (
+          <WorkspaceBadge label={formatEnumLabel(data.checkoutCase.submissionType)} tone={data.checkoutCase.submissionType === 'dispute' ? 'disputed' : 'submitted'} />
+        ) : null}
+        <WorkspaceBadge label={`${coreDocumentCount}/3 core reports`} tone={coreDocumentCount === 3 ? 'processed' : 'warning'} />
+      </div>
+
+      {data.workspace.case.summary ? (
+        <p className="border-b border-zinc-200 pb-3 text-sm leading-6 text-zinc-600">{data.workspace.case.summary}</p>
+      ) : null}
+
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+        <div className="space-y-4">
+          <CaseWorkspaceOverviewDetails
+            workspace={data.workspace}
+            fallbackLandlordEmail={data.checkoutCase?.landlordEmail}
+            fallbackTenantEmail={data.checkoutCase?.tenantEmail}
+          />
+
+          <dl className="grid gap-x-6 gap-y-1 border-b border-zinc-200 pb-3 sm:grid-cols-2 xl:grid-cols-4">
+            {[
+              { label: 'Checkout date', value: formatDate(data.checkoutCase?.checkoutDate ?? data.workspace.tenancy.end_date) },
+              { label: 'Check-in date', value: formatDate(data.checkoutCase?.checkinDate) },
+              { label: 'Property ref', value: formatTextValue(data.workspace.property.reference) },
+              { label: 'Case ref', value: data.checkoutCase?.caseReference ?? data.workspace.case.id.slice(0, 8).toUpperCase() },
+              { label: 'Assessor', value: formatTextValue(data.checkoutCase?.assessorName) },
+              { label: 'Agency', value: formatTextValue(data.checkoutCase?.agencyName) },
+              { label: 'Report source', value: formatTextValue(data.checkoutCase?.reportSource) },
+              { label: 'Last activity', value: formatDateTime(data.workspace.case.last_activity_at) },
+            ].map((item) => (
+              <div key={item.label} className="flex items-baseline justify-between gap-3 py-1">
+                <span className="text-xs text-zinc-500">{item.label}</span>
+                <span className="text-right text-sm font-medium text-zinc-950">{item.value}</span>
+              </div>
+            ))}
+          </dl>
+        </div>
+
+        <div className="space-y-4">
+          <div className="border-l-2 border-zinc-200 pl-4">
+            <h3 className="text-sm font-semibold text-zinc-950">Financial position</h3>
+            <div className="mt-2">
+              {[
+                { label: 'Deposit held', value: formatCurrencyValue(depositHeld) },
+                { label: 'Return to tenant', value: formatCurrencyValue(data.workspace.totals.returnToTenant) },
+                { label: 'Disputed amount', value: formatCurrency(data.workspace.totals.disputedAmount) },
+                { label: 'Breakdown items', value: String(data.workspace.claimBreakdown.length) },
+              ].map((item) => (
+                <div key={item.label} className="flex items-baseline justify-between gap-3 border-b border-zinc-100 py-2">
+                  <span className="text-xs text-zinc-500">{item.label}</span>
+                  <span className="text-sm font-medium text-zinc-950">{item.value}</span>
+                </div>
+              ))}
+            </div>
+            {claimExceedsDeposit ? (
+              <WorkspaceNotice body="Proposed deductions exceed deposit held." title="Deposit overrun" tone="warning" className="mt-2" />
             ) : null}
           </div>
 
-          <p className="mt-4 text-sm leading-6 text-zinc-600 [overflow-wrap:anywhere]">
-            {formatTextValue(
-              data.workspace.case.summary,
-              'No structured case summary has been recorded yet.'
-            )}
-          </p>
-
-          <div className="mt-6 border-t border-zinc-200 pt-6">
-            <CaseWorkspaceOverviewDetails
-              workspace={data.workspace}
-              fallbackLandlordEmail={data.checkoutCase?.landlordEmail}
-              fallbackTenantEmail={data.checkoutCase?.tenantEmail}
-            />
+          <div className="border-l-2 border-zinc-200 pl-4">
+            <h3 className="text-sm font-semibold text-zinc-950">Readiness</h3>
+            <div className="mt-2 space-y-2">
+              <WorkspaceProgressBar label="Core documents" max={3} tone={coreDocumentCount === 3 ? 'success' : 'warning'} value={coreDocumentCount} valueLabel={`${coreDocumentCount}/3`} />
+              <WorkspaceProgressBar label="Docs processed" max={Math.max(data.documents.length, 1)} tone={processedCheckoutDocuments === data.documents.length && data.documents.length > 0 ? 'success' : 'default'} value={processedCheckoutDocuments} valueLabel={`${processedCheckoutDocuments}/${data.documents.length}`} />
+              <WorkspaceProgressBar label="Defects reviewed" max={Math.max(data.defects.length, 1)} tone={reviewedDefects === data.defects.length && data.defects.length > 0 ? 'success' : 'warning'} value={reviewedDefects} valueLabel={`${reviewedDefects}/${data.defects.length}`} />
+              <WorkspaceProgressBar label="Handover checklist" max={6} tone={handoverChecklistValue >= 5 ? 'success' : 'info'} value={handoverChecklistValue} valueLabel={`${handoverChecklistValue}/6`} />
+            </div>
           </div>
-
-          <dl className="mt-6 grid gap-x-6 gap-y-3 border-t border-zinc-200 pt-6 md:grid-cols-2">
-            <div className="flex items-start justify-between gap-4 border-b border-zinc-200 pb-3">
-              <dt className="text-sm text-zinc-500">Checkout date</dt>
-              <dd className="min-w-0 text-right text-sm font-medium text-zinc-950">
-                {formatDate(data.checkoutCase?.checkoutDate ?? data.workspace.tenancy.end_date)}
-              </dd>
-            </div>
-            <div className="flex items-start justify-between gap-4 border-b border-zinc-200 pb-3">
-              <dt className="text-sm text-zinc-500">Check-in date</dt>
-              <dd className="min-w-0 text-right text-sm font-medium text-zinc-950">
-                {formatDate(data.checkoutCase?.checkinDate)}
-              </dd>
-            </div>
-            <div className="flex items-start justify-between gap-4 border-b border-zinc-200 pb-3">
-              <dt className="text-sm text-zinc-500">Property reference</dt>
-              <dd className="min-w-0 text-right text-sm font-medium text-zinc-950">
-                {formatTextValue(data.workspace.property.reference)}
-              </dd>
-            </div>
-            <div className="flex items-start justify-between gap-4 border-b border-zinc-200 pb-3">
-              <dt className="text-sm text-zinc-500">Case reference</dt>
-              <dd className="min-w-0 text-right text-sm font-medium text-zinc-950 [overflow-wrap:anywhere]">
-                {data.checkoutCase?.caseReference ?? data.workspace.case.id.slice(0, 8).toUpperCase()}
-              </dd>
-            </div>
-            <div className="flex items-start justify-between gap-4 border-b border-zinc-200 pb-3">
-              <dt className="text-sm text-zinc-500">Assessor</dt>
-              <dd className="min-w-0 text-right text-sm font-medium text-zinc-950 [overflow-wrap:anywhere]">
-                {formatTextValue(data.checkoutCase?.assessorName)}
-              </dd>
-            </div>
-            <div className="flex items-start justify-between gap-4 border-b border-zinc-200 pb-3">
-              <dt className="text-sm text-zinc-500">Agency</dt>
-              <dd className="min-w-0 text-right text-sm font-medium text-zinc-950 [overflow-wrap:anywhere]">
-                {formatTextValue(data.checkoutCase?.agencyName)}
-              </dd>
-            </div>
-            <div className="flex items-start justify-between gap-4 border-b border-zinc-200 pb-3">
-              <dt className="text-sm text-zinc-500">Report source</dt>
-              <dd className="min-w-0 text-right text-sm font-medium text-zinc-950 [overflow-wrap:anywhere]">
-                {formatTextValue(data.checkoutCase?.reportSource)}
-              </dd>
-            </div>
-            <div className="flex items-start justify-between gap-4 border-b border-zinc-200 pb-3">
-              <dt className="text-sm text-zinc-500">Last activity</dt>
-              <dd className="min-w-0 text-right text-sm font-medium text-zinc-950">
-                {formatDateTime(data.workspace.case.last_activity_at)}
-              </dd>
-            </div>
-          </dl>
-        </SectionCard>
-
-        <DetailPanel
-          description="Current deposit position and structured coverage before the case moves into deeper review."
-          title="Financial & readiness"
-        >
-          <div className="space-y-3">
-            <div className="flex flex-wrap gap-2">
-              <WorkspaceBadge
-                label={`Case reference ${data.checkoutCase?.caseReference ?? data.workspace.case.id.slice(0, 8).toUpperCase()}`}
-                tone="neutral"
-              />
-              <WorkspaceBadge
-                label={`${coreDocumentCount}/3 core reports`}
-                tone={coreDocumentCount === 3 ? 'processed' : 'warning'}
-              />
-            </div>
-
-            <dl className="space-y-3">
-              <div className="flex items-start justify-between gap-4">
-                <dt className="text-sm text-zinc-500">Deposit held</dt>
-                <dd className="text-right text-sm font-medium text-zinc-950">
-                  {formatCurrencyValue(depositHeld)}
-                </dd>
-              </div>
-              <div className="flex items-start justify-between gap-4">
-                <dt className="text-sm text-zinc-500">Return to tenant</dt>
-                <dd className="text-right text-sm font-medium text-zinc-950">
-                  {formatCurrencyValue(data.workspace.totals.returnToTenant)}
-                </dd>
-              </div>
-              <div className="flex items-start justify-between gap-4">
-                <dt className="text-sm text-zinc-500">Disputed amount</dt>
-                <dd className="text-right text-sm font-medium text-zinc-950">
-                  {formatCurrency(data.workspace.totals.disputedAmount)}
-                </dd>
-              </div>
-              <div className="flex items-start justify-between gap-4">
-                <dt className="text-sm text-zinc-500">Claim breakdown items</dt>
-                <dd className="text-right text-sm font-medium text-zinc-950">
-                  {data.workspace.claimBreakdown.length}
-                </dd>
-              </div>
-            </dl>
-          </div>
-
-          {claimExceedsDeposit ? (
-            <WorkspaceNotice
-              body="The current proposed deductions exceed the recorded deposit held. Check the deduction logic before moving the case forward."
-              title="Deposit overrun risk"
-              tone="warning"
-            />
-          ) : null}
-
-          <div className="space-y-4 border-t border-zinc-200 pt-4">
-            <WorkspaceProgressBar
-              label="Core documents linked"
-              max={3}
-              tone={coreDocumentCount === 3 ? 'success' : 'warning'}
-              value={coreDocumentCount}
-              valueLabel={`${coreDocumentCount}/3`}
-            />
-            <WorkspaceProgressBar
-              label="Structured documents processed"
-              max={Math.max(data.documents.length, 1)}
-              tone={processedCheckoutDocuments === data.documents.length && data.documents.length > 0 ? 'success' : 'default'}
-              value={processedCheckoutDocuments}
-              valueLabel={`${processedCheckoutDocuments}/${data.documents.length}`}
-            />
-            <WorkspaceProgressBar
-              label="Defects reviewed"
-              max={Math.max(data.defects.length, 1)}
-              tone={reviewedDefects === data.defects.length && data.defects.length > 0 ? 'success' : 'warning'}
-              value={reviewedDefects}
-              valueLabel={`${reviewedDefects}/${data.defects.length}`}
-            />
-            <WorkspaceProgressBar
-              label="Handover checklist coverage"
-              max={6}
-              tone={handoverChecklistValue >= 5 ? 'success' : 'info'}
-              value={handoverChecklistValue}
-              valueLabel={`${handoverChecklistValue}/6`}
-            />
-          </div>
-        </DetailPanel>
+        </div>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(300px,0.85fr)]">
-        <SectionCard className="px-6 py-6 md:px-7">
-          <div className="flex flex-col gap-2 border-b border-zinc-200 pb-5">
-            <WorkspaceSectionTitle>Rooms & condition</WorkspaceSectionTitle>
-            <p className="text-sm leading-6 text-zinc-600">
-              Room-by-room capture pulled from the structured checkout tables.
-            </p>
-          </div>
-
-          <div className="pt-5">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+        <div>
+          <h3 className="text-sm font-semibold text-zinc-950">Rooms & condition</h3>
+          <div className="mt-2">
             {data.rooms.length > 0 ? (
               <WorkspaceTable>
                 <thead>
@@ -519,12 +405,8 @@ export function CaseOverview({ data }: { data: OperatorCheckoutWorkspaceData }) 
                   {data.rooms.map((room) => (
                     <WorkspaceTableRow key={room.id}>
                       <WorkspaceTableCell emphasis="strong">{room.roomName}</WorkspaceTableCell>
-                      <WorkspaceTableCell>
-                        <ConditionBadge value={room.conditionCheckin} />
-                      </WorkspaceTableCell>
-                      <WorkspaceTableCell>
-                        <ConditionBadge value={room.conditionCheckout} />
-                      </WorkspaceTableCell>
+                      <WorkspaceTableCell><ConditionBadge value={room.conditionCheckin} /></WorkspaceTableCell>
+                      <WorkspaceTableCell><ConditionBadge value={room.conditionCheckout} /></WorkspaceTableCell>
                       <WorkspaceTableCell align="center">{room.defectCount}</WorkspaceTableCell>
                       <WorkspaceTableCell align="center">{room.photoCount}</WorkspaceTableCell>
                     </WorkspaceTableRow>
@@ -532,33 +414,20 @@ export function CaseOverview({ data }: { data: OperatorCheckoutWorkspaceData }) 
                 </tbody>
               </WorkspaceTable>
             ) : (
-              <EmptyState
-                body="Structured room capture has not been added yet. As room parsing and defect extraction land in later steps, this overview will show condition drift and room-level evidence here."
-                title="No structured rooms yet"
-              />
+              <EmptyState body="Room capture not started yet." title="No rooms" />
             )}
           </div>
-        </SectionCard>
+        </div>
 
-        <SectionCard className="px-6 py-6 md:px-7">
-          <div className="flex flex-col gap-2 border-b border-zinc-200 pb-5">
-            <WorkspaceSectionTitle>Recent activity</WorkspaceSectionTitle>
-            <p className="text-sm leading-6 text-zinc-600">
-              Latest structured events for the checkout workspace, falling back to operator case activity when needed.
-            </p>
-          </div>
-          <div className="pt-5">
+        <div>
+          <h3 className="text-sm font-semibold text-zinc-950">Recent activity</h3>
+          <div className="mt-2">
             <ActivityTimeline
-              empty={
-                <EmptyState
-                  body="No activity entries have been recorded for this case yet."
-                  title="No activity yet"
-                />
-              }
+              empty={<EmptyState body="No activity recorded." title="No activity" />}
               items={activityTimelineItems}
             />
           </div>
-        </SectionCard>
+        </div>
       </div>
     </div>
   )

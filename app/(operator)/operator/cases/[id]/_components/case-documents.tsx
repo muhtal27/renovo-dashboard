@@ -2,14 +2,13 @@
 
 import { useRouter } from 'next/navigation'
 import { Download, ExternalLink, FileText } from 'lucide-react'
-import { DetailPanel, EmptyState, SectionCard } from '@/app/operator-ui'
+import { EmptyState } from '@/app/operator-ui'
 import { ReportComparisonCard } from '@/app/(operator)/operator/cases/[id]/_components/report-comparison-card'
 import { SupportingDocumentsPanel } from '@/app/(operator)/operator/cases/[id]/_components/supporting-documents-panel'
 import {
   WorkspaceBadge,
   WorkspaceMetricCard,
   WorkspaceNotice,
-  WorkspaceSectionTitle,
   WorkspaceTable,
   WorkspaceTableCell,
   WorkspaceTableHeaderCell,
@@ -129,8 +128,8 @@ export function CaseDocuments({ data }: { data: OperatorCheckoutWorkspaceData })
   const supportingDocumentCount = data.workspace.supportingDocuments.length
 
   return (
-    <div className="space-y-6">
-      <section className="grid gap-4 md:grid-cols-2 2xl:grid-cols-4">
+    <div className="space-y-4">
+      <div className="flex items-end gap-8 border-b border-zinc-200 pb-3">
         <WorkspaceMetricCard
           detail="Check-in, check-out, and tenancy agreement coverage."
           label="Evidence pack"
@@ -161,44 +160,40 @@ export function CaseDocuments({ data }: { data: OperatorCheckoutWorkspaceData })
           tone={caseDocumentLibraryCount > 0 ? 'default' : 'warning'}
           value={caseDocumentLibraryCount}
         />
-      </section>
-
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
-        <SectionCard className="px-6 py-6 md:px-7">
-          <ReportComparisonCard workspace={data.workspace} />
-        </SectionCard>
-
-        <DetailPanel
-          description="The agreement and import status below show whether the wider evidence pack is ready for document-led review."
-          title="Document readiness"
-        >
-          <WorkspaceNotice
-            body={
-              reportDocumentCount === 3
-                ? 'The evidence pack includes the core reports and tenancy agreement.'
-                : 'At least one expected evidence-pack document is still missing from the linked case files.'
-            }
-            title={reportDocumentCount === 3 ? 'Evidence pack complete' : 'Evidence pack incomplete'}
-            tone={reportDocumentCount === 3 ? 'success' : 'warning'}
-          />
-
-          <ReadOnlyLinkedDocumentCard
-            description="A linked tenancy agreement keeps the checkout evidence pack complete without introducing a new upload flow in this step."
-            document={data.workspace.reportDocuments.tenancyAgreement}
-            label="Tenancy agreement"
-          />
-        </DetailPanel>
       </div>
 
-      <SectionCard className="px-6 py-6 md:px-7">
-        <div className="flex flex-col gap-2 border-b border-zinc-200 pb-5">
-          <WorkspaceSectionTitle>Structured checkout document inventory</WorkspaceSectionTitle>
-          <p className="text-sm leading-6 text-zinc-600">
-            Files indexed into the structured checkout workspace for processing and later downstream review.
-          </p>
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
+        <div>
+          <ReportComparisonCard workspace={data.workspace} />
         </div>
 
-        <div className="pt-5">
+        <div className="border-l-2 border-zinc-200 pl-4">
+          <h3 className="text-sm font-semibold text-zinc-950">Document readiness</h3>
+
+          <div className="mt-2 space-y-4">
+            <WorkspaceNotice
+              body={
+                reportDocumentCount === 3
+                  ? 'The evidence pack includes the core reports and tenancy agreement.'
+                  : 'At least one expected evidence-pack document is still missing from the linked case files.'
+              }
+              title={reportDocumentCount === 3 ? 'Evidence pack complete' : 'Evidence pack incomplete'}
+              tone={reportDocumentCount === 3 ? 'success' : 'warning'}
+            />
+
+            <ReadOnlyLinkedDocumentCard
+              description="A linked tenancy agreement keeps the checkout evidence pack complete without introducing a new upload flow in this step."
+              document={data.workspace.reportDocuments.tenancyAgreement}
+              label="Tenancy agreement"
+            />
+          </div>
+        </div>
+      </div>
+
+      <section className="border-b border-zinc-200 pb-4">
+        <h3 className="text-sm font-semibold text-zinc-950">Structured checkout document inventory</h3>
+
+        <div className="mt-2">
           {data.documents.length > 0 ? (
             <WorkspaceTable>
               <thead>
@@ -259,7 +254,7 @@ export function CaseDocuments({ data }: { data: OperatorCheckoutWorkspaceData })
             />
           )}
         </div>
-      </SectionCard>
+      </section>
 
       <SupportingDocumentsPanel
         caseId={data.workspace.case.id}

@@ -3,14 +3,13 @@
 import { Loader2, Sparkles } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
-import { EmptyState, SectionCard } from '@/app/operator-ui'
+import { EmptyState } from '@/app/operator-ui'
 import {
   WorkspaceActionButton,
   WorkspaceBadge,
   WorkspaceMetricCard,
   WorkspaceNotice,
   WorkspaceProgressBar,
-  WorkspaceSectionTitle,
   WorkspaceTable,
   WorkspaceTableCell,
   WorkspaceTableHeaderCell,
@@ -218,8 +217,8 @@ export function CaseProcess({ data }: { data: OperatorCheckoutWorkspaceData }) {
   }
 
   return (
-    <div className="space-y-6">
-      <section className="grid gap-4 md:grid-cols-2 2xl:grid-cols-4">
+    <div className="space-y-4">
+      <div className="flex items-end gap-8 border-b border-zinc-200 pb-3">
         <WorkspaceMetricCard
           detail={`${linkedEvidencePack}/3 evidence-pack files linked`}
           label="Core reports"
@@ -254,18 +253,13 @@ export function CaseProcess({ data }: { data: OperatorCheckoutWorkspaceData }) {
           tone={data.workspace.claim ? 'warning' : 'default'}
           value={formatCurrency(currentClaimTotal)}
         />
-      </section>
+      </div>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
-        <SectionCard className="px-6 py-6 md:px-7">
-          <div className="flex flex-col gap-2 border-b border-zinc-200 pb-5">
-            <WorkspaceSectionTitle>AI analysis control</WorkspaceSectionTitle>
-            <p className="text-sm leading-6 text-zinc-600">
-              This step reuses the existing operator analysis route. Core reports are the only hard blocker; structured defects enrich the review when they exist.
-            </p>
-          </div>
+        <section className="border-b border-zinc-200 pb-4">
+          <h3 className="text-sm font-semibold text-zinc-950">AI analysis control</h3>
 
-          <div className="grid gap-6 pt-5 xl:grid-cols-[minmax(0,1fr)_minmax(260px,0.8fr)]">
+          <div className="mt-2 grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(260px,0.8fr)]">
             <div className="space-y-4">
               <WorkspaceNotice
                 body={
@@ -369,17 +363,12 @@ export function CaseProcess({ data }: { data: OperatorCheckoutWorkspaceData }) {
               </div>
             </div>
           </div>
-        </SectionCard>
+        </section>
 
-        <SectionCard className="px-6 py-6 md:px-7">
-          <div className="flex flex-col gap-2 border-b border-zinc-200 pb-5">
-            <WorkspaceSectionTitle>Current output state</WorkspaceSectionTitle>
-            <p className="text-sm leading-6 text-zinc-600">
-              Existing operator outputs remain the source of truth after each run.
-            </p>
-          </div>
+        <div className="border-l-2 border-zinc-200 pl-4">
+          <h3 className="text-sm font-semibold text-zinc-950">Current output state</h3>
 
-          <div className="space-y-5 pt-5">
+          <div className="mt-2 space-y-5">
             <div className="flex flex-wrap items-center gap-2">
               <WorkspaceBadge label={formatEnumLabel(data.workspace.case.status)} tone={getStatusTone(data.workspace.case.status)} />
               {data.workspace.claim ? <WorkspaceBadge label="Claim generated" tone="warning" /> : null}
@@ -420,18 +409,13 @@ export function CaseProcess({ data }: { data: OperatorCheckoutWorkspaceData }) {
               </div>
             </dl>
           </div>
-        </SectionCard>
+        </div>
       </div>
 
-      <SectionCard className="px-6 py-6 md:px-7">
-        <div className="flex flex-col gap-2 border-b border-zinc-200 pb-5">
-          <WorkspaceSectionTitle>Structured defect inputs</WorkspaceSectionTitle>
-          <p className="text-sm leading-6 text-zinc-600">
-            Review context from the structured defect model, kept visible here so operators can compare it against the backend-generated issue list after each run.
-          </p>
-        </div>
+      <section className="border-b border-zinc-200 pb-4">
+        <h3 className="text-sm font-semibold text-zinc-950">Structured defect inputs</h3>
 
-        <div className="pt-5">
+        <div className="mt-2">
           {defectRows.length > 0 ? (
             <WorkspaceTable>
               <thead>
@@ -484,18 +468,13 @@ export function CaseProcess({ data }: { data: OperatorCheckoutWorkspaceData }) {
             />
           )}
         </div>
-      </SectionCard>
+      </section>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)]">
-        <SectionCard className="px-6 py-6 md:px-7">
-          <div className="flex flex-col gap-2 border-b border-zinc-200 pb-5">
-            <WorkspaceSectionTitle>Generated recommendations</WorkspaceSectionTitle>
-            <p className="text-sm leading-6 text-zinc-600">
-              These are the live recommendation records currently attached to the operator workspace.
-            </p>
-          </div>
+        <section className="border-b border-zinc-200 pb-4">
+          <h3 className="text-sm font-semibold text-zinc-950">Generated recommendations</h3>
 
-          <div className="space-y-4 pt-5">
+          <div className="mt-2 space-y-4">
             {recommendationRows.length > 0 ? (
               recommendationRows.map((recommendation) => {
                 const issue = issueById.get(recommendation.issue_id)
@@ -546,17 +525,12 @@ export function CaseProcess({ data }: { data: OperatorCheckoutWorkspaceData }) {
               />
             )}
           </div>
-        </SectionCard>
+        </section>
 
-        <SectionCard className="px-6 py-6 md:px-7">
-          <div className="flex flex-col gap-2 border-b border-zinc-200 pb-5">
-            <WorkspaceSectionTitle>Claim output</WorkspaceSectionTitle>
-            <p className="text-sm leading-6 text-zinc-600">
-              Itemised claim output from the current workspace state.
-            </p>
-          </div>
+        <div className="border-l-2 border-zinc-200 pl-4">
+          <h3 className="text-sm font-semibold text-zinc-950">Claim output</h3>
 
-          <div className="space-y-4 pt-5">
+          <div className="mt-2 space-y-4">
             <div className="border border-zinc-200 bg-zinc-50/70 px-5 py-5">
               <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Current total</p>
               <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-zinc-950">
@@ -607,7 +581,7 @@ export function CaseProcess({ data }: { data: OperatorCheckoutWorkspaceData }) {
               />
             )}
           </div>
-        </SectionCard>
+        </div>
       </div>
     </div>
   )

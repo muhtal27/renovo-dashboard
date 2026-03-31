@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { DetailPanel, EmptyState, SectionCard } from '@/app/operator-ui'
+import { EmptyState } from '@/app/operator-ui'
 import { ClaimSummaryCard } from '@/app/(operator)/operator/cases/[id]/_components/claim-summary-card'
 import { MessageThreadCard } from '@/app/(operator)/operator/cases/[id]/_components/message-thread-card'
 import {
@@ -9,7 +9,6 @@ import {
   WorkspaceMetricCard,
   WorkspaceNotice,
   WorkspaceProgressBar,
-  WorkspaceSectionTitle,
   WorkspaceSelectableCard,
 } from '@/app/(operator)/operator/cases/[id]/_components/checkout-workspace-ui'
 import {
@@ -91,14 +90,14 @@ export function CaseNegotiation({ data }: { data: OperatorCheckoutWorkspaceData 
             }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <WorkspaceNotice
         body={negotiationNotice.body}
         title={negotiationNotice.title}
         tone={negotiationNotice.tone}
       />
 
-      <section className="grid gap-4 md:grid-cols-2 2xl:grid-cols-4">
+      <div className="flex items-end gap-8 border-b border-zinc-200 pb-3">
         <WorkspaceMetricCard
           detail={data.checkoutCase?.submissionType ? `Submission path: ${formatEnumLabel(data.checkoutCase.submissionType)}` : 'Submission path not selected'}
           label="Negotiation status"
@@ -133,27 +132,21 @@ export function CaseNegotiation({ data }: { data: OperatorCheckoutWorkspaceData 
           tone={data.workspace.messages.length > 0 ? 'default' : 'warning'}
           value={data.workspace.messages.length}
         />
-      </section>
+      </div>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
-        <SectionCard className="px-6 py-6 md:px-7">
-          <div className="flex flex-col gap-2 border-b border-zinc-200 pb-5">
-            <WorkspaceSectionTitle>Negotiation position</WorkspaceSectionTitle>
-            <p className="text-sm leading-6 text-zinc-600">
-              Review the current deduction profile and recommendation mix before any outbound message is prepared.
-            </p>
-          </div>
+        <section className="border-b border-zinc-200 pb-4">
+          <h3 className="text-sm font-semibold text-zinc-950">Negotiation position</h3>
 
-          <div className="pt-5">
+          <div className="mt-2">
             <ClaimSummaryCard workspace={data.workspace} />
           </div>
-        </SectionCard>
+        </section>
 
-        <DetailPanel
-          description="This panel keeps the live checkout negotiation state visible without introducing send or submission actions in this step."
-          title="Negotiation stance"
-        >
-          <div className="flex flex-wrap items-center gap-2">
+        <div className="border-l-2 border-zinc-200 pl-4">
+          <h3 className="text-sm font-semibold text-zinc-950">Negotiation stance</h3>
+
+          <div className="mt-2 flex flex-wrap items-center gap-2">
             <WorkspaceBadge label={negotiationStatus.label} tone={negotiationStatus.tone} />
             {data.checkoutCase?.submissionType ? (
               <WorkspaceBadge
@@ -208,18 +201,13 @@ export function CaseNegotiation({ data }: { data: OperatorCheckoutWorkspaceData 
               {data.checkoutCase?.negotiationNotes?.trim() || 'No negotiation notes recorded yet.'}
             </p>
           </div>
-        </DetailPanel>
+        </div>
       </div>
 
-      <SectionCard className="px-6 py-6 md:px-7">
-        <div className="flex flex-col gap-2 border-b border-zinc-200 pb-5">
-          <WorkspaceSectionTitle>Negotiation draft pack</WorkspaceSectionTitle>
-          <p className="text-sm leading-6 text-zinc-600">
-            Review the existing email drafts that support negotiation. Delivery remains isolated to the later Send out step.
-          </p>
-        </div>
+      <section className="border-b border-zinc-200 pb-4">
+        <h3 className="text-sm font-semibold text-zinc-950">Negotiation draft pack</h3>
 
-        <div className="pt-5">
+        <div className="mt-2">
           {sortedDrafts.length > 0 ? (
             <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.92fr)]">
               <div className="space-y-3">
@@ -249,12 +237,13 @@ export function CaseNegotiation({ data }: { data: OperatorCheckoutWorkspaceData 
                 ))}
               </div>
 
-              <DetailPanel
-                description="A selected draft shows who it is intended for, which structured documents are attached, and the current message body."
-                title={selectedDraft?.subject?.trim() || (selectedDraft ? formatEnumLabel(selectedDraft.draftType) : 'Draft detail')}
-              >
+              <div className="border-l-2 border-zinc-200 pl-4">
+                <h3 className="text-sm font-semibold text-zinc-950">
+                  {selectedDraft?.subject?.trim() || (selectedDraft ? formatEnumLabel(selectedDraft.draftType) : 'Draft detail')}
+                </h3>
+
                 {selectedDraft ? (
-                  <>
+                  <div className="mt-2">
                     <div className="flex flex-wrap items-center gap-2">
                       <WorkspaceBadge
                         label={formatEnumLabel(selectedDraft.draftType)}
@@ -317,14 +306,14 @@ export function CaseNegotiation({ data }: { data: OperatorCheckoutWorkspaceData 
                         {selectedDraft.body}
                       </p>
                     </div>
-                  </>
+                  </div>
                 ) : (
                   <EmptyState
                     body="Select a draft to inspect its recipient, attached documents, and message body."
                     title="No draft selected"
                   />
                 )}
-              </DetailPanel>
+              </div>
             </div>
           ) : (
             <EmptyState
@@ -333,20 +322,15 @@ export function CaseNegotiation({ data }: { data: OperatorCheckoutWorkspaceData 
             />
           )}
         </div>
-      </SectionCard>
+      </section>
 
-      <SectionCard className="px-6 py-6 md:px-7">
-        <div className="flex flex-col gap-2 border-b border-zinc-200 pb-5">
-          <WorkspaceSectionTitle>Stakeholder communication</WorkspaceSectionTitle>
-          <p className="text-sm leading-6 text-zinc-600">
-            Existing case messages stay visible here so operators can compare the proposed negotiation stance against the live conversation trail.
-          </p>
-        </div>
+      <section className="border-b border-zinc-200 pb-4">
+        <h3 className="text-sm font-semibold text-zinc-950">Stakeholder communication</h3>
 
-        <div className="pt-5">
+        <div className="mt-2">
           <MessageThreadCard workspace={data.workspace} />
         </div>
-      </SectionCard>
+      </section>
     </div>
   )
 }

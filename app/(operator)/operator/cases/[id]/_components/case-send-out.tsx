@@ -2,14 +2,13 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { DetailPanel, EmptyState, SectionCard } from '@/app/operator-ui'
+import { EmptyState } from '@/app/operator-ui'
 import { MessageThreadCard } from '@/app/(operator)/operator/cases/[id]/_components/message-thread-card'
 import {
   WorkspaceBadge,
   WorkspaceMetricCard,
   WorkspaceNotice,
   WorkspaceProgressBar,
-  WorkspaceSectionTitle,
   WorkspaceSelectableCard,
   WorkspaceTable,
   WorkspaceTableCell,
@@ -68,14 +67,14 @@ export function CaseSendOut({ data }: { data: OperatorCheckoutWorkspaceData }) {
   })
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <WorkspaceNotice
         body={sendOutNotice.body}
         title={sendOutNotice.title}
         tone={sendOutNotice.tone}
       />
 
-      <section className="grid gap-4 md:grid-cols-2 2xl:grid-cols-4">
+      <div className="flex items-end gap-8 border-b border-zinc-200 pb-3">
         <WorkspaceMetricCard
           detail={OUTBOUND_CONFIGURED ? 'External handoff endpoint available in this deployment' : 'Drafts remain local to the operator workspace'}
           label="Integration"
@@ -108,18 +107,13 @@ export function CaseSendOut({ data }: { data: OperatorCheckoutWorkspaceData }) {
           tone={sentCount > 0 ? 'default' : 'warning'}
           value={sentCount}
         />
-      </section>
+      </div>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.92fr)]">
-        <SectionCard className="px-6 py-6 md:px-7">
-          <div className="flex flex-col gap-2 border-b border-zinc-200 pb-5">
-            <WorkspaceSectionTitle>Outbound queue</WorkspaceSectionTitle>
-            <p className="text-sm leading-6 text-zinc-600">
-              Review the delivery queue built from structured checkout email drafts. This step surfaces handoff readiness without introducing a new send API.
-            </p>
-          </div>
+        <section className="border-b border-zinc-200 pb-4">
+          <h3 className="text-sm font-semibold text-zinc-950">Outbound queue</h3>
 
-          <div className="space-y-3 pt-5">
+          <div className="mt-2 space-y-3">
             {sortedDrafts.length > 0 ? (
               sortedDrafts.map((draft) => {
                 const deliveryState = getSendOutDeliveryState(draft, data, {
@@ -163,15 +157,15 @@ export function CaseSendOut({ data }: { data: OperatorCheckoutWorkspaceData }) {
               />
             )}
           </div>
-        </SectionCard>
+        </section>
 
-        <DetailPanel
-          description="A selected draft shows the exact send-out payload currently present in the workspace, including recipient resolution and structured attachments."
-          title={selectedDraft?.subject?.trim() || (selectedDraft ? formatEnumLabel(selectedDraft.draftType) : 'Selected draft')}
-        >
+        <div className="border-l-2 border-zinc-200 pl-4">
+          <h3 className="text-sm font-semibold text-zinc-950">
+            {selectedDraft?.subject?.trim() || (selectedDraft ? formatEnumLabel(selectedDraft.draftType) : 'Selected draft')}
+          </h3>
           {selectedDraft ? (
             <>
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="mt-2 flex flex-wrap items-center gap-2">
                 <WorkspaceBadge
                   label={formatEnumLabel(selectedDraft.draftType)}
                   tone={getCheckoutEmailDraftTypeTone(selectedDraft.draftType)}
@@ -256,18 +250,13 @@ export function CaseSendOut({ data }: { data: OperatorCheckoutWorkspaceData }) {
               title="No draft selected"
             />
           )}
-        </DetailPanel>
+        </div>
       </div>
 
-      <SectionCard className="px-6 py-6 md:px-7">
-        <div className="flex flex-col gap-2 border-b border-zinc-200 pb-5">
-          <WorkspaceSectionTitle>Sent and queued delivery log</WorkspaceSectionTitle>
-          <p className="text-sm leading-6 text-zinc-600">
-            Delivery state remains anchored to the structured draft records in this repo, so operators can audit what has already gone out and what is still queued.
-          </p>
-        </div>
+      <section className="border-b border-zinc-200 pb-4">
+        <h3 className="text-sm font-semibold text-zinc-950">Sent and queued delivery log</h3>
 
-        <div className="pt-5">
+        <div className="mt-2">
           {sortedDrafts.length > 0 ? (
             <WorkspaceTable>
               <thead>
@@ -322,20 +311,15 @@ export function CaseSendOut({ data }: { data: OperatorCheckoutWorkspaceData }) {
             />
           )}
         </div>
-      </SectionCard>
+      </section>
 
-      <SectionCard className="px-6 py-6 md:px-7">
-        <div className="flex flex-col gap-2 border-b border-zinc-200 pb-5">
-          <WorkspaceSectionTitle>Communication record</WorkspaceSectionTitle>
-          <p className="text-sm leading-6 text-zinc-600">
-            Existing case messages remain visible alongside the structured send-out queue so operators can compare outbound drafts with the live conversation trail.
-          </p>
-        </div>
+      <section className="border-b border-zinc-200 pb-4">
+        <h3 className="text-sm font-semibold text-zinc-950">Communication record</h3>
 
-        <div className="pt-5">
+        <div className="mt-2">
           <MessageThreadCard workspace={data.workspace} />
         </div>
-      </SectionCard>
+      </section>
     </div>
   )
 }

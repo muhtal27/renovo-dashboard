@@ -1,12 +1,11 @@
 'use client'
 
-import { DetailPanel, EmptyState, SectionCard } from '@/app/operator-ui'
+import { EmptyState } from '@/app/operator-ui'
 import {
   WorkspaceBadge,
   WorkspaceMetricCard,
   WorkspaceNotice,
   WorkspaceProgressBar,
-  WorkspaceSectionTitle,
   WorkspaceTable,
   WorkspaceTableCell,
   WorkspaceTableHeaderCell,
@@ -110,7 +109,7 @@ export function CaseUtilities({ data }: { data: OperatorCheckoutWorkspaceData })
     Boolean(data.parking)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {!hasUtilitiesData ? (
         <WorkspaceNotice
           body="No structured utilities, keys, detector, compliance, council, or parking records have been captured for this case yet."
@@ -119,7 +118,7 @@ export function CaseUtilities({ data }: { data: OperatorCheckoutWorkspaceData })
         />
       ) : null}
 
-      <section className="grid gap-4 md:grid-cols-2 2xl:grid-cols-4">
+      <div className="flex items-end gap-8 border-b border-zinc-200 pb-3">
         <WorkspaceMetricCard
           detail={`${utilityReadingsCaptured}/${data.utilities.length || 0} checkout readings captured`}
           label="Utilities tracked"
@@ -148,18 +147,13 @@ export function CaseUtilities({ data }: { data: OperatorCheckoutWorkspaceData })
           tone={handoverChecklistCount >= 5 ? 'success' : handoverChecklistCount >= 3 ? 'warning' : 'default'}
           value={`${handoverChecklistCount}/6`}
         />
-      </section>
+      </div>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
-        <SectionCard className="px-6 py-6 md:px-7">
-          <div className="flex flex-col gap-2 border-b border-zinc-200 pb-5">
-            <WorkspaceSectionTitle>Utility readings</WorkspaceSectionTitle>
-            <p className="text-sm leading-6 text-zinc-600">
-              Meter details captured for the structured checkout workspace.
-            </p>
-          </div>
+        <section className="border-b border-zinc-200 pb-4">
+          <h3 className="text-sm font-semibold text-zinc-950">Utility readings</h3>
 
-          <div className="pt-5">
+          <div className="mt-2">
             {data.utilities.length > 0 ? (
               <WorkspaceTable>
                 <thead>
@@ -207,12 +201,12 @@ export function CaseUtilities({ data }: { data: OperatorCheckoutWorkspaceData })
               />
             )}
           </div>
-        </SectionCard>
+        </section>
 
-        <DetailPanel
-          title="Handover summary"
-          description="Overall readiness across utilities, keys, safety devices, and admin handover."
-        >
+        <div className="border-l-2 border-zinc-200 pl-4">
+          <h3 className="text-sm font-semibold text-zinc-950">Handover summary</h3>
+
+          <div className="mt-2 space-y-4">
           <WorkspaceProgressBar
             label="Utilities captured"
             max={Math.max(data.utilities.length, 1)}
@@ -256,19 +250,15 @@ export function CaseUtilities({ data }: { data: OperatorCheckoutWorkspaceData })
               </dd>
             </div>
           </div>
-        </DetailPanel>
+          </div>
+        </div>
       </div>
 
       <div className="grid gap-6 xl:grid-cols-2">
-        <SectionCard className="px-6 py-6 md:px-7">
-          <div className="flex flex-col gap-2 border-b border-zinc-200 pb-5">
-            <WorkspaceSectionTitle>Keys & parking</WorkspaceSectionTitle>
-            <p className="text-sm leading-6 text-zinc-600">
-              Access items and parking handover status for the property.
-            </p>
-          </div>
+        <section className="border-b border-zinc-200 pb-4">
+          <h3 className="text-sm font-semibold text-zinc-950">Keys & parking</h3>
 
-          <div className="pt-5 space-y-6">
+          <div className="mt-2 space-y-4">
             {data.keys.length > 0 ? (
               <WorkspaceTable>
                 <thead>
@@ -337,17 +327,12 @@ export function CaseUtilities({ data }: { data: OperatorCheckoutWorkspaceData })
               )}
             </div>
           </div>
-        </SectionCard>
+        </section>
 
-        <SectionCard className="px-6 py-6 md:px-7">
-          <div className="flex flex-col gap-2 border-b border-zinc-200 pb-5">
-            <WorkspaceSectionTitle>Safety & compliance</WorkspaceSectionTitle>
-            <p className="text-sm leading-6 text-zinc-600">
-              Detector testing and handover compliance captured during checkout.
-            </p>
-          </div>
+        <section className="border-b border-zinc-200 pb-4">
+          <h3 className="text-sm font-semibold text-zinc-950">Safety & compliance</h3>
 
-          <div className="pt-5 space-y-6">
+          <div className="mt-2 space-y-4">
             {data.detectors.length > 0 ? (
               <WorkspaceTable>
                 <thead>
@@ -425,20 +410,15 @@ export function CaseUtilities({ data }: { data: OperatorCheckoutWorkspaceData })
               />
             )}
           </div>
-        </SectionCard>
+        </section>
       </div>
 
-      <SectionCard className="px-6 py-6 md:px-7">
-        <div className="flex flex-col gap-2 border-b border-zinc-200 pb-5">
-          <WorkspaceSectionTitle>Council tax handover</WorkspaceSectionTitle>
-          <p className="text-sm leading-6 text-zinc-600">
-            Council notification status captured as part of the checkout offboarding workflow.
-          </p>
-        </div>
+      <section className="border-b border-zinc-200 pb-4">
+        <h3 className="text-sm font-semibold text-zinc-950">Council tax handover</h3>
 
-        <div className="pt-5">
+        <div className="mt-2">
           {data.councilTax ? (
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <div className="flex items-end gap-8">
               <WorkspaceMetricCard
                 detail="Recorded council for the tenancy end handover."
                 label="Council"
@@ -471,7 +451,7 @@ export function CaseUtilities({ data }: { data: OperatorCheckoutWorkspaceData })
             />
           )}
         </div>
-      </SectionCard>
+      </section>
     </div>
   )
 }
