@@ -189,7 +189,7 @@ export function MarketingShell({
             </div>
 
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-500">
                 Product
               </p>
               <nav className="mt-4 grid gap-2" aria-label="Footer product links">
@@ -206,7 +206,7 @@ export function MarketingShell({
             </div>
 
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-500">
                 Company
               </p>
               <nav className="mt-4 grid gap-2" aria-label="Footer company links">
@@ -226,7 +226,7 @@ export function MarketingShell({
             </div>
 
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-500">
                 Legal
               </p>
               <nav className="mt-4 grid gap-2" aria-label="Footer legal links">
