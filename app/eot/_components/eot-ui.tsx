@@ -62,7 +62,7 @@ export function StatusBadge({
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium',
+        'inline-flex items-center border px-2.5 py-1 text-xs font-medium',
         getToneClass(tone),
         className
       )}
@@ -116,7 +116,6 @@ export function KeyValueList({
 
 export function WorkspaceSection({
   title,
-  description,
   aside,
   children,
   className,
@@ -128,10 +127,13 @@ export function WorkspaceSection({
   className?: string
 }) {
   return (
-    <SectionCard className={cn('px-6 py-6', className)}>
-      <SectionHeading title={title} description={description} aside={aside} />
-      <div className="mt-5">{children}</div>
-    </SectionCard>
+    <section className={cn('border-b border-zinc-200 pb-4', className)}>
+      <div className="flex items-center justify-between gap-3">
+        <h3 className="text-sm font-semibold text-zinc-950">{title}</h3>
+        {aside ? <div className="flex shrink-0 flex-wrap items-center gap-2">{aside}</div> : null}
+      </div>
+      <div className="mt-3">{children}</div>
+    </section>
   )
 }
 

@@ -40,8 +40,8 @@ function DistributionBar({
               <span>{item.label}</span>
               <span className="font-medium text-zinc-900">{item.value}</span>
             </div>
-            <div className="h-2.5 overflow-hidden rounded-full bg-zinc-100">
-              <div className={`h-full rounded-full ${color}`} style={{ width: `${width}%` }} />
+            <div className="h-1.5 overflow-hidden bg-zinc-100">
+              <div className={`h-full ${color}`} style={{ width: `${width}%` }} />
             </div>
           </div>
         )

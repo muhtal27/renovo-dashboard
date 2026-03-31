@@ -199,7 +199,7 @@ export function WorkspaceBadge({
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-full border font-medium',
+        'inline-flex items-center border font-medium',
         size === 'compact' ? 'px-2 py-0.5 text-[11px]' : 'px-2.5 py-1 text-xs',
         BADGE_STYLES[tone],
         className
@@ -280,9 +280,9 @@ export function WorkspaceProgressBar({
         </div>
       ) : null}
       <div className="flex items-center gap-3">
-        <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-zinc-100">
+        <div className="h-1.5 flex-1 overflow-hidden bg-zinc-100">
           <div
-            className={cn('h-full rounded-full transition-[width]', PROGRESS_FILL_STYLES[tone])}
+            className={cn('h-full transition-[width]', PROGRESS_FILL_STYLES[tone])}
             style={{ width: `${percentage}%` }}
           />
         </div>

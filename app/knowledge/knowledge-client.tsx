@@ -372,7 +372,7 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
                       </p>
                     </div>
                     <span
-                      className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
+                      className={`inline-flex px-2.5 py-1 text-xs font-semibold ${
                         active ? 'bg-white/10 text-white' : 'bg-white text-zinc-600'
                       }`}
                     >
@@ -460,7 +460,7 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
                         {article.category}
                       </span>
                       <span
-                        className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-medium ${getRegionChipTone(
+                        className={`inline-flex border px-2.5 py-1 text-xs font-medium ${getRegionChipTone(
                           article.regions
                         )}`}
                       >
@@ -474,11 +474,11 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
                     <span
-                      className={`rounded-full px-3 py-1 text-xs font-semibold ${getSourceTone(article.sourceLabel)}`}
+                      className={`px-3 py-1 text-xs font-semibold ${getSourceTone(article.sourceLabel)}`}
                     >
                       {article.sourceLabel}
                     </span>
-                    <span className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs font-medium text-zinc-500">
+                    <span className="border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs font-medium text-zinc-500">
                       Last reviewed {LAST_REVIEWED}
                     </span>
                   </div>
@@ -548,7 +548,7 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
                       {activeSelectedArticle.article.category}
                     </span>
                     <span
-                      className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-medium ${getRegionChipTone(
+                      className={`inline-flex border px-2.5 py-1 text-xs font-medium ${getRegionChipTone(
                         activeSelectedArticle.article.regions
                       )}`}
                     >
@@ -586,7 +586,7 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
             <div className="flex-1 overflow-y-auto px-6 py-6">
               <div className="flex flex-wrap items-center gap-2">
                 <span
-                  className={`rounded-full px-3 py-1 text-xs font-semibold ${getSourceTone(activeSelectedArticle.article.sourceLabel)}`}
+                  className={`px-3 py-1 text-xs font-semibold ${getSourceTone(activeSelectedArticle.article.sourceLabel)}`}
                 >
                   {activeSelectedArticle.article.sourceLabel}
                 </span>

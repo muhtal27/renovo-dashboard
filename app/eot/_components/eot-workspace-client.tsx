@@ -51,9 +51,7 @@ import {
   DetailPanel,
   EmptyState,
   KPIStatCard,
-  KeyValueList,
   MetaItem,
-  PageHeader,
   ProgressBar,
   SectionCard,
   SkeletonPanel,
@@ -1103,155 +1101,89 @@ export function EotWorkspaceClient({
   const claimReadiness = getClaimReadiness(summary)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {refreshError ? (
         <div className="border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
           {refreshError}
         </div>
       ) : null}
 
-      <PageHeader
-        eyebrow="Checkout workspace"
-        title={summary.property.name}
-        description={summary.case.summary?.trim() || 'No checkout summary has been recorded yet.'}
-        actions={
-          <>
-            <Link
-              href="/eot"
-              className="inline-flex items-center gap-2 border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:text-zinc-950"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to checkouts
-            </Link>
-            <button
-              type="button"
-              onClick={() => void refreshWorkspaceNow()}
-              className="inline-flex items-center gap-2 border border-zinc-900 bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800"
-            >
-              <RefreshCcw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
-              Refresh
-            </button>
-          </>
-        }
-      />
-
-      <section className="grid gap-4 xl:grid-cols-[minmax(0,1.55fr)_360px]">
-        <SectionCard className="px-6 py-6">
-          <div className="grid gap-5 xl:grid-cols-[minmax(0,1.3fr)_minmax(280px,0.9fr)]">
-            <div className="space-y-5">
-              <div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <StatusBadge label={formatEnumLabel(summary.case.status)} tone={summary.case.status} />
-                  <StatusBadge label={formatEnumLabel(summary.case.priority)} tone={summary.case.priority} />
-                  <StatusBadge
-                    label={claimReadiness.label}
-                    tone={
-                      claimReadiness.tone === 'ready'
-                        ? 'ready_for_claim'
-                        : claimReadiness.tone === 'attention'
-                          ? 'attention'
-                          : 'document'
-                    }
-                  />
-                </div>
-                <p className="mt-4 text-sm leading-6 text-zinc-600">
-                  {summary.tenancy.tenant_name}
-                  {summary.tenancy.tenant_email ? ` · ${summary.tenancy.tenant_email}` : ''}
-                </p>
-              </div>
-
-              <ProgressBar
-                value={progress}
-                label={
-                  <>
-                    <span>Workflow completion</span>
-                    <span>{progress}%</span>
-                  </>
-                }
-              />
-
-              <div className="grid gap-4 md:grid-cols-3">
-                <MetaItem label="Last activity" value={formatDateTime(summary.case.last_activity_at)} />
-                <MetaItem
-                  label="Deposit"
-                  value={
-                    summary.tenancy.deposit_amount
-                      ? formatCurrency(summary.tenancy.deposit_amount)
-                      : 'Not recorded'
-                  }
-                />
-                <MetaItem label="Property reference" value={summary.property.reference || 'Not set'} />
-              </div>
-            </div>
-
-            <DetailPanel
-              title="Operator focus"
-              description="Priority items surfaced from current evidence, issues, and output state."
-            >
-              <KeyValueList
-                items={[
-                  {
-                    label: 'High severity issues',
-                    value: summary.metrics.high_severity_open_issue_count || 'None',
-                  },
-                  {
-                    label: 'Evidence logged',
-                    value: summary.metrics.evidence_count,
-                  },
-                  {
-                    label: 'Recommendations',
-                    value: summary.metrics.recommendation_count,
-                  },
-                  {
-                    label: 'Claim readiness',
-                    value: claimReadiness.label,
-                  },
-                ]}
-              />
-              <div className="border border-zinc-200 bg-white px-4 py-4 text-sm leading-6 text-zinc-600">
-                {claimReadiness.description}
-              </div>
-            </DetailPanel>
+      <div className="flex items-start justify-between gap-4 border-b border-zinc-200 pb-4">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <StatusBadge label={formatEnumLabel(summary.case.status)} tone={summary.case.status} />
+            <StatusBadge label={formatEnumLabel(summary.case.priority)} tone={summary.case.priority} />
+            <StatusBadge
+              label={claimReadiness.label}
+              tone={
+                claimReadiness.tone === 'ready'
+                  ? 'ready_for_claim'
+                  : claimReadiness.tone === 'attention'
+                    ? 'attention'
+                    : 'document'
+              }
+            />
           </div>
-        </SectionCard>
+          <h2 className="mt-2 text-lg font-semibold text-zinc-950">{summary.property.name}</h2>
+          <p className="mt-1 text-sm text-zinc-600">
+            {summary.tenancy.tenant_name}
+            {summary.tenancy.tenant_email ? ` · ${summary.tenancy.tenant_email}` : ''}
+            <span className="mx-1.5 text-zinc-300">·</span>
+            {formatDate(summary.tenancy.start_date)} to {formatDate(summary.tenancy.end_date)}
+          </p>
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
+          <Link
+            href="/eot"
+            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-zinc-600 transition hover:text-zinc-950"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Checkouts
+          </Link>
+          <button
+            type="button"
+            onClick={() => void refreshWorkspaceNow()}
+            className="inline-flex items-center gap-1.5 bg-zinc-900 px-2.5 py-1.5 text-xs font-medium text-white transition hover:bg-zinc-800"
+          >
+            <RefreshCcw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} />
+            Refresh
+          </button>
+        </div>
+      </div>
 
-        <DetailPanel title="Checkout metadata" description="Property, tenancy, and audit context.">
-          <KeyValueList
-            items={[
-              { label: 'Checkout ID', value: summary.case.id.slice(0, 8) },
-              { label: 'Created', value: formatDate(summary.case.created_at) },
-              {
-                label: 'Tenancy dates',
-                value: `${formatDate(summary.tenancy.start_date)} to ${formatDate(summary.tenancy.end_date)}`,
-              },
-              {
-                label: 'Address',
-                value: formatAddress([
-                  summary.property.address_line_1,
-                  summary.property.address_line_2,
-                  summary.property.city,
-                  summary.property.postcode,
-                  summary.property.country_code,
-                ]),
-              },
-            ]}
-          />
-          {summary.tenancy.notes ? (
-            <div className="border border-zinc-200 bg-white px-4 py-4 text-sm leading-6 text-zinc-600">
-              {summary.tenancy.notes}
+      <div className="flex items-end justify-between gap-6 border-b border-zinc-200 pb-3">
+        <div className="flex items-end gap-8">
+          <KPIStatCard label="Evidence" value={summary.metrics.evidence_count} />
+          <KPIStatCard label="Open issues" value={summary.metrics.open_issue_count} tone="warning" />
+          <KPIStatCard label="Resolved" value={summary.metrics.resolved_issue_count} tone="accent" />
+          <KPIStatCard label="Notes" value={summary.metrics.message_count} />
+          <KPIStatCard label="Recommendations" value={summary.metrics.recommendation_count} />
+        </div>
+        <div className="pb-2">
+          <ProgressBar value={progress} className="w-[140px]" />
+        </div>
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.55fr)_280px]">
+        <div className="space-y-4">
+          <div className="grid gap-x-6 gap-y-2 border-b border-zinc-200 pb-3 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="flex items-baseline justify-between gap-3 py-1">
+              <span className="text-xs text-zinc-500">Last activity</span>
+              <span className="text-sm font-medium text-zinc-950">{formatDateTime(summary.case.last_activity_at)}</span>
             </div>
-          ) : null}
-        </DetailPanel>
-      </section>
-
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.55fr)_360px]">
-        <div className="space-y-6">
-          <section className="grid gap-4 md:grid-cols-4">
-            <KPIStatCard label="Evidence" value={summary.metrics.evidence_count} detail="Registered evidence items." />
-            <KPIStatCard label="Open issues" value={summary.metrics.open_issue_count} detail="Issues still under operator review." tone="warning" />
-            <KPIStatCard label="Resolved issues" value={summary.metrics.resolved_issue_count} detail="Issues already closed out." tone="accent" />
-            <KPIStatCard label="Checkout notes" value={summary.metrics.message_count} detail="Logged communication and internal updates." />
-          </section>
+            <div className="flex items-baseline justify-between gap-3 py-1">
+              <span className="text-xs text-zinc-500">Deposit</span>
+              <span className="text-sm font-medium text-zinc-950">{summary.tenancy.deposit_amount ? formatCurrency(summary.tenancy.deposit_amount) : '—'}</span>
+            </div>
+            <div className="flex items-baseline justify-between gap-3 py-1">
+              <span className="text-xs text-zinc-500">Reference</span>
+              <span className="text-sm font-medium text-zinc-950">{summary.property.reference || '—'}</span>
+            </div>
+            <div className="flex items-baseline justify-between gap-3 py-1">
+              <span className="text-xs text-zinc-500">ID</span>
+              <span className="text-sm font-mono text-zinc-700">{summary.case.id.slice(0, 8)}</span>
+            </div>
+          </div>
 
           <WorkspaceSection
             title="Evidence review"
@@ -2134,6 +2066,32 @@ export function EotWorkspaceClient({
               </form>
             </SectionBody>
           </WorkspaceSection>
+        </div>
+
+        <div className="space-y-4">
+          <div className="border-l-2 border-zinc-200 pl-4">
+            <h3 className="text-sm font-semibold text-zinc-950">Operator focus</h3>
+            <div className="mt-2 space-y-0">
+              {[
+                { label: 'High severity', value: summary.metrics.high_severity_open_issue_count || 'None' },
+                { label: 'Claim readiness', value: claimReadiness.label },
+                { label: 'Address', value: formatAddress([summary.property.address_line_1, summary.property.address_line_2, summary.property.city, summary.property.postcode]) },
+              ].map((item) => (
+                <div key={item.label} className="flex items-baseline justify-between gap-3 border-b border-zinc-100 py-2">
+                  <span className="text-xs text-zinc-500">{item.label}</span>
+                  <span className="text-right text-sm font-medium text-zinc-950">{item.value}</span>
+                </div>
+              ))}
+            </div>
+            <p className="mt-3 text-xs leading-5 text-zinc-500">{claimReadiness.description}</p>
+          </div>
+
+          {summary.tenancy.notes ? (
+            <div className="border-l-2 border-zinc-200 pl-4">
+              <h3 className="text-sm font-semibold text-zinc-950">Tenancy notes</h3>
+              <p className="mt-2 text-sm leading-6 text-zinc-600">{summary.tenancy.notes}</p>
+            </div>
+          ) : null}
         </div>
       </div>
     </div>

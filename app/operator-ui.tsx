@@ -45,7 +45,7 @@ export function SectionCard({
   className?: string
 }) {
   return (
-    <section className={cn('', className)}>
+    <section className={cn('border-b border-zinc-200 pb-4', className)}>
       {children}
     </section>
   )
@@ -158,7 +158,7 @@ export function DetailPanel({
   className?: string
 }) {
   return (
-    <aside className={cn('', className)}>
+    <aside className={cn('border-l-2 border-zinc-200 pl-4', className)}>
       <h3 className="text-sm font-semibold text-zinc-950">{title}</h3>
       <div className="mt-3 space-y-0">{children}</div>
     </aside>
