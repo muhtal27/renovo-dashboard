@@ -90,15 +90,15 @@ function PartyList({
   role: 'tenant' | 'landlord'
 }) {
   if (parties.length === 0) {
-    return <p className="text-sm leading-6 text-slate-500">{emptyMessage}</p>
+    return <p className="text-sm leading-6 text-zinc-500">{emptyMessage}</p>
   }
 
   return (
-    <div className="divide-y divide-slate-200 border-t border-slate-200">
+    <div className="divide-y divide-zinc-200 border-t border-zinc-200">
       {parties.map((party, index) => (
         <div key={party.id} className="space-y-2 py-4 first:pt-0 last:pb-0">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="text-sm font-semibold text-slate-950 [overflow-wrap:anywhere]">
+            <p className="text-sm font-semibold text-zinc-950 [overflow-wrap:anywhere]">
               {getDisplayName(party, `${fallbackLabel} ${index + 1}`)}
             </p>
             {party.isLead ? <WorkspaceBadge label="Lead tenant" tone="tenant" /> : null}
@@ -106,7 +106,7 @@ function PartyList({
               <WorkspaceBadge label={party.ownershipLabel} tone={role === 'landlord' ? 'landlord' : 'neutral'} />
             ) : null}
           </div>
-          <p className="text-sm leading-6 text-slate-600 [overflow-wrap:anywhere]">
+          <p className="text-sm leading-6 text-zinc-600 [overflow-wrap:anywhere]">
             {formatContactValue(party)}
           </p>
         </div>
@@ -160,10 +160,10 @@ export function CaseWorkspaceOverviewDetails({
       <div className="grid gap-x-6 gap-y-4 md:grid-cols-2 xl:grid-cols-3">
         {overviewItems.map((item) => (
           <div key={item.label} className="min-w-0 space-y-1">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+            <p className="text-xs font-semibold uppercase tracking-[0.08em] text-zinc-500">
               {item.label}
             </p>
-            <p className="text-sm leading-6 text-slate-950 [overflow-wrap:anywhere]">
+            <p className="text-sm leading-6 text-zinc-950 [overflow-wrap:anywhere]">
               {item.value}
             </p>
           </div>
@@ -173,8 +173,8 @@ export function CaseWorkspaceOverviewDetails({
       <div className="grid gap-8 lg:grid-cols-2">
         <section className="space-y-3">
           <div className="space-y-1">
-            <h3 className="text-sm font-semibold tracking-[-0.02em] text-slate-950">Tenants</h3>
-            <p className="text-sm leading-6 text-slate-600">
+            <h3 className="text-sm font-semibold tracking-[-0.02em] text-zinc-950">Tenants</h3>
+            <p className="text-sm leading-6 text-zinc-600">
               All tenant contacts attached to this tenancy, with the lead tenant highlighted when known.
             </p>
           </div>
@@ -188,8 +188,8 @@ export function CaseWorkspaceOverviewDetails({
 
         <section className="space-y-3">
           <div className="space-y-1">
-            <h3 className="text-sm font-semibold tracking-[-0.02em] text-slate-950">Landlords</h3>
-            <p className="text-sm leading-6 text-slate-600">
+            <h3 className="text-sm font-semibold tracking-[-0.02em] text-zinc-950">Landlords</h3>
+            <p className="text-sm leading-6 text-zinc-600">
               Ownership contacts linked to this property or case, including joint ownership when metadata is available.
             </p>
           </div>
@@ -203,9 +203,9 @@ export function CaseWorkspaceOverviewDetails({
       </div>
 
       {workspace.tenancy.notes ? (
-        <section className="space-y-2 border-t border-slate-200 pt-6">
-          <h3 className="text-sm font-semibold tracking-[-0.02em] text-slate-950">Tenancy notes</h3>
-          <p className="text-sm leading-6 text-slate-600 [overflow-wrap:anywhere]">
+        <section className="space-y-2 border-t border-zinc-200 pt-6">
+          <h3 className="text-sm font-semibold tracking-[-0.02em] text-zinc-950">Tenancy notes</h3>
+          <p className="text-sm leading-6 text-zinc-600 [overflow-wrap:anywhere]">
             {formatTextValue(workspace.tenancy.notes)}
           </p>
         </section>

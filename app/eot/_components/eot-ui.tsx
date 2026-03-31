@@ -16,7 +16,7 @@ import {
 import { cn } from '@/lib/ui'
 
 const TONE_STYLES: Record<string, string> = {
-  draft: 'border-slate-200 bg-slate-100 text-slate-700',
+  draft: 'border-zinc-200 bg-zinc-100 text-zinc-700',
   collecting_evidence: 'border-sky-200 bg-sky-50 text-sky-700',
   analysis: 'border-indigo-200 bg-indigo-50 text-indigo-700',
   review: 'border-amber-200 bg-amber-50 text-amber-700',
@@ -29,14 +29,14 @@ const TONE_STYLES: Record<string, string> = {
   high: 'border-rose-200 bg-rose-50 text-rose-700',
   image: 'border-fuchsia-200 bg-fuchsia-50 text-fuchsia-700',
   video: 'border-violet-200 bg-violet-50 text-violet-700',
-  document: 'border-slate-200 bg-slate-100 text-slate-700',
+  document: 'border-zinc-200 bg-zinc-100 text-zinc-700',
   open: 'border-amber-200 bg-amber-50 text-amber-700',
   resolved_issue: 'border-emerald-200 bg-emerald-50 text-emerald-700',
   disputed_issue: 'border-rose-200 bg-rose-50 text-rose-700',
   charge: 'border-rose-200 bg-rose-50 text-rose-700',
   partial: 'border-amber-200 bg-amber-50 text-amber-700',
   no_charge: 'border-emerald-200 bg-emerald-50 text-emerald-700',
-  manager: 'border-slate-200 bg-slate-100 text-slate-700',
+  manager: 'border-zinc-200 bg-zinc-100 text-zinc-700',
   landlord: 'border-amber-200 bg-amber-50 text-amber-700',
   tenant: 'border-sky-200 bg-sky-50 text-sky-700',
   risk: 'border-rose-200 bg-rose-50 text-rose-700',
@@ -47,7 +47,7 @@ const TONE_STYLES: Record<string, string> = {
 function getToneClass(tone: string) {
   if (tone === 'resolved') return TONE_STYLES.resolved_issue
   if (tone === 'disputed') return TONE_STYLES.disputed_issue
-  return TONE_STYLES[tone] ?? 'border-slate-200 bg-slate-100 text-slate-700'
+  return TONE_STYLES[tone] ?? 'border-zinc-200 bg-zinc-100 text-zinc-700'
 }
 
 export function StatusBadge({
@@ -90,9 +90,9 @@ export function MetaItem({
   className?: string
 }) {
   return (
-    <div className={cn('rounded-[18px] border border-slate-200 bg-white px-4 py-4', className)}>
-      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">{label}</p>
-      <div className="mt-2 text-sm font-medium leading-6 text-slate-900">{value}</div>
+    <div className={cn('rounded-xl border border-zinc-200 bg-white px-4 py-4', className)}>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">{label}</p>
+      <div className="mt-2 text-sm font-medium leading-6 text-zinc-900">{value}</div>
     </div>
   )
 }
@@ -106,8 +106,8 @@ export function KeyValueList({
     <dl className="space-y-3">
       {items.map((item) => (
         <div key={item.label} className="flex items-start justify-between gap-4">
-          <dt className="text-sm text-slate-500">{item.label}</dt>
-          <dd className="text-right text-sm font-medium text-slate-900">{item.value}</dd>
+          <dt className="text-sm text-zinc-500">{item.label}</dt>
+          <dd className="text-right text-sm font-medium text-zinc-900">{item.value}</dd>
         </div>
       ))}
     </dl>
@@ -140,7 +140,7 @@ export function DividerTitle({
 }: {
   children: ReactNode
 }) {
-  return <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">{children}</p>
+  return <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">{children}</p>
 }
 
 export function formatEnumLabel(value: string | null | undefined) {

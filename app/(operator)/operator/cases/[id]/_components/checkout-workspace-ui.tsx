@@ -70,7 +70,7 @@ const BADGE_STYLES: Record<WorkspaceBadgeTone, string> = {
   accepted: 'border-emerald-200 bg-emerald-50 text-emerald-700',
   agreed: 'border-emerald-200 bg-emerald-50 text-emerald-700',
   cleaning: 'border-amber-200 bg-amber-50 text-amber-700',
-  draft: 'border-slate-200 bg-slate-100 text-slate-700',
+  draft: 'border-zinc-200 bg-zinc-100 text-zinc-700',
   disputed: 'border-rose-200 bg-rose-50 text-rose-700',
   expired: 'border-amber-200 bg-amber-50 text-amber-700',
   fair: 'border-amber-200 bg-amber-50 text-amber-700',
@@ -79,10 +79,10 @@ const BADGE_STYLES: Record<WorkspaceBadgeTone, string> = {
   info: 'border-sky-200 bg-sky-50 text-sky-700',
   landlord: 'border-sky-200 bg-sky-50 text-sky-700',
   maintenance: 'border-violet-200 bg-violet-50 text-violet-700',
-  neutral: 'border-slate-200 bg-slate-100 text-slate-700',
+  neutral: 'border-zinc-200 bg-zinc-100 text-zinc-700',
   overdue: 'border-rose-200 bg-rose-50 text-rose-700',
   pass: 'border-emerald-200 bg-emerald-50 text-emerald-700',
-  pending: 'border-slate-200 bg-slate-100 text-slate-700',
+  pending: 'border-zinc-200 bg-zinc-100 text-zinc-700',
   poor: 'border-rose-200 bg-rose-50 text-rose-700',
   processed: 'border-emerald-200 bg-emerald-50 text-emerald-700',
   processing: 'border-amber-200 bg-amber-50 text-amber-700',
@@ -92,13 +92,13 @@ const BADGE_STYLES: Record<WorkspaceBadgeTone, string> = {
   submitted: 'border-sky-200 bg-sky-50 text-sky-700',
   tenant: 'border-fuchsia-200 bg-fuchsia-50 text-fuchsia-700',
   unacceptable: 'border-rose-700 bg-rose-700 text-white',
-  uploaded: 'border-slate-200 bg-slate-100 text-slate-700',
+  uploaded: 'border-zinc-200 bg-zinc-100 text-zinc-700',
   warning: 'border-amber-200 bg-amber-50 text-amber-700',
 }
 
 const METRIC_STYLES: Record<WorkspaceAccentTone, string> = {
   danger: 'border-rose-200 bg-rose-50/80 text-rose-700',
-  default: 'border-slate-200 bg-slate-50/80 text-slate-950',
+  default: 'border-zinc-200 bg-zinc-50/80 text-zinc-950',
   info: 'border-sky-200 bg-sky-50/80 text-sky-700',
   landlord: 'border-sky-200 bg-sky-50/80 text-sky-700',
   shared: 'border-orange-200 bg-orange-50/80 text-orange-700',
@@ -109,7 +109,7 @@ const METRIC_STYLES: Record<WorkspaceAccentTone, string> = {
 
 const PROGRESS_FILL_STYLES: Record<WorkspaceAccentTone, string> = {
   danger: 'bg-rose-500',
-  default: 'bg-slate-900',
+  default: 'bg-zinc-900',
   info: 'bg-sky-500',
   landlord: 'bg-sky-500',
   shared: 'bg-orange-500',
@@ -121,7 +121,7 @@ const PROGRESS_FILL_STYLES: Record<WorkspaceAccentTone, string> = {
 const NOTICE_STYLES: Record<WorkspaceNoticeTone, string> = {
   danger: 'border-rose-200 bg-rose-50 text-rose-800',
   info: 'border-sky-200 bg-sky-50 text-sky-800',
-  neutral: 'border-slate-200 bg-slate-50 text-slate-700',
+  neutral: 'border-zinc-200 bg-zinc-50 text-zinc-700',
   success: 'border-emerald-200 bg-emerald-50 text-emerald-800',
   warning: 'border-amber-200 bg-amber-50 text-amber-800',
 }
@@ -129,42 +129,42 @@ const NOTICE_STYLES: Record<WorkspaceNoticeTone, string> = {
 const OPTION_STYLES: Record<WorkspaceOptionTone, { active: string; idle: string }> = {
   danger: {
     active: 'border-rose-300 bg-rose-50 text-rose-700',
-    idle: 'border-slate-200 bg-white text-slate-500 hover:border-rose-200 hover:text-rose-700',
+    idle: 'border-zinc-200 bg-white text-zinc-500 hover:border-rose-200 hover:text-rose-700',
   },
   default: {
-    active: 'border-slate-900 bg-slate-900 text-white',
-    idle: 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900',
+    active: 'border-zinc-900 bg-zinc-900 text-white',
+    idle: 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:text-zinc-900',
   },
   landlord: {
     active: 'border-sky-300 bg-sky-50 text-sky-700',
-    idle: 'border-slate-200 bg-white text-slate-500 hover:border-sky-200 hover:text-sky-700',
+    idle: 'border-zinc-200 bg-white text-zinc-500 hover:border-sky-200 hover:text-sky-700',
   },
   neutral: {
-    active: 'border-slate-300 bg-slate-100 text-slate-700',
-    idle: 'border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:text-slate-900',
+    active: 'border-zinc-300 bg-zinc-100 text-zinc-700',
+    idle: 'border-zinc-200 bg-white text-zinc-500 hover:border-zinc-300 hover:text-zinc-900',
   },
   shared: {
     active: 'border-orange-300 bg-orange-50 text-orange-700',
-    idle: 'border-slate-200 bg-white text-slate-500 hover:border-orange-200 hover:text-orange-700',
+    idle: 'border-zinc-200 bg-white text-zinc-500 hover:border-orange-200 hover:text-orange-700',
   },
   success: {
     active: 'border-emerald-300 bg-emerald-50 text-emerald-700',
-    idle: 'border-slate-200 bg-white text-slate-500 hover:border-emerald-200 hover:text-emerald-700',
+    idle: 'border-zinc-200 bg-white text-zinc-500 hover:border-emerald-200 hover:text-emerald-700',
   },
   tenant: {
     active: 'border-fuchsia-300 bg-fuchsia-50 text-fuchsia-700',
-    idle: 'border-slate-200 bg-white text-slate-500 hover:border-fuchsia-200 hover:text-fuchsia-700',
+    idle: 'border-zinc-200 bg-white text-zinc-500 hover:border-fuchsia-200 hover:text-fuchsia-700',
   },
   warning: {
     active: 'border-amber-300 bg-amber-50 text-amber-700',
-    idle: 'border-slate-200 bg-white text-slate-500 hover:border-amber-200 hover:text-amber-700',
+    idle: 'border-zinc-200 bg-white text-zinc-500 hover:border-amber-200 hover:text-amber-700',
   },
 }
 
 const ACTION_BUTTON_STYLES: Record<WorkspaceButtonTone, string> = {
   danger: 'border-rose-200 bg-white text-rose-700 hover:bg-rose-50',
-  primary: 'border-slate-900 bg-slate-900 text-white hover:border-slate-800 hover:bg-slate-800',
-  secondary: 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50',
+  primary: 'border-zinc-900 bg-zinc-900 text-white hover:border-slate-800 hover:bg-zinc-800',
+  secondary: 'border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50',
   success: 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100',
 }
 
@@ -233,19 +233,19 @@ export function WorkspaceMetricCard({
   tone?: WorkspaceAccentTone
   value: ReactNode
 }) {
-  const valueClassName = tone === 'default' ? 'text-slate-950' : METRIC_STYLES[tone].split(' ').at(-1) ?? 'text-slate-950'
+  const valueClassName = tone === 'default' ? 'text-zinc-950' : METRIC_STYLES[tone].split(' ').at(-1) ?? 'text-zinc-950'
 
   return (
     <div
       className={cn(
-        'rounded-[20px] border px-4 py-4 shadow-[0_6px_18px_rgba(15,23,42,0.03)]',
+        'rounded-xl border px-4 py-4 shadow-[0_1px_3px_rgba(0,0,0,0.03)]',
         tone === 'default' ? METRIC_STYLES.default : METRIC_STYLES[tone],
         className
       )}
     >
-      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">{label}</p>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">{label}</p>
       <div className={cn('mt-3 text-[1.55rem] font-semibold tracking-[-0.04em]', valueClassName)}>{value}</div>
-      {detail ? <div className="mt-2 text-sm leading-6 text-slate-600">{detail}</div> : null}
+      {detail ? <div className="mt-2 text-sm leading-6 text-zinc-600">{detail}</div> : null}
     </div>
   )
 }
@@ -274,19 +274,19 @@ export function WorkspaceProgressBar({
   return (
     <div className={cn('space-y-2', className)}>
       {label || valueLabel ? (
-        <div className="flex items-center justify-between gap-3 text-sm text-slate-600">
+        <div className="flex items-center justify-between gap-3 text-sm text-zinc-600">
           <div>{label}</div>
-          {valueLabel ? <div className="text-xs font-medium text-slate-500">{valueLabel}</div> : null}
+          {valueLabel ? <div className="text-xs font-medium text-zinc-500">{valueLabel}</div> : null}
         </div>
       ) : null}
       <div className="flex items-center gap-3">
-        <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-slate-100">
+        <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-zinc-100">
           <div
             className={cn('h-full rounded-full transition-[width]', PROGRESS_FILL_STYLES[tone])}
             style={{ width: `${percentage}%` }}
           />
         </div>
-        {showPercentage ? <span className="min-w-10 text-right text-xs text-slate-500">{percentage}%</span> : null}
+        {showPercentage ? <span className="min-w-10 text-right text-xs text-zinc-500">{percentage}%</span> : null}
       </div>
     </div>
   )
@@ -300,7 +300,7 @@ export function WorkspaceSectionTitle({
   className?: string
 }) {
   return (
-    <h3 className={cn('text-sm font-semibold tracking-[-0.02em] text-slate-950', className)}>
+    <h3 className={cn('text-sm font-semibold tracking-[-0.02em] text-zinc-950', className)}>
       {children}
     </h3>
   )
@@ -322,7 +322,7 @@ export function WorkspaceNotice({
   tone?: WorkspaceNoticeTone
 }) {
   return (
-    <div className={cn('rounded-[18px] border px-4 py-4', NOTICE_STYLES[tone], className)}>
+    <div className={cn('rounded-xl border px-4 py-4', NOTICE_STYLES[tone], className)}>
       <div className="flex items-start gap-3">
         {icon ? <div className="mt-0.5 shrink-0">{icon}</div> : null}
         <div className="min-w-0 flex-1">
@@ -351,7 +351,7 @@ export function WorkspaceTabBar<TTab extends string>({
   return (
     <div
       aria-label={ariaLabel}
-      className={cn('flex gap-2 overflow-x-auto border-b border-slate-200 pb-0', className)}
+      className={cn('flex gap-2 overflow-x-auto border-b border-zinc-200 pb-0', className)}
       role="tablist"
     >
       {items.map((item) => {
@@ -364,8 +364,8 @@ export function WorkspaceTabBar<TTab extends string>({
             className={cn(
               'inline-flex min-h-11 items-center gap-2 border-b-2 px-1 pb-3 pt-2 text-sm font-medium whitespace-nowrap transition',
               selected
-                ? 'border-slate-900 text-slate-950'
-                : 'border-transparent text-slate-500 hover:text-slate-900'
+                ? 'border-zinc-900 text-zinc-950'
+                : 'border-transparent text-zinc-500 hover:text-zinc-900'
             )}
             onClick={() => onChange(item.id)}
             role="tab"
@@ -396,7 +396,7 @@ export function WorkspaceTable({
   tableClassName?: string
 }) {
   return (
-    <DataTable className={cn('rounded-[20px] border-slate-200', className)}>
+    <DataTable className={cn('rounded-xl border-zinc-200', className)}>
       <table className={cn('w-full border-collapse text-sm', tableClassName)}>{children}</table>
     </DataTable>
   )
@@ -413,7 +413,7 @@ export function WorkspaceTableHeaderCell({
   return (
     <th
       className={cn(
-        'bg-slate-50 px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500',
+        'bg-zinc-50 px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500',
         align === 'center' ? 'text-center' : align === 'right' ? 'text-right' : 'text-left',
         className
       )}
@@ -440,14 +440,14 @@ export function WorkspaceTableCell({
         'px-4 py-3 text-sm',
         align === 'center' ? 'text-center' : align === 'right' ? 'text-right' : 'text-left',
         emphasis === 'strong'
-          ? 'font-semibold text-slate-950'
+          ? 'font-semibold text-zinc-950'
           : emphasis === 'muted'
-            ? 'text-slate-500'
+            ? 'text-zinc-500'
             : emphasis === 'danger'
               ? 'text-rose-700'
               : emphasis === 'mono'
-                ? 'font-mono text-[13px] text-slate-700'
-                : 'text-slate-700',
+                ? 'font-mono text-[13px] text-zinc-700'
+                : 'text-zinc-700',
         className
       )}
       {...props}
@@ -471,9 +471,9 @@ export function WorkspaceOptionButton({
   return (
     <button
       className={cn(
-        'inline-flex min-h-10 items-center justify-center rounded-[14px] border px-4 py-2 text-sm font-medium transition',
+        'inline-flex min-h-10 items-center justify-center rounded-lg border px-4 py-2 text-sm font-medium transition',
         selected ? toneStyles.active : toneStyles.idle,
-        props.disabled ? 'cursor-not-allowed opacity-60 hover:border-slate-200 hover:text-inherit' : null,
+        props.disabled ? 'cursor-not-allowed opacity-60 hover:border-zinc-200 hover:text-inherit' : null,
         className
       )}
       type="button"
@@ -502,9 +502,9 @@ export function WorkspaceSelectableCard({
   return (
     <button
       className={cn(
-        'w-full rounded-[20px] border px-5 py-5 text-left shadow-[0_6px_18px_rgba(15,23,42,0.03)] transition',
+        'w-full rounded-xl border px-5 py-5 text-left shadow-[0_1px_3px_rgba(0,0,0,0.03)] transition',
         selected ? toneStyles.active : cn('bg-white', toneStyles.idle),
-        props.disabled ? 'cursor-not-allowed opacity-60 hover:border-slate-200 hover:text-inherit' : null,
+        props.disabled ? 'cursor-not-allowed opacity-60 hover:border-zinc-200 hover:text-inherit' : null,
         className
       )}
       type="button"
@@ -529,8 +529,8 @@ export function WorkspaceActionButton({
   return (
     <button
       className={cn(
-        'inline-flex min-h-10 items-center justify-center gap-2 rounded-[14px] border px-4 py-2 text-sm font-medium transition',
-        'disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-500',
+        'inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition',
+        'disabled:cursor-not-allowed disabled:border-zinc-200 disabled:bg-zinc-100 disabled:text-zinc-500',
         ACTION_BUTTON_STYLES[tone],
         className
       )}
@@ -553,7 +553,7 @@ export function WorkspaceFieldLabel({
 }) {
   return (
     <label
-      className={cn('block text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500', className)}
+      className={cn('block text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500', className)}
       htmlFor={htmlFor}
     >
       {children}
@@ -568,7 +568,7 @@ export function WorkspaceTextInput({
   return (
     <input
       className={cn(
-        'h-11 w-full rounded-[16px] border border-slate-200 bg-white px-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500',
+        'h-11 w-full rounded-lg border border-zinc-200 bg-white px-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-slate-400 disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-500',
         className
       )}
       {...props}
@@ -583,7 +583,7 @@ export function WorkspaceTextarea({
   return (
     <textarea
       className={cn(
-        'min-h-32 w-full rounded-[16px] border border-slate-200 bg-white px-4 py-3 text-sm leading-6 text-slate-900 placeholder:text-slate-400 focus:border-slate-400 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500',
+        'min-h-32 w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm leading-6 text-zinc-900 placeholder:text-zinc-400 focus:border-slate-400 disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-500',
         className
       )}
       {...props}
@@ -598,7 +598,7 @@ export function WorkspaceSelect({
   return (
     <select
       className={cn(
-        'h-11 w-full rounded-[16px] border border-slate-200 bg-white px-4 text-sm text-slate-900 focus:border-slate-400 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500',
+        'h-11 w-full rounded-lg border border-zinc-200 bg-white px-4 text-sm text-zinc-900 focus:border-slate-400 disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-500',
         className
       )}
       {...props}
@@ -612,7 +612,7 @@ export function WorkspaceTableRow({
   ...props
 }: HTMLAttributes<HTMLTableRowElement>) {
   return (
-    <tr className={cn('border-t border-slate-200 first:border-t-0', className)} {...props}>
+    <tr className={cn('border-t border-zinc-200 first:border-t-0', className)} {...props}>
       {children}
     </tr>
   )

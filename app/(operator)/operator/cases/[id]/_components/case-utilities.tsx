@@ -152,9 +152,9 @@ export function CaseUtilities({ data }: { data: OperatorCheckoutWorkspaceData })
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
         <SectionCard className="px-6 py-6 md:px-7">
-          <div className="flex flex-col gap-2 border-b border-slate-200 pb-5">
+          <div className="flex flex-col gap-2 border-b border-zinc-200 pb-5">
             <WorkspaceSectionTitle>Utility readings</WorkspaceSectionTitle>
-            <p className="text-sm leading-6 text-slate-600">
+            <p className="text-sm leading-6 text-zinc-600">
               Meter details captured for the structured checkout workspace.
             </p>
           </div>
@@ -242,16 +242,16 @@ export function CaseUtilities({ data }: { data: OperatorCheckoutWorkspaceData })
             valueLabel={`${passedComplianceItems}/${data.compliance.length}`}
           />
 
-          <div className="space-y-3 border-t border-slate-200 pt-4">
+          <div className="space-y-3 border-t border-zinc-200 pt-4">
             <div className="flex items-start justify-between gap-4">
-              <dt className="text-sm text-slate-500">Council notified</dt>
-              <dd className="text-right text-sm font-semibold text-slate-950">
+              <dt className="text-sm text-zinc-500">Council notified</dt>
+              <dd className="text-right text-sm font-semibold text-zinc-950">
                 {data.councilTax?.councilNotified ? 'Yes' : data.councilTax ? 'No' : 'Not recorded'}
               </dd>
             </div>
             <div className="flex items-start justify-between gap-4">
-              <dt className="text-sm text-slate-500">Parking status</dt>
-              <dd className="text-right text-sm font-semibold text-slate-950">
+              <dt className="text-sm text-zinc-500">Parking status</dt>
+              <dd className="text-right text-sm font-semibold text-zinc-950">
                 {data.parking ? formatEnumLabel(data.parking.status) : 'Not recorded'}
               </dd>
             </div>
@@ -261,9 +261,9 @@ export function CaseUtilities({ data }: { data: OperatorCheckoutWorkspaceData })
 
       <div className="grid gap-6 xl:grid-cols-2">
         <SectionCard className="px-6 py-6 md:px-7">
-          <div className="flex flex-col gap-2 border-b border-slate-200 pb-5">
+          <div className="flex flex-col gap-2 border-b border-zinc-200 pb-5">
             <WorkspaceSectionTitle>Keys & parking</WorkspaceSectionTitle>
-            <p className="text-sm leading-6 text-slate-600">
+            <p className="text-sm leading-6 text-zinc-600">
               Access items and parking handover status for the property.
             </p>
           </div>
@@ -302,8 +302,8 @@ export function CaseUtilities({ data }: { data: OperatorCheckoutWorkspaceData })
               />
             )}
 
-            <div className="rounded-[20px] border border-slate-200 bg-slate-50/70 px-5 py-5">
-              <p className="text-sm font-semibold tracking-[-0.02em] text-slate-950">Parking</p>
+            <div className="rounded-xl border border-zinc-200 bg-zinc-50/70 px-5 py-5">
+              <p className="text-sm font-semibold tracking-[-0.02em] text-zinc-950">Parking</p>
               {data.parking ? (
                 <div className="mt-4 space-y-3">
                   <div className="flex flex-wrap items-center gap-2">
@@ -317,21 +317,21 @@ export function CaseUtilities({ data }: { data: OperatorCheckoutWorkspaceData })
                   </div>
                   <dl className="space-y-3">
                     <div className="flex items-start justify-between gap-4">
-                      <dt className="text-sm text-slate-500">Permit number</dt>
-                      <dd className="text-right text-sm font-semibold text-slate-950">
+                      <dt className="text-sm text-zinc-500">Permit number</dt>
+                      <dd className="text-right text-sm font-semibold text-zinc-950">
                         {data.parking.permitNumber || 'Not recorded'}
                       </dd>
                     </div>
                     <div className="flex items-start justify-between gap-4">
-                      <dt className="text-sm text-slate-500">Updated</dt>
-                      <dd className="text-right text-sm font-semibold text-slate-950">
+                      <dt className="text-sm text-zinc-500">Updated</dt>
+                      <dd className="text-right text-sm font-semibold text-zinc-950">
                         {formatDate(data.parking.updatedAt)}
                       </dd>
                     </div>
                   </dl>
                 </div>
               ) : (
-                <p className="mt-3 text-sm leading-6 text-slate-600">
+                <p className="mt-3 text-sm leading-6 text-zinc-600">
                   No parking handover record has been captured for this case.
                 </p>
               )}
@@ -340,9 +340,9 @@ export function CaseUtilities({ data }: { data: OperatorCheckoutWorkspaceData })
         </SectionCard>
 
         <SectionCard className="px-6 py-6 md:px-7">
-          <div className="flex flex-col gap-2 border-b border-slate-200 pb-5">
+          <div className="flex flex-col gap-2 border-b border-zinc-200 pb-5">
             <WorkspaceSectionTitle>Safety & compliance</WorkspaceSectionTitle>
-            <p className="text-sm leading-6 text-slate-600">
+            <p className="text-sm leading-6 text-zinc-600">
               Detector testing and handover compliance captured during checkout.
             </p>
           </div>
@@ -429,9 +429,9 @@ export function CaseUtilities({ data }: { data: OperatorCheckoutWorkspaceData })
       </div>
 
       <SectionCard className="px-6 py-6 md:px-7">
-        <div className="flex flex-col gap-2 border-b border-slate-200 pb-5">
+        <div className="flex flex-col gap-2 border-b border-zinc-200 pb-5">
           <WorkspaceSectionTitle>Council tax handover</WorkspaceSectionTitle>
-          <p className="text-sm leading-6 text-slate-600">
+          <p className="text-sm leading-6 text-zinc-600">
             Council notification status captured as part of the checkout offboarding workflow.
           </p>
         </div>

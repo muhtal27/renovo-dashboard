@@ -226,7 +226,7 @@ export function CaseDefects({ data }: { data: OperatorCheckoutWorkspaceData }) {
           <div className="min-w-0">
             <div className="flex flex-col gap-2">
               <WorkspaceSectionTitle>Defect queue</WorkspaceSectionTitle>
-              <p className="text-sm leading-6 text-slate-600">
+              <p className="text-sm leading-6 text-zinc-600">
                 Structured checkout defects ordered by financial exposure so operators can review liability and evidence impact.
               </p>
             </div>
@@ -309,12 +309,12 @@ export function CaseDefects({ data }: { data: OperatorCheckoutWorkspaceData }) {
                       </div>
 
                       <div className="mt-4 flex items-center justify-between gap-4 text-sm">
-                        <span className="text-slate-500">
+                        <span className="text-zinc-500">
                           {defect.aiSuggestedLiability
                             ? `AI ${formatEnumLabel(defect.aiSuggestedLiability).toLowerCase()}`
                             : 'No AI suggestion'}
                         </span>
-                        <span className="font-semibold text-slate-950">{getCostLabel(defect)}</span>
+                        <span className="font-semibold text-zinc-950">{getCostLabel(defect)}</span>
                       </div>
                     </WorkspaceSelectableCard>
                   )
@@ -354,19 +354,19 @@ export function CaseDefects({ data }: { data: OperatorCheckoutWorkspaceData }) {
                   />
                 </div>
 
-                <div className="space-y-3 border-t border-slate-200 pt-4">
+                <div className="space-y-3 border-t border-zinc-200 pt-4">
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
                       Description
                     </p>
-                    <p className="mt-2 text-sm leading-6 text-slate-700 [overflow-wrap:anywhere]">
+                    <p className="mt-2 text-sm leading-6 text-zinc-700 [overflow-wrap:anywhere]">
                       {selectedDefect.description || 'No description recorded.'}
                     </p>
                   </div>
 
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
                         Current condition
                       </p>
                       <div className="mt-2">
@@ -374,7 +374,7 @@ export function CaseDefects({ data }: { data: OperatorCheckoutWorkspaceData }) {
                       </div>
                     </div>
                     <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
                         Current cleanliness
                       </p>
                       <div className="mt-2">
@@ -384,26 +384,26 @@ export function CaseDefects({ data }: { data: OperatorCheckoutWorkspaceData }) {
                   </div>
                 </div>
 
-                <div className="space-y-3 border-t border-slate-200 pt-4">
+                <div className="space-y-3 border-t border-zinc-200 pt-4">
                   <div className="flex items-start justify-between gap-4">
-                    <dt className="text-sm text-slate-500">Estimated cost</dt>
-                    <dd className="text-right text-sm font-semibold text-slate-950">
+                    <dt className="text-sm text-zinc-500">Estimated cost</dt>
+                    <dd className="text-right text-sm font-semibold text-zinc-950">
                       {selectedDefect.costEstimate == null
                         ? 'Not estimated'
                         : formatCurrency(selectedDefect.costEstimate)}
                     </dd>
                   </div>
                   <div className="flex items-start justify-between gap-4">
-                    <dt className="text-sm text-slate-500">Adjusted cost</dt>
-                    <dd className="text-right text-sm font-semibold text-slate-950">
+                    <dt className="text-sm text-zinc-500">Adjusted cost</dt>
+                    <dd className="text-right text-sm font-semibold text-zinc-950">
                       {selectedDefect.costAdjusted == null
                         ? 'Not adjusted'
                         : formatCurrency(selectedDefect.costAdjusted)}
                     </dd>
                   </div>
                   <div className="flex items-start justify-between gap-4">
-                    <dt className="text-sm text-slate-500">Review updated</dt>
-                    <dd className="text-right text-sm font-semibold text-slate-950">
+                    <dt className="text-sm text-zinc-500">Review updated</dt>
+                    <dd className="text-right text-sm font-semibold text-zinc-950">
                       {selectedDefect.reviewedAt
                         ? formatDateTime(selectedDefect.reviewedAt)
                         : 'Awaiting review'}
@@ -411,9 +411,9 @@ export function CaseDefects({ data }: { data: OperatorCheckoutWorkspaceData }) {
                   </div>
                 </div>
 
-                <div className="space-y-3 border-t border-slate-200 pt-4">
+                <div className="space-y-3 border-t border-zinc-200 pt-4">
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
                       AI suggestion
                     </p>
                     <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -433,18 +433,18 @@ export function CaseDefects({ data }: { data: OperatorCheckoutWorkspaceData }) {
                       ) : null}
                     </div>
                     {selectedDefect.aiReasoning ? (
-                      <p className="mt-3 text-sm leading-6 text-slate-600 [overflow-wrap:anywhere]">
+                      <p className="mt-3 text-sm leading-6 text-zinc-600 [overflow-wrap:anywhere]">
                         {selectedDefect.aiReasoning}
                       </p>
                     ) : (
-                      <p className="mt-3 text-sm leading-6 text-slate-500">
+                      <p className="mt-3 text-sm leading-6 text-zinc-500">
                         No AI reasoning has been recorded for this defect yet.
                       </p>
                     )}
                   </div>
 
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
                       Operator liability
                     </p>
                     <div className="mt-2">
@@ -471,9 +471,9 @@ export function CaseDefects({ data }: { data: OperatorCheckoutWorkspaceData }) {
       </SectionCard>
 
       <SectionCard className="px-6 py-6 md:px-7">
-        <div className="flex flex-col gap-2 border-b border-slate-200 pb-5">
+        <div className="flex flex-col gap-2 border-b border-zinc-200 pb-5">
           <WorkspaceSectionTitle>Room exposure</WorkspaceSectionTitle>
-          <p className="text-sm leading-6 text-slate-600">
+          <p className="text-sm leading-6 text-zinc-600">
             Room-level defect concentration and exposure to support later analysis workflows.
           </p>
         </div>
@@ -536,22 +536,22 @@ export function CaseDefects({ data }: { data: OperatorCheckoutWorkspaceData }) {
               valueLabel={`${aiCoverageCount}/${data.defects.length}`}
             />
 
-            <div className="space-y-3 border-t border-slate-200 pt-4">
+            <div className="space-y-3 border-t border-zinc-200 pt-4">
               <div className="flex items-start justify-between gap-4">
-                <dt className="text-sm text-slate-500">Tenant exposure</dt>
-                <dd className="text-right text-sm font-semibold text-slate-950">
+                <dt className="text-sm text-zinc-500">Tenant exposure</dt>
+                <dd className="text-right text-sm font-semibold text-zinc-950">
                   {formatCurrency(tenantExposure)}
                 </dd>
               </div>
               <div className="flex items-start justify-between gap-4">
-                <dt className="text-sm text-slate-500">Shared exposure</dt>
-                <dd className="text-right text-sm font-semibold text-slate-950">
+                <dt className="text-sm text-zinc-500">Shared exposure</dt>
+                <dd className="text-right text-sm font-semibold text-zinc-950">
                   {formatCurrency(sharedExposure)}
                 </dd>
               </div>
               <div className="flex items-start justify-between gap-4">
-                <dt className="text-sm text-slate-500">Landlord exposure</dt>
-                <dd className="text-right text-sm font-semibold text-slate-950">
+                <dt className="text-sm text-zinc-500">Landlord exposure</dt>
+                <dd className="text-right text-sm font-semibold text-zinc-950">
                   {formatCurrency(landlordExposure)}
                 </dd>
               </div>

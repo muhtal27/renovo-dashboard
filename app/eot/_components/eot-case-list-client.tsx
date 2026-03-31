@@ -374,7 +374,7 @@ export function EotCaseListClient({
             <button
               type="button"
               onClick={() => setCreateOpen((current) => !current)}
-              className="inline-flex items-center gap-2 rounded-[14px] border border-slate-900 bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
+              className="inline-flex items-center gap-2 rounded-lg border border-zinc-900 bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800"
             >
               <Plus className="h-4 w-4" />
               {createOpen ? 'Close intake' : 'New checkout'}
@@ -382,7 +382,7 @@ export function EotCaseListClient({
             <button
               type="button"
               onClick={() => void refreshCases()}
-              className="inline-flex items-center gap-2 rounded-[14px] border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:text-slate-950"
+              className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:text-zinc-950"
             >
               <RefreshCcw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
               Refresh
@@ -429,76 +429,76 @@ export function EotCaseListClient({
           <form className="mt-6 grid gap-4" onSubmit={handleCreateCase}>
             <div className="grid gap-4 xl:grid-cols-2">
               <label className="text-sm">
-                <span className="font-medium text-slate-700">Property ID</span>
+                <span className="font-medium text-zinc-700">Property ID</span>
                 <input
                   required
                   value={formState.propertyId}
                   onChange={(event) =>
                     setFormState((current) => ({ ...current, propertyId: event.target.value }))
                   }
-                  className="mt-2 h-12 w-full rounded-[16px] border border-slate-200 bg-[#f8fafc] px-4 text-slate-900"
+                  className="mt-2 h-12 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-4 text-zinc-900"
                   placeholder="UUID from the live property record"
                 />
               </label>
               <label className="text-sm">
-                <span className="font-medium text-slate-700">Tenant name</span>
+                <span className="font-medium text-zinc-700">Tenant name</span>
                 <input
                   required
                   value={formState.tenantName}
                   onChange={(event) =>
                     setFormState((current) => ({ ...current, tenantName: event.target.value }))
                   }
-                  className="mt-2 h-12 w-full rounded-[16px] border border-slate-200 bg-[#f8fafc] px-4 text-slate-900"
+                  className="mt-2 h-12 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-4 text-zinc-900"
                   placeholder="Primary tenancy contact"
                 />
               </label>
               <label className="text-sm">
-                <span className="font-medium text-slate-700">Tenant email</span>
+                <span className="font-medium text-zinc-700">Tenant email</span>
                 <input
                   type="email"
                   value={formState.tenantEmail}
                   onChange={(event) =>
                     setFormState((current) => ({ ...current, tenantEmail: event.target.value }))
                   }
-                  className="mt-2 h-12 w-full rounded-[16px] border border-slate-200 bg-[#f8fafc] px-4 text-slate-900"
+                  className="mt-2 h-12 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-4 text-zinc-900"
                   placeholder="tenant@example.com"
                 />
               </label>
               <label className="text-sm">
-                <span className="font-medium text-slate-700">Deposit amount</span>
+                <span className="font-medium text-zinc-700">Deposit amount</span>
                 <input
                   value={formState.depositAmount}
                   onChange={(event) =>
                     setFormState((current) => ({ ...current, depositAmount: event.target.value }))
                   }
-                  className="mt-2 h-12 w-full rounded-[16px] border border-slate-200 bg-[#f8fafc] px-4 text-slate-900"
+                  className="mt-2 h-12 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-4 text-zinc-900"
                   placeholder="1200.00"
                 />
               </label>
               <label className="text-sm">
-                <span className="font-medium text-slate-700">Start date</span>
+                <span className="font-medium text-zinc-700">Start date</span>
                 <input
                   type="date"
                   value={formState.startDate}
                   onChange={(event) =>
                     setFormState((current) => ({ ...current, startDate: event.target.value }))
                   }
-                  className="mt-2 h-12 w-full rounded-[16px] border border-slate-200 bg-[#f8fafc] px-4 text-slate-900"
+                  className="mt-2 h-12 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-4 text-zinc-900"
                 />
               </label>
               <label className="text-sm">
-                <span className="font-medium text-slate-700">End date</span>
+                <span className="font-medium text-zinc-700">End date</span>
                 <input
                   type="date"
                   value={formState.endDate}
                   onChange={(event) =>
                     setFormState((current) => ({ ...current, endDate: event.target.value }))
                   }
-                  className="mt-2 h-12 w-full rounded-[16px] border border-slate-200 bg-[#f8fafc] px-4 text-slate-900"
+                  className="mt-2 h-12 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-4 text-zinc-900"
                 />
               </label>
               <label className="text-sm">
-                <span className="font-medium text-slate-700">Priority</span>
+                <span className="font-medium text-zinc-700">Priority</span>
                 <select
                   value={formState.priority}
                   onChange={(event) =>
@@ -507,7 +507,7 @@ export function EotCaseListClient({
                       priority: event.target.value as EotCasePriority,
                     }))
                   }
-                  className="mt-2 h-12 w-full rounded-[16px] border border-slate-200 bg-[#f8fafc] px-4 text-slate-900"
+                  className="mt-2 h-12 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-4 text-zinc-900"
                 >
                   {CASE_PRIORITIES.map((priority) => (
                     <option key={priority} value={priority}>
@@ -517,7 +517,7 @@ export function EotCaseListClient({
                 </select>
               </label>
               <label className="text-sm">
-                <span className="font-medium text-slate-700">Initial status</span>
+                <span className="font-medium text-zinc-700">Initial status</span>
                 <select
                   value={formState.status}
                   onChange={(event) =>
@@ -526,7 +526,7 @@ export function EotCaseListClient({
                       status: event.target.value as EotCaseStatus,
                     }))
                   }
-                  className="mt-2 h-12 w-full rounded-[16px] border border-slate-200 bg-[#f8fafc] px-4 text-slate-900"
+                  className="mt-2 h-12 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-4 text-zinc-900"
                 >
                   {CASE_STATUSES.map((status) => (
                     <option key={status} value={status}>
@@ -538,31 +538,31 @@ export function EotCaseListClient({
             </div>
 
             <label className="text-sm">
-              <span className="font-medium text-slate-700">Checkout summary</span>
+              <span className="font-medium text-zinc-700">Checkout summary</span>
               <textarea
                 value={formState.summary}
                 onChange={(event) =>
                   setFormState((current) => ({ ...current, summary: event.target.value }))
                 }
-                className="mt-2 min-h-28 w-full rounded-[16px] border border-slate-200 bg-[#f8fafc] px-4 py-3 text-slate-900"
+                className="mt-2 min-h-28 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3 text-zinc-900"
                 placeholder="What is the tenancy-end context for this checkout?"
               />
             </label>
 
             <label className="text-sm">
-              <span className="font-medium text-slate-700">Tenancy notes</span>
+              <span className="font-medium text-zinc-700">Tenancy notes</span>
               <textarea
                 value={formState.notes}
                 onChange={(event) =>
                   setFormState((current) => ({ ...current, notes: event.target.value }))
                 }
-                className="mt-2 min-h-24 w-full rounded-[16px] border border-slate-200 bg-[#f8fafc] px-4 py-3 text-slate-900"
+                className="mt-2 min-h-24 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3 text-zinc-900"
                 placeholder="Deposit scheme, move-out context, or internal tenancy notes"
               />
             </label>
 
             {createError ? (
-              <p className="rounded-[16px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+              <p className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
                 {createError}
               </p>
             ) : null}
@@ -571,11 +571,11 @@ export function EotCaseListClient({
               <button
                 type="submit"
                 disabled={createPending}
-                className="inline-flex items-center justify-center rounded-[14px] border border-slate-900 bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:opacity-60"
+                className="inline-flex items-center justify-center rounded-lg border border-zinc-900 bg-zinc-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-60"
               >
                 {createPending ? 'Creating checkout...' : 'Create checkout'}
               </button>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-zinc-500">
                 New checkouts are created against the live tenant and immediately open the workspace.
               </p>
             </div>
@@ -584,7 +584,7 @@ export function EotCaseListClient({
       ) : null}
 
       <SectionCard className="overflow-hidden">
-        <div className="sticky top-4 z-10 border-b border-slate-200 bg-white/95 px-6 py-5 backdrop-blur">
+        <div className="sticky top-4 z-10 border-b border-zinc-200 bg-white/95 px-6 py-5 backdrop-blur">
           <FilterToolbar>
             <div className="flex flex-wrap items-center gap-2">
               {[
@@ -604,7 +604,7 @@ export function EotCaseListClient({
               <select
                 value={statusFilter}
                 onChange={(event) => setStatusFilter(event.target.value as 'all' | EotCaseStatus)}
-                className="h-10 rounded-[14px] border border-slate-200 bg-white px-3 text-sm text-slate-700"
+                className="h-10 rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-700"
               >
                 <option value="all">All statuses</option>
                 {CASE_STATUSES.map((status) => (
@@ -618,7 +618,7 @@ export function EotCaseListClient({
                 onChange={(event) =>
                   setPriorityFilter(event.target.value as 'all' | EotCasePriority)
                 }
-                className="h-10 rounded-[14px] border border-slate-200 bg-white px-3 text-sm text-slate-700"
+                className="h-10 rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-700"
               >
                 <option value="all">All priorities</option>
                 {CASE_PRIORITIES.map((priority) => (
@@ -631,29 +631,29 @@ export function EotCaseListClient({
           </FilterToolbar>
 
           {selectedIds.length ? (
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-[18px] border border-slate-200 bg-[#f8fafc] px-4 py-3">
-              <p className="text-sm text-slate-700">
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
+              <p className="text-sm text-zinc-700">
                 {selectedIds.length} checkout{selectedIds.length === 1 ? '' : 's'} selected
               </p>
               <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
                   onClick={() => void handleCopySelection()}
-                  className="inline-flex items-center gap-2 rounded-[12px] border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700"
+                  className="inline-flex items-center gap-2 rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700"
                 >
                   {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                   {copied ? 'Copied IDs' : 'Copy IDs'}
                 </button>
                 <Link
                   href={`/eot/${selectedIds[0]}`}
-                  className="inline-flex items-center rounded-[12px] border border-slate-900 bg-slate-900 px-3 py-2 text-sm font-medium text-white"
+                  className="inline-flex items-center rounded-md border border-zinc-900 bg-zinc-900 px-3 py-2 text-sm font-medium text-white"
                 >
                   Open first selected
                 </Link>
                 <button
                   type="button"
                   onClick={() => setSelectedIds([])}
-                  className="inline-flex items-center rounded-[12px] border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700"
+                  className="inline-flex items-center rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700"
                 >
                   Clear
                 </button>
@@ -682,7 +682,7 @@ export function EotCaseListClient({
           ) : (
             <DataTable>
               <table className="min-w-full text-left">
-                <thead className="bg-[#f8fafc] text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                <thead className="bg-zinc-50 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
                   <tr>
                     <th className="px-4 py-3">
                       <input
@@ -700,14 +700,14 @@ export function EotCaseListClient({
                     <th className="px-4 py-3 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-200 bg-white">
+                <tbody className="divide-y divide-zinc-200 bg-white">
                   {visibleCaseRows.map(({ attention, caseItem, progress }) => {
                     const selected = selectedIds.includes(caseItem.id)
 
                     return (
                       <tr
                         key={caseItem.id}
-                        className={selected ? 'bg-slate-50/90' : 'hover:bg-slate-50/70'}
+                        className={selected ? 'bg-zinc-50/90' : 'hover:bg-zinc-50/70'}
                       >
                         <td className="px-4 py-4 align-top">
                             <input
@@ -720,17 +720,17 @@ export function EotCaseListClient({
                         <td className="px-4 py-4 align-top">
                           <div className="space-y-2">
                             <div>
-                              <p className="text-sm font-semibold text-slate-950">
+                              <p className="text-sm font-semibold text-zinc-950">
                                 {caseItem.property.name}
                               </p>
-                              <p className="mt-1 text-sm text-slate-600">{caseItem.tenant_name}</p>
+                              <p className="mt-1 text-sm text-zinc-600">{caseItem.tenant_name}</p>
                             </div>
                             <div className="flex flex-wrap items-center gap-2">
                               <StatusBadge
                                 label={caseItem.property.reference || 'Reference pending'}
                                 tone="document"
                               />
-                              <span className="text-xs font-medium uppercase tracking-[0.14em] text-slate-400">
+                              <span className="text-xs font-medium uppercase tracking-[0.08em] text-zinc-400">
                                 {caseItem.id.slice(0, 8)}
                               </span>
                             </div>
@@ -762,7 +762,7 @@ export function EotCaseListClient({
                         <td className="px-4 py-4 align-top">
                           <div className="space-y-2">
                             <StatusBadge label={attention.label} tone={attention.tone} />
-                            <p className="text-sm leading-6 text-slate-600">
+                            <p className="text-sm leading-6 text-zinc-600">
                               {caseItem.status === 'ready_for_claim'
                                 ? 'Ready for final review and submission.'
                                 : caseItem.status === 'disputed'
@@ -773,19 +773,19 @@ export function EotCaseListClient({
                         </td>
                         <td className="px-4 py-4 align-top">
                           <div className="grid gap-2">
-                            <div className="rounded-[14px] border border-slate-200 bg-[#f8fafc] px-3 py-2">
-                              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                            <div className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2">
+                              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
                                 Evidence
                               </p>
-                              <p className="mt-1 text-sm font-semibold text-slate-950">
+                              <p className="mt-1 text-sm font-semibold text-zinc-950">
                                 {caseItem.evidence_count}
                               </p>
                             </div>
-                            <div className="rounded-[14px] border border-slate-200 bg-[#f8fafc] px-3 py-2">
-                              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                            <div className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2">
+                              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
                                 Issues
                               </p>
-                              <p className="mt-1 text-sm font-semibold text-slate-950">
+                              <p className="mt-1 text-sm font-semibold text-zinc-950">
                                 {caseItem.issue_count}
                               </p>
                             </div>
@@ -793,24 +793,24 @@ export function EotCaseListClient({
                         </td>
                         <td className="px-4 py-4 align-top">
                           <div>
-                            <p className="text-sm font-medium text-slate-950">
+                            <p className="text-sm font-medium text-zinc-950">
                               {formatDateTime(caseItem.last_activity_at)}
                             </p>
-                            <p className="mt-1 text-sm text-slate-500">Latest checkout activity</p>
+                            <p className="mt-1 text-sm text-zinc-500">Latest checkout activity</p>
                           </div>
                         </td>
                         <td className="px-4 py-4 align-top text-right">
                           <div className="flex flex-col items-end gap-2">
                             <Link
                               href={`/operator/cases/${caseItem.id}`}
-                              className="inline-flex items-center rounded-[12px] border border-slate-900 bg-slate-900 px-3 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
+                              className="inline-flex items-center rounded-md border border-zinc-900 bg-zinc-900 px-3 py-2 text-sm font-medium text-white transition hover:bg-zinc-800"
                             >
                               Open workspace
                             </Link>
                             <button
                               type="button"
                               onClick={() => toggleSelection(caseItem.id)}
-                              className="inline-flex items-center rounded-[12px] border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700"
+                              className="inline-flex items-center rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700"
                             >
                               {selected ? 'Deselect' : 'Select'}
                             </button>

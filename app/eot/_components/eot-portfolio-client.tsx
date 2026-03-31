@@ -64,15 +64,15 @@ function DistributionBar({
               ? 'bg-amber-500'
               : item.tone === 'accent'
                 ? 'bg-emerald-500'
-                : 'bg-slate-900'
+                : 'bg-zinc-900'
 
         return (
           <div key={item.label}>
-            <div className="mb-1 flex items-center justify-between gap-3 text-sm text-slate-600">
+            <div className="mb-1 flex items-center justify-between gap-3 text-sm text-zinc-600">
               <span>{item.label}</span>
-              <span className="font-medium text-slate-900">{item.value}</span>
+              <span className="font-medium text-zinc-900">{item.value}</span>
             </div>
-            <div className="h-2.5 overflow-hidden rounded-full bg-slate-100">
+            <div className="h-2.5 overflow-hidden rounded-full bg-zinc-100">
               <div className={`h-full rounded-full ${color}`} style={{ width: `${width}%` }} />
             </div>
           </div>
@@ -260,7 +260,7 @@ export function EotPortfolioClient({
           action={
             <Link
               href="/eot"
-              className="inline-flex items-center rounded-[14px] border border-slate-900 bg-slate-900 px-4 py-2.5 text-sm font-medium text-white"
+              className="inline-flex items-center rounded-lg border border-zinc-900 bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white"
             >
               Open checkouts
             </Link>
@@ -302,7 +302,7 @@ export function EotPortfolioClient({
                   <Link
                     key={workspace.case.id}
                     href={`/operator/cases/${workspace.case.id}`}
-                    className="block rounded-[20px] border border-slate-200 bg-white px-5 py-5 transition hover:border-slate-300 hover:bg-slate-50"
+                    className="block rounded-xl border border-zinc-200 bg-white px-5 py-5 transition hover:border-zinc-300 hover:bg-zinc-50"
                   >
                     <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                       <div className="min-w-0">
@@ -311,13 +311,13 @@ export function EotPortfolioClient({
                           <StatusBadge label={formatEnumLabel(workspace.case.status)} tone={workspace.case.status} />
                           <StatusBadge label={readiness.label} tone={readiness.tone === 'ready' ? 'ready_for_claim' : readiness.tone === 'attention' ? 'attention' : 'document'} />
                         </div>
-                        <p className="mt-3 text-base font-semibold text-slate-950">{workspace.property.name}</p>
-                        <p className="mt-1 text-sm text-slate-600">{workspace.tenancy.tenant_name}</p>
-                        <p className="mt-3 text-sm leading-6 text-slate-600">
+                        <p className="mt-3 text-base font-semibold text-zinc-950">{workspace.property.name}</p>
+                        <p className="mt-1 text-sm text-zinc-600">{workspace.tenancy.tenant_name}</p>
+                        <p className="mt-3 text-sm leading-6 text-zinc-600">
                           {workspace.case.summary?.trim() || readiness.description}
                         </p>
                       </div>
-                      <div className="flex items-center gap-2 text-sm font-medium text-slate-500">
+                      <div className="flex items-center gap-2 text-sm font-medium text-zinc-500">
                         Open workspace
                         <ArrowRight className="h-4 w-4" />
                       </div>
@@ -333,12 +333,12 @@ export function EotPortfolioClient({
             description="Operational hotspots inferred from current workflow state."
           >
             {attentionQueue.slice(0, 4).map((workspace) => (
-              <div key={workspace.case.id} className="rounded-[18px] border border-slate-200 bg-white px-4 py-4">
+              <div key={workspace.case.id} className="rounded-xl border border-zinc-200 bg-white px-4 py-4">
                 <div className="flex items-start gap-3">
                   <TriangleAlert className="mt-0.5 h-4 w-4 text-amber-500" />
                   <div>
-                    <p className="text-sm font-semibold text-slate-950">{workspace.property.name}</p>
-                    <p className="mt-1 text-sm leading-6 text-slate-600">
+                    <p className="text-sm font-semibold text-zinc-950">{workspace.property.name}</p>
+                    <p className="mt-1 text-sm leading-6 text-zinc-600">
                       {workspace.case.status === 'ready_for_claim'
                         ? 'Ready for submission review and operator sign-off.'
                         : workspace.case.status === 'disputed'
@@ -454,7 +454,7 @@ export function EotPortfolioClient({
             <div className="mt-5">
               <DataTable>
                 <table className="min-w-full text-left">
-                  <thead className="bg-[#f8fafc] text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                  <thead className="bg-zinc-50 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
                     <tr>
                       <th className="px-4 py-3">Property</th>
                       <th className="px-4 py-3">Tenant</th>
@@ -463,29 +463,29 @@ export function EotPortfolioClient({
                       <th className="px-4 py-3">Workflow</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-200 bg-white">
+                  <tbody className="divide-y divide-zinc-200 bg-white">
                     {tenancyItems.map((workspace) => (
                       <tr
                         key={workspace.case.id}
-                        className={selectedTenancy?.case.id === workspace.case.id ? 'bg-slate-50/90' : 'hover:bg-slate-50/70'}
+                        className={selectedTenancy?.case.id === workspace.case.id ? 'bg-zinc-50/90' : 'hover:bg-zinc-50/70'}
                         onClick={() => setSelectedItemId(workspace.case.id)}
                       >
                         <td className="px-4 py-4">
                           <div>
-                            <p className="text-sm font-semibold text-slate-950">{workspace.property.name}</p>
-                            <p className="mt-1 text-sm text-slate-600">{workspace.property.reference || 'Reference pending'}</p>
+                            <p className="text-sm font-semibold text-zinc-950">{workspace.property.name}</p>
+                            <p className="mt-1 text-sm text-zinc-600">{workspace.property.reference || 'Reference pending'}</p>
                           </div>
                         </td>
                         <td className="px-4 py-4">
                           <div>
-                            <p className="text-sm font-medium text-slate-950">{workspace.tenancy.tenant_name}</p>
-                            <p className="mt-1 text-sm text-slate-600">{workspace.tenancy.tenant_email || 'Email not recorded'}</p>
+                            <p className="text-sm font-medium text-zinc-950">{workspace.tenancy.tenant_name}</p>
+                            <p className="mt-1 text-sm text-zinc-600">{workspace.tenancy.tenant_email || 'Email not recorded'}</p>
                           </div>
                         </td>
-                        <td className="px-4 py-4 text-sm font-medium text-slate-950">
+                        <td className="px-4 py-4 text-sm font-medium text-zinc-950">
                           {workspace.tenancy.deposit_amount ? formatCurrency(workspace.tenancy.deposit_amount) : 'Not recorded'}
                         </td>
-                        <td className="px-4 py-4 text-sm text-slate-700">
+                        <td className="px-4 py-4 text-sm text-zinc-700">
                           {formatDate(workspace.tenancy.start_date)} to {formatDate(workspace.tenancy.end_date)}
                         </td>
                         <td className="px-4 py-4">
@@ -522,7 +522,7 @@ export function EotPortfolioClient({
               />
               <Link
                 href={`/operator/cases/${selectedTenancy.case.id}`}
-                className="inline-flex items-center gap-2 rounded-[14px] border border-slate-900 bg-slate-900 px-4 py-2.5 text-sm font-medium text-white"
+                className="inline-flex items-center gap-2 rounded-lg border border-zinc-900 bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white"
               >
                 Open checkout workspace
                 <ArrowRight className="h-4 w-4" />
@@ -562,10 +562,10 @@ export function EotPortfolioClient({
                   key={issue.id}
                   type="button"
                   onClick={() => setSelectedItemId(issue.id)}
-                  className={`rounded-[18px] border px-4 py-4 text-left transition ${
+                  className={`rounded-xl border px-4 py-4 text-left transition ${
                     selectedDispute?.id === issue.id
-                      ? 'border-slate-900 bg-slate-900 text-white shadow-[0_10px_24px_rgba(15,23,42,0.16)]'
-                      : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
+                      ? 'border-zinc-900 bg-zinc-900 text-white shadow-[0_2px_8px_rgba(0,0,0,0.08)]'
+                      : 'border-zinc-200 bg-white hover:border-zinc-300 hover:bg-zinc-50'
                   }`}
                 >
                   <div className="flex flex-wrap items-center gap-2">
@@ -582,13 +582,13 @@ export function EotPortfolioClient({
                       />
                       ) : null}
                   </div>
-                  <p className={`mt-3 text-sm font-semibold ${selectedDispute?.id === issue.id ? 'text-white' : 'text-slate-950'}`}>
+                  <p className={`mt-3 text-sm font-semibold ${selectedDispute?.id === issue.id ? 'text-white' : 'text-zinc-950'}`}>
                     {issue.title}
                   </p>
-                  <p className={`mt-1 text-sm ${selectedDispute?.id === issue.id ? 'text-slate-200' : 'text-slate-600'}`}>
+                  <p className={`mt-1 text-sm ${selectedDispute?.id === issue.id ? 'text-zinc-200' : 'text-zinc-600'}`}>
                     {issue.propertyName} · {issue.tenantName}
                   </p>
-                  <p className={`mt-3 text-sm leading-6 ${selectedDispute?.id === issue.id ? 'text-slate-200' : 'text-slate-600'}`}>
+                  <p className={`mt-3 text-sm leading-6 ${selectedDispute?.id === issue.id ? 'text-zinc-200' : 'text-zinc-600'}`}>
                     {issue.description || 'No additional narrative recorded.'}
                   </p>
                 </button>
@@ -612,7 +612,7 @@ export function EotPortfolioClient({
                 />
               ) : null}
               {selectedDispute.recommendation?.rationale ? (
-                <div className="rounded-[18px] border border-slate-200 bg-white px-4 py-4 text-sm leading-6 text-slate-600">
+                <div className="rounded-xl border border-zinc-200 bg-white px-4 py-4 text-sm leading-6 text-zinc-600">
                   {selectedDispute.recommendation.rationale}
                 </div>
               ) : null}
@@ -627,7 +627,7 @@ export function EotPortfolioClient({
               </div>
               <Link
                 href={`/operator/cases/${selectedDispute.caseId}`}
-                className="inline-flex items-center gap-2 rounded-[14px] border border-slate-900 bg-slate-900 px-4 py-2.5 text-sm font-medium text-white"
+                className="inline-flex items-center gap-2 rounded-lg border border-zinc-900 bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white"
               >
                 Open checkout workspace
                 <ArrowRight className="h-4 w-4" />
@@ -664,7 +664,7 @@ export function EotPortfolioClient({
 
           <div className="mt-6 grid gap-4 xl:grid-cols-2">
             {recommendations.map((item) => (
-              <div key={item.recommendation.id} className="rounded-[20px] border border-slate-200 bg-white px-5 py-5">
+              <div key={item.recommendation.id} className="rounded-xl border border-zinc-200 bg-white px-5 py-5">
                 <div className="flex flex-wrap items-center gap-2">
                   <StatusBadge
                     label={formatEnumLabel(item.recommendation.decision)}
@@ -672,22 +672,22 @@ export function EotPortfolioClient({
                   />
                   <StatusBadge label={formatEnumLabel(item.issue.severity)} tone={item.issue.severity} />
                 </div>
-                <p className="mt-3 text-base font-semibold text-slate-950">{item.issue.title}</p>
-                <p className="mt-1 text-sm text-slate-600">
+                <p className="mt-3 text-base font-semibold text-zinc-950">{item.issue.title}</p>
+                <p className="mt-1 text-sm text-zinc-600">
                   {item.propertyName} · {item.tenantName}
                 </p>
-                <p className="mt-3 text-sm leading-6 text-slate-600">
+                <p className="mt-3 text-sm leading-6 text-zinc-600">
                   {item.recommendation.rationale || 'No recommendation rationale recorded.'}
                 </p>
                 <div className="mt-4 flex items-center justify-between gap-3">
-                  <p className="text-sm font-semibold text-slate-950">
+                  <p className="text-sm font-semibold text-zinc-950">
                     {item.recommendation.estimated_cost
                       ? formatCurrency(item.recommendation.estimated_cost)
                       : 'No estimate'}
                   </p>
                   <Link
                     href={`/operator/cases/${item.caseId}`}
-                    className="inline-flex items-center gap-2 text-sm font-medium text-slate-700 transition hover:text-slate-950"
+                    className="inline-flex items-center gap-2 text-sm font-medium text-zinc-700 transition hover:text-zinc-950"
                   >
                     Open checkout
                     <ArrowRight className="h-4 w-4" />
@@ -727,7 +727,7 @@ export function EotPortfolioClient({
               const readiness = getClaimReadiness(workspace)
 
               return (
-                <div key={workspace.case.id} className="rounded-[20px] border border-slate-200 bg-white px-5 py-5">
+                <div key={workspace.case.id} className="rounded-xl border border-zinc-200 bg-white px-5 py-5">
                   <div className="flex flex-wrap items-center gap-2">
                     <StatusBadge label={formatEnumLabel(workspace.case.status)} tone={workspace.case.status} />
                     <StatusBadge
@@ -735,16 +735,16 @@ export function EotPortfolioClient({
                       tone={readiness.tone === 'ready' ? 'ready_for_claim' : readiness.tone === 'attention' ? 'attention' : 'document'}
                     />
                   </div>
-                  <p className="mt-3 text-base font-semibold text-slate-950">{workspace.property.name}</p>
-                  <p className="mt-1 text-sm text-slate-600">{workspace.tenancy.tenant_name}</p>
-                  <p className="mt-3 text-sm leading-6 text-slate-600">{readiness.description}</p>
+                  <p className="mt-3 text-base font-semibold text-zinc-950">{workspace.property.name}</p>
+                  <p className="mt-1 text-sm text-zinc-600">{workspace.tenancy.tenant_name}</p>
+                  <p className="mt-3 text-sm leading-6 text-zinc-600">{readiness.description}</p>
                   <div className="mt-4 flex items-center justify-between gap-3">
-                    <p className="text-sm font-semibold text-slate-950">
+                    <p className="text-sm font-semibold text-zinc-950">
                       {workspace.claim ? formatCurrency(workspace.claim.total_amount) : 'No claim total yet'}
                     </p>
                     <Link
                       href={`/operator/cases/${workspace.case.id}`}
-                      className="inline-flex items-center gap-2 text-sm font-medium text-slate-700 transition hover:text-slate-950"
+                      className="inline-flex items-center gap-2 text-sm font-medium text-zinc-700 transition hover:text-zinc-950"
                     >
                       Open checkout
                       <ArrowRight className="h-4 w-4" />
@@ -775,7 +775,7 @@ export function EotPortfolioClient({
           />
           <div className="mt-5 grid gap-6 xl:grid-cols-2">
             <div>
-              <p className="mb-3 text-sm font-semibold text-slate-950">Checkout statuses</p>
+              <p className="mb-3 text-sm font-semibold text-zinc-950">Checkout statuses</p>
               <DistributionBar
                 items={Object.entries(statusBreakdown).map(([label, value]) => ({
                   label: formatEnumLabel(label),
@@ -792,7 +792,7 @@ export function EotPortfolioClient({
               />
             </div>
             <div>
-              <p className="mb-3 text-sm font-semibold text-slate-950">Issue severity</p>
+              <p className="mb-3 text-sm font-semibold text-zinc-950">Issue severity</p>
               <DistributionBar
                 items={Object.entries(issueSeverityBreakdown).map(([label, value]) => ({
                   label: formatEnumLabel(label),
@@ -816,7 +816,7 @@ export function EotPortfolioClient({
           <MetaItem label="Ready for submission" value={stats.readyForClaim} />
           <MetaItem label="Recommendations recorded" value={recommendationCount} />
           <MetaItem label="Generated claims" value={workspaces.filter((workspace) => workspace.claim).length} />
-          <div className="rounded-[18px] border border-slate-200 bg-white px-4 py-4 text-sm leading-6 text-slate-600">
+          <div className="rounded-xl border border-zinc-200 bg-white px-4 py-4 text-sm leading-6 text-zinc-600">
             Submission readiness remains live and operator-facing. These analytics are derived directly from the active checkout portfolio.
           </div>
         </DetailPanel>
@@ -830,7 +830,7 @@ export function EotPortfolioClient({
         <div className="mt-5">
           <DataTable>
             <table className="min-w-full text-left">
-              <thead className="bg-[#f8fafc] text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+              <thead className="bg-zinc-50 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
                 <tr>
                   <th className="px-4 py-3">Property</th>
                   <th className="px-4 py-3">Status</th>
@@ -841,13 +841,13 @@ export function EotPortfolioClient({
                   <th className="px-4 py-3">Last activity</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200 bg-white">
+              <tbody className="divide-y divide-zinc-200 bg-white">
                 {workspaces.map((workspace) => (
                   <tr key={workspace.case.id}>
                     <td className="px-4 py-4">
                       <div>
-                        <p className="text-sm font-semibold text-slate-950">{workspace.property.name}</p>
-                        <p className="mt-1 text-sm text-slate-600">{workspace.tenancy.tenant_name}</p>
+                        <p className="text-sm font-semibold text-zinc-950">{workspace.property.name}</p>
+                        <p className="mt-1 text-sm text-zinc-600">{workspace.tenancy.tenant_name}</p>
                       </div>
                     </td>
                     <td className="px-4 py-4">
@@ -856,12 +856,12 @@ export function EotPortfolioClient({
                     <td className="px-4 py-4">
                       <StatusBadge label={formatEnumLabel(workspace.case.priority)} tone={workspace.case.priority} />
                     </td>
-                    <td className="px-4 py-4 text-sm text-slate-700">{workspace.evidence.length}</td>
-                    <td className="px-4 py-4 text-sm text-slate-700">{workspace.issues.length}</td>
-                    <td className="px-4 py-4 text-sm font-medium text-slate-950">
+                    <td className="px-4 py-4 text-sm text-zinc-700">{workspace.evidence.length}</td>
+                    <td className="px-4 py-4 text-sm text-zinc-700">{workspace.issues.length}</td>
+                    <td className="px-4 py-4 text-sm font-medium text-zinc-950">
                       {workspace.claim ? formatCurrency(workspace.claim.total_amount) : 'Not generated'}
                     </td>
-                    <td className="px-4 py-4 text-sm text-slate-700">{formatDateTime(workspace.case.last_activity_at)}</td>
+                    <td className="px-4 py-4 text-sm text-zinc-700">{formatDateTime(workspace.case.last_activity_at)}</td>
                   </tr>
                 ))}
               </tbody>

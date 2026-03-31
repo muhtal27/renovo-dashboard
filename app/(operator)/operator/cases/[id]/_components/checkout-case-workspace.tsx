@@ -147,13 +147,13 @@ export function CheckoutCaseWorkspace({
 
   return (
     <div className="space-y-6">
-      <section className="rounded-[24px] border border-slate-200/80 bg-white px-6 py-6 md:px-7">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+      <section className="rounded-xl border border-zinc-200/80 bg-white px-6 py-6 md:px-7">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
           {`Case #${caseReference}`}
         </p>
         <div className="mt-3 flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
           <div className="min-w-0">
-            <h1 className="text-[1.7rem] font-semibold tracking-[-0.04em] text-slate-950 [overflow-wrap:anywhere]">
+            <h1 className="text-[1.7rem] font-semibold tracking-[-0.04em] text-zinc-950 [overflow-wrap:anywhere]">
               {propertyAddress}
             </h1>
             <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -162,13 +162,13 @@ export function CheckoutCaseWorkspace({
           </div>
         </div>
 
-        <dl className="mt-6 grid gap-4 border-t border-slate-200 pt-6 text-sm text-slate-600 md:grid-cols-2 xl:grid-cols-4">
+        <dl className="mt-6 grid gap-4 border-t border-zinc-200 pt-6 text-sm text-zinc-600 md:grid-cols-2 xl:grid-cols-4">
           {metadataItems.map((item) => (
             <div key={item.label} className="min-w-0">
-              <dt className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+              <dt className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
                 {item.label}
               </dt>
-              <dd className="mt-2 text-sm font-medium text-slate-950 [overflow-wrap:anywhere]">
+              <dd className="mt-2 text-sm font-medium text-zinc-950 [overflow-wrap:anywhere]">
                 {item.value}
               </dd>
             </div>
@@ -179,7 +179,7 @@ export function CheckoutCaseWorkspace({
       <section
         aria-busy={isPending}
         className={cn(
-          'overflow-hidden rounded-[24px] border border-slate-200/80 bg-white',
+          'overflow-hidden rounded-xl border border-zinc-200/80 bg-white',
           isPending ? 'opacity-80' : null
         )}
       >
@@ -191,7 +191,7 @@ export function CheckoutCaseWorkspace({
             onChange={handleTabChange}
           />
         </div>
-        <div className="border-t border-slate-200 px-6 py-6 md:px-7">
+        <div className="border-t border-zinc-200 px-6 py-6 md:px-7">
           <ActiveTabComponent data={data} />
         </div>
       </section>

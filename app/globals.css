@@ -372,7 +372,7 @@ a:focus-visible {
 .operator-app h4 {
   font-family: var(--font-dm-sans), "Segoe UI", sans-serif;
   font-weight: 600;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.03em;
 }
 
 .operator-app {
@@ -384,12 +384,12 @@ a:focus-visible {
   content: "";
   position: fixed;
   inset: 0;
-  background: #eef3f9;
+  background: #fafafa;
   z-index: -1;
 }
 
 .operator-app ::selection {
-  background: rgba(37, 99, 235, 0.16);
+  background: rgba(16, 185, 129, 0.16);
 }
 
 .marketing-frame {

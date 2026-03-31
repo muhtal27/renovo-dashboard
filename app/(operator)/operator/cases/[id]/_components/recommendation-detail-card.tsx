@@ -18,7 +18,7 @@ function getOutcomeClasses(outcome: string | null | undefined) {
     return 'border-emerald-200 bg-emerald-50/80'
   }
 
-  return 'border-slate-200 bg-slate-50/80'
+  return 'border-zinc-200 bg-zinc-50/80'
 }
 
 function getWearAndTearExplanation(issue: CaseWorkspaceIssue) {
@@ -66,13 +66,13 @@ export function RecommendationDetailCard({
 
   if (!recommendation) {
     return (
-      <div className="rounded-[18px] border border-slate-200 px-5 py-5">
+      <div className="rounded-xl border border-zinc-200 px-5 py-5">
         <div className="flex flex-wrap items-center gap-2">
           <StatusBadge label={formatEnumLabel(issue.severity)} tone={issue.severity} />
           <StatusBadge label={formatEnumLabel(issue.status)} tone={issue.status} />
         </div>
-        <p className="mt-4 text-sm font-semibold text-slate-950 [overflow-wrap:anywhere]">{issue.title}</p>
-        <p className="mt-2 text-sm text-slate-500 [overflow-wrap:anywhere]">{issue.area || 'Area not specified'}</p>
+        <p className="mt-4 text-sm font-semibold text-zinc-950 [overflow-wrap:anywhere]">{issue.title}</p>
+        <p className="mt-2 text-sm text-zinc-500 [overflow-wrap:anywhere]">{issue.area || 'Area not specified'}</p>
         <EmptyState
           title="No recommendation yet"
           body="This issue has not reached a charge outcome, rationale, or cost estimate."
@@ -83,7 +83,7 @@ export function RecommendationDetailCard({
   }
 
   return (
-    <div className={cn('rounded-[18px] border px-5 py-5', getOutcomeClasses(recommendation.decision))}>
+    <div className={cn('rounded-xl border px-5 py-5', getOutcomeClasses(recommendation.decision))}>
       <div className="flex flex-wrap items-center gap-2">
         <StatusBadge
           label={formatEnumLabel(recommendation.decision || 'pending')}
@@ -93,31 +93,31 @@ export function RecommendationDetailCard({
       </div>
 
       <div className="mt-4">
-        <p className="text-sm font-semibold text-slate-950 [overflow-wrap:anywhere]">{issue.title}</p>
-        <p className="mt-2 text-sm text-slate-600 [overflow-wrap:anywhere]">{issue.area || 'Area not specified'}</p>
+        <p className="text-sm font-semibold text-zinc-950 [overflow-wrap:anywhere]">{issue.title}</p>
+        <p className="mt-2 text-sm text-zinc-600 [overflow-wrap:anywhere]">{issue.area || 'Area not specified'}</p>
       </div>
 
       <div className="mt-5 space-y-4 border-t border-current/10 pt-5">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Rationale</p>
-          <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-700 [overflow-wrap:anywhere]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Rationale</p>
+          <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-zinc-700 [overflow-wrap:anywhere]">
             {recommendation.rationale?.trim() || 'No rationale has been recorded.'}
           </p>
         </div>
 
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Estimated cost</p>
-          <p className="mt-2 text-base font-semibold text-slate-950">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Estimated cost</p>
+          <p className="mt-2 text-base font-semibold text-zinc-950">
             {recommendation.estimated_cost ? formatCurrency(recommendation.estimated_cost) : 'Not estimated'}
           </p>
         </div>
 
         {wearAndTearExplanation ? (
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
               Fair wear / betterment
             </p>
-            <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-700 [overflow-wrap:anywhere]">
+            <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-zinc-700 [overflow-wrap:anywhere]">
               {wearAndTearExplanation}
             </p>
           </div>

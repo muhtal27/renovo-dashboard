@@ -242,18 +242,18 @@ function OperatorSearchForm({
       <input type="hidden" name="search" value={searchValue.trim()} />
       <label className="relative block">
         <span className="sr-only">Global search</span>
-        <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+        <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
         <input
           type="search"
           value={searchValue}
           onChange={(event) => setSearchValue(event.target.value)}
           placeholder={searchPlaceholder}
-          className="h-12 w-full rounded-[16px] border border-slate-200 bg-[#f8fafc] pl-11 pr-28 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400"
+          className="h-12 w-full rounded-lg border border-zinc-200 bg-zinc-50 pl-11 pr-28 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-slate-400"
         />
         <Link
           href={searchAction}
           prefetch={false}
-          className="absolute right-2 top-2 inline-flex h-8 items-center rounded-[12px] bg-slate-900 px-4 text-sm font-medium text-white transition hover:bg-slate-800"
+          className="absolute right-2 top-2 inline-flex h-8 items-center rounded-md bg-zinc-900 px-4 text-sm font-medium text-white transition hover:bg-zinc-800"
         >
           Search
         </Link>
@@ -289,7 +289,7 @@ export function OperatorLayout({ children, operator }: OperatorLayoutProps) {
   const headerActions = DEFAULT_ACTIONS
 
   return (
-    <main className="operator-app min-h-screen bg-[#f4f7fb] text-slate-900">
+    <main className="operator-app min-h-screen bg-zinc-50 text-zinc-900">
       <div className="flex min-h-screen">
         <OperatorNav
           role={operatorRole}
@@ -303,14 +303,14 @@ export function OperatorLayout({ children, operator }: OperatorLayoutProps) {
 
         <div className="min-w-0 flex-1">
           <div className="mx-auto flex min-h-screen w-full max-w-[1760px] flex-col px-4 py-4 md:px-6 md:py-6 xl:px-8">
-            <header className="rounded-[28px] border border-slate-200/80 bg-white px-5 py-5 shadow-[0_10px_30px_rgba(15,23,42,0.04)] md:px-6">
+            <header className="rounded-xl border border-zinc-200/80 bg-white px-5 py-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)] md:px-6">
               <div className="flex flex-col gap-5">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex min-w-0 items-start gap-3">
                     <button
                       type="button"
                       onClick={() => setMobileNavOpen(true)}
-                      className="mt-0.5 flex h-10 w-10 items-center justify-center rounded-[14px] border border-slate-200 bg-slate-50 text-slate-600 xl:hidden"
+                      className="mt-0.5 flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 bg-zinc-50 text-zinc-600 xl:hidden"
                       aria-label="Open navigation"
                     >
                       <Menu className="h-4 w-4" />
@@ -318,37 +318,37 @@ export function OperatorLayout({ children, operator }: OperatorLayoutProps) {
 
                     <div className="min-w-0">
                       {breadcrumbs.length ? (
-                        <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-slate-500">
+                        <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-zinc-500">
                           {breadcrumbs.map((breadcrumb, index) => (
                             <div key={`${breadcrumb.label}-${index}`} className="flex items-center gap-2">
                               {breadcrumb.href ? (
                                 <Link
                                   href={breadcrumb.href}
                                   prefetch={false}
-                                  className="transition hover:text-slate-900"
+                                  className="transition hover:text-zinc-900"
                                 >
                                   {breadcrumb.label}
                                 </Link>
                               ) : (
-                                <span className="text-slate-700">{breadcrumb.label}</span>
+                                <span className="text-zinc-700">{breadcrumb.label}</span>
                               )}
                               {index < breadcrumbs.length - 1 ? <span>/</span> : null}
                             </div>
                           ))}
                         </div>
                       ) : (
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
                           Renovo operations platform
                         </p>
                       )}
 
                       {routeConfig.pageTitle ? (
-                        <h1 className="mt-2 text-[1.9rem] font-semibold tracking-[-0.04em] text-slate-950">
+                        <h1 className="mt-2 text-[1.9rem] font-semibold tracking-[-0.04em] text-zinc-950">
                           {routeConfig.pageTitle}
                         </h1>
                       ) : null}
                       {routeConfig.pageDescription ? (
-                        <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+                        <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-600">
                           {routeConfig.pageDescription}
                         </p>
                       ) : null}
@@ -357,12 +357,12 @@ export function OperatorLayout({ children, operator }: OperatorLayoutProps) {
 
                   <div className="hidden items-center gap-3 md:flex">
                     <div className="text-right">
-                      <p className="text-sm font-semibold text-slate-950">{displayName || 'Operator'}</p>
-                      <p className="text-xs uppercase tracking-[0.14em] text-slate-500">
+                      <p className="text-sm font-semibold text-zinc-950">{displayName || 'Operator'}</p>
+                      <p className="text-xs uppercase tracking-[0.08em] text-zinc-500">
                         End of tenancy
                       </p>
                     </div>
-                    <div className="flex h-11 w-11 items-center justify-center rounded-[16px] border border-slate-200 bg-slate-100 text-sm font-semibold text-slate-700">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-lg border border-zinc-200 bg-zinc-100 text-sm font-semibold text-zinc-700">
                       {getInitials(displayName)}
                     </div>
                   </div>
@@ -385,10 +385,10 @@ export function OperatorLayout({ children, operator }: OperatorLayoutProps) {
                         href={action.href}
                         prefetch={false}
                         className={cn(
-                          'inline-flex items-center gap-2 rounded-[14px] border px-4 py-2.5 text-sm font-medium transition',
+                          'inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition',
                           action.tone === 'primary'
-                            ? 'border-slate-900 bg-slate-900 text-white hover:bg-slate-800'
-                            : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:text-slate-950'
+                            ? 'border-zinc-900 bg-zinc-900 text-white hover:bg-zinc-800'
+                            : 'border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 hover:text-zinc-950'
                         )}
                       >
                         {action.icon}
@@ -396,7 +396,7 @@ export function OperatorLayout({ children, operator }: OperatorLayoutProps) {
                       </Link>
                     ))}
                   </div>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 md:hidden">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 bg-zinc-50 text-sm font-semibold text-zinc-700 md:hidden">
                     {getInitials(displayName)}
                   </div>
                 </div>

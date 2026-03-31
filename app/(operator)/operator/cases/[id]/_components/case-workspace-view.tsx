@@ -49,8 +49,8 @@ function Section({
   return (
     <section className="space-y-4">
       <div className="space-y-2">
-        <h2 className="text-lg font-semibold tracking-[-0.02em] text-slate-950">{title}</h2>
-        {description ? <p className="max-w-3xl text-sm leading-6 text-slate-600">{description}</p> : null}
+        <h2 className="text-lg font-semibold tracking-[-0.02em] text-zinc-950">{title}</h2>
+        {description ? <p className="max-w-3xl text-sm leading-6 text-zinc-600">{description}</p> : null}
       </div>
       <div className="space-y-4">{children}</div>
     </section>
@@ -105,13 +105,13 @@ export function CaseWorkspaceView({
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div className="min-w-0 space-y-3">
               <div className="flex flex-wrap items-center gap-3">
-                <p className="text-sm font-medium text-slate-500">{`Case #${caseReference}`}</p>
+                <p className="text-sm font-medium text-zinc-500">{`Case #${caseReference}`}</p>
                 <CaseStatusBadge status={workspace.case.status} />
               </div>
-              <h1 className="text-3xl font-semibold tracking-[-0.04em] text-slate-950 [overflow-wrap:anywhere]">
+              <h1 className="text-3xl font-semibold tracking-[-0.04em] text-zinc-950 [overflow-wrap:anywhere]">
                 {propertyAddress}
               </h1>
-              <p className="max-w-3xl text-sm leading-6 text-slate-600 [overflow-wrap:anywhere]">
+              <p className="max-w-3xl text-sm leading-6 text-zinc-600 [overflow-wrap:anywhere]">
                 Review evidence, issues, recommendation, and submission state in one continuous workspace.
               </p>
             </div>
@@ -120,16 +120,16 @@ export function CaseWorkspaceView({
           <dl className="grid gap-x-6 gap-y-4 text-sm md:grid-cols-2 xl:grid-cols-3">
             {metadataItems.map((item) => (
               <div key={item.label} className="min-w-0 space-y-1">
-                <dt className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                <dt className="text-xs font-semibold uppercase tracking-[0.08em] text-zinc-500">
                   {item.label}
                 </dt>
-                <dd className="text-sm leading-6 text-slate-900 [overflow-wrap:anywhere]">{item.value}</dd>
+                <dd className="text-sm leading-6 text-zinc-900 [overflow-wrap:anywhere]">{item.value}</dd>
               </div>
             ))}
           </dl>
         </header>
 
-        <div className="border-b border-slate-200" />
+        <div className="border-b border-zinc-200" />
 
         <Section
           title="Overview"
@@ -138,7 +138,7 @@ export function CaseWorkspaceView({
           <CaseWorkspaceOverviewDetails workspace={workspace} />
         </Section>
 
-        <div className="border-b border-slate-200" />
+        <div className="border-b border-zinc-200" />
 
         <Section
           title="Summary"
@@ -147,7 +147,7 @@ export function CaseWorkspaceView({
           <ClaimSummaryCard workspace={workspace} />
         </Section>
 
-        <div className="border-b border-slate-200" />
+        <div className="border-b border-zinc-200" />
 
         <Section
           title="Evidence"
@@ -161,7 +161,7 @@ export function CaseWorkspaceView({
           />
         </Section>
 
-        <div className="border-b border-slate-200" />
+        <div className="border-b border-zinc-200" />
 
         <Section
           title="Issues"
@@ -174,7 +174,7 @@ export function CaseWorkspaceView({
           />
         </Section>
 
-        <div className="border-b border-slate-200" />
+        <div className="border-b border-zinc-200" />
 
         <Section
           title="Decision / Recommendation"
@@ -183,7 +183,7 @@ export function CaseWorkspaceView({
           <RecommendationDetailCard issue={selectedIssue} />
         </Section>
 
-        <div className="border-b border-slate-200" />
+        <div className="border-b border-zinc-200" />
 
         <Section
           title="Submission / Next Steps"
@@ -192,16 +192,16 @@ export function CaseWorkspaceView({
           <div className="space-y-3">
             <div className="flex flex-wrap items-center gap-3">
               <CaseStatusBadge status={submissionState.tone} />
-              <p className="text-sm font-semibold text-slate-950">{submissionState.label}</p>
+              <p className="text-sm font-semibold text-zinc-950">{submissionState.label}</p>
             </div>
-            <p className="max-w-3xl text-sm leading-6 text-slate-600 [overflow-wrap:anywhere]">
+            <p className="max-w-3xl text-sm leading-6 text-zinc-600 [overflow-wrap:anywhere]">
               {submissionState.description}
             </p>
           </div>
 
           <div className="space-y-2 pt-2">
-            <h3 className="text-sm font-semibold tracking-[-0.02em] text-slate-950">Message thread</h3>
-            <p className="text-sm leading-6 text-slate-600">
+            <h3 className="text-sm font-semibold tracking-[-0.02em] text-zinc-950">Message thread</h3>
+            <p className="text-sm leading-6 text-zinc-600">
               Operator, tenant, and landlord communication attached to this case.
             </p>
           </div>

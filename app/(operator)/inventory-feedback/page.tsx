@@ -9,15 +9,15 @@ export default async function InventoryFeedbackPage() {
   await requireOperatorTenant('/inventory-feedback')
 
   return (
-    <section className="rounded-[28px] border border-slate-200/80 bg-white px-6 py-6 shadow-[0_10px_30px_rgba(15,23,42,0.04)] md:px-7">
+    <section className="rounded-xl border border-zinc-200/80 bg-white px-6 py-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)] md:px-7">
       <div className="max-w-3xl space-y-3">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
           Inventory feedback
         </p>
-        <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-slate-950">
+        <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-zinc-950">
           Inventory feedback is not wired yet
         </h2>
-        <p className="text-sm leading-6 text-slate-600">
+        <p className="text-sm leading-6 text-zinc-600">
           This placeholder route keeps the operator sidebar navigation valid while the inventory
           feedback workflow is being defined. Hook the page into the eventual feedback queue,
           review tools, and source report context when that feature is ready.

@@ -137,9 +137,9 @@ export function CaseNegotiation({ data }: { data: OperatorCheckoutWorkspaceData 
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
         <SectionCard className="px-6 py-6 md:px-7">
-          <div className="flex flex-col gap-2 border-b border-slate-200 pb-5">
+          <div className="flex flex-col gap-2 border-b border-zinc-200 pb-5">
             <WorkspaceSectionTitle>Negotiation position</WorkspaceSectionTitle>
-            <p className="text-sm leading-6 text-slate-600">
+            <p className="text-sm leading-6 text-zinc-600">
               Review the current deduction profile and recommendation mix before any outbound message is prepared.
             </p>
           </div>
@@ -164,9 +164,9 @@ export function CaseNegotiation({ data }: { data: OperatorCheckoutWorkspaceData 
           </div>
 
           {depositCoverage != null ? (
-            <div className="mt-5 rounded-[18px] border border-slate-200 bg-slate-50/70 px-5 py-5">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Claim vs deposit</p>
-              <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-slate-950">
+            <div className="mt-5 rounded-xl border border-zinc-200 bg-zinc-50/70 px-5 py-5">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Claim vs deposit</p>
+              <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-zinc-950">
                 {depositCoverage}%
               </p>
               <div className="mt-4">
@@ -178,33 +178,33 @@ export function CaseNegotiation({ data }: { data: OperatorCheckoutWorkspaceData 
                   value={depositCoverage}
                 />
               </div>
-              <p className="mt-3 text-sm leading-6 text-slate-600">
+              <p className="mt-3 text-sm leading-6 text-zinc-600">
                 {formatCurrency(currentClaimTotal)} proposed against {formatCurrency(depositHeld)} held.
               </p>
             </div>
           ) : null}
 
-          <div className="mt-5 rounded-[18px] border border-slate-200 bg-white px-5 py-5">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Recommendation mix</p>
+          <div className="mt-5 rounded-xl border border-zinc-200 bg-white px-5 py-5">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Recommendation mix</p>
             <dl className="mt-4 space-y-3">
               <div className="flex items-start justify-between gap-4">
-                <dt className="text-sm text-slate-500">Charge</dt>
-                <dd className="text-sm font-medium text-slate-950">{chargeCount}</dd>
+                <dt className="text-sm text-zinc-500">Charge</dt>
+                <dd className="text-sm font-medium text-zinc-950">{chargeCount}</dd>
               </div>
               <div className="flex items-start justify-between gap-4">
-                <dt className="text-sm text-slate-500">Partial</dt>
-                <dd className="text-sm font-medium text-slate-950">{partialCount}</dd>
+                <dt className="text-sm text-zinc-500">Partial</dt>
+                <dd className="text-sm font-medium text-zinc-950">{partialCount}</dd>
               </div>
               <div className="flex items-start justify-between gap-4">
-                <dt className="text-sm text-slate-500">No charge</dt>
-                <dd className="text-sm font-medium text-slate-950">{noChargeCount}</dd>
+                <dt className="text-sm text-zinc-500">No charge</dt>
+                <dd className="text-sm font-medium text-zinc-950">{noChargeCount}</dd>
               </div>
             </dl>
           </div>
 
-          <div className="mt-5 rounded-[18px] border border-slate-200 bg-white px-5 py-5">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Operator notes</p>
-            <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-600 [overflow-wrap:anywhere]">
+          <div className="mt-5 rounded-xl border border-zinc-200 bg-white px-5 py-5">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Operator notes</p>
+            <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-zinc-600 [overflow-wrap:anywhere]">
               {data.checkoutCase?.negotiationNotes?.trim() || 'No negotiation notes recorded yet.'}
             </p>
           </div>
@@ -212,9 +212,9 @@ export function CaseNegotiation({ data }: { data: OperatorCheckoutWorkspaceData 
       </div>
 
       <SectionCard className="px-6 py-6 md:px-7">
-        <div className="flex flex-col gap-2 border-b border-slate-200 pb-5">
+        <div className="flex flex-col gap-2 border-b border-zinc-200 pb-5">
           <WorkspaceSectionTitle>Negotiation draft pack</WorkspaceSectionTitle>
-          <p className="text-sm leading-6 text-slate-600">
+          <p className="text-sm leading-6 text-zinc-600">
             Review the existing email drafts that support negotiation. Delivery remains isolated to the later Send out step.
           </p>
         </div>
@@ -268,8 +268,8 @@ export function CaseNegotiation({ data }: { data: OperatorCheckoutWorkspaceData 
 
                     <dl className="mt-5 space-y-3">
                       <div className="flex items-start justify-between gap-4">
-                        <dt className="text-sm text-slate-500">Recipient</dt>
-                        <dd className="text-right text-sm font-medium text-slate-950 [overflow-wrap:anywhere]">
+                        <dt className="text-sm text-zinc-500">Recipient</dt>
+                        <dd className="text-right text-sm font-medium text-zinc-950 [overflow-wrap:anywhere]">
                           {getCheckoutEmailDraftRecipient(selectedDraft, data, {
                             fallback: {
                               landlord: 'Landlord address not recorded',
@@ -279,21 +279,21 @@ export function CaseNegotiation({ data }: { data: OperatorCheckoutWorkspaceData 
                         </dd>
                       </div>
                       <div className="flex items-start justify-between gap-4">
-                        <dt className="text-sm text-slate-500">Last update</dt>
-                        <dd className="text-right text-sm font-medium text-slate-950">
+                        <dt className="text-sm text-zinc-500">Last update</dt>
+                        <dd className="text-right text-sm font-medium text-zinc-950">
                           {formatDateTime(selectedDraft.sentAt ?? selectedDraft.updatedAt)}
                         </dd>
                       </div>
                       <div className="flex items-start justify-between gap-4">
-                        <dt className="text-sm text-slate-500">Structured attachments</dt>
-                        <dd className="text-sm font-medium text-slate-950">
+                        <dt className="text-sm text-zinc-500">Structured attachments</dt>
+                        <dd className="text-sm font-medium text-zinc-950">
                           {selectedDraft.attachmentDocumentIds.length}
                         </dd>
                       </div>
                     </dl>
 
-                    <div className="mt-5 rounded-[18px] border border-slate-200 bg-white px-5 py-5">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Attached documents</p>
+                    <div className="mt-5 rounded-xl border border-zinc-200 bg-white px-5 py-5">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Attached documents</p>
                       {selectedDraft.attachmentDocumentIds.length > 0 ? (
                         <div className="mt-4 flex flex-wrap gap-2">
                           {getCheckoutEmailDraftAttachmentNames(selectedDraft, data).map((attachmentName) => (
@@ -305,15 +305,15 @@ export function CaseNegotiation({ data }: { data: OperatorCheckoutWorkspaceData 
                           ))}
                         </div>
                       ) : (
-                        <p className="mt-3 text-sm leading-6 text-slate-600">
+                        <p className="mt-3 text-sm leading-6 text-zinc-600">
                           No structured checkout attachments are linked to this draft yet.
                         </p>
                       )}
                     </div>
 
-                    <div className="mt-5 rounded-[18px] border border-slate-200 bg-white px-5 py-5">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Draft body</p>
-                      <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-600 [overflow-wrap:anywhere]">
+                    <div className="mt-5 rounded-xl border border-zinc-200 bg-white px-5 py-5">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Draft body</p>
+                      <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-zinc-600 [overflow-wrap:anywhere]">
                         {selectedDraft.body}
                       </p>
                     </div>
@@ -336,9 +336,9 @@ export function CaseNegotiation({ data }: { data: OperatorCheckoutWorkspaceData 
       </SectionCard>
 
       <SectionCard className="px-6 py-6 md:px-7">
-        <div className="flex flex-col gap-2 border-b border-slate-200 pb-5">
+        <div className="flex flex-col gap-2 border-b border-zinc-200 pb-5">
           <WorkspaceSectionTitle>Stakeholder communication</WorkspaceSectionTitle>
-          <p className="text-sm leading-6 text-slate-600">
+          <p className="text-sm leading-6 text-zinc-600">
             Existing case messages stay visible here so operators can compare the proposed negotiation stance against the live conversation trail.
           </p>
         </div>

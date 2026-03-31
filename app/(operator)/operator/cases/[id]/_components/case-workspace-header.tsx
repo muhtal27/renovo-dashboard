@@ -117,14 +117,14 @@ export function CaseWorkspaceHeader({
           <div className="flex flex-wrap items-center gap-2">
             <CaseStatusBadge status={workspace.case.status} />
           </div>
-          <h2 className="mt-3 max-w-5xl text-[1.7rem] font-semibold tracking-[-0.04em] text-slate-950 [overflow-wrap:anywhere]">
+          <h2 className="mt-3 max-w-5xl text-[1.7rem] font-semibold tracking-[-0.04em] text-zinc-950 [overflow-wrap:anywhere]">
             {propertyAddress}
           </h2>
-          <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600 [overflow-wrap:anywhere]">
+          <p className="mt-3 max-w-3xl text-sm leading-6 text-zinc-600 [overflow-wrap:anywhere]">
             {workspace.tenant.name}
             {workspace.tenant.email ? ` · ${workspace.tenant.email}` : ''}
           </p>
-          <p className="mt-1 text-sm leading-6 text-slate-600">
+          <p className="mt-1 text-sm leading-6 text-zinc-600">
             {formatDate(workspace.tenancy.start_date)} to {formatDate(workspace.tenancy.end_date)}
           </p>
         </div>
@@ -135,7 +135,7 @@ export function CaseWorkspaceHeader({
               type="button"
               disabled={isAnalysing}
               onClick={() => void handleAnalyse()}
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-[14px] border border-slate-900 bg-slate-900 px-4 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-500"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-zinc-900 bg-zinc-900 px-4 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:border-zinc-200 disabled:bg-zinc-100 disabled:text-zinc-500"
             >
               {isAnalysing ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
               {isAnalysing ? 'Analysing...' : 'Analyse'}
@@ -154,64 +154,64 @@ export function CaseWorkspaceHeader({
         </div>
       </div>
 
-      <div className="mt-6 border-t border-slate-200 pt-6">
+      <div className="mt-6 border-t border-zinc-200 pt-6">
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.75fr)]">
           <dl className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
             <div className="min-w-0">
-              <dt className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+              <dt className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
                 Issues
               </dt>
-              <dd className="mt-2 text-[1.65rem] font-semibold tracking-[-0.04em] text-slate-950">
+              <dd className="mt-2 text-[1.65rem] font-semibold tracking-[-0.04em] text-zinc-950">
                 {workspace.issues.length}
               </dd>
-              <p className="mt-2 text-sm leading-6 text-slate-600">Items currently in operator review.</p>
+              <p className="mt-2 text-sm leading-6 text-zinc-600">Items currently in operator review.</p>
             </div>
             <div className="min-w-0">
-              <dt className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+              <dt className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
                 Proposed deductions
               </dt>
-              <dd className="mt-2 text-[1.65rem] font-semibold tracking-[-0.04em] text-slate-950">
+              <dd className="mt-2 text-[1.65rem] font-semibold tracking-[-0.04em] text-zinc-950">
                 {formatCurrency(workspace.totals.proposedDeductions)}
               </dd>
-              <p className="mt-2 text-sm leading-6 text-slate-600">Current claim position from recommendations.</p>
+              <p className="mt-2 text-sm leading-6 text-zinc-600">Current claim position from recommendations.</p>
             </div>
             <div className="min-w-0">
-              <dt className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+              <dt className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
                 Remaining deposit
               </dt>
-              <dd className="mt-2 text-[1.65rem] font-semibold tracking-[-0.04em] text-slate-950">
+              <dd className="mt-2 text-[1.65rem] font-semibold tracking-[-0.04em] text-zinc-950">
                 {workspace.totals.remainingDeposit == null
                   ? 'Not recorded'
                   : formatCurrency(workspace.totals.remainingDeposit)}
               </dd>
-              <p className="mt-2 text-sm leading-6 text-slate-600">Estimated return after deductions.</p>
+              <p className="mt-2 text-sm leading-6 text-zinc-600">Estimated return after deductions.</p>
             </div>
           </dl>
 
           <dl className="grid gap-x-6 gap-y-3 sm:grid-cols-2 xl:content-start">
-            <div className="flex items-start justify-between gap-4 border-b border-slate-200 pb-3">
-              <dt className="text-sm text-slate-500">Deposit</dt>
-              <dd className="min-w-0 text-right text-sm font-medium text-slate-950 [overflow-wrap:anywhere]">
+            <div className="flex items-start justify-between gap-4 border-b border-zinc-200 pb-3">
+              <dt className="text-sm text-zinc-500">Deposit</dt>
+              <dd className="min-w-0 text-right text-sm font-medium text-zinc-950 [overflow-wrap:anywhere]">
                 {workspace.totals.depositAmount == null
                   ? 'Not recorded'
                   : formatCurrency(workspace.totals.depositAmount)}
               </dd>
             </div>
-            <div className="flex items-start justify-between gap-4 border-b border-slate-200 pb-3">
-              <dt className="text-sm text-slate-500">Case reference</dt>
-              <dd className="min-w-0 text-right text-sm font-medium text-slate-950 [overflow-wrap:anywhere]">
+            <div className="flex items-start justify-between gap-4 border-b border-zinc-200 pb-3">
+              <dt className="text-sm text-zinc-500">Case reference</dt>
+              <dd className="min-w-0 text-right text-sm font-medium text-zinc-950 [overflow-wrap:anywhere]">
                 {workspace.case.id.slice(0, 8)}
               </dd>
             </div>
-            <div className="flex items-start justify-between gap-4 border-b border-slate-200 pb-3">
-              <dt className="text-sm text-slate-500">Deposit scheme</dt>
-              <dd className="min-w-0 text-right text-sm font-medium text-slate-950 [overflow-wrap:anywhere]">
+            <div className="flex items-start justify-between gap-4 border-b border-zinc-200 pb-3">
+              <dt className="text-sm text-zinc-500">Deposit scheme</dt>
+              <dd className="min-w-0 text-right text-sm font-medium text-zinc-950 [overflow-wrap:anywhere]">
                 {depositScheme}
               </dd>
             </div>
-            <div className="flex items-start justify-between gap-4 border-b border-slate-200 pb-3">
-              <dt className="text-sm text-slate-500">Certificate number</dt>
-              <dd className="min-w-0 text-right text-sm font-medium text-slate-950 [overflow-wrap:anywhere]">
+            <div className="flex items-start justify-between gap-4 border-b border-zinc-200 pb-3">
+              <dt className="text-sm text-zinc-500">Certificate number</dt>
+              <dd className="min-w-0 text-right text-sm font-medium text-zinc-950 [overflow-wrap:anywhere]">
                 {certificateNumber}
               </dd>
             </div>

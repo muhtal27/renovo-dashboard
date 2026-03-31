@@ -32,15 +32,15 @@ function DistributionBar({
               ? 'bg-amber-500'
               : item.tone === 'accent'
                 ? 'bg-emerald-500'
-                : 'bg-slate-900'
+                : 'bg-zinc-900'
 
         return (
           <div key={item.label}>
-            <div className="mb-1 flex items-center justify-between gap-3 text-sm text-slate-600">
+            <div className="mb-1 flex items-center justify-between gap-3 text-sm text-zinc-600">
               <span>{item.label}</span>
-              <span className="font-medium text-slate-900">{item.value}</span>
+              <span className="font-medium text-zinc-900">{item.value}</span>
             </div>
-            <div className="h-2.5 overflow-hidden rounded-full bg-slate-100">
+            <div className="h-2.5 overflow-hidden rounded-full bg-zinc-100">
               <div className={`h-full rounded-full ${color}`} style={{ width: `${width}%` }} />
             </div>
           </div>
@@ -94,7 +94,7 @@ export function EotReportsClient({
           />
           <div className="mt-5 grid gap-6 xl:grid-cols-2">
             <div>
-              <p className="mb-3 text-sm font-semibold text-slate-950">Checkout statuses</p>
+              <p className="mb-3 text-sm font-semibold text-zinc-950">Checkout statuses</p>
               <DistributionBar
                 items={Object.entries(status_breakdown).map(([label, value]) => ({
                   label: formatEnumLabel(label),
@@ -111,7 +111,7 @@ export function EotReportsClient({
               />
             </div>
             <div>
-              <p className="mb-3 text-sm font-semibold text-slate-950">Issue severity</p>
+              <p className="mb-3 text-sm font-semibold text-zinc-950">Issue severity</p>
               <DistributionBar
                 items={Object.entries(issue_severity_breakdown).map(([label, value]) => ({
                   label: formatEnumLabel(label),
@@ -136,7 +136,7 @@ export function EotReportsClient({
           <MetaItem label="Recommendations recorded" value={stats.recommendation_count} />
           <MetaItem label="Generated claims" value={stats.generated_claim_count} />
           <MetaItem label="Claim total" value={formatCurrency(stats.claim_amount)} />
-          <div className="rounded-[18px] border border-slate-200 bg-white px-4 py-4 text-sm leading-6 text-slate-600">
+          <div className="rounded-xl border border-zinc-200 bg-white px-4 py-4 text-sm leading-6 text-zinc-600">
             These analytics views now read from a compact live reporting summary instead of hydrating every
             checkout workspace individually.
           </div>
@@ -162,7 +162,7 @@ export function EotReportsClient({
         <div className="mt-5">
           <DataTable>
             <table className="min-w-full text-left">
-              <thead className="bg-[#f8fafc] text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+              <thead className="bg-zinc-50 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
                 <tr>
                   <th className="px-4 py-3">Property</th>
                   <th className="px-4 py-3">Status</th>
@@ -173,13 +173,13 @@ export function EotReportsClient({
                   <th className="px-4 py-3">Last activity</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200 bg-white">
+              <tbody className="divide-y divide-zinc-200 bg-white">
                 {performance_rows.map((row) => (
                   <tr key={row.case_id}>
                     <td className="px-4 py-4">
                       <div>
-                        <p className="text-sm font-semibold text-slate-950">{row.property_name}</p>
-                        <p className="mt-1 text-sm text-slate-600">{row.tenant_name}</p>
+                        <p className="text-sm font-semibold text-zinc-950">{row.property_name}</p>
+                        <p className="mt-1 text-sm text-zinc-600">{row.tenant_name}</p>
                       </div>
                     </td>
                     <td className="px-4 py-4">
@@ -188,12 +188,12 @@ export function EotReportsClient({
                     <td className="px-4 py-4">
                       <StatusBadge label={formatEnumLabel(row.priority)} tone={row.priority} />
                     </td>
-                    <td className="px-4 py-4 text-sm text-slate-700">{row.evidence_count}</td>
-                    <td className="px-4 py-4 text-sm text-slate-700">{row.issue_count}</td>
-                    <td className="px-4 py-4 text-sm font-medium text-slate-950">
+                    <td className="px-4 py-4 text-sm text-zinc-700">{row.evidence_count}</td>
+                    <td className="px-4 py-4 text-sm text-zinc-700">{row.issue_count}</td>
+                    <td className="px-4 py-4 text-sm font-medium text-zinc-950">
                       {row.claim_total_amount ? formatCurrency(row.claim_total_amount) : 'Not generated'}
                     </td>
-                    <td className="px-4 py-4 text-sm text-slate-700">
+                    <td className="px-4 py-4 text-sm text-zinc-700">
                       {formatDateTime(row.last_activity_at)}
                     </td>
                   </tr>

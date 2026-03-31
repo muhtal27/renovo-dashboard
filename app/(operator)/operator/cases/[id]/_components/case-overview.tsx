@@ -342,14 +342,14 @@ export function CaseOverview({ data }: { data: OperatorCheckoutWorkspaceData }) 
             ) : null}
           </div>
 
-          <p className="mt-4 text-sm leading-6 text-slate-600 [overflow-wrap:anywhere]">
+          <p className="mt-4 text-sm leading-6 text-zinc-600 [overflow-wrap:anywhere]">
             {formatTextValue(
               data.workspace.case.summary,
               'No structured case summary has been recorded yet.'
             )}
           </p>
 
-          <div className="mt-6 border-t border-slate-200 pt-6">
+          <div className="mt-6 border-t border-zinc-200 pt-6">
             <CaseWorkspaceOverviewDetails
               workspace={data.workspace}
               fallbackLandlordEmail={data.checkoutCase?.landlordEmail}
@@ -357,52 +357,52 @@ export function CaseOverview({ data }: { data: OperatorCheckoutWorkspaceData }) 
             />
           </div>
 
-          <dl className="mt-6 grid gap-x-6 gap-y-3 border-t border-slate-200 pt-6 md:grid-cols-2">
-            <div className="flex items-start justify-between gap-4 border-b border-slate-200 pb-3">
-              <dt className="text-sm text-slate-500">Checkout date</dt>
-              <dd className="min-w-0 text-right text-sm font-medium text-slate-950">
+          <dl className="mt-6 grid gap-x-6 gap-y-3 border-t border-zinc-200 pt-6 md:grid-cols-2">
+            <div className="flex items-start justify-between gap-4 border-b border-zinc-200 pb-3">
+              <dt className="text-sm text-zinc-500">Checkout date</dt>
+              <dd className="min-w-0 text-right text-sm font-medium text-zinc-950">
                 {formatDate(data.checkoutCase?.checkoutDate ?? data.workspace.tenancy.end_date)}
               </dd>
             </div>
-            <div className="flex items-start justify-between gap-4 border-b border-slate-200 pb-3">
-              <dt className="text-sm text-slate-500">Check-in date</dt>
-              <dd className="min-w-0 text-right text-sm font-medium text-slate-950">
+            <div className="flex items-start justify-between gap-4 border-b border-zinc-200 pb-3">
+              <dt className="text-sm text-zinc-500">Check-in date</dt>
+              <dd className="min-w-0 text-right text-sm font-medium text-zinc-950">
                 {formatDate(data.checkoutCase?.checkinDate)}
               </dd>
             </div>
-            <div className="flex items-start justify-between gap-4 border-b border-slate-200 pb-3">
-              <dt className="text-sm text-slate-500">Property reference</dt>
-              <dd className="min-w-0 text-right text-sm font-medium text-slate-950">
+            <div className="flex items-start justify-between gap-4 border-b border-zinc-200 pb-3">
+              <dt className="text-sm text-zinc-500">Property reference</dt>
+              <dd className="min-w-0 text-right text-sm font-medium text-zinc-950">
                 {formatTextValue(data.workspace.property.reference)}
               </dd>
             </div>
-            <div className="flex items-start justify-between gap-4 border-b border-slate-200 pb-3">
-              <dt className="text-sm text-slate-500">Case reference</dt>
-              <dd className="min-w-0 text-right text-sm font-medium text-slate-950 [overflow-wrap:anywhere]">
+            <div className="flex items-start justify-between gap-4 border-b border-zinc-200 pb-3">
+              <dt className="text-sm text-zinc-500">Case reference</dt>
+              <dd className="min-w-0 text-right text-sm font-medium text-zinc-950 [overflow-wrap:anywhere]">
                 {data.checkoutCase?.caseReference ?? data.workspace.case.id.slice(0, 8).toUpperCase()}
               </dd>
             </div>
-            <div className="flex items-start justify-between gap-4 border-b border-slate-200 pb-3">
-              <dt className="text-sm text-slate-500">Assessor</dt>
-              <dd className="min-w-0 text-right text-sm font-medium text-slate-950 [overflow-wrap:anywhere]">
+            <div className="flex items-start justify-between gap-4 border-b border-zinc-200 pb-3">
+              <dt className="text-sm text-zinc-500">Assessor</dt>
+              <dd className="min-w-0 text-right text-sm font-medium text-zinc-950 [overflow-wrap:anywhere]">
                 {formatTextValue(data.checkoutCase?.assessorName)}
               </dd>
             </div>
-            <div className="flex items-start justify-between gap-4 border-b border-slate-200 pb-3">
-              <dt className="text-sm text-slate-500">Agency</dt>
-              <dd className="min-w-0 text-right text-sm font-medium text-slate-950 [overflow-wrap:anywhere]">
+            <div className="flex items-start justify-between gap-4 border-b border-zinc-200 pb-3">
+              <dt className="text-sm text-zinc-500">Agency</dt>
+              <dd className="min-w-0 text-right text-sm font-medium text-zinc-950 [overflow-wrap:anywhere]">
                 {formatTextValue(data.checkoutCase?.agencyName)}
               </dd>
             </div>
-            <div className="flex items-start justify-between gap-4 border-b border-slate-200 pb-3">
-              <dt className="text-sm text-slate-500">Report source</dt>
-              <dd className="min-w-0 text-right text-sm font-medium text-slate-950 [overflow-wrap:anywhere]">
+            <div className="flex items-start justify-between gap-4 border-b border-zinc-200 pb-3">
+              <dt className="text-sm text-zinc-500">Report source</dt>
+              <dd className="min-w-0 text-right text-sm font-medium text-zinc-950 [overflow-wrap:anywhere]">
                 {formatTextValue(data.checkoutCase?.reportSource)}
               </dd>
             </div>
-            <div className="flex items-start justify-between gap-4 border-b border-slate-200 pb-3">
-              <dt className="text-sm text-slate-500">Last activity</dt>
-              <dd className="min-w-0 text-right text-sm font-medium text-slate-950">
+            <div className="flex items-start justify-between gap-4 border-b border-zinc-200 pb-3">
+              <dt className="text-sm text-zinc-500">Last activity</dt>
+              <dd className="min-w-0 text-right text-sm font-medium text-zinc-950">
                 {formatDateTime(data.workspace.case.last_activity_at)}
               </dd>
             </div>
@@ -427,26 +427,26 @@ export function CaseOverview({ data }: { data: OperatorCheckoutWorkspaceData }) 
 
             <dl className="space-y-3">
               <div className="flex items-start justify-between gap-4">
-                <dt className="text-sm text-slate-500">Deposit held</dt>
-                <dd className="text-right text-sm font-medium text-slate-950">
+                <dt className="text-sm text-zinc-500">Deposit held</dt>
+                <dd className="text-right text-sm font-medium text-zinc-950">
                   {formatCurrencyValue(depositHeld)}
                 </dd>
               </div>
               <div className="flex items-start justify-between gap-4">
-                <dt className="text-sm text-slate-500">Return to tenant</dt>
-                <dd className="text-right text-sm font-medium text-slate-950">
+                <dt className="text-sm text-zinc-500">Return to tenant</dt>
+                <dd className="text-right text-sm font-medium text-zinc-950">
                   {formatCurrencyValue(data.workspace.totals.returnToTenant)}
                 </dd>
               </div>
               <div className="flex items-start justify-between gap-4">
-                <dt className="text-sm text-slate-500">Disputed amount</dt>
-                <dd className="text-right text-sm font-medium text-slate-950">
+                <dt className="text-sm text-zinc-500">Disputed amount</dt>
+                <dd className="text-right text-sm font-medium text-zinc-950">
                   {formatCurrency(data.workspace.totals.disputedAmount)}
                 </dd>
               </div>
               <div className="flex items-start justify-between gap-4">
-                <dt className="text-sm text-slate-500">Claim breakdown items</dt>
-                <dd className="text-right text-sm font-medium text-slate-950">
+                <dt className="text-sm text-zinc-500">Claim breakdown items</dt>
+                <dd className="text-right text-sm font-medium text-zinc-950">
                   {data.workspace.claimBreakdown.length}
                 </dd>
               </div>
@@ -461,7 +461,7 @@ export function CaseOverview({ data }: { data: OperatorCheckoutWorkspaceData }) 
             />
           ) : null}
 
-          <div className="space-y-4 border-t border-slate-200 pt-4">
+          <div className="space-y-4 border-t border-zinc-200 pt-4">
             <WorkspaceProgressBar
               label="Core documents linked"
               max={3}
@@ -496,9 +496,9 @@ export function CaseOverview({ data }: { data: OperatorCheckoutWorkspaceData }) 
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(300px,0.85fr)]">
         <SectionCard className="px-6 py-6 md:px-7">
-          <div className="flex flex-col gap-2 border-b border-slate-200 pb-5">
+          <div className="flex flex-col gap-2 border-b border-zinc-200 pb-5">
             <WorkspaceSectionTitle>Rooms & condition</WorkspaceSectionTitle>
-            <p className="text-sm leading-6 text-slate-600">
+            <p className="text-sm leading-6 text-zinc-600">
               Room-by-room capture pulled from the structured checkout tables.
             </p>
           </div>
@@ -541,9 +541,9 @@ export function CaseOverview({ data }: { data: OperatorCheckoutWorkspaceData }) 
         </SectionCard>
 
         <SectionCard className="px-6 py-6 md:px-7">
-          <div className="flex flex-col gap-2 border-b border-slate-200 pb-5">
+          <div className="flex flex-col gap-2 border-b border-zinc-200 pb-5">
             <WorkspaceSectionTitle>Recent activity</WorkspaceSectionTitle>
-            <p className="text-sm leading-6 text-slate-600">
+            <p className="text-sm leading-6 text-zinc-600">
               Latest structured events for the checkout workspace, falling back to operator case activity when needed.
             </p>
           </div>
