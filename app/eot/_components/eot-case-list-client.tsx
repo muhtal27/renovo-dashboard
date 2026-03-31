@@ -6,6 +6,7 @@ import { FormEvent, useEffect, useMemo, useState } from 'react'
 import { Check, Copy, Plus, RefreshCcw } from 'lucide-react'
 import { createEotCase, EotApiError, listEotCases } from '@/lib/eot-api'
 import { byLastActivityDesc } from '@/lib/eot-dashboard'
+import { getDefaultEotWorkspaceHref } from '@/lib/eot-workspace-routes'
 import type {
   CreateEotCaseInput,
   EotCaseListItem,
@@ -328,7 +329,7 @@ export function EotCaseListClient({
       inFlightCaseListRequest = null
       setFormState(DEFAULT_FORM_STATE)
       setCreateOpen(false)
-      router.push(`/eot/${workspace.case.id}`)
+      router.push(getDefaultEotWorkspaceHref(workspace.case.id))
       router.refresh()
     } catch (createCaseError) {
       if (createCaseError instanceof EotApiError) {
@@ -645,7 +646,7 @@ export function EotCaseListClient({
                   {copied ? 'Copied IDs' : 'Copy IDs'}
                 </button>
                 <Link
-                  href={`/eot/${selectedIds[0]}`}
+                  href={getDefaultEotWorkspaceHref(selectedIds[0])}
                   className="inline-flex items-center rounded-[12px] border border-slate-900 bg-slate-900 px-3 py-2 text-sm font-medium text-white"
                 >
                   Open first selected
@@ -802,7 +803,7 @@ export function EotCaseListClient({
                         <td className="px-4 py-4 align-top text-right">
                           <div className="flex flex-col items-end gap-2">
                             <Link
-                              href={`/operator/cases/${caseItem.id}`}
+                              href={getDefaultEotWorkspaceHref(caseItem.id)}
                               className="inline-flex items-center rounded-[12px] border border-slate-900 bg-slate-900 px-3 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
                             >
                               Open workspace

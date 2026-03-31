@@ -36,6 +36,7 @@ import {
 } from '@/app/eot/_components/eot-ui'
 import { useEotPortfolioData } from '@/app/eot/_components/use-eot-portfolio-data'
 import { getEotUiErrorMessage } from '@/lib/eot-errors'
+import { getDefaultEotWorkspaceHref } from '@/lib/eot-workspace-routes'
 import type { EotPortfolioSnapshot } from '@/lib/eot-server-data'
 
 type PortfolioViewMode =
@@ -301,7 +302,7 @@ export function EotPortfolioClient({
                 return (
                   <Link
                     key={workspace.case.id}
-                    href={`/operator/cases/${workspace.case.id}`}
+                    href={getDefaultEotWorkspaceHref(workspace.case.id)}
                     className="block rounded-[20px] border border-slate-200 bg-white px-5 py-5 transition hover:border-slate-300 hover:bg-slate-50"
                   >
                     <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
@@ -521,7 +522,7 @@ export function EotPortfolioClient({
                 }
               />
               <Link
-                href={`/operator/cases/${selectedTenancy.case.id}`}
+                href={getDefaultEotWorkspaceHref(selectedTenancy.case.id)}
                 className="inline-flex items-center gap-2 rounded-[14px] border border-slate-900 bg-slate-900 px-4 py-2.5 text-sm font-medium text-white"
               >
                 Open checkout workspace
@@ -626,7 +627,7 @@ export function EotPortfolioClient({
                 ))}
               </div>
               <Link
-                href={`/operator/cases/${selectedDispute.caseId}`}
+                href={getDefaultEotWorkspaceHref(selectedDispute.caseId)}
                 className="inline-flex items-center gap-2 rounded-[14px] border border-slate-900 bg-slate-900 px-4 py-2.5 text-sm font-medium text-white"
               >
                 Open checkout workspace
@@ -686,7 +687,7 @@ export function EotPortfolioClient({
                       : 'No estimate'}
                   </p>
                   <Link
-                    href={`/operator/cases/${item.caseId}`}
+                    href={getDefaultEotWorkspaceHref(item.caseId)}
                     className="inline-flex items-center gap-2 text-sm font-medium text-slate-700 transition hover:text-slate-950"
                   >
                     Open checkout
@@ -743,7 +744,7 @@ export function EotPortfolioClient({
                       {workspace.claim ? formatCurrency(workspace.claim.total_amount) : 'No claim total yet'}
                     </p>
                     <Link
-                      href={`/operator/cases/${workspace.case.id}`}
+                      href={getDefaultEotWorkspaceHref(workspace.case.id)}
                       className="inline-flex items-center gap-2 text-sm font-medium text-slate-700 transition hover:text-slate-950"
                     >
                       Open checkout
