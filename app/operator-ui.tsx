@@ -17,15 +17,14 @@ export function PageHeader({
   return (
     <div
       className={cn(
-        'flex flex-col gap-4 rounded-xl border border-zinc-200/80 bg-white px-6 py-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)]',
-        'md:px-7',
+        'flex flex-col gap-4',
         'xl:flex-row xl:items-start xl:justify-between',
         className
       )}
     >
       <div className="min-w-0">
         {eyebrow ? (
-          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-600">
             {eyebrow}
           </p>
         ) : null}
@@ -33,7 +32,7 @@ export function PageHeader({
           {title}
         </h2>
         {description ? (
-          <p className="mt-3 max-w-3xl text-sm leading-6 text-zinc-600">{description}</p>
+          <p className="mt-3 max-w-3xl text-sm leading-6 text-zinc-500">{description}</p>
         ) : null}
       </div>
       {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
@@ -51,7 +50,7 @@ export function SectionCard({
   return (
     <section
       className={cn(
-        'rounded-xl border border-zinc-200/80 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.04)]',
+        'rounded-xl border border-zinc-200 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.04)]',
         className
       )}
     >
@@ -106,12 +105,12 @@ export function KPIStatCard({
 }) {
   const toneClasses =
     tone === 'accent'
-      ? 'border-emerald-200 bg-emerald-50/70'
+      ? 'border-emerald-200 bg-emerald-50/60'
       : tone === 'danger'
-        ? 'border-rose-200 bg-rose-50/70'
+        ? 'border-rose-200 bg-rose-50/60'
         : tone === 'warning'
-          ? 'border-amber-200 bg-amber-50/75'
-          : 'border-zinc-200 bg-zinc-50/70'
+          ? 'border-amber-200 bg-amber-50/60'
+          : 'border-zinc-200 bg-zinc-50/60'
 
   return (
     <div
@@ -125,7 +124,7 @@ export function KPIStatCard({
         <p className="text-xs font-medium uppercase tracking-[0.08em] text-zinc-500">{label}</p>
         {trend ? <div className="text-xs font-medium text-zinc-500">{trend}</div> : null}
       </div>
-      <div className="mt-4 text-[1.9rem] font-semibold tracking-[-0.04em] text-zinc-950">
+      <div className="mt-4 text-[1.75rem] font-semibold tracking-[-0.04em] text-zinc-950">
         {value}
       </div>
       {detail ? <div className="mt-2 text-sm leading-6 text-zinc-600">{detail}</div> : null}
@@ -191,7 +190,7 @@ export function DetailPanel({
   return (
     <aside
       className={cn(
-        'rounded-xl border border-zinc-200 bg-white px-5 py-5 shadow-[0_1px_3px_rgba(0,0,0,0.03)]',
+        'rounded-xl border border-zinc-200 bg-white px-5 py-5',
         className
       )}
     >
@@ -216,7 +215,7 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        'rounded-xl border border-dashed border-zinc-300 bg-zinc-50/70 px-5 py-6',
+        'rounded-xl border border-dashed border-zinc-300 bg-zinc-50/60 px-5 py-6',
         className
       )}
     >
@@ -268,12 +267,12 @@ export function ActivityTimeline({
               ? 'bg-amber-500'
               : item.tone === 'danger'
                 ? 'bg-rose-500'
-                : 'bg-slate-400'
+                : 'bg-zinc-400'
 
         return (
           <div key={item.id} className="relative flex gap-3 pl-5">
             {index !== items.length - 1 ? (
-              <span className="absolute left-[7px] top-4 h-[calc(100%+16px)] w-px bg-slate-200" />
+              <span className="absolute left-[7px] top-4 h-[calc(100%+16px)] w-px bg-zinc-200" />
             ) : null}
             <span className={cn('absolute left-0 top-1.5 h-4 w-4 rounded-full ring-4 ring-white', toneClass)} />
             <div className="min-w-0">
@@ -302,9 +301,9 @@ export function ProgressBar({
   return (
     <div className={cn('space-y-2', className)}>
       {label ? <div className="flex items-center justify-between gap-3 text-sm text-zinc-600">{label}</div> : null}
-      <div className="h-2.5 overflow-hidden rounded-full bg-zinc-100">
+      <div className="h-2 overflow-hidden rounded-full bg-zinc-100">
         <div
-          className="h-full rounded-full bg-zinc-900"
+          className="h-full rounded-full bg-emerald-500 transition-all duration-500"
           style={{ width: `${clamped}%` }}
         />
       </div>
@@ -324,12 +323,12 @@ export function SkeletonPanel({
         className
       )}
     >
-      <div className="h-3 w-24 rounded-full bg-slate-200" />
-      <div className="mt-4 h-8 w-52 rounded-full bg-slate-200" />
+      <div className="h-3 w-24 rounded-full bg-zinc-100" />
+      <div className="mt-4 h-8 w-52 rounded-full bg-zinc-100" />
       <div className="mt-6 space-y-3">
-        <div className="h-4 rounded-full bg-zinc-100" />
-        <div className="h-4 w-11/12 rounded-full bg-zinc-100" />
-        <div className="h-4 w-9/12 rounded-full bg-zinc-100" />
+        <div className="h-4 rounded-full bg-zinc-50" />
+        <div className="h-4 w-11/12 rounded-full bg-zinc-50" />
+        <div className="h-4 w-9/12 rounded-full bg-zinc-50" />
       </div>
     </div>
   )

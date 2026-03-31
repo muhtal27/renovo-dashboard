@@ -144,19 +144,22 @@ function NavLink({
       onClick={onNavigate}
       title={collapsed ? item.label : undefined}
       className={cn(
-        'group flex items-center gap-3 rounded-xl border px-3 py-3 text-sm font-medium transition',
+        'group relative flex items-center gap-3 rounded-lg border px-3 py-2.5 text-sm font-medium transition',
         active
-          ? 'border-zinc-900 bg-zinc-900 text-white shadow-[0_2px_8px_rgba(0,0,0,0.08)]'
+          ? 'border-zinc-200 bg-white text-zinc-950 shadow-[0_1px_3px_rgba(0,0,0,0.04)]'
           : 'border-transparent text-zinc-600 hover:border-zinc-200 hover:bg-white hover:text-zinc-950',
         collapsed && 'justify-center px-2'
       )}
     >
+      {active ? (
+        <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-emerald-500" />
+      ) : null}
       <span
         className={cn(
-          'flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border transition',
+          'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition',
           active
-            ? 'border-white/10 bg-white/10 text-white'
-            : 'border-zinc-200 bg-zinc-100 text-zinc-500 group-hover:border-zinc-300 group-hover:bg-white group-hover:text-zinc-700'
+            ? 'bg-emerald-50 text-emerald-600'
+            : 'text-zinc-400 group-hover:text-zinc-600'
         )}
       >
         <Icon className="h-4 w-4" strokeWidth={2} />
@@ -186,11 +189,11 @@ function NavActionButton({
       disabled={pending}
       title={collapsed ? label : undefined}
       className={cn(
-        'group flex w-full items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-sm font-medium text-zinc-600 transition hover:border-zinc-200 hover:bg-white hover:text-zinc-950 disabled:cursor-not-allowed disabled:opacity-60',
+        'group flex w-full items-center gap-3 rounded-lg border border-transparent px-3 py-2.5 text-sm font-medium text-zinc-600 transition hover:border-zinc-200 hover:bg-white hover:text-zinc-950 disabled:cursor-not-allowed disabled:opacity-60',
         collapsed && 'justify-center px-2'
       )}
     >
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-zinc-200 bg-zinc-100 text-zinc-500 transition group-hover:border-zinc-300 group-hover:bg-white group-hover:text-zinc-700">
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-zinc-400 transition group-hover:text-zinc-600">
         <Icon className="h-4 w-4" strokeWidth={2} />
       </span>
       {!collapsed ? <span className="truncate">{pending ? 'Signing out...' : label}</span> : null}
@@ -231,13 +234,10 @@ function SidebarContent({
           href="/overview"
           prefetch={false}
           onClick={onNavigate}
-          className={cn(
-            'rounded-xl border border-zinc-200 bg-white px-4 py-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)]',
-            collapsed && !mobile && 'px-3'
-          )}
+          className="flex items-center gap-3 px-3 py-3"
         >
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-zinc-900 text-sm font-semibold text-white">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-zinc-900 text-sm font-semibold text-white">
               R
             </div>
             {!collapsed || mobile ? (
@@ -256,22 +256,22 @@ function SidebarContent({
         <button
           type="button"
           onClick={onToggleCollapse}
-          className="hidden h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-600 transition hover:text-zinc-950 xl:flex"
+          className="hidden h-8 w-8 items-center justify-center rounded-lg text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 xl:flex"
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           <ChevronLeft className={cn('h-4 w-4 transition', collapsed && 'rotate-180')} />
         </button>
       </div>
 
-      <div className="mt-8 space-y-7 pb-6">
+      <div className="mt-8 space-y-6 pb-6">
         {visibleGroups.map((group) => (
           <div key={group.label}>
             {!collapsed || mobile ? (
-              <p className="px-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
+              <p className="px-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-600/70">
                 {group.label}
               </p>
             ) : null}
-            <div className={cn('space-y-1.5', (!collapsed || mobile) && 'mt-3')}>
+            <div className={cn('space-y-0.5', (!collapsed || mobile) && 'mt-3')}>
               {group.items.map((item) => (
                 <NavLink
                   key={item.href}
@@ -314,7 +314,7 @@ export function OperatorNav({
       <aside
         className={cn(
           'hidden xl:block xl:border-r xl:border-zinc-200/80 xl:bg-zinc-50/80',
-          collapsed ? 'xl:w-[96px]' : 'xl:w-[308px]'
+          collapsed ? 'xl:w-[80px]' : 'xl:w-[264px]'
         )}
       >
         <div className="sticky top-0 h-screen overflow-y-auto px-4 py-4">
@@ -330,16 +330,16 @@ export function OperatorNav({
       </aside>
 
       {mobileOpen ? (
-        <div className="fixed inset-0 z-50 bg-zinc-950/35 xl:hidden" onClick={onCloseMobile}>
+        <div className="fixed inset-0 z-50 bg-zinc-950/30 xl:hidden" onClick={onCloseMobile}>
           <aside
-            className="absolute inset-y-0 left-0 w-[84vw] max-w-[320px] bg-zinc-50/80 px-4 py-4 shadow-[0_8px_32px_rgba(0,0,0,0.12)]"
+            className="absolute inset-y-0 left-0 w-[84vw] max-w-[320px] bg-zinc-50 px-4 py-4 shadow-[0_8px_32px_rgba(0,0,0,0.12)]"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="mb-4 flex justify-end">
               <button
                 type="button"
                 onClick={onCloseMobile}
-                className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-600"
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950"
                 aria-label="Close navigation"
               >
                 <X className="h-4 w-4" />
