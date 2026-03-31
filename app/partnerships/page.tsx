@@ -24,15 +24,15 @@ const partnerTypes = [
 const handoffAreas = [
   {
     title: 'Where Renovo AI sits',
-    body: 'Renovo AI sits between evidence collection and claim preparation. It is designed to organise the operational work that usually happens across reports, photos, spreadsheets, and email.',
+    body: 'Between evidence collection and claim preparation. Designed to organise the operational work that usually happens across reports, photos, spreadsheets, and email.',
   },
   {
     title: 'What a partner gets',
     body: 'A clearer workflow handoff for shared customers, less manual rework at the checkout stage, and a stronger structure around evidence-led review.',
   },
   {
-    title: 'How workflow handoff can work',
-    body: 'Structured document intake, case context, issue-level evidence links, reviewed recommendations, and claim-ready output are the main areas where workflow alignment matters.',
+    title: 'How workflow handoff works',
+    body: 'Structured document intake, case context, issue-level evidence links, reviewed recommendations, and claim-ready output.',
   },
 ] as const
 
@@ -46,91 +46,68 @@ export const metadata = createMarketingMetadata({
 export default function PartnershipsPage() {
   return (
     <MarketingShell currentPath="/partnerships">
-      <section className="app-surface rounded-[2rem] p-6 md:p-8">
-        <div className="mx-auto max-w-6xl space-y-10">
-          <section className="rounded-[1.8rem] border border-stone-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,247,243,0.95))] px-6 py-7 md:px-8 md:py-8">
-            <p className="app-kicker">Partnerships</p>
-            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-stone-900 md:text-4xl">
-              Work with Renovo AI
-            </h1>
-            <p className="mt-4 max-w-3xl text-sm leading-7 text-stone-600 md:text-base md:leading-8">
-              Renovo AI automates end-of-tenancy work for property managers and letting agencies. We
-              are interested in partnerships where workflow handoff, structured evidence, and
-              operational review can fit together cleanly.
-            </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Link
-                href="/contact"
-                className="app-primary-button rounded-md px-4 py-2 text-sm font-medium"
-              >
-                Contact Renovo AI
-              </Link>
-              <Link
-                href="/demo"
-                className="app-secondary-button rounded-md px-4 py-2 text-sm font-medium"
-              >
-                View demo
-              </Link>
-            </div>
-          </section>
+      <div className="page-shell page-stack">
 
-          <section>
+        <section className="page-hero">
+          <p className="app-kicker">Partnerships</p>
+          <h1 className="page-title max-w-[820px]">
+            Work with <em>Renovo AI</em>
+          </h1>
+          <p className="page-copy max-w-[640px]">
+            Renovo AI automates end-of-tenancy work for property managers and letting
+            agencies. We are interested in partnerships where workflow handoff, structured
+            evidence, and operational review fit together cleanly.
+          </p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link href="/contact" className="app-primary-button rounded-md px-6 py-3 text-sm font-medium">Contact Renovo AI</Link>
+            <Link href="/demo" className="app-secondary-button rounded-md px-6 py-3 text-sm font-medium">View demo</Link>
+          </div>
+        </section>
+
+        {/* WHO WE WORK WITH */}
+        <section className="section-tinted">
+          <div className="mx-auto max-w-[1080px] px-6 py-24">
             <p className="app-kicker">Who we work with</p>
-            <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <div className="mt-14 grid gap-10 md:grid-cols-2">
               {partnerTypes.map((item) => (
-                <article
-                  key={item.title}
-                  className="rounded-[1.45rem] border border-stone-200 bg-white/92 p-5"
-                >
-                  <h2 className="text-lg font-semibold text-stone-900">{item.title}</h2>
-                  <p className="mt-3 text-sm leading-7 text-stone-600">{item.body}</p>
-                </article>
+                <div key={item.title}>
+                  <h3 className="text-[15px] font-semibold text-zinc-950">{item.title}</h3>
+                  <p className="mt-2 text-sm leading-7 text-slate-500">{item.body}</p>
+                </div>
               ))}
             </div>
-          </section>
+          </div>
+        </section>
 
-          <section>
-            <p className="app-kicker">How Renovo AI connects</p>
-            <div className="mt-4 grid gap-4 md:grid-cols-3">
-              {handoffAreas.map((item) => (
-                <article
-                  key={item.title}
-                  className="rounded-[1.45rem] border border-stone-200 bg-white/92 p-5"
-                >
-                  <h2 className="text-base font-semibold text-stone-900">{item.title}</h2>
-                  <p className="mt-3 text-sm leading-7 text-stone-600">{item.body}</p>
-                </article>
-              ))}
-            </div>
-          </section>
-
-          <section className="app-surface-strong rounded-[2.2rem] p-6 md:p-8">
-            <div className="rounded-[1.8rem] border border-stone-200 bg-[linear-gradient(135deg,rgba(255,255,255,0.97),rgba(240,247,243,0.94))] px-6 py-7 text-center md:px-8 md:py-9">
-              <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
-                Let&apos;s talk about working together
-              </h2>
-              <p className="mx-auto mt-4 max-w-3xl text-base leading-8 text-stone-700">
-                If you&apos;re building for property managers, inventory teams, or end-of-tenancy
-                operations, we&apos;d be happy to explore how Renovo AI could fit into your workflow.
-              </p>
-              <div className="mt-8 flex flex-wrap justify-center gap-3">
-                <Link
-                  href="/contact"
-                  className="app-primary-button rounded-md px-5 py-3 text-sm font-medium"
-                >
-                  Contact Renovo AI
-                </Link>
-                <Link
-                  href="/demo"
-                  className="app-secondary-button rounded-md px-5 py-3 text-sm font-medium"
-                >
-                  View demo
-                </Link>
+        {/* HOW RENOVO CONNECTS */}
+        <section className="mx-auto max-w-[1080px] px-6 py-24">
+          <p className="app-kicker">How Renovo AI connects</p>
+          <div className="mt-14 grid gap-10 md:grid-cols-3">
+            {handoffAreas.map((item) => (
+              <div key={item.title}>
+                <h3 className="text-[15px] font-semibold text-zinc-950">{item.title}</h3>
+                <p className="mt-2 text-sm leading-7 text-slate-500">{item.body}</p>
               </div>
-            </div>
-          </section>
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
+
+        {/* CTA */}
+        <section className="page-hero text-center">
+          <h2 className="text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
+            Interested in <em className="text-slate-400">working together</em>?
+          </h2>
+          <p className="mx-auto mt-4 max-w-[500px] text-base leading-8 text-slate-500">
+            If you build for property managers, inventory teams, or end-of-tenancy
+            operations, we would be happy to explore how Renovo AI fits your workflow.
+          </p>
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <Link href="/contact" className="app-primary-button rounded-md px-6 py-3 text-sm font-medium">Contact Renovo AI</Link>
+            <Link href="/demo" className="app-secondary-button rounded-md px-6 py-3 text-sm font-medium">View demo</Link>
+          </div>
+        </section>
+
+      </div>
     </MarketingShell>
   )
 }
