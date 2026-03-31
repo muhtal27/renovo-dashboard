@@ -636,5 +636,5 @@ a:focus-visible {
 .bg-\[\#0a0e1a\] h2,
 .bg-\[\#0a0e1a\] h3,
 .bg-\[\#0a0e1a\] h4 {
-  color: inherit;
+  color: unset;
 }
