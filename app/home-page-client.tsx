@@ -310,7 +310,7 @@ export default function HomePageClient() {
             </div>
             {Object.entries(footerCols).map(([title, links]) => (
               <div key={title}>
-                <h4 className="text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-500">{title}</h4>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-500">{title}</p>
                 <nav className="mt-4 grid gap-0.5">
                   {links.map((l) => (
                     <Link key={l.href} href={l.href} className="text-[13px] leading-[2.3] text-white/35 transition-colors hover:text-white">{l.label}</Link>
