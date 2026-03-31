@@ -18,14 +18,9 @@ import {
 import {
   ActivityTimeline,
   DataTable,
-  DetailPanel,
   EmptyState,
   KPIStatCard,
-  MetaItem,
-  PageHeader,
-  ProgressBar,
   SectionCard,
-  SectionHeading,
   SkeletonPanel,
   StatusBadge,
   ToolbarPill,
@@ -72,8 +67,8 @@ function DistributionBar({
               <span>{item.label}</span>
               <span className="font-medium text-zinc-900">{item.value}</span>
             </div>
-            <div className="h-2.5 overflow-hidden rounded-full bg-zinc-100">
-              <div className={`h-full rounded-full ${color}`} style={{ width: `${width}%` }} />
+            <div className="h-1.5 overflow-hidden bg-zinc-100">
+              <div className={`h-full ${color}`} style={{ width: `${width}%` }} />
             </div>
           </div>
         )
@@ -272,90 +267,71 @@ export function EotPortfolioClient({
 
   if (mode === 'overview') {
     return (
-      <div className="space-y-6">
-        <PageHeader
-          eyebrow="Overview"
-          title="Portfolio command view"
-          description="A live executive summary of checkout volume, dispute risk, workflow throughput, and the checkouts that need action next."
-        />
+      <div className="space-y-4">
+        <div className="flex items-end gap-8 border-b border-zinc-200 pb-3">
+          <KPIStatCard label="Active" value={stats.activeCases} />
+          <KPIStatCard label="Ready" value={stats.readyForClaim} tone="accent" />
+          <KPIStatCard label="Disputed" value={stats.disputed} tone="danger" />
+          <KPIStatCard label="Evidence" value={stats.totalEvidence} />
+          <KPIStatCard label="Resolved" value={stats.resolvedIssues} tone="warning" />
+        </div>
 
-        <section className="grid gap-4 xl:grid-cols-5">
-          <KPIStatCard label="Active checkouts" value={stats.activeCases} detail={`${stats.totalCases} total live checkouts`} />
-          <KPIStatCard label="Ready for submission" value={stats.readyForClaim} detail="Queue for final submission review." tone="accent" />
-          <KPIStatCard label="Disputed" value={stats.disputed} detail="Checkouts currently in dispute handling." tone="danger" />
-          <KPIStatCard label="Evidence logged" value={stats.totalEvidence} detail={`Avg ${stats.averageEvidencePerCase.toFixed(1)} per checkout`} />
-          <KPIStatCard label="Resolved issues" value={stats.resolvedIssues} detail={`${stats.totalIssues} issues assessed overall`} tone="warning" />
-        </section>
-
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_360px]">
-          <SectionCard className="px-6 py-6">
-            <SectionHeading
-              eyebrow="Attention queue"
-              title="Checkouts requiring operator focus"
-              description="High-priority, disputed, or stalled files surfaced from the live workspace data."
-            />
-            <div className="mt-5 space-y-3">
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+          <div>
+            <h3 className="text-sm font-semibold text-zinc-950">Attention queue</h3>
+            <div className="mt-2">
               {attentionQueue.map((workspace) => {
                 const readiness = getClaimReadiness(workspace)
 
                 return (
-                  <div
-                    key={workspace.case.id}
-                    className="border-b border-zinc-200 px-5 py-5 last:border-b-0"
-                  >
-                    <div className="flex flex-wrap items-center gap-2">
+                  <div key={workspace.case.id} className="flex items-start justify-between gap-4 border-b border-zinc-100 py-2.5">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <Link
+                          href={`/operator/cases/${workspace.case.id}`}
+                          className="text-sm font-medium text-zinc-950 underline decoration-zinc-300 underline-offset-2 transition hover:decoration-zinc-900"
+                        >
+                          {workspace.property.name}
+                        </Link>
+                        <span className="text-xs text-zinc-400">{workspace.tenancy.tenant_name}</span>
+                      </div>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-1">
                       <StatusBadge label={formatEnumLabel(workspace.case.priority)} tone={workspace.case.priority} />
                       <StatusBadge label={formatEnumLabel(workspace.case.status)} tone={workspace.case.status} />
-                      <StatusBadge label={readiness.label} tone={readiness.tone === 'ready' ? 'ready_for_claim' : readiness.tone === 'attention' ? 'attention' : 'document'} />
                     </div>
-                    <Link
-                      href={`/operator/cases/${workspace.case.id}`}
-                      className="mt-3 block text-base font-semibold text-zinc-950 underline decoration-zinc-300 underline-offset-2 transition hover:decoration-zinc-900"
-                    >
-                      {workspace.property.name}
-                    </Link>
-                    <p className="mt-1 text-sm text-zinc-600">{workspace.tenancy.tenant_name}</p>
-                    <p className="mt-3 text-sm leading-6 text-zinc-600">
-                      {workspace.case.summary?.trim() || readiness.description}
-                    </p>
                   </div>
                 )
               })}
             </div>
-          </SectionCard>
+          </div>
 
-          <DetailPanel
-            title="Upcoming risk and deadlines"
-            description="Operational hotspots inferred from current workflow state."
-          >
-            {attentionQueue.slice(0, 4).map((workspace) => (
-              <div key={workspace.case.id} className="border-b border-zinc-200 py-4 last:border-b-0">
-                <div className="flex items-start gap-3">
-                  <TriangleAlert className="mt-0.5 h-4 w-4 text-amber-500" />
-                  <div>
-                    <p className="text-sm font-semibold text-zinc-950">{workspace.property.name}</p>
-                    <p className="mt-1 text-sm leading-6 text-zinc-600">
+          <div>
+            <h3 className="text-sm font-semibold text-zinc-950">Risk signals</h3>
+            <div className="mt-2">
+              {attentionQueue.slice(0, 4).map((workspace) => (
+                <div key={workspace.case.id} className="flex items-start gap-2 border-b border-zinc-100 py-2">
+                  <TriangleAlert className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-500" />
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-zinc-950">{workspace.property.name}</p>
+                    <p className="text-xs text-zinc-500">
                       {workspace.case.status === 'ready_for_claim'
-                        ? 'Ready for submission review and operator sign-off.'
+                        ? 'Ready for submission sign-off'
                         : workspace.case.status === 'disputed'
-                          ? 'Dispute handling needs a clear evidence-backed narrative.'
-                          : 'Review evidence quality and move the case forward.'}
+                          ? 'Dispute needs evidence narrative'
+                          : 'Review evidence and advance'}
                     </p>
                   </div>
                 </div>
-              </div>
-            ))}
-          </DetailPanel>
+              ))}
+            </div>
+          </div>
         </div>
 
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
-          <SectionCard className="px-6 py-6">
-            <SectionHeading
-              eyebrow="Pipeline"
-              title="Status breakdown"
-              description="Distribution of active checkouts across the end-of-tenancy workflow."
-            />
-            <div className="mt-5">
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+          <div>
+            <h3 className="text-sm font-semibold text-zinc-950">Pipeline</h3>
+            <div className="mt-2">
               <DistributionBar
                 items={Object.entries(statusBreakdown).map(([label, value]) => ({
                   label: formatEnumLabel(label),
@@ -371,31 +347,30 @@ export function EotPortfolioClient({
                 }))}
               />
             </div>
-          </SectionCard>
+          </div>
 
-          <SectionCard className="px-6 py-6">
-            <SectionHeading
-              eyebrow="Productivity"
-              title="Operator throughput snapshot"
-              description="Evidence intake, issue assessment, and recommendation mix across the current operator workload."
-            />
-            <div className="mt-5 grid gap-4 md:grid-cols-2">
-              <MetaItem label="Issue resolution rate" value={`${stats.totalIssues ? Math.round((stats.resolvedIssues / stats.totalIssues) * 100) : 0}%`} />
-              <MetaItem label="Claim total" value={formatCurrency(stats.claimAmount)} />
-              <MetaItem label="Evidence / checkout" value={stats.averageEvidencePerCase.toFixed(1)} />
-              <MetaItem label="Recommendations" value={recommendationCount} />
+          <div>
+            <h3 className="text-sm font-semibold text-zinc-950">Throughput</h3>
+            <div className="mt-2 space-y-0">
+              {[
+                { label: 'Resolution rate', value: `${stats.totalIssues ? Math.round((stats.resolvedIssues / stats.totalIssues) * 100) : 0}%` },
+                { label: 'Claim total', value: formatCurrency(stats.claimAmount) },
+                { label: 'Evidence / checkout', value: stats.averageEvidencePerCase.toFixed(1) },
+                { label: 'Recommendations', value: String(recommendationCount) },
+              ].map((item) => (
+                <div key={item.label} className="flex items-baseline justify-between gap-3 border-b border-zinc-100 py-2">
+                  <span className="text-xs text-zinc-500">{item.label}</span>
+                  <span className="text-sm font-semibold tabular-nums text-zinc-950">{item.value}</span>
+                </div>
+              ))}
             </div>
-          </SectionCard>
+          </div>
         </div>
 
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-          <SectionCard className="px-6 py-6">
-            <SectionHeading
-              eyebrow="Recent activity"
-              title="Latest portfolio movement"
-              description="Live activity stream across checkout workspaces."
-            />
-            <div className="mt-5">
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+          <div>
+            <h3 className="text-sm font-semibold text-zinc-950">Recent activity</h3>
+            <div className="mt-2">
               <ActivityTimeline
                 items={recentActivity.map((item) => ({
                   id: item.id,
@@ -406,20 +381,20 @@ export function EotPortfolioClient({
                 }))}
               />
             </div>
-          </SectionCard>
+          </div>
 
-          <DetailPanel
-            title="Evidence mix"
-            description="Current media and document composition across active checkouts."
-          >
-            <DistributionBar
-              items={Object.entries(evidenceTypeBreakdown).map(([label, value]) => ({
-                label: formatEnumLabel(label),
-                value,
-                tone: label === 'image' ? 'accent' : label === 'video' ? 'warning' : undefined,
-              }))}
-            />
-          </DetailPanel>
+          <div>
+            <h3 className="text-sm font-semibold text-zinc-950">Evidence mix</h3>
+            <div className="mt-2">
+              <DistributionBar
+                items={Object.entries(evidenceTypeBreakdown).map(([label, value]) => ({
+                  label: formatEnumLabel(label),
+                  value,
+                  tone: label === 'image' ? 'accent' : label === 'video' ? 'warning' : undefined,
+                }))}
+              />
+            </div>
+          </div>
         </div>
       </div>
     )
@@ -427,416 +402,284 @@ export function EotPortfolioClient({
 
   if (mode === 'tenancy') {
     return (
-      <div className="space-y-6">
-        <PageHeader
-          eyebrow="Tenancy"
-          title="Tenancy operations"
-          description="Review resident, deposit, property, and workflow context across the live end-of-tenancy portfolio."
-        />
-
-        <section className="grid gap-4 xl:grid-cols-4">
-          <KPIStatCard label="Active tenancies" value={tenancyItems.length} detail="Tenancy records currently attached to live checkouts." />
-          <KPIStatCard label="Deposits captured" value={workspaces.filter((workspace) => workspace.tenancy.deposit_amount).length} detail="Checkouts with deposit values already recorded." tone="accent" />
-          <KPIStatCard label="References present" value={workspaces.filter((workspace) => workspace.property.reference).length} detail="Properties with a usable internal reference." />
-          <KPIStatCard label="Ready for submission" value={workspaces.filter((workspace) => workspace.case.status === 'ready_for_claim').length} detail="Tenancies ready for final submission work." tone="warning" />
-        </section>
-
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_360px]">
-          <SectionCard className="px-6 py-6">
-            <SectionHeading
-              title="Tenancy register"
-              description={`${tenancyItems.length} tenancy record${tenancyItems.length === 1 ? '' : 's'} visible.`}
-            />
-            <div className="mt-5">
-              <DataTable>
-                <table className="min-w-full text-left">
-                  <thead className="bg-zinc-50 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
-                    <tr>
-                      <th className="px-4 py-3">Property</th>
-                      <th className="px-4 py-3">Tenant</th>
-                      <th className="px-4 py-3">Deposit</th>
-                      <th className="px-4 py-3">Tenancy dates</th>
-                      <th className="px-4 py-3">Workflow</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-zinc-200 bg-white">
-                    {tenancyItems.map((workspace) => (
-                      <tr
-                        key={workspace.case.id}
-                        className={selectedTenancy?.case.id === workspace.case.id ? 'bg-zinc-50/90' : 'hover:bg-zinc-50/70'}
-                        onClick={() => setSelectedItemId(workspace.case.id)}
-                      >
-                        <td className="px-4 py-4">
-                          <div>
-                            <Link href={`/operator/cases/${workspace.case.id}`} className="text-sm font-semibold text-zinc-950 underline decoration-zinc-300 underline-offset-2 transition hover:decoration-zinc-900">{workspace.property.name}</Link>
-                            <p className="mt-1 text-sm text-zinc-600">{workspace.property.reference || 'Reference pending'}</p>
-                          </div>
-                        </td>
-                        <td className="px-4 py-4">
-                          <div>
-                            <p className="text-sm font-medium text-zinc-950">{workspace.tenancy.tenant_name}</p>
-                            <p className="mt-1 text-sm text-zinc-600">{workspace.tenancy.tenant_email || 'Email not recorded'}</p>
-                          </div>
-                        </td>
-                        <td className="px-4 py-4 text-sm font-medium text-zinc-950">
-                          {workspace.tenancy.deposit_amount ? formatCurrency(workspace.tenancy.deposit_amount) : 'Not recorded'}
-                        </td>
-                        <td className="px-4 py-4 text-sm text-zinc-700">
-                          {formatDate(workspace.tenancy.start_date)} to {formatDate(workspace.tenancy.end_date)}
-                        </td>
-                        <td className="px-4 py-4">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <StatusBadge label={formatEnumLabel(workspace.case.status)} tone={workspace.case.status} />
-                            <StatusBadge label={formatEnumLabel(workspace.case.priority)} tone={workspace.case.priority} />
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </DataTable>
-            </div>
-          </SectionCard>
-
-          {selectedTenancy ? (
-            <DetailPanel
-              title="Tenancy context"
-              description="Deposit, case coverage, and supporting tenancy activity for the selected record."
-            >
-              <MetaItem label="Property" value={selectedTenancy.property.name} />
-              <MetaItem label="Property reference" value={selectedTenancy.property.reference || 'Reference pending'} />
-              <MetaItem label="Evidence logged" value={selectedTenancy.evidence.length} />
-              <MetaItem label="Issues raised" value={selectedTenancy.issues.length} />
-              <ProgressBar
-                value={selectedTenancy.evidence.length ? Math.min(100, selectedTenancy.evidence.length * 14) : 8}
-                label={
-                  <>
-                    <span>File completeness</span>
-                    <span>{selectedTenancy.evidence.length ? 'In progress' : 'Just started'}</span>
-                  </>
-                }
-              />
-            </DetailPanel>
-          ) : null}
+      <div className="space-y-4">
+        <div className="flex items-end gap-8 border-b border-zinc-200 pb-3">
+          <KPIStatCard label="Active tenancies" value={tenancyItems.length} />
+          <KPIStatCard label="Deposits captured" value={workspaces.filter((workspace) => workspace.tenancy.deposit_amount).length} tone="accent" />
+          <KPIStatCard label="References present" value={workspaces.filter((workspace) => workspace.property.reference).length} />
+          <KPIStatCard label="Ready for submission" value={workspaces.filter((workspace) => workspace.case.status === 'ready_for_claim').length} tone="warning" />
         </div>
+
+        <DataTable>
+          <table className="min-w-full text-left">
+            <thead className="bg-zinc-50 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
+              <tr>
+                <th className="px-3 py-2.5">Property</th>
+                <th className="px-3 py-2.5">Tenant</th>
+                <th className="px-3 py-2.5">Deposit</th>
+                <th className="px-3 py-2.5">Tenancy dates</th>
+                <th className="px-3 py-2.5">Evidence</th>
+                <th className="px-3 py-2.5">Issues</th>
+                <th className="px-3 py-2.5">Workflow</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-100">
+              {tenancyItems.map((workspace) => (
+                <tr key={workspace.case.id} className="hover:bg-zinc-50/70">
+                  <td className="px-3 py-2.5">
+                    <Link href={`/operator/cases/${workspace.case.id}`} className="text-sm font-medium text-zinc-950 underline decoration-zinc-300 underline-offset-2 transition hover:decoration-zinc-900">{workspace.property.name}</Link>
+                    <p className="text-xs text-zinc-500">{workspace.property.reference || '—'}</p>
+                  </td>
+                  <td className="px-3 py-2.5">
+                    <p className="text-sm text-zinc-950">{workspace.tenancy.tenant_name}</p>
+                    <p className="text-xs text-zinc-500">{workspace.tenancy.tenant_email || '—'}</p>
+                  </td>
+                  <td className="px-3 py-2.5 text-sm font-medium text-zinc-950">
+                    {workspace.tenancy.deposit_amount ? formatCurrency(workspace.tenancy.deposit_amount) : '—'}
+                  </td>
+                  <td className="px-3 py-2.5 text-sm text-zinc-700">
+                    {formatDate(workspace.tenancy.start_date)} – {formatDate(workspace.tenancy.end_date)}
+                  </td>
+                  <td className="px-3 py-2.5 text-sm text-zinc-700">{workspace.evidence.length}</td>
+                  <td className="px-3 py-2.5 text-sm text-zinc-700">{workspace.issues.length}</td>
+                  <td className="px-3 py-2.5">
+                    <div className="flex items-center gap-1">
+                      <StatusBadge label={formatEnumLabel(workspace.case.status)} tone={workspace.case.status} />
+                      <StatusBadge label={formatEnumLabel(workspace.case.priority)} tone={workspace.case.priority} />
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </DataTable>
       </div>
     )
   }
 
   if (mode === 'disputes') {
     return (
-      <div className="space-y-6">
-        <PageHeader
-          eyebrow="Disputes"
-          title="Dispute review queue"
-          description="Review disputed checkouts, contested issues, linked evidence, and recommendation rationale before final resolution."
-        />
-
-        <section className="grid gap-4 xl:grid-cols-4">
-          <KPIStatCard label="Disputed checkouts" value={workspaces.filter((workspace) => workspace.case.status === 'disputed').length} detail="Checkouts currently marked disputed." tone="danger" />
-          <KPIStatCard label="Disputed issues" value={disputeItems.length} detail="Issue records needing dispute handling." tone="warning" />
-          <KPIStatCard label="Charge recommendations" value={disputeItems.filter((issue) => issue.recommendation?.decision === 'charge').length} detail="Disputes with a full charge position." />
-          <KPIStatCard label="Evidence links" value={disputeItems.reduce((sum, issue) => sum + issue.linked_evidence.length, 0)} detail="Evidence items attached to disputed issues." />
-        </section>
-
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_360px]">
-          <SectionCard className="px-6 py-6">
-            <SectionHeading
-              title="Active disputes"
-              description={`${disputeItems.length} dispute item${disputeItems.length === 1 ? '' : 's'} visible.`}
-            />
-            <div className="mt-5 grid gap-3">
-              {disputeItems.map((issue) => (
-                <button
-                  key={issue.id}
-                  type="button"
-                  onClick={() => setSelectedItemId(issue.id)}
-                  className={`border px-4 py-4 text-left transition ${
-                    selectedDispute?.id === issue.id
-                      ? 'border-zinc-900 bg-zinc-900 text-white'
-                      : 'border-zinc-200 bg-white hover:border-zinc-300 hover:bg-zinc-50'
-                  }`}
-                >
-                  <div className="flex flex-wrap items-center gap-2">
-                    <StatusBadge label={formatEnumLabel(issue.severity)} tone={issue.severity} />
-                    <StatusBadge
-                      label={issue.status === 'disputed' ? 'Contested' : formatEnumLabel(issue.status)}
-                      tone={issue.status}
-                    />
-                    <StatusBadge label={formatEnumLabel(issue.caseStatus)} tone={issue.caseStatus} />
-                    {issue.recommendation?.decision ? (
-                      <StatusBadge
-                        label={formatEnumLabel(issue.recommendation.decision)}
-                        tone={issue.recommendation.decision}
-                      />
-                      ) : null}
-                  </div>
-                  <p className={`mt-3 text-sm font-semibold ${selectedDispute?.id === issue.id ? 'text-white' : 'text-zinc-950'}`}>
-                    {issue.title}
-                  </p>
-                  <p className={`mt-1 text-sm ${selectedDispute?.id === issue.id ? 'text-zinc-200' : 'text-zinc-600'}`}>
-                    {issue.propertyName} · {issue.tenantName}
-                  </p>
-                  <p className={`mt-3 text-sm leading-6 ${selectedDispute?.id === issue.id ? 'text-zinc-200' : 'text-zinc-600'}`}>
-                    {issue.description || 'No additional narrative recorded.'}
-                  </p>
-                </button>
-              ))}
-            </div>
-          </SectionCard>
-
-          {selectedDispute ? (
-            <DetailPanel
-              title="Dispute context"
-              description="Evidence linkage, cost position, and the narrative currently supporting the dispute."
-            >
-              <MetaItem label="Property" value={<Link href={`/operator/cases/${selectedDispute.caseId}`} className="underline decoration-zinc-300 underline-offset-2 transition hover:decoration-zinc-900">{selectedDispute.propertyName}</Link>} />
-              <MetaItem label="Tenant" value={selectedDispute.tenantName} />
-              <MetaItem label="Linked evidence" value={selectedDispute.linked_evidence.length} />
-              <MetaItem label="Checkout status" value={formatEnumLabel(selectedDispute.caseStatus)} />
-              {selectedDispute.recommendation?.estimated_cost ? (
-                <MetaItem
-                  label="Estimated cost"
-                  value={formatCurrency(selectedDispute.recommendation.estimated_cost)}
-                />
-              ) : null}
-              {selectedDispute.recommendation?.rationale ? (
-                <div className="border-b border-zinc-200 py-3 text-sm leading-6 text-zinc-600">
-                  {selectedDispute.recommendation.rationale}
-                </div>
-              ) : null}
-              <div className="flex flex-wrap gap-2">
-                {selectedDispute.linked_evidence.map((item) => (
-                  <StatusBadge
-                    key={item.id}
-                    label={item.area || formatEnumLabel(item.type)}
-                    tone={item.type}
-                  />
-                ))}
-              </div>
-            </DetailPanel>
-          ) : null}
+      <div className="space-y-4">
+        <div className="flex items-end gap-8 border-b border-zinc-200 pb-3">
+          <KPIStatCard label="Disputed checkouts" value={workspaces.filter((workspace) => workspace.case.status === 'disputed').length} tone="danger" />
+          <KPIStatCard label="Disputed issues" value={disputeItems.length} tone="warning" />
+          <KPIStatCard label="Charge recommendations" value={disputeItems.filter((issue) => issue.recommendation?.decision === 'charge').length} />
+          <KPIStatCard label="Evidence links" value={disputeItems.reduce((sum, issue) => sum + issue.linked_evidence.length, 0)} />
         </div>
+
+        <DataTable>
+          <table className="min-w-full text-left">
+            <thead className="bg-zinc-50 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
+              <tr>
+                <th className="px-3 py-2.5">Issue</th>
+                <th className="px-3 py-2.5">Property</th>
+                <th className="px-3 py-2.5">Severity</th>
+                <th className="px-3 py-2.5">Status</th>
+                <th className="px-3 py-2.5">Decision</th>
+                <th className="px-3 py-2.5">Evidence</th>
+                <th className="px-3 py-2.5">Cost</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-100">
+              {disputeItems.map((issue) => (
+                <tr key={issue.id} className="hover:bg-zinc-50/70">
+                  <td className="px-3 py-2.5">
+                    <p className="text-sm font-medium text-zinc-950">{issue.title}</p>
+                    <p className="text-xs text-zinc-500">{issue.description ? issue.description.slice(0, 80) + (issue.description.length > 80 ? '…' : '') : '—'}</p>
+                  </td>
+                  <td className="px-3 py-2.5">
+                    <Link href={`/operator/cases/${issue.caseId}`} className="text-sm text-zinc-950 underline decoration-zinc-300 underline-offset-2 transition hover:decoration-zinc-900">{issue.propertyName}</Link>
+                    <p className="text-xs text-zinc-500">{issue.tenantName}</p>
+                  </td>
+                  <td className="px-3 py-2.5"><StatusBadge label={formatEnumLabel(issue.severity)} tone={issue.severity} /></td>
+                  <td className="px-3 py-2.5"><StatusBadge label={issue.status === 'disputed' ? 'Contested' : formatEnumLabel(issue.status)} tone={issue.status} /></td>
+                  <td className="px-3 py-2.5">{issue.recommendation?.decision ? <StatusBadge label={formatEnumLabel(issue.recommendation.decision)} tone={issue.recommendation.decision} /> : <span className="text-xs text-zinc-400">—</span>}</td>
+                  <td className="px-3 py-2.5 text-sm text-zinc-700">{issue.linked_evidence.length}</td>
+                  <td className="px-3 py-2.5 text-sm font-medium text-zinc-950">{issue.recommendation?.estimated_cost ? formatCurrency(issue.recommendation.estimated_cost) : '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </DataTable>
       </div>
     )
   }
 
   if (mode === 'recommendations') {
     return (
-      <div className="space-y-6">
-        <PageHeader
-          eyebrow="Recommendations"
-          title="Charge recommendation review"
-          description="Review recommendation decisions, cost estimates, and supporting rationale before submission generation."
-        />
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 border-b border-zinc-200">
+          {[
+            { value: 'all' as const, label: 'All decisions' },
+            { value: 'charge' as const, label: 'Charge' },
+            { value: 'partial' as const, label: 'Partial' },
+            { value: 'no_charge' as const, label: 'No charge' },
+          ].map((option) => (
+            <button key={option.value} type="button" onClick={() => setRecommendationView(option.value)}>
+              <ToolbarPill active={recommendationView === option.value}>{option.label}</ToolbarPill>
+            </button>
+          ))}
+        </div>
 
-        <SectionCard className="px-6 py-6">
-          <div className="flex flex-wrap items-center gap-2">
-            {[
-              { value: 'all' as const, label: 'All decisions' },
-              { value: 'charge' as const, label: 'Charge' },
-              { value: 'partial' as const, label: 'Partial' },
-              { value: 'no_charge' as const, label: 'No charge' },
-            ].map((option) => (
-              <button key={option.value} type="button" onClick={() => setRecommendationView(option.value)}>
-                <ToolbarPill active={recommendationView === option.value}>{option.label}</ToolbarPill>
-              </button>
-            ))}
-          </div>
-
-          <div className="mt-6 grid gap-4 xl:grid-cols-2">
-            {recommendations.map((item) => (
-              <div key={item.recommendation.id} className="border-b border-zinc-200 px-5 py-5">
-                <div className="flex flex-wrap items-center gap-2">
-                  <StatusBadge
-                    label={formatEnumLabel(item.recommendation.decision)}
-                    tone={item.recommendation.decision ?? 'document'}
-                  />
-                  <StatusBadge label={formatEnumLabel(item.issue.severity)} tone={item.issue.severity} />
-                </div>
-                <p className="mt-3 text-base font-semibold text-zinc-950">{item.issue.title}</p>
-                <p className="mt-1 text-sm text-zinc-600">
-                  <Link href={`/operator/cases/${item.caseId}`} className="underline decoration-zinc-300 underline-offset-2 transition hover:decoration-zinc-900">{item.propertyName}</Link> · {item.tenantName}
-                </p>
-                <p className="mt-3 text-sm leading-6 text-zinc-600">
-                  {item.recommendation.rationale || 'No recommendation rationale recorded.'}
-                </p>
-                <div className="mt-4">
-                  <p className="text-sm font-semibold text-zinc-950">
-                    {item.recommendation.estimated_cost
-                      ? formatCurrency(item.recommendation.estimated_cost)
-                      : 'No estimate'}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </SectionCard>
+        <DataTable>
+          <table className="min-w-full text-left">
+            <thead className="bg-zinc-50 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
+              <tr>
+                <th className="px-3 py-2.5">Issue</th>
+                <th className="px-3 py-2.5">Property</th>
+                <th className="px-3 py-2.5">Decision</th>
+                <th className="px-3 py-2.5">Severity</th>
+                <th className="px-3 py-2.5">Rationale</th>
+                <th className="px-3 py-2.5">Cost</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-100">
+              {recommendations.map((item) => (
+                <tr key={item.recommendation.id} className="hover:bg-zinc-50/70">
+                  <td className="px-3 py-2.5">
+                    <p className="text-sm font-medium text-zinc-950">{item.issue.title}</p>
+                  </td>
+                  <td className="px-3 py-2.5">
+                    <Link href={`/operator/cases/${item.caseId}`} className="text-sm text-zinc-950 underline decoration-zinc-300 underline-offset-2 transition hover:decoration-zinc-900">{item.propertyName}</Link>
+                    <p className="text-xs text-zinc-500">{item.tenantName}</p>
+                  </td>
+                  <td className="px-3 py-2.5"><StatusBadge label={formatEnumLabel(item.recommendation.decision)} tone={item.recommendation.decision ?? 'document'} /></td>
+                  <td className="px-3 py-2.5"><StatusBadge label={formatEnumLabel(item.issue.severity)} tone={item.issue.severity} /></td>
+                  <td className="max-w-xs px-3 py-2.5 text-sm text-zinc-600">{item.recommendation.rationale ? item.recommendation.rationale.slice(0, 120) + (item.recommendation.rationale.length > 120 ? '…' : '') : '—'}</td>
+                  <td className="px-3 py-2.5 text-sm font-medium text-zinc-950">{item.recommendation.estimated_cost ? formatCurrency(item.recommendation.estimated_cost) : '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </DataTable>
       </div>
     )
   }
 
   if (mode === 'claims') {
     return (
-      <div className="space-y-6">
-        <PageHeader
-          eyebrow="Submissions"
-          title="Submission desk"
-          description="Monitor generated claim packs, checkouts waiting for submission, and the traceability needed for operator sign-off."
-        />
+      <div className="space-y-4">
+        <div className="flex items-end gap-8 border-b border-zinc-200 pb-3">
+          <KPIStatCard label="Generated claims" value={workspaces.filter((workspace) => workspace.claim).length} tone="accent" />
+          <KPIStatCard label="Awaiting submission" value={workspaces.filter((workspace) => workspace.case.status === 'ready_for_claim' && !workspace.claim).length} tone="warning" />
+          <KPIStatCard label="Claim value" value={formatCurrency(stats.claimAmount)} />
+          <KPIStatCard label="Recommendations" value={recommendationCount} />
+        </div>
 
-        <section className="grid gap-4 xl:grid-cols-4">
-          <KPIStatCard label="Generated claims" value={workspaces.filter((workspace) => workspace.claim).length} detail="Submission packs already created." tone="accent" />
-          <KPIStatCard label="Awaiting submission" value={workspaces.filter((workspace) => workspace.case.status === 'ready_for_claim' && !workspace.claim).length} detail="Checkouts ready but not yet generated." tone="warning" />
-          <KPIStatCard label="Claim value" value={formatCurrency(stats.claimAmount)} detail="Current generated claim total." />
-          <KPIStatCard label="Recommendations" value={recommendationCount} detail="Supporting recommendation set." />
-        </section>
-
-        <SectionCard className="px-6 py-6">
-          <SectionHeading
-            title="Submission readiness by checkout"
-            description="Generated claims, pending submissions, and the checkouts still being prepared."
-          />
-          <div className="mt-5 grid gap-4 xl:grid-cols-2">
-            {workspaces.map((workspace) => {
-              const readiness = getClaimReadiness(workspace)
-
-              return (
-                <div key={workspace.case.id} className="border-b border-zinc-200 px-5 py-5">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <StatusBadge label={formatEnumLabel(workspace.case.status)} tone={workspace.case.status} />
-                    <StatusBadge
-                      label={readiness.label}
-                      tone={readiness.tone === 'ready' ? 'ready_for_claim' : readiness.tone === 'attention' ? 'attention' : 'document'}
-                    />
-                  </div>
-                  <Link href={`/operator/cases/${workspace.case.id}`} className="mt-3 block text-base font-semibold text-zinc-950 underline decoration-zinc-300 underline-offset-2 transition hover:decoration-zinc-900">{workspace.property.name}</Link>
-                  <p className="mt-1 text-sm text-zinc-600">{workspace.tenancy.tenant_name}</p>
-                  <p className="mt-3 text-sm leading-6 text-zinc-600">{readiness.description}</p>
-                  <div className="mt-4">
-                    <p className="text-sm font-semibold text-zinc-950">
-                      {workspace.claim ? formatCurrency(workspace.claim.total_amount) : 'No claim total yet'}
-                    </p>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </SectionCard>
+        <DataTable>
+          <table className="min-w-full text-left">
+            <thead className="bg-zinc-50 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
+              <tr>
+                <th className="px-3 py-2.5">Property</th>
+                <th className="px-3 py-2.5">Tenant</th>
+                <th className="px-3 py-2.5">Status</th>
+                <th className="px-3 py-2.5">Readiness</th>
+                <th className="px-3 py-2.5">Claim value</th>
+                <th className="px-3 py-2.5">Last activity</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-100">
+              {workspaces.map((workspace) => {
+                const readiness = getClaimReadiness(workspace)
+                return (
+                  <tr key={workspace.case.id} className="hover:bg-zinc-50/70">
+                    <td className="px-3 py-2.5">
+                      <Link href={`/operator/cases/${workspace.case.id}`} className="text-sm font-medium text-zinc-950 underline decoration-zinc-300 underline-offset-2 transition hover:decoration-zinc-900">{workspace.property.name}</Link>
+                    </td>
+                    <td className="px-3 py-2.5 text-sm text-zinc-700">{workspace.tenancy.tenant_name}</td>
+                    <td className="px-3 py-2.5"><StatusBadge label={formatEnumLabel(workspace.case.status)} tone={workspace.case.status} /></td>
+                    <td className="px-3 py-2.5"><StatusBadge label={readiness.label} tone={readiness.tone === 'ready' ? 'ready_for_claim' : readiness.tone === 'attention' ? 'attention' : 'document'} /></td>
+                    <td className="px-3 py-2.5 text-sm font-medium text-zinc-950">{workspace.claim ? formatCurrency(workspace.claim.total_amount) : '—'}</td>
+                    <td className="px-3 py-2.5 text-sm text-zinc-700">{formatDateTime(workspace.case.last_activity_at)}</td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </DataTable>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        eyebrow="Reports"
-        title="Operations analytics"
-        description="Portfolio-level reporting on workflow mix, issue severity, evidence composition, and generated claim value."
-      />
-
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <SectionCard className="px-6 py-6">
-          <SectionHeading
-            title="Workflow and risk"
-            description="Checkout distribution and issue severity across the live portfolio."
-          />
-          <div className="mt-5 grid gap-6 xl:grid-cols-2">
-            <div>
-              <p className="mb-3 text-sm font-semibold text-zinc-950">Checkout statuses</p>
-              <DistributionBar
-                items={Object.entries(statusBreakdown).map(([label, value]) => ({
-                  label: formatEnumLabel(label),
-                  value,
-                  tone:
-                    label === 'disputed'
-                      ? 'danger'
-                      : label === 'ready_for_claim'
-                        ? 'accent'
-                        : label === 'review'
-                          ? 'warning'
-                          : undefined,
-                }))}
-              />
-            </div>
-            <div>
-              <p className="mb-3 text-sm font-semibold text-zinc-950">Issue severity</p>
-              <DistributionBar
-                items={Object.entries(issueSeverityBreakdown).map(([label, value]) => ({
-                  label: formatEnumLabel(label),
-                  value,
-                  tone:
-                    label === 'high'
-                      ? 'danger'
-                      : label === 'medium'
-                        ? 'warning'
-                        : 'accent',
-                }))}
-              />
-            </div>
-          </div>
-        </SectionCard>
-
-        <DetailPanel
-          title="AI-assisted submission readiness"
-          description="Current live signals relevant to final submission generation."
-        >
-          <MetaItem label="Ready for submission" value={stats.readyForClaim} />
-          <MetaItem label="Recommendations recorded" value={recommendationCount} />
-          <MetaItem label="Generated claims" value={workspaces.filter((workspace) => workspace.claim).length} />
-          <div className="border-b border-zinc-200 py-3 text-sm leading-6 text-zinc-600">
-            Submission readiness remains live and operator-facing. These analytics are derived directly from the active checkout portfolio.
-          </div>
-        </DetailPanel>
+    <div className="space-y-4">
+      <div className="flex items-end gap-8 border-b border-zinc-200 pb-3">
+        <KPIStatCard label="Ready for submission" value={stats.readyForClaim} tone="accent" />
+        <KPIStatCard label="Recommendations" value={recommendationCount} />
+        <KPIStatCard label="Generated claims" value={workspaces.filter((workspace) => workspace.claim).length} />
+        <KPIStatCard label="Total claim value" value={formatCurrency(stats.claimAmount)} />
       </div>
 
-      <SectionCard className="px-6 py-6">
-        <SectionHeading
-          title="Checkout performance table"
-          description="Operational comparison of the full live checkout portfolio."
-        />
-        <div className="mt-5">
-          <DataTable>
-            <table className="min-w-full text-left">
-              <thead className="bg-zinc-50 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
-                <tr>
-                  <th className="px-4 py-3">Property</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Priority</th>
-                  <th className="px-4 py-3">Evidence</th>
-                  <th className="px-4 py-3">Issues</th>
-                  <th className="px-4 py-3">Claim value</th>
-                  <th className="px-4 py-3">Last activity</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-200 bg-white">
-                {workspaces.map((workspace) => (
-                  <tr key={workspace.case.id}>
-                    <td className="px-4 py-4">
-                      <div>
-                        <p className="text-sm font-semibold text-zinc-950">{workspace.property.name}</p>
-                        <p className="mt-1 text-sm text-zinc-600">{workspace.tenancy.tenant_name}</p>
-                      </div>
-                    </td>
-                    <td className="px-4 py-4">
-                      <StatusBadge label={formatEnumLabel(workspace.case.status)} tone={workspace.case.status} />
-                    </td>
-                    <td className="px-4 py-4">
-                      <StatusBadge label={formatEnumLabel(workspace.case.priority)} tone={workspace.case.priority} />
-                    </td>
-                    <td className="px-4 py-4 text-sm text-zinc-700">{workspace.evidence.length}</td>
-                    <td className="px-4 py-4 text-sm text-zinc-700">{workspace.issues.length}</td>
-                    <td className="px-4 py-4 text-sm font-medium text-zinc-950">
-                      {workspace.claim ? formatCurrency(workspace.claim.total_amount) : 'Not generated'}
-                    </td>
-                    <td className="px-4 py-4 text-sm text-zinc-700">{formatDateTime(workspace.case.last_activity_at)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </DataTable>
+      <div className="grid gap-6 xl:grid-cols-2">
+        <div>
+          <h3 className="text-sm font-semibold text-zinc-950">Checkout statuses</h3>
+          <div className="mt-2">
+            <DistributionBar
+              items={Object.entries(statusBreakdown).map(([label, value]) => ({
+                label: formatEnumLabel(label),
+                value,
+                tone:
+                  label === 'disputed'
+                    ? 'danger'
+                    : label === 'ready_for_claim'
+                      ? 'accent'
+                      : label === 'review'
+                        ? 'warning'
+                        : undefined,
+              }))}
+            />
+          </div>
         </div>
-      </SectionCard>
+        <div>
+          <h3 className="text-sm font-semibold text-zinc-950">Issue severity</h3>
+          <div className="mt-2">
+            <DistributionBar
+              items={Object.entries(issueSeverityBreakdown).map(([label, value]) => ({
+                label: formatEnumLabel(label),
+                value,
+                tone:
+                  label === 'high'
+                    ? 'danger'
+                    : label === 'medium'
+                      ? 'warning'
+                      : 'accent',
+              }))}
+            />
+          </div>
+        </div>
+      </div>
+
+      <DataTable>
+        <table className="min-w-full text-left">
+          <thead className="bg-zinc-50 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
+            <tr>
+              <th className="px-3 py-2.5">Property</th>
+              <th className="px-3 py-2.5">Status</th>
+              <th className="px-3 py-2.5">Priority</th>
+              <th className="px-3 py-2.5">Evidence</th>
+              <th className="px-3 py-2.5">Issues</th>
+              <th className="px-3 py-2.5">Claim value</th>
+              <th className="px-3 py-2.5">Last activity</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-zinc-100">
+            {workspaces.map((workspace) => (
+              <tr key={workspace.case.id} className="hover:bg-zinc-50/70">
+                <td className="px-3 py-2.5">
+                  <Link href={`/operator/cases/${workspace.case.id}`} className="text-sm font-medium text-zinc-950 underline decoration-zinc-300 underline-offset-2 transition hover:decoration-zinc-900">{workspace.property.name}</Link>
+                  <p className="text-xs text-zinc-500">{workspace.tenancy.tenant_name}</p>
+                </td>
+                <td className="px-3 py-2.5"><StatusBadge label={formatEnumLabel(workspace.case.status)} tone={workspace.case.status} /></td>
+                <td className="px-3 py-2.5"><StatusBadge label={formatEnumLabel(workspace.case.priority)} tone={workspace.case.priority} /></td>
+                <td className="px-3 py-2.5 text-sm text-zinc-700">{workspace.evidence.length}</td>
+                <td className="px-3 py-2.5 text-sm text-zinc-700">{workspace.issues.length}</td>
+                <td className="px-3 py-2.5 text-sm font-medium text-zinc-950">{workspace.claim ? formatCurrency(workspace.claim.total_amount) : '—'}</td>
+                <td className="px-3 py-2.5 text-sm text-zinc-700">{formatDateTime(workspace.case.last_activity_at)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </DataTable>
     </div>
   )
 }

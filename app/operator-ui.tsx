@@ -4,38 +4,35 @@ import { cn } from '@/lib/ui'
 export function PageHeader({
   eyebrow,
   title,
-  description,
   actions,
   className,
 }: {
   eyebrow?: string
-  title: string
+  title?: string
   description?: string
   actions?: ReactNode
   className?: string
 }) {
+  if (!actions && !title) return null
+
   return (
     <div
       className={cn(
-        'flex flex-col gap-4',
-        'xl:flex-row xl:items-start xl:justify-between',
+        'flex items-center justify-between gap-4',
         className
       )}
     >
       <div className="min-w-0">
-        {eyebrow ? (
+        {eyebrow && !title ? (
           <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-600">
             {eyebrow}
           </p>
         ) : null}
-        <h2 className="mt-2 text-[1.55rem] font-semibold tracking-[-0.03em] text-zinc-950">
-          {title}
-        </h2>
-        {description ? (
-          <p className="mt-3 max-w-3xl text-sm leading-6 text-zinc-500">{description}</p>
+        {title ? (
+          <h2 className="text-sm font-semibold text-zinc-950">{title}</h2>
         ) : null}
       </div>
-      {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
+      {actions ? <div className="flex flex-shrink-0 flex-wrap items-center gap-2">{actions}</div> : null}
     </div>
   )
 }
@@ -48,21 +45,14 @@ export function SectionCard({
   className?: string
 }) {
   return (
-    <section
-      className={cn(
-        'border border-zinc-200 bg-white',
-        className
-      )}
-    >
+    <section className={cn('', className)}>
       {children}
     </section>
   )
 }
 
 export function SectionHeading({
-  eyebrow,
   title,
-  description,
   aside,
   className,
 }: {
@@ -73,16 +63,8 @@ export function SectionHeading({
   className?: string
 }) {
   return (
-    <div className={cn('flex flex-col gap-3 md:flex-row md:items-start md:justify-between', className)}>
-      <div className="min-w-0">
-        {eyebrow ? (
-          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
-            {eyebrow}
-          </p>
-        ) : null}
-        <h3 className="mt-1 text-lg font-semibold tracking-[-0.03em] text-zinc-950">{title}</h3>
-        {description ? <p className="mt-2 text-sm leading-6 text-zinc-600">{description}</p> : null}
-      </div>
+    <div className={cn('flex items-center justify-between gap-3', className)}>
+      <h3 className="text-sm font-semibold text-zinc-950">{title}</h3>
       {aside ? <div className="flex shrink-0 flex-wrap items-center gap-2">{aside}</div> : null}
     </div>
   )
@@ -91,7 +73,6 @@ export function SectionHeading({
 export function KPIStatCard({
   label,
   value,
-  detail,
   trend,
   tone = 'default',
   className,
@@ -103,31 +84,22 @@ export function KPIStatCard({
   tone?: 'default' | 'accent' | 'danger' | 'warning'
   className?: string
 }) {
-  const toneClasses =
+  const valueColor =
     tone === 'accent'
-      ? 'border-emerald-200 bg-emerald-50/60'
+      ? 'text-emerald-600'
       : tone === 'danger'
-        ? 'border-rose-200 bg-rose-50/60'
+        ? 'text-rose-600'
         : tone === 'warning'
-          ? 'border-amber-200 bg-amber-50/60'
-          : 'border-zinc-200 bg-zinc-50/60'
+          ? 'text-amber-600'
+          : 'text-zinc-950'
 
   return (
-    <div
-      className={cn(
-        'border px-5 py-5',
-        toneClasses,
-        className
-      )}
-    >
-      <div className="flex items-start justify-between gap-3">
-        <p className="text-xs font-medium uppercase tracking-[0.08em] text-zinc-500">{label}</p>
-        {trend ? <div className="text-xs font-medium text-zinc-500">{trend}</div> : null}
+    <div className={cn('py-2', className)}>
+      <span className="text-[11px] font-medium uppercase tracking-wide text-zinc-400">{label}</span>
+      <div className="mt-0.5 flex items-baseline gap-1.5">
+        <span className={cn('text-xl font-semibold tabular-nums leading-tight', valueColor)}>{value}</span>
+        {trend ? <span className="text-[11px] text-zinc-400">{trend}</span> : null}
       </div>
-      <div className="mt-4 text-[1.75rem] font-semibold tracking-[-0.04em] text-zinc-950">
-        {value}
-      </div>
-      {detail ? <div className="mt-2 text-sm leading-6 text-zinc-600">{detail}</div> : null}
     </div>
   )
 }
@@ -144,10 +116,10 @@ export function ToolbarPill({
   return (
     <span
       className={cn(
-        'inline-flex min-h-9 items-center rounded-full border px-3.5 py-2 text-sm font-medium transition',
+        'inline-flex items-center border-b-2 px-2.5 pb-2 text-sm font-medium transition',
         active
-          ? 'border-zinc-900 bg-zinc-900 text-white'
-          : 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:text-zinc-900',
+          ? 'border-zinc-900 text-zinc-900'
+          : 'border-transparent text-zinc-500 hover:border-zinc-300 hover:text-zinc-700',
         className
       )}
     >
@@ -166,8 +138,7 @@ export function FilterToolbar({
   return (
     <div
       className={cn(
-        'flex flex-col gap-4 border border-zinc-200 bg-zinc-50 px-4 py-4',
-        'lg:flex-row lg:items-center lg:justify-between',
+        'flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between',
         className
       )}
     >
@@ -178,7 +149,6 @@ export function FilterToolbar({
 
 export function DetailPanel({
   title,
-  description,
   children,
   className,
 }: {
@@ -188,15 +158,9 @@ export function DetailPanel({
   className?: string
 }) {
   return (
-    <aside
-      className={cn(
-        'border border-zinc-200 bg-white px-5 py-5',
-        className
-      )}
-    >
-      <h3 className="text-sm font-semibold tracking-[-0.02em] text-zinc-950">{title}</h3>
-      {description ? <p className="mt-2 text-sm leading-6 text-zinc-600">{description}</p> : null}
-      <div className="mt-4 space-y-4">{children}</div>
+    <aside className={cn('', className)}>
+      <h3 className="text-sm font-semibold text-zinc-950">{title}</h3>
+      <div className="mt-3 space-y-0">{children}</div>
     </aside>
   )
 }
@@ -213,15 +177,10 @@ export function EmptyState({
   className?: string
 }) {
   return (
-    <div
-      className={cn(
-        'border border-dashed border-zinc-300 bg-zinc-50/60 px-5 py-6',
-        className
-      )}
-    >
+    <div className={cn('py-8 text-center', className)}>
       <p className="text-sm font-semibold text-zinc-950">{title}</p>
-      <p className="mt-2 text-sm leading-6 text-zinc-600">{body}</p>
-      {action ? <div className="mt-4">{action}</div> : null}
+      <p className="mt-1 text-sm text-zinc-500">{body}</p>
+      {action ? <div className="mt-3">{action}</div> : null}
     </div>
   )
 }
@@ -234,7 +193,7 @@ export function DataTable({
   className?: string
 }) {
   return (
-    <div className={cn('overflow-hidden border border-zinc-200/80 bg-white', className)}>
+    <div className={cn('overflow-hidden', className)}>
       <div className="overflow-x-auto">{children}</div>
     </div>
   )
@@ -258,8 +217,8 @@ export function ActivityTimeline({
   }
 
   return (
-    <div className="space-y-4">
-      {items.map((item, index) => {
+    <div className="space-y-0">
+      {items.map((item) => {
         const toneClass =
           item.tone === 'accent'
             ? 'bg-emerald-500'
@@ -270,15 +229,14 @@ export function ActivityTimeline({
                 : 'bg-zinc-400'
 
         return (
-          <div key={item.id} className="relative flex gap-3 pl-5">
-            {index !== items.length - 1 ? (
-              <span className="absolute left-[7px] top-4 h-[calc(100%+16px)] w-px bg-zinc-200" />
-            ) : null}
-            <span className={cn('absolute left-0 top-1.5 h-4 w-4 rounded-full ring-4 ring-white', toneClass)} />
-            <div className="min-w-0">
-              <p className="text-sm font-medium text-zinc-900">{item.title}</p>
-              <p className="mt-1 text-sm leading-6 text-zinc-600">{item.detail}</p>
-              {item.meta ? <p className="mt-1 text-xs uppercase tracking-[0.08em] text-zinc-400">{item.meta}</p> : null}
+          <div key={item.id} className="flex gap-3 border-b border-zinc-100 py-2.5 last:border-b-0">
+            <span className={cn('mt-1.5 h-2 w-2 shrink-0 rounded-full', toneClass)} />
+            <div className="min-w-0 flex-1">
+              <div className="flex items-baseline justify-between gap-3">
+                <p className="text-sm font-medium text-zinc-900">{item.title}</p>
+                {item.meta ? <span className="shrink-0 text-[11px] text-zinc-400">{item.meta}</span> : null}
+              </div>
+              <p className="mt-0.5 text-sm text-zinc-500">{item.detail}</p>
             </div>
           </div>
         )
@@ -299,11 +257,11 @@ export function ProgressBar({
   const clamped = Math.max(0, Math.min(100, value))
 
   return (
-    <div className={cn('space-y-2', className)}>
-      {label ? <div className="flex items-center justify-between gap-3 text-sm text-zinc-600">{label}</div> : null}
-      <div className="h-2 overflow-hidden rounded-full bg-zinc-100">
+    <div className={cn('space-y-1', className)}>
+      {label ? <div className="flex items-center justify-between gap-3 text-xs text-zinc-500">{label}</div> : null}
+      <div className="h-1.5 overflow-hidden bg-zinc-100">
         <div
-          className="h-full rounded-full bg-emerald-500 transition-all duration-500"
+          className="h-full bg-emerald-500 transition-all duration-500"
           style={{ width: `${clamped}%` }}
         />
       </div>
@@ -317,18 +275,12 @@ export function SkeletonPanel({
   className?: string
 }) {
   return (
-    <div
-      className={cn(
-        'animate-pulse border border-zinc-200/80 bg-white px-6 py-6',
-        className
-      )}
-    >
-      <div className="h-3 w-24 rounded-full bg-zinc-100" />
-      <div className="mt-4 h-8 w-52 rounded-full bg-zinc-100" />
-      <div className="mt-6 space-y-3">
-        <div className="h-4 rounded-full bg-zinc-50" />
-        <div className="h-4 w-11/12 rounded-full bg-zinc-50" />
-        <div className="h-4 w-9/12 rounded-full bg-zinc-50" />
+    <div className={cn('animate-pulse py-4', className)}>
+      <div className="h-3 w-24 bg-zinc-100" />
+      <div className="mt-3 h-6 w-40 bg-zinc-100" />
+      <div className="mt-4 space-y-2">
+        <div className="h-3 bg-zinc-50" />
+        <div className="h-3 w-11/12 bg-zinc-50" />
       </div>
     </div>
   )

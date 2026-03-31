@@ -242,18 +242,18 @@ function OperatorSearchForm({
       <input type="hidden" name="search" value={searchValue.trim()} />
       <label className="relative block">
         <span className="sr-only">Global search</span>
-        <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+        <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400" />
         <input
           type="search"
           value={searchValue}
           onChange={(event) => setSearchValue(event.target.value)}
           placeholder={searchPlaceholder}
-          className="h-10 w-full border border-zinc-200 bg-zinc-50 pl-11 pr-28 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white"
+          className="h-8 w-[320px] border border-zinc-200 bg-zinc-50 pl-8 pr-16 text-xs text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white"
         />
         <Link
           href={searchAction}
           prefetch={false}
-          className="absolute right-1.5 top-1.5 inline-flex h-7 items-center bg-zinc-900 px-3 text-xs font-medium text-white transition hover:bg-zinc-800"
+          className="absolute right-1 top-1 inline-flex h-6 items-center bg-zinc-900 px-2 text-[11px] font-medium text-white transition hover:bg-zinc-800"
         >
           Search
         </Link>
@@ -302,108 +302,92 @@ export function OperatorLayout({ children, operator }: OperatorLayoutProps) {
         />
 
         <div className="min-w-0 flex-1">
-          <div className="mx-auto flex min-h-screen w-full max-w-[1600px] flex-col px-4 py-5 md:px-6 md:py-5 xl:px-8">
-            <header className="border-b border-zinc-200 pb-5">
-              <div className="flex flex-col gap-5">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex min-w-0 items-start gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setMobileNavOpen(true)}
-                      className="mt-0.5 flex h-8 w-8 items-center justify-center border border-zinc-200 text-zinc-500 xl:hidden"
-                      aria-label="Open navigation"
-                    >
-                      <Menu className="h-4 w-4" />
-                    </button>
+          <div className="mx-auto flex min-h-screen w-full max-w-[1600px] flex-col px-4 py-3 md:px-6 xl:px-8">
+            <header className="border-b border-zinc-200 pb-3">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex min-w-0 items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setMobileNavOpen(true)}
+                    className="flex h-7 w-7 items-center justify-center border border-zinc-200 text-zinc-500 xl:hidden"
+                    aria-label="Open navigation"
+                  >
+                    <Menu className="h-3.5 w-3.5" />
+                  </button>
 
-                    <div className="min-w-0">
-                      {breadcrumbs.length ? (
-                        <div className="flex flex-wrap items-center gap-1.5 text-xs font-medium text-zinc-500">
-                          {breadcrumbs.map((breadcrumb, index) => (
-                            <div key={`${breadcrumb.label}-${index}`} className="flex items-center gap-1.5">
-                              {breadcrumb.href ? (
-                                <Link
-                                  href={breadcrumb.href}
-                                  prefetch={false}
-                                  className="transition hover:text-zinc-700"
-                                >
-                                  {breadcrumb.label}
-                                </Link>
-                              ) : (
-                                <span className="text-zinc-700">{breadcrumb.label}</span>
-                              )}
-                              {index < breadcrumbs.length - 1 ? <span className="text-zinc-300">/</span> : null}
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-600">
-                          Renovo operations platform
-                        </p>
-                      )}
+                  <div className="flex min-w-0 items-center gap-3">
+                    {breadcrumbs.length ? (
+                      <div className="flex flex-wrap items-center gap-1.5 text-xs font-medium text-zinc-500">
+                        {breadcrumbs.map((breadcrumb, index) => (
+                          <div key={`${breadcrumb.label}-${index}`} className="flex items-center gap-1.5">
+                            {breadcrumb.href ? (
+                              <Link
+                                href={breadcrumb.href}
+                                prefetch={false}
+                                className="transition hover:text-zinc-700"
+                              >
+                                {breadcrumb.label}
+                              </Link>
+                            ) : (
+                              <span className="text-zinc-700">{breadcrumb.label}</span>
+                            )}
+                            {index < breadcrumbs.length - 1 ? <span className="text-zinc-300">/</span> : null}
+                          </div>
+                        ))}
+                      </div>
+                    ) : null}
 
-                      {routeConfig.pageTitle ? (
-                        <h1 className="mt-2 text-xl font-semibold tracking-[-0.03em] text-zinc-950">
-                          {routeConfig.pageTitle}
-                        </h1>
-                      ) : null}
-                      {routeConfig.pageDescription ? (
-                        <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-500">
-                          {routeConfig.pageDescription}
-                        </p>
-                      ) : null}
-                    </div>
-                  </div>
-
-                  <div className="hidden items-center gap-3 md:flex">
-                    <div className="text-right">
-                      <p className="text-sm font-semibold text-zinc-950">{displayName || 'Operator'}</p>
-                      <p className="text-[11px] font-medium text-zinc-400">
-                        End of tenancy
-                      </p>
-                    </div>
-                    <div className="flex h-9 w-9 items-center justify-center bg-zinc-100 text-sm font-semibold text-zinc-600">
-                      {getInitials(displayName)}
-                    </div>
+                    {routeConfig.pageTitle ? (
+                      <h1 className="text-sm font-semibold text-zinc-950">
+                        {routeConfig.pageTitle}
+                      </h1>
+                    ) : null}
                   </div>
                 </div>
 
-                <div className="grid gap-4 xl:grid-cols-[minmax(0,1.4fr)_auto_auto] xl:items-center">
-                  <OperatorSearchForm
-                    key={`${pathname}?${searchParamValue}`}
-                    searchTargetPath={searchTargetPath}
-                    searchPlaceholder={
-                      routeConfig.searchPlaceholder ?? DEFAULT_ROUTE_CONFIG.searchPlaceholder ?? ''
-                    }
-                    initialSearchValue={searchParamValue}
-                  />
-
-                  <div className="flex flex-wrap items-center gap-2">
-                    {headerActions.map((action) => (
-                      <Link
-                        key={`${action.href}-${action.label}`}
-                        href={action.href}
-                        prefetch={false}
-                        className={cn(
-                          'inline-flex items-center gap-2 border px-3.5 py-2 text-sm font-medium transition',
-                          action.tone === 'primary'
-                            ? 'border-zinc-900 bg-zinc-900 text-white hover:bg-zinc-800'
-                            : 'border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 hover:text-zinc-950'
-                        )}
-                      >
-                        {action.icon}
-                        {action.label}
-                      </Link>
-                    ))}
+                <div className="flex items-center gap-3">
+                  <div className="hidden xl:block">
+                    <OperatorSearchForm
+                      key={`${pathname}?${searchParamValue}`}
+                      searchTargetPath={searchTargetPath}
+                      searchPlaceholder={
+                        routeConfig.searchPlaceholder ?? DEFAULT_ROUTE_CONFIG.searchPlaceholder ?? ''
+                      }
+                      initialSearchValue={searchParamValue}
+                    />
                   </div>
-                  <div className="flex h-8 w-8 items-center justify-center bg-zinc-100 text-sm font-semibold text-zinc-600 md:hidden">
+
+                  {headerActions.map((action) => (
+                    <Link
+                      key={`${action.href}-${action.label}`}
+                      href={action.href}
+                      prefetch={false}
+                      className={cn(
+                        'hidden items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium transition md:inline-flex',
+                        action.tone === 'primary'
+                          ? 'bg-zinc-900 text-white hover:bg-zinc-800'
+                          : 'text-zinc-600 hover:text-zinc-950'
+                      )}
+                    >
+                      {action.icon}
+                      {action.label}
+                    </Link>
+                  ))}
+
+                  <div className="hidden items-center gap-2 border-l border-zinc-200 pl-3 md:flex">
+                    <div className="flex h-7 w-7 items-center justify-center bg-zinc-100 text-xs font-semibold text-zinc-600">
+                      {getInitials(displayName)}
+                    </div>
+                    <span className="text-xs font-medium text-zinc-600">{displayName || 'Operator'}</span>
+                  </div>
+                  <div className="flex h-7 w-7 items-center justify-center bg-zinc-100 text-xs font-semibold text-zinc-600 md:hidden">
                     {getInitials(displayName)}
                   </div>
                 </div>
               </div>
             </header>
 
-            <div className={cn('mt-6 flex-1 space-y-6')}>{children}</div>
+            <div className="mt-4 flex-1 space-y-4">{children}</div>
           </div>
         </div>
       </div>

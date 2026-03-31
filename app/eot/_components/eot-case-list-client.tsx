@@ -19,7 +19,6 @@ import {
   getCaseAttentionTone,
   getCaseProgress,
   KPIStatCard,
-  PageHeader,
   ProgressBar,
   SectionCard,
   SkeletonPanel,
@@ -364,70 +363,39 @@ export function EotCaseListClient({
   }
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        eyebrow="Checkouts"
-        title="Operational checkout pipeline"
-        description="Track active end-of-tenancy checkouts, prioritise dispute risk, and move operators into the correct workspace with fewer clicks."
-        actions={
-          <>
-            <button
-              type="button"
-              onClick={() => setCreateOpen((current) => !current)}
-              className="inline-flex items-center gap-2 border border-zinc-900 bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800"
-            >
-              <Plus className="h-4 w-4" />
-              {createOpen ? 'Close intake' : 'New checkout'}
-            </button>
-            <button
-              type="button"
-              onClick={() => void refreshCases()}
-              className="inline-flex items-center gap-2 border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:text-zinc-950"
-            >
-              <RefreshCcw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
-              Refresh
-            </button>
-          </>
-        }
-      />
-
-      <section className="grid gap-4 xl:grid-cols-4">
-        <KPIStatCard
-          label="Active checkouts"
-          value={stats.total}
-          detail="Live checkouts in the operational queue."
-        />
-        <KPIStatCard
-          label="Needs attention"
-          value={stats.requiringAttention}
-          detail="High-priority, disputed, or stale checkouts."
-          tone="danger"
-        />
-        <KPIStatCard
-          label="Ready for submission"
-          value={stats.readyForClaim}
-          detail="Checkouts at final review or submission stage."
-          tone="accent"
-        />
-        <KPIStatCard
-          label="High risk"
-          value={stats.highPriority}
-          detail="Checkouts with elevated dispute risk."
-          tone="warning"
-        />
-      </section>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between gap-4 border-b border-zinc-200 pb-3">
+        <div className="flex items-end gap-8">
+          <KPIStatCard label="Active" value={stats.total} />
+          <KPIStatCard label="Attention" value={stats.requiringAttention} tone="danger" />
+          <KPIStatCard label="Ready" value={stats.readyForClaim} tone="accent" />
+          <KPIStatCard label="High risk" value={stats.highPriority} tone="warning" />
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
+          <button
+            type="button"
+            onClick={() => void refreshCases()}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-zinc-600 transition hover:text-zinc-950"
+          >
+            <RefreshCcw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} />
+            Refresh
+          </button>
+          <button
+            type="button"
+            onClick={() => setCreateOpen((current) => !current)}
+            className="inline-flex items-center gap-1.5 bg-zinc-900 px-2.5 py-1.5 text-xs font-medium text-white transition hover:bg-zinc-800"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            {createOpen ? 'Close' : 'New'}
+          </button>
+        </div>
+      </div>
 
       {createOpen ? (
-        <SectionCard className="px-6 py-6">
-          <PageHeader
-            eyebrow="Intake"
-            title="Create a new checkout"
-            description="Create the live checkout record and tenancy context. New checkouts open directly into the workspace."
-            className="border-none bg-transparent px-0 py-0 shadow-none"
-          />
-
-          <form className="mt-6 grid gap-4" onSubmit={handleCreateCase}>
-            <div className="grid gap-4 xl:grid-cols-2">
+        <div className="border-b border-zinc-200 pb-4">
+          <h3 className="text-sm font-semibold text-zinc-950">New checkout</h3>
+          <form className="mt-3 grid gap-3" onSubmit={handleCreateCase}>
+            <div className="grid gap-3 xl:grid-cols-4">
               <label className="text-sm">
                 <span className="font-medium text-zinc-700">Property ID</span>
                 <input
@@ -436,7 +404,7 @@ export function EotCaseListClient({
                   onChange={(event) =>
                     setFormState((current) => ({ ...current, propertyId: event.target.value }))
                   }
-                  className="mt-2 h-12 w-full border border-zinc-200 bg-zinc-50 px-4 text-zinc-900"
+                  className="mt-1 h-8 w-full border border-zinc-200 bg-zinc-50 px-4 text-zinc-900"
                   placeholder="UUID from the live property record"
                 />
               </label>
@@ -448,7 +416,7 @@ export function EotCaseListClient({
                   onChange={(event) =>
                     setFormState((current) => ({ ...current, tenantName: event.target.value }))
                   }
-                  className="mt-2 h-12 w-full border border-zinc-200 bg-zinc-50 px-4 text-zinc-900"
+                  className="mt-1 h-8 w-full border border-zinc-200 bg-zinc-50 px-4 text-zinc-900"
                   placeholder="Primary tenancy contact"
                 />
               </label>
@@ -460,7 +428,7 @@ export function EotCaseListClient({
                   onChange={(event) =>
                     setFormState((current) => ({ ...current, tenantEmail: event.target.value }))
                   }
-                  className="mt-2 h-12 w-full border border-zinc-200 bg-zinc-50 px-4 text-zinc-900"
+                  className="mt-1 h-8 w-full border border-zinc-200 bg-zinc-50 px-4 text-zinc-900"
                   placeholder="tenant@example.com"
                 />
               </label>
@@ -471,7 +439,7 @@ export function EotCaseListClient({
                   onChange={(event) =>
                     setFormState((current) => ({ ...current, depositAmount: event.target.value }))
                   }
-                  className="mt-2 h-12 w-full border border-zinc-200 bg-zinc-50 px-4 text-zinc-900"
+                  className="mt-1 h-8 w-full border border-zinc-200 bg-zinc-50 px-4 text-zinc-900"
                   placeholder="1200.00"
                 />
               </label>
@@ -483,7 +451,7 @@ export function EotCaseListClient({
                   onChange={(event) =>
                     setFormState((current) => ({ ...current, startDate: event.target.value }))
                   }
-                  className="mt-2 h-12 w-full border border-zinc-200 bg-zinc-50 px-4 text-zinc-900"
+                  className="mt-1 h-8 w-full border border-zinc-200 bg-zinc-50 px-4 text-zinc-900"
                 />
               </label>
               <label className="text-sm">
@@ -494,7 +462,7 @@ export function EotCaseListClient({
                   onChange={(event) =>
                     setFormState((current) => ({ ...current, endDate: event.target.value }))
                   }
-                  className="mt-2 h-12 w-full border border-zinc-200 bg-zinc-50 px-4 text-zinc-900"
+                  className="mt-1 h-8 w-full border border-zinc-200 bg-zinc-50 px-4 text-zinc-900"
                 />
               </label>
               <label className="text-sm">
@@ -507,7 +475,7 @@ export function EotCaseListClient({
                       priority: event.target.value as EotCasePriority,
                     }))
                   }
-                  className="mt-2 h-12 w-full border border-zinc-200 bg-zinc-50 px-4 text-zinc-900"
+                  className="mt-1 h-8 w-full border border-zinc-200 bg-zinc-50 px-4 text-zinc-900"
                 >
                   {CASE_PRIORITIES.map((priority) => (
                     <option key={priority} value={priority}>
@@ -526,7 +494,7 @@ export function EotCaseListClient({
                       status: event.target.value as EotCaseStatus,
                     }))
                   }
-                  className="mt-2 h-12 w-full border border-zinc-200 bg-zinc-50 px-4 text-zinc-900"
+                  className="mt-1 h-8 w-full border border-zinc-200 bg-zinc-50 px-4 text-zinc-900"
                 >
                   {CASE_STATUSES.map((status) => (
                     <option key={status} value={status}>
@@ -544,7 +512,7 @@ export function EotCaseListClient({
                 onChange={(event) =>
                   setFormState((current) => ({ ...current, summary: event.target.value }))
                 }
-                className="mt-2 min-h-28 w-full border border-zinc-200 bg-zinc-50 px-4 py-3 text-zinc-900"
+                className="mt-1 min-h-20 w-full border border-zinc-200 bg-zinc-50 px-4 py-3 text-zinc-900"
                 placeholder="What is the tenancy-end context for this checkout?"
               />
             </label>
@@ -556,7 +524,7 @@ export function EotCaseListClient({
                 onChange={(event) =>
                   setFormState((current) => ({ ...current, notes: event.target.value }))
                 }
-                className="mt-2 min-h-24 w-full border border-zinc-200 bg-zinc-50 px-4 py-3 text-zinc-900"
+                className="mt-1 min-h-16 w-full border border-zinc-200 bg-zinc-50 px-4 py-3 text-zinc-900"
                 placeholder="Deposit scheme, move-out context, or internal tenancy notes"
               />
             </label>
@@ -567,59 +535,55 @@ export function EotCaseListClient({
               </p>
             ) : null}
 
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-3">
               <button
                 type="submit"
                 disabled={createPending}
-                className="inline-flex items-center justify-center border border-zinc-900 bg-zinc-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-60"
+                className="bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-zinc-800 disabled:opacity-60"
               >
-                {createPending ? 'Creating checkout...' : 'Create checkout'}
+                {createPending ? 'Creating...' : 'Create'}
               </button>
-              <p className="text-sm text-zinc-500">
-                New checkouts are created against the live tenant and immediately open the workspace.
-              </p>
             </div>
           </form>
-        </SectionCard>
+        </div>
       ) : null}
 
-      <SectionCard className="overflow-hidden">
-        <div className="sticky top-4 z-10 border-b border-zinc-200 bg-white/95 px-6 py-5 backdrop-blur">
-          <FilterToolbar>
-            <div className="flex flex-wrap items-center gap-2">
-              {[
-                { value: 'all' as const, label: 'All checkouts' },
-                { value: 'attention' as const, label: 'Needs attention' },
-                { value: 'ready' as const, label: 'Ready for submission' },
-                { value: 'disputed' as const, label: 'Disputed' },
-                { value: 'recent' as const, label: 'Recently active' },
-              ].map((view) => (
-                <button key={view.value} type="button" onClick={() => setSavedView(view.value)}>
-                  <ToolbarPill active={savedView === view.value}>{view.label}</ToolbarPill>
-                </button>
-              ))}
-            </div>
+      <div className="sticky top-0 z-10 border-b border-zinc-200 bg-white/95 py-2 backdrop-blur">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-0">
+            {[
+              { value: 'all' as const, label: 'All' },
+              { value: 'attention' as const, label: 'Attention' },
+              { value: 'ready' as const, label: 'Ready' },
+              { value: 'disputed' as const, label: 'Disputed' },
+              { value: 'recent' as const, label: 'Recent' },
+            ].map((view) => (
+              <button key={view.value} type="button" onClick={() => setSavedView(view.value)}>
+                <ToolbarPill active={savedView === view.value}>{view.label}</ToolbarPill>
+              </button>
+            ))}
+          </div>
 
-            <div className="flex flex-col gap-3 md:flex-row md:items-center">
-              <select
-                value={statusFilter}
-                onChange={(event) => setStatusFilter(event.target.value as 'all' | EotCaseStatus)}
-                className="h-10 border border-zinc-200 bg-white px-3 text-sm text-zinc-700"
-              >
-                <option value="all">All statuses</option>
-                {CASE_STATUSES.map((status) => (
-                  <option key={status} value={status}>
-                    {formatEnumLabel(status)}
-                  </option>
-                ))}
-              </select>
-              <select
-                value={priorityFilter}
-                onChange={(event) =>
-                  setPriorityFilter(event.target.value as 'all' | EotCasePriority)
-                }
-                className="h-10 border border-zinc-200 bg-white px-3 text-sm text-zinc-700"
-              >
+          <div className="flex items-center gap-2">
+            <select
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value as 'all' | EotCaseStatus)}
+              className="h-7 border border-zinc-200 bg-white px-2 text-xs text-zinc-700"
+            >
+              <option value="all">All statuses</option>
+              {CASE_STATUSES.map((status) => (
+                <option key={status} value={status}>
+                  {formatEnumLabel(status)}
+                </option>
+              ))}
+            </select>
+            <select
+              value={priorityFilter}
+              onChange={(event) =>
+                setPriorityFilter(event.target.value as 'all' | EotCasePriority)
+              }
+              className="h-7 border border-zinc-200 bg-white px-2 text-xs text-zinc-700"
+            >
                 <option value="all">All priorities</option>
                 {CASE_PRIORITIES.map((priority) => (
                   <option key={priority} value={priority}>
@@ -628,78 +592,53 @@ export function EotCaseListClient({
                 ))}
               </select>
             </div>
-          </FilterToolbar>
-
           {selectedIds.length ? (
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border border-zinc-200 bg-zinc-50 px-4 py-3">
-              <p className="text-sm text-zinc-700">
-                {selectedIds.length} checkout{selectedIds.length === 1 ? '' : 's'} selected
-              </p>
-              <div className="flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => void handleCopySelection()}
-                  className="inline-flex items-center gap-2 border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700"
-                >
-                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                  {copied ? 'Copied IDs' : 'Copy IDs'}
-                </button>
-                <Link
-                  href={`/eot/${selectedIds[0]}`}
-                  className="inline-flex items-center border border-zinc-900 bg-zinc-900 px-3 py-2 text-sm font-medium text-white"
-                >
-                  Open first selected
-                </Link>
-                <button
-                  type="button"
-                  onClick={() => setSelectedIds([])}
-                  className="inline-flex items-center border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700"
-                >
-                  Clear
-                </button>
-              </div>
-            </div>
+            <span className="ml-3 text-xs text-zinc-500">
+              {selectedIds.length} selected
+              <button type="button" onClick={() => void handleCopySelection()} className="ml-2 text-zinc-700 underline">{copied ? 'Copied' : 'Copy IDs'}</button>
+              <button type="button" onClick={() => setSelectedIds([])} className="ml-2 text-zinc-700 underline">Clear</button>
+            </span>
           ) : null}
         </div>
+      </div>
 
-        <div className="px-6 py-6">
-          {loading ? (
-            <div className="grid gap-4 xl:grid-cols-2">
-              <SkeletonPanel />
-              <SkeletonPanel />
-            </div>
-          ) : error ? (
-            <EmptyState title="Unable to load checkouts" body={error} />
-          ) : visibleCaseRows.length === 0 ? (
-            <EmptyState
-              title={cases.length === 0 ? 'No live checkouts yet' : 'No checkouts match this view'}
-              body={
-                cases.length === 0
-                  ? 'Create the first checkout to start the operational workflow.'
-                  : 'Adjust the saved view or filters to widen the queue.'
-              }
-            />
-          ) : (
-            <DataTable>
-              <table className="min-w-full text-left">
-                <thead className="bg-zinc-50 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
-                  <tr>
-                    <th className="px-4 py-3">
-                      <input
-                        type="checkbox"
-                        checked={visibleCaseRows.length > 0 && selectedIds.length === visibleCaseRows.length}
-                        onChange={toggleSelectAll}
-                        aria-label="Select all visible checkouts"
-                      />
-                    </th>
-                    <th className="px-4 py-3">Checkout</th>
-                    <th className="px-4 py-3">Workflow</th>
-                    <th className="px-4 py-3">Attention</th>
-                    <th className="px-4 py-3">Coverage</th>
-                    <th className="px-4 py-3">Last updated</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-zinc-200 bg-white">
+      {loading ? (
+        <div className="grid gap-4 xl:grid-cols-2">
+          <SkeletonPanel />
+          <SkeletonPanel />
+        </div>
+      ) : error ? (
+        <EmptyState title="Unable to load checkouts" body={error} />
+      ) : visibleCaseRows.length === 0 ? (
+        <EmptyState
+          title={cases.length === 0 ? 'No live checkouts yet' : 'No checkouts match this view'}
+          body={
+            cases.length === 0
+              ? 'Create the first checkout to start the operational workflow.'
+              : 'Adjust the saved view or filters to widen the queue.'
+          }
+        />
+      ) : (
+        <DataTable>
+          <table className="min-w-full text-left">
+            <thead className="border-b border-zinc-200 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
+              <tr>
+                <th className="px-3 py-2">
+                  <input
+                    type="checkbox"
+                    checked={visibleCaseRows.length > 0 && selectedIds.length === visibleCaseRows.length}
+                    onChange={toggleSelectAll}
+                    aria-label="Select all visible checkouts"
+                  />
+                </th>
+                <th className="px-3 py-2">Checkout</th>
+                <th className="px-3 py-2">Workflow</th>
+                <th className="px-3 py-2">Attention</th>
+                <th className="px-3 py-2">Coverage</th>
+                <th className="px-3 py-2">Last updated</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-100">
                   {visibleCaseRows.map(({ attention, caseItem, progress }) => {
                     const selected = selectedIds.includes(caseItem.id)
 
@@ -708,98 +647,42 @@ export function EotCaseListClient({
                         key={caseItem.id}
                         className={selected ? 'bg-zinc-50/90' : 'hover:bg-zinc-50/70'}
                       >
-                        <td className="px-4 py-4 align-top">
-                            <input
-                              type="checkbox"
-                              checked={selected}
-                              onChange={() => toggleSelection(caseItem.id)}
-                              aria-label={`Select checkout ${caseItem.id}`}
-                            />
+                        <td className="px-3 py-2.5 align-top">
+                          <input
+                            type="checkbox"
+                            checked={selected}
+                            onChange={() => toggleSelection(caseItem.id)}
+                            aria-label={`Select checkout ${caseItem.id}`}
+                          />
                         </td>
-                        <td className="px-4 py-4 align-top">
-                          <div className="space-y-2">
-                            <div>
-                              <Link
-                                href={`/operator/cases/${caseItem.id}`}
-                                className="text-sm font-semibold text-zinc-950 underline decoration-zinc-300 underline-offset-2 transition hover:decoration-zinc-900"
-                              >
-                                {caseItem.property.name}
-                              </Link>
-                              <p className="mt-1 text-sm text-zinc-600">{caseItem.tenant_name}</p>
-                            </div>
-                            <div className="flex flex-wrap items-center gap-2">
-                              <StatusBadge
-                                label={caseItem.property.reference || 'Reference pending'}
-                                tone="document"
-                              />
-                              <span className="text-xs font-medium uppercase tracking-[0.08em] text-zinc-400">
-                                {caseItem.id.slice(0, 8)}
-                              </span>
-                            </div>
-                          </div>
+                        <td className="px-3 py-2.5 align-top">
+                          <Link
+                            href={`/operator/cases/${caseItem.id}`}
+                            className="text-sm font-medium text-zinc-950 underline decoration-zinc-300 underline-offset-2 transition hover:decoration-zinc-900"
+                          >
+                            {caseItem.property.name}
+                          </Link>
+                          <p className="text-xs text-zinc-500">{caseItem.tenant_name} · {caseItem.id.slice(0, 8)}</p>
                         </td>
-                        <td className="px-4 py-4 align-top">
-                          <div className="space-y-3">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <StatusBadge
-                                label={formatEnumLabel(caseItem.status)}
-                                tone={caseItem.status}
-                              />
-                              <StatusBadge
-                                label={formatEnumLabel(caseItem.priority)}
-                                tone={caseItem.priority}
-                              />
-                            </div>
-                            <ProgressBar
-                              value={progress}
-                              label={
-                                <>
-                                  <span>Progress</span>
-                                  <span>{progress}%</span>
-                                </>
-                              }
-                            />
+                        <td className="px-3 py-2.5 align-top">
+                          <div className="flex flex-wrap items-center gap-1">
+                            <StatusBadge label={formatEnumLabel(caseItem.status)} tone={caseItem.status} />
+                            <StatusBadge label={formatEnumLabel(caseItem.priority)} tone={caseItem.priority} />
                           </div>
+                          <ProgressBar value={progress} className="mt-1.5 max-w-[120px]" />
                         </td>
-                        <td className="px-4 py-4 align-top">
-                          <div className="space-y-2">
-                            <StatusBadge label={attention.label} tone={attention.tone} />
-                            <p className="text-sm leading-6 text-zinc-600">
-                              {caseItem.status === 'ready_for_claim'
-                                ? 'Ready for final review and submission.'
-                                : caseItem.status === 'disputed'
-                                  ? 'Requires dispute handling and audit trace.'
-                                  : 'Normal workflow progression.'}
-                            </p>
-                          </div>
+                        <td className="px-3 py-2.5 align-top">
+                          <StatusBadge label={attention.label} tone={attention.tone} />
                         </td>
-                        <td className="px-4 py-4 align-top">
-                          <div className="grid gap-2">
-                            <div className="border border-zinc-200 bg-zinc-50 px-3 py-2">
-                              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
-                                Evidence
-                              </p>
-                              <p className="mt-1 text-sm font-semibold text-zinc-950">
-                                {caseItem.evidence_count}
-                              </p>
-                            </div>
-                            <div className="border border-zinc-200 bg-zinc-50 px-3 py-2">
-                              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
-                                Issues
-                              </p>
-                              <p className="mt-1 text-sm font-semibold text-zinc-950">
-                                {caseItem.issue_count}
-                              </p>
-                            </div>
-                          </div>
+                        <td className="px-3 py-2.5 align-top text-xs tabular-nums text-zinc-700">
+                          <span>{caseItem.evidence_count} evidence</span>
+                          <span className="mx-1 text-zinc-300">·</span>
+                          <span>{caseItem.issue_count} issues</span>
                         </td>
-                        <td className="px-4 py-4 align-top">
-                          <div>
-                            <p className="text-sm font-medium text-zinc-950">
-                              {formatDateTime(caseItem.last_activity_at)}
-                            </p>
-                            <p className="mt-1 text-sm text-zinc-500">Latest checkout activity</p>
-                          </div>
+                        <td className="px-3 py-2.5 align-top">
+                          <span className="text-xs text-zinc-600">
+                            {formatDateTime(caseItem.last_activity_at)}
+                          </span>
                         </td>
                       </tr>
                     )
@@ -808,8 +691,6 @@ export function EotCaseListClient({
               </table>
             </DataTable>
           )}
-        </div>
-      </SectionCard>
     </div>
   )
 }
