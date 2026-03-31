@@ -66,7 +66,7 @@ export function RecommendationDetailCard({
 
   if (!recommendation) {
     return (
-      <div className="rounded-xl border border-zinc-200 px-5 py-5">
+      <div className="border border-zinc-200 px-5 py-5">
         <div className="flex flex-wrap items-center gap-2">
           <StatusBadge label={formatEnumLabel(issue.severity)} tone={issue.severity} />
           <StatusBadge label={formatEnumLabel(issue.status)} tone={issue.status} />
@@ -83,7 +83,7 @@ export function RecommendationDetailCard({
   }
 
   return (
-    <div className={cn('rounded-xl border px-5 py-5', getOutcomeClasses(recommendation.decision))}>
+    <div className={cn('border px-5 py-5', getOutcomeClasses(recommendation.decision))}>
       <div className="flex flex-wrap items-center gap-2">
         <StatusBadge
           label={formatEnumLabel(recommendation.decision || 'pending')}

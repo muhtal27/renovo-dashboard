@@ -343,7 +343,7 @@ export function CaseSubmission({ data }: { data: OperatorCheckoutWorkspaceData }
             <ClaimSummaryCard workspace={data.workspace} />
 
             {activeSubmission.claim ? (
-              <div className="rounded-xl border border-zinc-200 bg-zinc-50/70 px-5 py-5">
+              <div className="border border-zinc-200 bg-zinc-50/70 px-5 py-5">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div>
                     <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
@@ -381,7 +381,7 @@ export function CaseSubmission({ data }: { data: OperatorCheckoutWorkspaceData }
             ) : null}
           </div>
 
-          <div className="rounded-xl border border-zinc-200 bg-zinc-50/70 px-5 py-5">
+          <div className="border border-zinc-200 bg-zinc-50/70 px-5 py-5">
             <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Readiness</p>
             <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-zinc-950">
               {readinessProgress}%
@@ -439,7 +439,7 @@ export function CaseSubmission({ data }: { data: OperatorCheckoutWorkspaceData }
         <div className="grid gap-6 pt-5 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.9fr)]">
           <div className="min-w-0">
             {data.workspace.claimBreakdown.length > 0 ? (
-              <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
+              <div className="overflow-hidden border border-zinc-200 bg-white">
                 <WorkspaceTable>
                   <thead>
                     <tr>
@@ -475,7 +475,7 @@ export function CaseSubmission({ data }: { data: OperatorCheckoutWorkspaceData }
                 </WorkspaceTable>
               </div>
             ) : activeSubmission.claim ? (
-              <div className="overflow-hidden rounded-xl border border-zinc-200 bg-zinc-950">
+              <div className="overflow-hidden border border-zinc-200 bg-zinc-950">
                 <pre className="overflow-x-auto px-5 py-5 text-xs leading-6 text-zinc-200">
                   {JSON.stringify(activeSubmission.claim.breakdown, null, 2)}
                 </pre>
@@ -502,7 +502,7 @@ export function CaseSubmission({ data }: { data: OperatorCheckoutWorkspaceData }
 
             {activeSubmission.issues.length > 0 ? (
               activeSubmission.issues.map((issue) => (
-                <div key={issue.id} className="rounded-xl border border-zinc-200 bg-white px-4 py-4">
+                <div key={issue.id} className="border border-zinc-200 bg-white px-4 py-4">
                   <div className="flex flex-wrap items-center gap-2">
                     <WorkspaceBadge label={formatEnumLabel(issue.severity)} tone="review" />
                     {issue.recommendation?.decision ? (

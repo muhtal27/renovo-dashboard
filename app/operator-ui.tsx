@@ -50,7 +50,7 @@ export function SectionCard({
   return (
     <section
       className={cn(
-        'rounded-xl border border-zinc-200 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.04)]',
+        'border border-zinc-200 bg-white',
         className
       )}
     >
@@ -115,7 +115,7 @@ export function KPIStatCard({
   return (
     <div
       className={cn(
-        'rounded-xl border px-5 py-5 shadow-[0_1px_3px_rgba(0,0,0,0.03)]',
+        'border px-5 py-5',
         toneClasses,
         className
       )}
@@ -166,7 +166,7 @@ export function FilterToolbar({
   return (
     <div
       className={cn(
-        'flex flex-col gap-4 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-4',
+        'flex flex-col gap-4 border border-zinc-200 bg-zinc-50 px-4 py-4',
         'lg:flex-row lg:items-center lg:justify-between',
         className
       )}
@@ -190,7 +190,7 @@ export function DetailPanel({
   return (
     <aside
       className={cn(
-        'rounded-xl border border-zinc-200 bg-white px-5 py-5',
+        'border border-zinc-200 bg-white px-5 py-5',
         className
       )}
     >
@@ -215,7 +215,7 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        'rounded-xl border border-dashed border-zinc-300 bg-zinc-50/60 px-5 py-6',
+        'border border-dashed border-zinc-300 bg-zinc-50/60 px-5 py-6',
         className
       )}
     >
@@ -234,7 +234,7 @@ export function DataTable({
   className?: string
 }) {
   return (
-    <div className={cn('overflow-hidden rounded-xl border border-zinc-200/80 bg-white', className)}>
+    <div className={cn('overflow-hidden border border-zinc-200/80 bg-white', className)}>
       <div className="overflow-x-auto">{children}</div>
     </div>
   )
@@ -319,7 +319,7 @@ export function SkeletonPanel({
   return (
     <div
       className={cn(
-        'animate-pulse rounded-xl border border-zinc-200/80 bg-white px-6 py-6 shadow-[0_1px_3px_rgba(0,0,0,0.03)]',
+        'animate-pulse border border-zinc-200/80 bg-white px-6 py-6',
         className
       )}
     >

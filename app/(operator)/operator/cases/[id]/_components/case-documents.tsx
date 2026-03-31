@@ -61,7 +61,7 @@ function ReadOnlyLinkedDocumentCard({
 }) {
   if (!document) {
     return (
-      <div className="rounded-xl border border-dashed border-zinc-300 bg-zinc-50/70 px-5 py-5">
+      <div className="border border-dashed border-zinc-300 bg-zinc-50/70 px-5 py-5">
         <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">{label}</p>
         <p className="mt-3 text-sm font-semibold text-zinc-950">Document not linked</p>
         <p className="mt-2 text-sm leading-6 text-zinc-600">{description}</p>
@@ -70,7 +70,7 @@ function ReadOnlyLinkedDocumentCard({
   }
 
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white px-5 py-5">
+    <div className="border border-zinc-200 bg-white px-5 py-5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">{label}</p>
@@ -94,7 +94,7 @@ function ReadOnlyLinkedDocumentCard({
           href={document.fileUrl}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-zinc-900 bg-zinc-900 px-4 text-sm font-medium text-white transition hover:bg-zinc-800"
+          className="inline-flex h-10 items-center justify-center gap-2 border border-zinc-900 bg-zinc-900 px-4 text-sm font-medium text-white transition hover:bg-zinc-800"
         >
           Open document
           <ExternalLink className="h-4 w-4" />
@@ -102,7 +102,7 @@ function ReadOnlyLinkedDocumentCard({
         <a
           href={document.fileUrl}
           download={document.fileName}
-          className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
+          className="inline-flex h-10 items-center justify-center gap-2 border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
         >
           Download
           <Download className="h-4 w-4" />

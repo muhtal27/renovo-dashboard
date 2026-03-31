@@ -238,7 +238,7 @@ export function WorkspaceMetricCard({
   return (
     <div
       className={cn(
-        'rounded-xl border px-4 py-4 shadow-[0_1px_3px_rgba(0,0,0,0.03)]',
+        'border px-4 py-4',
         tone === 'default' ? METRIC_STYLES.default : METRIC_STYLES[tone],
         className
       )}
@@ -322,7 +322,7 @@ export function WorkspaceNotice({
   tone?: WorkspaceNoticeTone
 }) {
   return (
-    <div className={cn('rounded-xl border px-4 py-4', NOTICE_STYLES[tone], className)}>
+    <div className={cn('border px-4 py-4', NOTICE_STYLES[tone], className)}>
       <div className="flex items-start gap-3">
         {icon ? <div className="mt-0.5 shrink-0">{icon}</div> : null}
         <div className="min-w-0 flex-1">
@@ -396,7 +396,7 @@ export function WorkspaceTable({
   tableClassName?: string
 }) {
   return (
-    <DataTable className={cn('rounded-xl border-zinc-200', className)}>
+    <DataTable className={cn('border-zinc-200', className)}>
       <table className={cn('w-full border-collapse text-sm', tableClassName)}>{children}</table>
     </DataTable>
   )
@@ -471,7 +471,7 @@ export function WorkspaceOptionButton({
   return (
     <button
       className={cn(
-        'inline-flex min-h-10 items-center justify-center rounded-lg border px-4 py-2 text-sm font-medium transition',
+        'inline-flex min-h-10 items-center justify-center border px-4 py-2 text-sm font-medium transition',
         selected ? toneStyles.active : toneStyles.idle,
         props.disabled ? 'cursor-not-allowed opacity-60 hover:border-zinc-200 hover:text-inherit' : null,
         className
@@ -502,7 +502,7 @@ export function WorkspaceSelectableCard({
   return (
     <button
       className={cn(
-        'w-full rounded-xl border px-5 py-5 text-left shadow-[0_1px_3px_rgba(0,0,0,0.03)] transition',
+        'w-full border px-5 py-5 text-left transition',
         selected ? toneStyles.active : cn('bg-white', toneStyles.idle),
         props.disabled ? 'cursor-not-allowed opacity-60 hover:border-zinc-200 hover:text-inherit' : null,
         className
@@ -529,7 +529,7 @@ export function WorkspaceActionButton({
   return (
     <button
       className={cn(
-        'inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition',
+        'inline-flex min-h-10 items-center justify-center gap-2 border px-4 py-2 text-sm font-medium transition',
         'disabled:cursor-not-allowed disabled:border-zinc-200 disabled:bg-zinc-100 disabled:text-zinc-500',
         ACTION_BUTTON_STYLES[tone],
         className
@@ -568,7 +568,7 @@ export function WorkspaceTextInput({
   return (
     <input
       className={cn(
-        'h-11 w-full rounded-lg border border-zinc-200 bg-white px-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-slate-400 disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-500',
+        'h-11 w-full border border-zinc-200 bg-white px-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-slate-400 disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-500',
         className
       )}
       {...props}
@@ -583,7 +583,7 @@ export function WorkspaceTextarea({
   return (
     <textarea
       className={cn(
-        'min-h-32 w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm leading-6 text-zinc-900 placeholder:text-zinc-400 focus:border-slate-400 disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-500',
+        'min-h-32 w-full border border-zinc-200 bg-white px-4 py-3 text-sm leading-6 text-zinc-900 placeholder:text-zinc-400 focus:border-slate-400 disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-500',
         className
       )}
       {...props}
@@ -598,7 +598,7 @@ export function WorkspaceSelect({
   return (
     <select
       className={cn(
-        'h-11 w-full rounded-lg border border-zinc-200 bg-white px-4 text-sm text-zinc-900 focus:border-slate-400 disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-500',
+        'h-11 w-full border border-zinc-200 bg-white px-4 text-sm text-zinc-900 focus:border-slate-400 disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-500',
         className
       )}
       {...props}

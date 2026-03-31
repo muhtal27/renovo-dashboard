@@ -164,7 +164,7 @@ export function CaseNegotiation({ data }: { data: OperatorCheckoutWorkspaceData 
           </div>
 
           {depositCoverage != null ? (
-            <div className="mt-5 rounded-xl border border-zinc-200 bg-zinc-50/70 px-5 py-5">
+            <div className="mt-5 border border-zinc-200 bg-zinc-50/70 px-5 py-5">
               <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Claim vs deposit</p>
               <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-zinc-950">
                 {depositCoverage}%
@@ -184,7 +184,7 @@ export function CaseNegotiation({ data }: { data: OperatorCheckoutWorkspaceData 
             </div>
           ) : null}
 
-          <div className="mt-5 rounded-xl border border-zinc-200 bg-white px-5 py-5">
+          <div className="mt-5 border border-zinc-200 bg-white px-5 py-5">
             <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Recommendation mix</p>
             <dl className="mt-4 space-y-3">
               <div className="flex items-start justify-between gap-4">
@@ -202,7 +202,7 @@ export function CaseNegotiation({ data }: { data: OperatorCheckoutWorkspaceData 
             </dl>
           </div>
 
-          <div className="mt-5 rounded-xl border border-zinc-200 bg-white px-5 py-5">
+          <div className="mt-5 border border-zinc-200 bg-white px-5 py-5">
             <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Operator notes</p>
             <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-zinc-600 [overflow-wrap:anywhere]">
               {data.checkoutCase?.negotiationNotes?.trim() || 'No negotiation notes recorded yet.'}
@@ -292,7 +292,7 @@ export function CaseNegotiation({ data }: { data: OperatorCheckoutWorkspaceData 
                       </div>
                     </dl>
 
-                    <div className="mt-5 rounded-xl border border-zinc-200 bg-white px-5 py-5">
+                    <div className="mt-5 border border-zinc-200 bg-white px-5 py-5">
                       <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Attached documents</p>
                       {selectedDraft.attachmentDocumentIds.length > 0 ? (
                         <div className="mt-4 flex flex-wrap gap-2">
@@ -311,7 +311,7 @@ export function CaseNegotiation({ data }: { data: OperatorCheckoutWorkspaceData 
                       )}
                     </div>
 
-                    <div className="mt-5 rounded-xl border border-zinc-200 bg-white px-5 py-5">
+                    <div className="mt-5 border border-zinc-200 bg-white px-5 py-5">
                       <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Draft body</p>
                       <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-zinc-600 [overflow-wrap:anywhere]">
                         {selectedDraft.body}

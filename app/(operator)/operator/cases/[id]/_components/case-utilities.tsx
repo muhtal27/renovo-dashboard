@@ -302,7 +302,7 @@ export function CaseUtilities({ data }: { data: OperatorCheckoutWorkspaceData })
               />
             )}
 
-            <div className="rounded-xl border border-zinc-200 bg-zinc-50/70 px-5 py-5">
+            <div className="border border-zinc-200 bg-zinc-50/70 px-5 py-5">
               <p className="text-sm font-semibold tracking-[-0.02em] text-zinc-950">Parking</p>
               {data.parking ? (
                 <div className="mt-4 space-y-3">

@@ -90,7 +90,7 @@ export function MetaItem({
   className?: string
 }) {
   return (
-    <div className={cn('rounded-xl border border-zinc-200 bg-white px-4 py-4', className)}>
+    <div className={cn('border-b border-zinc-200 py-3', className)}>
       <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">{label}</p>
       <div className="mt-2 text-sm font-medium leading-6 text-zinc-900">{value}</div>
     </div>

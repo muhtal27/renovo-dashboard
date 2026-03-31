@@ -192,7 +192,7 @@ export function SupportingDocumentsPanel({
   const reachedLimit = documents.length >= MAX_SUPPORTING_DOCUMENT_COUNT
 
   return (
-    <div className="rounded-xl border border-zinc-200 bg-zinc-50/70 p-5">
+    <div className="border border-zinc-200 bg-zinc-50/70 p-5">
       <SectionHeading
         title="Supporting tenancy documents"
         description="Upload invoices, quotes, receipts, correspondence, and other supporting files without affecting the core analysis reports."
@@ -215,7 +215,7 @@ export function SupportingDocumentsPanel({
             onChange={(event) => setLabel(event.target.value)}
             placeholder="Invoice, contractor quote, cleaning receipt..."
             maxLength={80}
-            className="mt-2 h-12 w-full rounded-lg border border-zinc-200 bg-white px-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-slate-400"
+            className="mt-2 h-12 w-full border border-zinc-200 bg-white px-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-slate-400"
           />
         </label>
 
@@ -231,7 +231,7 @@ export function SupportingDocumentsPanel({
             type="button"
             disabled={mutationState.pending || reachedLimit}
             onClick={() => inputRef.current?.click()}
-            className="inline-flex h-12 items-center justify-center gap-2 rounded-lg border border-zinc-900 bg-zinc-900 px-5 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:border-zinc-200 disabled:bg-zinc-100 disabled:text-zinc-500"
+            className="inline-flex h-12 items-center justify-center gap-2 border border-zinc-900 bg-zinc-900 px-5 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:border-zinc-200 disabled:bg-zinc-100 disabled:text-zinc-500"
           >
             {mutationState.pending && mutationState.action === 'upload' ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -260,7 +260,7 @@ export function SupportingDocumentsPanel({
           className="mt-5 bg-white"
         />
       ) : (
-        <div className="mt-5 overflow-hidden rounded-xl border border-zinc-200 bg-white">
+        <div className="mt-5 overflow-hidden border border-zinc-200 bg-white">
           {documents.map((document) => {
             const isDeleting =
               mutationState.pending &&
@@ -293,7 +293,7 @@ export function SupportingDocumentsPanel({
                     href={document.file_url}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
+                    className="inline-flex h-10 items-center justify-center gap-2 border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
                   >
                     <ExternalLink className="h-4 w-4" />
                     Open document
@@ -301,7 +301,7 @@ export function SupportingDocumentsPanel({
                   <a
                     href={document.file_url}
                     download={document.name}
-                    className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
+                    className="inline-flex h-10 items-center justify-center gap-2 border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
                   >
                     <Download className="h-4 w-4" />
                     Download
@@ -311,7 +311,7 @@ export function SupportingDocumentsPanel({
                       type="button"
                       disabled={mutationState.pending}
                       onClick={() => void removeDocument(document.id)}
-                      className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-rose-200 bg-white px-4 text-sm font-medium text-rose-700 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:border-zinc-200 disabled:bg-zinc-100 disabled:text-zinc-500"
+                      className="inline-flex h-10 items-center justify-center gap-2 border border-rose-200 bg-white px-4 text-sm font-medium text-rose-700 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:border-zinc-200 disabled:bg-zinc-100 disabled:text-zinc-500"
                     >
                       {isDeleting ? (
                         <Loader2 className="h-4 w-4 animate-spin" />

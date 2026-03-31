@@ -147,7 +147,7 @@ export function CheckoutCaseWorkspace({
 
   return (
     <div className="space-y-6">
-      <section className="rounded-xl border border-zinc-200/80 bg-white px-6 py-6 md:px-7">
+      <section className="border border-zinc-200/80 bg-white px-6 py-6 md:px-7">
         <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
           {`Case #${caseReference}`}
         </p>
@@ -179,7 +179,7 @@ export function CheckoutCaseWorkspace({
       <section
         aria-busy={isPending}
         className={cn(
-          'overflow-hidden rounded-xl border border-zinc-200/80 bg-white',
+          'overflow-hidden border border-zinc-200/80 bg-white',
           isPending ? 'opacity-80' : null
         )}
       >

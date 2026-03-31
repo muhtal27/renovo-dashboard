@@ -136,7 +136,7 @@ export function EotReportsClient({
           <MetaItem label="Recommendations recorded" value={stats.recommendation_count} />
           <MetaItem label="Generated claims" value={stats.generated_claim_count} />
           <MetaItem label="Claim total" value={formatCurrency(stats.claim_amount)} />
-          <div className="rounded-xl border border-zinc-200 bg-white px-4 py-4 text-sm leading-6 text-zinc-600">
+          <div className="border border-zinc-200 bg-white px-4 py-4 text-sm leading-6 text-zinc-600">
             These analytics views now read from a compact live reporting summary instead of hydrating every
             checkout workspace individually.
           </div>

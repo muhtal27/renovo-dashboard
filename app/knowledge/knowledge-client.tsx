@@ -356,9 +356,9 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
                   key={region.value}
                   type="button"
                   onClick={() => setRegionFilter(region.value)}
-                  className={`rounded-xl border px-4 py-4 text-left transition ${
+                  className={`border px-4 py-4 text-left transition ${
                     active
-                      ? 'border-zinc-900 bg-zinc-900 text-white shadow-[0_2px_8px_rgba(0,0,0,0.08)]'
+                      ? 'border-zinc-900 bg-zinc-900 text-white'
                       : 'border-zinc-200 bg-zinc-50/70 hover:border-zinc-300 hover:bg-white'
                   }`}
                 >
@@ -408,7 +408,7 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
                   value={searchQuery}
                   onChange={(event) => setSearchQuery(event.target.value)}
                   placeholder="Search the guidance library"
-                  className="h-11 w-full rounded-lg border border-zinc-200 bg-white pl-11 pr-4 text-sm text-zinc-900 placeholder:text-zinc-400"
+                  className="h-11 w-full border border-zinc-200 bg-white pl-11 pr-4 text-sm text-zinc-900 placeholder:text-zinc-400"
                 />
               </label>
             </FilterToolbar>
@@ -419,7 +419,7 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
           title="Library status"
           description="The operator guidance library is curated for live decision support and should be checked alongside the tenancy location."
         >
-          <div className="rounded-xl border border-zinc-200 bg-zinc-50/70 px-4 py-4">
+          <div className="border border-zinc-200 bg-zinc-50/70 px-4 py-4">
             <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
               Current scope
             </p>
@@ -427,7 +427,7 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
               {REGION_OPTIONS.find((region) => region.value === regionFilter)?.label}
             </p>
           </div>
-          <div className="rounded-xl border border-zinc-200 bg-zinc-50/70 px-4 py-4">
+          <div className="border border-zinc-200 bg-zinc-50/70 px-4 py-4">
             <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
               Visible articles
             </p>
@@ -435,13 +435,13 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
               {visibleArticleRecords.length} matching article{visibleArticleRecords.length === 1 ? '' : 's'}
             </p>
           </div>
-          <div className="rounded-xl border border-zinc-200 bg-zinc-50/70 px-4 py-4">
+          <div className="border border-zinc-200 bg-zinc-50/70 px-4 py-4">
             <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
               Last reviewed
             </p>
             <p className="mt-2 text-sm font-medium leading-6 text-zinc-900">{LAST_REVIEWED}</p>
           </div>
-          <div className="rounded-xl border border-zinc-200 bg-white px-4 py-4 text-sm leading-6 text-zinc-600">
+          <div className="border border-zinc-200 bg-white px-4 py-4 text-sm leading-6 text-zinc-600">
             Always follow the official scheme or government guidance for the tenancy location before confirming any deduction position or dispute path.
           </div>
         </DetailPanel>
@@ -493,14 +493,14 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
                     href={article.sourceHref}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center rounded-lg border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:text-zinc-950"
+                    className="inline-flex items-center border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:text-zinc-950"
                   >
                     Open source
                   </a>
                   <button
                     type="button"
                     onClick={() => setSelectedArticleTitle(article.title)}
-                    className="inline-flex items-center rounded-lg border border-zinc-900 bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800"
+                    className="inline-flex items-center border border-zinc-900 bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800"
                   >
                     Read article
                   </button>
@@ -522,7 +522,7 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
               <button
                 type="button"
                 onClick={clearSearch}
-                className="inline-flex items-center rounded-lg border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:text-zinc-950"
+                className="inline-flex items-center border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:text-zinc-950"
               >
                 Clear search
               </button>
@@ -539,7 +539,7 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
             className="flex-1 cursor-default"
             aria-label="Close article panel"
           />
-          <aside className="relative flex h-full w-full max-w-2xl flex-col border-l border-zinc-200 bg-white shadow-[0_24px_70px_rgba(15,23,42,0.12)]">
+          <aside className="relative flex h-full w-full max-w-2xl flex-col border-l border-zinc-200 bg-white">
             <div className="border-b border-zinc-200 px-6 py-5">
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
@@ -617,7 +617,7 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
                           key={article.title}
                           type="button"
                           onClick={() => setSelectedArticleTitle(article.title)}
-                          className="rounded-xl border border-zinc-200 bg-zinc-50/70 px-4 py-4 text-left transition hover:border-zinc-300 hover:bg-white"
+                          className="border border-zinc-200 bg-zinc-50/70 px-4 py-4 text-left transition hover:border-zinc-300 hover:bg-white"
                         >
                           <div className="flex items-center justify-between gap-3">
                             <span className="text-sm font-medium text-zinc-900">

@@ -186,7 +186,7 @@ export function CaseSendOut({ data }: { data: OperatorCheckoutWorkspaceData }) {
                 />
               </div>
 
-              <div className="mt-5 rounded-xl border border-zinc-200 bg-zinc-50/70 px-5 py-5">
+              <div className="mt-5 border border-zinc-200 bg-zinc-50/70 px-5 py-5">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Selected draft readiness</p>
                 <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-zinc-950">{selectedReadiness}%</p>
                 <div className="mt-4">
@@ -217,7 +217,7 @@ export function CaseSendOut({ data }: { data: OperatorCheckoutWorkspaceData }) {
                 </div>
               </dl>
 
-              <div className="mt-5 rounded-xl border border-zinc-200 bg-white px-5 py-5">
+              <div className="mt-5 border border-zinc-200 bg-white px-5 py-5">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Attached documents</p>
                 {selectedAttachments.length > 0 ? (
                   <div className="mt-4 flex flex-wrap gap-2">
@@ -232,7 +232,7 @@ export function CaseSendOut({ data }: { data: OperatorCheckoutWorkspaceData }) {
                 )}
               </div>
 
-              <div className="mt-5 rounded-xl border border-zinc-200 bg-white px-5 py-5">
+              <div className="mt-5 border border-zinc-200 bg-white px-5 py-5">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Draft body</p>
                 <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-zinc-600 [overflow-wrap:anywhere]">
                   {selectedDraft.body}
@@ -243,7 +243,7 @@ export function CaseSendOut({ data }: { data: OperatorCheckoutWorkspaceData }) {
                 <div className="mt-5 flex flex-wrap items-center gap-3">
                   <Link
                     href="/settings"
-                    className="inline-flex min-h-10 items-center justify-center rounded-lg border border-zinc-900 bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800"
+                    className="inline-flex min-h-10 items-center justify-center border border-zinc-900 bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800"
                   >
                     Open messaging settings
                   </Link>

@@ -17,7 +17,7 @@ export function MessageThreadCard({
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
+    <div className="overflow-hidden border border-zinc-200 bg-white">
         {workspace.messages.map((message) => (
           <div key={message.id} className="border-b border-zinc-200 px-5 py-4 last:border-b-0">
             <div className="flex flex-wrap items-center gap-2">

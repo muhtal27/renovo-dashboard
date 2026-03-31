@@ -9,7 +9,7 @@ export default async function InventoryFeedbackPage() {
   await requireOperatorTenant('/inventory-feedback')
 
   return (
-    <section className="rounded-xl border border-zinc-200/80 bg-white px-6 py-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)] md:px-7">
+    <section className="border border-zinc-200/80 bg-white px-6 py-6 md:px-7">
       <div className="max-w-3xl space-y-3">
         <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
           Inventory feedback

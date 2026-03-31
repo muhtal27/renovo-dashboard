@@ -135,7 +135,7 @@ export function CaseWorkspaceHeader({
               type="button"
               disabled={isAnalysing}
               onClick={() => void handleAnalyse()}
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-zinc-900 bg-zinc-900 px-4 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:border-zinc-200 disabled:bg-zinc-100 disabled:text-zinc-500"
+              className="inline-flex h-10 items-center justify-center gap-2 border border-zinc-900 bg-zinc-900 px-4 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:border-zinc-200 disabled:bg-zinc-100 disabled:text-zinc-500"
             >
               {isAnalysing ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
               {isAnalysing ? 'Analysing...' : 'Analyse'}

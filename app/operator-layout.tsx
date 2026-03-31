@@ -248,12 +248,12 @@ function OperatorSearchForm({
           value={searchValue}
           onChange={(event) => setSearchValue(event.target.value)}
           placeholder={searchPlaceholder}
-          className="h-10 w-full rounded-lg border border-zinc-200 bg-zinc-50 pl-11 pr-28 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white"
+          className="h-10 w-full border border-zinc-200 bg-zinc-50 pl-11 pr-28 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white"
         />
         <Link
           href={searchAction}
           prefetch={false}
-          className="absolute right-1.5 top-1.5 inline-flex h-7 items-center rounded-md bg-zinc-900 px-3 text-xs font-medium text-white transition hover:bg-zinc-800"
+          className="absolute right-1.5 top-1.5 inline-flex h-7 items-center bg-zinc-900 px-3 text-xs font-medium text-white transition hover:bg-zinc-800"
         >
           Search
         </Link>
@@ -310,7 +310,7 @@ export function OperatorLayout({ children, operator }: OperatorLayoutProps) {
                     <button
                       type="button"
                       onClick={() => setMobileNavOpen(true)}
-                      className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 text-zinc-500 xl:hidden"
+                      className="mt-0.5 flex h-8 w-8 items-center justify-center border border-zinc-200 text-zinc-500 xl:hidden"
                       aria-label="Open navigation"
                     >
                       <Menu className="h-4 w-4" />
@@ -362,7 +362,7 @@ export function OperatorLayout({ children, operator }: OperatorLayoutProps) {
                         End of tenancy
                       </p>
                     </div>
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-zinc-100 text-sm font-semibold text-zinc-600">
+                    <div className="flex h-9 w-9 items-center justify-center bg-zinc-100 text-sm font-semibold text-zinc-600">
                       {getInitials(displayName)}
                     </div>
                   </div>
@@ -385,7 +385,7 @@ export function OperatorLayout({ children, operator }: OperatorLayoutProps) {
                         href={action.href}
                         prefetch={false}
                         className={cn(
-                          'inline-flex items-center gap-2 rounded-lg border px-3.5 py-2 text-sm font-medium transition',
+                          'inline-flex items-center gap-2 border px-3.5 py-2 text-sm font-medium transition',
                           action.tone === 'primary'
                             ? 'border-zinc-900 bg-zinc-900 text-white hover:bg-zinc-800'
                             : 'border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 hover:text-zinc-950'
@@ -396,7 +396,7 @@ export function OperatorLayout({ children, operator }: OperatorLayoutProps) {
                       </Link>
                     ))}
                   </div>
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-100 text-sm font-semibold text-zinc-600 md:hidden">
+                  <div className="flex h-8 w-8 items-center justify-center bg-zinc-100 text-sm font-semibold text-zinc-600 md:hidden">
                     {getInitials(displayName)}
                   </div>
                 </div>

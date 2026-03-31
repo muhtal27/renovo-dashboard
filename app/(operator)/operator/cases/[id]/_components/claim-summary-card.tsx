@@ -10,26 +10,26 @@ export function ClaimSummaryCard({
   workspace: OperatorCaseWorkspaceData
 }) {
   return (
-    <div className="rounded-xl border border-zinc-200 bg-zinc-50/70 p-5">
+    <div className="border border-zinc-200 bg-zinc-50/70 p-5">
       <p className="text-sm font-semibold tracking-[-0.02em] text-zinc-950">Claim summary</p>
       <p className="mt-2 text-sm leading-6 text-zinc-600">
         Current deduction position against the recorded deposit.
       </p>
 
       <div className="mt-5 grid gap-3 md:grid-cols-2">
-        <div className="rounded-xl border border-zinc-200 bg-white px-4 py-4">
+        <div className="border border-zinc-200 bg-white px-4 py-4">
           <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Total claimed</p>
           <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-zinc-950">
             {formatCurrency(workspace.totals.totalClaimed)}
           </p>
         </div>
-        <div className="rounded-xl border border-zinc-200 bg-white px-4 py-4">
+        <div className="border border-zinc-200 bg-white px-4 py-4">
           <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Return to landlord</p>
           <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-zinc-950">
             {formatCurrency(workspace.totals.returnToLandlord)}
           </p>
         </div>
-        <div className="rounded-xl border border-zinc-200 bg-white px-4 py-4">
+        <div className="border border-zinc-200 bg-white px-4 py-4">
           <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Return to tenant</p>
           <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-zinc-950">
             {workspace.totals.returnToTenant == null
@@ -37,7 +37,7 @@ export function ClaimSummaryCard({
               : formatCurrency(workspace.totals.returnToTenant)}
           </p>
         </div>
-        <div className="rounded-xl border border-zinc-200 bg-white px-4 py-4">
+        <div className="border border-zinc-200 bg-white px-4 py-4">
           <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Disputed amount</p>
           <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-zinc-950">
             {formatCurrency(workspace.totals.disputedAmount)}
@@ -63,7 +63,7 @@ export function ClaimSummaryCard({
       </dl>
 
       {workspace.claimBreakdown.length ? (
-        <div className="mt-5 overflow-hidden rounded-xl border border-zinc-200 bg-white">
+        <div className="mt-5 overflow-hidden border border-zinc-200 bg-white">
           {workspace.claimBreakdown.map((item) => (
             <div key={item.id} className="border-b border-zinc-200 px-4 py-4 last:border-b-0">
               <div className="flex items-start justify-between gap-3">

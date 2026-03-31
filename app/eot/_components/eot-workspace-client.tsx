@@ -414,9 +414,9 @@ function IssueCard({
     <button
       type="button"
       onClick={() => onEdit(issue)}
-      className={`w-full rounded-xl border px-4 py-4 text-left transition ${
+      className={`w-full border px-4 py-4 text-left transition ${
         active
-          ? 'border-zinc-900 bg-zinc-900 text-white shadow-[0_2px_8px_rgba(0,0,0,0.08)]'
+          ? 'border-zinc-900 bg-zinc-900 text-white'
           : 'border-zinc-200 bg-white hover:border-zinc-300 hover:bg-zinc-50'
       }`}
     >
@@ -475,13 +475,13 @@ function SectionBody({
   if (error && !loaded) {
     return (
       <div className="space-y-3">
-        <p className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+        <p className="border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
           {getEotUiErrorMessage(error)}
         </p>
         <button
           type="button"
           onClick={onRetry}
-          className="inline-flex items-center justify-center rounded-lg border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700"
+          className="inline-flex items-center justify-center border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700"
         >
           {retryLabel ?? 'Retry'}
         </button>
@@ -492,12 +492,12 @@ function SectionBody({
   return (
     <div className="space-y-4">
       {error && loaded ? (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+        <div className="flex flex-wrap items-center justify-between gap-3 border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
           <span>{getEotUiErrorMessage(error)}</span>
           <button
             type="button"
             onClick={onRetry}
-            className="inline-flex items-center justify-center rounded-md border border-amber-300 bg-white px-3 py-2 text-sm font-medium text-amber-900"
+            className="inline-flex items-center justify-center border border-amber-300 bg-white px-3 py-2 text-sm font-medium text-amber-900"
           >
             {retryLabel ?? 'Retry'}
           </button>
@@ -1105,7 +1105,7 @@ export function EotWorkspaceClient({
   return (
     <div className="space-y-6">
       {refreshError ? (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+        <div className="border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
           {refreshError}
         </div>
       ) : null}
@@ -1118,7 +1118,7 @@ export function EotWorkspaceClient({
           <>
             <Link
               href="/eot"
-              className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:text-zinc-950"
+              className="inline-flex items-center gap-2 border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:text-zinc-950"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to checkouts
@@ -1126,7 +1126,7 @@ export function EotWorkspaceClient({
             <button
               type="button"
               onClick={() => void refreshWorkspaceNow()}
-              className="inline-flex items-center gap-2 rounded-lg border border-zinc-900 bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800"
+              className="inline-flex items-center gap-2 border border-zinc-900 bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800"
             >
               <RefreshCcw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
               Refresh
@@ -1208,7 +1208,7 @@ export function EotWorkspaceClient({
                   },
                 ]}
               />
-              <div className="rounded-xl border border-zinc-200 bg-white px-4 py-4 text-sm leading-6 text-zinc-600">
+              <div className="border border-zinc-200 bg-white px-4 py-4 text-sm leading-6 text-zinc-600">
                 {claimReadiness.description}
               </div>
             </DetailPanel>
@@ -1237,7 +1237,7 @@ export function EotWorkspaceClient({
             ]}
           />
           {summary.tenancy.notes ? (
-            <div className="rounded-xl border border-zinc-200 bg-white px-4 py-4 text-sm leading-6 text-zinc-600">
+            <div className="border border-zinc-200 bg-white px-4 py-4 text-sm leading-6 text-zinc-600">
               {summary.tenancy.notes}
             </div>
           ) : null}
@@ -1266,7 +1266,7 @@ export function EotWorkspaceClient({
                 <button
                   type="button"
                   onClick={() => handleToggleSection('evidence')}
-                  className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700"
+                  className="inline-flex items-center gap-2 border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700"
                 >
                   {openSections.evidence ? 'Hide' : sections.evidence.loaded ? 'Open' : 'Load'}
                   <ChevronDown className={`h-4 w-4 transition ${openSections.evidence ? 'rotate-180' : ''}`} />
@@ -1297,14 +1297,14 @@ export function EotWorkspaceClient({
                         key={item.id}
                         type="button"
                         onClick={() => setSelectedEvidenceId(item.id)}
-                        className={`w-full rounded-xl border px-4 py-4 text-left transition ${
+                        className={`w-full border px-4 py-4 text-left transition ${
                           selectedEvidence?.id === item.id
-                            ? 'border-zinc-900 bg-zinc-900 text-white shadow-[0_2px_8px_rgba(0,0,0,0.08)]'
+                            ? 'border-zinc-900 bg-zinc-900 text-white'
                             : 'border-zinc-200 bg-white hover:border-zinc-300 hover:bg-zinc-50'
                         }`}
                       >
                         <div className="flex items-center gap-2">
-                          <span className={`flex h-9 w-9 items-center justify-center rounded-md ${
+                          <span className={`flex h-9 w-9 items-center justify-center ${
                             selectedEvidence?.id === item.id ? 'bg-white/10 text-white' : 'bg-zinc-100 text-zinc-600'
                           }`}>
                             <EvidenceIcon type={item.type} />
@@ -1331,7 +1331,7 @@ export function EotWorkspaceClient({
                       type="button"
                       onClick={() => void loadMoreSection('evidence')}
                       disabled={sections.evidence.loadingMore}
-                      className="inline-flex items-center justify-center rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 disabled:opacity-60"
+                      className="inline-flex items-center justify-center border border-zinc-200 bg-white px-4 py-3 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 disabled:opacity-60"
                     >
                       {sections.evidence.loadingMore ? 'Loading more evidence...' : 'Load more evidence'}
                     </button>
@@ -1353,7 +1353,7 @@ export function EotWorkspaceClient({
 
                       <div className="px-5 py-5">
                         {selectedEvidence.type === 'image' ? (
-                          <div className="overflow-hidden rounded-xl border border-zinc-200 bg-zinc-100">
+                          <div className="overflow-hidden border border-zinc-200 bg-zinc-100">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={selectedEvidence.file_url}
@@ -1362,8 +1362,8 @@ export function EotWorkspaceClient({
                             />
                           </div>
                         ) : (
-                          <div className="rounded-xl border border-dashed border-zinc-300 bg-zinc-50 px-5 py-10 text-center">
-                            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-white text-zinc-600 shadow-sm">
+                          <div className="border border-dashed border-zinc-300 bg-zinc-50 px-5 py-10 text-center">
+                            <div className="mx-auto flex h-14 w-14 items-center justify-center bg-white text-zinc-600 shadow-sm">
                               <EvidenceIcon type={selectedEvidence.type} />
                             </div>
                             <p className="mt-4 text-sm font-semibold text-zinc-950">Preview opens in a new tab</p>
@@ -1374,7 +1374,7 @@ export function EotWorkspaceClient({
                               href={selectedEvidence.file_url}
                               target="_blank"
                               rel="noreferrer"
-                              className="mt-4 inline-flex items-center gap-2 rounded-lg border border-zinc-900 bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white"
+                              className="mt-4 inline-flex items-center gap-2 border border-zinc-900 bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white"
                             >
                               Open source
                               <ExternalLink className="h-4 w-4" />
@@ -1388,7 +1388,7 @@ export function EotWorkspaceClient({
                         </div>
 
                         {selectedEvidence.metadata ? (
-                          <div className="mt-4 overflow-hidden rounded-xl border border-zinc-200 bg-zinc-950">
+                          <div className="mt-4 overflow-hidden border border-zinc-200 bg-zinc-950">
                             <pre className="overflow-x-auto px-4 py-4 text-xs leading-6 text-zinc-200">
                               {JSON.stringify(selectedEvidence.metadata, null, 2)}
                             </pre>
@@ -1412,7 +1412,7 @@ export function EotWorkspaceClient({
                           onChange={(event) =>
                             setEvidenceForm((current) => ({ ...current, fileUrl: event.target.value }))
                           }
-                          className="mt-2 h-11 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-4 text-zinc-900"
+                          className="mt-2 h-11 w-full border border-zinc-200 bg-zinc-50 px-4 text-zinc-900"
                           placeholder="https://..."
                         />
                       </label>
@@ -1427,7 +1427,7 @@ export function EotWorkspaceClient({
                                 type: event.target.value as EotEvidenceType,
                               }))
                             }
-                            className="mt-2 h-11 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-4 text-zinc-900"
+                            className="mt-2 h-11 w-full border border-zinc-200 bg-zinc-50 px-4 text-zinc-900"
                           >
                             {(['document', 'image', 'video'] as EotEvidenceType[]).map((type) => (
                               <option key={type} value={type}>
@@ -1443,7 +1443,7 @@ export function EotWorkspaceClient({
                             onChange={(event) =>
                               setEvidenceForm((current) => ({ ...current, area: event.target.value }))
                             }
-                            className="mt-2 h-11 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-4 text-zinc-900"
+                            className="mt-2 h-11 w-full border border-zinc-200 bg-zinc-50 px-4 text-zinc-900"
                             placeholder="Kitchen, hallway, inventory..."
                           />
                         </label>
@@ -1456,7 +1456,7 @@ export function EotWorkspaceClient({
                           onChange={(event) =>
                             setEvidenceForm((current) => ({ ...current, uploadedBy: event.target.value }))
                           }
-                          className="mt-2 h-11 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-4 text-zinc-900"
+                          className="mt-2 h-11 w-full border border-zinc-200 bg-zinc-50 px-4 text-zinc-900"
                         />
                       </label>
                       <label className="text-sm">
@@ -1466,19 +1466,19 @@ export function EotWorkspaceClient({
                           onChange={(event) =>
                             setEvidenceForm((current) => ({ ...current, metadata: event.target.value }))
                           }
-                          className="mt-2 min-h-24 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3 text-zinc-900"
+                          className="mt-2 min-h-24 w-full border border-zinc-200 bg-zinc-50 px-4 py-3 text-zinc-900"
                           placeholder='{"source":"inventory","page":"12"}'
                         />
                       </label>
                       {evidenceError ? (
-                        <p className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                        <p className="border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
                           {evidenceError}
                         </p>
                       ) : null}
                       <button
                         type="submit"
                         disabled={evidencePending}
-                        className="inline-flex items-center justify-center rounded-lg border border-zinc-900 bg-zinc-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-60"
+                        className="inline-flex items-center justify-center border border-zinc-900 bg-zinc-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-60"
                       >
                         {evidencePending ? 'Saving evidence...' : 'Add evidence'}
                       </button>
@@ -1507,7 +1507,7 @@ export function EotWorkspaceClient({
                 <button
                   type="button"
                   onClick={() => handleToggleSection('issues')}
-                  className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700"
+                  className="inline-flex items-center gap-2 border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700"
                 >
                   {openSections.issues ? 'Hide' : sections.issues.loaded ? 'Open' : 'Load'}
                   <ChevronDown className={`h-4 w-4 transition ${openSections.issues ? 'rotate-180' : ''}`} />
@@ -1572,7 +1572,7 @@ export function EotWorkspaceClient({
                         onChange={(event) =>
                           setIssueForm((current) => ({ ...current, title: event.target.value }))
                         }
-                        className="mt-2 h-11 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-4 text-zinc-900"
+                        className="mt-2 h-11 w-full border border-zinc-200 bg-zinc-50 px-4 text-zinc-900"
                         placeholder="Damage, cleaning, missing item..."
                       />
                     </label>
@@ -1584,7 +1584,7 @@ export function EotWorkspaceClient({
                         onChange={(event) =>
                           setIssueForm((current) => ({ ...current, description: event.target.value }))
                         }
-                        className="mt-2 min-h-28 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3 text-zinc-900"
+                        className="mt-2 min-h-28 w-full border border-zinc-200 bg-zinc-50 px-4 py-3 text-zinc-900"
                         placeholder="What happened, where, and why does it matter?"
                       />
                     </label>
@@ -1600,7 +1600,7 @@ export function EotWorkspaceClient({
                               severity: event.target.value as EotIssueSeverity,
                             }))
                           }
-                          className="mt-2 h-11 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-4 text-zinc-900"
+                          className="mt-2 h-11 w-full border border-zinc-200 bg-zinc-50 px-4 text-zinc-900"
                         >
                           {(['low', 'medium', 'high'] as EotIssueSeverity[]).map((severity) => (
                             <option key={severity} value={severity}>
@@ -1619,7 +1619,7 @@ export function EotWorkspaceClient({
                               status: event.target.value as EotIssueStatus,
                             }))
                           }
-                          className="mt-2 h-11 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-4 text-zinc-900"
+                          className="mt-2 h-11 w-full border border-zinc-200 bg-zinc-50 px-4 text-zinc-900"
                         >
                           {(['open', 'resolved', 'disputed'] as EotIssueStatus[]).map((status) => (
                             <option key={status} value={status}>
@@ -1634,11 +1634,11 @@ export function EotWorkspaceClient({
                       <span className="font-medium text-zinc-700">Link evidence</span>
                       <div className="mt-2 grid gap-2">
                         {sections.evidence.loading && !sections.evidence.loaded ? (
-                          <p className="rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-500">
+                          <p className="border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-500">
                             Loading evidence options...
                           </p>
                         ) : evidence.length === 0 ? (
-                          <p className="rounded-lg border border-dashed border-zinc-300 px-4 py-3 text-sm text-zinc-500">
+                          <p className="border border-dashed border-zinc-300 px-4 py-3 text-sm text-zinc-500">
                             Add evidence first to link it to this issue.
                           </p>
                         ) : (
@@ -1648,7 +1648,7 @@ export function EotWorkspaceClient({
                             return (
                               <label
                                 key={evidenceItem.id}
-                                className="flex items-center gap-3 rounded-lg border border-zinc-200 bg-white px-3 py-3"
+                                className="flex items-center gap-3 border border-zinc-200 bg-white px-3 py-3"
                               >
                                 <input
                                   type="checkbox"
@@ -1677,7 +1677,7 @@ export function EotWorkspaceClient({
                             type="button"
                             onClick={() => void loadMoreSection('evidence')}
                             disabled={sections.evidence.loadingMore}
-                            className="inline-flex items-center justify-center rounded-lg border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 disabled:opacity-60"
+                            className="inline-flex items-center justify-center border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 disabled:opacity-60"
                           >
                             {sections.evidence.loadingMore
                               ? 'Loading more evidence options...'
@@ -1698,7 +1698,7 @@ export function EotWorkspaceClient({
                               decision: event.target.value as EotRecommendationDecision | '',
                             }))
                           }
-                          className="mt-2 h-11 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-4 text-zinc-900"
+                          className="mt-2 h-11 w-full border border-zinc-200 bg-zinc-50 px-4 text-zinc-900"
                         >
                           <option value="">No recommendation yet</option>
                           {(['charge', 'partial', 'no_charge'] as EotRecommendationDecision[]).map(
@@ -1720,7 +1720,7 @@ export function EotWorkspaceClient({
                               estimatedCost: event.target.value,
                             }))
                           }
-                          className="mt-2 h-11 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-4 text-zinc-900"
+                          className="mt-2 h-11 w-full border border-zinc-200 bg-zinc-50 px-4 text-zinc-900"
                           placeholder="250.00"
                         />
                       </label>
@@ -1733,13 +1733,13 @@ export function EotWorkspaceClient({
                         onChange={(event) =>
                           setIssueForm((current) => ({ ...current, rationale: event.target.value }))
                         }
-                        className="mt-2 min-h-24 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3 text-zinc-900"
+                        className="mt-2 min-h-24 w-full border border-zinc-200 bg-zinc-50 px-4 py-3 text-zinc-900"
                         placeholder="Explain liability, confidence, and proportionality."
                       />
                     </label>
 
                     {issueError ? (
-                      <p className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                      <p className="border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
                         {issueError}
                       </p>
                     ) : null}
@@ -1748,7 +1748,7 @@ export function EotWorkspaceClient({
                       <button
                         type="submit"
                         disabled={issuePending}
-                        className="inline-flex items-center justify-center rounded-lg border border-zinc-900 bg-zinc-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-60"
+                        className="inline-flex items-center justify-center border border-zinc-900 bg-zinc-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-60"
                       >
                         {issuePending ? 'Saving issue...' : issueForm.issueId ? 'Update issue' : 'Add issue'}
                       </button>
@@ -1756,7 +1756,7 @@ export function EotWorkspaceClient({
                         <button
                           type="button"
                           onClick={resetIssueForm}
-                          className="inline-flex items-center justify-center rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm font-medium text-zinc-700"
+                          className="inline-flex items-center justify-center border border-zinc-200 bg-white px-4 py-3 text-sm font-medium text-zinc-700"
                         >
                           Cancel
                         </button>
@@ -1781,7 +1781,7 @@ export function EotWorkspaceClient({
                 <button
                   type="button"
                   onClick={() => handleToggleSection('submission')}
-                  className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700"
+                  className="inline-flex items-center gap-2 border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700"
                 >
                   {openSections.submission ? 'Hide' : sections.submission.loaded ? 'Open' : 'Load'}
                   <ChevronDown className={`h-4 w-4 transition ${openSections.submission ? 'rotate-180' : ''}`} />
@@ -1801,7 +1801,7 @@ export function EotWorkspaceClient({
             >
               {submission?.claim ? (
                 <div className="space-y-5">
-                  <div className="rounded-xl border border-zinc-200 bg-white px-6 py-6 shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
+                  <div className="border border-zinc-200 bg-white px-6 py-6">
                     <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                       <div>
                         <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
@@ -1842,7 +1842,7 @@ export function EotWorkspaceClient({
                         />
                       ) : (
                         submission.issues.map((issue) => (
-                          <div key={issue.id} className="rounded-xl border border-zinc-200 bg-white px-4 py-4">
+                          <div key={issue.id} className="border border-zinc-200 bg-white px-4 py-4">
                             <div className="flex flex-wrap items-center gap-2">
                               <StatusBadge label={formatEnumLabel(issue.severity)} tone={issue.severity} />
                               {issue.recommendation?.decision ? (
@@ -1895,7 +1895,7 @@ export function EotWorkspaceClient({
               <button
                 type="button"
                 onClick={() => handleToggleSection('timeline')}
-                className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700"
+                className="inline-flex items-center gap-2 border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700"
               >
                 {openSections.timeline ? 'Hide' : sections.timeline.loaded ? 'Open' : 'Load'}
                 <ChevronDown className={`h-4 w-4 transition ${openSections.timeline ? 'rotate-180' : ''}`} />
@@ -1933,7 +1933,7 @@ export function EotWorkspaceClient({
                 <button
                   type="button"
                   onClick={() => handleToggleSection('documents')}
-                  className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700"
+                  className="inline-flex items-center gap-2 border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700"
                 >
                   {openSections.documents ? 'Hide' : sections.documents.loaded ? 'Open' : 'Load'}
                   <ChevronDown className={`h-4 w-4 transition ${openSections.documents ? 'rotate-180' : ''}`} />
@@ -1964,7 +1964,7 @@ export function EotWorkspaceClient({
                       href={document.file_url}
                       target="_blank"
                       rel="noreferrer"
-                      className="block rounded-xl border border-zinc-200 bg-white px-4 py-4 transition hover:border-zinc-300"
+                      className="block border border-zinc-200 bg-white px-4 py-4 transition hover:border-zinc-300"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div>
@@ -1982,7 +1982,7 @@ export function EotWorkspaceClient({
                       type="button"
                       onClick={() => void loadMoreSection('documents')}
                       disabled={sections.documents.loadingMore}
-                      className="inline-flex items-center justify-center rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 disabled:opacity-60"
+                      className="inline-flex items-center justify-center border border-zinc-200 bg-white px-4 py-3 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 disabled:opacity-60"
                     >
                       {sections.documents.loadingMore ? 'Loading more documents...' : 'Load more documents'}
                     </button>
@@ -2004,7 +2004,7 @@ export function EotWorkspaceClient({
                 <button
                   type="button"
                   onClick={() => handleToggleSection('messages')}
-                  className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700"
+                  className="inline-flex items-center gap-2 border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700"
                 >
                   {openSections.messages ? 'Hide' : sections.messages.loaded ? 'Open' : 'Load'}
                   <ChevronDown className={`h-4 w-4 transition ${openSections.messages ? 'rotate-180' : ''}`} />
@@ -2030,7 +2030,7 @@ export function EotWorkspaceClient({
                   />
                 ) : (
                   visibleMessages.map((message) => (
-                    <div key={message.id} className="rounded-xl border border-zinc-200 bg-white px-4 py-4">
+                    <div key={message.id} className="border border-zinc-200 bg-white px-4 py-4">
                       <div className="flex flex-wrap items-center gap-2">
                         <StatusBadge label={formatEnumLabel(message.sender_type)} tone={message.sender_type} />
                         <span className="text-xs uppercase tracking-[0.08em] text-zinc-400">
@@ -2046,7 +2046,7 @@ export function EotWorkspaceClient({
                     type="button"
                     onClick={() => void loadMoreSection('messages')}
                     disabled={sections.messages.loadingMore}
-                    className="inline-flex items-center justify-center rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 disabled:opacity-60"
+                    className="inline-flex items-center justify-center border border-zinc-200 bg-white px-4 py-3 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 disabled:opacity-60"
                   >
                     {sections.messages.loadingMore ? 'Loading more notes...' : 'Load more notes'}
                   </button>
@@ -2070,7 +2070,7 @@ export function EotWorkspaceClient({
                           senderType: event.target.value as EotMessageSenderType,
                         }))
                       }
-                      className="mt-2 h-11 w-full rounded-lg border border-zinc-200 bg-white px-4 text-zinc-900"
+                      className="mt-2 h-11 w-full border border-zinc-200 bg-white px-4 text-zinc-900"
                     >
                       {(['manager', 'landlord', 'tenant'] as EotMessageSenderType[]).map((senderType) => (
                         <option key={senderType} value={senderType}>
@@ -2087,7 +2087,7 @@ export function EotWorkspaceClient({
                       onChange={(event) =>
                         setMessageForm((current) => ({ ...current, senderId: event.target.value }))
                       }
-                      className="mt-2 h-11 w-full rounded-lg border border-zinc-200 bg-white px-4 text-zinc-900"
+                      className="mt-2 h-11 w-full border border-zinc-200 bg-white px-4 text-zinc-900"
                     />
                   </label>
                 </div>
@@ -2100,7 +2100,7 @@ export function EotWorkspaceClient({
                     onChange={(event) =>
                       setMessageForm((current) => ({ ...current, content: event.target.value }))
                     }
-                    className="mt-2 min-h-24 w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-zinc-900"
+                    className="mt-2 min-h-24 w-full border border-zinc-200 bg-white px-4 py-3 text-zinc-900"
                     placeholder="Record an operator note or outbound case update."
                   />
                 </label>
@@ -2112,13 +2112,13 @@ export function EotWorkspaceClient({
                     onChange={(event) =>
                       setMessageForm((current) => ({ ...current, attachments: event.target.value }))
                     }
-                    className="mt-2 min-h-20 w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-zinc-900"
+                    className="mt-2 min-h-20 w-full border border-zinc-200 bg-white px-4 py-3 text-zinc-900"
                     placeholder='[{"name":"invoice.pdf","url":"https://..."}]'
                   />
                 </label>
 
                 {messageError ? (
-                  <p className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                  <p className="border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
                     {messageError}
                   </p>
                 ) : null}
@@ -2126,7 +2126,7 @@ export function EotWorkspaceClient({
                 <button
                   type="submit"
                   disabled={messagePending}
-                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-zinc-900 bg-zinc-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-60"
+                  className="inline-flex items-center justify-center gap-2 border border-zinc-900 bg-zinc-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-60"
                 >
                   <Send className="h-4 w-4" />
                   {messagePending ? 'Saving note...' : 'Add case note'}

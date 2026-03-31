@@ -36,7 +36,7 @@ export default async function SettingsPage() {
               ['Evidence review', 'Tracked against the live workspace'],
               ['Operator notes', 'Stored in the checkout record'],
             ].map(([label, value]) => (
-              <div key={label} className="rounded-xl border border-zinc-200 bg-zinc-50/70 px-4 py-4">
+              <div key={label} className="border border-zinc-200 bg-zinc-50/70 px-4 py-4">
                 <dt className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
                   {label}
                 </dt>
@@ -58,7 +58,7 @@ export default async function SettingsPage() {
               />
             }
           />
-          <div className="mt-6 rounded-xl border border-zinc-200 bg-zinc-50/70 px-5 py-5">
+          <div className="mt-6 border border-zinc-200 bg-zinc-50/70 px-5 py-5">
             <p className="text-sm font-semibold text-zinc-950">
               {outboundConfigured ? 'Outbound webhook configured' : 'Outbound webhook not configured'}
             </p>
@@ -71,13 +71,13 @@ export default async function SettingsPage() {
           <div className="mt-6 flex flex-wrap items-center gap-3">
             <Link
               href="/knowledge"
-              className="inline-flex items-center rounded-lg border border-zinc-900 bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800"
+              className="inline-flex items-center border border-zinc-900 bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800"
             >
               Open guidance hub
             </Link>
             <Link
               href="/overview"
-              className="inline-flex items-center rounded-lg border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:text-zinc-950"
+              className="inline-flex items-center border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:text-zinc-950"
             >
               Return to overview
             </Link>

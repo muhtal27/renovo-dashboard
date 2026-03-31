@@ -304,7 +304,7 @@ export function CaseProcess({ data }: { data: OperatorCheckoutWorkspaceData }) {
               ) : null}
             </div>
 
-            <div className="rounded-xl border border-zinc-200 bg-zinc-50/70 px-5 py-5">
+            <div className="border border-zinc-200 bg-zinc-50/70 px-5 py-5">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
@@ -503,7 +503,7 @@ export function CaseProcess({ data }: { data: OperatorCheckoutWorkspaceData }) {
                 return (
                   <div
                     key={recommendation.id}
-                    className="rounded-xl border border-zinc-200 bg-zinc-50/70 px-5 py-5"
+                    className="border border-zinc-200 bg-zinc-50/70 px-5 py-5"
                   >
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div className="min-w-0">
@@ -557,7 +557,7 @@ export function CaseProcess({ data }: { data: OperatorCheckoutWorkspaceData }) {
           </div>
 
           <div className="space-y-4 pt-5">
-            <div className="rounded-xl border border-zinc-200 bg-zinc-50/70 px-5 py-5">
+            <div className="border border-zinc-200 bg-zinc-50/70 px-5 py-5">
               <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Current total</p>
               <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-zinc-950">
                 {formatCurrency(currentClaimTotal)}
@@ -570,7 +570,7 @@ export function CaseProcess({ data }: { data: OperatorCheckoutWorkspaceData }) {
             </div>
 
             {data.workspace.claimBreakdown.length > 0 ? (
-              <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
+              <div className="overflow-hidden border border-zinc-200 bg-white">
                 {data.workspace.claimBreakdown.map((item) => (
                   <div key={item.id} className="border-b border-zinc-200 px-4 py-4 last:border-b-0">
                     <div className="flex items-start justify-between gap-3">

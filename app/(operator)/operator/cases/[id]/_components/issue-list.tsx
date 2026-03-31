@@ -23,7 +23,7 @@ export function IssueList({
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
+    <div className="overflow-hidden border border-zinc-200 bg-white">
       {issues.map((issue) => (
         <div key={issue.id} className="border-b border-zinc-200 last:border-b-0">
           <IssueCard
