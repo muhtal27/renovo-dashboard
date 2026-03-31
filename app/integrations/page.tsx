@@ -53,109 +53,90 @@ export const metadata = createMarketingMetadata({
 export default function IntegrationsPage() {
   return (
     <MarketingShell currentPath="/integrations">
-      <section className="app-surface rounded-[2rem] p-6 md:p-8">
-        <div className="mx-auto max-w-6xl space-y-10">
-          <section className="rounded-[1.8rem] border border-stone-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,247,243,0.95))] px-6 py-7 md:px-8 md:py-8">
-            <p className="app-kicker">Integrations</p>
-            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-stone-900 md:text-4xl">
-              Connect your workflow to Renovo AI
-            </h1>
-            <p className="mt-4 max-w-3xl text-sm leading-7 text-stone-600 md:text-base md:leading-8">
-              Renovo AI is being built to support structured workflow handoff around end-of-tenancy
-              operations. The integration framework is in planning and is not yet publicly
-              available.
-            </p>
-            <div className="mt-6 rounded-[1.4rem] border border-amber-200 bg-amber-50 px-5 py-4">
-              <p className="text-sm font-semibold text-amber-900">Current status</p>
-              <p className="mt-2 text-sm leading-7 text-amber-900/85">
-                Integration framework in planning. Not yet publicly available.
-              </p>
-            </div>
-          </section>
+      <div className="page-shell page-stack">
 
-          <section>
-            <p className="app-kicker">What integrations are being built for</p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">
-              End-of-tenancy workflow alignment
-            </h2>
-            <p className="mt-4 max-w-4xl text-base leading-8 text-stone-700">
-              Renovo AI sits between evidence intake, manager review, and claim preparation. Any
-              future integration work is intended to support that operational flow rather than add a
-              separate developer platform for its own sake.
-            </p>
-          </section>
+        <section className="page-hero">
+          <p className="app-kicker">Integrations</p>
+          <h1 className="page-title max-w-[820px]">
+            Connect your workflow to <em>Renovo AI</em>
+          </h1>
+          <p className="page-copy max-w-[640px]">
+            Renovo AI is being built to support structured workflow handoff around
+            end-of-tenancy operations. The integration framework is in planning and is
+            not yet publicly available.
+          </p>
+          <div className="renovo-highlight mt-6 inline-block rounded-lg px-5 py-3">
+            <p className="text-sm font-semibold text-slate-800">Current status</p>
+            <p className="mt-1 text-sm leading-7 text-slate-500">Integration framework in planning. Not yet publicly available.</p>
+          </div>
+        </section>
 
-          <section>
+        {/* PLANNED AREAS */}
+        <section className="section-tinted">
+          <div className="mx-auto max-w-[1080px] px-6 py-24">
             <p className="app-kicker">Planned integration areas</p>
-            <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
+              End-of-tenancy <em className="text-slate-400">workflow alignment</em>
+            </h2>
+            <p className="mt-3.5 max-w-[560px] text-base leading-8 text-slate-500">
+              Renovo AI sits between evidence intake, manager review, and claim preparation.
+              Integration work supports that operational flow.
+            </p>
+            <div className="mt-14 grid gap-10 md:grid-cols-2">
               {plannedAreas.map((item) => (
-                <article
-                  key={item.title}
-                  className="rounded-[1.45rem] border border-stone-200 bg-white/92 p-5"
-                >
-                  <h2 className="text-lg font-semibold text-stone-900">{item.title}</h2>
-                  <p className="mt-3 text-sm leading-7 text-stone-600">{item.body}</p>
-                </article>
+                <div key={item.title}>
+                  <h3 className="text-[15px] font-semibold text-zinc-950">{item.title}</h3>
+                  <p className="mt-2 text-sm leading-7 text-slate-500">{item.body}</p>
+                </div>
               ))}
             </div>
-          </section>
+          </div>
+        </section>
 
-          <section>
-            <p className="app-kicker">How data is expected to move through Renovo AI</p>
-            <div className="mt-4 grid gap-4 md:grid-cols-3">
-              {flowItems.map((item) => (
-                <article
-                  key={item.title}
-                  className="rounded-[1.45rem] border border-stone-200 bg-white/92 p-5"
-                >
-                  <h2 className="text-base font-semibold text-stone-900">{item.title}</h2>
-                  <p className="mt-3 text-sm leading-7 text-stone-600">{item.body}</p>
-                </article>
-              ))}
-            </div>
-          </section>
-
-          <section>
-            <p className="app-kicker">Future partner access</p>
-            <div className="mt-4 rounded-[1.6rem] border border-stone-200 bg-white/92 p-6">
-              <ul className="space-y-3 text-sm leading-7 text-stone-600">
-                {futureAccess.map((item) => (
-                  <li key={item} className="flex items-start gap-2">
-                    <span className="mt-[10px] h-1.5 w-1.5 shrink-0 rounded-full bg-zinc-950" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </section>
-
-          <section className="app-surface-strong rounded-[2.2rem] p-6 md:p-8">
-            <div className="rounded-[1.8rem] border border-stone-200 bg-[linear-gradient(135deg,rgba(255,255,255,0.97),rgba(240,247,243,0.94))] px-6 py-7 text-center md:px-8 md:py-9">
-              <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
-                Interested in integration discussions?
-              </h2>
-              <p className="mx-auto mt-4 max-w-3xl text-base leading-8 text-stone-700">
-                We&apos;re happy to speak with inventory platforms, PMS providers, and workflow
-                partners exploring future integration with Renovo AI.
-              </p>
-              <div className="mt-8 flex flex-wrap justify-center gap-3">
-                <Link
-                  href="/contact"
-                  className="app-primary-button rounded-md px-5 py-3 text-sm font-medium"
-                >
-                  Contact Renovo AI
-                </Link>
-                <Link
-                  href="/demo"
-                  className="app-secondary-button rounded-md px-5 py-3 text-sm font-medium"
-                >
-                  View demo
-                </Link>
+        {/* DATA FLOW */}
+        <section className="mx-auto max-w-[1080px] px-6 py-24">
+          <p className="app-kicker">How data moves through Renovo AI</p>
+          <div className="mt-14 grid gap-10 md:grid-cols-3">
+            {flowItems.map((item) => (
+              <div key={item.title}>
+                <h3 className="text-[15px] font-semibold text-zinc-950">{item.title}</h3>
+                <p className="mt-2 text-sm leading-7 text-slate-500">{item.body}</p>
               </div>
+            ))}
+          </div>
+        </section>
+
+        {/* FUTURE ACCESS */}
+        <section className="section-tinted">
+          <div className="mx-auto max-w-[1080px] px-6 py-24">
+            <p className="app-kicker">Future partner access</p>
+            <div className="mt-8 space-y-3">
+              {futureAccess.map((item) => (
+                <div key={item} className="flex items-start gap-3 text-sm leading-7 text-slate-500">
+                  <span className="mt-[10px] h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
+                  <span>{item}</span>
+                </div>
+              ))}
             </div>
-          </section>
-        </div>
-      </section>
+          </div>
+        </section>
+
+        {/* CTA */}
+        <section className="page-hero text-center">
+          <h2 className="text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
+            Interested in <em className="text-slate-400">integration discussions</em>?
+          </h2>
+          <p className="mx-auto mt-4 max-w-[500px] text-base leading-8 text-slate-500">
+            We are happy to speak with inventory platforms, PMS providers, and workflow
+            partners exploring future integration with Renovo AI.
+          </p>
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <Link href="/contact" className="app-primary-button rounded-md px-6 py-3 text-sm font-medium">Contact Renovo AI</Link>
+            <Link href="/demo" className="app-secondary-button rounded-md px-6 py-3 text-sm font-medium">View demo</Link>
+          </div>
+        </section>
+
+      </div>
     </MarketingShell>
   )
 }
