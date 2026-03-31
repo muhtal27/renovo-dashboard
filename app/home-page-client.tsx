@@ -72,7 +72,7 @@ export default function HomePageClient() {
               <Link key={l.href} href={l.href} className="text-sm font-medium text-white/50 transition-colors hover:text-white">{l.label}</Link>
             ))}
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-6">
             <SignInLink className="hidden text-sm font-medium text-white/50 transition-colors hover:text-white lg:inline-flex">
               Sign in
             </SignInLink>
@@ -101,7 +101,7 @@ export default function HomePageClient() {
 
         {/* ── HERO ── */}
         <section className="relative overflow-hidden bg-[#0a0e1a] px-8 pb-20 pt-[140px] lg:px-10">
-          <div className="renovo-glow pointer-events-none absolute -right-[100px] -top-[300px] h-[900px] w-[900px]" />
+          <div className="renovo-glow pointer-events-none absolute left-1/2 top-[-200px] h-[900px] w-[900px] -translate-x-1/2" />
           <div className="relative z-10 mx-auto grid max-w-[1280px] items-center gap-14 lg:grid-cols-[1fr_1.15fr]">
             <div>
               <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-[#1e293b] bg-white/[0.025] px-4 py-1.5 text-[13px] font-medium text-emerald-500">
@@ -109,8 +109,8 @@ export default function HomePageClient() {
                 End-of-tenancy automation
               </div>
               <h1 className="text-[clamp(32px,4.5vw,52px)] font-bold leading-[1.08] tracking-[-0.035em] text-white">
-                Checkout reports in.<br />
-                <span className="bg-gradient-to-br from-emerald-500 to-emerald-300 bg-clip-text text-transparent">Deposit decisions out.</span>
+                <span className="bg-gradient-to-br from-emerald-500 to-emerald-300 bg-clip-text text-transparent">Checkout reports in.</span><br />
+                <span className="text-white">Deposit decisions out.</span>
               </h1>
               <p className="mt-5 max-w-[460px] text-[17px] leading-[1.75] text-slate-400">
                 AI-powered liability comparison, deduction drafting, evidence management, and dispute pack preparation. Manager-approved at every stage.
@@ -290,7 +290,7 @@ export default function HomePageClient() {
         <section className="relative overflow-hidden bg-[#0a0e1a] px-8 py-24 text-center lg:px-10">
           <div className="renovo-glow pointer-events-none absolute -bottom-[120px] left-1/2 h-[700px] w-[700px] -translate-x-1/2" />
           <div className="relative z-10 mx-auto max-w-[560px]">
-            <h2 className="text-[clamp(26px,3.5vw,42px)] font-bold leading-[1.1] tracking-[-0.03em] text-white">See it with a <span className="text-emerald-500">real case</span></h2>
+            <h2 className="text-[clamp(26px,3.5vw,42px)] font-bold leading-[1.1] tracking-[-0.03em] text-white">See it with a <span className="bg-gradient-to-br from-emerald-500 to-emerald-300 bg-clip-text text-transparent">real case</span></h2>
             <p className="mx-auto mt-4 max-w-[420px] text-base leading-[1.85] text-slate-400">Tell us how your team handles checkouts, deduction letters, and disputes today. We will show you how Renovo fits your operation.</p>
             <div className="mt-9 flex flex-wrap justify-center gap-3">
               <Link href="/contact" className="app-accent-button rounded-lg px-6 py-3 text-sm">Get started &rarr;</Link>
@@ -310,7 +310,7 @@ export default function HomePageClient() {
             </div>
             {Object.entries(footerCols).map(([title, links]) => (
               <div key={title}>
-                <h4 className="text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-400">{title}</h4>
+                <h4 className="text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-500">{title}</h4>
                 <nav className="mt-4 grid gap-0.5">
                   {links.map((l) => (
                     <Link key={l.href} href={l.href} className="text-[13px] leading-[2.3] text-white/35 transition-colors hover:text-white">{l.label}</Link>

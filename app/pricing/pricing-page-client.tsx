@@ -138,8 +138,8 @@ export default function PricingPageClient() {
           <div className="grid gap-6 lg:grid-cols-2">
 
             {/* PAY AS YOU GO */}
-            <article className="rounded-xl border border-zinc-200 bg-white p-7 text-zinc-950">
-              <p className="inline-block rounded-full bg-emerald-500/[0.08] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-600">
+            <article className="border border-zinc-200 bg-white p-7 text-zinc-950">
+              <p className="inline-block bg-emerald-500/[0.08] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-600">
                 Flexible
               </p>
               <h2 className="mt-4 text-3xl font-semibold tracking-[-0.03em]">Pay As You Go</h2>
@@ -147,7 +147,7 @@ export default function PricingPageClient() {
                 Full platform access with usage-based billing. No contracts, no
                 minimum commitment. Scale up or down as your portfolio moves.
               </p>
-              <p className="mt-4 rounded-lg bg-emerald-500/[0.06] px-4 py-3 text-sm text-slate-600">
+              <p className="mt-4 bg-emerald-500/[0.06] px-4 py-3 text-sm text-slate-600">
                 One-time setup: £500 + VAT
               </p>
 
@@ -190,8 +190,8 @@ export default function PricingPageClient() {
             </article>
 
             {/* ENTERPRISE */}
-            <article className="rounded-xl border border-zinc-300 bg-slate-50 p-7 text-zinc-950">
-              <p className="inline-block rounded-full bg-emerald-500/[0.08] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-600">
+            <article className="border border-zinc-300 bg-slate-50 p-7 text-zinc-950">
+              <p className="inline-block bg-emerald-500/[0.08] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-600">
                 Tailored
               </p>
               <h2 className="mt-4 text-3xl font-semibold tracking-[-0.03em]">Enterprise</h2>
@@ -260,7 +260,7 @@ export default function PricingPageClient() {
             dedicated support, and custom configuration.
           </p>
 
-          <div className="mt-8 overflow-x-auto rounded-xl border border-zinc-200">
+          <div className="mt-10 overflow-x-auto border border-zinc-200">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b-2 border-zinc-200 bg-zinc-50">
