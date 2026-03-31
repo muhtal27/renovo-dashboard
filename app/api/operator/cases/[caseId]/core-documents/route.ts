@@ -9,6 +9,10 @@ import {
   resolveManagedStorageObject,
   type EditableCoreDocumentKind,
 } from '@/lib/operator-core-documents'
+import {
+  removeStructuredDocumentsForLegacyIds,
+  syncStructuredCoreDocument,
+} from '@/lib/operator-checkout-document-sync'
 import { getOperatorTenantContextForApi } from '@/lib/operator-server'
 import { OPERATOR_PERMISSIONS } from '@/lib/operator-rbac'
 import { getSupabaseServiceRoleClient } from '@/lib/supabase-admin'
@@ -196,6 +200,38 @@ async function removeManagedStorageObjects({
   }
 }
 
+async function touchCaseWorkflow({
+  supabase,
+  tenantId,
+  caseId,
+}: {
+  supabase: ReturnType<typeof getSupabaseServiceRoleClient>
+  tenantId: string
+  caseId: string
+}) {
+  const now = new Date().toISOString()
+  await supabase
+    .from('cases')
+    .update({
+      last_activity_at: now,
+      updated_at: now,
+      status: 'collecting_evidence',
+    })
+    .eq('tenant_id', tenantId)
+    .eq('id', caseId)
+    .in('status', ['draft', 'collecting_evidence'])
+
+  await supabase
+    .from('checkout_cases')
+    .update({
+      status: 'in_review',
+      updated_at: now,
+    })
+    .eq('tenant_id', tenantId)
+    .eq('case_id', caseId)
+    .is('deleted_at', null)
+}
+
 export async function POST(request: Request, context: RouteContext) {
   const { caseId } = await context.params
   const authorization = await requireAuthorizedCase(caseId)
@@ -309,6 +345,7 @@ export async function PUT(request: Request, context: RouteContext) {
 
     const publicUrlResult = supabase.storage.from(bucketName).getPublicUrl(storagePath)
     const now = new Date().toISOString()
+    const insertedDocumentId = randomUUID()
     const metadata = {
       label: spec.label,
       source: 'operator_workspace_upload',
@@ -334,11 +371,21 @@ export async function PUT(request: Request, context: RouteContext) {
       if (updateResult.error) {
         throw updateResult.error
       }
+
+      await syncStructuredCoreDocument({
+        supabase,
+        tenantId: auth.tenantId,
+        caseId,
+        legacyDocumentId: primaryDocument.id,
+        fileName,
+        storagePath,
+        kind: documentKind,
+      })
     } else {
       const insertResult = await supabase
         .from('documents')
         .insert({
-          id: randomUUID(),
+          id: insertedDocumentId,
           tenant_id: auth.tenantId,
           case_id: caseId,
           name: fileName,
@@ -350,6 +397,16 @@ export async function PUT(request: Request, context: RouteContext) {
       if (insertResult.error) {
         throw insertResult.error
       }
+
+      await syncStructuredCoreDocument({
+        supabase,
+        tenantId: auth.tenantId,
+        caseId,
+        legacyDocumentId: insertedDocumentId,
+        fileName,
+        storagePath,
+        kind: documentKind,
+      })
     }
 
     await softDeleteDocuments({
@@ -361,6 +418,17 @@ export async function PUT(request: Request, context: RouteContext) {
     await removeManagedStorageObjects({
       supabase,
       rows: [...duplicateDocuments, ...(primaryDocument ? [primaryDocument] : [])],
+    })
+    await removeStructuredDocumentsForLegacyIds({
+      supabase,
+      tenantId: auth.tenantId,
+      caseId,
+      legacyDocumentIds: duplicateDocuments.map((row) => row.id),
+    })
+    await touchCaseWorkflow({
+      supabase,
+      tenantId: auth.tenantId,
+      caseId,
     })
 
     revalidatePath(`/operator/cases/${caseId}`)
@@ -424,9 +492,20 @@ export async function DELETE(request: Request, context: RouteContext) {
       tenantId: auth.tenantId,
       ids: existingDocuments.map((row) => row.id),
     })
+    await removeStructuredDocumentsForLegacyIds({
+      supabase,
+      tenantId: auth.tenantId,
+      caseId,
+      legacyDocumentIds: existingDocuments.map((row) => row.id),
+    })
     await removeManagedStorageObjects({
       supabase,
       rows: existingDocuments,
+    })
+    await touchCaseWorkflow({
+      supabase,
+      tenantId: auth.tenantId,
+      caseId,
     })
 
     revalidatePath(`/operator/cases/${caseId}`)

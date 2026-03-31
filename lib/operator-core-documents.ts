@@ -1,12 +1,12 @@
-export type EditableCoreDocumentKind = 'check_in' | 'check_out'
+export type EditableCoreDocumentKind = 'check_in' | 'check_out' | 'tenancy_agreement'
 
-export const CORE_CASE_DOCUMENT_TYPES = ['check_in_report', 'check_out_report'] as const
+export const CORE_CASE_DOCUMENT_TYPES = ['check_in_report', 'check_out_report', 'tenancy'] as const
 export const SUPPORTING_DOCUMENT_TYPE = 'supporting_document'
 
 type EditableCoreDocumentSpec = {
   kind: EditableCoreDocumentKind
   label: string
-  documentType: 'check_in_report' | 'check_out_report'
+  documentType: 'check_in_report' | 'check_out_report' | 'tenancy'
 }
 
 const CORE_DOCUMENT_SPECS: Record<EditableCoreDocumentKind, EditableCoreDocumentSpec> = {
@@ -20,12 +20,17 @@ const CORE_DOCUMENT_SPECS: Record<EditableCoreDocumentKind, EditableCoreDocument
     label: 'Check-out report',
     documentType: 'check_out_report',
   },
+  tenancy_agreement: {
+    kind: 'tenancy_agreement',
+    label: 'Tenancy agreement',
+    documentType: 'tenancy',
+  },
 }
 
 const SUPABASE_STORAGE_PUBLIC_SEGMENT = '/storage/v1/object/public/'
 
 export function isEditableCoreDocumentKind(value: unknown): value is EditableCoreDocumentKind {
-  return value === 'check_in' || value === 'check_out'
+  return value === 'check_in' || value === 'check_out' || value === 'tenancy_agreement'
 }
 
 export function getEditableCoreDocumentSpec(kind: EditableCoreDocumentKind) {
