@@ -631,10 +631,14 @@ a:focus-visible {
   color: #10b981;
 }
 
-/* Override global heading colour inside dark backgrounds */
+/* Override global heading colour inside dark backgrounds.
+   The unlayered h1-h4 { color: #18181b } in this file beats Tailwind's
+   @layer utilities (text-white etc). Neither inherit nor unset work because
+   color is inherited and unset resolves to CanvasText. Only !important or
+   a higher-specificity rule can fix this. */
 .bg-\[\#0a0e1a\] h1,
 .bg-\[\#0a0e1a\] h2,
 .bg-\[\#0a0e1a\] h3,
 .bg-\[\#0a0e1a\] h4 {
-  color: unset;
+  color: #fff;
 }

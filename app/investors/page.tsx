@@ -29,7 +29,7 @@ export default function InvestorsPage() {
         <section className="page-hero">
           <p className="app-kicker">Investors</p>
           <h1 className="page-title max-w-[860px]">
-            The operating layer between checkout evidence and <em>defensible deduction decisions</em>
+            The operating layer between checkout evidence and <em className="text-slate-400">defensible deduction decisions</em>
           </h1>
           <p className="page-copy max-w-[640px]">
             Renovo AI gives letting agencies a structured route from checkout report to

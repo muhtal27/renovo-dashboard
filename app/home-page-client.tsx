@@ -108,7 +108,7 @@ export default function HomePageClient() {
                 <span className="renovo-pulse h-1.5 w-1.5 rounded-full bg-emerald-500" />
                 End-of-tenancy automation
               </div>
-              <h1 className="text-[clamp(32px,4.5vw,52px)] font-bold leading-[1.08] tracking-[-0.035em] text-white">
+              <h1 className="text-[clamp(32px,4.5vw,52px)] font-bold leading-[1.15] tracking-[-0.035em] text-white">
                 <span className="bg-gradient-to-br from-emerald-500 to-emerald-300 bg-clip-text text-transparent">Checkout reports in.</span><br />
                 <span className="text-white">Deposit decisions out.</span>
               </h1>
@@ -132,11 +132,11 @@ export default function HomePageClient() {
         {/* ── PROBLEM ── */}
         <section className="mx-auto max-w-[1080px] px-8 py-24 lg:px-10">
           <p className="text-[13px] font-semibold uppercase tracking-[0.1em] text-emerald-500">The problem</p>
-          <h2 className="mt-3.5 text-[clamp(26px,3.5vw,42px)] font-bold leading-[1.1] tracking-[-0.03em]">One checkout. <em className="not-italic text-slate-400">Six tools. No audit trail.</em></h2>
+          <h2 className="mt-3.5 text-[clamp(26px,3.5vw,42px)] font-bold leading-[1.15] tracking-[-0.03em]">One checkout. <em className="not-italic text-slate-400">Six tools. No audit trail.</em></h2>
           <p className="mt-3.5 max-w-[560px] text-base leading-[1.85] text-slate-500">Letting agents still manage end-of-tenancy across email threads, inventory apps, shared drives, Word documents, spreadsheets, and deposit portals. Nothing links together.</p>
           <div className="mt-12 flex flex-wrap gap-14">
             {([["6+", "Tools per checkout"], ["2-3h", "Admin per case"], ["0", "Audit trail"]] as const).map(([v, l]) => (
-              <div key={l}><p className="text-5xl font-bold tracking-tight text-emerald-500">{v}</p><p className="mt-1 text-[13px] font-medium text-slate-500">{l}</p></div>
+              <div key={l}><p className="text-5xl font-bold leading-[1.15] tracking-tight text-emerald-500">{v}</p><p className="mt-1 text-[13px] font-medium text-slate-500">{l}</p></div>
             ))}
           </div>
           <div className="mt-14 grid gap-10 md:grid-cols-3">
@@ -158,7 +158,7 @@ export default function HomePageClient() {
         <section className="section-tinted">
           <div className="mx-auto max-w-[1080px] px-8 py-24 lg:px-10">
             <p className="text-[13px] font-semibold uppercase tracking-[0.1em] text-emerald-500">How it works</p>
-            <h2 className="mt-3.5 text-[clamp(26px,3.5vw,42px)] font-bold leading-[1.1] tracking-[-0.03em]">Checkout scheduled to <em className="not-italic text-slate-400">deposit released</em></h2>
+            <h2 className="mt-3.5 text-[clamp(26px,3.5vw,42px)] font-bold leading-[1.15] tracking-[-0.03em]">Checkout scheduled to <em className="not-italic text-slate-400">deposit released</em></h2>
             <p className="mt-3.5 max-w-[560px] text-base leading-[1.85] text-slate-500">The Renovo workflow. Automated where the task is repeatable. Manager-reviewed where judgement matters.</p>
             <div className="mt-14 divide-y divide-slate-200">
               {[
@@ -186,7 +186,7 @@ export default function HomePageClient() {
         {/* ── BEFORE AND AFTER ── */}
         <section className="mx-auto max-w-[1080px] px-8 py-24 lg:px-10">
           <p className="text-[13px] font-semibold uppercase tracking-[0.1em] text-emerald-500">Before and after</p>
-          <h2 className="mt-3.5 text-[clamp(26px,3.5vw,42px)] font-bold leading-[1.1] tracking-[-0.03em]">What changes on <em className="not-italic text-slate-400">day one</em></h2>
+          <h2 className="mt-3.5 text-[clamp(26px,3.5vw,42px)] font-bold leading-[1.15] tracking-[-0.03em]">What changes on <em className="not-italic text-slate-400">day one</em></h2>
           <div className="mt-14 divide-y divide-slate-200">
             {[
               { l: "Deduction letters", b: "30-45 min each, retyped from the inventory every time", a: "Structured draft with evidence references in under 2 minutes" },
@@ -208,7 +208,7 @@ export default function HomePageClient() {
         <section className="section-tinted">
           <div className="mx-auto max-w-[1080px] px-8 py-24 lg:px-10">
             <p className="text-[13px] font-semibold uppercase tracking-[0.1em] text-emerald-500">Human control</p>
-            <h2 className="mt-3.5 text-[clamp(26px,3.5vw,42px)] font-bold leading-[1.1] tracking-[-0.03em]">AI drafts. Your team <em className="not-italic text-slate-400">decides.</em></h2>
+            <h2 className="mt-3.5 text-[clamp(26px,3.5vw,42px)] font-bold leading-[1.15] tracking-[-0.03em]">AI drafts. Your team <em className="not-italic text-slate-400">decides.</em></h2>
             <p className="mt-3.5 max-w-[560px] text-base leading-[1.85] text-slate-500">Every liability assessment, deduction letter, and landlord recommendation requires manager approval. Nothing is sent without sign-off.</p>
             <div className="mt-14 grid gap-10 md:grid-cols-3">
               {[
@@ -239,7 +239,7 @@ export default function HomePageClient() {
         {/* ── REGULATORY ── */}
         <section className="mx-auto max-w-[1080px] px-8 py-24 lg:px-10">
           <p className="text-[13px] font-semibold uppercase tracking-[0.1em] text-emerald-500">Regulatory change</p>
-          <h2 className="mt-3.5 max-w-[700px] text-[clamp(26px,3.5vw,42px)] font-bold leading-[1.1] tracking-[-0.03em]">{"Renters' Rights Act"} <em className="not-italic text-slate-400">live from 1 May 2026</em></h2>
+          <h2 className="mt-3.5 max-w-[700px] text-[clamp(26px,3.5vw,42px)] font-bold leading-[1.15] tracking-[-0.03em]">{"Renters' Rights Act"} <em className="not-italic text-slate-400">live from 1 May 2026</em></h2>
           <div className="renovo-highlight mt-7 rounded-xl p-7">
             <p className="text-[15px] leading-[1.85] text-slate-500">Section 21 is abolished. All assured shorthold tenancies become periodic. Prescribed information obligations are tightening. Agents in England who fail to comply risk <strong className="font-semibold text-slate-800">civil penalties up to &pound;7,000</strong>. Evidence standards for deposit deductions are rising across all four schemes.</p>
           </div>
@@ -258,7 +258,7 @@ export default function HomePageClient() {
         <section className="section-tinted">
           <div className="mx-auto max-w-[1080px] px-8 py-24 lg:px-10">
             <p className="text-[13px] font-semibold uppercase tracking-[0.1em] text-emerald-500">The platform</p>
-            <h2 className="mt-3.5 text-[clamp(26px,3.5vw,42px)] font-bold leading-[1.1] tracking-[-0.03em]">Built for how letting agencies <em className="not-italic text-slate-400">actually operate</em></h2>
+            <h2 className="mt-3.5 text-[clamp(26px,3.5vw,42px)] font-bold leading-[1.15] tracking-[-0.03em]">Built for how letting agencies <em className="not-italic text-slate-400">actually operate</em></h2>
             <div className="mt-14 grid gap-10 md:grid-cols-2">
               {[
                 { h: "Portfolio command view", p: "Live status across active checkouts, pending deduction letters, open disputes, and evidence gaps." },
@@ -276,7 +276,7 @@ export default function HomePageClient() {
         {/* ── INTEGRATIONS ── */}
         <section className="mx-auto max-w-[1080px] px-8 py-24 lg:px-10">
           <p className="text-[13px] font-semibold uppercase tracking-[0.1em] text-emerald-500">Integrations</p>
-          <h2 className="mt-3.5 text-[clamp(26px,3.5vw,42px)] font-bold leading-[1.1] tracking-[-0.03em]">Connects to your <em className="not-italic text-slate-400">existing agency software</em></h2>
+          <h2 className="mt-3.5 text-[clamp(26px,3.5vw,42px)] font-bold leading-[1.15] tracking-[-0.03em]">Connects to your <em className="not-italic text-slate-400">existing agency software</em></h2>
           <p className="mt-3.5 max-w-[560px] text-base leading-[1.85] text-slate-500">Designed around the CRM, inventory, and maintenance systems UK letting agents already use.</p>
           <div className="mt-12 flex flex-wrap gap-2.5">
             {["Reapit", "Arthur Online", "SME Professional", "Fixflo", "InventoryBase", "No Letting Go", "HelloReport"].map((n) => (
@@ -290,7 +290,7 @@ export default function HomePageClient() {
         <section className="relative overflow-hidden bg-[#0a0e1a] px-8 py-24 text-center lg:px-10">
           <div className="renovo-glow pointer-events-none absolute -bottom-[120px] left-1/2 h-[700px] w-[700px] -translate-x-1/2" />
           <div className="relative z-10 mx-auto max-w-[560px]">
-            <h2 className="text-[clamp(26px,3.5vw,42px)] font-bold leading-[1.1] tracking-[-0.03em] text-white">See it with a <span className="bg-gradient-to-br from-emerald-500 to-emerald-300 bg-clip-text text-transparent">real case</span></h2>
+            <h2 className="text-[clamp(26px,3.5vw,42px)] font-bold leading-[1.15] tracking-[-0.03em] text-white">See it with a <span className="bg-gradient-to-br from-emerald-500 to-emerald-300 bg-clip-text text-transparent">real case</span></h2>
             <p className="mx-auto mt-4 max-w-[420px] text-base leading-[1.85] text-slate-400">Tell us how your team handles checkouts, deduction letters, and disputes today. We will show you how Renovo fits your operation.</p>
             <div className="mt-9 flex flex-wrap justify-center gap-3">
               <Link href="/contact" className="app-accent-button rounded-lg px-6 py-3 text-sm">Get started &rarr;</Link>
@@ -313,10 +313,10 @@ export default function HomePageClient() {
                 <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-500">{title}</p>
                 <nav className="mt-4 grid gap-0.5">
                   {links.map((l) => (
-                    <Link key={l.href} href={l.href} className="text-[13px] leading-[2.3] text-white/35 transition-colors hover:text-white">{l.label}</Link>
+                    <Link key={l.href} href={l.href} className="text-[13px] leading-[2.3] text-white/50 transition-colors hover:text-white">{l.label}</Link>
                   ))}
                   {title === "Company" && (
-                    <SignInLink className="text-[13px] leading-[2.3] text-white/35 transition-colors hover:text-white">Sign in</SignInLink>
+                    <SignInLink className="text-[13px] leading-[2.3] text-white/50 transition-colors hover:text-white">Sign in</SignInLink>
                   )}
                 </nav>
               </div>

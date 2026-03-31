@@ -125,7 +125,7 @@ export default function PricingPageClient() {
         <section className="page-hero text-center">
           <p className="app-kicker">Pricing</p>
           <h1 className="page-title mx-auto max-w-[820px]">
-            Start small. <em>Scale when ready.</em>
+            Start small. <em className="text-slate-400">Scale when ready.</em>
           </h1>
           <p className="page-copy mx-auto max-w-[760px]">
             Every plan includes the full Renovo AI workflow. Pay per checkout or

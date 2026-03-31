@@ -58,7 +58,7 @@ export default function IntegrationsPage() {
         <section className="page-hero">
           <p className="app-kicker">Integrations</p>
           <h1 className="page-title max-w-[820px]">
-            Connect your workflow to <em>Renovo AI</em>
+            Connect your workflow to <em className="text-slate-400">Renovo AI</em>
           </h1>
           <p className="page-copy max-w-[640px]">
             Renovo AI is being built to support structured workflow handoff around

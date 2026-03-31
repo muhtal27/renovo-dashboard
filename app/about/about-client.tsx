@@ -10,7 +10,7 @@ export default function AboutClient() {
         <section className="page-hero">
           <p className="app-kicker">About</p>
           <h1 className="page-title max-w-[820px]">
-            Enterprise software for <em>end-of-tenancy operations</em>
+            Enterprise software for <em className="text-slate-400">end-of-tenancy operations</em>
           </h1>
           <p className="page-copy max-w-[640px]">
             Renovo AI automates the operational layer between checkout evidence

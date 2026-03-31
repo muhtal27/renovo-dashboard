@@ -181,7 +181,7 @@ export function MarketingShell({
         <div className="marketing-frame">
           <div className="grid gap-10 border-b border-zinc-100 pb-10 md:grid-cols-2 xl:grid-cols-[2fr_1fr_1fr_1fr]">
             <div>
-              <p className="text-base font-semibold tracking-[-0.02em] text-zinc-950">Renovo AI</p>
+              <Link href="/" className="text-base font-semibold tracking-[-0.02em] text-zinc-950">Renovo AI</Link>
               <p className="mt-3 max-w-[320px] text-sm leading-6">
                 End-of-tenancy automation for UK letting agencies. Checkouts, claims, and disputes
                 in one workflow.
