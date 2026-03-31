@@ -34,7 +34,6 @@ const CASE_PRIORITIES: EotCasePriority[] = ['low', 'medium', 'high']
 const CASE_STATUSES: EotCaseStatus[] = [
   'draft',
   'collecting_evidence',
-  'analysis',
   'review',
   'ready_for_claim',
   'submitted',
