@@ -670,7 +670,7 @@ export function EotCaseListClient({
                 </div>
 
                 {/* Middle: Tenant */}
-                <div className="hidden shrink-0 sm:block">
+                <div className="hidden min-w-0 flex-1 sm:block">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
                     Tenant
                   </p>
