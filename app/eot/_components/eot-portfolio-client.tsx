@@ -411,28 +411,28 @@ export function EotPortfolioClient({
         </div>
 
         <DataTable>
-          <table className="min-w-full text-left">
+          <table className="min-w-full table-fixed text-left">
             <thead className="bg-zinc-50 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
               <tr>
-                <th className="px-3 py-2.5">Property</th>
-                <th className="px-3 py-2.5">Tenant</th>
-                <th className="px-3 py-2.5">Deposit</th>
-                <th className="px-3 py-2.5">Tenancy dates</th>
-                <th className="px-3 py-2.5">Evidence</th>
-                <th className="px-3 py-2.5">Issues</th>
-                <th className="px-3 py-2.5">Workflow</th>
+                <th className="w-[18%] px-3 py-2.5">Property</th>
+                <th className="w-[16%] px-3 py-2.5">Tenant</th>
+                <th className="w-[10%] px-3 py-2.5">Deposit</th>
+                <th className="w-[20%] px-3 py-2.5">Tenancy dates</th>
+                <th className="w-[10%] px-3 py-2.5">Evidence</th>
+                <th className="w-[10%] px-3 py-2.5">Issues</th>
+                <th className="w-[16%] px-3 py-2.5">Workflow</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100">
               {tenancyItems.map((workspace) => (
                 <tr key={workspace.case.id} className="hover:bg-zinc-50/70">
                   <td className="px-3 py-2.5">
-                    <Link href={`/operator/cases/${workspace.case.id}`} className="text-sm font-medium text-zinc-950 underline decoration-zinc-300 underline-offset-2 transition hover:decoration-zinc-900">{workspace.property.name}</Link>
-                    <p className="text-xs text-zinc-500">{workspace.property.reference || '—'}</p>
+                    <Link href={`/operator/cases/${workspace.case.id}`} className="block truncate text-sm font-medium text-zinc-950 underline decoration-zinc-300 underline-offset-2 transition hover:decoration-zinc-900">{workspace.property.name}</Link>
+                    <p className="truncate text-xs text-zinc-500">{workspace.property.reference || '—'}</p>
                   </td>
                   <td className="px-3 py-2.5">
-                    <p className="text-sm text-zinc-950">{workspace.tenancy.tenant_name}</p>
-                    <p className="text-xs text-zinc-500">{workspace.tenancy.tenant_email || '—'}</p>
+                    <p className="truncate text-sm text-zinc-950">{workspace.tenancy.tenant_name}</p>
+                    <p className="truncate text-xs text-zinc-500">{workspace.tenancy.tenant_email || '—'}</p>
                   </td>
                   <td className="px-3 py-2.5 text-sm font-medium text-zinc-950">
                     {workspace.tenancy.deposit_amount ? formatCurrency(workspace.tenancy.deposit_amount) : '—'}
@@ -468,28 +468,28 @@ export function EotPortfolioClient({
         </div>
 
         <DataTable>
-          <table className="min-w-full text-left">
+          <table className="min-w-full table-fixed text-left">
             <thead className="bg-zinc-50 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
               <tr>
-                <th className="px-3 py-2.5">Issue</th>
-                <th className="px-3 py-2.5">Property</th>
-                <th className="px-3 py-2.5">Severity</th>
-                <th className="px-3 py-2.5">Status</th>
-                <th className="px-3 py-2.5">Decision</th>
-                <th className="px-3 py-2.5">Evidence</th>
-                <th className="px-3 py-2.5">Cost</th>
+                <th className="w-[22%] px-3 py-2.5">Issue</th>
+                <th className="w-[16%] px-3 py-2.5">Property</th>
+                <th className="w-[12%] px-3 py-2.5">Severity</th>
+                <th className="w-[12%] px-3 py-2.5">Status</th>
+                <th className="w-[12%] px-3 py-2.5">Decision</th>
+                <th className="w-[12%] px-3 py-2.5">Evidence</th>
+                <th className="w-[14%] px-3 py-2.5">Cost</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100">
               {disputeItems.map((issue) => (
                 <tr key={issue.id} className="hover:bg-zinc-50/70">
                   <td className="px-3 py-2.5">
-                    <p className="text-sm font-medium text-zinc-950">{issue.title}</p>
-                    <p className="text-xs text-zinc-500">{issue.description ? issue.description.slice(0, 80) + (issue.description.length > 80 ? '…' : '') : '—'}</p>
+                    <p className="truncate text-sm font-medium text-zinc-950">{issue.title}</p>
+                    <p className="truncate text-xs text-zinc-500">{issue.description ? issue.description.slice(0, 80) + (issue.description.length > 80 ? '…' : '') : '—'}</p>
                   </td>
                   <td className="px-3 py-2.5">
-                    <Link href={`/operator/cases/${issue.caseId}`} className="text-sm text-zinc-950 underline decoration-zinc-300 underline-offset-2 transition hover:decoration-zinc-900">{issue.propertyName}</Link>
-                    <p className="text-xs text-zinc-500">{issue.tenantName}</p>
+                    <Link href={`/operator/cases/${issue.caseId}`} className="block truncate text-sm text-zinc-950 underline decoration-zinc-300 underline-offset-2 transition hover:decoration-zinc-900">{issue.propertyName}</Link>
+                    <p className="truncate text-xs text-zinc-500">{issue.tenantName}</p>
                   </td>
                   <td className="px-3 py-2.5"><StatusBadge label={formatEnumLabel(issue.severity)} tone={issue.severity} /></td>
                   <td className="px-3 py-2.5"><StatusBadge label={issue.status === 'disputed' ? 'Contested' : formatEnumLabel(issue.status)} tone={issue.status} /></td>
@@ -522,26 +522,26 @@ export function EotPortfolioClient({
         </div>
 
         <DataTable>
-          <table className="min-w-full text-left">
+          <table className="min-w-full table-fixed text-left">
             <thead className="bg-zinc-50 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
               <tr>
-                <th className="px-3 py-2.5">Issue</th>
-                <th className="px-3 py-2.5">Property</th>
-                <th className="px-3 py-2.5">Decision</th>
-                <th className="px-3 py-2.5">Severity</th>
-                <th className="px-3 py-2.5">Rationale</th>
-                <th className="px-3 py-2.5">Cost</th>
+                <th className="w-[18%] px-3 py-2.5">Issue</th>
+                <th className="w-[16%] px-3 py-2.5">Property</th>
+                <th className="w-[12%] px-3 py-2.5">Decision</th>
+                <th className="w-[12%] px-3 py-2.5">Severity</th>
+                <th className="w-[30%] px-3 py-2.5">Rationale</th>
+                <th className="w-[12%] px-3 py-2.5">Cost</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100">
               {recommendations.map((item) => (
                 <tr key={item.recommendation.id} className="hover:bg-zinc-50/70">
                   <td className="px-3 py-2.5">
-                    <p className="text-sm font-medium text-zinc-950">{item.issue.title}</p>
+                    <p className="truncate text-sm font-medium text-zinc-950">{item.issue.title}</p>
                   </td>
                   <td className="px-3 py-2.5">
-                    <Link href={`/operator/cases/${item.caseId}`} className="text-sm text-zinc-950 underline decoration-zinc-300 underline-offset-2 transition hover:decoration-zinc-900">{item.propertyName}</Link>
-                    <p className="text-xs text-zinc-500">{item.tenantName}</p>
+                    <Link href={`/operator/cases/${item.caseId}`} className="block truncate text-sm text-zinc-950 underline decoration-zinc-300 underline-offset-2 transition hover:decoration-zinc-900">{item.propertyName}</Link>
+                    <p className="truncate text-xs text-zinc-500">{item.tenantName}</p>
                   </td>
                   <td className="px-3 py-2.5"><StatusBadge label={formatEnumLabel(item.recommendation.decision)} tone={item.recommendation.decision ?? 'document'} /></td>
                   <td className="px-3 py-2.5"><StatusBadge label={formatEnumLabel(item.issue.severity)} tone={item.issue.severity} /></td>
@@ -567,15 +567,15 @@ export function EotPortfolioClient({
         </div>
 
         <DataTable>
-          <table className="min-w-full text-left">
+          <table className="min-w-full table-fixed text-left">
             <thead className="bg-zinc-50 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
               <tr>
-                <th className="px-3 py-2.5">Property</th>
-                <th className="px-3 py-2.5">Tenant</th>
-                <th className="px-3 py-2.5">Status</th>
-                <th className="px-3 py-2.5">Readiness</th>
-                <th className="px-3 py-2.5">Claim value</th>
-                <th className="px-3 py-2.5">Last activity</th>
+                <th className="w-[20%] px-3 py-2.5">Property</th>
+                <th className="w-[18%] px-3 py-2.5">Tenant</th>
+                <th className="w-[15%] px-3 py-2.5">Status</th>
+                <th className="w-[15%] px-3 py-2.5">Readiness</th>
+                <th className="w-[14%] px-3 py-2.5">Claim value</th>
+                <th className="w-[18%] px-3 py-2.5">Last activity</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100">
@@ -584,9 +584,9 @@ export function EotPortfolioClient({
                 return (
                   <tr key={workspace.case.id} className="hover:bg-zinc-50/70">
                     <td className="px-3 py-2.5">
-                      <Link href={`/operator/cases/${workspace.case.id}`} className="text-sm font-medium text-zinc-950 underline decoration-zinc-300 underline-offset-2 transition hover:decoration-zinc-900">{workspace.property.name}</Link>
+                      <Link href={`/operator/cases/${workspace.case.id}`} className="block truncate text-sm font-medium text-zinc-950 underline decoration-zinc-300 underline-offset-2 transition hover:decoration-zinc-900">{workspace.property.name}</Link>
                     </td>
-                    <td className="px-3 py-2.5 text-sm text-zinc-700">{workspace.tenancy.tenant_name}</td>
+                    <td className="px-3 py-2.5 truncate text-sm text-zinc-700">{workspace.tenancy.tenant_name}</td>
                     <td className="px-3 py-2.5"><StatusBadge label={formatEnumLabel(workspace.case.status)} tone={workspace.case.status} /></td>
                     <td className="px-3 py-2.5"><StatusBadge label={readiness.label} tone={readiness.tone === 'ready' ? 'ready_for_claim' : readiness.tone === 'attention' ? 'attention' : 'document'} /></td>
                     <td className="px-3 py-2.5 text-sm font-medium text-zinc-950">{workspace.claim ? formatCurrency(workspace.claim.total_amount) : '—'}</td>
