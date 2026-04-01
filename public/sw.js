@@ -1,14 +1,6 @@
-const CACHE_NAME = 'renovo-v1'
+const CACHE_NAME = 'renovo-v2'
 
-const PRECACHE_URLS = [
-  '/',
-  '/renovo-ai-icon.svg',
-]
-
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS))
-  )
+self.addEventListener('install', () => {
   self.skipWaiting()
 })
 
