@@ -364,31 +364,23 @@ export function EotCaseListClient({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4 border-b border-zinc-200 pb-3">
-        <div className="flex items-end gap-8">
-          <KPIStatCard label="Active" value={stats.total} />
-          <KPIStatCard label="Attention" value={stats.requiringAttention} tone="danger" />
-          <KPIStatCard label="Ready" value={stats.readyForClaim} tone="accent" />
-          <KPIStatCard label="High risk" value={stats.highPriority} tone="warning" />
-        </div>
-        <div className="flex shrink-0 items-center gap-2">
-          <button
-            type="button"
-            onClick={() => void refreshCases()}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-zinc-600 transition hover:text-zinc-950"
-          >
-            <RefreshCcw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} />
-            Refresh
-          </button>
-          <button
-            type="button"
-            onClick={() => setCreateOpen((current) => !current)}
-            className="inline-flex items-center gap-1.5 bg-zinc-900 px-2.5 py-1.5 text-xs font-medium text-white transition hover:bg-zinc-800"
-          >
-            <Plus className="h-3.5 w-3.5" />
-            {createOpen ? 'Close' : 'New'}
-          </button>
-        </div>
+      <div className="flex items-center justify-end gap-2 border-b border-zinc-200 pb-3">
+        <button
+          type="button"
+          onClick={() => void refreshCases()}
+          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-zinc-600 transition hover:text-zinc-950"
+        >
+          <RefreshCcw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} />
+          Refresh
+        </button>
+        <button
+          type="button"
+          onClick={() => setCreateOpen((current) => !current)}
+          className="inline-flex items-center gap-1.5 bg-zinc-900 px-2.5 py-1.5 text-xs font-medium text-white transition hover:bg-zinc-800"
+        >
+          <Plus className="h-3.5 w-3.5" />
+          {createOpen ? 'Close' : 'New'}
+        </button>
       </div>
 
       {createOpen ? (
@@ -619,77 +611,22 @@ export function EotCaseListClient({
           }
         />
       ) : (
-        <DataTable>
-          <table className="min-w-full text-left">
-            <thead className="border-b border-zinc-200 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
-              <tr>
-                <th className="px-3 py-2">
-                  <input
-                    type="checkbox"
-                    checked={visibleCaseRows.length > 0 && selectedIds.length === visibleCaseRows.length}
-                    onChange={toggleSelectAll}
-                    aria-label="Select all visible checkouts"
-                  />
-                </th>
-                <th className="px-3 py-2">Checkout</th>
-                <th className="px-3 py-2">Workflow</th>
-                <th className="px-3 py-2">Attention</th>
-                <th className="px-3 py-2">Coverage</th>
-                <th className="px-3 py-2">Last updated</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-100">
-                  {visibleCaseRows.map(({ attention, caseItem, progress }) => {
-                    const selected = selectedIds.includes(caseItem.id)
-
-                    return (
-                      <tr
-                        key={caseItem.id}
-                        className={selected ? 'bg-zinc-50/90' : 'hover:bg-zinc-50/70'}
-                      >
-                        <td className="px-3 py-2.5 align-top">
-                          <input
-                            type="checkbox"
-                            checked={selected}
-                            onChange={() => toggleSelection(caseItem.id)}
-                            aria-label={`Select checkout ${caseItem.id}`}
-                          />
-                        </td>
-                        <td className="px-3 py-2.5 align-top">
-                          <Link
-                            href={`/operator/cases/${caseItem.id}`}
-                            className="text-sm font-medium text-zinc-950 underline decoration-zinc-300 underline-offset-2 transition hover:decoration-zinc-900"
-                          >
-                            {caseItem.property.name}
-                          </Link>
-                          <p className="text-xs text-zinc-500">{caseItem.tenant_name} · {caseItem.id.slice(0, 8)}</p>
-                        </td>
-                        <td className="px-3 py-2.5 align-top">
-                          <div className="flex flex-wrap items-center gap-1">
-                            <StatusBadge label={formatEnumLabel(caseItem.status)} tone={caseItem.status} />
-                            <StatusBadge label={formatEnumLabel(caseItem.priority)} tone={caseItem.priority} />
-                          </div>
-                          <ProgressBar value={progress} className="mt-1.5 max-w-[120px]" />
-                        </td>
-                        <td className="px-3 py-2.5 align-top">
-                          <StatusBadge label={attention.label} tone={attention.tone} />
-                        </td>
-                        <td className="px-3 py-2.5 align-top text-xs tabular-nums text-zinc-700">
-                          <span>{caseItem.evidence_count} evidence</span>
-                          <span className="mx-1 text-zinc-300">·</span>
-                          <span>{caseItem.issue_count} issues</span>
-                        </td>
-                        <td className="px-3 py-2.5 align-top">
-                          <span className="text-xs text-zinc-600">
-                            {formatDateTime(caseItem.last_activity_at)}
-                          </span>
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            </DataTable>
+        <div className="space-y-0">
+          {visibleCaseRows.map(({ caseItem }) => (
+            <Link
+              key={caseItem.id}
+              href={`/operator/cases/${caseItem.id}`}
+              className="block border-b border-zinc-200 px-5 py-6 transition hover:bg-zinc-50/60"
+            >
+              <p className="text-base font-semibold text-zinc-950">
+                {caseItem.property.name}
+              </p>
+              <p className="mt-1 text-sm text-zinc-500">
+                {caseItem.tenant_name}
+              </p>
+            </Link>
+          ))}
+        </div>
           )}
     </div>
   )
