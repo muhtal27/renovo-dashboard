@@ -660,7 +660,7 @@ export function EotCaseListClient({
                 href={`/operator/cases/${caseItem.id}`}
                 className="flex items-start gap-6 border-b border-zinc-200 px-5 py-6 transition hover:bg-zinc-50/60"
               >
-                {/* Left: Property + tenant/landlord */}
+                {/* Left: Property + tenant */}
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <p className="text-base font-semibold text-zinc-950">
@@ -668,22 +668,24 @@ export function EotCaseListClient({
                     </p>
                     <CopyAddressButton address={fullAddress || caseItem.property.name} />
                   </div>
-                  <div className="mt-1.5 flex flex-wrap items-center gap-x-6 gap-y-1 text-sm text-zinc-500">
-                    <span>
-                      <span className="text-xs text-zinc-400">Tenant </span>
-                      {caseItem.tenant_name}
-                    </span>
-                    {caseItem.landlord_name ? (
-                      <span>
-                        <span className="text-xs text-zinc-400">Landlord </span>
-                        {caseItem.landlord_name}
-                      </span>
-                    ) : null}
-                  </div>
+                  <p className="mt-1.5 text-sm text-zinc-500">
+                    <span className="text-xs text-zinc-400">Tenant </span>
+                    {caseItem.tenant_name}
+                  </p>
+                </div>
+
+                {/* Middle: Landlord */}
+                <div className="hidden shrink-0 sm:block">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
+                    Landlord
+                  </p>
+                  <p className="mt-0.5 text-sm text-zinc-700">
+                    {caseItem.landlord_name || '—'}
+                  </p>
                 </div>
 
                 {/* Right: Deposit + scheme */}
-                <div className="hidden shrink-0 text-right sm:block">
+                <div className="hidden shrink-0 text-right md:block">
                   <div>
                     <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
                       Deposit
