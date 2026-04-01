@@ -18,7 +18,6 @@ export default function robots(): MetadataRoute.Robots {
           '/login',
           '/overview',
           '/reports',
-          '/reset-password',
           '/settings',
           '/tenancy',
           '/workspace-access',

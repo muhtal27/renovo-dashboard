@@ -36,12 +36,8 @@ const workflowStages = [
 
 export default function LoginPage() {
   const handledSessionRef = useRef<string | null>(null)
-  const [email, setEmail] = useState('')
-  const [loadingMagicLink, setLoadingMagicLink] = useState(false)
   const [loadingSSO, setLoadingSSO] = useState(false)
-  const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [magicSent, setMagicSent] = useState(false)
   const [returnTo] = useState(() => {
     if (typeof window === 'undefined') return '/eot'
 
@@ -124,42 +120,9 @@ export default function LoginPage() {
     }
   }, [returnTo])
 
-  async function handleMagicLink() {
-    if (!email.trim()) {
-      setError('Enter your email address to receive a magic link.')
-      return
-    }
-
-    setLoadingMagicLink(true)
-    setMessage(null)
-    setError(null)
-    setMagicSent(false)
-
-    const { error } = await supabase.auth.signInWithOtp({
-      email: email.trim(),
-      options: {
-        emailRedirectTo:
-          typeof window === 'undefined'
-            ? undefined
-            : `${window.location.origin}/login?returnTo=${encodeURIComponent(returnTo)}`,
-        shouldCreateUser: false,
-      },
-    })
-
-    if (error) {
-      setError("We couldn't send a magic link to that address. Please check your email and try again.")
-      setLoadingMagicLink(false)
-      return
-    }
-
-    setMagicSent(true)
-    setLoadingMagicLink(false)
-  }
-
   async function handleSSO() {
     setLoadingSSO(true)
     setError(null)
-    setMessage(null)
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'azure',
@@ -223,7 +186,7 @@ export default function LoginPage() {
           </div>
 
           <p className="mt-4 text-sm leading-6 text-slate-600">
-            Use your organisation&apos;s Microsoft account for the fastest sign-in. A magic link is available for non-Microsoft users.
+            Use your organisation&apos;s Microsoft account to sign in securely.
           </p>
 
           <div className="mt-6 rounded-lg border border-zinc-200 bg-slate-50 p-4">
@@ -242,11 +205,11 @@ export default function LoginPage() {
             </div>
           ) : null}
 
-          <div className="mt-6 grid gap-3">
+          <div className="mt-6">
             <button
               onClick={handleSSO}
               disabled={loadingSSO}
-              className="app-primary-button flex items-center justify-center gap-2.5 rounded px-4 py-3.5 text-sm font-medium disabled:opacity-60"
+              className="app-primary-button flex w-full items-center justify-center gap-2.5 rounded px-4 py-3.5 text-sm font-medium disabled:opacity-60"
             >
               <svg width="18" height="18" viewBox="0 0 21 21" fill="none" aria-hidden="true">
                 <rect x="1" y="1" width="9" height="9" fill="#f25022" />
@@ -256,54 +219,7 @@ export default function LoginPage() {
               </svg>
               {loadingSSO ? 'Redirecting...' : 'Sign in with Microsoft'}
             </button>
-
-            <div className="relative my-1">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-zinc-200" />
-              </div>
-              <div className="relative flex justify-center text-xs">
-                <span className="bg-white px-3 text-slate-400">or use email</span>
-              </div>
-            </div>
-
-            <label className="block">
-              <span className="mb-2 block text-sm font-medium text-slate-600">Email address</span>
-              <input
-                type="email"
-                autoComplete="email"
-                value={email}
-                onChange={(event) => {
-                  setEmail(event.target.value)
-                  setMagicSent(false)
-                }}
-                placeholder="your@email.co.uk"
-                className="app-field text-sm outline-none"
-              />
-            </label>
-
-            {magicSent ? (
-              <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3.5 text-sm font-medium text-emerald-700">
-                Magic link sent - check your inbox
-              </div>
-            ) : (
-              <button
-                onClick={handleMagicLink}
-                disabled={loadingMagicLink || loadingSSO}
-                className="app-secondary-button rounded px-4 py-3.5 text-sm font-medium disabled:opacity-60"
-              >
-                {loadingMagicLink ? 'Sending...' : 'Email me a magic link'}
-              </button>
-            )}
           </div>
-
-          {message && (
-            <div
-              aria-live="polite"
-              className="mt-4 rounded-lg border border-zinc-200 bg-slate-50 px-4 py-3 text-sm text-slate-600"
-            >
-              {message}
-            </div>
-          )}
         </section>
       </div>
     </main>
