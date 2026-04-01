@@ -1,5 +1,5 @@
 import './globals.css'
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { DM_Sans, Instrument_Serif } from 'next/font/google'
 import {
   defaultDescription,
@@ -7,6 +7,7 @@ import {
   siteName,
   siteUrl,
 } from '@/lib/marketing-metadata'
+import { ServiceWorkerRegistration } from './components/ServiceWorkerRegistration'
 
 const dmSans = DM_Sans({
   subsets: ['latin'],
@@ -44,6 +45,22 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Renovo AI',
+  },
+  icons: {
+    icon: [
+      { url: '/renovo-ai-icon.svg', type: 'image/svg+xml' },
+      { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+    ],
+    apple: [{ url: '/icons/apple-touch-icon.png', sizes: '180x180' }],
+  },
+}
+
+export const viewport: Viewport = {
+  themeColor: '#0a0a0a',
 }
 
 export default function RootLayout({
@@ -53,7 +70,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${dmSans.variable} ${instrumentSerif.variable}`}>{children}</body>
+      <body className={`${dmSans.variable} ${instrumentSerif.variable}`}>
+        {children}
+        <ServiceWorkerRegistration />
+      </body>
     </html>
   )
 }
