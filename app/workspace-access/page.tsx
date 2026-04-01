@@ -153,31 +153,31 @@ export default function WorkspaceAccessPage() {
   return (
     <MarketingShell currentPath="/contact">
       <section className="marketing-frame pb-16 pt-14 md:pt-24">
-        <div className="mx-auto max-w-3xl rounded-xl border border-[rgba(15,14,13,0.1)] bg-white p-7 shadow-[0_20px_60px_rgba(15,14,13,0.08)] md:p-10">
-          <p className="inline-flex items-center gap-2 rounded-full bg-[#e1f5ee] px-3 py-1.5 text-xs font-medium uppercase tracking-[0.08em] text-[#0f6e56]">
-            <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#0f6e56]" />
+        <div className="mx-auto max-w-3xl rounded-xl border border-zinc-200 bg-white p-7 shadow-[var(--shadow-strong)] md:p-10">
+          <p className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-medium uppercase tracking-[0.08em] text-emerald-700">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-600" />
             Operator access
           </p>
 
           <h1 className="mt-6 text-[clamp(2rem,4.2vw,3rem)] leading-[1.06] tracking-[-0.03em]">
             {heading}
           </h1>
-          <p className="mt-4 max-w-2xl text-[15px] leading-8 text-[#3d3b37]">{body}</p>
+          <p className="mt-4 max-w-2xl text-[15px] leading-8 text-zinc-600">{body}</p>
 
           {operator?.authUser ? (
-            <div className="mt-6 rounded-2xl border border-[rgba(15,14,13,0.08)] bg-[#faf8f5] px-5 py-4 text-sm text-[#4b4741]">
-              Signed in as <span className="font-medium text-[#0f0e0d]">{operatorLabel || operator.authUser.email || 'Operator account'}</span>
+            <div className="mt-6 rounded-2xl border border-zinc-200 bg-zinc-50 px-5 py-4 text-sm text-zinc-600">
+              Signed in as <span className="font-medium text-zinc-950">{operatorLabel || operator.authUser.email || 'Operator account'}</span>
             </div>
           ) : null}
 
           {loading ? (
-            <div className="mt-8 rounded-2xl border border-[rgba(15,14,13,0.08)] bg-[#fcfbf9] px-5 py-5 text-sm text-[#4b4741]">
+            <div className="mt-8 rounded-2xl border border-zinc-200 bg-zinc-50 px-5 py-5 text-sm text-zinc-600">
               Loading access details...
             </div>
           ) : null}
 
           {error ? (
-            <div className="mt-8 rounded-2xl border border-[rgba(163,45,45,0.2)] bg-[#fcebeb] px-5 py-4 text-sm text-[#7f2727]">
+            <div className="mt-8 rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">
               {error}
             </div>
           ) : null}
@@ -216,15 +216,15 @@ export default function WorkspaceAccessPage() {
                     type="button"
                     onClick={() => handleSelectMembership(membership.id)}
                     disabled={selectionState.loading}
-                    className="flex w-full items-center justify-between rounded-2xl border border-[rgba(15,14,13,0.1)] bg-[#fcfbf9] px-5 py-4 text-left transition hover:border-[rgba(15,14,13,0.18)] disabled:cursor-not-allowed disabled:opacity-60"
+                    className="flex w-full items-center justify-between rounded-2xl border border-zinc-200 bg-zinc-50 px-5 py-4 text-left transition hover:border-zinc-300 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     <span>
-                      <span className="block text-base text-[#0f0e0d]">Workspace {membership.tenant_id}</span>
-                      <span className="mt-1 block text-sm text-[#7a7670]">
+                      <span className="block text-base text-zinc-950">Workspace {membership.tenant_id}</span>
+                      <span className="mt-1 block text-sm text-zinc-500">
                         Role: {membership.role}
                       </span>
                     </span>
-                    <span className="text-sm font-medium text-[#0f0e0d]">
+                    <span className="text-sm font-medium text-zinc-950">
                       {selecting ? 'Opening...' : 'Open'}
                     </span>
                   </button>
@@ -232,7 +232,7 @@ export default function WorkspaceAccessPage() {
               })}
 
               {selectionState.error ? (
-                <div className="rounded-2xl border border-[rgba(163,45,45,0.2)] bg-[#fcebeb] px-5 py-4 text-sm text-[#7f2727]">
+                <div className="rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">
                   {selectionState.error}
                 </div>
               ) : null}

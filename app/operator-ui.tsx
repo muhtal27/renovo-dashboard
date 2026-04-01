@@ -118,7 +118,7 @@ export function ToolbarPill({
       className={cn(
         'inline-flex items-center border-b-2 px-2.5 pb-2 text-sm font-medium transition',
         active
-          ? 'border-zinc-900 text-zinc-900'
+          ? 'border-emerald-600 text-zinc-900'
           : 'border-transparent text-zinc-500 hover:border-zinc-300 hover:text-zinc-700',
         className
       )}
@@ -259,9 +259,9 @@ export function ProgressBar({
   return (
     <div className={cn('space-y-1', className)}>
       {label ? <div className="flex items-center justify-between gap-3 text-xs text-zinc-500">{label}</div> : null}
-      <div className="h-1.5 overflow-hidden bg-zinc-100">
+      <div className="h-1.5 overflow-hidden rounded-full bg-zinc-100">
         <div
-          className="h-full bg-emerald-500 transition-all duration-500"
+          className="h-full rounded-full bg-emerald-500 transition-all duration-500"
           style={{ width: `${clamped}%` }}
         />
       </div>
@@ -276,11 +276,11 @@ export function SkeletonPanel({
 }) {
   return (
     <div className={cn('animate-pulse py-4', className)}>
-      <div className="h-3 w-24 bg-zinc-100" />
-      <div className="mt-3 h-6 w-40 bg-zinc-100" />
+      <div className="h-3 w-24 rounded bg-zinc-100" />
+      <div className="mt-3 h-6 w-40 rounded bg-zinc-100" />
       <div className="mt-4 space-y-2">
-        <div className="h-3 bg-zinc-50" />
-        <div className="h-3 w-11/12 bg-zinc-50" />
+        <div className="h-3 rounded bg-zinc-50" />
+        <div className="h-3 w-11/12 rounded bg-zinc-50" />
       </div>
     </div>
   )

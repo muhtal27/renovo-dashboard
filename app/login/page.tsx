@@ -264,7 +264,7 @@ export default function LoginPage() {
   return (
     <main className="marketing-page min-h-screen bg-white py-8 text-zinc-950 md:py-10">
       <div className="marketing-frame grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_460px]">
-        <section className="border border-zinc-200 bg-white p-8 shadow-[0_8px_24px_rgba(0,0,0,0.04)] md:p-10">
+        <section className="rounded-xl border border-zinc-200 bg-white p-8 shadow-[0_8px_24px_rgba(0,0,0,0.04)] md:p-10">
           <p className="app-kicker">Renovo AI</p>
           <h1 className="mt-4 text-[clamp(2rem,4vw,2.9rem)] leading-[1.08]">
             Workspace sign-in
@@ -273,7 +273,7 @@ export default function LoginPage() {
             The end-of-tenancy decision engine for letting agencies.
           </p>
 
-          <div className="mt-8 border border-zinc-200 bg-slate-50 p-5">
+          <div className="mt-8 rounded-lg border border-zinc-200 bg-slate-50 p-5">
             <p className="app-kicker">Inside the workspace</p>
             <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {workflowStages.map((item) => (
@@ -289,7 +289,7 @@ export default function LoginPage() {
           </div>
         </section>
 
-        <section className="border border-zinc-200 bg-white p-8 shadow-[0_8px_24px_rgba(0,0,0,0.04)]">
+        <section className="rounded-xl border border-zinc-200 bg-white p-8 shadow-[0_8px_24px_rgba(0,0,0,0.04)]">
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="app-kicker">
@@ -344,7 +344,7 @@ export default function LoginPage() {
             ))}
           </div>
 
-          <div className="mt-6 border border-zinc-200 bg-slate-50 p-4">
+          <div className="mt-6 rounded-lg border border-zinc-200 bg-slate-50 p-4">
             <p className="text-sm font-medium text-zinc-950">
               {mode === 'sign_in' && 'For approved property managers'}
               {mode === 'sign_up' && 'Create a sign-in before your access is linked'}
@@ -408,7 +408,7 @@ export default function LoginPage() {
           {mode === 'sign_in' && error ? (
             <div
               aria-live="polite"
-              className="mt-4 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+              className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
             >
               {error}
             </div>
@@ -426,7 +426,7 @@ export default function LoginPage() {
                 </button>
 
                 {magicSent ? (
-                  <div className="border border-emerald-200 bg-emerald-50 px-4 py-3.5 text-sm font-medium text-emerald-700">
+                  <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3.5 text-sm font-medium text-emerald-700">
                     ✓ Magic link sent - check your inbox
                   </div>
                 ) : (
@@ -465,7 +465,7 @@ export default function LoginPage() {
           {message && (
             <div
               aria-live="polite"
-              className="mt-4 border border-zinc-200 bg-slate-50 px-4 py-3 text-sm text-slate-600"
+              className="mt-4 rounded-lg border border-zinc-200 bg-slate-50 px-4 py-3 text-sm text-slate-600"
             >
               {message}
             </div>

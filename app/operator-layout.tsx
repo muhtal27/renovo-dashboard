@@ -79,7 +79,7 @@ const OPERATOR_ROUTE_CONFIG: Array<{
         'Manage checkout intake from inventory software and case allocation to property managers.',
       searchPlaceholder: 'Search integrations, allocations, or property managers',
       searchTargetPath: '/overview',
-      breadcrumbs: [{ label: 'Intelligence', href: '/reports' }, { label: 'Admin' }],
+      breadcrumbs: [{ label: 'Management', href: '/reports' }, { label: 'Admin' }],
     },
   },
   {
@@ -154,7 +154,7 @@ const OPERATOR_ROUTE_CONFIG: Array<{
         'Portfolio analytics for workflow mix, issue severity, evidence composition, and generated claim value.',
       searchPlaceholder: 'Search reports by property, tenant, workflow state, or recommendation',
       searchTargetPath: '/reports',
-      breadcrumbs: [{ label: 'Intelligence' }, { label: 'Reports / Analytics' }],
+      breadcrumbs: [{ label: 'Management' }, { label: 'Reports / Analytics' }],
     },
   },
   {
@@ -221,12 +221,12 @@ function OperatorSearchForm({
           value={searchValue}
           onChange={(event) => setSearchValue(event.target.value)}
           placeholder={searchPlaceholder}
-          className="h-8 w-[320px] border border-zinc-200 bg-zinc-50 pl-8 pr-16 text-xs text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white"
+          className="h-8 w-[320px] rounded-md border border-zinc-200 bg-zinc-50 pl-8 pr-16 text-xs text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white"
         />
         <Link
           href={searchAction}
           prefetch={false}
-          className="absolute right-1 top-1 inline-flex h-6 items-center bg-zinc-900 px-2 text-[11px] font-medium text-white transition hover:bg-zinc-800"
+          className="absolute right-1 top-1 inline-flex h-6 items-center rounded bg-emerald-600 px-2 text-[11px] font-medium text-white transition hover:bg-emerald-700"
         >
           Search
         </Link>
@@ -282,7 +282,7 @@ export function OperatorLayout({ children, operator }: OperatorLayoutProps) {
                   <button
                     type="button"
                     onClick={() => setMobileNavOpen(true)}
-                    className="flex h-7 w-7 items-center justify-center border border-zinc-200 text-zinc-500 xl:hidden"
+                    className="flex h-7 w-7 items-center justify-center rounded-md border border-zinc-200 text-zinc-500 xl:hidden"
                     aria-label="Open navigation"
                   >
                     <Menu className="h-3.5 w-3.5" />
@@ -336,9 +336,9 @@ export function OperatorLayout({ children, operator }: OperatorLayoutProps) {
                       href={action.href}
                       prefetch={false}
                       className={cn(
-                        'hidden items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium transition md:inline-flex',
+                        'hidden items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition md:inline-flex',
                         action.tone === 'primary'
-                          ? 'bg-zinc-900 text-white hover:bg-zinc-800'
+                          ? 'bg-emerald-600 text-white hover:bg-emerald-700'
                           : 'text-zinc-600 hover:text-zinc-950'
                       )}
                     >
@@ -348,12 +348,12 @@ export function OperatorLayout({ children, operator }: OperatorLayoutProps) {
                   ))}
 
                   <div className="hidden items-center gap-2 border-l border-zinc-200 pl-3 md:flex">
-                    <div className="flex h-7 w-7 items-center justify-center bg-zinc-100 text-xs font-semibold text-zinc-600">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-50 text-xs font-semibold text-emerald-700">
                       {getInitials(displayName)}
                     </div>
                     <span className="text-xs font-medium text-zinc-600">{displayName || 'Operator'}</span>
                   </div>
-                  <div className="flex h-7 w-7 items-center justify-center bg-zinc-100 text-xs font-semibold text-zinc-600 md:hidden">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-50 text-xs font-semibold text-emerald-700 md:hidden">
                     {getInitials(displayName)}
                   </div>
                 </div>

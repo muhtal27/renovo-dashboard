@@ -58,7 +58,7 @@ export default async function AdminPage() {
               {INVENTORY_INTEGRATIONS.map((integration) => (
                 <span
                   key={integration.name}
-                  className="inline-flex items-center gap-2 border border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-700"
+                  className="inline-flex items-center gap-2 rounded-md border border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-700"
                 >
                   {integration.name}
                   <span className="text-[10px] uppercase tracking-wider text-zinc-400">
