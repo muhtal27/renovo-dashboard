@@ -4,18 +4,10 @@ import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 import type { ReactNode } from 'react'
 import { useMemo, useState } from 'react'
-import { BarChart3, BookOpenText, Menu, Search } from 'lucide-react'
+import { Menu, Search } from 'lucide-react'
 import { OperatorNav } from '@/app/operator-nav'
 import { getOperatorLabel, type CurrentOperator } from '@/lib/operator-types'
 import { clearLegacySupabaseBrowserAuthArtifacts } from '@/lib/supabase-session'
-import { cn } from '@/lib/ui'
-
-type HeaderAction = {
-  label: string
-  href: string
-  icon?: ReactNode
-  tone?: 'primary' | 'secondary'
-}
 
 type Breadcrumb = {
   label: string
@@ -34,21 +26,6 @@ type OperatorLayoutProps = {
   children: ReactNode
   operator: CurrentOperator
 }
-
-const DEFAULT_ACTIONS: HeaderAction[] = [
-  {
-    label: 'Open checkouts',
-    href: '/eot',
-    icon: <BarChart3 className="h-4 w-4" strokeWidth={2} />,
-    tone: 'primary',
-  },
-  {
-    label: 'Guidance',
-    href: '/knowledge',
-    icon: <BookOpenText className="h-4 w-4" strokeWidth={2} />,
-    tone: 'secondary',
-  },
-]
 
 const DEFAULT_ROUTE_CONFIG: ShellRouteConfig = {
   searchPlaceholder: 'Search checkouts, tenancy, disputes, and guidance',
@@ -259,7 +236,8 @@ export function OperatorLayout({ children, operator }: OperatorLayoutProps) {
 
   const displayName = operatorLabel?.trim() || operator.authUser?.email?.trim() || ''
   const operatorRole = operator.membership?.role ?? null
-  const headerActions = DEFAULT_ACTIONS
+
+  const hasNestedBreadcrumbs = breadcrumbs.length > 1
 
   return (
     <main className="operator-app min-h-screen text-zinc-900">
@@ -288,8 +266,8 @@ export function OperatorLayout({ children, operator }: OperatorLayoutProps) {
                     <Menu className="h-3.5 w-3.5" />
                   </button>
 
-                  <div className="flex min-w-0 items-center gap-3">
-                    {breadcrumbs.length ? (
+                  <div className="flex min-w-0 items-center gap-2">
+                    {hasNestedBreadcrumbs ? (
                       <div className="flex flex-wrap items-center gap-1.5 text-xs font-medium text-zinc-500">
                         {breadcrumbs.map((breadcrumb, index) => (
                           <div key={`${breadcrumb.label}-${index}`} className="flex items-center gap-1.5">
@@ -308,9 +286,7 @@ export function OperatorLayout({ children, operator }: OperatorLayoutProps) {
                           </div>
                         ))}
                       </div>
-                    ) : null}
-
-                    {routeConfig.pageTitle ? (
+                    ) : routeConfig.pageTitle ? (
                       <h1 className="text-sm font-semibold text-zinc-950">
                         {routeConfig.pageTitle}
                       </h1>
@@ -329,23 +305,6 @@ export function OperatorLayout({ children, operator }: OperatorLayoutProps) {
                       initialSearchValue={searchParamValue}
                     />
                   </div>
-
-                  {headerActions.map((action) => (
-                    <Link
-                      key={`${action.href}-${action.label}`}
-                      href={action.href}
-                      prefetch={false}
-                      className={cn(
-                        'hidden items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition md:inline-flex',
-                        action.tone === 'primary'
-                          ? 'bg-emerald-600 text-white hover:bg-emerald-700'
-                          : 'text-zinc-600 hover:text-zinc-950'
-                      )}
-                    >
-                      {action.icon}
-                      {action.label}
-                    </Link>
-                  ))}
 
                   <div className="hidden items-center gap-2 border-l border-zinc-200 pl-3 md:flex">
                     <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-50 text-xs font-semibold text-emerald-700">

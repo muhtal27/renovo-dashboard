@@ -398,24 +398,6 @@ export function EotCaseListClient({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-end gap-2 border-b border-zinc-200 pb-3">
-        <button
-          type="button"
-          onClick={() => void refreshCases()}
-          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-zinc-600 transition hover:text-zinc-950"
-        >
-          <RefreshCcw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} />
-          Refresh
-        </button>
-        <button
-          type="button"
-          onClick={() => setCreateOpen((current) => !current)}
-          className="inline-flex items-center gap-1.5 bg-zinc-900 px-2.5 py-1.5 text-xs font-medium text-white transition hover:bg-zinc-800"
-        >
-          <Plus className="h-3.5 w-3.5" />
-          {createOpen ? 'Close' : 'New'}
-        </button>
-      </div>
 
       {createOpen ? (
         <div className="border-b border-zinc-200 pb-4">
@@ -594,7 +576,7 @@ export function EotCaseListClient({
             <select
               value={statusFilter}
               onChange={(event) => setStatusFilter(event.target.value as 'all' | EotCaseStatus)}
-              className="h-7 border border-zinc-200 bg-white px-2 text-xs text-zinc-700"
+              className="h-7 rounded-md border border-zinc-200 bg-white px-2 text-xs text-zinc-700"
             >
               <option value="all">All statuses</option>
               {CASE_STATUSES.map((status) => (
@@ -608,7 +590,7 @@ export function EotCaseListClient({
               onChange={(event) =>
                 setPriorityFilter(event.target.value as 'all' | EotCasePriority)
               }
-              className="h-7 border border-zinc-200 bg-white px-2 text-xs text-zinc-700"
+              className="h-7 rounded-md border border-zinc-200 bg-white px-2 text-xs text-zinc-700"
             >
                 <option value="all">All priorities</option>
                 {CASE_PRIORITIES.map((priority) => (
@@ -617,6 +599,23 @@ export function EotCaseListClient({
                   </option>
                 ))}
               </select>
+
+            <button
+              type="button"
+              onClick={() => void refreshCases()}
+              className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-zinc-600 transition hover:text-zinc-950"
+            >
+              <RefreshCcw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} />
+              Refresh
+            </button>
+            <button
+              type="button"
+              onClick={() => setCreateOpen((current) => !current)}
+              className="inline-flex items-center gap-1.5 rounded-md bg-emerald-600 px-2.5 py-1.5 text-xs font-medium text-white transition hover:bg-emerald-700"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              {createOpen ? 'Close' : 'New'}
+            </button>
             </div>
           {selectedIds.length ? (
             <span className="ml-3 text-xs text-zinc-500">
@@ -670,11 +669,11 @@ export function EotCaseListClient({
                 </div>
 
                 {/* Middle: Tenant */}
-                <div className="hidden min-w-0 flex-1 sm:block">
+                <div className="hidden w-[200px] shrink-0 sm:block">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
                     Tenant
                   </p>
-                  <p className="mt-0.5 text-sm text-zinc-700">
+                  <p className="mt-0.5 truncate text-sm text-zinc-700">
                     {caseItem.tenant_name}
                   </p>
                 </div>
