@@ -42,6 +42,7 @@ const footerCols = {
     { href: "/compliance", label: "Compliance" },
     { href: "/privacy", label: "Privacy" },
     { href: "/terms", label: "Terms" },
+    { href: "/complaints", label: "Complaints" },
   ],
 } as const
 
