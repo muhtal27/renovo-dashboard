@@ -110,6 +110,13 @@ const NAV_GROUPS: Array<{
         requiredPermission: OPERATOR_PERMISSIONS.MANAGE_USERS,
       },
       {
+        label: 'Teams',
+        href: '/settings/teams',
+        icon: FolderKanban,
+        isActive: (pathname) => pathname.startsWith('/settings/teams'),
+        requiredPermission: OPERATOR_PERMISSIONS.MANAGE_USERS,
+      },
+      {
         label: 'Settings',
         href: '/settings',
         icon: Settings,

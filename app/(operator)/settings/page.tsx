@@ -76,6 +76,12 @@ export default async function SettingsPage() {
               Manage team members
             </Link>
             <Link
+              href="/settings/teams"
+              className="inline-flex items-center rounded-md border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:text-zinc-950"
+            >
+              Manage teams
+            </Link>
+            <Link
               href="/knowledge"
               className="inline-flex items-center rounded-md border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:text-zinc-950"
             >
