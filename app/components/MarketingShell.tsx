@@ -244,7 +244,7 @@ export function MarketingShell({
           </div>
 
           <div className="mt-7 flex flex-col gap-2 text-xs text-zinc-400 md:flex-row md:items-center md:justify-between">
-            <span>Renovo AI Ltd · SC833544 · VAT GB483379648</span>
+            <span>Renovo AI Ltd · SC833544 · VAT GB483379648 · ICO ZC112030</span>
             <span>© 2026 Renovo AI Ltd — Edinburgh, Scotland</span>
           </div>
         </div>

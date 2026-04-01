@@ -45,6 +45,9 @@ export default function PrivacyPage() {
             responsibly. We aim to use data carefully, securely, and only where it
             supports the delivery and improvement of the service.
           </p>
+          <p className="mt-4 text-sm text-slate-500">
+            Renovo AI Ltd is registered with the Information Commissioner&apos;s Office (ICO). Registration reference: ZC112030.
+          </p>
         </section>
 
         {/* INFORMATION WE HANDLE */}

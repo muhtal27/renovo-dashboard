@@ -43,6 +43,7 @@ export default function AboutClient() {
               { l: "Registered", v: "Edinburgh, Scotland" },
               { l: "Company number", v: "SC833544" },
               { l: "VAT", v: "GB483379648" },
+              { l: "ICO registration", v: "ZC112030" },
             ].map((d) => (
               <div key={d.l}>
                 <p className="text-xs font-semibold uppercase tracking-[0.08em] text-slate-400">{d.l}</p>
