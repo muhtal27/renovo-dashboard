@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { requireOperatorTenant } from '@/lib/operator-server'
 
 export const metadata: Metadata = {
-  title: 'Inventory feedback | Renovo',
+  title: 'Inventory feedback | Renovo AI',
 }
 
 export default async function InventoryFeedbackPage() {
@@ -15,12 +15,11 @@ export default async function InventoryFeedbackPage() {
           Inventory feedback
         </p>
         <h2 className="text-[1.5rem] font-semibold tracking-[-0.03em] text-zinc-950">
-          Inventory feedback is not wired yet
+          Inventory Feedback
         </h2>
         <p className="text-sm leading-6 text-zinc-600">
-          This placeholder route keeps the operator sidebar navigation valid while the inventory
-          feedback workflow is being defined. Hook the page into the eventual feedback queue,
-          review tools, and source report context when that feature is ready.
+          This feature is coming soon. You will be able to review inventory feedback, manage
+          response queues, and access source report context from here.
         </p>
       </div>
     </section>

@@ -5,7 +5,7 @@ import { OPERATOR_PERMISSIONS } from '@/lib/operator-rbac'
 import { requireOperatorPermission } from '@/lib/operator-server'
 
 export const metadata: Metadata = {
-  title: 'Reports | Renovo',
+  title: 'Reports | Renovo AI',
 }
 
 export default async function ReportsPage() {

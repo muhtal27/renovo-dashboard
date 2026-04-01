@@ -1,4 +1,4 @@
-import { PageHeader, SectionCard, SkeletonPanel } from '@/app/operator-ui'
+import { PageHeader, SkeletonPanel } from '@/app/operator-ui'
 
 export default function OperatorLoading() {
   return (
@@ -16,12 +16,12 @@ export default function OperatorLoading() {
         <SkeletonPanel />
       </section>
 
-      <SectionCard className="px-6 py-6">
+      <div className="px-6 py-6">
         <div className="grid gap-4 xl:grid-cols-2">
           <SkeletonPanel />
           <SkeletonPanel />
         </div>
-      </SectionCard>
+      </div>
     </div>
   )
 }

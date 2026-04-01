@@ -8,12 +8,11 @@ import {
   ChevronLeft,
   ClipboardCheck,
   FolderKanban,
+  Landmark,
   LayoutDashboard,
   LogOut,
   MessageSquareMore,
   Settings,
-  ShieldCheck,
-  Sparkles,
   X,
 } from 'lucide-react'
 import {
@@ -49,22 +48,10 @@ const NAV_GROUPS: Array<{
     label: 'Operations',
     items: [
       {
-        label: 'Admin',
-        href: '/overview',
-        icon: LayoutDashboard,
-        isActive: (pathname) => pathname.startsWith('/overview'),
-      },
-      {
         label: 'Checkouts',
         href: '/eot',
         icon: FolderKanban,
         isActive: (pathname) => pathname === '/eot' || pathname.startsWith('/eot/'),
-      },
-      {
-        label: 'Inventory feedback',
-        href: '/inventory-feedback',
-        icon: MessageSquareMore,
-        isActive: (pathname) => pathname.startsWith('/inventory-feedback'),
       },
       {
         label: 'Disputes',
@@ -73,16 +60,22 @@ const NAV_GROUPS: Array<{
         isActive: (pathname) => pathname.startsWith('/disputes') || pathname.startsWith('/issues'),
       },
       {
-        label: 'Compliance',
-        href: '/recommendations',
-        icon: Sparkles,
-        isActive: (pathname) => pathname.startsWith('/recommendations'),
+        label: 'Inventory feedback',
+        href: '/inventory-feedback',
+        icon: MessageSquareMore,
+        isActive: (pathname) => pathname.startsWith('/inventory-feedback'),
       },
       {
-        label: 'Submissions',
+        label: 'Deposit Scheme',
         href: '/claims',
-        icon: ShieldCheck,
+        icon: Landmark,
         isActive: (pathname) => pathname.startsWith('/claims'),
+      },
+      {
+        label: 'Guidance',
+        href: '/knowledge',
+        icon: BookOpenText,
+        isActive: (pathname) => pathname.startsWith('/knowledge'),
       },
     ],
   },
@@ -97,22 +90,16 @@ const NAV_GROUPS: Array<{
         requiredPermission: OPERATOR_PERMISSIONS.VIEW_REPORTING,
       },
       {
-        label: 'Guidance',
-        href: '/knowledge',
-        icon: BookOpenText,
-        isActive: (pathname) => pathname.startsWith('/knowledge'),
+        label: 'Admin',
+        href: '/overview',
+        icon: LayoutDashboard,
+        isActive: (pathname) => pathname.startsWith('/overview'),
       },
     ],
   },
   {
     label: 'Workspace',
     items: [
-      {
-        label: 'Inbox',
-        href: '/calls',
-        icon: MessageSquareMore,
-        isActive: (pathname) => pathname.startsWith('/calls'),
-      },
       {
         label: 'Settings',
         href: '/settings',
@@ -231,7 +218,7 @@ function SidebarContent({
     <div className="flex h-full flex-col">
       <div className={cn('flex items-center gap-3', collapsed && !mobile ? 'justify-center' : 'justify-between')}>
         <Link
-          href="/overview"
+          href="/eot"
           prefetch={false}
           onClick={onNavigate}
           className="flex items-center gap-3 px-3 py-3"
@@ -243,7 +230,7 @@ function SidebarContent({
             {!collapsed || mobile ? (
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
-                  Renovo
+                  Renovo AI
                 </p>
                 <p className="mt-1 text-base font-semibold tracking-[-0.03em] text-zinc-950">
                   End of tenancy

@@ -5,7 +5,7 @@ import KnowledgeClient, {
 import { requireOperatorTenant } from '@/lib/operator-server'
 
 export const metadata: Metadata = {
-  title: 'Guidance | Renovo',
+  title: 'Guidance | Renovo AI',
 }
 
 const GUIDANCE_ARTICLES: KnowledgeArticle[] = [

@@ -4,7 +4,7 @@ import { getEotCaseWorkspaceSummarySnapshot } from '@/lib/eot-server-data'
 import { requireOperatorTenant } from '@/lib/operator-server'
 
 export const metadata: Metadata = {
-  title: 'Checkout Workspace | Renovo',
+  title: 'Checkout Workspace | Renovo AI',
 }
 
 type PageProps = {

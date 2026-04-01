@@ -6,7 +6,7 @@ import { isOperatorCaseWorkspaceNotFoundError } from '@/lib/operator-case-worksp
 import { normalizeCheckoutWorkspaceTab } from '@/lib/operator-checkout-workspace-types'
 
 export const metadata: Metadata = {
-  title: 'Operator Case Workspace | Renovo',
+  title: 'Operator Case Workspace | Renovo AI',
 }
 
 type PageProps = {

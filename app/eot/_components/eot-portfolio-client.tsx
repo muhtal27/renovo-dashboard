@@ -602,84 +602,21 @@ export function EotPortfolioClient({
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-end gap-8 border-b border-zinc-200 pb-3">
-        <KPIStatCard label="Ready for submission" value={stats.readyForClaim} tone="accent" />
-        <KPIStatCard label="Recommendations" value={recommendationCount} />
-        <KPIStatCard label="Generated claims" value={workspaces.filter((workspace) => workspace.claim).length} />
-        <KPIStatCard label="Total claim value" value={formatCurrency(stats.claimAmount)} />
-      </div>
-
-      <div className="grid gap-6 xl:grid-cols-2">
-        <div>
-          <h3 className="text-sm font-semibold text-zinc-950">Checkout statuses</h3>
-          <div className="mt-2">
-            <DistributionBar
-              items={Object.entries(statusBreakdown).map(([label, value]) => ({
-                label: formatEnumLabel(label),
-                value,
-                tone:
-                  label === 'disputed'
-                    ? 'danger'
-                    : label === 'ready_for_claim'
-                      ? 'accent'
-                      : label === 'review'
-                        ? 'warning'
-                        : undefined,
-              }))}
-            />
-          </div>
-        </div>
-        <div>
-          <h3 className="text-sm font-semibold text-zinc-950">Issue severity</h3>
-          <div className="mt-2">
-            <DistributionBar
-              items={Object.entries(issueSeverityBreakdown).map(([label, value]) => ({
-                label: formatEnumLabel(label),
-                value,
-                tone:
-                  label === 'high'
-                    ? 'danger'
-                    : label === 'medium'
-                      ? 'warning'
-                      : 'accent',
-              }))}
-            />
-          </div>
-        </div>
-      </div>
-
-      <DataTable>
-        <table className="min-w-full text-left">
-          <thead className="bg-zinc-50 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
-            <tr>
-              <th className="px-3 py-2.5">Property</th>
-              <th className="px-3 py-2.5">Status</th>
-              <th className="px-3 py-2.5">Priority</th>
-              <th className="px-3 py-2.5">Evidence</th>
-              <th className="px-3 py-2.5">Issues</th>
-              <th className="px-3 py-2.5">Claim value</th>
-              <th className="px-3 py-2.5">Last activity</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-zinc-100">
-            {workspaces.map((workspace) => (
-              <tr key={workspace.case.id} className="hover:bg-zinc-50/70">
-                <td className="px-3 py-2.5">
-                  <Link href={`/operator/cases/${workspace.case.id}`} className="text-sm font-medium text-zinc-950 underline decoration-zinc-300 underline-offset-2 transition hover:decoration-zinc-900">{workspace.property.name}</Link>
-                  <p className="text-xs text-zinc-500">{workspace.tenancy.tenant_name}</p>
-                </td>
-                <td className="px-3 py-2.5"><StatusBadge label={formatEnumLabel(workspace.case.status)} tone={workspace.case.status} /></td>
-                <td className="px-3 py-2.5"><StatusBadge label={formatEnumLabel(workspace.case.priority)} tone={workspace.case.priority} /></td>
-                <td className="px-3 py-2.5 text-sm text-zinc-700">{workspace.evidence.length}</td>
-                <td className="px-3 py-2.5 text-sm text-zinc-700">{workspace.issues.length}</td>
-                <td className="px-3 py-2.5 text-sm font-medium text-zinc-950">{workspace.claim ? formatCurrency(workspace.claim.total_amount) : '—'}</td>
-                <td className="px-3 py-2.5 text-sm text-zinc-700">{formatDateTime(workspace.case.last_activity_at)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </DataTable>
+    <div className="space-y-0">
+      {workspaces.map((workspace) => (
+        <Link
+          key={workspace.case.id}
+          href={`/operator/cases/${workspace.case.id}`}
+          className="block border-b border-zinc-200 px-5 py-6 transition hover:bg-zinc-50/60"
+        >
+          <p className="text-base font-semibold text-zinc-950">
+            {workspace.property.name}
+          </p>
+          <p className="mt-1 text-sm text-zinc-500">
+            {workspace.tenancy.tenant_name}
+          </p>
+        </Link>
+      ))}
     </div>
   )
 }

@@ -1,12 +1,12 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { PageHeader, SectionCard, SectionHeading } from '@/app/operator-ui'
+import { PageHeader, SectionHeading } from '@/app/operator-ui'
 import { StatusBadge } from '@/app/eot/_components/eot-ui'
 import { OPERATOR_PERMISSIONS } from '@/lib/operator-rbac'
 import { requireOperatorPermission } from '@/lib/operator-server'
 
 export const metadata: Metadata = {
-  title: 'Settings | Renovo',
+  title: 'Settings | Renovo AI',
 }
 
 export default async function SettingsPage() {
@@ -23,7 +23,7 @@ export default async function SettingsPage() {
       />
 
       <section className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
-        <SectionCard className="px-6 py-6">
+        <div className="px-6 py-6">
           <SectionHeading
             eyebrow="Workspace"
             title="Operator defaults"
@@ -36,17 +36,17 @@ export default async function SettingsPage() {
               ['Evidence review', 'Tracked against the live workspace'],
               ['Operator notes', 'Stored in the checkout record'],
             ].map(([label, value]) => (
-              <div key={label} className="border border-zinc-200 bg-zinc-50/70 px-4 py-4">
+              <div key={label} className="border-l-2 border-zinc-200 pl-4 py-3">
                 <dt className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
                   {label}
                 </dt>
-                <dd className="mt-2 text-sm font-medium leading-6 text-zinc-900">{value}</dd>
+                <dd className="mt-1 text-sm font-medium leading-6 text-zinc-900">{value}</dd>
               </div>
             ))}
           </dl>
-        </SectionCard>
+        </div>
 
-        <SectionCard className="px-6 py-6">
+        <div className="px-6 py-6">
           <SectionHeading
             eyebrow="Outbound delivery"
             title="Messaging integration status"
@@ -58,13 +58,13 @@ export default async function SettingsPage() {
               />
             }
           />
-          <div className="mt-6 border border-zinc-200 bg-zinc-50/70 px-5 py-5">
+          <div className="mt-6 border-l-2 border-zinc-200 pl-5 py-4">
             <p className="text-sm font-semibold text-zinc-950">
               {outboundConfigured ? 'Outbound webhook configured' : 'Outbound webhook not configured'}
             </p>
             <p className="mt-2 text-sm leading-6 text-zinc-600">
               {outboundConfigured
-                ? 'Renovo can hand off queued external messages to the configured delivery endpoint.'
+                ? 'Renovo AI can hand off queued external messages to the configured delivery endpoint.'
                 : 'Messages remain in the checkout record until a delivery integration is connected.'}
             </p>
           </div>
@@ -82,7 +82,7 @@ export default async function SettingsPage() {
               Return to overview
             </Link>
           </div>
-        </SectionCard>
+        </div>
       </section>
     </div>
   )

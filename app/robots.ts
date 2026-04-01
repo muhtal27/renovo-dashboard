@@ -9,7 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         allow: '/',
         disallow: [
           '/api/',
-          '/calls',
           '/claims',
           '/disputes',
           '/eot',
@@ -18,7 +17,6 @@ export default function robots(): MetadataRoute.Robots {
           '/knowledge',
           '/login',
           '/overview',
-          '/recommendations',
           '/reports',
           '/reset-password',
           '/settings',
