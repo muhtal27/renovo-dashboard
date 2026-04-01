@@ -45,6 +45,7 @@ const footerLegalLinks = [
   { label: 'Compliance', href: '/compliance' },
   { label: 'Privacy', href: '/privacy' },
   { label: 'Terms', href: '/terms' },
+  { label: 'Complaints', href: '/complaints' },
 ] as const
 
 function SignInLink({
