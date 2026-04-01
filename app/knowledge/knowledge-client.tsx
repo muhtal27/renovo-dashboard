@@ -73,7 +73,7 @@ function getSourceTone(label: string) {
     case 'Housing & Property Chamber':
     case 'Letting Agent Register':
     case 'nidirect':
-      return 'border border-slate-300 bg-slate-100 text-slate-700'
+      return 'border border-zinc-300 bg-zinc-100 text-zinc-700'
     case 'TDS':
       return 'border border-sky-200 bg-sky-50 text-sky-800'
     case 'DPS':
@@ -84,7 +84,7 @@ function getSourceTone(label: string) {
     case 'SafeDeposits Scotland':
       return 'border border-blue-200 bg-blue-50 text-blue-800'
     default:
-      return 'border border-slate-200 bg-slate-50 text-slate-700'
+      return 'border border-zinc-200 bg-zinc-50 text-zinc-700'
   }
 }
 
@@ -122,7 +122,7 @@ function renderContent(content: string) {
         return (
           <ul key={blockIndex} className="mt-3 list-none space-y-2">
             {lines.map((line) => (
-              <li key={line} className="flex items-start gap-2 text-sm leading-7 text-slate-600">
+              <li key={line} className="flex items-start gap-2 text-sm leading-7 text-zinc-600">
                 <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-slate-400" />
                 <span>{renderInlineFormatting(line.replace(/^- /, ''))}</span>
               </li>
@@ -143,8 +143,8 @@ function renderContent(content: string) {
 
               return (
                 <div key={line} className="flex items-start gap-3">
-                  <span className="text-sm font-medium text-slate-500">{match[1]}.</span>
-                  <span className="text-sm leading-7 text-slate-600">
+                  <span className="text-sm font-medium text-zinc-500">{match[1]}.</span>
+                  <span className="text-sm leading-7 text-zinc-600">
                     {renderInlineFormatting(match[2])}
                   </span>
                 </div>
@@ -155,7 +155,7 @@ function renderContent(content: string) {
       }
 
       return (
-        <p key={blockIndex} className="text-sm leading-7 text-slate-600">
+        <p key={blockIndex} className="text-sm leading-7 text-zinc-600">
           {renderInlineFormatting(block)}
         </p>
       )
@@ -219,7 +219,7 @@ function getRegionChipTone(regions: RegionFilter[]) {
     return 'border-cyan-200 bg-cyan-50 text-cyan-700'
   }
 
-  return 'border-slate-200 bg-slate-100 text-slate-700'
+  return 'border-zinc-200 bg-zinc-100 text-zinc-700'
 }
 
 export default function KnowledgeClient({ articles }: { articles: KnowledgeArticle[] }) {
@@ -356,24 +356,24 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
                   key={region.value}
                   type="button"
                   onClick={() => setRegionFilter(region.value)}
-                  className={`rounded-[20px] border px-4 py-4 text-left transition ${
+                  className={`border px-4 py-4 text-left transition ${
                     active
-                      ? 'border-slate-900 bg-slate-900 text-white shadow-[0_10px_24px_rgba(15,23,42,0.16)]'
-                      : 'border-slate-200 bg-slate-50/70 hover:border-slate-300 hover:bg-white'
+                      ? 'border-zinc-900 bg-zinc-900 text-white'
+                      : 'border-zinc-200 bg-zinc-50/70 hover:border-zinc-300 hover:bg-white'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className={`text-sm font-semibold ${active ? 'text-white' : 'text-slate-950'}`}>
+                      <p className={`text-sm font-semibold ${active ? 'text-white' : 'text-zinc-950'}`}>
                         {region.label}
                       </p>
-                      <p className={`mt-2 text-sm leading-6 ${active ? 'text-slate-200' : 'text-slate-600'}`}>
+                      <p className={`mt-2 text-sm leading-6 ${active ? 'text-zinc-200' : 'text-zinc-600'}`}>
                         {region.description}
                       </p>
                     </div>
                     <span
-                      className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
-                        active ? 'bg-white/10 text-white' : 'bg-white text-slate-600'
+                      className={`inline-flex px-2.5 py-1 text-xs font-semibold ${
+                        active ? 'bg-white/10 text-white' : 'bg-white text-zinc-600'
                       }`}
                     >
                       {regionCounts[region.value]}
@@ -403,12 +403,12 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
 
               <label className="relative block w-full lg:w-[320px]">
                 <span className="sr-only">Search guidance</span>
-                <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
                 <input
                   value={searchQuery}
                   onChange={(event) => setSearchQuery(event.target.value)}
                   placeholder="Search the guidance library"
-                  className="h-11 w-full rounded-[14px] border border-slate-200 bg-white pl-11 pr-4 text-sm text-slate-900 placeholder:text-slate-400"
+                  className="h-11 w-full border border-zinc-200 bg-white pl-11 pr-4 text-sm text-zinc-900 placeholder:text-zinc-400"
                 />
               </label>
             </FilterToolbar>
@@ -419,29 +419,29 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
           title="Library status"
           description="The operator guidance library is curated for live decision support and should be checked alongside the tenancy location."
         >
-          <div className="rounded-[18px] border border-slate-200 bg-slate-50/70 px-4 py-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+          <div className="border border-zinc-200 bg-zinc-50/70 px-4 py-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
               Current scope
             </p>
-            <p className="mt-2 text-sm font-medium leading-6 text-slate-900">
+            <p className="mt-2 text-sm font-medium leading-6 text-zinc-900">
               {REGION_OPTIONS.find((region) => region.value === regionFilter)?.label}
             </p>
           </div>
-          <div className="rounded-[18px] border border-slate-200 bg-slate-50/70 px-4 py-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+          <div className="border border-zinc-200 bg-zinc-50/70 px-4 py-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
               Visible articles
             </p>
-            <p className="mt-2 text-sm font-medium leading-6 text-slate-900">
+            <p className="mt-2 text-sm font-medium leading-6 text-zinc-900">
               {visibleArticleRecords.length} matching article{visibleArticleRecords.length === 1 ? '' : 's'}
             </p>
           </div>
-          <div className="rounded-[18px] border border-slate-200 bg-slate-50/70 px-4 py-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+          <div className="border border-zinc-200 bg-zinc-50/70 px-4 py-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
               Last reviewed
             </p>
-            <p className="mt-2 text-sm font-medium leading-6 text-slate-900">{LAST_REVIEWED}</p>
+            <p className="mt-2 text-sm font-medium leading-6 text-zinc-900">{LAST_REVIEWED}</p>
           </div>
-          <div className="rounded-[18px] border border-slate-200 bg-white px-4 py-4 text-sm leading-6 text-slate-600">
+          <div className="border border-zinc-200 bg-white px-4 py-4 text-sm leading-6 text-zinc-600">
             Always follow the official scheme or government guidance for the tenancy location before confirming any deduction position or dispute path.
           </div>
         </DetailPanel>
@@ -456,51 +456,51 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                      <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
                         {article.category}
                       </span>
                       <span
-                        className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-medium ${getRegionChipTone(
+                        className={`inline-flex border px-2.5 py-1 text-xs font-medium ${getRegionChipTone(
                           article.regions
                         )}`}
                       >
                         {regionLabel}
                       </span>
                     </div>
-                    <p className="mt-1 text-xs text-slate-400">{summaryReadingTime}</p>
-                    <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
+                    <p className="mt-1 text-xs text-zinc-400">{summaryReadingTime}</p>
+                    <h2 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-950">
                       {article.title}
                     </h2>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
                     <span
-                      className={`rounded-full px-3 py-1 text-xs font-semibold ${getSourceTone(article.sourceLabel)}`}
+                      className={`px-3 py-1 text-xs font-semibold ${getSourceTone(article.sourceLabel)}`}
                     >
                       {article.sourceLabel}
                     </span>
-                    <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-500">
+                    <span className="border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs font-medium text-zinc-500">
                       Last reviewed {LAST_REVIEWED}
                     </span>
                   </div>
                 </div>
 
-                <p className="mt-4 text-sm leading-7 text-slate-600">{article.summary}</p>
+                <p className="mt-4 text-sm leading-7 text-zinc-600">{article.summary}</p>
 
-                <div className="my-6 border-t border-slate-200" />
+                <div className="my-6 border-t border-zinc-200" />
 
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <a
                     href={article.sourceHref}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center rounded-[14px] border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:text-slate-950"
+                    className="inline-flex items-center border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:text-zinc-950"
                   >
                     Open source
                   </a>
                   <button
                     type="button"
                     onClick={() => setSelectedArticleTitle(article.title)}
-                    className="inline-flex items-center rounded-[14px] border border-slate-900 bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
+                    className="inline-flex items-center border border-zinc-900 bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800"
                   >
                     Read article
                   </button>
@@ -522,7 +522,7 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
               <button
                 type="button"
                 onClick={clearSearch}
-                className="inline-flex items-center rounded-[14px] border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:text-slate-950"
+                className="inline-flex items-center border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:text-zinc-950"
               >
                 Clear search
               </button>
@@ -532,35 +532,35 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
       )}
 
       {activeSelectedArticle ? (
-        <div className="fixed inset-0 z-50 flex justify-end bg-slate-950/35">
+        <div className="fixed inset-0 z-50 flex justify-end bg-zinc-950/35">
           <button
             type="button"
             onClick={() => setSelectedArticleTitle(null)}
             className="flex-1 cursor-default"
             aria-label="Close article panel"
           />
-          <aside className="relative flex h-full w-full max-w-2xl flex-col border-l border-slate-200 bg-white shadow-[0_24px_70px_rgba(15,23,42,0.12)]">
-            <div className="border-b border-slate-200 px-6 py-5">
+          <aside className="relative flex h-full w-full max-w-2xl flex-col border-l border-zinc-200 bg-white">
+            <div className="border-b border-zinc-200 px-6 py-5">
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
                       {activeSelectedArticle.article.category}
                     </span>
                     <span
-                      className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-medium ${getRegionChipTone(
+                      className={`inline-flex border px-2.5 py-1 text-xs font-medium ${getRegionChipTone(
                         activeSelectedArticle.article.regions
                       )}`}
                     >
                       {activeSelectedArticle.regionLabel}
                     </span>
                   </div>
-                  <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
+                  <h2 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-950">
                     {activeSelectedArticle.article.title}
                   </h2>
-                  <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-slate-500">
+                  <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-zinc-500">
                     <span>{activeSelectedArticle.contentReadingTime}</span>
-                    <span className="text-slate-300">•</span>
+                    <span className="text-zinc-300">•</span>
                     <span>Last reviewed {LAST_REVIEWED}</span>
                   </div>
                 </div>
@@ -568,14 +568,14 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
                   <button
                     type="button"
                     onClick={() => window.print()}
-                    className="cursor-pointer text-sm text-slate-500 hover:text-slate-700"
+                    className="cursor-pointer text-sm text-zinc-500 hover:text-zinc-700"
                   >
                     Print article
                   </button>
                   <button
                     type="button"
                     onClick={() => setSelectedArticleTitle(null)}
-                    className="text-sm font-medium text-slate-500 hover:text-slate-900"
+                    className="text-sm font-medium text-zinc-500 hover:text-zinc-900"
                   >
                     Close
                   </button>
@@ -586,7 +586,7 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
             <div className="flex-1 overflow-y-auto px-6 py-6">
               <div className="flex flex-wrap items-center gap-2">
                 <span
-                  className={`rounded-full px-3 py-1 text-xs font-semibold ${getSourceTone(activeSelectedArticle.article.sourceLabel)}`}
+                  className={`px-3 py-1 text-xs font-semibold ${getSourceTone(activeSelectedArticle.article.sourceLabel)}`}
                 >
                   {activeSelectedArticle.article.sourceLabel}
                 </span>
@@ -594,21 +594,21 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
                   href={activeSelectedArticle.article.sourceHref}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-sm font-medium text-slate-500 underline decoration-slate-300 underline-offset-4 hover:text-slate-700"
+                  className="text-sm font-medium text-zinc-500 underline decoration-slate-300 underline-offset-4 hover:text-zinc-700"
                 >
                   Open source
                 </a>
               </div>
 
-              <p className="mt-5 text-base leading-8 text-slate-700">{activeSelectedArticle.article.summary}</p>
+              <p className="mt-5 text-base leading-8 text-zinc-700">{activeSelectedArticle.article.summary}</p>
 
               <div className="mt-6 space-y-5">{renderContent(activeSelectedArticle.article.content)}</div>
 
               {relatedArticleRecords.length > 0 ? (
                 <>
-                  <div className="my-6 border-t border-slate-200" />
+                  <div className="my-6 border-t border-zinc-200" />
                   <div>
-                    <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-500">
+                    <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-zinc-500">
                       More in this category
                     </h3>
                     <div className="mt-4 grid gap-3">
@@ -617,13 +617,13 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
                           key={article.title}
                           type="button"
                           onClick={() => setSelectedArticleTitle(article.title)}
-                          className="rounded-[18px] border border-slate-200 bg-slate-50/70 px-4 py-4 text-left transition hover:border-slate-300 hover:bg-white"
+                          className="border border-zinc-200 bg-zinc-50/70 px-4 py-4 text-left transition hover:border-zinc-300 hover:bg-white"
                         >
                           <div className="flex items-center justify-between gap-3">
-                            <span className="text-sm font-medium text-slate-900">
+                            <span className="text-sm font-medium text-zinc-900">
                               {article.title}
                             </span>
-                            <span className="text-sm font-medium text-slate-500">Read</span>
+                            <span className="text-sm font-medium text-zinc-500">Read</span>
                           </div>
                         </button>
                       ))}

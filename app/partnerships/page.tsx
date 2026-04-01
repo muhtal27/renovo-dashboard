@@ -51,7 +51,7 @@ export default function PartnershipsPage() {
         <section className="page-hero">
           <p className="app-kicker">Partnerships</p>
           <h1 className="page-title max-w-[820px]">
-            Work with <em>Renovo AI</em>
+            Work with <em className="text-slate-400">Renovo AI</em>
           </h1>
           <p className="page-copy max-w-[640px]">
             Renovo AI automates end-of-tenancy work for property managers and letting

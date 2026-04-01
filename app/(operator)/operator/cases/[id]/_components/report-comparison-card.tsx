@@ -169,10 +169,10 @@ function ManageableReportDocumentPane({
 
   if (!document) {
     return (
-      <div className="rounded-[18px] border border-dashed border-slate-300 bg-slate-50/70 px-5 py-5">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">{label}</p>
-        <p className="mt-3 text-sm font-semibold text-slate-950">Document not available</p>
-        <p className="mt-2 text-sm leading-6 text-slate-600">
+      <div className="border border-dashed border-zinc-300 bg-zinc-50/70 px-5 py-5">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">{label}</p>
+        <p className="mt-3 text-sm font-semibold text-zinc-950">Document not available</p>
+        <p className="mt-2 text-sm leading-6 text-zinc-600">
           Upload the current {label.toLowerCase()} so this case is ready for evidence review and backend analysis.
         </p>
         <input
@@ -186,7 +186,7 @@ function ManageableReportDocumentPane({
           type="button"
           disabled={mutationState.pending}
           onClick={() => inputRef.current?.click()}
-          className="mt-4 inline-flex h-10 items-center justify-center gap-2 rounded-[14px] border border-slate-900 bg-slate-900 px-4 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-500"
+          className="mt-4 inline-flex h-10 items-center justify-center gap-2 border border-zinc-900 bg-zinc-900 px-4 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:border-zinc-200 disabled:bg-zinc-100 disabled:text-zinc-500"
         >
           {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
           {isUploading ? 'Uploading...' : 'Upload PDF'}
@@ -199,13 +199,13 @@ function ManageableReportDocumentPane({
   }
 
   return (
-    <div className="rounded-[18px] border border-slate-200 px-5 py-5">
+    <div className="border border-zinc-200 px-5 py-5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">{label}</p>
-          <p className="mt-3 text-sm font-semibold text-slate-950 [overflow-wrap:anywhere]">{document.fileName}</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">{label}</p>
+          <p className="mt-3 text-sm font-semibold text-zinc-950 [overflow-wrap:anywhere]">{document.fileName}</p>
         </div>
-        <FileText className="mt-1 h-4 w-4 shrink-0 text-slate-400" />
+        <FileText className="mt-1 h-4 w-4 shrink-0 text-zinc-400" />
       </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -213,14 +213,14 @@ function ManageableReportDocumentPane({
         <StatusBadge label={formatEnumLabel(document.source)} tone="document" />
       </div>
 
-      <p className="mt-4 text-sm text-slate-600">Created {formatDate(document.createdAt)}</p>
+      <p className="mt-4 text-sm text-zinc-600">Created {formatDate(document.createdAt)}</p>
 
       <div className="mt-5 flex flex-wrap items-center gap-2">
         <a
           href={document.fileUrl}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex h-10 items-center justify-center gap-2 rounded-[14px] border border-slate-900 bg-slate-900 px-4 text-sm font-medium text-white transition hover:bg-slate-800"
+          className="inline-flex h-10 items-center justify-center gap-2 border border-zinc-900 bg-zinc-900 px-4 text-sm font-medium text-white transition hover:bg-zinc-800"
         >
           Open document
           <ExternalLink className="h-4 w-4" />
@@ -228,7 +228,7 @@ function ManageableReportDocumentPane({
         <a
           href={document.fileUrl}
           download={document.fileName}
-          className="inline-flex h-10 items-center justify-center gap-2 rounded-[14px] border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+          className="inline-flex h-10 items-center justify-center gap-2 border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
         >
           Download
           <Download className="h-4 w-4" />
@@ -244,7 +244,7 @@ function ManageableReportDocumentPane({
           type="button"
           disabled={mutationState.pending}
           onClick={() => inputRef.current?.click()}
-          className="inline-flex h-10 items-center justify-center gap-2 rounded-[14px] border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-500"
+          className="inline-flex h-10 items-center justify-center gap-2 border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:border-zinc-200 disabled:bg-zinc-100 disabled:text-zinc-500"
         >
           {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
           {isUploading ? 'Replacing...' : 'Replace'}
@@ -254,7 +254,7 @@ function ManageableReportDocumentPane({
             type="button"
             disabled={mutationState.pending}
             onClick={() => void removeDocument()}
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-[14px] border border-rose-200 bg-white px-4 text-sm font-medium text-rose-700 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-500"
+            className="inline-flex h-10 items-center justify-center gap-2 border border-rose-200 bg-white px-4 text-sm font-medium text-rose-700 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:border-zinc-200 disabled:bg-zinc-100 disabled:text-zinc-500"
           >
             {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
             {isDeleting ? 'Removing...' : 'Remove'}
@@ -262,7 +262,7 @@ function ManageableReportDocumentPane({
         ) : null}
       </div>
       {!canRemove ? (
-        <p className="mt-3 text-sm leading-6 text-slate-500">
+        <p className="mt-3 text-sm leading-6 text-zinc-500">
           This file is currently linked from evidence. Upload a dedicated report to manage this slot directly.
         </p>
       ) : null}
@@ -286,8 +286,8 @@ export function ReportComparisonCard({
     <div className="min-w-0">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-sm font-semibold tracking-[-0.02em] text-slate-950">Core documents</p>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
+          <p className="text-sm font-semibold tracking-[-0.02em] text-zinc-950">Core documents</p>
+          <p className="mt-2 text-sm leading-6 text-zinc-600">
             Keep the two analysis-critical reports current so the backend always compares the right check-in and check-out file.
           </p>
         </div>

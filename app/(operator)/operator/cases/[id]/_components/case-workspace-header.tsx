@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
-import { SectionCard } from '@/app/operator-ui'
 import { formatAddress, formatCurrency, formatDate } from '@/app/eot/_components/eot-ui'
 import { CaseStatusBadge } from '@/app/(operator)/operator/cases/[id]/_components/case-status-badge'
 import type { OperatorCaseWorkspaceData } from '@/lib/operator-case-workspace-types'
@@ -111,113 +110,74 @@ export function CaseWorkspaceHeader({
   }
 
   return (
-    <SectionCard className="px-6 py-6 md:px-7">
-      <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
-        <div className="min-w-0 flex-1">
+    <div className="space-y-4">
+      <div className="flex items-start justify-between gap-4 border-b border-zinc-200 pb-4">
+        <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <CaseStatusBadge status={workspace.case.status} />
           </div>
-          <h2 className="mt-3 max-w-5xl text-[1.7rem] font-semibold tracking-[-0.04em] text-slate-950 [overflow-wrap:anywhere]">
+          <h2 className="mt-2 text-lg font-semibold text-zinc-950 [overflow-wrap:anywhere]">
             {propertyAddress}
           </h2>
-          <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600 [overflow-wrap:anywhere]">
+          <p className="mt-1 text-sm text-zinc-600">
             {workspace.tenant.name}
             {workspace.tenant.email ? ` · ${workspace.tenant.email}` : ''}
-          </p>
-          <p className="mt-1 text-sm leading-6 text-slate-600">
+            <span className="mx-1.5 text-zinc-300">·</span>
             {formatDate(workspace.tenancy.start_date)} to {formatDate(workspace.tenancy.end_date)}
           </p>
         </div>
+        <div className="flex shrink-0 items-center gap-2">
+          <button
+            type="button"
+            disabled={isAnalysing}
+            onClick={() => void handleAnalyse()}
+            className="inline-flex items-center gap-1.5 bg-zinc-900 px-2.5 py-1.5 text-xs font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isAnalysing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+            {isAnalysing ? 'Analysing...' : 'Analyse'}
+          </button>
+        </div>
+      </div>
+      {analysisSuccess ? (
+        <p className="text-sm text-emerald-700">{analysisSuccess}</p>
+      ) : null}
+      {analysisError ? (
+        <p className="text-sm text-rose-700">{analysisError}</p>
+      ) : null}
 
-        <div className="flex shrink-0 flex-col items-start gap-3 xl:items-end">
-          <div className="flex flex-wrap items-center gap-2 xl:justify-end">
-            <button
-              type="button"
-              disabled={isAnalysing}
-              onClick={() => void handleAnalyse()}
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-[14px] border border-slate-900 bg-slate-900 px-4 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-500"
-            >
-              {isAnalysing ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-              {isAnalysing ? 'Analysing...' : 'Analyse'}
-            </button>
-          </div>
-          {analysisSuccess ? (
-            <p className="max-w-md text-sm leading-6 text-emerald-700 [overflow-wrap:anywhere]">
-              {analysisSuccess}
-            </p>
-          ) : null}
-          {analysisError ? (
-            <p className="max-w-md text-sm leading-6 text-rose-700 [overflow-wrap:anywhere]">
-              {analysisError}
-            </p>
-          ) : null}
+      <div className="flex items-end gap-8 border-b border-zinc-200 pb-3">
+        <div className="py-2">
+          <span className="text-[11px] font-medium uppercase tracking-wide text-zinc-400">Issues</span>
+          <div className="mt-0.5 text-xl font-semibold tabular-nums leading-tight text-zinc-950">{workspace.issues.length}</div>
+        </div>
+        <div className="py-2">
+          <span className="text-[11px] font-medium uppercase tracking-wide text-zinc-400">Deductions</span>
+          <div className="mt-0.5 text-xl font-semibold tabular-nums leading-tight text-zinc-950">{formatCurrency(workspace.totals.proposedDeductions)}</div>
+        </div>
+        <div className="py-2">
+          <span className="text-[11px] font-medium uppercase tracking-wide text-zinc-400">Remaining</span>
+          <div className="mt-0.5 text-xl font-semibold tabular-nums leading-tight text-zinc-950">{workspace.totals.remainingDeposit == null ? '—' : formatCurrency(workspace.totals.remainingDeposit)}</div>
+        </div>
+        <div className="py-2">
+          <span className="text-[11px] font-medium uppercase tracking-wide text-zinc-400">Deposit</span>
+          <div className="mt-0.5 text-xl font-semibold tabular-nums leading-tight text-zinc-950">{workspace.totals.depositAmount == null ? '—' : formatCurrency(workspace.totals.depositAmount)}</div>
         </div>
       </div>
 
-      <div className="mt-6 border-t border-slate-200 pt-6">
-        <div className="grid gap-5 xl:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.75fr)]">
-          <dl className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-            <div className="min-w-0">
-              <dt className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                Issues
-              </dt>
-              <dd className="mt-2 text-[1.65rem] font-semibold tracking-[-0.04em] text-slate-950">
-                {workspace.issues.length}
-              </dd>
-              <p className="mt-2 text-sm leading-6 text-slate-600">Items currently in operator review.</p>
-            </div>
-            <div className="min-w-0">
-              <dt className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                Proposed deductions
-              </dt>
-              <dd className="mt-2 text-[1.65rem] font-semibold tracking-[-0.04em] text-slate-950">
-                {formatCurrency(workspace.totals.proposedDeductions)}
-              </dd>
-              <p className="mt-2 text-sm leading-6 text-slate-600">Current claim position from recommendations.</p>
-            </div>
-            <div className="min-w-0">
-              <dt className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                Remaining deposit
-              </dt>
-              <dd className="mt-2 text-[1.65rem] font-semibold tracking-[-0.04em] text-slate-950">
-                {workspace.totals.remainingDeposit == null
-                  ? 'Not recorded'
-                  : formatCurrency(workspace.totals.remainingDeposit)}
-              </dd>
-              <p className="mt-2 text-sm leading-6 text-slate-600">Estimated return after deductions.</p>
-            </div>
-          </dl>
-
-          <dl className="grid gap-x-6 gap-y-3 sm:grid-cols-2 xl:content-start">
-            <div className="flex items-start justify-between gap-4 border-b border-slate-200 pb-3">
-              <dt className="text-sm text-slate-500">Deposit</dt>
-              <dd className="min-w-0 text-right text-sm font-medium text-slate-950 [overflow-wrap:anywhere]">
-                {workspace.totals.depositAmount == null
-                  ? 'Not recorded'
-                  : formatCurrency(workspace.totals.depositAmount)}
-              </dd>
-            </div>
-            <div className="flex items-start justify-between gap-4 border-b border-slate-200 pb-3">
-              <dt className="text-sm text-slate-500">Case reference</dt>
-              <dd className="min-w-0 text-right text-sm font-medium text-slate-950 [overflow-wrap:anywhere]">
-                {workspace.case.id.slice(0, 8)}
-              </dd>
-            </div>
-            <div className="flex items-start justify-between gap-4 border-b border-slate-200 pb-3">
-              <dt className="text-sm text-slate-500">Deposit scheme</dt>
-              <dd className="min-w-0 text-right text-sm font-medium text-slate-950 [overflow-wrap:anywhere]">
-                {depositScheme}
-              </dd>
-            </div>
-            <div className="flex items-start justify-between gap-4 border-b border-slate-200 pb-3">
-              <dt className="text-sm text-slate-500">Certificate number</dt>
-              <dd className="min-w-0 text-right text-sm font-medium text-slate-950 [overflow-wrap:anywhere]">
-                {certificateNumber}
-              </dd>
-            </div>
-          </dl>
+      <div className="grid gap-x-6 gap-y-1 border-b border-zinc-200 pb-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="flex items-baseline justify-between gap-3 py-1">
+          <span className="text-xs text-zinc-500">Reference</span>
+          <span className="text-sm font-medium text-zinc-950">{workspace.case.id.slice(0, 8)}</span>
+        </div>
+        <div className="flex items-baseline justify-between gap-3 py-1">
+          <span className="text-xs text-zinc-500">Deposit scheme</span>
+          <span className="text-sm font-medium text-zinc-950">{depositScheme}</span>
+        </div>
+        <div className="flex items-baseline justify-between gap-3 py-1">
+          <span className="text-xs text-zinc-500">Certificate</span>
+          <span className="text-sm font-medium text-zinc-950">{certificateNumber}</span>
         </div>
       </div>
-    </SectionCard>
+    </div>
   )
 }

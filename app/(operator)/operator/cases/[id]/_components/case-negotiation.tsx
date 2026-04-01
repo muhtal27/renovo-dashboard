@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { DetailPanel, EmptyState, SectionCard } from '@/app/operator-ui'
+import { EmptyState } from '@/app/operator-ui'
 import { ClaimSummaryCard } from '@/app/(operator)/operator/cases/[id]/_components/claim-summary-card'
 import { MessageThreadCard } from '@/app/(operator)/operator/cases/[id]/_components/message-thread-card'
 import {
@@ -9,7 +9,6 @@ import {
   WorkspaceMetricCard,
   WorkspaceNotice,
   WorkspaceProgressBar,
-  WorkspaceSectionTitle,
   WorkspaceSelectableCard,
 } from '@/app/(operator)/operator/cases/[id]/_components/checkout-workspace-ui'
 import {
@@ -91,14 +90,14 @@ export function CaseNegotiation({ data }: { data: OperatorCheckoutWorkspaceData 
             }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <WorkspaceNotice
         body={negotiationNotice.body}
         title={negotiationNotice.title}
         tone={negotiationNotice.tone}
       />
 
-      <section className="grid gap-4 md:grid-cols-2 2xl:grid-cols-4">
+      <div className="flex items-end gap-8 border-b border-zinc-200 pb-3">
         <WorkspaceMetricCard
           detail={data.checkoutCase?.submissionType ? `Submission path: ${formatEnumLabel(data.checkoutCase.submissionType)}` : 'Submission path not selected'}
           label="Negotiation status"
@@ -133,27 +132,21 @@ export function CaseNegotiation({ data }: { data: OperatorCheckoutWorkspaceData 
           tone={data.workspace.messages.length > 0 ? 'default' : 'warning'}
           value={data.workspace.messages.length}
         />
-      </section>
+      </div>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
-        <SectionCard className="px-6 py-6 md:px-7">
-          <div className="flex flex-col gap-2 border-b border-slate-200 pb-5">
-            <WorkspaceSectionTitle>Negotiation position</WorkspaceSectionTitle>
-            <p className="text-sm leading-6 text-slate-600">
-              Review the current deduction profile and recommendation mix before any outbound message is prepared.
-            </p>
-          </div>
+        <section className="border-b border-zinc-200 pb-4">
+          <h3 className="text-sm font-semibold text-zinc-950">Negotiation position</h3>
 
-          <div className="pt-5">
+          <div className="mt-2">
             <ClaimSummaryCard workspace={data.workspace} />
           </div>
-        </SectionCard>
+        </section>
 
-        <DetailPanel
-          description="This panel keeps the live checkout negotiation state visible without introducing send or submission actions in this step."
-          title="Negotiation stance"
-        >
-          <div className="flex flex-wrap items-center gap-2">
+        <div className="border-l-2 border-zinc-200 pl-4">
+          <h3 className="text-sm font-semibold text-zinc-950">Negotiation stance</h3>
+
+          <div className="mt-2 flex flex-wrap items-center gap-2">
             <WorkspaceBadge label={negotiationStatus.label} tone={negotiationStatus.tone} />
             {data.checkoutCase?.submissionType ? (
               <WorkspaceBadge
@@ -164,9 +157,9 @@ export function CaseNegotiation({ data }: { data: OperatorCheckoutWorkspaceData 
           </div>
 
           {depositCoverage != null ? (
-            <div className="mt-5 rounded-[18px] border border-slate-200 bg-slate-50/70 px-5 py-5">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Claim vs deposit</p>
-              <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-slate-950">
+            <div className="mt-5 border border-zinc-200 bg-zinc-50/70 px-5 py-5">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Claim vs deposit</p>
+              <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-zinc-950">
                 {depositCoverage}%
               </p>
               <div className="mt-4">
@@ -178,48 +171,43 @@ export function CaseNegotiation({ data }: { data: OperatorCheckoutWorkspaceData 
                   value={depositCoverage}
                 />
               </div>
-              <p className="mt-3 text-sm leading-6 text-slate-600">
+              <p className="mt-3 text-sm leading-6 text-zinc-600">
                 {formatCurrency(currentClaimTotal)} proposed against {formatCurrency(depositHeld)} held.
               </p>
             </div>
           ) : null}
 
-          <div className="mt-5 rounded-[18px] border border-slate-200 bg-white px-5 py-5">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Recommendation mix</p>
+          <div className="mt-5 border border-zinc-200 bg-white px-5 py-5">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Recommendation mix</p>
             <dl className="mt-4 space-y-3">
               <div className="flex items-start justify-between gap-4">
-                <dt className="text-sm text-slate-500">Charge</dt>
-                <dd className="text-sm font-medium text-slate-950">{chargeCount}</dd>
+                <dt className="text-sm text-zinc-500">Charge</dt>
+                <dd className="text-sm font-medium text-zinc-950">{chargeCount}</dd>
               </div>
               <div className="flex items-start justify-between gap-4">
-                <dt className="text-sm text-slate-500">Partial</dt>
-                <dd className="text-sm font-medium text-slate-950">{partialCount}</dd>
+                <dt className="text-sm text-zinc-500">Partial</dt>
+                <dd className="text-sm font-medium text-zinc-950">{partialCount}</dd>
               </div>
               <div className="flex items-start justify-between gap-4">
-                <dt className="text-sm text-slate-500">No charge</dt>
-                <dd className="text-sm font-medium text-slate-950">{noChargeCount}</dd>
+                <dt className="text-sm text-zinc-500">No charge</dt>
+                <dd className="text-sm font-medium text-zinc-950">{noChargeCount}</dd>
               </div>
             </dl>
           </div>
 
-          <div className="mt-5 rounded-[18px] border border-slate-200 bg-white px-5 py-5">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Operator notes</p>
-            <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-600 [overflow-wrap:anywhere]">
+          <div className="mt-5 border border-zinc-200 bg-white px-5 py-5">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Operator notes</p>
+            <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-zinc-600 [overflow-wrap:anywhere]">
               {data.checkoutCase?.negotiationNotes?.trim() || 'No negotiation notes recorded yet.'}
             </p>
           </div>
-        </DetailPanel>
+        </div>
       </div>
 
-      <SectionCard className="px-6 py-6 md:px-7">
-        <div className="flex flex-col gap-2 border-b border-slate-200 pb-5">
-          <WorkspaceSectionTitle>Negotiation draft pack</WorkspaceSectionTitle>
-          <p className="text-sm leading-6 text-slate-600">
-            Review the existing email drafts that support negotiation. Delivery remains isolated to the later Send out step.
-          </p>
-        </div>
+      <section className="border-b border-zinc-200 pb-4">
+        <h3 className="text-sm font-semibold text-zinc-950">Negotiation draft pack</h3>
 
-        <div className="pt-5">
+        <div className="mt-2">
           {sortedDrafts.length > 0 ? (
             <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.92fr)]">
               <div className="space-y-3">
@@ -249,12 +237,13 @@ export function CaseNegotiation({ data }: { data: OperatorCheckoutWorkspaceData 
                 ))}
               </div>
 
-              <DetailPanel
-                description="A selected draft shows who it is intended for, which structured documents are attached, and the current message body."
-                title={selectedDraft?.subject?.trim() || (selectedDraft ? formatEnumLabel(selectedDraft.draftType) : 'Draft detail')}
-              >
+              <div className="border-l-2 border-zinc-200 pl-4">
+                <h3 className="text-sm font-semibold text-zinc-950">
+                  {selectedDraft?.subject?.trim() || (selectedDraft ? formatEnumLabel(selectedDraft.draftType) : 'Draft detail')}
+                </h3>
+
                 {selectedDraft ? (
-                  <>
+                  <div className="mt-2">
                     <div className="flex flex-wrap items-center gap-2">
                       <WorkspaceBadge
                         label={formatEnumLabel(selectedDraft.draftType)}
@@ -268,8 +257,8 @@ export function CaseNegotiation({ data }: { data: OperatorCheckoutWorkspaceData 
 
                     <dl className="mt-5 space-y-3">
                       <div className="flex items-start justify-between gap-4">
-                        <dt className="text-sm text-slate-500">Recipient</dt>
-                        <dd className="text-right text-sm font-medium text-slate-950 [overflow-wrap:anywhere]">
+                        <dt className="text-sm text-zinc-500">Recipient</dt>
+                        <dd className="text-right text-sm font-medium text-zinc-950 [overflow-wrap:anywhere]">
                           {getCheckoutEmailDraftRecipient(selectedDraft, data, {
                             fallback: {
                               landlord: 'Landlord address not recorded',
@@ -279,21 +268,21 @@ export function CaseNegotiation({ data }: { data: OperatorCheckoutWorkspaceData 
                         </dd>
                       </div>
                       <div className="flex items-start justify-between gap-4">
-                        <dt className="text-sm text-slate-500">Last update</dt>
-                        <dd className="text-right text-sm font-medium text-slate-950">
+                        <dt className="text-sm text-zinc-500">Last update</dt>
+                        <dd className="text-right text-sm font-medium text-zinc-950">
                           {formatDateTime(selectedDraft.sentAt ?? selectedDraft.updatedAt)}
                         </dd>
                       </div>
                       <div className="flex items-start justify-between gap-4">
-                        <dt className="text-sm text-slate-500">Structured attachments</dt>
-                        <dd className="text-sm font-medium text-slate-950">
+                        <dt className="text-sm text-zinc-500">Structured attachments</dt>
+                        <dd className="text-sm font-medium text-zinc-950">
                           {selectedDraft.attachmentDocumentIds.length}
                         </dd>
                       </div>
                     </dl>
 
-                    <div className="mt-5 rounded-[18px] border border-slate-200 bg-white px-5 py-5">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Attached documents</p>
+                    <div className="mt-5 border border-zinc-200 bg-white px-5 py-5">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Attached documents</p>
                       {selectedDraft.attachmentDocumentIds.length > 0 ? (
                         <div className="mt-4 flex flex-wrap gap-2">
                           {getCheckoutEmailDraftAttachmentNames(selectedDraft, data).map((attachmentName) => (
@@ -305,26 +294,26 @@ export function CaseNegotiation({ data }: { data: OperatorCheckoutWorkspaceData 
                           ))}
                         </div>
                       ) : (
-                        <p className="mt-3 text-sm leading-6 text-slate-600">
+                        <p className="mt-3 text-sm leading-6 text-zinc-600">
                           No structured checkout attachments are linked to this draft yet.
                         </p>
                       )}
                     </div>
 
-                    <div className="mt-5 rounded-[18px] border border-slate-200 bg-white px-5 py-5">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Draft body</p>
-                      <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-600 [overflow-wrap:anywhere]">
+                    <div className="mt-5 border border-zinc-200 bg-white px-5 py-5">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Draft body</p>
+                      <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-zinc-600 [overflow-wrap:anywhere]">
                         {selectedDraft.body}
                       </p>
                     </div>
-                  </>
+                  </div>
                 ) : (
                   <EmptyState
                     body="Select a draft to inspect its recipient, attached documents, and message body."
                     title="No draft selected"
                   />
                 )}
-              </DetailPanel>
+              </div>
             </div>
           ) : (
             <EmptyState
@@ -333,20 +322,15 @@ export function CaseNegotiation({ data }: { data: OperatorCheckoutWorkspaceData 
             />
           )}
         </div>
-      </SectionCard>
+      </section>
 
-      <SectionCard className="px-6 py-6 md:px-7">
-        <div className="flex flex-col gap-2 border-b border-slate-200 pb-5">
-          <WorkspaceSectionTitle>Stakeholder communication</WorkspaceSectionTitle>
-          <p className="text-sm leading-6 text-slate-600">
-            Existing case messages stay visible here so operators can compare the proposed negotiation stance against the live conversation trail.
-          </p>
-        </div>
+      <section className="border-b border-zinc-200 pb-4">
+        <h3 className="text-sm font-semibold text-zinc-950">Stakeholder communication</h3>
 
-        <div className="pt-5">
+        <div className="mt-2">
           <MessageThreadCard workspace={data.workspace} />
         </div>
-      </SectionCard>
+      </section>
     </div>
   )
 }

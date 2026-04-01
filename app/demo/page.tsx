@@ -36,7 +36,7 @@ export default function DemoPage() {
           <section className="page-hero">
             <p className="app-kicker">Demo</p>
             <h1 className="page-title max-w-[820px]">
-              Review the Renovo AI workflow in a <em>read-only case preview</em>
+              Review the Renovo AI workflow in a <em className="text-slate-400">read-only case preview</em>
             </h1>
             <p className="page-copy max-w-[640px]">
               This demo shows how Renovo AI moves from checkout evidence to liability

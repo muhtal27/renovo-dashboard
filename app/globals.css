@@ -372,7 +372,7 @@ a:focus-visible {
 .operator-app h4 {
   font-family: var(--font-dm-sans), "Segoe UI", sans-serif;
   font-weight: 600;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.03em;
 }
 
 .operator-app {
@@ -384,12 +384,12 @@ a:focus-visible {
   content: "";
   position: fixed;
   inset: 0;
-  background: #eef3f9;
+  background: #fafafa;
   z-index: -1;
 }
 
 .operator-app ::selection {
-  background: rgba(37, 99, 235, 0.16);
+  background: rgba(16, 185, 129, 0.16);
 }
 
 .marketing-frame {
@@ -629,4 +629,16 @@ a:focus-visible {
 
 .marketing-page .app-kicker {
   color: #10b981;
+}
+
+/* Override global heading colour inside dark backgrounds.
+   The unlayered h1-h4 { color: #18181b } in this file beats Tailwind's
+   @layer utilities (text-white etc). Neither inherit nor unset work because
+   color is inherited and unset resolves to CanvasText. Only !important or
+   a higher-specificity rule can fix this. */
+.bg-\[\#0a0e1a\] h1,
+.bg-\[\#0a0e1a\] h2,
+.bg-\[\#0a0e1a\] h3,
+.bg-\[\#0a0e1a\] h4 {
+  color: #fff;
 }

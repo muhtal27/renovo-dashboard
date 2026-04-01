@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { ActivityTimeline, DetailPanel, EmptyState, SectionCard } from '@/app/operator-ui'
+import { ActivityTimeline, EmptyState } from '@/app/operator-ui'
 import { ClaimSummaryCard } from '@/app/(operator)/operator/cases/[id]/_components/claim-summary-card'
 import { MessageThreadCard } from '@/app/(operator)/operator/cases/[id]/_components/message-thread-card'
 import {
@@ -9,7 +9,6 @@ import {
   WorkspaceMetricCard,
   WorkspaceNotice,
   WorkspaceProgressBar,
-  WorkspaceSectionTitle,
   WorkspaceTable,
   WorkspaceTableCell,
   WorkspaceTableHeaderCell,
@@ -282,7 +281,7 @@ export function CaseSubmission({ data }: { data: OperatorCheckoutWorkspaceData }
           }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <WorkspaceNotice
         body={submissionNotice.body}
         title={submissionNotice.title}
@@ -297,7 +296,7 @@ export function CaseSubmission({ data }: { data: OperatorCheckoutWorkspaceData }
         />
       ) : null}
 
-      <section className="grid gap-4 md:grid-cols-2 2xl:grid-cols-4">
+      <div className="flex items-end gap-8 border-b border-zinc-200 pb-3">
         <WorkspaceMetricCard
           detail={submissionStatus.detail}
           label="Submission state"
@@ -328,31 +327,26 @@ export function CaseSubmission({ data }: { data: OperatorCheckoutWorkspaceData }
           tone={readinessProgress === 100 ? 'success' : readinessProgress >= 50 ? 'info' : 'warning'}
           value={`${readinessProgress}%`}
         />
-      </section>
+      </div>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
-        <SectionCard className="px-6 py-6 md:px-7">
-          <div className="flex flex-col gap-2 border-b border-slate-200 pb-5">
-            <WorkspaceSectionTitle>Submission pack review</WorkspaceSectionTitle>
-            <p className="text-sm leading-6 text-slate-600">
-              Final review of the claim package and structured checkout totals before release or dispute submission.
-            </p>
-          </div>
+        <section className="border-b border-zinc-200 pb-4">
+          <h3 className="text-sm font-semibold text-zinc-950">Submission pack review</h3>
 
-          <div className="space-y-5 pt-5">
+          <div className="mt-2 space-y-4">
             <ClaimSummaryCard workspace={data.workspace} />
 
             {activeSubmission.claim ? (
-              <div className="rounded-[20px] border border-slate-200 bg-slate-50/70 px-5 py-5">
+              <div className="border border-zinc-200 bg-zinc-50/70 px-5 py-5">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
                       Submission pack
                     </p>
-                    <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-slate-950">
+                    <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-zinc-950">
                       {formatCurrency(activeSubmission.claim.total_amount)}
                     </p>
-                    <p className="mt-2 text-sm leading-6 text-slate-600">
+                    <p className="mt-2 text-sm leading-6 text-zinc-600">
                       Generated {formatDateTime(activeSubmission.claim.generated_at)} and updated{' '}
                       {formatDateTime(activeSubmission.claim.updated_at)}.
                     </p>
@@ -365,81 +359,77 @@ export function CaseSubmission({ data }: { data: OperatorCheckoutWorkspaceData }
               </div>
             ) : null}
           </div>
-        </SectionCard>
+        </section>
 
-        <DetailPanel
-          description="This checklist reflects the live state already present in the dashboard workspace. It does not create or submit a new package in this step."
-          title="Submission checklist"
-        >
-          <div className="flex flex-wrap items-center gap-2">
-            <WorkspaceBadge label={submissionStatus.label} tone={submissionStatus.tone} />
-            {data.checkoutCase?.submissionType ? (
-              <WorkspaceBadge
-                label={`Path: ${formatEnumLabel(data.checkoutCase.submissionType)}`}
-                tone={data.checkoutCase.submissionType === 'dispute' ? 'disputed' : 'submitted'}
-              />
-            ) : null}
+        <div className="border-l-2 border-zinc-200 pl-4">
+          <h3 className="text-sm font-semibold text-zinc-950">Submission checklist</h3>
+
+          <div className="mt-2 space-y-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <WorkspaceBadge label={submissionStatus.label} tone={submissionStatus.tone} />
+              {data.checkoutCase?.submissionType ? (
+                <WorkspaceBadge
+                  label={`Path: ${formatEnumLabel(data.checkoutCase.submissionType)}`}
+                  tone={data.checkoutCase.submissionType === 'dispute' ? 'disputed' : 'submitted'}
+                />
+              ) : null}
+            </div>
+
+            <div className="border border-zinc-200 bg-zinc-50/70 px-5 py-5">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Readiness</p>
+              <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-zinc-950">
+                {readinessProgress}%
+              </p>
+              <div className="mt-4">
+                <WorkspaceProgressBar
+                  max={100}
+                  tone={readinessProgress === 100 ? 'success' : readinessProgress >= 50 ? 'warning' : 'danger'}
+                  value={readinessProgress}
+                />
+              </div>
+            </div>
+
+            <dl className="space-y-3">
+              <div className="flex items-start justify-between gap-4">
+                <dt className="text-sm text-zinc-500">Claim generated</dt>
+                <dd className="text-sm font-medium text-zinc-950">
+                  {activeSubmission.claim ? 'Yes' : 'No'}
+                </dd>
+              </div>
+              <div className="flex items-start justify-between gap-4">
+                <dt className="text-sm text-zinc-500">Submission path</dt>
+                <dd className="text-right text-sm font-medium text-zinc-950">
+                  {data.checkoutCase?.submissionType
+                    ? formatEnumLabel(data.checkoutCase.submissionType)
+                    : 'Not selected'}
+                </dd>
+              </div>
+              <div className="flex items-start justify-between gap-4">
+                <dt className="text-sm text-zinc-500">Sent outbound drafts</dt>
+                <dd className="text-sm font-medium text-zinc-950">{sentDraftCount}</dd>
+              </div>
+              <div className="flex items-start justify-between gap-4">
+                <dt className="text-sm text-zinc-500">Core evidence pack</dt>
+                <dd className="text-sm font-medium text-zinc-950">{coreDocumentCount}/3</dd>
+              </div>
+              <div className="flex items-start justify-between gap-4">
+                <dt className="text-sm text-zinc-500">Recorded submission</dt>
+                <dd className="text-right text-sm font-medium text-zinc-950">
+                  {data.checkoutCase?.submittedAt ? formatDateTime(data.checkoutCase.submittedAt) : 'Not recorded'}
+                </dd>
+              </div>
+            </dl>
           </div>
-
-          <div className="rounded-[18px] border border-slate-200 bg-slate-50/70 px-5 py-5">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Readiness</p>
-            <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-slate-950">
-              {readinessProgress}%
-            </p>
-            <div className="mt-4">
-              <WorkspaceProgressBar
-                max={100}
-                tone={readinessProgress === 100 ? 'success' : readinessProgress >= 50 ? 'warning' : 'danger'}
-                value={readinessProgress}
-              />
-            </div>
-          </div>
-
-          <dl className="space-y-3">
-            <div className="flex items-start justify-between gap-4">
-              <dt className="text-sm text-slate-500">Claim generated</dt>
-              <dd className="text-sm font-medium text-slate-950">
-                {activeSubmission.claim ? 'Yes' : 'No'}
-              </dd>
-            </div>
-            <div className="flex items-start justify-between gap-4">
-              <dt className="text-sm text-slate-500">Submission path</dt>
-              <dd className="text-right text-sm font-medium text-slate-950">
-                {data.checkoutCase?.submissionType
-                  ? formatEnumLabel(data.checkoutCase.submissionType)
-                  : 'Not selected'}
-              </dd>
-            </div>
-            <div className="flex items-start justify-between gap-4">
-              <dt className="text-sm text-slate-500">Sent outbound drafts</dt>
-              <dd className="text-sm font-medium text-slate-950">{sentDraftCount}</dd>
-            </div>
-            <div className="flex items-start justify-between gap-4">
-              <dt className="text-sm text-slate-500">Core evidence pack</dt>
-              <dd className="text-sm font-medium text-slate-950">{coreDocumentCount}/3</dd>
-            </div>
-            <div className="flex items-start justify-between gap-4">
-              <dt className="text-sm text-slate-500">Recorded submission</dt>
-              <dd className="text-right text-sm font-medium text-slate-950">
-                {data.checkoutCase?.submittedAt ? formatDateTime(data.checkoutCase.submittedAt) : 'Not recorded'}
-              </dd>
-            </div>
-          </dl>
-        </DetailPanel>
+        </div>
       </div>
 
-      <SectionCard className="px-6 py-6 md:px-7">
-        <div className="flex flex-col gap-2 border-b border-slate-200 pb-5">
-          <WorkspaceSectionTitle>Breakdown and traceability</WorkspaceSectionTitle>
-          <p className="text-sm leading-6 text-slate-600">
-            Review the claim breakdown and the issues currently feeding the submission package.
-          </p>
-        </div>
+      <section className="border-b border-zinc-200 pb-4">
+        <h3 className="text-sm font-semibold text-zinc-950">Breakdown and traceability</h3>
 
-        <div className="grid gap-6 pt-5 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.9fr)]">
+        <div className="mt-2 grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.9fr)]">
           <div className="min-w-0">
             {data.workspace.claimBreakdown.length > 0 ? (
-              <div className="overflow-hidden rounded-[18px] border border-slate-200 bg-white">
+              <div className="overflow-hidden border border-zinc-200 bg-white">
                 <WorkspaceTable>
                   <thead>
                     <tr>
@@ -475,8 +465,8 @@ export function CaseSubmission({ data }: { data: OperatorCheckoutWorkspaceData }
                 </WorkspaceTable>
               </div>
             ) : activeSubmission.claim ? (
-              <div className="overflow-hidden rounded-[18px] border border-slate-200 bg-slate-950">
-                <pre className="overflow-x-auto px-5 py-5 text-xs leading-6 text-slate-200">
+              <div className="overflow-hidden border border-zinc-200 bg-zinc-950">
+                <pre className="overflow-x-auto px-5 py-5 text-xs leading-6 text-zinc-200">
                   {JSON.stringify(activeSubmission.claim.breakdown, null, 2)}
                 </pre>
               </div>
@@ -488,73 +478,69 @@ export function CaseSubmission({ data }: { data: OperatorCheckoutWorkspaceData }
             )}
           </div>
 
-          <DetailPanel
-            description="Source issues stay visible here so operators can confirm every submitted line item still traces back to evidence and recommendation rationale."
-            title="Source issue traceability"
-          >
-            {isLoadingSubmission ? (
-              <WorkspaceNotice
-                body="Refreshing the submission traceability view from the existing case submission endpoint."
-                title="Loading latest submission traceability"
-                tone="info"
-              />
-            ) : null}
+          <div className="border-l-2 border-zinc-200 pl-4">
+            <h3 className="text-sm font-semibold text-zinc-950">Source issue traceability</h3>
 
-            {activeSubmission.issues.length > 0 ? (
-              activeSubmission.issues.map((issue) => (
-                <div key={issue.id} className="rounded-[18px] border border-slate-200 bg-white px-4 py-4">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <WorkspaceBadge label={formatEnumLabel(issue.severity)} tone="review" />
-                    {issue.recommendation?.decision ? (
-                      <WorkspaceBadge
-                        label={formatEnumLabel(issue.recommendation.decision)}
-                        tone={getRecommendationTone(issue)}
-                      />
-                    ) : null}
-                    <WorkspaceBadge
-                      label={`${issue.linked_evidence.length} evidence`}
-                      tone={issue.linked_evidence.length > 0 ? 'info' : 'neutral'}
-                    />
-                  </div>
-                  <p className="mt-3 text-sm font-semibold text-slate-950 [overflow-wrap:anywhere]">
-                    {issue.title}
-                  </p>
-                  <p className="mt-2 text-sm leading-6 text-slate-600 [overflow-wrap:anywhere]">
-                    {issue.recommendation?.rationale || issue.description || 'No narrative recorded.'}
-                  </p>
-                  {issue.linked_evidence.length > 0 ? (
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {issue.linked_evidence.map((item) => (
+            <div className="mt-2 space-y-4">
+              {isLoadingSubmission ? (
+                <WorkspaceNotice
+                  body="Refreshing the submission traceability view from the existing case submission endpoint."
+                  title="Loading latest submission traceability"
+                  tone="info"
+                />
+              ) : null}
+
+              {activeSubmission.issues.length > 0 ? (
+                activeSubmission.issues.map((issue) => (
+                  <div key={issue.id} className="border border-zinc-200 bg-white px-4 py-4">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <WorkspaceBadge label={formatEnumLabel(issue.severity)} tone="review" />
+                      {issue.recommendation?.decision ? (
                         <WorkspaceBadge
-                          key={item.id}
-                          label={item.area || formatEnumLabel(item.type)}
-                          tone={item.type === 'image' ? 'info' : item.type === 'video' ? 'maintenance' : 'neutral'}
+                          label={formatEnumLabel(issue.recommendation.decision)}
+                          tone={getRecommendationTone(issue)}
                         />
-                      ))}
+                      ) : null}
+                      <WorkspaceBadge
+                        label={`${issue.linked_evidence.length} evidence`}
+                        tone={issue.linked_evidence.length > 0 ? 'info' : 'neutral'}
+                      />
                     </div>
-                  ) : null}
-                </div>
-              ))
-            ) : (
-              <EmptyState
-                body="No source issues are currently attached to the submission package."
-                title="No source issue traceability"
-              />
-            )}
-          </DetailPanel>
+                    <p className="mt-3 text-sm font-semibold text-zinc-950 [overflow-wrap:anywhere]">
+                      {issue.title}
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-zinc-600 [overflow-wrap:anywhere]">
+                      {issue.recommendation?.rationale || issue.description || 'No narrative recorded.'}
+                    </p>
+                    {issue.linked_evidence.length > 0 ? (
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {issue.linked_evidence.map((item) => (
+                          <WorkspaceBadge
+                            key={item.id}
+                            label={item.area || formatEnumLabel(item.type)}
+                            tone={item.type === 'image' ? 'info' : item.type === 'video' ? 'maintenance' : 'neutral'}
+                          />
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                ))
+              ) : (
+                <EmptyState
+                  body="No source issues are currently attached to the submission package."
+                  title="No source issue traceability"
+                />
+              )}
+            </div>
+          </div>
         </div>
-      </SectionCard>
+      </section>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
-        <SectionCard className="px-6 py-6 md:px-7">
-          <div className="flex flex-col gap-2 border-b border-slate-200 pb-5">
-            <WorkspaceSectionTitle>Submission history</WorkspaceSectionTitle>
-            <p className="text-sm leading-6 text-slate-600">
-              Recent events relevant to final sign-off, handoff, and recorded submission state.
-            </p>
-          </div>
+        <section className="border-b border-zinc-200 pb-4">
+          <h3 className="text-sm font-semibold text-zinc-950">Submission history</h3>
 
-          <div className="pt-5">
+          <div className="mt-2">
             {timelineItems.length > 0 ? (
               <ActivityTimeline items={timelineItems} />
             ) : (
@@ -564,20 +550,15 @@ export function CaseSubmission({ data }: { data: OperatorCheckoutWorkspaceData }
               />
             )}
           </div>
-        </SectionCard>
+        </section>
 
-        <SectionCard className="px-6 py-6 md:px-7">
-          <div className="flex flex-col gap-2 border-b border-slate-200 pb-5">
-            <WorkspaceSectionTitle>Communication trail</WorkspaceSectionTitle>
-            <p className="text-sm leading-6 text-slate-600">
-              The latest operator, landlord, and tenant messages remain attached to the final submission review.
-            </p>
-          </div>
+        <section className="border-b border-zinc-200 pb-4">
+          <h3 className="text-sm font-semibold text-zinc-950">Communication trail</h3>
 
-          <div className="pt-5">
+          <div className="mt-2">
             <MessageThreadCard workspace={data.workspace} />
           </div>
-        </SectionCard>
+        </section>
       </div>
     </div>
   )

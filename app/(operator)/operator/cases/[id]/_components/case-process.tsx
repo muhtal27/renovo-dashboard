@@ -3,14 +3,13 @@
 import { Loader2, Sparkles } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
-import { EmptyState, SectionCard } from '@/app/operator-ui'
+import { EmptyState } from '@/app/operator-ui'
 import {
   WorkspaceActionButton,
   WorkspaceBadge,
   WorkspaceMetricCard,
   WorkspaceNotice,
   WorkspaceProgressBar,
-  WorkspaceSectionTitle,
   WorkspaceTable,
   WorkspaceTableCell,
   WorkspaceTableHeaderCell,
@@ -218,8 +217,8 @@ export function CaseProcess({ data }: { data: OperatorCheckoutWorkspaceData }) {
   }
 
   return (
-    <div className="space-y-6">
-      <section className="grid gap-4 md:grid-cols-2 2xl:grid-cols-4">
+    <div className="space-y-4">
+      <div className="flex items-end gap-8 border-b border-zinc-200 pb-3">
         <WorkspaceMetricCard
           detail={`${linkedEvidencePack}/3 evidence-pack files linked`}
           label="Core reports"
@@ -254,18 +253,13 @@ export function CaseProcess({ data }: { data: OperatorCheckoutWorkspaceData }) {
           tone={data.workspace.claim ? 'warning' : 'default'}
           value={formatCurrency(currentClaimTotal)}
         />
-      </section>
+      </div>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
-        <SectionCard className="px-6 py-6 md:px-7">
-          <div className="flex flex-col gap-2 border-b border-slate-200 pb-5">
-            <WorkspaceSectionTitle>AI analysis control</WorkspaceSectionTitle>
-            <p className="text-sm leading-6 text-slate-600">
-              This step reuses the existing operator analysis route. Core reports are the only hard blocker; structured defects enrich the review when they exist.
-            </p>
-          </div>
+        <section className="border-b border-zinc-200 pb-4">
+          <h3 className="text-sm font-semibold text-zinc-950">AI analysis control</h3>
 
-          <div className="grid gap-6 pt-5 xl:grid-cols-[minmax(0,1fr)_minmax(260px,0.8fr)]">
+          <div className="mt-2 grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(260px,0.8fr)]">
             <div className="space-y-4">
               <WorkspaceNotice
                 body={
@@ -304,13 +298,13 @@ export function CaseProcess({ data }: { data: OperatorCheckoutWorkspaceData }) {
               ) : null}
             </div>
 
-            <div className="rounded-[20px] border border-slate-200 bg-slate-50/70 px-5 py-5">
+            <div className="border border-zinc-200 bg-zinc-50/70 px-5 py-5">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
                     AI workflow readiness
                   </p>
-                  <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-slate-950">
+                  <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-zinc-950">
                     {workflowReadiness}%
                   </p>
                 </div>
@@ -330,26 +324,26 @@ export function CaseProcess({ data }: { data: OperatorCheckoutWorkspaceData }) {
 
               <dl className="mt-5 space-y-3">
                 <div className="flex items-start justify-between gap-4">
-                  <dt className="text-sm text-slate-500">Check-in report</dt>
-                  <dd className="text-sm font-medium text-slate-950">
+                  <dt className="text-sm text-zinc-500">Check-in report</dt>
+                  <dd className="text-sm font-medium text-zinc-950">
                     {data.workspace.reportDocuments.checkIn ? 'Linked' : 'Missing'}
                   </dd>
                 </div>
                 <div className="flex items-start justify-between gap-4">
-                  <dt className="text-sm text-slate-500">Check-out report</dt>
-                  <dd className="text-sm font-medium text-slate-950">
+                  <dt className="text-sm text-zinc-500">Check-out report</dt>
+                  <dd className="text-sm font-medium text-zinc-950">
                     {data.workspace.reportDocuments.checkOut ? 'Linked' : 'Missing'}
                   </dd>
                 </div>
                 <div className="flex items-start justify-between gap-4">
-                  <dt className="text-sm text-slate-500">Defect context</dt>
-                  <dd className="text-sm font-medium text-slate-950">
+                  <dt className="text-sm text-zinc-500">Defect context</dt>
+                  <dd className="text-sm font-medium text-zinc-950">
                     {data.defects.length > 0 ? `${data.defects.length} structured items` : `${data.workspace.issues.length} legacy issues`}
                   </dd>
                 </div>
                 <div className="flex items-start justify-between gap-4">
-                  <dt className="text-sm text-slate-500">Last workspace update</dt>
-                  <dd className="text-right text-sm font-medium text-slate-950">
+                  <dt className="text-sm text-zinc-500">Last workspace update</dt>
+                  <dd className="text-right text-sm font-medium text-zinc-950">
                     {formatDateTime(data.workspace.case.updated_at)}
                   </dd>
                 </div>
@@ -369,17 +363,12 @@ export function CaseProcess({ data }: { data: OperatorCheckoutWorkspaceData }) {
               </div>
             </div>
           </div>
-        </SectionCard>
+        </section>
 
-        <SectionCard className="px-6 py-6 md:px-7">
-          <div className="flex flex-col gap-2 border-b border-slate-200 pb-5">
-            <WorkspaceSectionTitle>Current output state</WorkspaceSectionTitle>
-            <p className="text-sm leading-6 text-slate-600">
-              Existing operator outputs remain the source of truth after each run.
-            </p>
-          </div>
+        <div className="border-l-2 border-zinc-200 pl-4">
+          <h3 className="text-sm font-semibold text-zinc-950">Current output state</h3>
 
-          <div className="space-y-5 pt-5">
+          <div className="mt-2 space-y-5">
             <div className="flex flex-wrap items-center gap-2">
               <WorkspaceBadge label={formatEnumLabel(data.workspace.case.status)} tone={getStatusTone(data.workspace.case.status)} />
               {data.workspace.claim ? <WorkspaceBadge label="Claim generated" tone="warning" /> : null}
@@ -393,26 +382,26 @@ export function CaseProcess({ data }: { data: OperatorCheckoutWorkspaceData }) {
 
             <dl className="space-y-3">
               <div className="flex items-start justify-between gap-4">
-                <dt className="text-sm text-slate-500">Current issues</dt>
-                <dd className="text-sm font-medium text-slate-950">{data.workspace.issues.length}</dd>
+                <dt className="text-sm text-zinc-500">Current issues</dt>
+                <dd className="text-sm font-medium text-zinc-950">{data.workspace.issues.length}</dd>
               </div>
               <div className="flex items-start justify-between gap-4">
-                <dt className="text-sm text-slate-500">Current recommendations</dt>
-                <dd className="text-sm font-medium text-slate-950">{data.workspace.recommendations.length}</dd>
+                <dt className="text-sm text-zinc-500">Current recommendations</dt>
+                <dd className="text-sm font-medium text-zinc-950">{data.workspace.recommendations.length}</dd>
               </div>
               <div className="flex items-start justify-between gap-4">
-                <dt className="text-sm text-slate-500">Claim total</dt>
-                <dd className="text-sm font-medium text-slate-950">{formatCurrency(currentClaimTotal)}</dd>
+                <dt className="text-sm text-zinc-500">Claim total</dt>
+                <dd className="text-sm font-medium text-zinc-950">{formatCurrency(currentClaimTotal)}</dd>
               </div>
               <div className="flex items-start justify-between gap-4">
-                <dt className="text-sm text-slate-500">Claim generated</dt>
-                <dd className="text-right text-sm font-medium text-slate-950">
+                <dt className="text-sm text-zinc-500">Claim generated</dt>
+                <dd className="text-right text-sm font-medium text-zinc-950">
                   {data.workspace.claim ? formatDateTime(data.workspace.claim.generated_at) : 'Not generated'}
                 </dd>
               </div>
               <div className="flex items-start justify-between gap-4">
-                <dt className="text-sm text-slate-500">Deposit held</dt>
-                <dd className="text-sm font-medium text-slate-950">
+                <dt className="text-sm text-zinc-500">Deposit held</dt>
+                <dd className="text-sm font-medium text-zinc-950">
                   {data.checkoutCase?.depositHeld == null
                     ? 'Not recorded'
                     : formatCurrency(data.checkoutCase.depositHeld)}
@@ -420,18 +409,13 @@ export function CaseProcess({ data }: { data: OperatorCheckoutWorkspaceData }) {
               </div>
             </dl>
           </div>
-        </SectionCard>
+        </div>
       </div>
 
-      <SectionCard className="px-6 py-6 md:px-7">
-        <div className="flex flex-col gap-2 border-b border-slate-200 pb-5">
-          <WorkspaceSectionTitle>Structured defect inputs</WorkspaceSectionTitle>
-          <p className="text-sm leading-6 text-slate-600">
-            Review context from the structured defect model, kept visible here so operators can compare it against the backend-generated issue list after each run.
-          </p>
-        </div>
+      <section className="border-b border-zinc-200 pb-4">
+        <h3 className="text-sm font-semibold text-zinc-950">Structured defect inputs</h3>
 
-        <div className="pt-5">
+        <div className="mt-2">
           {defectRows.length > 0 ? (
             <WorkspaceTable>
               <thead>
@@ -452,10 +436,10 @@ export function CaseProcess({ data }: { data: OperatorCheckoutWorkspaceData }) {
                     <WorkspaceTableRow key={defect.id}>
                       <WorkspaceTableCell emphasis="strong">
                         <div className="min-w-0">
-                          <p className="font-semibold text-slate-950 [overflow-wrap:anywhere]">
+                          <p className="font-semibold text-zinc-950 [overflow-wrap:anywhere]">
                             {defect.itemName}
                           </p>
-                          <p className="mt-1 text-xs text-slate-500 [overflow-wrap:anywhere]">
+                          <p className="mt-1 text-xs text-zinc-500 [overflow-wrap:anywhere]">
                             {getRoomLabel(defect.roomId, data.rooms)}
                           </p>
                         </div>
@@ -484,18 +468,13 @@ export function CaseProcess({ data }: { data: OperatorCheckoutWorkspaceData }) {
             />
           )}
         </div>
-      </SectionCard>
+      </section>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)]">
-        <SectionCard className="px-6 py-6 md:px-7">
-          <div className="flex flex-col gap-2 border-b border-slate-200 pb-5">
-            <WorkspaceSectionTitle>Generated recommendations</WorkspaceSectionTitle>
-            <p className="text-sm leading-6 text-slate-600">
-              These are the live recommendation records currently attached to the operator workspace.
-            </p>
-          </div>
+        <section className="border-b border-zinc-200 pb-4">
+          <h3 className="text-sm font-semibold text-zinc-950">Generated recommendations</h3>
 
-          <div className="space-y-4 pt-5">
+          <div className="mt-2 space-y-4">
             {recommendationRows.length > 0 ? (
               recommendationRows.map((recommendation) => {
                 const issue = issueById.get(recommendation.issue_id)
@@ -503,7 +482,7 @@ export function CaseProcess({ data }: { data: OperatorCheckoutWorkspaceData }) {
                 return (
                   <div
                     key={recommendation.id}
-                    className="rounded-[18px] border border-slate-200 bg-slate-50/70 px-5 py-5"
+                    className="border border-zinc-200 bg-zinc-50/70 px-5 py-5"
                   >
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div className="min-w-0">
@@ -516,24 +495,24 @@ export function CaseProcess({ data }: { data: OperatorCheckoutWorkspaceData }) {
                             <WorkspaceBadge label={formatEnumLabel(issue.severity)} tone="review" />
                           ) : null}
                         </div>
-                        <p className="mt-3 text-sm font-semibold text-slate-950 [overflow-wrap:anywhere]">
+                        <p className="mt-3 text-sm font-semibold text-zinc-950 [overflow-wrap:anywhere]">
                           {issue?.title ?? 'Issue not linked'}
                         </p>
                         {issue?.area ? (
-                          <p className="mt-1 text-xs text-slate-500 [overflow-wrap:anywhere]">
+                          <p className="mt-1 text-xs text-zinc-500 [overflow-wrap:anywhere]">
                             {issue.area}
                           </p>
                         ) : null}
                       </div>
-                      <p className="text-sm font-semibold text-slate-950">
+                      <p className="text-sm font-semibold text-zinc-950">
                         {formatCurrency(recommendation.estimated_cost)}
                       </p>
                     </div>
 
-                    <p className="mt-4 text-sm leading-6 text-slate-600">
+                    <p className="mt-4 text-sm leading-6 text-zinc-600">
                       {recommendation.rationale || 'No rationale recorded yet.'}
                     </p>
-                    <p className="mt-3 text-xs text-slate-500">
+                    <p className="mt-3 text-xs text-zinc-500">
                       Updated {formatDateTime(recommendation.updated_at)}
                     </p>
                   </div>
@@ -546,23 +525,18 @@ export function CaseProcess({ data }: { data: OperatorCheckoutWorkspaceData }) {
               />
             )}
           </div>
-        </SectionCard>
+        </section>
 
-        <SectionCard className="px-6 py-6 md:px-7">
-          <div className="flex flex-col gap-2 border-b border-slate-200 pb-5">
-            <WorkspaceSectionTitle>Claim output</WorkspaceSectionTitle>
-            <p className="text-sm leading-6 text-slate-600">
-              Itemised claim output from the current workspace state.
-            </p>
-          </div>
+        <div className="border-l-2 border-zinc-200 pl-4">
+          <h3 className="text-sm font-semibold text-zinc-950">Claim output</h3>
 
-          <div className="space-y-4 pt-5">
-            <div className="rounded-[18px] border border-slate-200 bg-slate-50/70 px-5 py-5">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Current total</p>
-              <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-slate-950">
+          <div className="mt-2 space-y-4">
+            <div className="border border-zinc-200 bg-zinc-50/70 px-5 py-5">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Current total</p>
+              <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-zinc-950">
                 {formatCurrency(currentClaimTotal)}
               </p>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
+              <p className="mt-2 text-sm leading-6 text-zinc-600">
                 {data.workspace.claim
                   ? `Generated ${formatDateTime(data.workspace.claim.generated_at)}`
                   : 'Using current recommendation totals until a formal claim record is generated.'}
@@ -570,12 +544,12 @@ export function CaseProcess({ data }: { data: OperatorCheckoutWorkspaceData }) {
             </div>
 
             {data.workspace.claimBreakdown.length > 0 ? (
-              <div className="overflow-hidden rounded-[18px] border border-slate-200 bg-white">
+              <div className="overflow-hidden border border-zinc-200 bg-white">
                 {data.workspace.claimBreakdown.map((item) => (
-                  <div key={item.id} className="border-b border-slate-200 px-4 py-4 last:border-b-0">
+                  <div key={item.id} className="border-b border-zinc-200 px-4 py-4 last:border-b-0">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold text-slate-950 [overflow-wrap:anywhere]">
+                        <p className="text-sm font-semibold text-zinc-950 [overflow-wrap:anywhere]">
                           {item.title}
                         </p>
                         {item.decision ? (
@@ -587,7 +561,7 @@ export function CaseProcess({ data }: { data: OperatorCheckoutWorkspaceData }) {
                           </div>
                         ) : null}
                       </div>
-                      <p className="text-sm font-semibold text-slate-950">
+                      <p className="text-sm font-semibold text-zinc-950">
                         {formatCurrency(item.estimatedCost)}
                       </p>
                     </div>
@@ -607,7 +581,7 @@ export function CaseProcess({ data }: { data: OperatorCheckoutWorkspaceData }) {
               />
             )}
           </div>
-        </SectionCard>
+        </div>
       </div>
     </div>
   )

@@ -87,7 +87,7 @@ export default function HowItWorksPage() {
         <section className="page-hero">
           <p className="app-kicker">How it works</p>
           <h1 className="page-title max-w-[860px]">
-            From checkout report to <em>deposit decision</em>
+            From checkout report to <em className="text-slate-400">deposit decision</em>
           </h1>
           <p className="page-copy max-w-[640px]">
             Renovo fits around the way letting agencies already manage end of tenancy.

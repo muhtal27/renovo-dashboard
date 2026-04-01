@@ -20,8 +20,8 @@ export function IssueCard({
       className={cn(
         'w-full border-l-4 px-5 py-4 text-left transition',
         selected
-          ? 'border-l-slate-900 bg-slate-100'
-          : 'border-l-transparent bg-white hover:bg-slate-50'
+          ? 'border-l-slate-900 bg-zinc-100'
+          : 'border-l-transparent bg-white hover:bg-zinc-50'
       )}
     >
       <div className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_220px] xl:items-start">
@@ -37,17 +37,17 @@ export function IssueCard({
             ) : null}
           </div>
 
-          <p className="mt-3 text-sm font-semibold text-slate-950 [overflow-wrap:anywhere]">{issue.title}</p>
-          <p className="mt-2 text-sm leading-6 text-slate-600 [overflow-wrap:anywhere]">
+          <p className="mt-3 text-sm font-semibold text-zinc-950 [overflow-wrap:anywhere]">{issue.title}</p>
+          <p className="mt-2 text-sm leading-6 text-zinc-600 [overflow-wrap:anywhere]">
             {issue.description?.trim() || 'No supporting description has been recorded for this issue.'}
           </p>
         </div>
 
         <div className="min-w-0 xl:text-right">
-          <p className="text-xs uppercase tracking-[0.14em] text-slate-400">
+          <p className="text-xs uppercase tracking-[0.08em] text-zinc-400">
             {issue.area || 'Area not specified'}
           </p>
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-zinc-500">
             {issue.recommendation?.decision
               ? `${formatEnumLabel(issue.recommendation.decision)} recommendation linked`
               : 'No recommendation linked yet'}

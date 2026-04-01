@@ -262,34 +262,34 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="marketing-page min-h-screen bg-[#faf8f5] py-8 text-[#0f0e0d] md:py-10">
+    <main className="marketing-page min-h-screen bg-white py-8 text-zinc-950 md:py-10">
       <div className="marketing-frame grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_460px]">
-        <section className="rounded-xl border border-[rgba(15,14,13,0.1)] bg-white p-8 shadow-[0_8px_24px_rgba(0,0,0,0.04)] md:p-10">
+        <section className="border border-zinc-200 bg-white p-8 shadow-[0_8px_24px_rgba(0,0,0,0.04)] md:p-10">
           <p className="app-kicker">Renovo AI</p>
           <h1 className="mt-4 text-[clamp(2rem,4vw,2.9rem)] leading-[1.08]">
             Workspace sign-in
           </h1>
-          <p className="mt-5 max-w-3xl text-base leading-8 text-[#3d3b37] md:text-lg">
+          <p className="mt-5 max-w-3xl text-base leading-8 text-slate-600 md:text-lg">
             The end-of-tenancy decision engine for letting agencies.
           </p>
 
-          <div className="mt-8 rounded-xl border border-[rgba(15,14,13,0.1)] bg-[#fcfbf9] p-5">
+          <div className="mt-8 border border-zinc-200 bg-slate-50 p-5">
             <p className="app-kicker">Inside the workspace</p>
             <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {workflowStages.map((item) => (
-              <div key={item.step} className="border-l border-[rgba(15,14,13,0.12)] pl-4 first:border-l-0 first:pl-0">
-                <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[#7a7670]">
+              <div key={item.step} className="border-l border-zinc-200 pl-4 first:border-l-0 first:pl-0">
+                <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-slate-400">
                   Step {item.step}
                 </p>
                 <h2 className="mt-2 text-base">{item.title}</h2>
-                <p className="mt-2 text-sm leading-6 text-[#3d3b37]">{item.body}</p>
+                <p className="mt-2 text-sm leading-6 text-slate-600">{item.body}</p>
               </div>
             ))}
           </div>
           </div>
         </section>
 
-        <section className="rounded-xl border border-[rgba(15,14,13,0.1)] bg-white p-8 shadow-[0_8px_24px_rgba(0,0,0,0.04)]">
+        <section className="border border-zinc-200 bg-white p-8 shadow-[0_8px_24px_rgba(0,0,0,0.04)]">
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="app-kicker">
@@ -311,7 +311,7 @@ export default function LoginPage() {
             </Link>
           </div>
 
-          <p className="mt-4 text-sm leading-6 text-[#3d3b37]">
+          <p className="mt-4 text-sm leading-6 text-slate-600">
             {mode === 'sign_in' &&
               'Password is fastest if you already have one. Magic link is useful when you are signing in on a new device.'}
             {mode === 'sign_up' &&
@@ -344,13 +344,13 @@ export default function LoginPage() {
             ))}
           </div>
 
-          <div className="mt-6 rounded-lg border border-[rgba(15,14,13,0.1)] bg-[#fcfbf9] p-4">
-            <p className="text-sm font-medium text-[#0f0e0d]">
+          <div className="mt-6 border border-zinc-200 bg-slate-50 p-4">
+            <p className="text-sm font-medium text-zinc-950">
               {mode === 'sign_in' && 'For approved property managers'}
               {mode === 'sign_up' && 'Create a sign-in before your access is linked'}
               {mode === 'reset' && 'Recover the password for your approved Renovo AI email'}
             </p>
-            <p className="mt-2 text-sm leading-6 text-[#3d3b37]">
+            <p className="mt-2 text-sm leading-6 text-slate-600">
               {mode === 'sign_in' &&
                 'If your email is linked correctly, Renovo AI will send you straight to the right workspace after sign-in.'}
               {mode === 'sign_up' &&
@@ -362,7 +362,7 @@ export default function LoginPage() {
 
           <div className="mt-6 space-y-4">
             <label className="block">
-              <span className="mb-2 block text-sm font-medium text-[#3d3b37]">Email address</span>
+              <span className="mb-2 block text-sm font-medium text-slate-600">Email address</span>
               <input
                 type="email"
                 autoComplete="email"
@@ -378,7 +378,7 @@ export default function LoginPage() {
 
             {mode !== 'reset' && (
               <label className="block">
-                <span className="mb-2 block text-sm font-medium text-[#3d3b37]">Password</span>
+                <span className="mb-2 block text-sm font-medium text-slate-600">Password</span>
                 <input
                   type="password"
                   autoComplete={mode === 'sign_up' ? 'new-password' : 'current-password'}
@@ -392,7 +392,7 @@ export default function LoginPage() {
 
             {mode === 'sign_up' && (
               <label className="block">
-                <span className="mb-2 block text-sm font-medium text-[#3d3b37]">Confirm password</span>
+                <span className="mb-2 block text-sm font-medium text-slate-600">Confirm password</span>
                 <input
                   type="password"
                   autoComplete="new-password"
@@ -408,7 +408,7 @@ export default function LoginPage() {
           {mode === 'sign_in' && error ? (
             <div
               aria-live="polite"
-              className="mt-4 rounded-lg border border-[#efc7c7] bg-[#fcebeb] px-4 py-3 text-sm text-[#8d2e2e]"
+              className="mt-4 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
             >
               {error}
             </div>
@@ -426,7 +426,7 @@ export default function LoginPage() {
                 </button>
 
                 {magicSent ? (
-                  <div className="rounded-lg border border-[#b9e3d7] bg-[#e1f5ee] px-4 py-3.5 text-sm font-medium text-[#0c5946]">
+                  <div className="border border-emerald-200 bg-emerald-50 px-4 py-3.5 text-sm font-medium text-emerald-700">
                     ✓ Magic link sent - check your inbox
                   </div>
                 ) : (
@@ -465,7 +465,7 @@ export default function LoginPage() {
           {message && (
             <div
               aria-live="polite"
-              className="mt-4 rounded-lg border border-[rgba(15,14,13,0.1)] bg-[#fcfbf9] px-4 py-3 text-sm text-[#3d3b37]"
+              className="mt-4 border border-zinc-200 bg-slate-50 px-4 py-3 text-sm text-slate-600"
             >
               {message}
             </div>

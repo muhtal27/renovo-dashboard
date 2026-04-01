@@ -41,7 +41,7 @@ export default function ContactPage() {
             <section className="page-hero">
               <p className="app-kicker">Contact</p>
               <h1 className="page-title max-w-[720px]">
-                Talk to Renovo AI about your <em>checkout workflow</em>
+                Talk to Renovo AI about your <em className="text-slate-400">checkout workflow</em>
               </h1>
               <p className="page-copy max-w-[640px]">
                 Use the form for product enquiries, partnerships, investor conversations,

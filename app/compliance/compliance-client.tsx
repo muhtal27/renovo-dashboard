@@ -69,7 +69,7 @@ export default function ComplianceClient() {
         <section className="page-hero">
           <p className="app-kicker">Compliance</p>
           <h1 className="page-title max-w-[820px]">
-            Security, privacy, and <em>data handling</em>
+            Security, privacy, and <em className="text-slate-400">data handling</em>
           </h1>
           <p className="page-copy max-w-[640px]">
             Renovo AI processes tenancy evidence, liability assessments, and

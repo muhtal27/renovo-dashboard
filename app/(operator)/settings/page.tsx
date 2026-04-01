@@ -36,11 +36,11 @@ export default async function SettingsPage() {
               ['Evidence review', 'Tracked against the live workspace'],
               ['Operator notes', 'Stored in the checkout record'],
             ].map(([label, value]) => (
-              <div key={label} className="rounded-[20px] border border-slate-200 bg-slate-50/70 px-4 py-4">
-                <dt className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+              <div key={label} className="border border-zinc-200 bg-zinc-50/70 px-4 py-4">
+                <dt className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
                   {label}
                 </dt>
-                <dd className="mt-2 text-sm font-medium leading-6 text-slate-900">{value}</dd>
+                <dd className="mt-2 text-sm font-medium leading-6 text-zinc-900">{value}</dd>
               </div>
             ))}
           </dl>
@@ -58,11 +58,11 @@ export default async function SettingsPage() {
               />
             }
           />
-          <div className="mt-6 rounded-[20px] border border-slate-200 bg-slate-50/70 px-5 py-5">
-            <p className="text-sm font-semibold text-slate-950">
+          <div className="mt-6 border border-zinc-200 bg-zinc-50/70 px-5 py-5">
+            <p className="text-sm font-semibold text-zinc-950">
               {outboundConfigured ? 'Outbound webhook configured' : 'Outbound webhook not configured'}
             </p>
-            <p className="mt-2 text-sm leading-6 text-slate-600">
+            <p className="mt-2 text-sm leading-6 text-zinc-600">
               {outboundConfigured
                 ? 'Renovo can hand off queued external messages to the configured delivery endpoint.'
                 : 'Messages remain in the checkout record until a delivery integration is connected.'}
@@ -71,13 +71,13 @@ export default async function SettingsPage() {
           <div className="mt-6 flex flex-wrap items-center gap-3">
             <Link
               href="/knowledge"
-              className="inline-flex items-center rounded-[14px] border border-slate-900 bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
+              className="inline-flex items-center border border-zinc-900 bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800"
             >
               Open guidance hub
             </Link>
             <Link
               href="/overview"
-              className="inline-flex items-center rounded-[14px] border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:text-slate-950"
+              className="inline-flex items-center border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:text-zinc-950"
             >
               Return to overview
             </Link>

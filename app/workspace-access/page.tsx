@@ -153,7 +153,7 @@ export default function WorkspaceAccessPage() {
   return (
     <MarketingShell currentPath="/contact">
       <section className="marketing-frame pb-16 pt-14 md:pt-24">
-        <div className="mx-auto max-w-3xl rounded-[28px] border border-[rgba(15,14,13,0.1)] bg-white p-7 shadow-[0_20px_60px_rgba(15,14,13,0.08)] md:p-10">
+        <div className="mx-auto max-w-3xl rounded-xl border border-[rgba(15,14,13,0.1)] bg-white p-7 shadow-[0_20px_60px_rgba(15,14,13,0.08)] md:p-10">
           <p className="inline-flex items-center gap-2 rounded-full bg-[#e1f5ee] px-3 py-1.5 text-xs font-medium uppercase tracking-[0.08em] text-[#0f6e56]">
             <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#0f6e56]" />
             Operator access
