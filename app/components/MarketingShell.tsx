@@ -185,7 +185,7 @@ export function MarketingShell({
             <div>
               <Link href="/" className="text-base font-semibold tracking-[-0.02em] text-zinc-950">Renovo AI</Link>
               <p className="mt-3 max-w-[320px] text-sm leading-6">
-                End-of-tenancy automation for UK letting agencies. Checkouts, claims, and disputes
+                End of tenancy automation for UK letting agencies. Checkouts, claims, and disputes
                 in one workflow.
               </p>
             </div>
@@ -247,7 +247,7 @@ export function MarketingShell({
 
           <div className="mt-7 flex flex-col gap-2 text-xs text-zinc-400 md:flex-row md:items-center md:justify-between">
             <span>Renovo AI Ltd · SC833544 · VAT GB483379648 · ICO ZC112030</span>
-            <span>© 2026 Renovo AI Ltd — Edinburgh, Scotland</span>
+            <span>© 2026 Renovo AI Ltd</span>
           </div>
         </div>
       </footer>

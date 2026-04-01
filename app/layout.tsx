@@ -22,11 +22,11 @@ const instrumentSerif = Instrument_Serif({
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: 'Renovo AI | End-of-Tenancy Automation',
+  title: 'Renovo AI | End of Tenancy Automation',
   description: defaultDescription,
   applicationName: siteName,
   openGraph: {
-    title: 'Renovo AI | End-of-Tenancy Automation',
+    title: 'Renovo AI | End of Tenancy Automation',
     description: defaultDescription,
     url: siteUrl,
     siteName,
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     images: [{ url: ogImagePath, width: 1200, height: 630, alt: `${siteName} marketing preview` }],
   },
   twitter: {
-    title: 'Renovo AI | End-of-Tenancy Automation',
+    title: 'Renovo AI | End of Tenancy Automation',
     description: defaultDescription,
     card: 'summary_large_image',
     images: [ogImagePath],

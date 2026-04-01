@@ -8,7 +8,7 @@ import {
 
 const title = 'Demo | Renovo AI'
 const description =
-  'View the Renovo AI read-only demo showing how checkout evidence becomes a liability assessment, deduction letter, and dispute-ready pack.'
+  'View the Renovo AI read-only demo showing how checkout evidence becomes a liability assessment, deduction letter, and dispute ready pack.'
 
 export const metadata = createMarketingMetadata({
   title,
@@ -40,7 +40,7 @@ export default function DemoPage() {
             </h1>
             <p className="page-copy max-w-[640px]">
               This demo shows how Renovo AI moves from checkout evidence to liability
-              assessment, deduction letter drafting, manager review, and claim-ready output
+              assessment, deduction letter drafting, manager review, and claim ready output
               without touching live customer data.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">

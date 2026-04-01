@@ -7,9 +7,9 @@ import {
   serializeJsonLd,
 } from "@/lib/marketing-metadata"
 
-const title = "Renovo AI | End-of-Tenancy Automation"
+const title = "Renovo AI | End of Tenancy Automation"
 const description =
-  "Renovo AI automates end-of-tenancy work for UK property managers and letting agencies, from evidence review and issue assessment to claim-ready output."
+  "Renovo AI automates end of tenancy work for UK property managers and letting agencies, from evidence review and issue assessment to claim ready output."
 
 export const metadata = createMarketingMetadata({
   title,

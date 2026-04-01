@@ -10,7 +10,7 @@ export default function AboutClient() {
         <section className="page-hero">
           <p className="app-kicker">About</p>
           <h1 className="page-title max-w-[820px]">
-            Enterprise software for <em className="text-slate-400">end-of-tenancy operations</em>
+            Enterprise software for <em className="text-slate-400">end of tenancy operations</em>
           </h1>
           <p className="page-copy max-w-[640px]">
             Renovo AI automates the operational layer between checkout evidence
@@ -25,7 +25,7 @@ export default function AboutClient() {
             Built from direct <em className="text-slate-400">operational experience</em>
           </h2>
           <p className="mt-4 max-w-[640px] text-base leading-8 text-slate-500">
-            Renovo AI was founded by a practising end-of-tenancy property manager
+            Renovo AI was founded by a practising end of tenancy property manager
             who saw the same problem across every agency: checkout evidence
             scattered across six tools, deduction reasoning rebuilt from memory,
             and dispute outcomes determined by whether the file was complete when
@@ -40,7 +40,7 @@ export default function AboutClient() {
           <div className="mt-14 grid grid-cols-2 gap-y-8 md:grid-cols-4">
             {[
               { l: "Company", v: "Renovo AI Ltd" },
-              { l: "Registered", v: "Edinburgh, Scotland" },
+
               { l: "Company number", v: "SC833544" },
               { l: "VAT", v: "GB483379648" },
               { l: "ICO registration", v: "ZC112030" },
@@ -66,7 +66,7 @@ export default function AboutClient() {
                 { label: "Liability comparison", desc: "AI compares check-in and checkout evidence room by room, flags discrepancies, and prepares a structured assessment against the schedule of condition." },
                 { label: "Deduction drafting", desc: "Fair wear and tear reasoning, betterment context, evidence references, and recommended deduction positions drafted automatically for manager review." },
                 { label: "Evidence assembly", desc: "Photos, reports, notes, and timeline linked to a single case record throughout the checkout lifecycle." },
-                { label: "Dispute preparation", desc: "If a tenant escalates to TDS, DPS, mydeposits, or SafeDeposits Scotland, the adjudication-ready evidence pack is already assembled." },
+                { label: "Dispute preparation", desc: "If a tenant escalates to TDS, DPS, mydeposits, or SafeDeposits Scotland, the adjudication ready evidence pack is already assembled." },
                 { label: "Human approval", desc: "Every recommendation requires manager sign-off. Nothing is sent without explicit approval from a named property manager." },
               ].map((item) => (
                 <div key={item.label} className="grid gap-2 py-5 md:grid-cols-[180px_1fr]">

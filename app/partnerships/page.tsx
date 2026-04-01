@@ -5,7 +5,7 @@ import { createMarketingMetadata } from '@/lib/marketing-metadata'
 const partnerTypes = [
   {
     title: 'Inventory and inspection providers',
-    body: 'Bring structured inventory evidence into the same end-of-tenancy workflow so reports, photos, and follow-up review stay connected.',
+    body: 'Bring structured inventory evidence into the same end of tenancy workflow so reports, photos, and follow-up review stay connected.',
   },
   {
     title: 'Property management software platforms',
@@ -17,7 +17,7 @@ const partnerTypes = [
   },
   {
     title: 'Strategic channel partners',
-    body: 'Work with Renovo AI where your customers already deal with checkout admin, evidence review, and end-of-tenancy operations at volume.',
+    body: 'Work with Renovo AI where your customers already deal with checkout admin, evidence review, and end of tenancy operations at volume.',
   },
 ] as const
 
@@ -28,18 +28,18 @@ const handoffAreas = [
   },
   {
     title: 'What a partner gets',
-    body: 'A clearer workflow handoff for shared customers, less manual rework at the checkout stage, and a stronger structure around evidence-led review.',
+    body: 'A clearer workflow handoff for shared customers, less manual rework at the checkout stage, and a stronger structure around evidence led review.',
   },
   {
     title: 'How workflow handoff works',
-    body: 'Structured document intake, case context, issue-level evidence links, reviewed recommendations, and claim-ready output.',
+    body: 'Structured document intake, case context, issue level evidence links, reviewed recommendations, and claim ready output.',
   },
 ] as const
 
 export const metadata = createMarketingMetadata({
   title: 'Partnerships | Renovo AI',
   description:
-    'Explore partnership discussions with Renovo AI across inventory systems, property management software, and end-of-tenancy workflow partners.',
+    'Explore partnership discussions with Renovo AI across inventory systems, property management software, and end of tenancy workflow partners.',
   path: '/partnerships',
 })
 
@@ -54,7 +54,7 @@ export default function PartnershipsPage() {
             Work with <em className="text-slate-400">Renovo AI</em>
           </h1>
           <p className="page-copy max-w-[640px]">
-            Renovo AI automates end-of-tenancy work for property managers and letting
+            Renovo AI automates end of tenancy work for property managers and letting
             agencies. We are interested in partnerships where workflow handoff, structured
             evidence, and operational review fit together cleanly.
           </p>
@@ -98,7 +98,7 @@ export default function PartnershipsPage() {
             Interested in <em className="text-slate-400">working together</em>?
           </h2>
           <p className="mx-auto mt-4 max-w-[500px] text-base leading-8 text-slate-500">
-            If you build for property managers, inventory teams, or end-of-tenancy
+            If you build for property managers, inventory teams, or end of tenancy
             operations, we would be happy to explore how Renovo AI fits your workflow.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">

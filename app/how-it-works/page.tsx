@@ -36,7 +36,7 @@ const workflowSteps = [
   {
     n: '06',
     tag: 'If disputed',
-    title: 'Adjudication-ready evidence pack',
+    title: 'Adjudication ready evidence pack',
     body: 'If the tenant refers the dispute, Renovo generates the evidence bundle with timeline, liability assessment, photographs, and supporting references already assembled.',
   },
 ] as const
@@ -48,11 +48,11 @@ const controls = [
   },
   {
     title: 'Case-level audit trail',
-    body: 'Notes, edits, evidence references, approvals, and rejections stay attached to the case file. The trail is immutable and supports scheme-level scrutiny.',
+    body: 'Notes, edits, evidence references, approvals, and rejections stay attached to the case file. The trail is immutable and supports scheme level scrutiny.',
   },
   {
     title: 'Operational consistency',
-    body: 'Fair wear and tear guidance, betterment calculations, evidence referencing, and scheme-ready wording handled through one structured process across all managers.',
+    body: 'Fair wear and tear guidance, betterment calculations, evidence referencing, and scheme ready wording handled through one structured process across all managers.',
   },
 ] as const
 
@@ -67,7 +67,7 @@ const integrationAreas = [
   },
   {
     title: 'Claim and dispute preparation',
-    body: 'Move from liability assessment to adjudication-ready evidence pack without rebuilding the file for the deposit scheme.',
+    body: 'Move from liability assessment to adjudication ready evidence pack without rebuilding the file for the deposit scheme.',
   },
 ] as const
 
@@ -165,7 +165,7 @@ export default function HowItWorksPage() {
             </h2>
             <p className="mt-3.5 max-w-[560px] text-base leading-8 text-slate-500">
               Integration work is focused on the handoff points that matter in
-              end-of-tenancy operations, not on adding another disconnected admin tool.
+              end of tenancy operations, not on adding another disconnected admin tool.
             </p>
 
             <div className="mt-14 grid gap-10 md:grid-cols-3">
@@ -186,7 +186,7 @@ export default function HowItWorksPage() {
           </h2>
           <p className="mx-auto mt-4 max-w-[560px] text-base leading-8 text-slate-500">
             Review how a checkout becomes a liability assessment, deduction letter,
-            and adjudication-ready evidence pack.
+            and adjudication ready evidence pack.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link href="/contact" className="app-primary-button rounded-md px-6 py-3 text-sm font-medium">

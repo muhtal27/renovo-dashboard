@@ -270,7 +270,7 @@ export default function LoginPage() {
             Workspace sign-in
           </h1>
           <p className="mt-5 max-w-3xl text-base leading-8 text-slate-600 md:text-lg">
-            The end-of-tenancy decision engine for letting agencies.
+            The end of tenancy decision engine for letting agencies.
           </p>
 
           <div className="mt-8 rounded-lg border border-zinc-200 bg-slate-50 p-5">

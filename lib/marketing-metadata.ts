@@ -9,7 +9,7 @@ export const siteUrl =
     ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
     : defaultSiteUrl)
 export const defaultDescription =
-  'Renovo AI automates end-of-tenancy work for UK property managers and letting agencies, from evidence review and issue assessment to claim-ready output.'
+  'Renovo AI automates end of tenancy work for UK property managers and letting agencies, from evidence review and issue assessment to claim ready output.'
 export const ogImagePath = '/og-image.jpg'
 
 const organizationId = `${siteUrl}#organization`
@@ -84,7 +84,6 @@ export function createOrganizationJsonLd() {
     identifier: 'SC833544',
     address: {
       '@type': 'PostalAddress',
-      addressLocality: 'Edinburgh',
       addressCountry: 'GB',
     },
   }

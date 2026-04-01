@@ -107,7 +107,7 @@ export default function HomePageClient() {
             <div>
               <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-[#1e293b] bg-white/[0.025] px-4 py-1.5 text-[13px] font-medium text-emerald-500">
                 <span className="renovo-pulse h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                End-of-tenancy automation
+                End of tenancy automation
               </div>
               <h1 className="text-[clamp(32px,4.5vw,52px)] font-bold leading-[1.15] tracking-[-0.035em] text-white">
                 <span className="bg-gradient-to-br from-emerald-500 to-emerald-300 bg-clip-text text-transparent">Checkout reports in.</span><br />
@@ -134,7 +134,7 @@ export default function HomePageClient() {
         <section className="mx-auto max-w-[1080px] px-8 py-24 lg:px-10">
           <p className="text-[13px] font-semibold uppercase tracking-[0.1em] text-emerald-500">The problem</p>
           <h2 className="mt-3.5 text-[clamp(26px,3.5vw,42px)] font-bold leading-[1.15] tracking-[-0.03em]">One checkout. <em className="not-italic text-slate-400">Six tools. No audit trail.</em></h2>
-          <p className="mt-3.5 max-w-[560px] text-base leading-[1.85] text-slate-500">Letting agents still manage end-of-tenancy across email threads, inventory apps, shared drives, Word documents, spreadsheets, and deposit portals. Nothing links together.</p>
+          <p className="mt-3.5 max-w-[560px] text-base leading-[1.85] text-slate-500">Letting agents still manage end of tenancy across email threads, inventory apps, shared drives, Word documents, spreadsheets, and deposit portals. Nothing links together.</p>
           <div className="mt-12 flex flex-wrap gap-14">
             {([["6+", "Tools per checkout"], ["2-3h", "Admin per case"], ["0", "Audit trail"]] as const).map(([v, l]) => (
               <div key={l}><p className="text-5xl font-bold leading-[1.15] tracking-tight text-emerald-500">{v}</p><p className="mt-1 text-[13px] font-medium text-slate-500">{l}</p></div>
@@ -168,7 +168,7 @@ export default function HomePageClient() {
                 { n: "3", t: "AI draft", h: "Liability assessment with reasoning", p: "Fair wear and tear reasoning, betterment context, evidence references, and a proportionate deduction recommendation per item." },
                 { n: "4", t: "Manager review", h: "Reviewed, amended, and approved", p: "The property manager reads the draft, adjusts positions, adds notes, and approves. Every edit logged with a name and timestamp." },
                 { n: "5", t: "Resolution", h: "Deposit released through the scheme", p: "Case closed with a full decision trail. Deposit released via TDS, DPS, mydeposits, or SafeDeposits Scotland." },
-                { n: "6", t: "If disputed", h: "Adjudication-ready evidence pack", p: "Evidence bundle with timeline, reasoning, photographs, and supporting references assembled during the workflow, not after escalation." },
+                { n: "6", t: "If disputed", h: "Adjudication ready evidence pack", p: "Evidence bundle with timeline, reasoning, photographs, and supporting references assembled during the workflow, not after escalation." },
               ].map((s) => (
                 <div key={s.n} className="grid grid-cols-[52px_1fr] gap-5 py-6 md:grid-cols-[52px_120px_1fr]">
                   <div className="flex h-10 w-10 items-center justify-center rounded-[10px] border border-emerald-500/[0.18] bg-emerald-500/[0.08] text-sm font-bold text-emerald-500">{s.n}</div>
@@ -193,7 +193,7 @@ export default function HomePageClient() {
               { l: "Deduction letters", b: "30-45 min each, retyped from the inventory every time", a: "Structured draft with evidence references in under 2 minutes" },
               { l: "Evidence trail", b: "Photos, reports, and notes scattered across five systems", a: "Linked case record from checkout through to deposit release" },
               { l: "Audit", b: "Reasoning rebuilt from memory when challenged", a: "Every decision documented before the position is disputed" },
-              { l: "Dispute packs", b: "Assembled under scheme deadline pressure", a: "Adjudication-ready pack built during the checkout workflow" },
+              { l: "Dispute packs", b: "Assembled under scheme deadline pressure", a: "Adjudication ready pack built during the checkout workflow" },
               { l: "Consistency", b: "Different property manager, different judgement", a: "Structured logic and proportionate reasoning on every case" },
             ].map((r) => (
               <div key={r.l} className="grid gap-2 py-5 md:grid-cols-[130px_1fr_1fr] md:gap-5">
@@ -215,7 +215,7 @@ export default function HomePageClient() {
               {[
                 { h: "Manager sign-off required", p: "No claim output leaves the platform without explicit approval from a named property manager." },
                 { h: "Immutable audit trail", p: "Every edit, note, approval, and rejection logged with a timestamp. The trail cannot be altered after the fact." },
-                { h: "Scheme-ready output", p: "When an adjudicator at TDS, DPS, or mydeposits opens the file, the reasoning and evidence are already there." },
+                { h: "Scheme ready output", p: "When an adjudicator at TDS, DPS, or mydeposits opens the file, the reasoning and evidence are already there." },
               ].map((c) => (
                 <div key={c.h}><h3 className="text-[15px] font-semibold">{c.h}</h3><p className="mt-2 text-sm leading-[1.8] text-slate-500">{c.p}</p></div>
               ))}
@@ -247,7 +247,7 @@ export default function HomePageClient() {
           <div className="mt-10 grid gap-10 md:grid-cols-3">
             {[
               { h: "Higher evidence thresholds", p: "Every proposed deduction must be backed by documented reasoning, timestamped evidence, and a clear audit trail." },
-              { h: "Fair wear and tear built in", p: "Guidance on fair wear and tear, betterment, and tenancy-length-adjusted charges embedded in the review workflow." },
+              { h: "Fair wear and tear built in", p: "Guidance on fair wear and tear, betterment, and tenancy length adjusted charges embedded in the review workflow." },
               { h: "Repeatable, defensible output", p: "Structured assessment logic applied to every case, regardless of which property manager handles it." },
             ].map((c) => (
               <div key={c.h}><h3 className="text-[15px] font-semibold">{c.h}</h3><p className="mt-2 text-sm leading-[1.8] text-slate-500">{c.p}</p></div>
@@ -265,7 +265,7 @@ export default function HomePageClient() {
                 { h: "Portfolio command view", p: "Live status across active checkouts, pending deduction letters, open disputes, and evidence gaps." },
                 { h: "Attention queue", p: "Stalled cases, overdue responses, and incomplete evidence flagged automatically." },
                 { h: "Operational reporting", p: "Checkout volumes, average resolution times, dispute referral rates, and team workload." },
-                { h: "Guidance hub", p: "Fair wear and tear tables, betterment calculations, and scheme-ready wording inside the workflow." },
+                { h: "Guidance hub", p: "Fair wear and tear tables, betterment calculations, and scheme ready wording inside the workflow." },
               ].map((f) => (
                 <div key={f.h}><h3 className="text-[15px] font-semibold">{f.h}</h3><p className="mt-2 text-sm leading-[1.8] text-slate-500">{f.p}</p></div>
               ))}
@@ -307,7 +307,7 @@ export default function HomePageClient() {
           <div className="grid gap-10 md:grid-cols-2 xl:grid-cols-[2fr_1fr_1fr_1fr]">
             <div>
               <Link href="/" className="text-lg font-bold tracking-tight text-white">Renovo AI</Link>
-              <p className="mt-3 max-w-[260px] text-[13px] leading-[1.7] text-slate-400">End-of-tenancy automation for UK letting agencies. Checkouts, claims, and disputes in one workflow.</p>
+              <p className="mt-3 max-w-[260px] text-[13px] leading-[1.7] text-slate-400">End of tenancy automation for UK letting agencies. Checkouts, claims, and disputes in one workflow.</p>
             </div>
             {Object.entries(footerCols).map(([title, links]) => (
               <div key={title}>
@@ -325,7 +325,7 @@ export default function HomePageClient() {
           </div>
           <div className="mt-10 flex flex-col gap-2 border-t border-[#1e293b] pt-6 text-xs text-white/20 md:flex-row md:justify-between">
             <span>Renovo AI Ltd &middot; SC833544 &middot; VAT GB483379648 &middot; ICO ZC112030</span>
-            <span>&copy; 2026 Renovo AI Ltd &mdash; Edinburgh, Scotland</span>
+            <span>&copy; 2026 Renovo AI Ltd</span>
           </div>
         </div>
       </footer>

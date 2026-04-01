@@ -42,7 +42,7 @@ const sections = [
     em: "record keeping",
     rows: [
       { l: "Audit trail", d: "Every case action, edit, approval, rejection, and note logged with a timestamp and the name of the person." },
-      { l: "Immutability", d: "Audit records cannot be edited or deleted by platform users. Supports scheme-level scrutiny if disputed." },
+      { l: "Immutability", d: "Audit records cannot be edited or deleted by platform users. Supports scheme level scrutiny if disputed." },
       { l: "Retention", d: "Standard retention is 3 years. Enterprise customers can configure custom retention periods." },
       { l: "Deletion", d: "On contract termination, customer data deleted within 90 days unless a longer period is required by law." },
     ],
@@ -104,7 +104,7 @@ export default function ComplianceClient() {
           <div className="mt-8 grid grid-cols-2 gap-y-8 md:grid-cols-4">
             {[
               { l: "Company", v: "Renovo AI Ltd" },
-              { l: "Registered", v: "Edinburgh, Scotland" },
+
               { l: "Company number", v: "SC833544" },
               { l: "VAT", v: "GB483379648" },
               { l: "ICO registration", v: "ZC112030" },

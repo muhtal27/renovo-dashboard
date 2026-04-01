@@ -547,7 +547,7 @@ export default function HomepageDemo({
           <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-5">
             <p className="app-kicker">Read-only preview</p>
             <p className="mt-3 max-w-3xl text-sm leading-7 text-zinc-700">
-              This is a preview of a live end-of-tenancy case. Contact us to discuss how Renovo AI
+              This is a preview of a live end of tenancy case. Contact us to discuss how Renovo AI
               would fit your agency&apos;s checkout workflow.
             </p>
             <Link

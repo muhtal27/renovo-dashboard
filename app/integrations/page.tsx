@@ -9,7 +9,7 @@ const plannedAreas = [
   },
   {
     title: 'Property management software',
-    body: 'Support cleaner handoff between tenancy operations, notice handling, and end-of-tenancy case preparation.',
+    body: 'Support cleaner handoff between tenancy operations, notice handling, and end of tenancy case preparation.',
   },
   {
     title: 'Case and communication workflows',
@@ -28,7 +28,7 @@ const flowItems = [
   },
   {
     title: 'Processing',
-    body: 'Evidence is organised for review, linked to findings, and prepared for manager sign-off inside the end-of-tenancy workflow.',
+    body: 'Evidence is organised for review, linked to findings, and prepared for manager sign-off inside the end of tenancy workflow.',
   },
   {
     title: 'Data out',
@@ -46,7 +46,7 @@ const futureAccess = [
 export const metadata = createMarketingMetadata({
   title: 'Integrations | Renovo AI',
   description:
-    'A forward-looking view of the Renovo AI integrations roadmap for end-of-tenancy workflows.',
+    'A forward-looking view of the Renovo AI integrations roadmap for end of tenancy workflows.',
   path: '/integrations',
 })
 
@@ -62,7 +62,7 @@ export default function IntegrationsPage() {
           </h1>
           <p className="page-copy max-w-[640px]">
             Renovo AI is being built to support structured workflow handoff around
-            end-of-tenancy operations. The integration framework is in planning and is
+            end of tenancy operations. The integration framework is in planning and is
             not yet publicly available.
           </p>
           <div className="renovo-highlight mt-6 inline-block rounded-lg px-5 py-3">
@@ -76,7 +76,7 @@ export default function IntegrationsPage() {
           <div className="mx-auto max-w-[1080px] px-6 py-24">
             <p className="app-kicker">Planned integration areas</p>
             <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
-              End-of-tenancy <em className="text-slate-400">workflow alignment</em>
+              End of tenancy <em className="text-slate-400">workflow alignment</em>
             </h2>
             <p className="mt-3.5 max-w-[560px] text-base leading-8 text-slate-500">
               Renovo AI sits between evidence intake, manager review, and claim preparation.

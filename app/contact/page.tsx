@@ -85,7 +85,7 @@ export default function ContactPage() {
 
               <div className="mt-10 text-sm text-slate-400">
                 <p>Renovo AI Ltd &middot; SC833544 &middot; VAT GB483379648 &middot; ICO ZC112030</p>
-                <p className="mt-1">Edinburgh, Scotland</p>
+
                 <div className="mt-4 flex flex-wrap gap-4">
                   <Link href="/compliance" className="text-emerald-500 hover:underline">Compliance</Link>
                   <Link href="/privacy" className="text-emerald-500 hover:underline">Privacy</Link>

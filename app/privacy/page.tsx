@@ -4,14 +4,14 @@ import { createMarketingMetadata } from '@/lib/marketing-metadata'
 
 const informationCategories = [
   { l: 'Account and contact information', d: 'We may handle basic account, user, and contact information needed to provide access to the platform and support customer relationships.' },
-  { l: 'Property and tenancy information', d: 'We may handle information related to properties, tenancies, inventories, checkouts, and end-of-tenancy workflows where required to deliver the service.' },
-  { l: 'Operational case information', d: 'We may handle case-related information, supporting records, issue tracking, and workflow data used to manage tenancy-related processes.' },
+  { l: 'Property and tenancy information', d: 'We may handle information related to properties, tenancies, inventories, checkouts, and end of tenancy workflows where required to deliver the service.' },
+  { l: 'Operational case information', d: 'We may handle case related information, supporting records, issue tracking, and workflow data used to manage tenancy related processes.' },
   { l: 'Support and communications data', d: 'We may keep records of enquiries, service communications, and support interactions to help operate and improve the service.' },
   { l: 'Technical and usage information', d: 'We may process technical and usage information to maintain system performance, reliability, and security.' },
 ] as const
 
 const usageCategories = [
-  { l: 'Delivering and operating the service', d: 'We use information to run the platform, support tenancy-related workflows, and provide the core functionality customers rely on.' },
+  { l: 'Delivering and operating the service', d: 'We use information to run the platform, support tenancy related workflows, and provide the core functionality customers rely on.' },
   { l: 'Customer relationships and support', d: 'We use information to respond to enquiries, manage onboarding and customer relationships, and provide support where needed.' },
   { l: 'Reliability, security, and improvement', d: 'We use information to maintain platform functionality, improve reliability, strengthen security, and refine how the service operates over time.' },
   { l: 'Operational, legal, and contractual needs', d: 'We may use information where needed to meet applicable legal, contractual, or operational requirements connected to running the service responsibly.' },

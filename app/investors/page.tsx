@@ -73,8 +73,8 @@ export default function InvestorsPage() {
           <div className="mt-14 grid grid-cols-2 gap-y-8 md:grid-cols-3">
             {[
               { l: 'Stage', v: 'Pre-seed' },
-              { l: 'Focus', v: 'End-of-tenancy automation' },
-              { l: 'Location', v: 'Edinburgh, Scotland' },
+              { l: 'Focus', v: 'End of tenancy automation' },
+
             ].map((d) => (
               <div key={d.l}>
                 <p className="text-xs font-semibold uppercase tracking-[0.08em] text-slate-400">{d.l}</p>
