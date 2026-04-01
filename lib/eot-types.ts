@@ -21,8 +21,15 @@ export type EotCaseListItem = {
     id: string
     name: string
     reference: string | null
+    address_line_1: string | null
+    address_line_2: string | null
+    city: string | null
+    postcode: string | null
   }
   tenant_name: string
+  landlord_name: string | null
+  deposit_amount: string | null
+  deposit_scheme: string | null
   status: EotCaseStatus
   priority: EotCasePriority
   issue_count: number

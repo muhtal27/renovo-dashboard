@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { FormEvent, useEffect, useMemo, useState } from 'react'
-import { Check, Copy, Plus, RefreshCcw } from 'lucide-react'
+import { Check, ClipboardCopy, Copy, Plus, RefreshCcw } from 'lucide-react'
 import { createEotCase, EotApiError, listEotCases } from '@/lib/eot-api'
 import { byLastActivityDesc } from '@/lib/eot-dashboard'
 import type {
@@ -13,20 +13,54 @@ import type {
   EotCaseStatus,
 } from '@/lib/eot-types'
 import {
-  DataTable,
   EmptyState,
-  FilterToolbar,
   getCaseAttentionTone,
   getCaseProgress,
-  KPIStatCard,
-  ProgressBar,
-  SectionCard,
   SkeletonPanel,
-  StatusBadge,
   ToolbarPill,
+  formatCurrency,
   formatDateTime,
   formatEnumLabel,
 } from '@/app/eot/_components/eot-ui'
+
+function buildFullAddress(property: EotCaseListItem['property']): string {
+  return [
+    property.address_line_1,
+    property.address_line_2,
+    property.city,
+    property.postcode,
+  ]
+    .filter(Boolean)
+    .join(', ')
+}
+
+function CopyAddressButton({ address }: { address: string }) {
+  const [copied, setCopied] = useState(false)
+
+  if (!address) return null
+
+  return (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        void navigator.clipboard.writeText(address).then(() => {
+          setCopied(true)
+          window.setTimeout(() => setCopied(false), 1500)
+        })
+      }}
+      className="ml-2 inline-flex items-center gap-1 text-xs text-zinc-400 transition hover:text-zinc-700"
+      title="Copy address"
+    >
+      {copied ? (
+        <Check className="h-3 w-3 text-emerald-500" />
+      ) : (
+        <ClipboardCopy className="h-3 w-3" />
+      )}
+    </button>
+  )
+}
 
 const CASE_PRIORITIES: EotCasePriority[] = ['low', 'medium', 'high']
 const CASE_STATUSES: EotCaseStatus[] = [
@@ -205,7 +239,12 @@ export function EotCaseListClient({
       searchableText: [
         caseItem.property.name,
         caseItem.property.reference ?? '',
+        caseItem.property.address_line_1 ?? '',
+        caseItem.property.city ?? '',
+        caseItem.property.postcode ?? '',
         caseItem.tenant_name,
+        caseItem.landlord_name ?? '',
+        caseItem.deposit_scheme ?? '',
         caseItem.status,
         caseItem.priority,
         caseItem.id,
@@ -612,20 +651,60 @@ export function EotCaseListClient({
         />
       ) : (
         <div className="space-y-0">
-          {visibleCaseRows.map(({ caseItem }) => (
-            <Link
-              key={caseItem.id}
-              href={`/operator/cases/${caseItem.id}`}
-              className="block border-b border-zinc-200 px-5 py-6 transition hover:bg-zinc-50/60"
-            >
-              <p className="text-base font-semibold text-zinc-950">
-                {caseItem.property.name}
-              </p>
-              <p className="mt-1 text-sm text-zinc-500">
-                {caseItem.tenant_name}
-              </p>
-            </Link>
-          ))}
+          {visibleCaseRows.map(({ caseItem }) => {
+            const fullAddress = buildFullAddress(caseItem.property)
+
+            return (
+              <Link
+                key={caseItem.id}
+                href={`/operator/cases/${caseItem.id}`}
+                className="flex items-start gap-6 border-b border-zinc-200 px-5 py-6 transition hover:bg-zinc-50/60"
+              >
+                {/* Left: Property + address */}
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <p className="text-base font-semibold text-zinc-950">
+                      {caseItem.property.name}
+                    </p>
+                    {caseItem.property.postcode ? (
+                      <span className="text-sm font-medium text-zinc-500">
+                        {caseItem.property.postcode}
+                      </span>
+                    ) : null}
+                    <CopyAddressButton address={fullAddress || caseItem.property.name} />
+                  </div>
+                  {fullAddress ? (
+                    <p className="mt-1 text-sm text-zinc-500">{fullAddress}</p>
+                  ) : null}
+                  <p className="mt-1 text-sm text-zinc-500">
+                    {caseItem.tenant_name}
+                    {caseItem.landlord_name ? (
+                      <span className="ml-3 text-xs text-zinc-400">
+                        Landlord: {caseItem.landlord_name}
+                      </span>
+                    ) : null}
+                  </p>
+                </div>
+
+                {/* Right: Deposit + status */}
+                <div className="hidden shrink-0 text-right sm:block">
+                  {caseItem.deposit_amount ? (
+                    <p className="text-sm font-semibold tabular-nums text-zinc-950">
+                      {formatCurrency(Number(caseItem.deposit_amount))}
+                    </p>
+                  ) : (
+                    <p className="text-sm text-zinc-400">No deposit</p>
+                  )}
+                  {caseItem.deposit_scheme ? (
+                    <p className="mt-0.5 text-xs text-zinc-500">{caseItem.deposit_scheme}</p>
+                  ) : null}
+                  <p className="mt-1 text-xs text-zinc-400">
+                    {formatEnumLabel(caseItem.status)}
+                  </p>
+                </div>
+              </Link>
+            )
+          })}
         </div>
           )}
     </div>
