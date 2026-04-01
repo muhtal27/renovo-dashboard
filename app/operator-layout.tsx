@@ -192,18 +192,18 @@ function OperatorSearchForm({
       <input type="hidden" name="search" value={searchValue.trim()} />
       <label className="relative block">
         <span className="sr-only">Global search</span>
-        <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400" />
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
         <input
           type="search"
           value={searchValue}
           onChange={(event) => setSearchValue(event.target.value)}
           placeholder={searchPlaceholder}
-          className="h-8 w-[320px] rounded-md border border-zinc-200 bg-zinc-50 pl-8 pr-16 text-xs text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white"
+          className="h-10 w-[520px] rounded-lg border border-zinc-200 bg-zinc-50 pl-9 pr-20 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-300"
         />
         <Link
           href={searchAction}
           prefetch={false}
-          className="absolute right-1 top-1 inline-flex h-6 items-center rounded bg-emerald-600 px-2 text-[11px] font-medium text-white transition hover:bg-emerald-700"
+          className="absolute right-1.5 top-1.5 inline-flex h-7 items-center rounded-md bg-emerald-600 px-3 text-xs font-medium text-white transition hover:bg-emerald-700"
         >
           Search
         </Link>
