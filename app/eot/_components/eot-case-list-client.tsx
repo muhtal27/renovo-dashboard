@@ -652,24 +652,24 @@ export function EotCaseListClient({
               <Link
                 key={caseItem.id}
                 href={`/operator/cases/${caseItem.id}`}
-                className="flex items-start gap-6 border-b border-zinc-200 px-5 py-6 transition hover:bg-zinc-50/60"
+                className="grid grid-cols-1 items-start gap-x-6 border-b border-zinc-200 px-5 py-6 transition hover:bg-zinc-50/60 sm:grid-cols-[1fr_180px] md:grid-cols-[1fr_180px_140px]"
               >
                 {/* Left: Property + landlord */}
-                <div className="min-w-0 flex-1">
+                <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="text-base font-semibold text-zinc-950">
+                    <p className="truncate text-base font-semibold text-zinc-950">
                       {fullAddress || caseItem.property.name}
                     </p>
                     <CopyAddressButton address={fullAddress || caseItem.property.name} />
                   </div>
-                  <p className="mt-1.5 text-sm text-zinc-500">
+                  <p className="mt-1.5 truncate text-sm text-zinc-500">
                     <span className="text-xs text-zinc-400">Landlord </span>
                     {caseItem.landlord_name || '—'}
                   </p>
                 </div>
 
                 {/* Middle: Tenant */}
-                <div className="hidden w-[200px] shrink-0 sm:block">
+                <div className="hidden sm:block">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
                     Tenant
                   </p>
@@ -679,7 +679,7 @@ export function EotCaseListClient({
                 </div>
 
                 {/* Right: Deposit + scheme */}
-                <div className="hidden shrink-0 text-right md:block">
+                <div className="hidden text-right md:block">
                   <div>
                     <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
                       Deposit
