@@ -11,7 +11,7 @@ const PROTECTED_OPERATOR_ROUTES = [
   '/settings',
 ] as const
 
-const PROTECTED_OPERATOR_PREFIXES = ['/eot/', '/cases/', '/operator/cases/'] as const
+const PROTECTED_OPERATOR_PREFIXES = ['/eot/', '/cases/', '/operator/cases/', '/settings/'] as const
 
 const protectedOperatorRouteSet = new Set<string>(PROTECTED_OPERATOR_ROUTES)
 

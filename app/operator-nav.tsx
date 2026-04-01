@@ -14,6 +14,7 @@ import {
   LogOut,
   MessageSquareMore,
   Settings,
+  Users,
   X,
 } from 'lucide-react'
 import {
@@ -102,10 +103,17 @@ const NAV_GROUPS: Array<{
     label: 'Workspace',
     items: [
       {
+        label: 'Team',
+        href: '/settings/members',
+        icon: Users,
+        isActive: (pathname) => pathname.startsWith('/settings/members'),
+        requiredPermission: OPERATOR_PERMISSIONS.MANAGE_USERS,
+      },
+      {
         label: 'Settings',
         href: '/settings',
         icon: Settings,
-        isActive: (pathname) => pathname.startsWith('/settings'),
+        isActive: (pathname) => pathname === '/settings',
         requiredPermission: OPERATOR_PERMISSIONS.MANAGE_SETTINGS,
       },
     ],

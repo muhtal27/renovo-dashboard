@@ -70,16 +70,16 @@ export default async function SettingsPage() {
           </div>
           <div className="mt-6 flex flex-wrap items-center gap-3">
             <Link
-              href="/knowledge"
+              href="/settings/members"
               className="inline-flex items-center rounded-md border border-emerald-600 bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-700 hover:border-emerald-700"
             >
-              Open guidance hub
+              Manage team members
             </Link>
             <Link
-              href="/overview"
+              href="/knowledge"
               className="inline-flex items-center rounded-md border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:text-zinc-950"
             >
-              Return to overview
+              Open guidance hub
             </Link>
           </div>
         </div>
