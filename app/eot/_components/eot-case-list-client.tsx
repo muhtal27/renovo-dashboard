@@ -24,14 +24,9 @@ import {
 } from '@/app/eot/_components/eot-ui'
 
 function buildFullAddress(property: EotCaseListItem['property']): string {
-  return [
-    property.address_line_1,
-    property.address_line_2,
-    property.city,
-    property.postcode,
-  ]
-    .filter(Boolean)
-    .join(', ')
+  const streetParts = [property.address_line_1, property.address_line_2].filter(Boolean).join(', ')
+  const cityPostcode = [property.city, property.postcode].filter(Boolean).join(' ')
+  return [streetParts, cityPostcode].filter(Boolean).join(', ')
 }
 
 function CopyAddressButton({ address }: { address: string }) {
@@ -660,7 +655,7 @@ export function EotCaseListClient({
                 href={`/operator/cases/${caseItem.id}`}
                 className="flex items-start gap-6 border-b border-zinc-200 px-5 py-6 transition hover:bg-zinc-50/60"
               >
-                {/* Left: Property + tenant */}
+                {/* Left: Property + landlord */}
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <p className="text-base font-semibold text-zinc-950">
@@ -669,18 +664,18 @@ export function EotCaseListClient({
                     <CopyAddressButton address={fullAddress || caseItem.property.name} />
                   </div>
                   <p className="mt-1.5 text-sm text-zinc-500">
-                    <span className="text-xs text-zinc-400">Tenant </span>
-                    {caseItem.tenant_name}
+                    <span className="text-xs text-zinc-400">Landlord </span>
+                    {caseItem.landlord_name || '—'}
                   </p>
                 </div>
 
-                {/* Middle: Landlord */}
+                {/* Middle: Tenant */}
                 <div className="hidden shrink-0 sm:block">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
-                    Landlord
+                    Tenant
                   </p>
                   <p className="mt-0.5 text-sm text-zinc-700">
-                    {caseItem.landlord_name || '—'}
+                    {caseItem.tenant_name}
                   </p>
                 </div>
 
