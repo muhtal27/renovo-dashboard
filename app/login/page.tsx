@@ -36,14 +36,9 @@ const workflowStages = [
 
 export default function LoginPage() {
   const handledSessionRef = useRef<string | null>(null)
-  const [mode, setMode] = useState<'sign_in' | 'sign_up' | 'reset'>('sign_in')
   const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [loadingPassword, setLoadingPassword] = useState(false)
-  const [loadingSignUp, setLoadingSignUp] = useState(false)
   const [loadingMagicLink, setLoadingMagicLink] = useState(false)
-  const [loadingReset, setLoadingReset] = useState(false)
+  const [loadingSSO, setLoadingSSO] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [magicSent, setMagicSent] = useState(false)
@@ -129,43 +124,6 @@ export default function LoginPage() {
     }
   }, [returnTo])
 
-  async function handlePasswordSignIn() {
-    if (!email.trim() || !password) {
-      setError('Enter your email and password to sign in.')
-      return
-    }
-
-    setLoadingPassword(true)
-    setMessage(null)
-    setError(null)
-    setMagicSent(false)
-
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password,
-    })
-
-    if (error) {
-      if (error.message.includes('Invalid login credentials')) {
-        setError('Email or password not recognised. Please try again.')
-      } else if (error.message.includes('Email not confirmed')) {
-        setError('Please confirm your email address before signing in.')
-      } else {
-        setError('Something went wrong. Please try again.')
-      }
-      setLoadingPassword(false)
-      return
-    }
-
-    if (!(await establishOperatorSession(data.session))) {
-      setError('Something went wrong. Please try again.')
-      setLoadingPassword(false)
-      return
-    }
-
-    window.location.href = returnTo
-  }
-
   async function handleMagicLink() {
     if (!email.trim()) {
       setError('Enter your email address to receive a magic link.')
@@ -198,67 +156,26 @@ export default function LoginPage() {
     setLoadingMagicLink(false)
   }
 
-  async function handleSignUp() {
-    if (!email.trim() || !password || !confirmPassword) {
-      setMessage('Enter your email, password, and confirmation to create an account.')
-      return
-    }
-
-    if (password.length < 8) {
-      setMessage('Use at least 8 characters for your password.')
-      return
-    }
-
-    if (password !== confirmPassword) {
-      setMessage('Password confirmation does not match.')
-      return
-    }
-
-    setLoadingSignUp(true)
+  async function handleSSO() {
+    setLoadingSSO(true)
+    setError(null)
     setMessage(null)
 
-    const { error } = await supabase.auth.signUp({
-      email: email.trim(),
-      password,
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'azure',
       options: {
-        emailRedirectTo: typeof window === 'undefined' ? undefined : `${window.location.origin}/login`,
+        redirectTo:
+          typeof window === 'undefined'
+            ? undefined
+            : `${window.location.origin}/login?returnTo=${encodeURIComponent(returnTo)}`,
+        scopes: 'openid profile email',
       },
     })
 
     if (error) {
-      setMessage(`Error: ${error.message}`)
-      setLoadingSignUp(false)
-      return
+      setError('Could not start Microsoft sign-in. Please try again.')
+      setLoadingSSO(false)
     }
-
-    setMessage(
-      'Account created. Check your email to confirm it. Access will only work after the agency links this account to the correct workspace.'
-    )
-    setLoadingSignUp(false)
-  }
-
-  async function handleResetPassword() {
-    if (!email.trim()) {
-      setMessage('Enter your email address to reset your password.')
-      return
-    }
-
-    setLoadingReset(true)
-    setMessage(null)
-
-    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-      redirectTo:
-        typeof window === 'undefined' ? undefined : `${window.location.origin}/reset-password`,
-    })
-
-    if (error) {
-      setMessage(`Error: ${error.message}`)
-      setLoadingReset(false)
-      return
-    }
-
-    setMessage('Password reset email sent. Use the link in your inbox to choose a new password.')
-    setLoadingReset(false)
   }
 
   return (
@@ -292,15 +209,9 @@ export default function LoginPage() {
         <section className="rounded-xl border border-zinc-200 bg-white p-8 shadow-[0_8px_24px_rgba(0,0,0,0.04)]">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="app-kicker">
-                {mode === 'sign_in' ? 'Sign In' : mode === 'sign_up' ? 'Sign Up' : 'Reset Password'}
-              </p>
+              <p className="app-kicker">Sign In</p>
               <h2 className="mt-2 text-3xl tracking-tight md:text-[2.6rem]">
-                {mode === 'sign_in'
-                  ? 'Enter the workspace'
-                  : mode === 'sign_up'
-                    ? 'Create your account'
-                    : 'Recover your password'}
+                Enter the workspace
               </h2>
             </div>
             <Link
@@ -312,55 +223,49 @@ export default function LoginPage() {
           </div>
 
           <p className="mt-4 text-sm leading-6 text-slate-600">
-            {mode === 'sign_in' &&
-              'Password is fastest if you already have one. Magic link is useful when you are signing in on a new device.'}
-            {mode === 'sign_up' &&
-              'Create your sign-in first. Workspace access still needs to be linked by your agency before you can enter the product.'}
-            {mode === 'reset' &&
-              'Send yourself a password reset link, then choose a new password from the recovery screen.'}
+            Use your organisation&apos;s Microsoft account for the fastest sign-in. A magic link is available for non-Microsoft users.
           </p>
 
-          <div className="mt-6 grid gap-2 sm:grid-cols-3">
-            {[
-              ['sign_in', 'Sign in'],
-              ['sign_up', 'Sign up'],
-              ['reset', 'Forgot password'],
-            ].map(([value, label]) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() => {
-                  setMode(value as 'sign_in' | 'sign_up' | 'reset')
-                  setMessage(null)
-                  setError(null)
-                  setMagicSent(false)
-                }}
-                className={`rounded px-4 py-2.5 text-sm font-medium ${
-                  mode === value ? 'app-pill-active' : 'app-pill'
-                }`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-
           <div className="mt-6 rounded-lg border border-zinc-200 bg-slate-50 p-4">
-            <p className="text-sm font-medium text-zinc-950">
-              {mode === 'sign_in' && 'For approved property managers'}
-              {mode === 'sign_up' && 'Create a sign-in before your access is linked'}
-              {mode === 'reset' && 'Recover the password for your approved Renovo AI email'}
-            </p>
+            <p className="text-sm font-medium text-zinc-950">For approved property managers</p>
             <p className="mt-2 text-sm leading-6 text-slate-600">
-              {mode === 'sign_in' &&
-                'If your email is linked correctly, Renovo AI will send you straight to the right workspace after sign-in.'}
-              {mode === 'sign_up' &&
-                'If your agency has not linked your role yet, you will not be able to enter a workspace until they do.'}
-              {mode === 'reset' &&
-                'Use the same email that was approved for Renovo AI access so the reset links back to the correct sign-in.'}
+              If your email is linked correctly, Renovo AI will send you straight to the right workspace after sign-in.
             </p>
           </div>
 
-          <div className="mt-6 space-y-4">
+          {error ? (
+            <div
+              aria-live="polite"
+              className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+            >
+              {error}
+            </div>
+          ) : null}
+
+          <div className="mt-6 grid gap-3">
+            <button
+              onClick={handleSSO}
+              disabled={loadingSSO}
+              className="app-primary-button flex items-center justify-center gap-2.5 rounded px-4 py-3.5 text-sm font-medium disabled:opacity-60"
+            >
+              <svg width="18" height="18" viewBox="0 0 21 21" fill="none" aria-hidden="true">
+                <rect x="1" y="1" width="9" height="9" fill="#f25022" />
+                <rect x="11" y="1" width="9" height="9" fill="#7fba00" />
+                <rect x="1" y="11" width="9" height="9" fill="#00a4ef" />
+                <rect x="11" y="11" width="9" height="9" fill="#ffb900" />
+              </svg>
+              {loadingSSO ? 'Redirecting...' : 'Sign in with Microsoft'}
+            </button>
+
+            <div className="relative my-1">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-zinc-200" />
+              </div>
+              <div className="relative flex justify-center text-xs">
+                <span className="bg-white px-3 text-slate-400">or use email</span>
+              </div>
+            </div>
+
             <label className="block">
               <span className="mb-2 block text-sm font-medium text-slate-600">Email address</span>
               <input
@@ -376,88 +281,17 @@ export default function LoginPage() {
               />
             </label>
 
-            {mode !== 'reset' && (
-              <label className="block">
-                <span className="mb-2 block text-sm font-medium text-slate-600">Password</span>
-                <input
-                  type="password"
-                  autoComplete={mode === 'sign_up' ? 'new-password' : 'current-password'}
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  placeholder={mode === 'sign_up' ? 'Create a password' : 'Enter your password'}
-                  className="app-field text-sm outline-none"
-                />
-              </label>
-            )}
-
-            {mode === 'sign_up' && (
-              <label className="block">
-                <span className="mb-2 block text-sm font-medium text-slate-600">Confirm password</span>
-                <input
-                  type="password"
-                  autoComplete="new-password"
-                  value={confirmPassword}
-                  onChange={(event) => setConfirmPassword(event.target.value)}
-                  placeholder="Confirm your password"
-                  className="app-field text-sm outline-none"
-                />
-              </label>
-            )}
-          </div>
-
-          {mode === 'sign_in' && error ? (
-            <div
-              aria-live="polite"
-              className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-            >
-              {error}
-            </div>
-          ) : null}
-
-          <div className="mt-6 grid gap-3">
-            {mode === 'sign_in' && (
-              <>
-                <button
-                  onClick={handlePasswordSignIn}
-                  disabled={loadingPassword || loadingMagicLink}
-                  className="app-primary-button rounded px-4 py-3.5 text-sm font-medium disabled:opacity-60"
-                >
-                  {loadingPassword ? 'Signing in...' : 'Sign in with password'}
-                </button>
-
-                {magicSent ? (
-                  <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3.5 text-sm font-medium text-emerald-700">
-                    ✓ Magic link sent - check your inbox
-                  </div>
-                ) : (
-                  <button
-                    onClick={handleMagicLink}
-                    disabled={loadingPassword || loadingMagicLink}
-                    className="app-secondary-button rounded px-4 py-3.5 text-sm font-medium disabled:opacity-60"
-                  >
-                    {loadingMagicLink ? 'Sending...' : 'Email me a magic link'}
-                  </button>
-                )}
-              </>
-            )}
-
-            {mode === 'sign_up' && (
+            {magicSent ? (
+              <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3.5 text-sm font-medium text-emerald-700">
+                Magic link sent - check your inbox
+              </div>
+            ) : (
               <button
-                onClick={handleSignUp}
-                disabled={loadingSignUp}
-                className="app-primary-button rounded px-4 py-3.5 text-sm font-medium disabled:opacity-60"
+                onClick={handleMagicLink}
+                disabled={loadingMagicLink || loadingSSO}
+                className="app-secondary-button rounded px-4 py-3.5 text-sm font-medium disabled:opacity-60"
               >
-                {loadingSignUp ? 'Creating account...' : 'Create account'}
-              </button>
-            )}
-
-            {mode === 'reset' && (
-              <button
-                onClick={handleResetPassword}
-                disabled={loadingReset}
-                className="app-primary-button rounded px-4 py-3.5 text-sm font-medium disabled:opacity-60"
-              >
-                {loadingReset ? 'Sending reset...' : 'Send password reset email'}
+                {loadingMagicLink ? 'Sending...' : 'Email me a magic link'}
               </button>
             )}
           </div>
