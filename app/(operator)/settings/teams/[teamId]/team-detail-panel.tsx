@@ -251,7 +251,7 @@ export function TeamDetailPanel({ teamId }: { teamId: string }) {
               All active workspace members are already in this team.
             </p>
           ) : (
-            <div className="mt-4 grid gap-4 md:grid-cols-[1fr_160px_auto]">
+            <div className="mt-4 grid gap-4 md:grid-cols-[2fr_160px_auto]">
               <div>
                 <label htmlFor="add-user" className="sr-only">
                   Workspace member

@@ -142,7 +142,7 @@ export function TeamsPanel() {
             Teams let you organise workspace members into groups — e.g. by property portfolio or region.
           </p>
 
-          <div className="mt-4 grid gap-4 md:grid-cols-[1fr_1fr_auto]">
+          <div className="mt-4 grid gap-4 md:grid-cols-[2fr_1fr_auto]">
             <div>
               <label htmlFor="team-name" className="sr-only">
                 Team name
