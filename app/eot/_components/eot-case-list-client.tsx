@@ -660,47 +660,48 @@ export function EotCaseListClient({
                 href={`/operator/cases/${caseItem.id}`}
                 className="flex items-start gap-6 border-b border-zinc-200 px-5 py-6 transition hover:bg-zinc-50/60"
               >
-                {/* Left: Property + address */}
+                {/* Left: Property + tenant/landlord */}
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <p className="text-base font-semibold text-zinc-950">
-                      {caseItem.property.name}
+                      {fullAddress || caseItem.property.name}
                     </p>
-                    {caseItem.property.postcode ? (
-                      <span className="text-sm font-medium text-zinc-500">
-                        {caseItem.property.postcode}
-                      </span>
-                    ) : null}
                     <CopyAddressButton address={fullAddress || caseItem.property.name} />
                   </div>
-                  {fullAddress ? (
-                    <p className="mt-1 text-sm text-zinc-500">{fullAddress}</p>
-                  ) : null}
-                  <p className="mt-1 text-sm text-zinc-500">
-                    {caseItem.tenant_name}
+                  <div className="mt-1.5 flex flex-wrap items-center gap-x-6 gap-y-1 text-sm text-zinc-500">
+                    <span>
+                      <span className="text-xs text-zinc-400">Tenant </span>
+                      {caseItem.tenant_name}
+                    </span>
                     {caseItem.landlord_name ? (
-                      <span className="ml-3 text-xs text-zinc-400">
-                        Landlord: {caseItem.landlord_name}
+                      <span>
+                        <span className="text-xs text-zinc-400">Landlord </span>
+                        {caseItem.landlord_name}
                       </span>
                     ) : null}
-                  </p>
+                  </div>
                 </div>
 
-                {/* Right: Deposit + status */}
+                {/* Right: Deposit + scheme */}
                 <div className="hidden shrink-0 text-right sm:block">
-                  {caseItem.deposit_amount ? (
-                    <p className="text-sm font-semibold tabular-nums text-zinc-950">
-                      {formatCurrency(Number(caseItem.deposit_amount))}
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
+                      Deposit
                     </p>
-                  ) : (
-                    <p className="text-sm text-zinc-400">No deposit</p>
-                  )}
-                  {caseItem.deposit_scheme ? (
-                    <p className="mt-0.5 text-xs text-zinc-500">{caseItem.deposit_scheme}</p>
-                  ) : null}
-                  <p className="mt-1 text-xs text-zinc-400">
-                    {formatEnumLabel(caseItem.status)}
-                  </p>
+                    <p className="mt-0.5 text-sm font-semibold tabular-nums text-zinc-950">
+                      {caseItem.deposit_amount
+                        ? formatCurrency(Number(caseItem.deposit_amount))
+                        : '—'}
+                    </p>
+                  </div>
+                  <div className="mt-2">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
+                      Scheme
+                    </p>
+                    <p className="mt-0.5 text-xs text-zinc-600">
+                      {caseItem.deposit_scheme || '—'}
+                    </p>
+                  </div>
                 </div>
               </Link>
             )
