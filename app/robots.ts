@@ -21,6 +21,8 @@ export default function robots(): MetadataRoute.Robots {
           '/settings',
           '/teams',
           '/tenancy',
+          '/prototype-workflow',
+          '/inventory-feedback',
           '/workspace-access',
         ],
       },

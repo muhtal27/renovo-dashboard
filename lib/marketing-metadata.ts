@@ -3,11 +3,12 @@ import type { Metadata } from 'next'
 export const siteName = 'Renovo AI'
 export const legalName = 'Renovo AI Ltd'
 export const defaultSiteUrl = 'https://renovoai.co.uk'
-export const siteUrl =
+export const siteUrl = (
   process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
   (process.env.VERCEL_PROJECT_PRODUCTION_URL
     ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
     : defaultSiteUrl)
+).replace(/\/+$/, '')
 export const defaultDescription =
   'Renovo AI automates end of tenancy work for UK property managers and letting agencies, from evidence review and issue assessment to claim ready output.'
 export const ogImagePath = '/og-image.jpg'
