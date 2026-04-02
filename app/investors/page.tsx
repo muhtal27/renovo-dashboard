@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import { MarketingShell } from '@/app/components/MarketingShell'
 import { createMarketingMetadata } from '@/lib/marketing-metadata'
 
@@ -84,24 +83,6 @@ export default function InvestorsPage() {
           </div>
         </section>
 
-        {/* CTA */}
-        <section className="page-hero text-center">
-          <h2 className="text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
-            Download the one-pager or <em className="text-slate-400">contact us directly</em>
-          </h2>
-          <p className="mx-auto mt-4 max-w-[560px] text-base leading-8 text-slate-500">
-            The one-pager covers the workflow problem, product scope, and current company
-            focus. For investor or strategic discussions, use the contact route.
-          </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <a href="/renovo-company-one-pager.pdf" download className="app-primary-button rounded-md px-6 py-3 text-sm font-medium">
-              Download company one-pager
-            </a>
-            <Link href="/contact" className="app-secondary-button rounded-md px-6 py-3 text-sm font-medium">
-              Contact Renovo AI
-            </Link>
-          </div>
-        </section>
 
       </div>
     </MarketingShell>

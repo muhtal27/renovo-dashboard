@@ -328,29 +328,7 @@ export default function PricingPageClient() {
           </div>
         </section>
 
-        {/* ── CTA ── */}
-        <section className="page-hero text-center">
-          <h2 className="text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
-            Ready to simplify your <em className="text-slate-400">checkout workflow</em>?
-          </h2>
-          <p className="mx-auto mt-4 max-w-[460px] text-base leading-8 text-slate-500">
-            Tell us about your team and portfolio. We will help you find the right setup.
-          </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Link
-              href="/contact"
-              className="app-primary-button rounded-md px-6 py-3 text-sm font-medium"
-            >
-              Get started →
-            </Link>
-            <Link
-              href="/demo"
-              className="app-secondary-button rounded-md px-6 py-3 text-sm font-medium"
-            >
-              View demo
-            </Link>
-          </div>
-        </section>
+
 
       </div>
     </MarketingShell>

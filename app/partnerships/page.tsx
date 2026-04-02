@@ -93,19 +93,7 @@ export default function PartnershipsPage() {
         </section>
 
         {/* CTA */}
-        <section className="page-hero text-center">
-          <h2 className="text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
-            Interested in <em className="text-slate-400">working together</em>?
-          </h2>
-          <p className="mx-auto mt-4 max-w-[500px] text-base leading-8 text-slate-500">
-            If you build for property managers, inventory teams, or end of tenancy
-            operations, we would be happy to explore how Renovo AI fits your workflow.
-          </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Link href="/contact" className="app-primary-button rounded-md px-6 py-3 text-sm font-medium">Contact Renovo AI</Link>
-            <Link href="/demo" className="app-secondary-button rounded-md px-6 py-3 text-sm font-medium">View demo</Link>
-          </div>
-        </section>
+
 
       </div>
     </MarketingShell>

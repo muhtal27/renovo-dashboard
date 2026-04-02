@@ -287,18 +287,6 @@ export default function HomePageClient() {
           </div>
         </section>
 
-        {/* ── CTA ── */}
-        <section className="relative overflow-hidden bg-[#0a0e1a] px-8 py-24 text-center lg:px-10">
-          <div className="renovo-glow pointer-events-none absolute -bottom-[120px] left-1/2 h-[700px] w-[700px] -translate-x-1/2" />
-          <div className="relative z-10 mx-auto max-w-[560px]">
-            <h2 className="text-[clamp(26px,3.5vw,42px)] font-bold leading-[1.15] tracking-[-0.03em] text-white">See it with a <span className="bg-gradient-to-br from-emerald-500 to-emerald-300 bg-clip-text text-transparent">real case</span></h2>
-            <p className="mx-auto mt-4 max-w-[420px] text-base leading-[1.85] text-slate-400">Tell us how your team handles checkouts, deduction letters, and disputes today. We will show you how Renovo fits your operation.</p>
-            <div className="mt-9 flex flex-wrap justify-center gap-3">
-              <Link href="/contact" className="app-accent-button rounded-lg px-6 py-3 text-sm">Get started &rarr;</Link>
-              <Link href="/demo" className="app-outline-white rounded-lg px-6 py-3 text-sm">View demo</Link>
-            </div>
-          </div>
-        </section>
       </main>
 
       {/* ── DARK FOOTER ── */}

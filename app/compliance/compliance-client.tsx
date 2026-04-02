@@ -1,4 +1,3 @@
-import Link from "next/link"
 import { MarketingShell } from "@/app/components/MarketingShell"
 
 const sections = [
@@ -121,20 +120,6 @@ export default function ComplianceClient() {
           </p>
         </section>
 
-        {/* CTA */}
-        <section className="page-hero text-center">
-          <h2 className="text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
-            Need compliance detail for <em className="text-slate-400">internal review</em>?
-          </h2>
-          <p className="mx-auto mt-4 max-w-[500px] text-base leading-8 text-slate-500">
-            Contact us for DPA documentation, security questionnaire responses,
-            or additional technical detail.
-          </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Link href="/contact" className="app-primary-button rounded-md px-6 py-3 text-sm font-medium">Get started &rarr;</Link>
-            <a href="mailto:hello@renovoai.co.uk?subject=Compliance%20enquiry" className="app-secondary-button rounded-md px-6 py-3 text-sm font-medium">Email Renovo AI</a>
-          </div>
-        </section>
 
       </div>
     </MarketingShell>
