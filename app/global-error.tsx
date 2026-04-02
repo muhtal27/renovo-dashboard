@@ -1,5 +1,8 @@
 'use client'
 
+/* eslint-disable @next/next/no-html-link-for-pages */
+// Global error boundary renders outside the router — <Link> is unsafe here
+
 export default function GlobalError({
   error,
   reset,
