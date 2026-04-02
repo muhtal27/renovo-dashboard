@@ -603,7 +603,7 @@ Northern Ireland landlords letting private tenancies must register, and tenants 
 ]
 
 export default async function KnowledgePage() {
-  await requireOperatorTenant('/knowledge')
+  await requireOperatorTenant('/guidance')
 
   return <KnowledgeClient articles={GUIDANCE_ARTICLES} />
 }

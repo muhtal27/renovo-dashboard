@@ -12,7 +12,7 @@ export default async function TeamDetailPage({
 }: {
   params: Promise<{ teamId: string }>
 }) {
-  await requireOperatorPermission('/settings/teams', OPERATOR_PERMISSIONS.MANAGE_USERS)
+  await requireOperatorPermission('/teams/teams', OPERATOR_PERMISSIONS.MANAGE_USERS)
 
   const { teamId } = await params
 

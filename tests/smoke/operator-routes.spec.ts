@@ -18,10 +18,10 @@ test.describe('operator route smoke', () => {
     await expect(page.getByText('Unable to load reporting summary')).toHaveCount(0)
   })
 
-  test('signed-in knowledge loads all jurisdictions', async ({ page }) => {
-    await page.goto('/knowledge')
+  test('signed-in guidance loads all jurisdictions', async ({ page }) => {
+    await page.goto('/guidance')
 
-    await expect(page).toHaveURL(/\/knowledge$/)
+    await expect(page).toHaveURL(/\/guidance$/)
     await expect(page.getByRole('heading', { name: 'Guidance', exact: true })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Guidance hub' })).toBeVisible()
     await expect(page.getByRole('button', { name: /England/i }).first()).toBeVisible()

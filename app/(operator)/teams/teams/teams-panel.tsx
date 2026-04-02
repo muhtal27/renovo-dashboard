@@ -93,14 +93,14 @@ export function TeamsPanel() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link
-            href="/overview"
+            href="/admin"
             className="text-xs font-medium text-zinc-500 transition hover:text-zinc-700"
           >
             Admin
           </Link>
           <span className="text-xs text-zinc-300">/</span>
           <Link
-            href="/settings/members"
+            href="/teams/members"
             className="text-xs font-medium text-zinc-500 transition hover:text-zinc-700"
           >
             Teams
@@ -241,7 +241,7 @@ export function TeamsPanel() {
                           Delete
                         </button>
                         <Link
-                          href={`/settings/teams/${team.id}`}
+                          href={`/teams/teams/${team.id}`}
                           className="inline-flex items-center gap-1 border border-zinc-200 bg-white px-2.5 py-1 text-xs font-medium text-zinc-700 transition hover:border-zinc-300"
                         >
                           Manage

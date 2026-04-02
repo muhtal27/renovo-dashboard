@@ -17,6 +17,36 @@
       "source": "/eot/:path*",
       "destination": "/checkouts/:path*",
       "permanent": true
+    },
+    {
+      "source": "/claims",
+      "destination": "/deposit-scheme",
+      "permanent": true
+    },
+    {
+      "source": "/knowledge",
+      "destination": "/guidance",
+      "permanent": true
+    },
+    {
+      "source": "/overview",
+      "destination": "/admin",
+      "permanent": true
+    },
+    {
+      "source": "/settings/members",
+      "destination": "/teams/members",
+      "permanent": true
+    },
+    {
+      "source": "/settings/teams",
+      "destination": "/teams/teams",
+      "permanent": true
+    },
+    {
+      "source": "/settings/teams/:path*",
+      "destination": "/teams/teams/:path*",
+      "permanent": true
     }
   ],
   "headers": [
@@ -41,7 +71,7 @@
       "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }]
     },
     {
-      "source": "/knowledge",
+      "source": "/guidance",
       "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }]
     },
     {

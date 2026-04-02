@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 }
 
 export default async function MembersPage() {
-  await requireOperatorPermission('/settings/members', OPERATOR_PERMISSIONS.MANAGE_USERS)
+  await requireOperatorPermission('/teams/members', OPERATOR_PERMISSIONS.MANAGE_USERS)
 
   return <MembersPanel />
 }

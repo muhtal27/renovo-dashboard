@@ -183,7 +183,7 @@ export function TeamDetailPanel({ teamId }: { teamId: string }) {
           body="This team may have been deleted."
           action={
             <Link
-              href="/settings/teams"
+              href="/teams/teams"
               className="inline-flex items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:text-zinc-950"
             >
               <ArrowLeft className="h-4 w-4" strokeWidth={2} />
@@ -203,7 +203,7 @@ export function TeamDetailPanel({ teamId }: { teamId: string }) {
         actions={
           <div className="flex items-center gap-2">
             <Link
-              href="/settings/teams"
+              href="/teams/teams"
               className="inline-flex items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:text-zinc-950"
             >
               <ArrowLeft className="h-4 w-4" strokeWidth={2} />

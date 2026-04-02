@@ -1,17 +1,17 @@
 const PROTECTED_OPERATOR_ROUTES = [
-  '/overview',
+  '/admin',
   '/checkouts',
   '/tenancy',
   '/disputes',
   '/recommendations',
-  '/claims',
+  '/deposit-scheme',
   '/reports',
   '/calls',
-  '/knowledge',
+  '/guidance',
   '/settings',
 ] as const
 
-const PROTECTED_OPERATOR_PREFIXES = ['/checkouts/', '/cases/', '/operator/cases/', '/settings/'] as const
+const PROTECTED_OPERATOR_PREFIXES = ['/checkouts/', '/cases/', '/operator/cases/', '/settings/', '/teams/'] as const
 
 const protectedOperatorRouteSet = new Set<string>(PROTECTED_OPERATOR_ROUTES)
 

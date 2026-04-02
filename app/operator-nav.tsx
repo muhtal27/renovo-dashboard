@@ -69,15 +69,15 @@ const NAV_GROUPS: Array<{
       },
       {
         label: 'Deposit Scheme',
-        href: '/claims',
+        href: '/deposit-scheme',
         icon: Landmark,
-        isActive: (pathname) => pathname.startsWith('/claims'),
+        isActive: (pathname) => pathname.startsWith('/deposit-scheme'),
       },
       {
         label: 'Guidance',
-        href: '/knowledge',
+        href: '/guidance',
         icon: BookOpenText,
-        isActive: (pathname) => pathname.startsWith('/knowledge'),
+        isActive: (pathname) => pathname.startsWith('/guidance'),
       },
     ],
   },
@@ -86,16 +86,16 @@ const NAV_GROUPS: Array<{
     items: [
       {
         label: 'Admin',
-        href: '/overview',
+        href: '/admin',
         icon: LayoutDashboard,
-        isActive: (pathname) => pathname.startsWith('/overview'),
+        isActive: (pathname) => pathname.startsWith('/admin'),
       },
       {
         label: 'Teams',
-        href: '/settings/members',
+        href: '/teams/members',
         icon: Users,
         isActive: (pathname) =>
-          pathname.startsWith('/settings/members') || pathname.startsWith('/settings/teams'),
+          pathname.startsWith('/teams/members') || pathname.startsWith('/teams/teams'),
         requiredPermission: OPERATOR_PERMISSIONS.MANAGE_USERS,
       },
       {

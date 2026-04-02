@@ -135,7 +135,7 @@ export function MembersPanel() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link
-            href="/overview"
+            href="/admin"
             className="text-xs font-medium text-zinc-500 transition hover:text-zinc-700"
           >
             Admin
@@ -349,7 +349,7 @@ export function MembersPanel() {
             </p>
           </div>
           <Link
-            href="/settings/teams"
+            href="/teams/teams"
             className="border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50"
           >
             Manage teams

@@ -49,13 +49,13 @@ const OPERATOR_ROUTE_CONFIG: Array<{
     },
   },
   {
-    matches: (pathname) => pathname.startsWith('/overview'),
+    matches: (pathname) => pathname.startsWith('/admin'),
     config: {
       pageTitle: 'Admin',
       pageDescription:
         'Manage checkout intake from inventory software and case allocation to property managers.',
       searchPlaceholder: 'Search integrations, allocations, or property managers',
-      searchTargetPath: '/overview',
+      searchTargetPath: '/admin',
       breadcrumbs: [{ label: 'Management', href: '/reports' }, { label: 'Admin' }],
     },
   },
@@ -115,7 +115,7 @@ const OPERATOR_ROUTE_CONFIG: Array<{
     },
   },
   {
-    matches: (pathname) => pathname.startsWith('/claims'),
+    matches: (pathname) => pathname.startsWith('/deposit-scheme'),
     config: {
       pageTitle: 'Deposit Scheme',
       pageDescription:
@@ -135,24 +135,24 @@ const OPERATOR_ROUTE_CONFIG: Array<{
     },
   },
   {
-    matches: (pathname) => pathname.startsWith('/knowledge'),
+    matches: (pathname) => pathname.startsWith('/guidance'),
     config: {
       pageTitle: 'Guidance',
       pageDescription:
         'Authoritative scheme, evidence, and deduction guidance for end-of-tenancy operators.',
       searchPlaceholder: 'Search the guidance library',
-      searchTargetPath: '/knowledge',
+      searchTargetPath: '/guidance',
       breadcrumbs: [{ label: 'Guidance' }],
     },
   },
   {
     matches: (pathname) =>
-      pathname.startsWith('/settings/members') || pathname.startsWith('/settings/teams'),
+      pathname.startsWith('/teams/members') || pathname.startsWith('/teams/teams'),
     config: {
       pageTitle: 'Teams',
       pageDescription: 'Manage workspace members, roles, and team structure.',
       breadcrumbs: [
-        { label: 'Management', href: '/overview' },
+        { label: 'Management', href: '/admin' },
         { label: 'Teams' },
       ],
     },
@@ -226,7 +226,7 @@ function OperatorSearchForm({
 }
 
 export function OperatorLayout({ children, operator }: OperatorLayoutProps) {
-  const pathname = usePathname() ?? '/overview'
+  const pathname = usePathname() ?? '/admin'
   const searchParams = useSearchParams()
   const routeConfig = useMemo(() => getRouteConfig(pathname), [pathname])
   const breadcrumbs = routeConfig.breadcrumbs ?? []

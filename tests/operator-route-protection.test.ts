@@ -10,7 +10,7 @@ import {
 } from '@/lib/eot-workspace-routes'
 
 test('critical operator routes stay protected by middleware', () => {
-  const protectedRoutes = ['/reports', '/checkouts', '/knowledge', '/settings']
+  const protectedRoutes = ['/reports', '/checkouts', '/guidance', '/settings']
 
   for (const route of protectedRoutes) {
     assert.equal(

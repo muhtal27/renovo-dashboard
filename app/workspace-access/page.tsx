@@ -266,8 +266,8 @@ export default function WorkspaceAccessPage() {
               <Link href="/checkouts" className="app-primary-button rounded px-6 py-3 text-sm font-medium">
                 Open checkouts
               </Link>
-              <Link href="/overview" className="app-secondary-button rounded px-6 py-3 text-sm font-medium">
-                Go to overview
+              <Link href="/admin" className="app-secondary-button rounded px-6 py-3 text-sm font-medium">
+                Go to admin
               </Link>
             </div>
           ) : null}

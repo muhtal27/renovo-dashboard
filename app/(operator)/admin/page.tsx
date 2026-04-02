@@ -15,7 +15,7 @@ const INVENTORY_INTEGRATIONS = [
 ] as const
 
 export default async function AdminPage() {
-  await requireOperatorTenant('/overview')
+  await requireOperatorTenant('/admin')
 
   return (
     <div className="space-y-6">
@@ -121,7 +121,7 @@ export default async function AdminPage() {
 
         <div className="mt-5 grid gap-4 md:grid-cols-2">
           <Link
-            href="/settings/members"
+            href="/teams/members"
             className="flex items-start gap-4 border border-zinc-200 px-5 py-4 transition hover:border-zinc-300 hover:bg-zinc-50/50"
           >
             <div>
@@ -132,7 +132,7 @@ export default async function AdminPage() {
             </div>
           </Link>
           <Link
-            href="/settings/teams"
+            href="/teams/teams"
             className="flex items-start gap-4 border border-zinc-200 px-5 py-4 transition hover:border-zinc-300 hover:bg-zinc-50/50"
           >
             <div>

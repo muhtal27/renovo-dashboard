@@ -72,7 +72,7 @@ const DEPOSIT_SCHEMES = [
 ]
 
 export default async function DepositSchemePage() {
-  await requireOperatorTenant('/claims')
+  await requireOperatorTenant('/deposit-scheme')
 
   return (
     <div className="space-y-8 px-6 py-6 md:px-7">
