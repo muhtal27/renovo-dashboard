@@ -7,7 +7,6 @@ import {
   siteName,
   siteUrl,
 } from '@/lib/marketing-metadata'
-import { Analytics } from '@vercel/analytics/next'
 import { ServiceWorkerRegistration } from './components/ServiceWorkerRegistration'
 
 const dmSans = DM_Sans({
@@ -73,7 +72,6 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${dmSans.variable} ${instrumentSerif.variable}`}>
         {children}
-        <Analytics />
         <ServiceWorkerRegistration />
       </body>
     </html>
