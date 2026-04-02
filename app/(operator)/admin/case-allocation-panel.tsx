@@ -28,7 +28,8 @@ export function CaseAllocationPanel() {
   const [cases, setCases] = useState<EotCaseListItem[]>([])
   const [members, setMembers] = useState<Assignee[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [loadError, setLoadError] = useState<string | null>(null)
+  const [assignError, setAssignError] = useState<string | null>(null)
   const [assigning, setAssigning] = useState<string | null>(null)
   const [filter, setFilter] = useState<'unallocated' | 'allocated' | 'all'>('unallocated')
 
@@ -37,7 +38,7 @@ export function CaseAllocationPanel() {
 
     async function load() {
       setLoading(true)
-      setError(null)
+      setLoadError(null)
 
       try {
         const [casesResult, assigneesResult] = await Promise.all([
@@ -51,7 +52,7 @@ export function CaseAllocationPanel() {
         }
       } catch (loadError) {
         if (!cancelled) {
-          setError(loadError instanceof Error ? loadError.message : 'Failed to load data.')
+          setLoadError(loadError instanceof Error ? loadError.message : 'Failed to load data.')
         }
       } finally {
         if (!cancelled) {
@@ -66,15 +67,16 @@ export function CaseAllocationPanel() {
 
   async function handleAssign(caseId: string, userId: string | null) {
     setAssigning(caseId)
+    setAssignError(null)
 
     try {
       await assignEotCase(caseId, userId)
       setCases((current) =>
         current.map((c) => (c.id === caseId ? { ...c, assigned_to: userId } : c))
       )
-    } catch (assignError) {
-      setError(
-        assignError instanceof Error ? assignError.message : 'Failed to assign case.'
+    } catch (err) {
+      setAssignError(
+        err instanceof Error ? err.message : 'Failed to assign case.'
       )
     } finally {
       setAssigning(null)
@@ -100,16 +102,30 @@ export function CaseAllocationPanel() {
     )
   }
 
-  if (error) {
+  if (loadError) {
     return (
       <div className="border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-        {error}
+        {loadError}
       </div>
     )
   }
 
   return (
     <div className="space-y-4">
+      {/* Inline assign error */}
+      {assignError ? (
+        <div className="flex items-center justify-between gap-3 border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm text-rose-700">
+          <span>{assignError}</span>
+          <button
+            type="button"
+            onClick={() => setAssignError(null)}
+            className="text-xs font-medium text-rose-600 hover:text-rose-800"
+          >
+            Dismiss
+          </button>
+        </div>
+      ) : null}
+
       {/* Filter tabs */}
       <div className="flex items-center gap-0">
         {[
