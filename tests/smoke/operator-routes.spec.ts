@@ -1,10 +1,10 @@
 import { expect, test } from '@playwright/test'
 
 test.describe('operator route smoke', () => {
-  test('signed-in eot loads', async ({ page }) => {
-    await page.goto('/eot')
+  test('signed-in checkouts loads', async ({ page }) => {
+    await page.goto('/checkouts')
 
-    await expect(page).toHaveURL(/\/eot$/)
+    await expect(page).toHaveURL(/\/checkouts$/)
     await expect(page.getByRole('heading', { name: 'Checkouts' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Operational checkout pipeline' })).toBeVisible()
   })

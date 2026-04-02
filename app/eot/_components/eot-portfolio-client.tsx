@@ -254,7 +254,7 @@ export function EotPortfolioClient({
           body="Create the first end-of-tenancy checkout to populate the operations portfolio."
           action={
             <Link
-              href="/eot"
+              href="/checkouts"
               className="inline-flex items-center border border-zinc-900 bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white"
             >
               Open checkouts

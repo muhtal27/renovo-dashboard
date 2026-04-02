@@ -1,5 +1,5 @@
 export function getDefaultEotWorkspaceHref(caseId: string) {
-  return `/eot/${caseId}`
+  return `/checkouts/${caseId}`
 }
 
 export function getPreviewCheckoutWorkspaceHref(caseId: string) {

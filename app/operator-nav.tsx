@@ -51,9 +51,9 @@ const NAV_GROUPS: Array<{
     items: [
       {
         label: 'Checkouts',
-        href: '/eot',
+        href: '/checkouts',
         icon: FolderKanban,
-        isActive: (pathname) => pathname === '/eot' || pathname.startsWith('/eot/'),
+        isActive: (pathname) => pathname === '/checkouts' || pathname.startsWith('/checkouts/'),
       },
       {
         label: 'Disputes',
@@ -228,7 +228,7 @@ function SidebarContent({
     <div className="flex h-full flex-col">
       <div className={cn('flex items-center gap-3', collapsed && !mobile ? 'justify-center' : 'justify-between')}>
         <Link
-          href="/eot"
+          href="/checkouts"
           prefetch={false}
           onClick={onNavigate}
           className="flex items-center gap-3 px-3 py-3"

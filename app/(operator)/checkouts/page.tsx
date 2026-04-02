@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 }
 
 export default async function EotCasesPage() {
-  const context = await requireOperatorTenant('/eot')
+  const context = await requireOperatorTenant('/checkouts')
   const initialCases = await getEotCaseListSnapshot(context).catch(() => null)
 
   return <EotCaseListClient initialCases={initialCases} />

@@ -7,6 +7,16 @@
       "has": [{ "type": "host", "value": "www.renovoai.co.uk" }],
       "destination": "https://renovoai.co.uk/:path*",
       "permanent": true
+    },
+    {
+      "source": "/eot",
+      "destination": "/checkouts",
+      "permanent": true
+    },
+    {
+      "source": "/eot/:path*",
+      "destination": "/checkouts/:path*",
+      "permanent": true
     }
   ],
   "headers": [
@@ -15,11 +25,11 @@
       "headers": [{ "key": "X-Robots-Tag", "value": "noindex" }]
     },
     {
-      "source": "/eot",
+      "source": "/checkouts",
       "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }]
     },
     {
-      "source": "/eot/(.*)",
+      "source": "/checkouts/(.*)",
       "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }]
     },
     {

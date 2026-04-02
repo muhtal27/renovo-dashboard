@@ -18,7 +18,7 @@ export async function POST(request: Request, context: RouteContext) {
 
   if (response.ok) {
     revalidatePath(`/operator/cases/${caseId}`)
-    revalidatePath(`/eot/${caseId}`)
+    revalidatePath(`/checkouts/${caseId}`)
   }
 
   return response

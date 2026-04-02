@@ -13,7 +13,7 @@ type SelectionState = {
 }
 
 function getSafeReturnTo() {
-  if (typeof window === 'undefined') return '/eot'
+  if (typeof window === 'undefined') return '/checkouts'
 
   return getReturnToFromSearch(window.location.search)
 }
@@ -255,7 +255,7 @@ export default function WorkspaceAccessPage() {
               <Link href={returnTo} className="app-primary-button rounded px-6 py-3 text-sm font-medium">
                 Continue to workspace
               </Link>
-              <Link href="/eot" className="app-secondary-button rounded px-6 py-3 text-sm font-medium">
+              <Link href="/checkouts" className="app-secondary-button rounded px-6 py-3 text-sm font-medium">
                 Open checkouts
               </Link>
             </div>
@@ -263,7 +263,7 @@ export default function WorkspaceAccessPage() {
 
           {!loading && operator?.membership && reason === 'forbidden' ? (
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/eot" className="app-primary-button rounded px-6 py-3 text-sm font-medium">
+              <Link href="/checkouts" className="app-primary-button rounded px-6 py-3 text-sm font-medium">
                 Open checkouts
               </Link>
               <Link href="/overview" className="app-secondary-button rounded px-6 py-3 text-sm font-medium">

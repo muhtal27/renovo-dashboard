@@ -43,7 +43,7 @@ const OPERATOR_ROUTE_CONFIG: Array<{
         'Single-case operator review across evidence, issues, decision rationale, and submission readiness.',
       searchPlaceholder: 'Search this case by issue, evidence, recommendation, or message',
       breadcrumbs: [
-        { label: 'Checkouts', href: '/eot' },
+        { label: 'Checkouts', href: '/checkouts' },
         { label: 'Case workspace' },
       ],
     },
@@ -60,25 +60,25 @@ const OPERATOR_ROUTE_CONFIG: Array<{
     },
   },
   {
-    matches: (pathname) => pathname === '/eot',
+    matches: (pathname) => pathname === '/checkouts',
     config: {
       pageTitle: 'Checkouts',
       pageDescription:
         'Operational checkout queue with live end-of-tenancy workflow state, dispute signals, and fast access into the workspace.',
       searchPlaceholder: 'Search live checkouts by property, tenant, status, priority, or checkout ID',
-      searchTargetPath: '/eot',
+      searchTargetPath: '/checkouts',
       breadcrumbs: [{ label: 'Checkouts' }],
     },
   },
   {
-    matches: (pathname) => pathname.startsWith('/eot/'),
+    matches: (pathname) => pathname.startsWith('/checkouts/'),
     config: {
       pageTitle: 'Checkout workspace',
       pageDescription:
         'Review live evidence, issues, recommendations, claim structure, and communication in a single operator workspace.',
       searchPlaceholder: 'Filter this checkout by issue, evidence, recommendation, or message',
       breadcrumbs: [
-        { label: 'Checkouts', href: '/eot' },
+        { label: 'Checkouts', href: '/checkouts' },
         { label: 'Checkout workspace' },
       ],
     },
@@ -91,7 +91,7 @@ const OPERATOR_ROUTE_CONFIG: Array<{
         'Cross-checkout tenancy view covering residents, deposits, property references, and checkout readiness.',
       searchPlaceholder: 'Search tenancy records by property, tenant, reference, or checkout state',
       searchTargetPath: '/tenancy',
-      breadcrumbs: [{ label: 'Checkouts', href: '/eot' }, { label: 'Tenancy' }],
+      breadcrumbs: [{ label: 'Checkouts', href: '/checkouts' }, { label: 'Tenancy' }],
     },
   },
   {
@@ -111,7 +111,7 @@ const OPERATOR_ROUTE_CONFIG: Array<{
         'Review disputed checkouts, contested issues, and the evidence-backed narratives needed for resolution.',
       searchPlaceholder: 'Search disputes by property, tenant, issue, severity, or dispute state',
       searchTargetPath: '/disputes',
-      breadcrumbs: [{ label: 'Checkouts', href: '/eot' }, { label: 'Disputes' }],
+      breadcrumbs: [{ label: 'Checkouts', href: '/checkouts' }, { label: 'Disputes' }],
     },
   },
   {
