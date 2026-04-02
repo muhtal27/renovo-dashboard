@@ -1,7 +1,9 @@
-// Renovo AI — Service Worker v3
+// Renovo AI — Service Worker v4
 // Strategies: precache shell, network-first HTML, stale-while-revalidate assets
+// Cache is versioned per deploy — old caches are deleted on activate.
 
-const CACHE_NAME = 'renovo-v3'
+const CACHE_VERSION = '__BUILD_TS__'
+const CACHE_NAME = `renovo-v4-${CACHE_VERSION}`
 const OFFLINE_URL = '/offline'
 
 // Critical shell assets to precache on install
@@ -50,7 +52,6 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          // Only cache successful responses
           if (response.ok) {
             const clone = response.clone()
             caches.open(CACHE_NAME).then((cache) => cache.put(request, clone))
@@ -64,7 +65,24 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  // Static assets (JS, CSS, images, fonts) → stale-while-revalidate
+  // Next.js hashed static assets → cache-first (hash changes on new builds)
+  if (url.pathname.startsWith('/_next/static/')) {
+    event.respondWith(
+      caches.match(request).then((cached) => {
+        if (cached) return cached
+        return fetch(request).then((response) => {
+          if (response.ok) {
+            const clone = response.clone()
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone))
+          }
+          return response
+        })
+      })
+    )
+    return
+  }
+
+  // Other static assets (images, fonts) → stale-while-revalidate
   if (isStaticAsset(url.pathname)) {
     event.respondWith(
       caches.match(request).then((cached) => {
@@ -96,6 +114,5 @@ self.addEventListener('message', (event) => {
 })
 
 function isStaticAsset(pathname) {
-  return /\.(?:js|css|png|jpg|jpeg|svg|webp|avif|ico|woff2?|ttf|eot)$/i.test(pathname) ||
-    pathname.startsWith('/_next/static/')
+  return /\.(?:js|css|png|jpg|jpeg|svg|webp|avif|ico|woff2?|ttf|eot)$/i.test(pathname)
 }

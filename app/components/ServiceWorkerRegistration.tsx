@@ -11,7 +11,7 @@ export function ServiceWorkerRegistration() {
 
     navigator.serviceWorker.register('/sw.js').then((registration) => {
       // Check for updates every 60 seconds
-      const interval = setInterval(() => registration.update(), 60_000)
+      const interval = setInterval(() => registration.update(), 15_000)
 
       registration.addEventListener('updatefound', () => {
         const newWorker = registration.installing

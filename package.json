@@ -14,6 +14,7 @@
     "deploy:preview:smoke": "bash scripts/deploy-dashboard.sh preview --smoke",
     "deploy:prod": "bash scripts/deploy-dashboard.sh production",
     "deploy:prod:smoke": "bash scripts/deploy-dashboard.sh production --smoke",
+    "prebuild": "node scripts/stamp-sw.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
