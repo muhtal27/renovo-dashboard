@@ -16,6 +16,30 @@ export type EotIssueStatus = 'open' | 'resolved' | 'disputed'
 export type EotRecommendationDecision = 'charge' | 'no_charge' | 'partial'
 export type EotMessageSenderType = 'manager' | 'landlord' | 'tenant'
 
+export type EotTenancyListItem = {
+  id: string
+  property: {
+    id: string
+    name: string
+    reference: string | null
+    address_line_1: string | null
+    address_line_2: string | null
+    city: string | null
+    postcode: string | null
+  }
+  tenant_name: string
+  tenant_email: string | null
+  landlord_name: string | null
+  start_date: string | null
+  end_date: string | null
+  deposit_amount: string | null
+  deposit_scheme: string | null
+  case_id: string | null
+  case_status: EotCaseStatus | null
+  created_at: string
+  updated_at: string
+}
+
 export type EotCaseListItem = {
   id: string
   property: {

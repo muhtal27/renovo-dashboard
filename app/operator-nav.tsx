@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import {
   BarChart3,
   BookOpenText,
+  Building2,
   ChevronLeft,
   ClipboardCheck,
   FolderKanban,
@@ -49,6 +50,12 @@ const NAV_GROUPS: Array<{
   {
     label: 'Operations',
     items: [
+      {
+        label: 'Tenancies',
+        href: '/tenancies',
+        icon: Building2,
+        isActive: (pathname) => pathname === '/tenancies' || pathname.startsWith('/tenancies/'),
+      },
       {
         label: 'Checkouts',
         href: '/checkouts',

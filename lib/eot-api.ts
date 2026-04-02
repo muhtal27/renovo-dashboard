@@ -14,6 +14,7 @@ import type {
   EotEvidence,
   EotIssue,
   EotMessage,
+  EotTenancyListItem,
   UpsertEotIssueInput,
   EotSectionPage,
 } from '@/lib/eot-types'
@@ -72,6 +73,10 @@ async function requestJson<T>(path: string, options: RequestOptions = {}): Promi
   }
 
   return payload as T
+}
+
+export function listEotTenancies() {
+  return requestJson<EotTenancyListItem[]>('/api/eot/tenancies')
 }
 
 export function listEotCases() {
