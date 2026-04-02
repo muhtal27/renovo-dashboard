@@ -91,6 +91,14 @@ const NAV_GROUPS: Array<{
         isActive: (pathname) => pathname.startsWith('/overview'),
       },
       {
+        label: 'Teams',
+        href: '/settings/members',
+        icon: Users,
+        isActive: (pathname) =>
+          pathname.startsWith('/settings/members') || pathname.startsWith('/settings/teams'),
+        requiredPermission: OPERATOR_PERMISSIONS.MANAGE_USERS,
+      },
+      {
         label: 'Reports / Analytics',
         href: '/reports',
         icon: BarChart3,
@@ -100,16 +108,9 @@ const NAV_GROUPS: Array<{
     ],
   },
   {
-    label: 'Workspace',
+    label: 'Account',
     items: [
       {
-        label: 'Team',
-        href: '/settings/members',
-        icon: Users,
-        isActive: (pathname) => pathname.startsWith('/settings/members'),
-        requiredPermission: OPERATOR_PERMISSIONS.MANAGE_USERS,
-      },
-{
         label: 'Settings',
         href: '/settings',
         icon: Settings,
@@ -275,7 +276,7 @@ function SidebarContent({
                   onNavigate={onNavigate}
                 />
               ))}
-              {group.label === 'Workspace' && onSignOut ? (
+              {group.label === 'Account' && onSignOut ? (
                 <NavActionButton
                   label="Sign out"
                   icon={LogOut}

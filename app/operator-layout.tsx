@@ -146,11 +146,24 @@ const OPERATOR_ROUTE_CONFIG: Array<{
     },
   },
   {
+    matches: (pathname) =>
+      pathname.startsWith('/settings/members') || pathname.startsWith('/settings/teams'),
+    config: {
+      pageTitle: 'Teams',
+      pageDescription: 'Manage workspace members, roles, and team structure.',
+      breadcrumbs: [
+        { label: 'Management', href: '/overview' },
+        { label: 'Teams' },
+      ],
+    },
+  },
+  {
     matches: (pathname) => pathname.startsWith('/settings'),
     config: {
       pageTitle: 'Settings',
       pageDescription:
         'Review operator workspace defaults, access controls, and outbound communication readiness.',
+      breadcrumbs: [{ label: 'Account' }, { label: 'Settings' }],
     },
   },
 ]
