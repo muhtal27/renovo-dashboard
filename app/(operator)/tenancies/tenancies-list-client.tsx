@@ -240,8 +240,10 @@ export function TenanciesListClient({
             const status = getTenancyStatus(tenancy)
 
             return (
-              <div
+              <Link
                 key={tenancy.id}
+                href={`/tenancies/${tenancy.id}`}
+                prefetch={false}
                 className="grid grid-cols-1 items-start gap-x-6 border-b border-zinc-200 px-5 py-5 transition hover:bg-zinc-50/60 sm:grid-cols-[1fr_160px] md:grid-cols-[1fr_160px_140px_120px_100px]"
               >
                 {/* Property + tenant */}
@@ -304,19 +306,16 @@ export function TenanciesListClient({
                 {/* Case link */}
                 <div className="hidden md:block">
                   {tenancy.case_id ? (
-                    <Link
-                      href={`/checkouts/${tenancy.case_id}`}
-                      className="mt-3 inline-flex items-center text-xs font-medium text-emerald-600 transition hover:text-emerald-700"
-                    >
-                      View case
-                    </Link>
+                    <span className="mt-3 inline-flex items-center text-xs font-medium text-emerald-600">
+                      Has case
+                    </span>
                   ) : (
                     <span className="mt-3 inline-flex items-center text-xs text-zinc-400">
                       No case
                     </span>
                   )}
                 </div>
-              </div>
+              </Link>
             )
           })}
         </div>

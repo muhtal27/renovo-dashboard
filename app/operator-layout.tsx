@@ -84,14 +84,26 @@ const OPERATOR_ROUTE_CONFIG: Array<{
     },
   },
   {
-    matches: (pathname) => pathname.startsWith('/tenancy'),
+    matches: (pathname) => pathname === '/tenancies',
     config: {
-      pageTitle: 'Tenancy',
+      pageTitle: 'Tenancies',
       pageDescription:
         'Cross-checkout tenancy view covering residents, deposits, property references, and checkout readiness.',
       searchPlaceholder: 'Search tenancy records by property, tenant, reference, or checkout state',
-      searchTargetPath: '/tenancy',
-      breadcrumbs: [{ label: 'Checkouts', href: '/checkouts' }, { label: 'Tenancy' }],
+      searchTargetPath: '/tenancies',
+      breadcrumbs: [{ label: 'Tenancies' }],
+    },
+  },
+  {
+    matches: (pathname) => pathname.startsWith('/tenancies/'),
+    config: {
+      pageTitle: 'Tenancy detail',
+      pageDescription:
+        'Full tenancy record with property, residents, deposit, period, and linked checkout case.',
+      breadcrumbs: [
+        { label: 'Tenancies', href: '/tenancies' },
+        { label: 'Tenancy detail' },
+      ],
     },
   },
   {

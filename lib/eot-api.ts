@@ -79,6 +79,10 @@ export function listEotTenancies() {
   return requestJson<EotTenancyListItem[]>('/api/eot/tenancies')
 }
 
+export function getEotTenancy(tenancyId: string) {
+  return requestJson<EotTenancyListItem>(`/api/eot/tenancies/${tenancyId}`)
+}
+
 export function listEotCases() {
   return requestJson<EotCaseListItem[]>('/api/eot/cases')
 }
