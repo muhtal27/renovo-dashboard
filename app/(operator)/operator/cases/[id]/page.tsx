@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import { CheckoutCaseWorkspace } from '@/app/(operator)/operator/cases/[id]/_components/checkout-case-workspace'
 import { getOperatorCheckoutWorkspaceData } from '@/lib/operator-checkout-workspace'
 import { isOperatorCaseWorkspaceNotFoundError } from '@/lib/operator-case-workspace'
-import { normalizeCheckoutWorkspaceTab } from '@/lib/operator-checkout-workspace-types'
+import { normalizeWorkspaceStep } from '@/lib/operator-checkout-workspace-types'
 
 export const metadata: Metadata = {
   title: 'Operator Case Workspace | Renovo AI',
@@ -14,14 +14,15 @@ type PageProps = {
     id: string
   }>
   searchParams: Promise<{
+    step?: string | string[]
     tab?: string | string[]
   }>
 }
 
 export default async function OperatorCaseWorkspacePage({ params, searchParams }: PageProps) {
   const [{ id }, resolvedSearchParams] = await Promise.all([params, searchParams])
-  const tabValue = resolvedSearchParams.tab
-  const initialTab = normalizeCheckoutWorkspaceTab(Array.isArray(tabValue) ? tabValue[0] : tabValue)
+  const stepValue = resolvedSearchParams.step ?? resolvedSearchParams.tab
+  const initialStep = normalizeWorkspaceStep(Array.isArray(stepValue) ? stepValue[0] : stepValue)
   const data = await getOperatorCheckoutWorkspaceData(id).catch((error) => {
     if (isOperatorCaseWorkspaceNotFoundError(error)) {
       notFound()
@@ -30,5 +31,5 @@ export default async function OperatorCaseWorkspacePage({ params, searchParams }
     throw error
   })
 
-  return <CheckoutCaseWorkspace data={data} initialTab={initialTab} />
+  return <CheckoutCaseWorkspace data={data} initialTab={initialStep} />
 }

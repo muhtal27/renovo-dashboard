@@ -13,6 +13,20 @@ export const CHECKOUT_WORKSPACE_TABS = [
 
 export type CheckoutWorkspaceTab = (typeof CHECKOUT_WORKSPACE_TABS)[number]
 
+export const WORKSPACE_STEPS = [
+  'overview',
+  'draft',
+  'collecting-evidence',
+  'analysis',
+  'review',
+  'draft-sent',
+  'ready-for-claim',
+  'submitted',
+  'resolved',
+] as const
+
+export type WorkspaceStep = (typeof WORKSPACE_STEPS)[number]
+
 export type CheckoutWorkspaceCaseStatus =
   | 'in_review'
   | 'ready'
@@ -263,4 +277,22 @@ export function normalizeCheckoutWorkspaceTab(value: string | null | undefined):
   }
 
   return isCheckoutWorkspaceTab(value) ? value : 'overview'
+}
+
+export function isWorkspaceStep(value: string | null | undefined): value is WorkspaceStep {
+  return Boolean(value && WORKSPACE_STEPS.includes(value as WorkspaceStep))
+}
+
+export function normalizeWorkspaceStep(value: string | null | undefined): WorkspaceStep {
+  if (!value) return 'overview'
+  const v = value.toLowerCase().trim()
+  if (isWorkspaceStep(v)) return v
+  if (v === 'process') return 'analysis'
+  if (v === 'documents') return 'draft'
+  if (v === 'defects') return 'review'
+  if (v === 'utilities') return 'overview'
+  if (v === 'negotiation') return 'ready-for-claim'
+  if (v === 'send-out' || v === 'sendout') return 'draft-sent'
+  if (v === 'submission') return 'submitted'
+  return 'overview'
 }

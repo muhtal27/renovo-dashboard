@@ -3,175 +3,197 @@
 import { Check } from 'lucide-react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useTransition, type ComponentType } from 'react'
-import { formatAddress, formatDate, formatEnumLabel } from '@/app/eot/_components/eot-ui'
-import { WorkspaceBadge, WorkspaceTabBar, type WorkspaceTabItem } from '@/app/(operator)/operator/cases/[id]/_components/checkout-workspace-ui'
-import { CaseDefects } from '@/app/(operator)/operator/cases/[id]/_components/case-defects'
-import { CaseDocuments } from '@/app/(operator)/operator/cases/[id]/_components/case-documents'
-import { CaseNegotiation } from '@/app/(operator)/operator/cases/[id]/_components/case-negotiation'
-import { CaseOverview } from '@/app/(operator)/operator/cases/[id]/_components/case-overview'
-import { CaseProcess } from '@/app/(operator)/operator/cases/[id]/_components/case-process'
-import { CaseSendOut } from '@/app/(operator)/operator/cases/[id]/_components/case-send-out'
-import { CaseSubmission } from '@/app/(operator)/operator/cases/[id]/_components/case-submission'
-import { CaseUtilities } from '@/app/(operator)/operator/cases/[id]/_components/case-utilities'
+import { formatAddress, formatDate } from '@/app/eot/_components/eot-ui'
+import { WorkspaceBadge } from '@/app/(operator)/operator/cases/[id]/_components/checkout-workspace-ui'
+import { StepOverview } from '@/app/(operator)/operator/cases/[id]/_components/step-overview'
+import { StepDraft } from '@/app/(operator)/operator/cases/[id]/_components/step-draft'
+import { StepEvidence } from '@/app/(operator)/operator/cases/[id]/_components/step-evidence'
+import { StepAnalysis } from '@/app/(operator)/operator/cases/[id]/_components/step-analysis'
+import { StepReview } from '@/app/(operator)/operator/cases/[id]/_components/step-review'
+import { StepDraftSent } from '@/app/(operator)/operator/cases/[id]/_components/step-draft-sent'
+import { StepReady } from '@/app/(operator)/operator/cases/[id]/_components/step-ready'
+import { StepSubmitted } from '@/app/(operator)/operator/cases/[id]/_components/step-submitted'
+import { StepResolved } from '@/app/(operator)/operator/cases/[id]/_components/step-resolved'
 import { cn } from '@/lib/ui'
 import type { EotCaseStatus } from '@/lib/eot-types'
 import {
-  normalizeCheckoutWorkspaceTab,
-  type CheckoutWorkspaceTab,
+  normalizeWorkspaceStep,
+  type WorkspaceStep,
   type OperatorCheckoutWorkspaceData,
 } from '@/lib/operator-checkout-workspace-types'
 
-const WORKFLOW_STEPS: { status: EotCaseStatus; label: string }[] = [
-  { status: 'draft', label: 'Draft' },
-  { status: 'collecting_evidence', label: 'Evidence' },
-  { status: 'analysis', label: 'Analysing' },
-  { status: 'review', label: 'Review' },
-  { status: 'draft_sent', label: 'Draft sent' },
-  { status: 'ready_for_claim', label: 'Ready' },
-  { status: 'submitted', label: 'Submitted' },
-  { status: 'resolved', label: 'Resolved' },
+/* ────────────────────────────────────────────────────────────── */
+/*  Workflow step definitions                                     */
+/* ────────────────────────────────────────────────────────────── */
+
+const WORKFLOW_STEPS: { step: WorkspaceStep; label: string; status: EotCaseStatus | null }[] = [
+  { step: 'overview', label: 'Overview', status: null },
+  { step: 'draft', label: 'Draft', status: 'draft' },
+  { step: 'collecting-evidence', label: 'Evidence', status: 'collecting_evidence' },
+  { step: 'analysis', label: 'Analysing', status: 'analysis' },
+  { step: 'review', label: 'Review', status: 'review' },
+  { step: 'draft-sent', label: 'Draft sent', status: 'draft_sent' },
+  { step: 'ready-for-claim', label: 'Ready', status: 'ready_for_claim' },
+  { step: 'submitted', label: 'Submitted', status: 'submitted' },
+  { step: 'resolved', label: 'Resolved', status: 'resolved' },
 ]
 
-function getStepIndex(status: EotCaseStatus): number {
-  const index = WORKFLOW_STEPS.findIndex((s) => s.status === status)
+const STATUS_ORDER: EotCaseStatus[] = [
+  'draft',
+  'collecting_evidence',
+  'analysis',
+  'review',
+  'draft_sent',
+  'ready_for_claim',
+  'submitted',
+  'resolved',
+]
+
+function getStatusIndex(status: EotCaseStatus): number {
+  const index = STATUS_ORDER.indexOf(status)
   return index >= 0 ? index : 0
 }
 
-function WorkflowProgressTrack({ currentStatus }: { currentStatus: EotCaseStatus }) {
-  const currentIndex = getStepIndex(currentStatus)
+function statusToStep(status: EotCaseStatus): WorkspaceStep {
+  if (status === 'disputed') return 'resolved'
+  const match = WORKFLOW_STEPS.find((s) => s.status === status)
+  return match?.step ?? 'overview'
+}
+
+/* ────────────────────────────────────────────────────────────── */
+/*  Clickable workflow navigation                                 */
+/* ────────────────────────────────────────────────────────────── */
+
+function WorkflowNav({
+  activeStep,
+  currentStatus,
+  onStepClick,
+}: {
+  activeStep: WorkspaceStep
+  currentStatus: EotCaseStatus
+  onStepClick: (step: WorkspaceStep) => void
+}) {
+  const currentIndex = getStatusIndex(currentStatus)
   const isDisputed = currentStatus === 'disputed'
 
   return (
-    <div className="flex flex-wrap items-center gap-0.5">
-      {WORKFLOW_STEPS.map((step, index) => {
-        const isComplete = !isDisputed && index < currentIndex
-        const isCurrent = step.status === currentStatus
+    <nav className="flex flex-wrap items-center gap-0.5" aria-label="Case workflow">
+      {WORKFLOW_STEPS.map((item, index) => {
+        const stepStatusIndex = item.status ? STATUS_ORDER.indexOf(item.status) : -1
+        const isComplete = !isDisputed && item.status != null && stepStatusIndex < currentIndex
+        const isCurrent = item.status === currentStatus || (isDisputed && item.step === 'resolved')
+        const isActive = item.step === activeStep
         const isProcessing = isCurrent && currentStatus === 'analysis'
 
         return (
-          <div key={step.status} className="flex items-center gap-0.5">
+          <div key={item.step} className="flex items-center gap-0.5">
             {index > 0 ? (
               <div className={`h-px w-4 ${isComplete ? 'bg-emerald-300' : 'bg-zinc-200'}`} />
             ) : null}
-            <div
-              className={`flex items-center gap-1.5 px-1.5 py-1 text-[11px] font-medium ${
-                isCurrent
-                  ? 'text-zinc-950'
-                  : isComplete
-                    ? 'text-emerald-600'
-                    : 'text-zinc-400'
-              }`}
+            <button
+              type="button"
+              onClick={() => onStepClick(item.step)}
+              className={cn(
+                'flex items-center gap-1.5 px-2 py-1.5 text-[11px] font-medium transition-colors',
+                isActive
+                  ? 'bg-zinc-100 text-zinc-950'
+                  : isCurrent
+                    ? 'text-zinc-950 hover:bg-zinc-50'
+                    : isComplete
+                      ? 'text-emerald-600 hover:bg-emerald-50/50'
+                      : 'text-zinc-400 hover:bg-zinc-50 hover:text-zinc-600'
+              )}
             >
               {isComplete ? (
                 <Check className="h-3.5 w-3.5 text-emerald-500" strokeWidth={2.5} />
               ) : isCurrent ? (
                 <div
                   className={`h-2 w-2 rounded-full ${
-                    isProcessing ? 'animate-pulse bg-amber-500' : 'bg-zinc-900'
+                    isProcessing ? 'animate-pulse bg-amber-500' : isDisputed ? 'bg-rose-500' : 'bg-zinc-900'
                   }`}
                 />
+              ) : item.step === 'overview' ? (
+                <div className="h-2 w-2 rounded-full bg-zinc-400" />
               ) : (
                 <div className="h-1.5 w-1.5 rounded-full bg-zinc-300" />
               )}
-              {step.label}
-            </div>
+              {item.label}
+            </button>
           </div>
         )
       })}
-      {isDisputed ? (
-        <div className="flex items-center gap-0.5">
-          <div className="h-px w-4 bg-zinc-200" />
-          <div className="flex items-center gap-1.5 px-1.5 py-1 text-[11px] font-medium text-rose-700">
-            <div className="h-2 w-2 rounded-full bg-rose-500" />
-            Disputed
-          </div>
-        </div>
-      ) : null}
-    </div>
+    </nav>
   )
 }
 
-const TAB_ITEMS: WorkspaceTabItem<CheckoutWorkspaceTab>[] = [
-  { id: 'overview', label: 'Overview' },
-  { id: 'process', label: 'Process' },
-  { id: 'documents', label: 'Documents' },
-  { id: 'defects', label: 'Defects & liability' },
-  { id: 'utilities', label: 'Utilities & keys' },
-  { id: 'negotiation', label: 'Negotiation' },
-  { id: 'send-out', label: 'Send out' },
-  { id: 'submission', label: 'Submission' },
-]
+/* ────────────────────────────────────────────────────────────── */
+/*  Step → component mapping                                      */
+/* ────────────────────────────────────────────────────────────── */
 
-const TAB_COMPONENTS: Record<
-  CheckoutWorkspaceTab,
-  ComponentType<{ data: OperatorCheckoutWorkspaceData }>
-> = {
-  overview: CaseOverview,
-  process: CaseProcess,
-  documents: CaseDocuments,
-  defects: CaseDefects,
-  utilities: CaseUtilities,
-  negotiation: CaseNegotiation,
-  'send-out': CaseSendOut,
-  submission: CaseSubmission,
+const STEP_COMPONENTS: Record<WorkspaceStep, ComponentType<{ data: OperatorCheckoutWorkspaceData }>> = {
+  overview: StepOverview,
+  draft: StepDraft,
+  'collecting-evidence': StepEvidence,
+  analysis: StepAnalysis,
+  review: StepReview,
+  'draft-sent': StepDraftSent,
+  'ready-for-claim': StepReady,
+  submitted: StepSubmitted,
+  resolved: StepResolved,
 }
 
-function getStatusPresentation(status: string | null | undefined) {
+/* ────────────────────────────────────────────────────────────── */
+/*  Status badge presentation                                     */
+/* ────────────────────────────────────────────────────────────── */
+
+function getStatusPresentation(status: EotCaseStatus) {
   switch (status) {
-    case 'ready':
-      return {
-        label: 'Ready to finalise',
-        tone: 'accepted' as const,
-      }
-    case 'sent':
-      return {
-        label: 'Sent',
-        tone: 'sent' as const,
-      }
+    case 'draft':
+      return { label: 'Draft', tone: 'draft' as const }
+    case 'collecting_evidence':
+      return { label: 'Collecting evidence', tone: 'processing' as const }
+    case 'analysis':
+      return { label: 'Analysing', tone: 'warning' as const }
+    case 'review':
+      return { label: 'In review', tone: 'review' as const }
+    case 'draft_sent':
+      return { label: 'Draft sent', tone: 'sent' as const }
+    case 'ready_for_claim':
+      return { label: 'Ready for claim', tone: 'accepted' as const }
     case 'submitted':
-      return {
-        label: 'Submitted',
-        tone: 'submitted' as const,
-      }
+      return { label: 'Submitted', tone: 'submitted' as const }
     case 'disputed':
-      return {
-        label: 'Disputed',
-        tone: 'disputed' as const,
-      }
-    case 'closed':
-      return {
-        label: 'Closed',
-        tone: 'neutral' as const,
-      }
-    case 'in_review':
+      return { label: 'Disputed', tone: 'disputed' as const }
+    case 'resolved':
+      return { label: 'Resolved', tone: 'accepted' as const }
     default:
-      return {
-        label: 'In review',
-        tone: 'review' as const,
-      }
+      return { label: 'Unknown', tone: 'neutral' as const }
   }
 }
 
-function getWorkspaceHref(pathname: string, searchParams: URLSearchParams) {
-  const query = searchParams.toString()
-  return query ? `${pathname}?${query}` : pathname
-}
+/* ────────────────────────────────────────────────────────────── */
+/*  Main workspace                                                */
+/* ────────────────────────────────────────────────────────────── */
 
 export function CheckoutCaseWorkspace({
   data,
   initialTab,
 }: {
   data: OperatorCheckoutWorkspaceData
-  initialTab: CheckoutWorkspaceTab
+  initialTab: string
 }) {
   const pathname = usePathname()
   const router = useRouter()
   const searchParams = useSearchParams()
   const [isPending, startTransition] = useTransition()
-  const urlTab = normalizeCheckoutWorkspaceTab(searchParams.get('tab'))
-  const activeTab = urlTab || initialTab
-  const ActiveTabComponent = TAB_COMPONENTS[activeTab]
-  const status = getStatusPresentation(data.checkoutCase?.status)
+
+  const urlStep = normalizeWorkspaceStep(searchParams.get('step') ?? searchParams.get('tab'))
+  const activeStep = urlStep || (normalizeWorkspaceStep(initialTab) as WorkspaceStep)
+  const ActiveStepComponent = STEP_COMPONENTS[activeStep]
+
+  const currentStatus = data.workspace.case.status
+  const status = getStatusPresentation(currentStatus)
+
   const propertyAddress = formatAddress([
     data.workspace.property.address_line_1,
     data.workspace.property.address_line_2,
@@ -179,96 +201,67 @@ export function CheckoutCaseWorkspace({
     data.workspace.property.postcode,
     data.workspace.property.country_code,
   ])
-  const caseReference = data.checkoutCase?.caseReference ?? data.workspace.case.id.slice(0, 8).toUpperCase()
-  const metadataItems = [
-    {
-      label: 'Checkout',
-      value: formatDate(data.checkoutCase?.checkoutDate ?? data.workspace.tenancy.end_date),
-    },
-    {
-      label: 'Assessor',
-      value: data.checkoutCase?.assessorName ?? 'Not recorded',
-    },
-    {
-      label: 'Agency',
-      value: data.checkoutCase?.agencyName ?? 'Not recorded',
-    },
-    {
-      label: 'Source',
-      value: data.checkoutCase?.reportSource ?? 'Not recorded',
-    },
-  ]
+  const caseReference =
+    data.checkoutCase?.caseReference ?? data.workspace.case.id.slice(0, 8).toUpperCase()
 
-  function handleTabChange(tabId: CheckoutWorkspaceTab) {
-    if (!pathname) {
-      return
-    }
+  function handleStepClick(step: WorkspaceStep) {
+    if (!pathname) return
 
     startTransition(() => {
-      const nextSearchParams = new URLSearchParams(searchParams.toString())
+      const nextParams = new URLSearchParams(searchParams.toString())
+      nextParams.delete('tab')
 
-      if (tabId === 'overview') {
-        nextSearchParams.delete('tab')
+      if (step === 'overview') {
+        nextParams.delete('step')
       } else {
-        nextSearchParams.set('tab', tabId)
+        nextParams.set('step', step)
       }
 
-      router.replace(getWorkspaceHref(pathname, nextSearchParams), { scroll: false })
+      const query = nextParams.toString()
+      router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false })
     })
   }
 
   return (
     <div className="space-y-6">
+      {/* Case header */}
       <section className="border border-zinc-200/80 bg-white px-6 py-6 md:px-7">
         <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
           {`Case #${caseReference}`}
         </p>
-        <div className="mt-3 flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+        <div className="mt-3 flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
           <div className="min-w-0">
             <h1 className="text-[1.7rem] font-semibold tracking-[-0.04em] text-zinc-950 [overflow-wrap:anywhere]">
               {propertyAddress}
             </h1>
-            <div className="mt-3 flex flex-wrap items-center gap-2">
+            <div className="mt-2 flex flex-wrap items-center gap-2">
               <WorkspaceBadge label={status.label} tone={status.tone} />
-            </div>
-            <div className="mt-4">
-              <WorkflowProgressTrack currentStatus={data.workspace.case.status} />
+              <span className="text-xs text-zinc-400">
+                Checkout {formatDate(data.checkoutCase?.checkoutDate ?? data.workspace.tenancy.end_date)}
+              </span>
             </div>
           </div>
         </div>
 
-        <dl className="mt-6 grid gap-4 border-t border-zinc-200 pt-6 text-sm text-zinc-600 md:grid-cols-2 xl:grid-cols-4">
-          {metadataItems.map((item) => (
-            <div key={item.label} className="min-w-0">
-              <dt className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
-                {item.label}
-              </dt>
-              <dd className="mt-2 text-sm font-medium text-zinc-950 [overflow-wrap:anywhere]">
-                {item.value}
-              </dd>
-            </div>
-          ))}
-        </dl>
+        {/* Workflow navigation */}
+        <div className="mt-5 border-t border-zinc-100 pt-4">
+          <WorkflowNav
+            activeStep={activeStep}
+            currentStatus={currentStatus}
+            onStepClick={handleStepClick}
+          />
+        </div>
       </section>
 
+      {/* Step content */}
       <section
         aria-busy={isPending}
         className={cn(
-          'overflow-hidden border border-zinc-200/80 bg-white',
+          'border border-zinc-200/80 bg-white px-6 py-6 md:px-7',
           isPending ? 'opacity-80' : null
         )}
       >
-        <div className="px-6 pt-4 md:px-7">
-          <WorkspaceTabBar
-            activeTab={activeTab}
-            ariaLabel="Checkout workspace sections"
-            items={TAB_ITEMS}
-            onChange={handleTabChange}
-          />
-        </div>
-        <div className="border-t border-zinc-200 px-6 py-6 md:px-7">
-          <ActiveTabComponent data={data} />
-        </div>
+        <ActiveStepComponent data={data} />
       </section>
     </div>
   )
