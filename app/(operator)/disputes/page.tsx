@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { EotPortfolioClient } from '@/app/eot/_components/eot-portfolio-client'
+import { DisputeListClient } from '@/app/(operator)/disputes/_components/dispute-list-client'
 import { getEotCaseListSnapshot } from '@/lib/eot-server-data'
 import { requireOperatorTenant } from '@/lib/operator-server'
 
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default async function DisputesPage() {
   const context = await requireOperatorTenant('/disputes')
   const cases = await getEotCaseListSnapshot(context).catch(() => null)
-  const initialSnapshot = cases ? { cases, workspaces: [] } : null
+  const disputedCases = cases?.filter((c) => c.status === 'disputed') ?? null
 
-  return <EotPortfolioClient mode="disputes" initialSnapshot={initialSnapshot} />
+  return <DisputeListClient initialCases={disputedCases} />
 }
