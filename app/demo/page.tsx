@@ -45,37 +45,23 @@ export default function DemoPage() {
               page in the sidebar is fully interactive.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                href="/contact"
+              <a
+                href="/demo.html"
                 className="app-primary-button rounded-md px-6 py-3 text-sm font-medium"
               >
-                Get started &rarr;
-              </Link>
+                Launch interactive demo &rarr;
+              </a>
               <Link
-                href="/"
+                href="/contact"
                 className="app-secondary-button rounded-md px-6 py-3 text-sm font-medium"
               >
-                Back to homepage
+                Get started
               </Link>
             </div>
             <p className="mt-5 text-sm leading-7 text-slate-400">
               This demo uses mock Edinburgh properties and tenants. No real
               customer data is shown.
             </p>
-          </section>
-
-          <section className="overflow-hidden rounded-xl border border-zinc-200 shadow-[0_18px_48px_rgba(0,0,0,0.08)]">
-            <div
-              className="relative w-full overflow-hidden bg-white"
-              style={{ aspectRatio: '16 / 9' }}
-            >
-              <iframe
-                src="/demo.html"
-                title="Renovo AI interactive demo"
-                className="absolute inset-0 h-full w-full border-0"
-                loading="eager"
-              />
-            </div>
           </section>
 
           <section className="mx-auto grid max-w-4xl gap-6 md:grid-cols-3">
@@ -114,6 +100,30 @@ export default function DemoPage() {
                 Nine Edinburgh properties with tenants, landlords, deposits, and
                 AI-generated liability assessments across every workflow state.
               </p>
+            </div>
+          </section>
+
+          <section className="page-hero">
+            <h2 className="text-[clamp(1.6rem,3vw,2.2rem)] leading-[1.1] tracking-[-0.03em]">
+              Ready to automate your checkouts?
+            </h2>
+            <p className="page-copy max-w-[540px]">
+              See how Renovo AI handles your real portfolio. Book a walkthrough
+              with your own property data.
+            </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link
+                href="/contact"
+                className="app-primary-button rounded-md px-6 py-3 text-sm font-medium"
+              >
+                Get started &rarr;
+              </Link>
+              <Link
+                href="/"
+                className="app-secondary-button rounded-md px-6 py-3 text-sm font-medium"
+              >
+                Back to homepage
+              </Link>
             </div>
           </section>
         </div>
