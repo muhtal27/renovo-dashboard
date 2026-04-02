@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Renovo AI — Interactive Demo</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: { sans: ['-apple-system','BlinkMacSystemFont','Segoe UI','Roboto','sans-serif'] }
+    }
+  }
+}
+</script>
+<style>
+@keyframes spin{to{transform:rotate(360deg)}}.anim-spin{animation:spin 1s linear infinite}
+@keyframes pulse-glow{0%,100%{opacity:1}50%{opacity:.5}}.anim-pulse{animation:pulse-glow 2s ease-in-out infinite}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}.fade-in{animation:fadeIn .25s ease-out}
+@keyframes slideIn{from{transform:translateX(-100%)}to{transform:translateX(0)}}.slide-in{animation:slideIn .2s ease-out}
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#d4d4d8;border-radius:3px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+// ═══════════════════════════════════════════════════════════════
+// MOCK DATA
+// ═══════════════════════════════════════════════════════════════
+
+const CASES = [
+  {id:'CHK-2026-001',property:'17 Bruntsfield Place, Edinburgh EH1 4EQ',tenant:'Sarah Campbell',landlord:'Andrew Turnbull',deposit:1100,scheme:'SafeDeposits Scotland',start:'15 Mar 2024',end:'14 Mar 2026',ref:'SDS-2024-00847',status:'draft',priority:'high',issues:0,claim:0,lastActivity:'2 hours ago'},
+  {id:'CHK-2026-002',property:'42 Leith Walk, Edinburgh EH6 5HB',tenant:'James Murray',landlord:'Claire Henderson',deposit:950,scheme:'SafeDeposits Scotland',start:'01 Jun 2024',end:'31 May 2026',ref:'SDS-2024-01203',status:'review',priority:'high',issues:3,claim:210,lastActivity:'4 hours ago'},
+  {id:'CHK-2026-003',property:'8 Morningside Road, Edinburgh EH10 4DD',tenant:'Emma Wilson',landlord:'David Scott',deposit:1400,scheme:'mydeposits Scotland',start:'01 Sep 2023',end:'31 Aug 2025',ref:'MYD-2025-00412',status:'collecting_evidence',priority:'medium',issues:0,claim:0,lastActivity:'1 day ago'},
+  {id:'CHK-2026-004',property:'91 Gorgie Road, Edinburgh EH11 2LA',tenant:'Omar Rashid',landlord:'Fiona MacLeod',deposit:800,scheme:'SafeDeposits Scotland',start:'15 Jan 2024',end:'14 Jan 2026',ref:'SDS-2024-00561',status:'draft_sent',priority:'medium',issues:5,claim:340,lastActivity:'2 days ago'},
+  {id:'CHK-2026-005',property:'23 Dalry Road, Edinburgh EH11 2BQ',tenant:'Rachel Stewart',landlord:'Mark Thomson',deposit:1050,scheme:'SafeDeposits Scotland',start:'01 Apr 2024',end:'31 Mar 2026',ref:'SDS-2024-00923',status:'submitted',priority:'low',issues:2,claim:150,lastActivity:'3 days ago'},
+  {id:'CHK-2026-006',property:'156 Causewayside, Edinburgh EH9 1PN',tenant:'Liam O\'Brien',landlord:'Susan Gray',deposit:1250,scheme:'mydeposits Scotland',start:'01 Dec 2023',end:'30 Nov 2025',ref:'MYD-2025-00178',status:'disputed',priority:'high',issues:4,claim:485,lastActivity:'5 hours ago'},
+  {id:'CHK-2026-007',property:'3 Dean Path, Edinburgh EH4 3BA',tenant:'Priya Sharma',landlord:'Robert Allan',deposit:1600,scheme:'SafeDeposits Scotland',start:'15 Jul 2023',end:'14 Jul 2025',ref:'SDS-2025-00089',status:'resolved',priority:'low',issues:3,claim:270,lastActivity:'1 week ago'},
+  {id:'CHK-2026-008',property:'67 Easter Road, Edinburgh EH7 5PW',tenant:'Tom Henderson',landlord:'Karen White',deposit:875,scheme:'SafeDeposits Scotland',start:'01 Mar 2024',end:'28 Feb 2026',ref:'SDS-2024-00790',status:'ready_for_claim',priority:'medium',issues:2,claim:195,lastActivity:'6 hours ago'},
+  {id:'CHK-2026-009',property:'12 Stockbridge, Edinburgh EH3 6TZ',tenant:'Aisha Begum',landlord:'Neil Fraser',deposit:1350,scheme:'SafeDeposits Scotland',start:'15 May 2024',end:'14 May 2026',ref:'SDS-2024-01089',status:'analysis',priority:'high',issues:0,claim:0,lastActivity:'30 min ago'},
+]
+
+const MOCK_ISSUES = [
+  {id:'1',title:'Carpet stain in master bedroom',severity:'high',decision:'charge',cost:185,rationale:'Significant red wine stain not present in check-in report. Professional cleaning required.'},
+  {id:'2',title:'Scuff marks on hallway walls',severity:'medium',decision:'partial',cost:60,rationale:'Some wear expected given 2-year tenancy, but several deep scuffs exceed fair wear and tear.'},
+  {id:'3',title:'Missing shelf bracket in kitchen',severity:'low',decision:'charge',cost:25,rationale:'Bracket present in check-in photos, now missing. Replacement cost is reasonable.'},
+  {id:'4',title:'General cleaning required',severity:'medium',decision:'no_charge',cost:0,rationale:'Property left in reasonable state. Minor cleaning falls within fair wear and tear.'},
+]
+
+const STATUS_META = {
+  draft:{label:'Draft',color:'zinc',badgeCls:'border-zinc-200 bg-zinc-100 text-zinc-700'},
+  collecting_evidence:{label:'Evidence',color:'sky',badgeCls:'border-sky-200 bg-sky-50 text-sky-700'},
+  analysis:{label:'Analysing',color:'amber',badgeCls:'border-amber-200 bg-amber-50 text-amber-700'},
+  review:{label:'Review',color:'amber',badgeCls:'border-amber-200 bg-amber-50 text-amber-700'},
+  draft_sent:{label:'Draft sent',color:'violet',badgeCls:'border-violet-200 bg-violet-50 text-violet-700'},
+  ready_for_claim:{label:'Ready',color:'emerald',badgeCls:'border-emerald-200 bg-emerald-50 text-emerald-700'},
+  submitted:{label:'Submitted',color:'sky',badgeCls:'border-sky-200 bg-sky-50 text-sky-700'},
+  disputed:{label:'Disputed',color:'rose',badgeCls:'border-rose-200 bg-rose-50 text-rose-700'},
+  resolved:{label:'Resolved',color:'emerald',badgeCls:'border-emerald-200 bg-emerald-50 text-emerald-700'},
+}
+
+const WORKFLOW_STEPS = ['draft','collecting_evidence','analysis','review','draft_sent','ready_for_claim','submitted','resolved']
+
+const MEMBERS = [
+  {name:'Jamie Mitchell',email:'j.mitchell@propertyfirst.co.uk',role:'admin',status:'active',cases:4},
+  {name:'Sophie Grant',email:'s.grant@propertyfirst.co.uk',role:'operator',status:'active',cases:3},
+  {name:'Ravi Patel',email:'r.patel@propertyfirst.co.uk',role:'operator',status:'active',cases:2},
+  {name:'Laura Kemp',email:'l.kemp@propertyfirst.co.uk',role:'viewer',status:'invited',cases:0},
+]
+
+const DEPOSIT_SCHEMES = [
+  {region:'Scotland',schemes:[
+    {name:'SafeDeposits Scotland',url:'https://www.safedepositsscotland.com',desc:'The largest tenancy deposit scheme in Scotland, providing free dispute resolution for landlords and tenants.'},
+    {name:'Letting Protection Service Scotland',url:'https://www.lettingprotectionscotland.com',desc:'Government-approved scheme offering custodial deposit protection and independent adjudication.'},
+    {name:'mydeposits Scotland',url:'https://www.mydeposits.co.uk/scotland',desc:'Insurance-backed deposit protection with online management tools and alternative dispute resolution.'},
+  ]},
+  {region:'England & Wales',schemes:[
+    {name:'Deposit Protection Service (DPS)',url:'https://www.depositprotection.com',desc:'Free custodial scheme backed by the government, holding deposits in a secure account for the duration of the tenancy.'},
+    {name:'mydeposits',url:'https://www.mydeposits.co.uk',desc:'Insurance-backed and custodial options with online deposit management and dispute resolution.'},
+    {name:'Tenancy Deposit Scheme (TDS)',url:'https://www.tenancydepositscheme.com',desc:'Offers both insured and custodial protection with a free independent dispute resolution service.'},
+  ]},
+  {region:'Northern Ireland',schemes:[
+    {name:'Tenancy Deposit Scheme Northern Ireland (TDSNI)',url:'https://www.tdsni.co.uk',desc:'The primary custodial deposit scheme for Northern Ireland, providing free protection and dispute resolution.'},
+  ]},
+]
+
+const GUIDANCE_ARTICLES = [
+  {title:'Fair wear and tear',category:'Dispute Handling',regions:['England','Wales','Scotland'],summary:'Normal deterioration from reasonable use should not be treated as tenant-caused damage.'},
+  {title:'Cleaning standards at checkout',category:'Evidence Standards',regions:['England','Wales','Scotland','Northern Ireland'],summary:'What constitutes acceptable cleanliness depends on the property\'s condition at check-in and tenancy length.'},
+  {title:'Deposit deduction timelines',category:'Compliance',regions:['England','Wales'],summary:'Landlords must return deposits within 10 days of agreement. Delays weaken the claim position.'},
+  {title:'Photography as evidence',category:'Evidence Standards',regions:['England','Wales','Scotland','Northern Ireland'],summary:'Dated, well-lit photographs comparing check-in and checkout condition are the strongest form of evidence.'},
+  {title:'Betterment and improvement',category:'Dispute Handling',regions:['Scotland'],summary:'A landlord cannot claim for improvements that leave the property in better condition than at the start of tenancy.'},
+  {title:'Pre-tenancy condition reports',category:'Evidence Standards',regions:['England','Wales','Scotland'],summary:'A thorough check-in report is the foundation of every deposit claim. Without it, deductions are difficult to support.'},
+]
+
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+
+let state = {
+  page: 'checkouts',
+  sidebarCollapsed: false,
+  mobileSidebarOpen: false,
+  // workspace state
+  activeCaseId: null,
+  workspaceStatus: 'draft',
+  workspaceDocuments: [],
+  workspaceIssues: [],
+  workspaceLog: ['Case created — awaiting documents'],
+  // filters
+  checkoutFilter: 'all',
+  disputeFilter: 'all',
+  guidanceRegion: 'all',
+  guidanceSearch: '',
+}
+
+function navigate(page, caseId) {
+  state.page = page
+  state.mobileSidebarOpen = false
+  if (caseId) {
+    state.activeCaseId = caseId
+    state.workspaceStatus = 'draft'
+    state.workspaceDocuments = []
+    state.workspaceIssues = []
+    state.workspaceLog = ['Case created — awaiting documents']
+  }
+  render()
+}
+
+// ═══════════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════════
+
+function fmt(n) { return '\u00a3' + Number(n).toLocaleString('en-GB', {minimumFractionDigits: 0, maximumFractionDigits: 0}) }
+function badge(label, cls) { return `<span class="inline-flex items-center border px-2 py-0.5 text-[11px] font-medium ${cls}">${label}</span>` }
+function totalClaim() { return state.workspaceIssues.reduce((s, i) => s + i.cost, 0) }
+function chargeableCount() { return state.workspaceIssues.filter(i => i.decision !== 'no_charge').length }
+function addLog(msg) { state.workspaceLog = [msg, ...state.workspaceLog] }
+function getCase() { return CASES.find(c => c.id === state.activeCaseId) || CASES[0] }
+
+function svgIcon(name) {
+  const icons = {
+    checkouts: '<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 00-1.883 2.542l.857 6a2.25 2.25 0 002.227 1.932H19.05a2.25 2.25 0 002.227-1.932l.857-6a2.25 2.25 0 00-1.883-2.542m-16.5 0V6A2.25 2.25 0 016 3.75h3.879a1.5 1.5 0 011.06.44l2.122 2.12a1.5 1.5 0 001.06.44H18A2.25 2.25 0 0120.25 9v.776"/>',
+    disputes: '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>',
+    feedback: '<path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"/>',
+    'deposit-scheme': '<path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z"/>',
+    guidance: '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/>',
+    admin: '<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25a2.25 2.25 0 01-2.25-2.25v-2.25z"/>',
+    teams: '<path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/>',
+    reports: '<path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/>',
+    settings: '<path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"/><circle cx="12" cy="12" r="3"/>',
+    signout: '<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"/>',
+    check: '<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>',
+    menu: '<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>',
+    x: '<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>',
+    chevronLeft: '<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/>',
+    arrowLeft: '<path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/>',
+    search: '<path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>',
+  }
+  return `<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">${icons[name] || ''}</svg>`
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SIDEBAR
+// ═══════════════════════════════════════════════════════════════
+
+function renderSidebar(mobile = false) {
+  const c = state.sidebarCollapsed && !mobile
+  const p = state.page
+
+  const navGroups = [
+    { label: 'Operations', items: [
+      { label: 'Checkouts', page: 'checkouts', icon: 'checkouts', active: p === 'checkouts' || p === 'workspace' },
+      { label: 'Disputes', page: 'disputes', icon: 'disputes', active: p === 'disputes' },
+      { label: 'Inventory feedback', page: 'feedback', icon: 'feedback', active: p === 'feedback' },
+      { label: 'Deposit Scheme', page: 'deposit-scheme', icon: 'deposit-scheme', active: p === 'deposit-scheme' },
+      { label: 'Guidance', page: 'guidance', icon: 'guidance', active: p === 'guidance' },
+    ]},
+    { label: 'Management', items: [
+      { label: 'Admin', page: 'admin', icon: 'admin', active: p === 'admin' },
+      { label: 'Teams', page: 'teams', icon: 'teams', active: p === 'teams' },
+      { label: 'Reports / Analytics', page: 'reports', icon: 'reports', active: p === 'reports' },
+    ]},
+    { label: 'Account', items: [
+      { label: 'Settings', page: 'settings', icon: 'settings', active: p === 'settings' },
+    ]},
+  ]
+
+  return `
+    <div class="flex h-full flex-col">
+      <div class="flex items-center ${c ? 'justify-center' : 'justify-between'}">
+        <a onclick="navigate('checkouts')" class="flex items-center gap-3 px-3 py-3 cursor-pointer">
+          ${c ? `<div class="flex h-7 w-7 items-center justify-center rounded-md bg-emerald-600 text-white text-xs font-bold">R</div>` : `
+            <div>
+              <div class="flex items-center gap-2">
+                <div class="flex h-6 w-6 items-center justify-center rounded-md bg-emerald-600 text-white text-[10px] font-bold">R</div>
+                <span class="text-sm font-semibold tracking-[-0.02em] text-zinc-950">Renovo AI</span>
+              </div>
+              <p class="mt-1 pl-8 text-[13px] font-medium tracking-[-0.01em] text-zinc-500">End of Tenancy</p>
+            </div>
+          `}
+        </a>
+        ${!mobile ? `<button onclick="state.sidebarCollapsed=!state.sidebarCollapsed;render()" class="hidden xl:flex h-8 w-8 items-center justify-center rounded-md text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950">
+          <svg class="h-4 w-4 transition ${c ? 'rotate-180' : ''}" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">${svgIcon('chevronLeft').match(/<svg[^>]*>(.*)<\/svg>/)[1]}</svg>
+        </button>` : ''}
+      </div>
+      <div class="mt-8 space-y-6 pb-6">
+        ${navGroups.map(group => `
+          <div>
+            ${!c ? `<p class="px-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-600/70">${group.label}</p>` : ''}
+            <div class="space-y-0.5 ${!c ? 'mt-3' : ''}">
+              ${group.items.map(item => `
+                <a onclick="navigate('${item.page}')" class="group relative flex items-center gap-3 rounded-lg border px-3 py-2.5 text-sm font-medium transition cursor-pointer
+                  ${item.active ? 'border-zinc-200 bg-white text-zinc-950 shadow-[0_2px_8px_rgba(0,0,0,0.04)]' : 'border-transparent text-zinc-600 hover:border-zinc-200 hover:bg-white hover:text-zinc-950'}
+                  ${c ? 'justify-center px-2' : ''}">
+                  ${item.active ? '<span class="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-emerald-500"></span>' : ''}
+                  <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition ${item.active ? 'bg-emerald-50 text-emerald-600' : 'text-zinc-400 group-hover:text-zinc-600'}">
+                    ${svgIcon(item.icon)}
+                  </span>
+                  ${!c ? `<span class="truncate">${item.label}</span>` : ''}
+                </a>
+              `).join('')}
+              ${group.label === 'Account' ? `
+                <button onclick="alert('Demo sign out — in the real app this ends your session.')" class="group flex w-full items-center gap-3 rounded-lg border border-transparent px-3 py-2.5 text-sm font-medium text-zinc-600 transition hover:border-zinc-200 hover:bg-white hover:text-zinc-950 ${c ? 'justify-center px-2' : ''}">
+                  <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-zinc-400 transition group-hover:text-zinc-600">${svgIcon('signout')}</span>
+                  ${!c ? '<span class="truncate">Sign out</span>' : ''}
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>`
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PAGE CONFIGS
+// ═══════════════════════════════════════════════════════════════
+
+function getPageConfig() {
+  const configs = {
+    checkouts: { title: 'Checkouts', breadcrumbs: [{label:'Checkouts'}] },
+    workspace: { title: 'Checkout workspace', breadcrumbs: [{label:'Checkouts',link:'checkouts'},{label:'Checkout workspace'}] },
+    disputes: { title: 'Disputes', breadcrumbs: [{label:'Checkouts',link:'checkouts'},{label:'Disputes'}] },
+    feedback: { title: 'Inventory feedback', breadcrumbs: [{label:'Inventory feedback'}] },
+    'deposit-scheme': { title: 'Deposit Scheme', breadcrumbs: [{label:'Deposit Scheme'}] },
+    guidance: { title: 'Guidance', breadcrumbs: [{label:'Guidance'}] },
+    admin: { title: 'Admin', breadcrumbs: [{label:'Management'},{label:'Admin'}] },
+    teams: { title: 'Teams', breadcrumbs: [{label:'Management'},{label:'Teams'}] },
+    reports: { title: 'Reports / Analytics', breadcrumbs: [{label:'Management'},{label:'Reports / Analytics'}] },
+    settings: { title: 'Settings', breadcrumbs: [{label:'Account'},{label:'Settings'}] },
+  }
+  return configs[state.page] || configs.checkouts
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PAGE RENDERERS
+// ═══════════════════════════════════════════════════════════════
+
+function renderCheckoutsPage() {
+  const filters = ['all','draft','collecting_evidence','analysis','review','draft_sent','ready_for_claim','submitted','disputed','resolved']
+  const filtered = state.checkoutFilter === 'all' ? CASES : CASES.filter(c => c.status === state.checkoutFilter)
+
+  const statusCounts = {}
+  CASES.forEach(c => { statusCounts[c.status] = (statusCounts[c.status] || 0) + 1 })
+
+  return `
+    <div class="fade-in space-y-5">
+      <!-- Summary row -->
+      <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
+        <div class="border border-zinc-200/80 bg-white px-4 py-3">
+          <p class="text-[11px] font-medium uppercase tracking-wide text-zinc-400">Total checkouts</p>
+          <p class="mt-1 text-2xl font-semibold tabular-nums text-zinc-950">${CASES.length}</p>
+        </div>
+        <div class="border border-zinc-200/80 bg-white px-4 py-3">
+          <p class="text-[11px] font-medium uppercase tracking-wide text-zinc-400">In progress</p>
+          <p class="mt-1 text-2xl font-semibold tabular-nums text-sky-700">${CASES.filter(c => !['resolved','disputed'].includes(c.status)).length}</p>
+        </div>
+        <div class="border border-zinc-200/80 bg-white px-4 py-3">
+          <p class="text-[11px] font-medium uppercase tracking-wide text-zinc-400">Disputed</p>
+          <p class="mt-1 text-2xl font-semibold tabular-nums text-rose-700">${statusCounts.disputed || 0}</p>
+        </div>
+        <div class="border border-zinc-200/80 bg-white px-4 py-3">
+          <p class="text-[11px] font-medium uppercase tracking-wide text-zinc-400">Resolved</p>
+          <p class="mt-1 text-2xl font-semibold tabular-nums text-emerald-700">${statusCounts.resolved || 0}</p>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="flex items-center gap-2 overflow-x-auto pb-1">
+        ${filters.map(f => `
+          <button onclick="state.checkoutFilter='${f}';render()" class="whitespace-nowrap px-3 py-1.5 text-xs font-medium transition ${state.checkoutFilter === f ? 'border border-zinc-900 bg-zinc-900 text-white' : 'border border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:text-zinc-900'}">
+            ${f === 'all' ? 'All' : STATUS_META[f]?.label || f}${f !== 'all' && statusCounts[f] ? ` (${statusCounts[f]})` : ''}
+          </button>
+        `).join('')}
+      </div>
+
+      <!-- Table -->
+      <div class="overflow-hidden border border-zinc-200/80 bg-white">
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-left">
+            <thead class="bg-zinc-50/80">
+              <tr class="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
+                <th class="px-4 py-2.5">Property</th>
+                <th class="px-4 py-2.5">Tenant</th>
+                <th class="px-4 py-2.5">Status</th>
+                <th class="px-4 py-2.5">Priority</th>
+                <th class="px-4 py-2.5 text-right">Deposit</th>
+                <th class="px-4 py-2.5 text-right">Claim</th>
+                <th class="px-4 py-2.5">Last activity</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-zinc-100">
+              ${filtered.map(c => {
+                const sm = STATUS_META[c.status]
+                const priBadge = c.priority === 'high' ? 'border-rose-200 bg-rose-50 text-rose-700' : c.priority === 'medium' ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-zinc-200 bg-zinc-100 text-zinc-600'
+                return `
+                <tr onclick="navigate('workspace','${c.id}')" class="cursor-pointer transition hover:bg-zinc-50/70">
+                  <td class="px-4 py-3">
+                    <p class="text-sm font-medium text-zinc-950">${c.property}</p>
+                    <p class="mt-0.5 text-xs text-zinc-400">${c.id}</p>
+                  </td>
+                  <td class="px-4 py-3 text-sm text-zinc-700">${c.tenant}</td>
+                  <td class="px-4 py-3">${badge(sm.label, sm.badgeCls)}</td>
+                  <td class="px-4 py-3">${badge(c.priority.charAt(0).toUpperCase() + c.priority.slice(1), priBadge)}</td>
+                  <td class="px-4 py-3 text-right text-sm tabular-nums font-medium text-zinc-950">${fmt(c.deposit)}</td>
+                  <td class="px-4 py-3 text-right text-sm tabular-nums font-medium ${c.claim > 0 ? 'text-zinc-950' : 'text-zinc-400'}">${c.claim > 0 ? fmt(c.claim) : '\u2014'}</td>
+                  <td class="px-4 py-3 text-sm text-zinc-500">${c.lastActivity}</td>
+                </tr>`
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`
+}
+
+function renderWorkspacePage() {
+  const cs = getCase()
+  const s = state.workspaceStatus
+  const sm = STATUS_META[s]
+  const stepIdx = WORKFLOW_STEPS.indexOf(s)
+
+  // Progress bar
+  const progressBar = `
+    <div class="border border-zinc-200/80 bg-white px-5 py-3">
+      <div class="flex items-center gap-0">
+        ${WORKFLOW_STEPS.map((ws, i) => {
+          const wsm = STATUS_META[ws]
+          const isCurrent = ws === s
+          const isComplete = WORKFLOW_STEPS.indexOf(ws) < stepIdx
+          const connector = i > 0 ? `<div class="h-px w-5 ${isComplete ? 'bg-emerald-300' : 'bg-zinc-200'}"></div>` : ''
+          return `${connector}<button onclick="handleStepClick('${ws}')" class="flex items-center gap-1.5 px-2 py-1 text-[11px] font-medium transition cursor-pointer hover:text-zinc-700 ${isCurrent ? 'text-zinc-950' : isComplete ? 'text-emerald-600' : 'text-zinc-400'}">
+            ${isComplete ? `<svg class="h-3.5 w-3.5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>` :
+              isCurrent ? `<div class="h-2 w-2 rounded-full ${s === 'analysis' ? 'bg-amber-500 anim-pulse' : 'bg-zinc-900'}"></div>` :
+              '<div class="h-1.5 w-1.5 rounded-full bg-zinc-300"></div>'}
+            ${wsm.label}
+          </button>`
+        }).join('')}
+        ${s === 'disputed' ? `<div class="h-px w-5 bg-zinc-200"></div><div class="flex items-center gap-1.5 px-2 py-1 text-[11px] font-medium text-rose-700"><div class="h-2 w-2 rounded-full bg-rose-500"></div>Disputed</div>` : ''}
+      </div>
+    </div>`
+
+  return `
+    <div class="fade-in space-y-4">
+      <!-- Case header -->
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-base font-semibold tracking-[-0.02em] text-zinc-950">${cs.property}</h2>
+          <p class="mt-1 flex items-center gap-4 text-sm text-zinc-500">
+            <span>${cs.tenant}</span>
+            <span class="text-zinc-200">|</span>
+            <span>${cs.landlord}</span>
+            <span class="text-zinc-200">|</span>
+            <span>Deposit ${fmt(cs.deposit)}</span>
+          </p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="navigate('checkouts')" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-zinc-600 transition hover:text-zinc-950">
+            ${svgIcon('arrowLeft')} Checkouts
+          </button>
+          ${badge(sm.label, sm.badgeCls)}
+        </div>
+      </div>
+
+      ${progressBar}
+
+      <!-- Step content -->
+      <div class="border border-zinc-200/80 bg-white">
+        <div class="px-6 py-6">${renderWorkspaceStep()}</div>
+      </div>
+
+      <!-- Activity log -->
+      <div class="border border-zinc-200/80 bg-white px-6 py-5">
+        <h4 class="text-xs font-semibold uppercase tracking-[0.08em] text-zinc-400">Activity log</h4>
+        <div class="mt-3 space-y-2">
+          ${state.workspaceLog.slice(0, 6).map(l => `<p class="text-xs text-zinc-500">${l}</p>`).join('')}
+        </div>
+      </div>
+    </div>`
+}
+
+function renderWorkspaceStep() {
+  const s = state.workspaceStatus
+  const cs = getCase()
+
+  if (s === 'draft') return `
+    <div class="grid gap-8 xl:grid-cols-[minmax(0,1fr)_320px]">
+      <div>
+        <h3 class="text-sm font-semibold text-zinc-950">Pre-flight overview</h3>
+        <p class="mt-1 text-sm text-zinc-500">Review tenancy details before starting the checkout workflow.</p>
+        <div class="mt-5 grid gap-4 sm:grid-cols-2">
+          <div class="space-y-3 border-l-2 border-zinc-200 pl-4">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Property</p>
+            <div><p class="text-sm text-zinc-500">Address</p><p class="text-sm font-medium text-zinc-950">${cs.property}</p></div>
+          </div>
+          <div class="space-y-3 border-l-2 border-zinc-200 pl-4">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Tenancy</p>
+            <div><p class="text-sm text-zinc-500">Period</p><p class="text-sm font-medium text-zinc-950">${cs.start} — ${cs.end}</p></div>
+          </div>
+          <div class="space-y-3 border-l-2 border-zinc-200 pl-4">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Tenant</p>
+            <div><p class="text-sm font-medium text-zinc-950">${cs.tenant}</p></div>
+          </div>
+          <div class="space-y-3 border-l-2 border-zinc-200 pl-4">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Landlord</p>
+            <div><p class="text-sm font-medium text-zinc-950">${cs.landlord}</p></div>
+          </div>
+          <div class="space-y-3 border-l-2 border-zinc-200 pl-4">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Deposit</p>
+            <div><p class="text-sm font-medium text-zinc-950">${fmt(cs.deposit)}</p><p class="text-xs text-zinc-500">${cs.scheme}</p></div>
+          </div>
+          <div class="space-y-3 border-l-2 border-zinc-200 pl-4">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Reference</p>
+            <div><p class="text-sm font-medium text-zinc-950">${cs.ref}</p></div>
+          </div>
+        </div>
+        <div class="mt-6">
+          <button onclick="handleUpload()" class="border border-zinc-900 bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 transition">Upload documents &amp; start</button>
+        </div>
+      </div>
+      <div class="border border-zinc-200 bg-zinc-50/70 px-5 py-5 h-fit">
+        <p class="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Documents required</p>
+        <dl class="mt-4 space-y-3">
+          <div class="flex items-center justify-between gap-4"><dt class="text-sm text-zinc-500">Check-in report</dt><dd class="text-sm font-medium text-zinc-950">Missing</dd></div>
+          <div class="flex items-center justify-between gap-4"><dt class="text-sm text-zinc-500">Check-out report</dt><dd class="text-sm font-medium text-zinc-950">Missing</dd></div>
+          <div class="flex items-center justify-between gap-4"><dt class="text-sm text-zinc-500">Tenancy agreement</dt><dd class="text-sm font-medium text-zinc-950">Missing</dd></div>
+        </dl>
+      </div>
+    </div>`
+
+  if (s === 'collecting_evidence') return `
+    <div class="grid gap-8 xl:grid-cols-[minmax(0,1fr)_320px]">
+      <div>
+        <h3 class="text-sm font-semibold text-zinc-950">Document inventory</h3>
+        <p class="mt-1 text-sm text-zinc-500">All required documents are linked. Review the inventory and run AI analysis when ready.</p>
+        <div class="mt-4 space-y-2">
+          ${state.workspaceDocuments.map(d => `<div class="flex items-center justify-between border-b border-zinc-100 py-2.5"><span class="text-sm text-zinc-700">${d}</span><span class="text-xs font-medium text-emerald-600">Linked</span></div>`).join('')}
+        </div>
+        <div class="mt-5">
+          <button onclick="handleAnalyse()" class="border border-zinc-900 bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 transition">Run AI analysis</button>
+        </div>
+      </div>
+      <div class="border border-zinc-200 bg-zinc-50/70 px-5 py-5 h-fit">
+        <p class="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Readiness</p>
+        <p class="mt-2 text-2xl font-semibold text-emerald-700">100%</p>
+        <div class="mt-3 h-1.5 overflow-hidden bg-zinc-100"><div class="h-full bg-emerald-500" style="width:100%"></div></div>
+        <dl class="mt-4 space-y-3">
+          <div class="flex items-center justify-between gap-4"><dt class="text-sm text-zinc-500">Check-in report</dt><dd class="text-sm font-medium text-emerald-700">Linked</dd></div>
+          <div class="flex items-center justify-between gap-4"><dt class="text-sm text-zinc-500">Check-out report</dt><dd class="text-sm font-medium text-emerald-700">Linked</dd></div>
+          <div class="flex items-center justify-between gap-4"><dt class="text-sm text-zinc-500">Evidence photos</dt><dd class="text-sm font-medium text-emerald-700">12 files</dd></div>
+        </dl>
+      </div>
+    </div>`
+
+  if (s === 'analysis') return `
+    <div class="grid gap-8 xl:grid-cols-[minmax(0,1fr)_320px]">
+      <div>
+        <h3 class="text-sm font-semibold text-zinc-950">AI analysis in progress</h3>
+        <div class="mt-4 flex items-center gap-3">
+          <div class="h-5 w-5 border-2 border-zinc-200 border-t-zinc-900 rounded-full anim-spin"></div>
+          <span class="text-sm text-zinc-600">Comparing check-in and check-out reports...</span>
+        </div>
+        <div class="mt-6 space-y-2">
+          ${state.workspaceLog.slice(0, 5).map(l => `<p class="text-xs text-zinc-400">${l}</p>`).join('')}
+        </div>
+      </div>
+      <div class="border border-zinc-200 bg-zinc-50/70 px-5 py-5 h-fit">
+        <p class="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Analysis status</p>
+        <p class="mt-2 text-2xl font-semibold text-amber-700">Processing</p>
+        <div class="mt-3 h-1.5 overflow-hidden bg-zinc-100"><div class="h-full bg-amber-500 transition-all" style="width:50%"></div></div>
+      </div>
+    </div>`
+
+  if (s === 'review') return `
+    <div class="space-y-6">
+      <div class="grid gap-8 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <div>
+          <h3 class="text-sm font-semibold text-zinc-950">AI recommendations</h3>
+          <p class="mt-1 text-sm text-zinc-500">Review the ${state.workspaceIssues.length} issues identified. Approve to send the draft report to both parties.</p>
+        </div>
+        <div class="border border-zinc-200 bg-zinc-50/70 px-5 py-5 h-fit">
+          <p class="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Claim position</p>
+          <p class="mt-2 text-2xl font-semibold text-zinc-950">${fmt(totalClaim())}</p>
+          <p class="mt-1 text-xs text-zinc-500">${chargeableCount()} chargeable of ${state.workspaceIssues.length} issues</p>
+        </div>
+      </div>
+      ${renderIssuesTable()}
+      <div class="flex items-center gap-3 border-t border-zinc-200 pt-4">
+        <button onclick="handleApprove()" class="border border-zinc-900 bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 transition">Send draft to parties</button>
+        <button onclick="handleAnalyse()" class="border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition">Re-run analysis</button>
+      </div>
+    </div>`
+
+  if (s === 'draft_sent') return `
+    <div class="space-y-6">
+      <div class="grid gap-8 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <div>
+          <h3 class="text-sm font-semibold text-zinc-950">Draft report sent</h3>
+          <p class="mt-1 text-sm text-zinc-500">Checkout report has been emailed to both parties. Proceed once both have reviewed.</p>
+          <div class="mt-5 space-y-3">
+            <div class="border border-zinc-200 px-4 py-3">
+              <div class="flex items-center justify-between">
+                <div><p class="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Landlord</p><p class="mt-1 text-sm font-medium text-zinc-950">${cs.landlord}</p></div>
+                ${badge('Complete report', 'border-emerald-200 bg-emerald-50 text-emerald-700')}
+              </div>
+            </div>
+            <div class="border border-zinc-200 px-4 py-3">
+              <div class="flex items-center justify-between">
+                <div><p class="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Tenant</p><p class="mt-1 text-sm font-medium text-zinc-950">${cs.tenant}</p></div>
+                ${badge('Liabilities only', 'border-amber-200 bg-amber-50 text-amber-700')}
+              </div>
+            </div>
+          </div>
+          <div class="mt-5 flex items-center gap-3">
+            <button onclick="handleConfirmDraft()" class="border border-zinc-900 bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 transition">Proceed to claim</button>
+            <button onclick="state.workspaceStatus='review';addLog('Returned to review');render()" class="border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition">Back to review</button>
+          </div>
+        </div>
+        <div class="border border-zinc-200 bg-zinc-50/70 px-5 py-5 h-fit">
+          <p class="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Email status</p>
+          <p class="mt-2 text-2xl font-semibold text-violet-700">2 sent</p>
+          <dl class="mt-4 space-y-3">
+            <div class="flex items-center justify-between gap-4"><dt class="text-sm text-zinc-500">Landlord</dt><dd class="text-sm font-medium text-emerald-700">Delivered</dd></div>
+            <div class="flex items-center justify-between gap-4"><dt class="text-sm text-zinc-500">Tenant</dt><dd class="text-sm font-medium text-emerald-700">Delivered</dd></div>
+          </dl>
+        </div>
+      </div>
+      ${renderIssuesTable()}
+    </div>`
+
+  if (s === 'ready_for_claim') return `
+    <div class="space-y-6">
+      <div class="grid gap-8 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <div>
+          <h3 class="text-sm font-semibold text-zinc-950">Claim submission</h3>
+          <p class="mt-1 text-sm text-zinc-500">${chargeableCount()} chargeable issues totalling ${fmt(totalClaim())} against a deposit of ${fmt(cs.deposit)} held with ${cs.scheme}.</p>
+          <div class="mt-5">
+            <button onclick="handleSubmit()" class="border border-zinc-900 bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 transition">Submit claim</button>
+          </div>
+        </div>
+        <div class="border border-zinc-200 bg-zinc-50/70 px-5 py-5 h-fit">
+          <p class="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Claim position</p>
+          <p class="mt-2 text-2xl font-semibold text-emerald-700">${fmt(totalClaim())}</p>
+          <dl class="mt-4 space-y-3">
+            <div class="flex items-center justify-between gap-4"><dt class="text-sm text-zinc-500">Deposit held</dt><dd class="text-sm font-medium text-zinc-950">${fmt(cs.deposit)}</dd></div>
+            <div class="flex items-center justify-between gap-4"><dt class="text-sm text-zinc-500">Scheme</dt><dd class="text-sm font-medium text-zinc-950">${cs.scheme}</dd></div>
+          </dl>
+        </div>
+      </div>
+      ${renderIssuesTable()}
+    </div>`
+
+  if (s === 'submitted') return `
+    <div class="space-y-6">
+      <div class="grid gap-8 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <div>
+          <h3 class="text-sm font-semibold text-zinc-950">Claim submitted</h3>
+          <p class="mt-1 text-sm text-zinc-500">Claim of ${fmt(totalClaim())} submitted to ${cs.scheme}. Mark resolved once confirmed, or flag if the tenant disputes.</p>
+          <div class="mt-5 flex items-center gap-3">
+            <button onclick="handleResolve()" class="border border-zinc-900 bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 transition">Mark resolved</button>
+            <button onclick="handleDispute()" class="border border-rose-200 bg-white px-4 py-2 text-sm font-medium text-rose-700 hover:bg-rose-50 transition">Flag dispute</button>
+          </div>
+        </div>
+        <div class="border border-zinc-200 bg-zinc-50/70 px-5 py-5 h-fit">
+          <p class="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Awaiting outcome</p>
+          <p class="mt-2 text-2xl font-semibold text-sky-700">${fmt(totalClaim())}</p>
+        </div>
+      </div>
+      ${renderIssuesTable()}
+    </div>`
+
+  if (s === 'disputed') return `
+    <div class="space-y-6">
+      <div class="grid gap-8 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <div>
+          <h3 class="text-sm font-semibold text-zinc-950">Dispute resolution</h3>
+          <p class="mt-1 text-sm text-zinc-500">The tenant has disputed the claim. Review contested issues and resolve.</p>
+          <div class="mt-5">
+            <button onclick="handleResolve()" class="border border-zinc-900 bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 transition">Resolve dispute</button>
+          </div>
+        </div>
+        <div class="border border-zinc-200 bg-zinc-50/70 px-5 py-5 h-fit">
+          <p class="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Disputed claim</p>
+          <p class="mt-2 text-2xl font-semibold text-rose-700">${fmt(totalClaim())}</p>
+        </div>
+      </div>
+      ${renderIssuesTable()}
+    </div>`
+
+  if (s === 'resolved') return `
+    <div class="space-y-6">
+      <div class="grid gap-8 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <div>
+          <h3 class="text-sm font-semibold text-zinc-950">Case closed</h3>
+          <p class="mt-1 text-sm text-zinc-500">Final claim of ${fmt(totalClaim())} across ${chargeableCount()} chargeable issues. This checkout is complete.</p>
+          <div class="mt-5">
+            <button onclick="handleReset()" class="border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition">Restart demo</button>
+          </div>
+        </div>
+        <div class="border border-zinc-200 bg-zinc-50/70 px-5 py-5 h-fit">
+          <p class="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Final claim</p>
+          <p class="mt-2 text-2xl font-semibold text-emerald-700">${fmt(totalClaim())}</p>
+        </div>
+      </div>
+      ${renderIssuesTable()}
+    </div>`
+
+  return ''
+}
+
+function renderIssuesTable() {
+  if (!state.workspaceIssues.length) return ''
+  const sevBadge = s => s === 'high' ? 'border-rose-200 bg-rose-50 text-rose-700' : s === 'medium' ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-zinc-200 bg-zinc-100 text-zinc-700'
+  const decBadge = d => d === 'charge' ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : d === 'partial' ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-zinc-200 bg-zinc-100 text-zinc-700'
+  return `
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-left">
+        <thead class="bg-zinc-50/80 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
+          <tr><th class="px-3 py-2.5">Issue</th><th class="px-3 py-2.5">Severity</th><th class="px-3 py-2.5">Decision</th><th class="px-3 py-2.5">Rationale</th><th class="px-3 py-2.5 text-right">Cost</th></tr>
+        </thead>
+        <tbody class="divide-y divide-zinc-100">
+          ${state.workspaceIssues.map(i => `<tr class="hover:bg-zinc-50/70">
+            <td class="px-3 py-2.5 text-sm font-medium text-zinc-950">${i.title}</td>
+            <td class="px-3 py-2.5">${badge(i.severity.charAt(0).toUpperCase() + i.severity.slice(1), sevBadge(i.severity))}</td>
+            <td class="px-3 py-2.5">${badge(i.decision === 'no_charge' ? 'No charge' : i.decision.charAt(0).toUpperCase() + i.decision.slice(1), decBadge(i.decision))}</td>
+            <td class="max-w-xs px-3 py-2.5 text-sm text-zinc-600">${i.rationale}</td>
+            <td class="px-3 py-2.5 text-right text-sm font-medium tabular-nums text-zinc-950">${i.cost > 0 ? fmt(i.cost) : '\u2014'}</td>
+          </tr>`).join('')}
+        </tbody>
+        <tfoot><tr class="border-t border-zinc-200 bg-zinc-50"><td colspan="4" class="px-3 py-2.5 text-sm font-semibold text-zinc-700">Total</td><td class="px-3 py-2.5 text-right text-sm font-bold tabular-nums text-zinc-950">${fmt(totalClaim())}</td></tr></tfoot>
+      </table>
+    </div>`
+}
+
+function renderDisputesPage() {
+  const disputed = CASES.filter(c => c.status === 'disputed')
+  return `
+    <div class="fade-in space-y-5">
+      <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
+        <div class="border border-zinc-200/80 bg-white px-4 py-3">
+          <p class="text-[11px] font-medium uppercase tracking-wide text-zinc-400">Active disputes</p>
+          <p class="mt-1 text-2xl font-semibold tabular-nums text-rose-700">${disputed.length}</p>
+        </div>
+        <div class="border border-zinc-200/80 bg-white px-4 py-3">
+          <p class="text-[11px] font-medium uppercase tracking-wide text-zinc-400">High priority</p>
+          <p class="mt-1 text-2xl font-semibold tabular-nums text-zinc-950">${disputed.filter(c => c.priority === 'high').length}</p>
+        </div>
+        <div class="border border-zinc-200/80 bg-white px-4 py-3">
+          <p class="text-[11px] font-medium uppercase tracking-wide text-zinc-400">Deposit at risk</p>
+          <p class="mt-1 text-2xl font-semibold tabular-nums text-zinc-950">${fmt(disputed.reduce((s, c) => s + c.deposit, 0))}</p>
+        </div>
+        <div class="border border-zinc-200/80 bg-white px-4 py-3">
+          <p class="text-[11px] font-medium uppercase tracking-wide text-zinc-400">Total issues</p>
+          <p class="mt-1 text-2xl font-semibold tabular-nums text-zinc-950">${disputed.reduce((s, c) => s + c.issues, 0)}</p>
+        </div>
+      </div>
+      <div class="overflow-hidden border border-zinc-200/80 bg-white">
+        <table class="min-w-full text-left">
+          <thead class="bg-zinc-50/80 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
+            <tr><th class="px-4 py-2.5">Property</th><th class="px-4 py-2.5">Tenant</th><th class="px-4 py-2.5">Landlord</th><th class="px-4 py-2.5">Priority</th><th class="px-4 py-2.5 text-right">Deposit</th><th class="px-4 py-2.5">Issues</th><th class="px-4 py-2.5">Last activity</th></tr>
+          </thead>
+          <tbody class="divide-y divide-zinc-100">
+            ${disputed.length ? disputed.map(c => {
+              const priBadge = c.priority === 'high' ? 'border-rose-200 bg-rose-50 text-rose-700' : 'border-amber-200 bg-amber-50 text-amber-700'
+              return `<tr onclick="navigate('workspace','${c.id}')" class="cursor-pointer hover:bg-zinc-50/70">
+                <td class="px-4 py-3"><p class="text-sm font-medium text-zinc-950">${c.property}</p><p class="mt-0.5 text-xs text-zinc-400">${c.id}</p></td>
+                <td class="px-4 py-3 text-sm text-zinc-700">${c.tenant}</td>
+                <td class="px-4 py-3 text-sm text-zinc-700">${c.landlord}</td>
+                <td class="px-4 py-3">${badge(c.priority.charAt(0).toUpperCase() + c.priority.slice(1), priBadge)}</td>
+                <td class="px-4 py-3 text-right text-sm tabular-nums font-medium text-zinc-950">${fmt(c.deposit)}</td>
+                <td class="px-4 py-3 text-sm tabular-nums text-zinc-700">${c.issues}</td>
+                <td class="px-4 py-3 text-sm text-zinc-500">${c.lastActivity}</td>
+              </tr>`
+            }).join('') : '<tr><td colspan="7" class="px-4 py-8 text-center text-sm text-zinc-500">No active disputes</td></tr>'}
+          </tbody>
+        </table>
+      </div>
+    </div>`
+}
+
+function renderFeedbackPage() {
+  return `
+    <div class="fade-in">
+      <div class="border border-zinc-200/80 bg-white px-6 py-10 text-center">
+        <p class="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Coming soon</p>
+        <h3 class="mt-3 text-lg font-semibold text-zinc-950">Inventory feedback</h3>
+        <p class="mt-2 text-sm text-zinc-500">Capture and review inventory clerk feedback to improve future report quality.</p>
+      </div>
+    </div>`
+}
+
+function renderDepositSchemePage() {
+  return `
+    <div class="fade-in space-y-8">
+      <div class="max-w-3xl">
+        <p class="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Reference</p>
+        <h2 class="mt-2 text-lg font-semibold tracking-[-0.02em] text-zinc-950">Tenancy deposit protection schemes</h2>
+        <p class="mt-2 text-sm leading-6 text-zinc-600">All UK tenancy deposits must be registered with a government-approved scheme. Below are the approved schemes by region.</p>
+      </div>
+      ${DEPOSIT_SCHEMES.map(group => `
+        <section>
+          <div class="flex items-end gap-8 border-b border-zinc-200 pb-3">
+            <h3 class="text-sm font-semibold text-zinc-950">${group.region}</h3>
+            <span class="text-xs tabular-nums text-zinc-500">${group.schemes.length} scheme${group.schemes.length !== 1 ? 's' : ''}</span>
+          </div>
+          <div class="mt-4 space-y-3">
+            ${group.schemes.map(s => `
+              <div class="border-l-2 border-zinc-200 py-3 pl-5">
+                <div class="flex items-baseline gap-3">
+                  <h4 class="text-sm font-semibold text-zinc-950">${s.name}</h4>
+                  <span class="text-xs font-medium text-emerald-600 cursor-pointer hover:text-emerald-700">Visit site &rarr;</span>
+                </div>
+                <p class="mt-1 text-sm leading-6 text-zinc-600">${s.desc}</p>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+      `).join('')}
+    </div>`
+}
+
+function renderGuidancePage() {
+  const regions = ['all', 'England', 'Wales', 'Scotland', 'Northern Ireland']
+  const filtered = GUIDANCE_ARTICLES.filter(a => {
+    const regionMatch = state.guidanceRegion === 'all' || a.regions.includes(state.guidanceRegion)
+    const searchMatch = !state.guidanceSearch || a.title.toLowerCase().includes(state.guidanceSearch.toLowerCase()) || a.summary.toLowerCase().includes(state.guidanceSearch.toLowerCase())
+    return regionMatch && searchMatch
+  })
+
+  return `
+    <div class="fade-in space-y-5">
+      <div class="flex items-center gap-3 flex-wrap">
+        ${regions.map(r => `
+          <button onclick="state.guidanceRegion='${r}';render()" class="px-3 py-1.5 text-xs font-medium transition ${state.guidanceRegion === r ? 'border border-zinc-900 bg-zinc-900 text-white' : 'border border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300'}">
+            ${r === 'all' ? 'All regions' : r}
+          </button>
+        `).join('')}
+      </div>
+      <div class="space-y-3">
+        ${filtered.map(a => `
+          <div class="border border-zinc-200/80 bg-white px-5 py-4 transition hover:border-zinc-300 cursor-pointer">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <h3 class="text-sm font-semibold text-zinc-950">${a.title}</h3>
+                <p class="mt-1 text-sm leading-6 text-zinc-600">${a.summary}</p>
+              </div>
+              ${badge(a.category, 'border-zinc-200 bg-zinc-50 text-zinc-600')}
+            </div>
+            <div class="mt-2 flex items-center gap-2">
+              ${a.regions.map(r => `<span class="text-[10px] font-medium text-zinc-400">${r}</span>`).join('<span class="text-zinc-200">·</span>')}
+            </div>
+          </div>
+        `).join('')}
+        ${!filtered.length ? '<div class="border border-zinc-200/80 bg-white px-5 py-8 text-center text-sm text-zinc-500">No articles match your filters.</div>' : ''}
+      </div>
+    </div>`
+}
+
+function renderAdminPage() {
+  const integrations = ['Reapit', 'Arthur Online', 'Inventory Base', 'No Letting Go', 'Imfuna']
+  return `
+    <div class="fade-in space-y-6">
+      <section class="border border-zinc-200/80 bg-white px-6 py-6">
+        <h3 class="text-sm font-semibold text-zinc-950">Checkout intake</h3>
+        <p class="mt-1 text-sm text-zinc-500">Manage how end-of-tenancy checkouts arrive from inventory software.</p>
+        <div class="mt-5 overflow-hidden border border-zinc-200">
+          <table class="w-full text-sm">
+            <thead><tr class="border-b border-zinc-200 bg-zinc-50/80"><th class="px-4 py-2.5 text-left text-xs font-medium text-zinc-500">Platform</th><th class="px-4 py-2.5 text-left text-xs font-medium text-zinc-500">Status</th></tr></thead>
+            <tbody>${integrations.map(n => `<tr class="border-b border-zinc-100 last:border-0"><td class="px-4 py-2.5 font-medium text-zinc-950">${n}</td><td class="px-4 py-2.5"><span class="text-xs font-medium text-amber-600">Planned</span></td></tr>`).join('')}</tbody>
+          </table>
+        </div>
+      </section>
+      <section class="border border-zinc-200/80 bg-white px-6 py-6">
+        <h3 class="text-sm font-semibold text-zinc-950">Case allocation</h3>
+        <p class="mt-1 text-sm text-zinc-500">How incoming checkouts are assigned to property managers.</p>
+        <div class="mt-5 space-y-4">
+          <div class="flex items-start justify-between gap-4 border-b border-zinc-100 pb-4">
+            <div><p class="text-sm font-medium text-zinc-950">Auto-allocation</p><p class="mt-1 text-sm leading-6 text-zinc-600">Automatically assign incoming checkouts to the linked property manager.</p></div>
+            <span class="shrink-0 text-xs font-medium text-amber-600">Coming soon</span>
+          </div>
+          <div class="flex items-start justify-between gap-4">
+            <div><p class="text-sm font-medium text-zinc-950">Manual allocation</p><p class="mt-1 text-sm leading-6 text-zinc-600">A team lead manually assigns each checkout from the unallocated queue.</p></div>
+            <span class="shrink-0 text-xs font-medium text-amber-600">Coming soon</span>
+          </div>
+        </div>
+      </section>
+      <section class="border border-zinc-200/80 bg-white px-6 py-6">
+        <h3 class="text-sm font-semibold text-zinc-950">Teams</h3>
+        <p class="mt-1 text-sm text-zinc-500">Manage workspace members, roles, and team structure.</p>
+        <div class="mt-5 grid gap-4 md:grid-cols-2">
+          <a onclick="navigate('teams')" class="flex items-start gap-4 border border-zinc-200 px-5 py-4 transition hover:border-zinc-300 hover:bg-zinc-50/50 cursor-pointer">
+            <div><p class="text-sm font-medium text-zinc-950">Members</p><p class="mt-1 text-sm leading-6 text-zinc-600">Add, remove, and manage workspace members.</p></div>
+          </a>
+          <a onclick="navigate('teams')" class="flex items-start gap-4 border border-zinc-200 px-5 py-4 transition hover:border-zinc-300 hover:bg-zinc-50/50 cursor-pointer">
+            <div><p class="text-sm font-medium text-zinc-950">Team groups</p><p class="mt-1 text-sm leading-6 text-zinc-600">Organise members into teams by portfolio or region.</p></div>
+          </a>
+        </div>
+      </section>
+    </div>`
+}
+
+function renderTeamsPage() {
+  return `
+    <div class="fade-in space-y-6">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <a onclick="navigate('admin')" class="text-xs font-medium text-zinc-500 transition hover:text-zinc-700 cursor-pointer">Admin</a>
+          <span class="text-xs text-zinc-300">/</span>
+          <span class="text-xs font-medium text-zinc-700">Members</span>
+        </div>
+        <button class="inline-flex items-center gap-1.5 border border-zinc-900 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-zinc-800" onclick="alert('Demo — invite form would appear here.')">Invite member</button>
+      </div>
+      <div class="border border-zinc-200/80 bg-white px-4 py-3">
+        <span class="text-xs font-medium text-zinc-500">${MEMBERS.filter(m => m.status === 'active').length} active</span>
+        <span class="mx-2 text-zinc-200">|</span>
+        <span class="text-xs font-medium text-zinc-500">${MEMBERS.filter(m => m.status === 'invited').length} invited</span>
+      </div>
+      <div class="overflow-hidden border border-zinc-200/80 bg-white">
+        <table class="min-w-full text-left">
+          <thead class="bg-zinc-50/80 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
+            <tr><th class="px-4 py-2.5">Name</th><th class="px-4 py-2.5">Email</th><th class="px-4 py-2.5">Role</th><th class="px-4 py-2.5">Status</th><th class="px-4 py-2.5 text-right">Active cases</th></tr>
+          </thead>
+          <tbody class="divide-y divide-zinc-100">
+            ${MEMBERS.map(m => `
+              <tr class="hover:bg-zinc-50/70">
+                <td class="px-4 py-3 text-sm font-medium text-zinc-950">${m.name}</td>
+                <td class="px-4 py-3 text-sm text-zinc-600">${m.email}</td>
+                <td class="px-4 py-3">${badge(m.role.charAt(0).toUpperCase() + m.role.slice(1), m.role === 'admin' ? 'border-violet-200 bg-violet-50 text-violet-700' : m.role === 'operator' ? 'border-sky-200 bg-sky-50 text-sky-700' : 'border-zinc-200 bg-zinc-100 text-zinc-600')}</td>
+                <td class="px-4 py-3">${badge(m.status.charAt(0).toUpperCase() + m.status.slice(1), m.status === 'active' ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-amber-200 bg-amber-50 text-amber-700')}</td>
+                <td class="px-4 py-3 text-right text-sm tabular-nums text-zinc-700">${m.cases}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`
+}
+
+function renderReportsPage() {
+  const total = CASES.length
+  const statusDist = {}
+  CASES.forEach(c => { statusDist[c.status] = (statusDist[c.status] || 0) + 1 })
+  const totalDeposit = CASES.reduce((s, c) => s + c.deposit, 0)
+  const totalClaims = CASES.reduce((s, c) => s + c.claim, 0)
+
+  return `
+    <div class="fade-in space-y-6">
+      <!-- Overview numbers -->
+      <div class="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
+        <div class="border border-zinc-200/80 bg-white px-4 py-3">
+          <p class="text-[11px] font-medium uppercase tracking-wide text-zinc-400">Total cases</p>
+          <p class="mt-1 text-2xl font-semibold tabular-nums text-zinc-950">${total}</p>
+        </div>
+        <div class="border border-zinc-200/80 bg-white px-4 py-3">
+          <p class="text-[11px] font-medium uppercase tracking-wide text-zinc-400">Active</p>
+          <p class="mt-1 text-2xl font-semibold tabular-nums text-sky-700">${CASES.filter(c => !['resolved'].includes(c.status)).length}</p>
+        </div>
+        <div class="border border-zinc-200/80 bg-white px-4 py-3">
+          <p class="text-[11px] font-medium uppercase tracking-wide text-zinc-400">Resolved</p>
+          <p class="mt-1 text-2xl font-semibold tabular-nums text-emerald-700">${statusDist.resolved || 0}</p>
+        </div>
+        <div class="border border-zinc-200/80 bg-white px-4 py-3">
+          <p class="text-[11px] font-medium uppercase tracking-wide text-zinc-400">Total deposits</p>
+          <p class="mt-1 text-2xl font-semibold tabular-nums text-zinc-950">${fmt(totalDeposit)}</p>
+        </div>
+        <div class="border border-zinc-200/80 bg-white px-4 py-3">
+          <p class="text-[11px] font-medium uppercase tracking-wide text-zinc-400">Total claims</p>
+          <p class="mt-1 text-2xl font-semibold tabular-nums text-zinc-950">${fmt(totalClaims)}</p>
+        </div>
+        <div class="border border-zinc-200/80 bg-white px-4 py-3">
+          <p class="text-[11px] font-medium uppercase tracking-wide text-zinc-400">Avg claim rate</p>
+          <p class="mt-1 text-2xl font-semibold tabular-nums text-zinc-950">${totalDeposit > 0 ? Math.round((totalClaims / totalDeposit) * 100) : 0}%</p>
+        </div>
+      </div>
+
+      <!-- Status distribution -->
+      <div class="border border-zinc-200/80 bg-white px-6 py-5">
+        <h3 class="text-sm font-semibold text-zinc-950">Status distribution</h3>
+        <div class="mt-4 space-y-2.5">
+          ${Object.entries(statusDist).sort((a, b) => b[1] - a[1]).map(([status, count]) => {
+            const sm = STATUS_META[status]
+            const pct = Math.round((count / total) * 100)
+            const colorMap = { zinc: 'bg-zinc-400', sky: 'bg-sky-500', amber: 'bg-amber-500', violet: 'bg-violet-500', emerald: 'bg-emerald-500', rose: 'bg-rose-500' }
+            return `<div class="flex items-center gap-3">
+              <span class="w-28 text-sm text-zinc-600">${sm.label}</span>
+              <div class="flex-1 h-2 bg-zinc-100 overflow-hidden rounded-full"><div class="${colorMap[sm.color] || 'bg-zinc-400'} h-full rounded-full transition-all" style="width:${pct}%"></div></div>
+              <span class="w-8 text-right text-xs tabular-nums font-medium text-zinc-700">${count}</span>
+            </div>`
+          }).join('')}
+        </div>
+      </div>
+
+      <!-- Performance table -->
+      <div class="border border-zinc-200/80 bg-white px-6 py-5">
+        <h3 class="text-sm font-semibold text-zinc-950">Case performance</h3>
+        <div class="mt-4 overflow-x-auto">
+          <table class="min-w-full text-left">
+            <thead class="bg-zinc-50/80 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
+              <tr><th class="px-3 py-2.5">Property</th><th class="px-3 py-2.5">Status</th><th class="px-3 py-2.5 text-right">Deposit</th><th class="px-3 py-2.5 text-right">Claim</th><th class="px-3 py-2.5 text-right">Rate</th></tr>
+            </thead>
+            <tbody class="divide-y divide-zinc-100">
+              ${CASES.map(c => {
+                const sm = STATUS_META[c.status]
+                const rate = c.deposit > 0 && c.claim > 0 ? Math.round((c.claim / c.deposit) * 100) + '%' : '\u2014'
+                return `<tr class="hover:bg-zinc-50/70">
+                  <td class="px-3 py-2.5 text-sm font-medium text-zinc-950">${c.property}</td>
+                  <td class="px-3 py-2.5">${badge(sm.label, sm.badgeCls)}</td>
+                  <td class="px-3 py-2.5 text-right text-sm tabular-nums text-zinc-700">${fmt(c.deposit)}</td>
+                  <td class="px-3 py-2.5 text-right text-sm tabular-nums font-medium text-zinc-950">${c.claim > 0 ? fmt(c.claim) : '\u2014'}</td>
+                  <td class="px-3 py-2.5 text-right text-sm tabular-nums text-zinc-700">${rate}</td>
+                </tr>`
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`
+}
+
+function renderSettingsPage() {
+  return `
+    <div class="fade-in space-y-6">
+      <section class="border border-zinc-200/80 bg-white px-6 py-6">
+        <h3 class="text-sm font-semibold text-zinc-950">Operator defaults</h3>
+        <p class="mt-1 text-sm text-zinc-500">Default settings applied to new checkouts and operator workflows.</p>
+        <div class="mt-5 space-y-3">
+          <div class="flex items-center justify-between border-b border-zinc-100 py-3">
+            <div><p class="text-sm text-zinc-700">Default deposit scheme</p></div>
+            <p class="text-sm font-medium text-zinc-950">SafeDeposits Scotland</p>
+          </div>
+          <div class="flex items-center justify-between border-b border-zinc-100 py-3">
+            <div><p class="text-sm text-zinc-700">Auto-analyse on evidence complete</p></div>
+            <p class="text-sm font-medium text-zinc-950">Enabled</p>
+          </div>
+          <div class="flex items-center justify-between py-3">
+            <div><p class="text-sm text-zinc-700">Draft email review required</p></div>
+            <p class="text-sm font-medium text-zinc-950">Yes</p>
+          </div>
+        </div>
+      </section>
+      <section class="border border-zinc-200/80 bg-white px-6 py-6">
+        <h3 class="text-sm font-semibold text-zinc-950">Outbound messaging</h3>
+        <p class="mt-1 text-sm text-zinc-500">Email delivery configuration for checkout reports and notifications.</p>
+        <div class="mt-5 space-y-3">
+          <div class="flex items-center justify-between border-b border-zinc-100 py-3">
+            <div><p class="text-sm text-zinc-700">Email provider</p></div>
+            <p class="text-sm font-medium text-zinc-950">Resend</p>
+          </div>
+          <div class="flex items-center justify-between border-b border-zinc-100 py-3">
+            <div><p class="text-sm text-zinc-700">Sending domain</p></div>
+            <p class="text-sm font-medium text-emerald-700">Verified</p>
+          </div>
+          <div class="flex items-center justify-between py-3">
+            <div><p class="text-sm text-zinc-700">Reply-to address</p></div>
+            <p class="text-sm font-medium text-zinc-950">support@propertyfirst.co.uk</p>
+          </div>
+        </div>
+      </section>
+    </div>`
+}
+
+// ═══════════════════════════════════════════════════════════════
+// WORKFLOW ACTIONS
+// ═══════════════════════════════════════════════════════════════
+
+function handleUpload() {
+  state.workspaceDocuments = ['Check-in report', 'Check-out report', 'Evidence photos (12)']
+  state.workspaceStatus = 'collecting_evidence'
+  addLog('Documents uploaded: check-in report, check-out report, 12 evidence photos')
+  render()
+}
+
+async function handleAnalyse() {
+  state.workspaceStatus = 'analysis'
+  addLog('AI analysis started')
+  render()
+  await new Promise(r => setTimeout(r, 800))
+  addLog('Extracting check-in report text')
+  render()
+  await new Promise(r => setTimeout(r, 700))
+  addLog('Extracting check-out report text')
+  render()
+  await new Promise(r => setTimeout(r, 900))
+  addLog('Comparing property condition')
+  render()
+  await new Promise(r => setTimeout(r, 500))
+  state.workspaceIssues = MOCK_ISSUES
+  state.workspaceStatus = 'review'
+  addLog('Analysis complete: 4 issues identified, ' + fmt(totalClaim()) + ' claim position')
+  render()
+}
+
+function handleApprove() {
+  const cs = getCase()
+  state.workspaceStatus = 'draft_sent'
+  addLog('Draft sent to ' + cs.landlord + ' and ' + cs.tenant)
+  render()
+}
+
+function handleConfirmDraft() {
+  state.workspaceStatus = 'ready_for_claim'
+  addLog('Both parties reviewed — proceeding to claim')
+  render()
+}
+
+function handleSubmit() {
+  const cs = getCase()
+  state.workspaceStatus = 'submitted'
+  addLog('Claim of ' + fmt(totalClaim()) + ' submitted to ' + cs.scheme)
+  render()
+}
+
+function handleDispute() {
+  state.workspaceStatus = 'disputed'
+  addLog('Tenant disputed the claim')
+  render()
+}
+
+function handleResolve() {
+  state.workspaceStatus = 'resolved'
+  addLog('Case resolved')
+  render()
+}
+
+function handleReset() {
+  state.workspaceStatus = 'draft'
+  state.workspaceDocuments = []
+  state.workspaceIssues = []
+  state.workspaceLog = ['Case created — awaiting documents']
+  render()
+}
+
+function handleStepClick(step) {
+  // Only allow clicking completed or current steps
+  const currentIdx = WORKFLOW_STEPS.indexOf(state.workspaceStatus)
+  const targetIdx = WORKFLOW_STEPS.indexOf(step)
+  if (targetIdx <= currentIdx) {
+    // For completed steps, just show them (don't reset state)
+    // But we need issues populated for review+ steps
+    if (targetIdx >= 3 && state.workspaceIssues.length === 0) {
+      state.workspaceIssues = MOCK_ISSUES
+    }
+    if (targetIdx >= 1 && state.workspaceDocuments.length === 0) {
+      state.workspaceDocuments = ['Check-in report', 'Check-out report', 'Evidence photos (12)']
+    }
+    state.workspaceStatus = step
+    render()
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MAIN RENDER
+// ═══════════════════════════════════════════════════════════════
+
+function render() {
+  const pageConfig = getPageConfig()
+  const pageRenderers = {
+    checkouts: renderCheckoutsPage,
+    workspace: renderWorkspacePage,
+    disputes: renderDisputesPage,
+    feedback: renderFeedbackPage,
+    'deposit-scheme': renderDepositSchemePage,
+    guidance: renderGuidancePage,
+    admin: renderAdminPage,
+    teams: renderTeamsPage,
+    reports: renderReportsPage,
+    settings: renderSettingsPage,
+  }
+  const pageContent = (pageRenderers[state.page] || renderCheckoutsPage)()
+
+  document.getElementById('app').innerHTML = `
+    <main class="min-h-screen text-zinc-900">
+      <div class="flex min-h-screen">
+        <!-- Desktop sidebar -->
+        <aside class="hidden xl:block xl:border-r xl:border-zinc-200/80 xl:bg-zinc-50/80 ${state.sidebarCollapsed ? 'xl:w-[80px]' : 'xl:w-[264px]'} shrink-0">
+          <div class="sticky top-0 h-screen overflow-y-auto px-4 py-4">
+            ${renderSidebar()}
+          </div>
+        </aside>
+
+        <!-- Mobile sidebar overlay -->
+        ${state.mobileSidebarOpen ? `
+          <div class="fixed inset-0 z-50 bg-zinc-950/30 xl:hidden" onclick="state.mobileSidebarOpen=false;render()">
+            <aside class="absolute inset-y-0 left-0 flex w-[84vw] max-w-[320px] flex-col overflow-y-auto bg-zinc-50 px-4 py-4 slide-in" onclick="event.stopPropagation()">
+              <div class="mb-4 flex justify-end">
+                <button onclick="state.mobileSidebarOpen=false;render()" class="flex h-8 w-8 items-center justify-center rounded-md text-zinc-600 hover:bg-zinc-100">${svgIcon('x')}</button>
+              </div>
+              ${renderSidebar(true)}
+            </aside>
+          </div>
+        ` : ''}
+
+        <!-- Main content -->
+        <div class="min-w-0 flex-1">
+          <div class="mx-auto flex min-h-screen w-full max-w-[1600px] flex-col px-4 py-3 md:px-6 xl:px-8">
+            <!-- Header -->
+            <header class="border-b border-zinc-200 pb-3">
+              <div class="flex items-center justify-between gap-4">
+                <div class="flex min-w-0 items-center gap-3">
+                  <button onclick="state.mobileSidebarOpen=true;render()" class="flex h-7 w-7 items-center justify-center rounded-md border border-zinc-200 text-zinc-500 xl:hidden">${svgIcon('menu')}</button>
+                  <div class="flex items-center gap-1.5 text-xs font-medium text-zinc-500">
+                    ${pageConfig.breadcrumbs.map((b, i) => `
+                      <div class="flex items-center gap-1.5">
+                        ${b.link ? `<a onclick="navigate('${b.link}')" class="transition hover:text-zinc-700 cursor-pointer">${b.label}</a>` : `<span class="text-zinc-700">${b.label}</span>`}
+                        ${i < pageConfig.breadcrumbs.length - 1 ? '<span class="text-zinc-300">/</span>' : ''}
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
+                <div class="flex items-center gap-3">
+                  <!-- Demo badge -->
+                  <span class="hidden md:inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11px] font-medium text-emerald-700">
+                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                    Interactive demo
+                  </span>
+                  <div class="hidden items-center gap-2 border-l border-zinc-200 pl-3 md:flex">
+                    <div class="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-50 text-xs font-semibold text-emerald-700">JM</div>
+                    <span class="text-xs font-medium text-zinc-600">Jamie Mitchell</span>
+                  </div>
+                </div>
+              </div>
+            </header>
+
+            <!-- Page content -->
+            <div class="mt-4 flex-1 space-y-4">
+              ${pageContent}
+            </div>
+
+            <!-- Demo footer -->
+            <footer class="mt-8 border-t border-zinc-100 py-4 text-center">
+              <p class="text-xs text-zinc-400">This is an interactive product demo with mock data. <a href="https://renovoai.co.uk" class="font-medium text-emerald-600 hover:text-emerald-700">Visit Renovo AI &rarr;</a></p>
+            </footer>
+          </div>
+        </div>
+      </div>
+    </main>`
+}
+
+// Boot
+render()
+</script>
+</body>
+</html>
