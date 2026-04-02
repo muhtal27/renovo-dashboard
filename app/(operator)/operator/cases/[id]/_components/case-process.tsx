@@ -1,6 +1,6 @@
 'use client'
 
-import { Loader2, Sparkles } from 'lucide-react'
+import { Loader2, Send, Sparkles } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import { EmptyState } from '@/app/operator-ui'
@@ -28,6 +28,8 @@ import type {
 } from '@/lib/operator-checkout-workspace-types'
 import type { EotCaseStatus, EotRecommendation, EotRecommendationDecision } from '@/lib/eot-types'
 
+/* ── Types ── */
+
 type AnalyseCaseResponse = {
   success: boolean
   caseId: string
@@ -41,6 +43,8 @@ type AnalyseCaseError = {
   detail?: string
   error?: string
 }
+
+/* ── Helpers ── */
 
 function getPrimaryCost(defect: CheckoutWorkspaceDefectRecord) {
   return defect.costAdjusted ?? defect.costEstimate ?? 0
@@ -78,6 +82,8 @@ function getStatusTone(status: EotCaseStatus) {
       return 'processing' as const
     case 'review':
       return 'review' as const
+    case 'draft_sent':
+      return 'sent' as const
     case 'ready_for_claim':
       return 'accepted' as const
     case 'submitted':
@@ -146,12 +152,19 @@ function sortRecommendations(recommendations: EotRecommendation[]) {
   })
 }
 
+/* ── Main component ── */
+
 export function CaseProcess({ data }: { data: OperatorCheckoutWorkspaceData }) {
   const router = useRouter()
   const [isAnalysing, setIsAnalysing] = useState(false)
+  const [isSendingDraft, setIsSendingDraft] = useState(false)
   const [isRefreshing, startTransition] = useTransition()
   const [analysisError, setAnalysisError] = useState<string | null>(null)
   const [analysisResult, setAnalysisResult] = useState<AnalyseCaseResponse | null>(null)
+  const [sendError, setSendError] = useState<string | null>(null)
+
+  const caseId = data.workspace.case.id
+  const caseStatus = data.workspace.case.status
 
   const linkedCoreReports = [
     data.workspace.reportDocuments.checkIn,
@@ -177,6 +190,18 @@ export function CaseProcess({ data }: { data: OperatorCheckoutWorkspaceData }) {
       : 'Run AI analysis'
   const buttonDisabled = isAnalysing || isRefreshing || !hasRequiredReports
 
+  const tenantName = data.workspace.tenant?.name ?? data.workspace.tenancy.tenant_name
+  const landlordName = data.workspace.overview.landlords[0]?.fullName ?? 'Landlord'
+  const tenantEmail = data.checkoutCase?.tenantEmail ?? data.workspace.tenant?.email ?? null
+  const landlordEmail = data.checkoutCase?.landlordEmail ?? null
+  const propertyAddress = [
+    data.workspace.property.address_line_1,
+    data.workspace.property.city,
+    data.workspace.property.postcode,
+  ]
+    .filter(Boolean)
+    .join(', ')
+
   async function handleAnalyse() {
     if (buttonDisabled) {
       return
@@ -187,7 +212,7 @@ export function CaseProcess({ data }: { data: OperatorCheckoutWorkspaceData }) {
     setAnalysisResult(null)
 
     try {
-      const response = await fetch(`/api/operator/cases/${data.workspace.case.id}/analyse`, {
+      const response = await fetch(`/api/operator/cases/${caseId}/analyse`, {
         method: 'POST',
         headers: {
           Accept: 'application/json',
@@ -213,6 +238,54 @@ export function CaseProcess({ data }: { data: OperatorCheckoutWorkspaceData }) {
       )
     } finally {
       setIsAnalysing(false)
+    }
+  }
+
+  async function handleSendDraft() {
+    if (!landlordEmail || !tenantEmail) return
+
+    setIsSendingDraft(true)
+    setSendError(null)
+
+    try {
+      // Send emails
+      const emailResponse = await fetch(`/api/eot/cases/${caseId}/send-draft`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          landlordEmail,
+          landlordName,
+          tenantEmail,
+          tenantName,
+          propertyAddress,
+          caseRef: data.checkoutCase?.caseReference ?? caseId.slice(0, 8).toUpperCase(),
+        }),
+      })
+
+      if (!emailResponse.ok) {
+        const err = await emailResponse.json().catch(() => null)
+        throw new Error(err?.error || 'Failed to send draft emails.')
+      }
+
+      // Transition to draft_sent
+      const transitionResponse = await fetch(`/api/eot/cases/${caseId}/transition`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'draft_sent' }),
+      })
+
+      if (!transitionResponse.ok) {
+        const err = await transitionResponse.json().catch(() => null)
+        throw new Error(err?.detail || 'Emails sent but failed to update case status.')
+      }
+
+      startTransition(() => {
+        router.refresh()
+      })
+    } catch (error) {
+      setSendError(error instanceof Error ? error.message : 'Failed to send draft emails.')
+    } finally {
+      setIsSendingDraft(false)
     }
   }
 
@@ -296,6 +369,10 @@ export function CaseProcess({ data }: { data: OperatorCheckoutWorkspaceData }) {
                   tone="danger"
                 />
               ) : null}
+
+              {sendError ? (
+                <WorkspaceNotice body={sendError} title="Send draft failed" tone="danger" />
+              ) : null}
             </div>
 
             <div className="border border-zinc-200 bg-zinc-50/70 px-5 py-5">
@@ -309,8 +386,8 @@ export function CaseProcess({ data }: { data: OperatorCheckoutWorkspaceData }) {
                   </p>
                 </div>
                 <WorkspaceBadge
-                  label={formatEnumLabel(data.workspace.case.status)}
-                  tone={getStatusTone(data.workspace.case.status)}
+                  label={formatEnumLabel(caseStatus)}
+                  tone={getStatusTone(caseStatus)}
                 />
               </div>
 
@@ -360,6 +437,23 @@ export function CaseProcess({ data }: { data: OperatorCheckoutWorkspaceData }) {
                   {isAnalysing || isRefreshing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
                   {isAnalysing ? 'Running analysis...' : isRefreshing ? 'Refreshing results...' : runButtonLabel}
                 </WorkspaceActionButton>
+
+                {caseStatus === 'review' && landlordEmail && tenantEmail ? (
+                  <WorkspaceActionButton
+                    disabled={isSendingDraft || isRefreshing}
+                    onClick={() => { void handleSendDraft() }}
+                    tone="success"
+                  >
+                    {isSendingDraft ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                    {isSendingDraft ? 'Sending...' : 'Send draft to parties'}
+                  </WorkspaceActionButton>
+                ) : null}
+
+                {caseStatus === 'review' && (!landlordEmail || !tenantEmail) ? (
+                  <span className="text-xs text-amber-600">
+                    Add {!landlordEmail ? 'landlord' : ''}{!landlordEmail && !tenantEmail ? ' & ' : ''}{!tenantEmail ? 'tenant' : ''} email to send draft
+                  </span>
+                ) : null}
               </div>
             </div>
           </div>
@@ -370,7 +464,7 @@ export function CaseProcess({ data }: { data: OperatorCheckoutWorkspaceData }) {
 
           <div className="mt-2 space-y-5">
             <div className="flex flex-wrap items-center gap-2">
-              <WorkspaceBadge label={formatEnumLabel(data.workspace.case.status)} tone={getStatusTone(data.workspace.case.status)} />
+              <WorkspaceBadge label={formatEnumLabel(caseStatus)} tone={getStatusTone(caseStatus)} />
               {data.workspace.claim ? <WorkspaceBadge label="Claim generated" tone="warning" /> : null}
               {data.workspace.recommendations.length > 0 ? (
                 <WorkspaceBadge label="Recommendations present" tone="info" />
@@ -411,6 +505,58 @@ export function CaseProcess({ data }: { data: OperatorCheckoutWorkspaceData }) {
           </div>
         </div>
       </div>
+
+      {/* Recommendations table (visible when recommendations exist) */}
+      {recommendationRows.length > 0 ? (
+        <section className="border-b border-zinc-200 pb-4">
+          <h3 className="text-sm font-semibold text-zinc-950">Generated recommendations</h3>
+
+          <div className="mt-2 space-y-4">
+            {recommendationRows.map((recommendation) => {
+              const issue = issueById.get(recommendation.issue_id)
+
+              return (
+                <div
+                  key={recommendation.id}
+                  className="border border-zinc-200 bg-zinc-50/70 px-5 py-5"
+                >
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <WorkspaceBadge
+                          label={formatEnumLabel(recommendation.decision)}
+                          tone={getDecisionTone(recommendation.decision)}
+                        />
+                        {issue?.severity ? (
+                          <WorkspaceBadge label={formatEnumLabel(issue.severity)} tone="review" />
+                        ) : null}
+                      </div>
+                      <p className="mt-3 text-sm font-semibold text-zinc-950 [overflow-wrap:anywhere]">
+                        {issue?.title ?? 'Issue not linked'}
+                      </p>
+                      {issue?.area ? (
+                        <p className="mt-1 text-xs text-zinc-500 [overflow-wrap:anywhere]">
+                          {issue.area}
+                        </p>
+                      ) : null}
+                    </div>
+                    <p className="text-sm font-semibold text-zinc-950">
+                      {formatCurrency(recommendation.estimated_cost)}
+                    </p>
+                  </div>
+
+                  <p className="mt-4 text-sm leading-6 text-zinc-600">
+                    {recommendation.rationale || 'No rationale recorded yet.'}
+                  </p>
+                  <p className="mt-3 text-xs text-zinc-500">
+                    Updated {formatDateTime(recommendation.updated_at)}
+                  </p>
+                </div>
+              )
+            })}
+          </div>
+        </section>
+      ) : null}
 
       <section className="border-b border-zinc-200 pb-4">
         <h3 className="text-sm font-semibold text-zinc-950">Structured defect inputs</h3>
@@ -471,62 +617,6 @@ export function CaseProcess({ data }: { data: OperatorCheckoutWorkspaceData }) {
       </section>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)]">
-        <section className="border-b border-zinc-200 pb-4">
-          <h3 className="text-sm font-semibold text-zinc-950">Generated recommendations</h3>
-
-          <div className="mt-2 space-y-4">
-            {recommendationRows.length > 0 ? (
-              recommendationRows.map((recommendation) => {
-                const issue = issueById.get(recommendation.issue_id)
-
-                return (
-                  <div
-                    key={recommendation.id}
-                    className="border border-zinc-200 bg-zinc-50/70 px-5 py-5"
-                  >
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <WorkspaceBadge
-                            label={formatEnumLabel(recommendation.decision)}
-                            tone={getDecisionTone(recommendation.decision)}
-                          />
-                          {issue?.severity ? (
-                            <WorkspaceBadge label={formatEnumLabel(issue.severity)} tone="review" />
-                          ) : null}
-                        </div>
-                        <p className="mt-3 text-sm font-semibold text-zinc-950 [overflow-wrap:anywhere]">
-                          {issue?.title ?? 'Issue not linked'}
-                        </p>
-                        {issue?.area ? (
-                          <p className="mt-1 text-xs text-zinc-500 [overflow-wrap:anywhere]">
-                            {issue.area}
-                          </p>
-                        ) : null}
-                      </div>
-                      <p className="text-sm font-semibold text-zinc-950">
-                        {formatCurrency(recommendation.estimated_cost)}
-                      </p>
-                    </div>
-
-                    <p className="mt-4 text-sm leading-6 text-zinc-600">
-                      {recommendation.rationale || 'No rationale recorded yet.'}
-                    </p>
-                    <p className="mt-3 text-xs text-zinc-500">
-                      Updated {formatDateTime(recommendation.updated_at)}
-                    </p>
-                  </div>
-                )
-              })
-            ) : (
-              <EmptyState
-                body="No recommendations have been generated yet. Run analysis once the required reports are linked to populate this section."
-                title="No recommendations yet"
-              />
-            )}
-          </div>
-        </section>
-
         <div className="border-l-2 border-zinc-200 pl-4">
           <h3 className="text-sm font-semibold text-zinc-950">Claim output</h3>
 

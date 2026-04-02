@@ -3,6 +3,7 @@ export type EotCaseStatus =
   | 'collecting_evidence'
   | 'analysis'
   | 'review'
+  | 'draft_sent'
   | 'ready_for_claim'
   | 'submitted'
   | 'disputed'

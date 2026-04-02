@@ -1,8 +1,9 @@
 'use client'
 
+import { Check } from 'lucide-react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useTransition, type ComponentType } from 'react'
-import { formatAddress, formatDate } from '@/app/eot/_components/eot-ui'
+import { formatAddress, formatDate, formatEnumLabel } from '@/app/eot/_components/eot-ui'
 import { WorkspaceBadge, WorkspaceTabBar, type WorkspaceTabItem } from '@/app/(operator)/operator/cases/[id]/_components/checkout-workspace-ui'
 import { CaseDefects } from '@/app/(operator)/operator/cases/[id]/_components/case-defects'
 import { CaseDocuments } from '@/app/(operator)/operator/cases/[id]/_components/case-documents'
@@ -13,11 +14,82 @@ import { CaseSendOut } from '@/app/(operator)/operator/cases/[id]/_components/ca
 import { CaseSubmission } from '@/app/(operator)/operator/cases/[id]/_components/case-submission'
 import { CaseUtilities } from '@/app/(operator)/operator/cases/[id]/_components/case-utilities'
 import { cn } from '@/lib/ui'
+import type { EotCaseStatus } from '@/lib/eot-types'
 import {
   normalizeCheckoutWorkspaceTab,
   type CheckoutWorkspaceTab,
   type OperatorCheckoutWorkspaceData,
 } from '@/lib/operator-checkout-workspace-types'
+
+const WORKFLOW_STEPS: { status: EotCaseStatus; label: string }[] = [
+  { status: 'draft', label: 'Draft' },
+  { status: 'collecting_evidence', label: 'Evidence' },
+  { status: 'analysis', label: 'Analysing' },
+  { status: 'review', label: 'Review' },
+  { status: 'draft_sent', label: 'Draft sent' },
+  { status: 'ready_for_claim', label: 'Ready' },
+  { status: 'submitted', label: 'Submitted' },
+  { status: 'resolved', label: 'Resolved' },
+]
+
+function getStepIndex(status: EotCaseStatus): number {
+  const index = WORKFLOW_STEPS.findIndex((s) => s.status === status)
+  return index >= 0 ? index : 0
+}
+
+function WorkflowProgressTrack({ currentStatus }: { currentStatus: EotCaseStatus }) {
+  const currentIndex = getStepIndex(currentStatus)
+  const isDisputed = currentStatus === 'disputed'
+
+  return (
+    <div className="flex flex-wrap items-center gap-0.5">
+      {WORKFLOW_STEPS.map((step, index) => {
+        const isComplete = !isDisputed && index < currentIndex
+        const isCurrent = step.status === currentStatus
+        const isProcessing = isCurrent && currentStatus === 'analysis'
+
+        return (
+          <div key={step.status} className="flex items-center gap-0.5">
+            {index > 0 ? (
+              <div className={`h-px w-4 ${isComplete ? 'bg-emerald-300' : 'bg-zinc-200'}`} />
+            ) : null}
+            <div
+              className={`flex items-center gap-1.5 px-1.5 py-1 text-[11px] font-medium ${
+                isCurrent
+                  ? 'text-zinc-950'
+                  : isComplete
+                    ? 'text-emerald-600'
+                    : 'text-zinc-400'
+              }`}
+            >
+              {isComplete ? (
+                <Check className="h-3.5 w-3.5 text-emerald-500" strokeWidth={2.5} />
+              ) : isCurrent ? (
+                <div
+                  className={`h-2 w-2 rounded-full ${
+                    isProcessing ? 'animate-pulse bg-amber-500' : 'bg-zinc-900'
+                  }`}
+                />
+              ) : (
+                <div className="h-1.5 w-1.5 rounded-full bg-zinc-300" />
+              )}
+              {step.label}
+            </div>
+          </div>
+        )
+      })}
+      {isDisputed ? (
+        <div className="flex items-center gap-0.5">
+          <div className="h-px w-4 bg-zinc-200" />
+          <div className="flex items-center gap-1.5 px-1.5 py-1 text-[11px] font-medium text-rose-700">
+            <div className="h-2 w-2 rounded-full bg-rose-500" />
+            Disputed
+          </div>
+        </div>
+      ) : null}
+    </div>
+  )
+}
 
 const TAB_ITEMS: WorkspaceTabItem<CheckoutWorkspaceTab>[] = [
   { id: 'overview', label: 'Overview' },
@@ -158,6 +230,9 @@ export function CheckoutCaseWorkspace({
             </h1>
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <WorkspaceBadge label={status.label} tone={status.tone} />
+            </div>
+            <div className="mt-4">
+              <WorkflowProgressTrack currentStatus={data.workspace.case.status} />
             </div>
           </div>
         </div>

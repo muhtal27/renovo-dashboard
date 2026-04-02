@@ -1,10 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Loader2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState, useTransition } from 'react'
 import { ActivityTimeline, EmptyState } from '@/app/operator-ui'
 import { ClaimSummaryCard } from '@/app/(operator)/operator/cases/[id]/_components/claim-summary-card'
 import { MessageThreadCard } from '@/app/(operator)/operator/cases/[id]/_components/message-thread-card'
 import {
+  WorkspaceActionButton,
   WorkspaceBadge,
   WorkspaceMetricCard,
   WorkspaceNotice,
@@ -199,9 +202,37 @@ function buildSubmissionTimeline(data: OperatorCheckoutWorkspaceData) {
 }
 
 export function CaseSubmission({ data }: { data: OperatorCheckoutWorkspaceData }) {
+  const router = useRouter()
+  const [isTransitioning, setIsTransitioning] = useState(false)
+  const [isRefreshing, startTransition] = useTransition()
+  const [transitionError, setTransitionError] = useState<string | null>(null)
   const [submissionData, setSubmissionData] = useState<EotCaseSubmission | null>(null)
   const [submissionError, setSubmissionError] = useState<string | null>(null)
   const [isLoadingSubmission, setIsLoadingSubmission] = useState(false)
+
+  const caseStatus = data.workspace.case.status
+  const caseId = data.workspace.case.id
+
+  async function handleTransition(targetStatus: string) {
+    setIsTransitioning(true)
+    setTransitionError(null)
+    try {
+      const response = await fetch(`/api/eot/cases/${caseId}/transition`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: targetStatus }),
+      })
+      if (!response.ok) {
+        const err = await response.json().catch(() => null)
+        throw new Error(err?.detail || 'Failed to update case status.')
+      }
+      startTransition(() => { router.refresh() })
+    } catch (error) {
+      setTransitionError(error instanceof Error ? error.message : 'Failed to update case status.')
+    } finally {
+      setIsTransitioning(false)
+    }
+  }
 
   useEffect(() => {
     let cancelled = false
@@ -560,6 +591,78 @@ export function CaseSubmission({ data }: { data: OperatorCheckoutWorkspaceData }
           </div>
         </section>
       </div>
+
+      {transitionError ? (
+        <WorkspaceNotice body={transitionError} title="Transition failed" tone="warning" />
+      ) : null}
+
+      {caseStatus === 'ready_for_claim' ? (
+        <section className="border border-zinc-200 bg-zinc-50/70 px-6 py-5">
+          <h3 className="text-sm font-semibold text-zinc-950">Submit claim</h3>
+          <p className="mt-1 text-sm leading-6 text-zinc-600">
+            The case is ready for formal submission. Once submitted, the case moves to the submitted
+            state and cannot be edited further without dispute resolution.
+          </p>
+          <div className="mt-4">
+            <WorkspaceActionButton
+              disabled={isTransitioning || isRefreshing}
+              tone="primary"
+              onClick={() => handleTransition('submitted')}
+            >
+              {isTransitioning ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+              Submit claim
+            </WorkspaceActionButton>
+          </div>
+        </section>
+      ) : null}
+
+      {caseStatus === 'submitted' ? (
+        <section className="border border-zinc-200 bg-zinc-50/70 px-6 py-5">
+          <h3 className="text-sm font-semibold text-zinc-950">Resolution</h3>
+          <p className="mt-1 text-sm leading-6 text-zinc-600">
+            The claim has been submitted. Mark the case as resolved once the outcome is confirmed, or
+            flag a dispute if the claim is being contested.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <WorkspaceActionButton
+              disabled={isTransitioning || isRefreshing}
+              tone="primary"
+              onClick={() => handleTransition('resolved')}
+            >
+              {isTransitioning ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+              Mark resolved
+            </WorkspaceActionButton>
+            <WorkspaceActionButton
+              disabled={isTransitioning || isRefreshing}
+              tone="danger"
+              onClick={() => handleTransition('disputed')}
+            >
+              {isTransitioning ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+              Flag dispute
+            </WorkspaceActionButton>
+          </div>
+        </section>
+      ) : null}
+
+      {caseStatus === 'disputed' ? (
+        <section className="border border-zinc-200 bg-zinc-50/70 px-6 py-5">
+          <h3 className="text-sm font-semibold text-zinc-950">Dispute resolution</h3>
+          <p className="mt-1 text-sm leading-6 text-zinc-600">
+            This case is currently under dispute. Once the dispute has been resolved, mark it as
+            resolved to close the case.
+          </p>
+          <div className="mt-4">
+            <WorkspaceActionButton
+              disabled={isTransitioning || isRefreshing}
+              tone="primary"
+              onClick={() => handleTransition('resolved')}
+            >
+              {isTransitioning ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+              Resolve dispute
+            </WorkspaceActionButton>
+          </div>
+        </section>
+      ) : null}
     </div>
   )
 }
