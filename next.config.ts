@@ -4,6 +4,12 @@ const securityHeaders = [
   {
     key: 'Content-Security-Policy',
     value: [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: blob:",
+      "font-src 'self' https://fonts.gstatic.com",
+      "connect-src 'self' https://va.vercel-scripts.com https://*.supabase.co",
       "base-uri 'self'",
       "form-action 'self'",
       "frame-ancestors 'none'",
