@@ -173,6 +173,25 @@ export function EotCaseListClient({
   const [savedView, setSavedView] = useState<SavedView>('all')
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [copied, setCopied] = useState(false)
+  const [memberNames, setMemberNames] = useState<Map<string, string>>(new Map())
+
+  useEffect(() => {
+    let cancelled = false
+
+    void fetch('/api/operator/assignees')
+      .then((r) => r.json())
+      .then((data: { assignees?: Array<{ userId: string; fullName: string | null; email: string | null }> }) => {
+        if (cancelled || !data.assignees) return
+        const map = new Map<string, string>()
+        for (const m of data.assignees) {
+          map.set(m.userId, m.fullName || m.email || m.userId.slice(0, 8))
+        }
+        setMemberNames(map)
+      })
+      .catch(() => {})
+
+    return () => { cancelled = true }
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -652,7 +671,7 @@ export function EotCaseListClient({
               <Link
                 key={caseItem.id}
                 href={`/operator/cases/${caseItem.id}`}
-                className="grid grid-cols-1 items-start gap-x-6 border-b border-zinc-200 px-5 py-6 transition hover:bg-zinc-50/60 sm:grid-cols-[1fr_180px] md:grid-cols-[1fr_180px_140px]"
+                className="grid grid-cols-1 items-start gap-x-6 border-b border-zinc-200 px-5 py-6 transition hover:bg-zinc-50/60 sm:grid-cols-[1fr_180px] md:grid-cols-[1fr_180px_160px_140px]"
               >
                 {/* Left: Property + landlord */}
                 <div className="min-w-0">
@@ -675,6 +694,18 @@ export function EotCaseListClient({
                   </p>
                   <p className="mt-0.5 truncate text-sm text-zinc-700">
                     {caseItem.tenant_name}
+                  </p>
+                </div>
+
+                {/* Assigned to */}
+                <div className="hidden md:block">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
+                    Assigned
+                  </p>
+                  <p className="mt-0.5 truncate text-sm text-zinc-700">
+                    {caseItem.assigned_to
+                      ? (memberNames.get(caseItem.assigned_to) ?? 'Member')
+                      : (<span className="text-zinc-400">Unassigned</span>)}
                   </p>
                 </div>
 

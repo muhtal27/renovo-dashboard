@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { requireOperatorTenant } from '@/lib/operator-server'
+import { CaseAllocationPanel } from './case-allocation-panel'
 
 export const metadata: Metadata = {
   title: 'Admin | Renovo AI',
@@ -79,36 +80,12 @@ export default async function AdminPage() {
       <section className="border border-zinc-200/80 bg-white px-6 py-6 md:px-7">
         <h3 className="text-sm font-semibold text-zinc-950">Case allocation</h3>
         <p className="mt-1 text-sm text-zinc-500">
-          How incoming checkouts are assigned to property managers.
+          Assign incoming checkouts to property managers. Select a team member from the dropdown to
+          allocate, or remove an existing assignment.
         </p>
 
-        <div className="mt-5 space-y-4">
-          <div className="border-b border-zinc-100 pb-4">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-sm font-medium text-zinc-950">Auto-allocation</p>
-                <p className="mt-1 text-sm leading-6 text-zinc-600">
-                  Automatically assign incoming checkouts to the property manager linked to the
-                  tenancy record. Falls back to round-robin distribution across available team
-                  members if no direct match is found.
-                </p>
-              </div>
-              <span className="shrink-0 text-xs font-medium text-amber-600">Coming soon</span>
-            </div>
-          </div>
-
-          <div>
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-sm font-medium text-zinc-950">Manual allocation</p>
-                <p className="mt-1 text-sm leading-6 text-zinc-600">
-                  A team lead or admin manually assigns each incoming checkout to a specific property
-                  manager from the unallocated queue.
-                </p>
-              </div>
-              <span className="shrink-0 text-xs font-medium text-amber-600">Coming soon</span>
-            </div>
-          </div>
+        <div className="mt-5">
+          <CaseAllocationPanel />
         </div>
       </section>
 

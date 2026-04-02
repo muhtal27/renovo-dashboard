@@ -4,6 +4,7 @@ import type {
   CreateEotCaseInput,
   CreateEotEvidenceInput,
   CreateEotMessageInput,
+  EotCase,
   EotCaseSubmission,
   EotCaseListItem,
   EotCaseTimelineItem,
@@ -18,7 +19,7 @@ import type {
 } from '@/lib/eot-types'
 
 type RequestOptions = {
-  method?: 'GET' | 'POST'
+  method?: 'GET' | 'POST' | 'PATCH'
   body?: unknown
   searchParams?: Record<string, string | number | null | undefined>
 }
@@ -118,6 +119,13 @@ export function getEotCaseTimeline(caseId: string) {
 
 export function getEotCaseSubmission(caseId: string) {
   return requestJson<EotCaseSubmission>(`/api/eot/cases/${caseId}/submission`)
+}
+
+export function assignEotCase(caseId: string, assignedTo: string | null) {
+  return requestJson<EotCase>(`/api/eot/cases/${caseId}/assign`, {
+    method: 'PATCH',
+    body: { assigned_to: assignedTo },
+  })
 }
 
 export function createEotCase(input: CreateEotCaseInput) {

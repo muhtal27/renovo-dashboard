@@ -32,6 +32,7 @@ export type EotCaseListItem = {
   deposit_amount: string | null
   deposit_scheme: string | null
   status: EotCaseStatus
+  assigned_to: string | null
   priority: EotCasePriority
   issue_count: number
   evidence_count: number
