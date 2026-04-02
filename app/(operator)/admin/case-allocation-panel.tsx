@@ -110,21 +110,6 @@ export function CaseAllocationPanel() {
 
   return (
     <div className="space-y-4">
-      {/* Stats */}
-      <div className="flex items-center gap-4 text-sm">
-        <span className="text-zinc-500">
-          <span className="font-semibold text-zinc-950">{unallocatedCount}</span> unallocated
-        </span>
-        <span className="text-zinc-300">|</span>
-        <span className="text-zinc-500">
-          <span className="font-semibold text-zinc-950">{allocatedCount}</span> allocated
-        </span>
-        <span className="text-zinc-300">|</span>
-        <span className="text-zinc-500">
-          <span className="font-semibold text-zinc-950">{cases.length}</span> total
-        </span>
-      </div>
-
       {/* Filter tabs */}
       <div className="flex items-center gap-0">
         {[

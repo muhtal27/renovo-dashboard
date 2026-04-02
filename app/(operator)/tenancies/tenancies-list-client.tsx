@@ -163,22 +163,6 @@ export function TenanciesListClient({
 
   return (
     <div className="space-y-4">
-      {/* Stats */}
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">
-        <span className="text-zinc-500">
-          <span className="font-semibold text-zinc-950">{stats.total}</span> tenancies
-        </span>
-        <span className="text-zinc-500">
-          <span className="font-semibold text-zinc-950">{stats.ending}</span> ending soon
-        </span>
-        <span className="text-zinc-500">
-          <span className="font-semibold text-zinc-950">{stats.withCase}</span> with active case
-        </span>
-        <span className="text-zinc-500">
-          <span className="font-semibold text-zinc-950">{stats.noCase}</span> no case
-        </span>
-      </div>
-
       {/* Toolbar */}
       <div className="sticky top-0 z-10 border-b border-zinc-200 bg-white/95 py-2 backdrop-blur">
         <div className="flex items-center justify-between gap-3">
