@@ -111,7 +111,7 @@ const OPERATOR_ROUTE_CONFIG: Array<{
     config: {
       pageTitle: 'Inventory feedback',
       pageDescription:
-        'Placeholder workspace for inventory feedback capture, review, and future operator workflows.',
+        'Review issues identified across all checkout cases. Filter by severity, recommendation, and status to manage your inventory feedback queue.',
       breadcrumbs: [{ label: 'Inventory feedback' }],
     },
   },
