@@ -258,7 +258,7 @@ export function TenancyDetailClient({ tenancyId }: { tenancyId: string }) {
                     No checkout case exists for this tenancy yet.
                   </p>
                   <Link
-                    href={`/checkouts?new=1&tenancy=${tenancyId}`}
+                    href="/checkouts"
                     className="inline-flex items-center gap-1.5 rounded-md bg-zinc-900 px-3.5 py-2 text-xs font-medium text-white transition hover:bg-zinc-800"
                   >
                     <Plus className="h-3.5 w-3.5" />

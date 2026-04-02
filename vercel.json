@@ -47,6 +47,11 @@
       "source": "/settings/teams/:path*",
       "destination": "/teams/teams/:path*",
       "permanent": true
+    },
+    {
+      "source": "/tenancy",
+      "destination": "/tenancies",
+      "permanent": true
     }
   ],
   "headers": [
