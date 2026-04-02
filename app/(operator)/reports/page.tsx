@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { EotReportsClient } from '@/app/eot/_components/eot-reports-client'
+import { ReportsClient } from '@/app/(operator)/reports/_components/reports-client'
 import { getEotReportSummary } from '@/lib/eot-server-data'
 import { OPERATOR_PERMISSIONS } from '@/lib/operator-rbac'
 import { requireOperatorPermission } from '@/lib/operator-server'
@@ -15,12 +15,12 @@ export default async function ReportsPage() {
     error:
       error instanceof Error
         ? error.message
-        : 'Unable to load the end-of-tenancy portfolio.',
+        : 'Unable to load the reporting summary.',
   }))
 
   if ('error' in initialSummary) {
-    return <EotReportsClient error={initialSummary.error} />
+    return <ReportsClient error={initialSummary.error} />
   }
 
-  return <EotReportsClient initialSummary={initialSummary} />
+  return <ReportsClient initialSummary={initialSummary} />
 }
