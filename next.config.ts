@@ -49,6 +49,12 @@ const nextConfig: NextConfig = {
           { key: 'Content-Type', value: 'application/javascript; charset=utf-8' },
         ],
       },
+      {
+        source: '/icons/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
     ]
   },
 };

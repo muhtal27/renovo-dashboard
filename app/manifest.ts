@@ -5,10 +5,13 @@ export default function manifest(): MetadataRoute.Manifest {
     name: 'Renovo AI',
     short_name: 'Renovo',
     description: 'End of Tenancy Automation — deposit disputes, reports & compliance.',
-    start_url: '/',
+    start_url: '/checkouts',
+    scope: '/',
     display: 'standalone',
+    orientation: 'portrait-primary',
     background_color: '#ffffff',
     theme_color: '#0a0a0a',
+    categories: ['business', 'productivity'],
     icons: [
       {
         src: '/renovo-ai-icon.svg',
@@ -30,6 +33,15 @@ export default function manifest(): MetadataRoute.Manifest {
         sizes: '512x512',
         type: 'image/png',
         purpose: 'maskable',
+      },
+    ],
+    screenshots: [
+      {
+        src: '/og-image.jpg',
+        sizes: '1200x630',
+        type: 'image/jpeg',
+        form_factor: 'wide',
+        label: 'Renovo AI dashboard',
       },
     ],
   }
