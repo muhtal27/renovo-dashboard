@@ -2,6 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useState, type ReactNode } from 'react'
+import { useCrossTabSync } from '@/lib/use-cross-tab-sync'
 
 function makeQueryClient() {
   return new QueryClient({
@@ -30,11 +31,17 @@ function getQueryClient() {
   return browserQueryClient
 }
 
+function CrossTabSyncSetup() {
+  useCrossTabSync()
+  return null
+}
+
 export function AppQueryClientProvider({ children }: { children: ReactNode }) {
   const [queryClient] = useState(getQueryClient)
 
   return (
     <QueryClientProvider client={queryClient}>
+      <CrossTabSyncSetup />
       {children}
     </QueryClientProvider>
   )

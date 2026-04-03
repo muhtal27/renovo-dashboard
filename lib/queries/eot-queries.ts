@@ -1,6 +1,7 @@
 'use client'
 
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { broadcastInvalidation } from '@/lib/use-cross-tab-sync'
 import {
   listEotCases,
   listEotTenancies,
@@ -38,6 +39,8 @@ export function useEotCases(initialData?: EotCaseListItem[] | null) {
       return [...cases].sort(byLastActivityDesc)
     },
     initialData: initialData ?? undefined,
+    refetchInterval: 60_000,
+    refetchIntervalInBackground: false,
   })
 }
 
@@ -77,6 +80,8 @@ export function useEotTenancies(initialData?: EotTenancyListItem[] | null) {
     queryKey: eotKeys.tenancies,
     queryFn: listEotTenancies,
     initialData: initialData ?? undefined,
+    refetchInterval: 60_000,
+    refetchIntervalInBackground: false,
   })
 }
 
@@ -132,14 +137,23 @@ export function useInventoryFeedback(initialData?: FeedbackRow[] | null) {
 
 export function useInvalidateEotCases() {
   const queryClient = useQueryClient()
-  return () => queryClient.invalidateQueries({ queryKey: eotKeys.cases })
+  return () => {
+    queryClient.invalidateQueries({ queryKey: eotKeys.cases })
+    broadcastInvalidation([eotKeys.cases])
+  }
 }
 
 export function useInvalidateEotCase(caseId: string) {
   const queryClient = useQueryClient()
   return () => {
-    queryClient.invalidateQueries({ queryKey: eotKeys.caseWorkspace(caseId) })
-    queryClient.invalidateQueries({ queryKey: eotKeys.caseSummary(caseId) })
-    queryClient.invalidateQueries({ queryKey: eotKeys.caseIssues(caseId) })
+    const keys = [
+      eotKeys.caseWorkspace(caseId),
+      eotKeys.caseSummary(caseId),
+      eotKeys.caseIssues(caseId),
+    ]
+    for (const key of keys) {
+      queryClient.invalidateQueries({ queryKey: key })
+    }
+    broadcastInvalidation(keys)
   }
 }
