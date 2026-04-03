@@ -5,7 +5,7 @@ import { createMarketingMetadata } from '@/lib/marketing-metadata'
 const complaintSteps = [
   {
     title: 'Contact us directly',
-    body: 'If you are unhappy with any aspect of our service, please contact us first at hello@renovoai.co.uk. We will acknowledge your complaint within two working days.',
+    body: 'If you are unhappy with any aspect of our service, please contact us first at complaints@renovoai.co.uk. We will acknowledge your complaint within two working days.',
   },
   {
     title: 'Investigation',
@@ -61,10 +61,10 @@ export default function ComplaintsPage() {
                     <>
                       If you are unhappy with any aspect of our service, please contact us first at{' '}
                       <a
-                        href="mailto:hello@renovoai.co.uk"
+                        href="mailto:complaints@renovoai.co.uk"
                         className="text-emerald-500 hover:underline"
                       >
-                        hello@renovoai.co.uk
+                        complaints@renovoai.co.uk
                       </a>
                       . We will acknowledge your complaint within two working days.
                     </>

@@ -83,6 +83,27 @@ export default function InvestorsPage() {
           </div>
         </section>
 
+        {/* CTA */}
+        <section className="section-tinted">
+          <div className="mx-auto max-w-[1080px] px-6 py-24 text-center">
+            <p className="app-kicker">Get in touch</p>
+            <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
+              Interested in <em className="text-slate-400">Renovo AI</em>?
+            </h2>
+            <p className="mx-auto mt-4 max-w-[500px] text-base leading-8 text-slate-500">
+              For investor enquiries, introductions, or to request our deck,
+              reach out directly.
+            </p>
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <a
+                href="mailto:investors@renovoai.co.uk"
+                className="app-primary-button rounded-md px-6 py-3 text-sm font-medium"
+              >
+                investors@renovoai.co.uk &rarr;
+              </a>
+            </div>
+          </div>
+        </section>
 
       </div>
     </MarketingShell>

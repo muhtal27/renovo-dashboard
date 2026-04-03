@@ -32,7 +32,7 @@ const sections = [
       { l: "Data categories", d: "Tenant names, tenancy addresses, deposit amounts, checkout evidence (photographs, reports), and case decisions." },
       { l: "AI processing", d: "Tenancy data processed by AI to draft liability assessments. Not used to train models or shared with third parties." },
       { l: "Subject rights", d: "Data subject access, erasure, and portability requests handled within statutory timescales." },
-      { l: "Privacy notice", d: "Full privacy notice at renovoai.co.uk/privacy. Data protection enquiries to hello@renovoai.co.uk." },
+      { l: "Privacy notice", d: "Full privacy notice at renovoai.co.uk/privacy. Data protection enquiries to compliance@renovoai.co.uk." },
     ],
   },
   {
@@ -116,7 +116,7 @@ export default function ComplianceClient() {
           </div>
           <p className="mt-8 text-sm text-slate-500">
             For procurement, onboarding, or compliance enquiries contact{" "}
-            <a href="mailto:hello@renovoai.co.uk" className="text-emerald-500 hover:underline">hello@renovoai.co.uk</a>
+            <a href="mailto:compliance@renovoai.co.uk" className="text-emerald-500 hover:underline">compliance@renovoai.co.uk</a>
           </p>
         </section>
 
