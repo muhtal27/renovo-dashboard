@@ -2,6 +2,25 @@ import Link from 'next/link'
 import { MarketingShell } from '@/app/components/MarketingShell'
 import { createMarketingMetadata } from '@/lib/marketing-metadata'
 
+const securityPrinciples = [
+  {
+    title: 'Data isolation',
+    body: 'Every workspace is fully isolated at the database level. Tenant data, evidence, and case records are scoped and access-controlled throughout the stack.',
+  },
+  {
+    title: 'Encryption',
+    body: 'All data is encrypted in transit via TLS and at rest using AES-256. Authentication tokens, session credentials, and API keys follow least-privilege principles.',
+  },
+  {
+    title: 'Access control',
+    body: 'Role-based permissions govern every operator action. Manager sign-off, audit trails, and scoped API access are built into the workflow — not bolted on.',
+  },
+  {
+    title: 'Infrastructure',
+    body: 'Renovo AI runs on hardened cloud infrastructure with automated patching, monitoring, and incident response. We do not self-host customer data on shared hardware.',
+  },
+] as const
+
 const reportItems = [
   'A clear summary of the issue and the affected area',
   'Steps to reproduce, including any required account state',
@@ -32,51 +51,64 @@ const disclosureGuidelines = [
 ] as const
 
 export const metadata = createMarketingMetadata({
-  title: 'Bug Bounty | Renovo AI',
+  title: 'Security | Renovo AI',
   description:
-    'Responsible disclosure policy for Renovo AI, including reporting instructions, scope, disclosure expectations, and discretionary compensation guidance.',
-  path: '/bug-bounty',
+    'How Renovo AI protects customer data, infrastructure security practices, and responsible disclosure policy.',
+  path: '/security',
 })
 
-export default function BugBountyPage() {
+export default function SecurityPage() {
   return (
-    <MarketingShell currentPath="/bug-bounty">
+    <MarketingShell currentPath="/security">
       <div className="page-shell page-stack">
         <section className="page-hero">
-          <Link
-            href="/"
-            className="inline-flex items-center text-sm font-medium text-zinc-500 hover:text-zinc-950"
-          >
-            Back to Home
-          </Link>
-          <p className="app-kicker mt-8">Security</p>
-          <h1 className="page-title">Bug Bounty</h1>
-          <p className="page-copy max-w-[760px]">
-            Renovo AI welcomes responsible disclosure and good-faith security research. If you
-            identify a vulnerability in systems we control, we want to hear about it quickly and
-            clearly so we can investigate and respond appropriately.
+          <p className="app-kicker">Security</p>
+          <h1 className="page-title max-w-[820px]">
+            Built for trust from <em className="text-slate-400">day one</em>
+          </h1>
+          <p className="page-copy max-w-[640px]">
+            Renovo AI handles sensitive property, tenancy, and financial data on behalf of
+            letting agencies and property managers. Security is a core requirement of the
+            platform — not an afterthought.
           </p>
         </section>
 
+        {/* Security principles */}
+        <section className="section-tinted">
+          <div className="mx-auto max-w-[1080px] px-6 py-24">
+            <p className="app-kicker">How we protect your data</p>
+            <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
+              Security <em className="text-slate-400">principles</em>
+            </h2>
+            <div className="mt-14 grid gap-10 md:grid-cols-2">
+              {securityPrinciples.map((item) => (
+                <div key={item.title}>
+                  <h3 className="text-[15px] font-semibold text-zinc-950">{item.title}</h3>
+                  <p className="mt-2 text-sm leading-7 text-slate-500">{item.body}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Responsible disclosure */}
         <div className="mx-auto w-full max-w-[780px]">
           <section className="page-section">
-            <h2 className="text-[clamp(1.5rem,3vw,2rem)] leading-[1.12] text-zinc-950">Overview</h2>
+            <h2 className="text-[clamp(1.5rem,3vw,2rem)] leading-[1.12] text-zinc-950">
+              Responsible disclosure
+            </h2>
             <div className="mt-5 space-y-4 text-base leading-8 text-zinc-600">
               <p>
-                This page explains how to report security issues affecting Renovo AI. We value
-                precise, responsible reports that help us understand the issue, reproduce it, and
-                assess the impact on customers, users, and the platform.
-              </p>
-              <p>
-                We ask researchers to act lawfully, minimise impact, and avoid any activity that
-                would compromise service availability, user privacy, or operational integrity.
+                We welcome responsible disclosure and good-faith security research. If you
+                identify a vulnerability in systems we control, we want to hear about it quickly
+                and clearly so we can investigate and respond appropriately.
               </p>
             </div>
           </section>
 
           <section className="page-section">
             <h2 className="text-[clamp(1.5rem,3vw,2rem)] leading-[1.12] text-zinc-950">
-              How to Report
+              How to report
             </h2>
             <div className="mt-6 rounded-xl border border-zinc-200 bg-zinc-50 p-6">
               <p className="text-sm font-semibold text-zinc-950">Email</p>
@@ -114,7 +146,7 @@ export default function BugBountyPage() {
 
           <section className="page-section">
             <h2 className="text-[clamp(1.5rem,3vw,2rem)] leading-[1.12] text-zinc-950">
-              Out of Scope
+              Out of scope
             </h2>
             <ul className="mt-6 space-y-4">
               {outOfScopeItems.map((item) => (
@@ -145,7 +177,7 @@ export default function BugBountyPage() {
 
           <section className="page-section">
             <h2 className="text-[clamp(1.5rem,3vw,2rem)] leading-[1.12] text-zinc-950">
-              Responsible Disclosure Guidelines
+              Disclosure guidelines
             </h2>
             <ul className="mt-6 space-y-4">
               {disclosureGuidelines.map((item) => (
@@ -155,22 +187,6 @@ export default function BugBountyPage() {
                 </li>
               ))}
             </ul>
-          </section>
-
-          <section className="page-section">
-            <h2 className="text-[clamp(1.5rem,3vw,2rem)] leading-[1.12] text-zinc-950">
-              Our Commitment
-            </h2>
-            <div className="mt-5 space-y-4 text-base leading-8 text-zinc-600">
-              <p>
-                We will review credible reports in a timely way, communicate with researchers in
-                good faith, and work to validate, prioritise, and remediate legitimate security issues.
-              </p>
-              <p>
-                Where a report is clear and responsibly handled, we will aim to acknowledge receipt,
-                keep the reporter updated where practical, and recognise the value of good-faith research.
-              </p>
-            </div>
           </section>
 
           <section className="page-section-compact pb-0">

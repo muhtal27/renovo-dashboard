@@ -89,7 +89,7 @@ export default function ContactPage() {
                 <div className="mt-4 flex flex-wrap gap-4">
                   <Link href="/compliance" className="text-emerald-500 hover:underline">Compliance</Link>
                   <Link href="/privacy" className="text-emerald-500 hover:underline">Privacy</Link>
-                  <Link href="/bug-bounty" className="text-emerald-500 hover:underline">Security</Link>
+                  <Link href="/security" className="text-emerald-500 hover:underline">Security</Link>
                 </div>
               </div>
             </section>

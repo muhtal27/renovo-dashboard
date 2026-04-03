@@ -10,7 +10,8 @@ type MarketingShellProps = {
     | '/demo'
     | '/how-it-works'
     | '/investors'
-    | '/bug-bounty'
+    | '/security'
+    | '/careers'
     | '/partnerships'
     | '/integrations'
     | '/pricing'
@@ -40,6 +41,7 @@ const footerCompanyLinks = [
   { label: 'About', href: '/about' },
   { label: 'Contact', href: '/contact' },
   { label: 'Investors', href: '/investors' },
+  { label: 'Careers', href: '/careers' },
 ] as const
 
 const footerLegalLinks = [
@@ -47,6 +49,7 @@ const footerLegalLinks = [
   { label: 'Privacy', href: '/privacy' },
   { label: 'Terms', href: '/terms' },
   { label: 'Complaints', href: '/complaints' },
+  { label: 'Security', href: '/security' },
 ] as const
 
 function SignInLink({
