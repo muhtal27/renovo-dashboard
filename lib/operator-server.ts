@@ -2,6 +2,7 @@ import { cache } from 'react'
 import { redirect } from 'next/navigation'
 import type { User } from '@supabase/supabase-js'
 import {
+  ACTIVE_TENANT_SELECTION_COOKIE,
   getActiveTenantFailureDetail,
   resolveActiveTenantMembership,
 } from '@/lib/operator-membership-server'
@@ -117,7 +118,8 @@ const resolveOperatorContext = cache(async (): Promise<OperatorContextResult> =>
 // Short-lived in-memory cache for API route auth context.
 // Each client-side page load fires multiple /api/eot/* calls in quick succession;
 // without this cache every call repeats Supabase auth.getUser + profile + membership
-// lookups (3-4 DB round trips). The cache is keyed by access_token and lives for 10s.
+// lookups (3-4 DB round trips). Keyed by access_token + active tenant cookie so a
+// tenant switch immediately produces a cache miss.
 const apiContextCache = new Map<
   string,
   { result: OperatorContextResult; expiresAt: number }
@@ -144,7 +146,12 @@ async function resolveOperatorApiContext(): Promise<OperatorContextResult> {
     return buildOperatorContextResult(authResult)
   }
 
-  const cacheKey = authResult.session.access_token
+  // Include active tenant cookie in the key so a tenant switch immediately
+  // invalidates the cached context instead of serving stale data for up to 10s.
+  const { cookies } = await import('next/headers')
+  const cookieStore = await cookies()
+  const tenantCookie = cookieStore.get(ACTIVE_TENANT_SELECTION_COOKIE)?.value ?? ''
+  const cacheKey = `${authResult.session.access_token}:${tenantCookie}`
   const now = Date.now()
   const cached = apiContextCache.get(cacheKey)
 
