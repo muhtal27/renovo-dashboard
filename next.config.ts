@@ -10,7 +10,6 @@ const securityHeaders = [
       "img-src 'self' data: blob:",
       "font-src 'self' https://fonts.gstatic.com",
       "connect-src 'self' https://*.supabase.co https://api.renovoai.co.uk",
-      "frame-src https://outlook.office.com",
       "base-uri 'self'",
       "form-action 'self' https://*.supabase.co https://api.renovoai.co.uk https://login.microsoftonline.com",
       "frame-ancestors 'none'",

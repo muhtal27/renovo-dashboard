@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { MarketingShell } from '@/app/components/MarketingShell'
 import { createMarketingMetadata } from '@/lib/marketing-metadata'
 
@@ -45,16 +46,30 @@ export default function BookDemoPage() {
           </p>
         </section>
 
-        {/* Booking embed */}
-        <section className="mx-auto w-full max-w-[900px] px-6 py-12">
-          <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
-            <iframe
-              src={BOOKING_URL}
-              title="Book a demo with Renovo AI"
-              className="h-[680px] w-full border-0"
-              loading="lazy"
-              allow="clipboard-write"
-            />
+        {/* Booking CTA */}
+        <section className="mx-auto w-full max-w-[640px] px-6 py-12">
+          <div className="rounded-xl border border-zinc-200 bg-white px-8 py-10 text-center shadow-sm">
+            <p className="text-sm font-medium text-zinc-500">30 minutes · Microsoft Teams</p>
+            <h2 className="mt-3 text-2xl font-bold tracking-tight text-zinc-950">
+              Pick a time that works for you
+            </h2>
+            <p className="mx-auto mt-3 max-w-[420px] text-sm leading-7 text-slate-500">
+              Choose a slot from our calendar. You will receive a Teams meeting
+              link and a calendar invite immediately.
+            </p>
+            <div className="mt-8">
+              <a
+                href={BOOKING_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="app-primary-button inline-block rounded-md px-8 py-3.5 text-sm font-medium"
+              >
+                Choose a time &rarr;
+              </a>
+            </div>
+            <p className="mt-4 text-xs text-zinc-400">
+              Opens Microsoft Bookings in a new tab
+            </p>
           </div>
         </section>
 
