@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { ExternalLink } from 'lucide-react'
-import { listEotCases, listEotCaseIssues } from '@/lib/eot-api'
+import { useInventoryFeedback } from '@/lib/queries/eot-queries'
 import type { EotCaseListItem, EotIssue, EotRecommendationDecision } from '@/lib/eot-types'
 import {
   StatusBadge,
@@ -50,48 +50,12 @@ function sumEstimatedCosts(rows: FeedbackRow[]): number {
 /* ------------------------------------------------------------------ */
 
 export function InventoryFeedbackClient() {
-  const [rows, setRows] = useState<FeedbackRow[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const { data: rows = [], isLoading: loading, error: queryError } = useInventoryFeedback()
+  const error = queryError ? (queryError instanceof Error ? queryError.message : 'Failed to load inventory feedback.') : null
 
   const [severityFilter, setSeverityFilter] = useState<SeverityFilter>('all')
   const [decisionFilter, setDecisionFilter] = useState<DecisionFilter>('all')
   const [searchQuery, setSearchQuery] = useState('')
-
-  useEffect(() => {
-    let cancelled = false
-
-    async function load() {
-      setLoading(true)
-      setError(null)
-
-      try {
-        const cases = await listEotCases()
-
-        // Only fetch issues for cases that have them
-        const casesWithIssues = cases.filter((c) => c.issue_count > 0)
-        const issueResults = await Promise.all(
-          casesWithIssues.map(async (c) => {
-            const issues = await listEotCaseIssues(c.id)
-            return issues.map((issue) => ({ issue, caseItem: c }))
-          })
-        )
-
-        if (!cancelled) {
-          setRows(issueResults.flat())
-        }
-      } catch (err) {
-        if (!cancelled) {
-          setError(err instanceof Error ? err.message : 'Failed to load inventory feedback.')
-        }
-      } finally {
-        if (!cancelled) setLoading(false)
-      }
-    }
-
-    void load()
-    return () => { cancelled = true }
-  }, [])
 
   /* Filtering */
   const filtered = rows.filter((r) => {

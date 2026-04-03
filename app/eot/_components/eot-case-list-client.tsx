@@ -4,8 +4,8 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { Check, ClipboardCopy, Copy, Plus, RefreshCcw } from 'lucide-react'
-import { createEotCase, EotApiError, listEotCases } from '@/lib/eot-api'
-import { byLastActivityDesc } from '@/lib/eot-dashboard'
+import { createEotCase, EotApiError } from '@/lib/eot-api'
+import { useEotCases, useOperatorAssignees, useInvalidateEotCases } from '@/lib/queries/eot-queries'
 import type {
   CreateEotCaseInput,
   EotCaseListItem,
@@ -77,21 +77,6 @@ const CASE_STATUSES: EotCaseStatus[] = [
   'resolved',
 ]
 
-const CASE_LIST_CACHE_TTL_MS = 30_000
-
-let cachedCaseList: EotCaseListItem[] | null = null
-let cachedCaseListAt = 0
-let inFlightCaseListRequest: Promise<EotCaseListItem[]> | null = null
-
-function primeCaseListCache(cases: EotCaseListItem[] | null | undefined) {
-  if (!cases?.length) {
-    return
-  }
-
-  cachedCaseList = cases
-  cachedCaseListAt = Date.now()
-}
-
 type CreateCaseFormState = {
   propertyId: string
   summary: string
@@ -128,50 +113,28 @@ const DEFAULT_FORM_STATE: CreateCaseFormState = {
   notes: '',
 }
 
-async function loadCaseList(forceRefresh = false) {
-  const now = Date.now()
-
-  if (!forceRefresh && cachedCaseList && now - cachedCaseListAt < CASE_LIST_CACHE_TTL_MS) {
-    return cachedCaseList
-  }
-
-  if (!forceRefresh && inFlightCaseListRequest) {
-    return inFlightCaseListRequest
-  }
-
-  const request = listEotCases()
-    .then((nextCases) => {
-      const sortedCases = [...nextCases].sort(byLastActivityDesc)
-      cachedCaseList = sortedCases
-      cachedCaseListAt = Date.now()
-      return sortedCases
-    })
-    .finally(() => {
-      if (inFlightCaseListRequest === request) {
-        inFlightCaseListRequest = null
-      }
-    })
-
-  inFlightCaseListRequest = request
-
-  return request
-}
-
 export function EotCaseListClient({
   initialCases,
 }: {
   initialCases?: EotCaseListItem[] | null
 }) {
-  primeCaseListCache(initialCases)
-
   const router = useRouter()
   const searchParams = useSearchParams()
   const search = searchParams.get('search')?.trim().toLowerCase() ?? ''
 
-  const [cases, setCases] = useState<EotCaseListItem[]>(() => initialCases ?? cachedCaseList ?? [])
-  const [loading, setLoading] = useState(initialCases == null && cachedCaseList === null)
-  const [error, setError] = useState<string | null>(null)
-  const [refreshing, setRefreshing] = useState(false)
+  const { data: cases = [], isLoading: loading, error: queryError, isFetching: refreshing, refetch } = useEotCases(initialCases)
+  const error = queryError ? (queryError instanceof Error ? queryError.message : 'Unable to load end-of-tenancy cases.') : null
+  const invalidateCases = useInvalidateEotCases()
+
+  const { data: assignees = [] } = useOperatorAssignees()
+  const memberNames = useMemo(() => {
+    const map = new Map<string, string>()
+    for (const m of assignees) {
+      map.set(m.userId, m.fullName || m.email || m.userId.slice(0, 8))
+    }
+    return map
+  }, [assignees])
+
   const [createOpen, setCreateOpen] = useState(false)
   const [createPending, setCreatePending] = useState(false)
   const [createError, setCreateError] = useState<string | null>(null)
@@ -181,67 +144,6 @@ export function EotCaseListClient({
   const [savedView, setSavedView] = useState<SavedView>('all')
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [copied, setCopied] = useState(false)
-  const [memberNames, setMemberNames] = useState<Map<string, string>>(new Map())
-
-  useEffect(() => {
-    let cancelled = false
-
-    void fetch('/api/operator/assignees')
-      .then((r) => r.json())
-      .then((data: { assignees?: Array<{ userId: string; fullName: string | null; email: string | null }> }) => {
-        if (cancelled || !data.assignees) return
-        const map = new Map<string, string>()
-        for (const m of data.assignees) {
-          map.set(m.userId, m.fullName || m.email || m.userId.slice(0, 8))
-        }
-        setMemberNames(map)
-      })
-      .catch(() => {})
-
-    return () => { cancelled = true }
-  }, [])
-
-  useEffect(() => {
-    let cancelled = false
-
-    async function loadCases() {
-      if (initialCases) {
-        return
-      }
-
-      const shouldRefreshInBackground = Boolean(cachedCaseList)
-
-      if (!shouldRefreshInBackground) {
-        setLoading(true)
-        setError(null)
-      }
-
-      try {
-        const nextCases = await loadCaseList(shouldRefreshInBackground)
-
-        if (!cancelled) {
-          setCases(nextCases)
-          setError(null)
-        }
-      } catch (loadError) {
-        if (!cancelled) {
-          setError(
-            loadError instanceof Error ? loadError.message : 'Unable to load end-of-tenancy cases.'
-          )
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false)
-        }
-      }
-    }
-
-    void loadCases()
-
-    return () => {
-      cancelled = true
-    }
-  }, [initialCases])
 
   useEffect(() => {
     setSelectedIds((current) => current.filter((id) => cases.some((caseItem) => caseItem.id === id)))
@@ -333,18 +235,8 @@ export function EotCaseListClient({
     }
   }, [preparedCaseRows])
 
-  async function refreshCases() {
-    setRefreshing(true)
-
-    try {
-      const nextCases = await loadCaseList(true)
-      setCases(nextCases)
-      setError(null)
-    } catch (refreshError) {
-      setError(refreshError instanceof Error ? refreshError.message : 'Unable to refresh cases.')
-    } finally {
-      setRefreshing(false)
-    }
+  function refreshCases() {
+    void refetch()
   }
 
   async function handleCreateCase(event: FormEvent<HTMLFormElement>) {
@@ -383,9 +275,7 @@ export function EotCaseListClient({
 
     try {
       const workspace = await createEotCase(payload)
-      cachedCaseList = null
-      cachedCaseListAt = 0
-      inFlightCaseListRequest = null
+      void invalidateCases()
       setFormState(DEFAULT_FORM_STATE)
       setCreateOpen(false)
       router.push(`/checkouts/${workspace.case.id}`)

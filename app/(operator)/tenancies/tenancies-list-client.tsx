@@ -1,10 +1,10 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { RefreshCcw } from 'lucide-react'
-import { listEotTenancies } from '@/lib/eot-api'
+import { useEotTenancies } from '@/lib/queries/eot-queries'
 import type { EotTenancyListItem } from '@/lib/eot-types'
 import {
   EmptyState,
@@ -58,50 +58,14 @@ export function TenanciesListClient({
 }: {
   initialTenancies?: EotTenancyListItem[] | null
 }) {
-  const [tenancies, setTenancies] = useState<EotTenancyListItem[]>(initialTenancies ?? [])
-  const [loading, setLoading] = useState(initialTenancies == null)
-  const [error, setError] = useState<string | null>(null)
-  const [refreshing, setRefreshing] = useState(false)
+  const { data: tenancies = [], isLoading: loading, error: queryError, isFetching: refreshing, refetch } = useEotTenancies(initialTenancies)
+  const error = queryError ? (queryError instanceof Error ? queryError.message : 'Failed to load tenancies.') : null
   const searchParams = useSearchParams()
   const [view, setView] = useState<TenancyView>('all')
   const [search, setSearch] = useState(searchParams.get('search') ?? '')
 
-  useEffect(() => {
-    if (initialTenancies) return
-    let cancelled = false
-
-    async function load() {
-      setLoading(true)
-      try {
-        const data = await listEotTenancies()
-        if (!cancelled) {
-          setTenancies(data)
-          setError(null)
-        }
-      } catch (loadError) {
-        if (!cancelled) {
-          setError(loadError instanceof Error ? loadError.message : 'Failed to load tenancies.')
-        }
-      } finally {
-        if (!cancelled) setLoading(false)
-      }
-    }
-
-    void load()
-    return () => { cancelled = true }
-  }, [initialTenancies])
-
-  async function refreshTenancies() {
-    setRefreshing(true)
-    try {
-      const data = await listEotTenancies()
-      setTenancies(data)
-      setError(null)
-    } catch (refreshError) {
-      setError(refreshError instanceof Error ? refreshError.message : 'Failed to refresh.')
-    } finally {
-      setRefreshing(false)
-    }
+  function refreshTenancies() {
+    void refetch()
   }
 
   const stats = useMemo(() => {

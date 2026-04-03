@@ -2,10 +2,9 @@
 
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { RefreshCcw } from 'lucide-react'
-import { listEotCases } from '@/lib/eot-api'
-import { byLastActivityDesc } from '@/lib/eot-dashboard'
+import { useEotCases } from '@/lib/queries/eot-queries'
 import type { EotCaseListItem, EotCasePriority } from '@/lib/eot-types'
 import {
   EmptyState,
@@ -36,51 +35,18 @@ function priorityColor(priority: EotCasePriority) {
 export function DisputeListClient({
   initialCases,
 }: {
-  initialCases?: EotCaseListItem[] | null
+  initialCases?: import('@/lib/eot-types').EotCaseListItem[] | null
 }) {
   const searchParams = useSearchParams()
   const search = searchParams.get('search')?.trim().toLowerCase() ?? ''
 
-  const [cases, setCases] = useState<EotCaseListItem[]>(() => initialCases ?? [])
-  const [loading, setLoading] = useState(initialCases == null)
-  const [error, setError] = useState<string | null>(null)
-  const [refreshing, setRefreshing] = useState(false)
+  const { data: allCases = [], isLoading: loading, error: queryError, isFetching: refreshing, refetch } = useEotCases(initialCases)
+  const error = queryError ? (queryError instanceof Error ? queryError.message : 'Unable to load disputes.') : null
+  const cases = useMemo(() => allCases.filter((c) => c.status === 'disputed'), [allCases])
   const [priorityFilter, setPriorityFilter] = useState<'all' | EotCasePriority>('all')
 
-  useEffect(() => {
-    if (initialCases) return
-    let cancelled = false
-
-    async function load() {
-      setLoading(true)
-      setError(null)
-      try {
-        const all = await listEotCases()
-        const disputed = all.filter((c) => c.status === 'disputed').sort(byLastActivityDesc)
-        if (!cancelled) setCases(disputed)
-      } catch (e) {
-        if (!cancelled) setError(e instanceof Error ? e.message : 'Unable to load disputes.')
-      } finally {
-        if (!cancelled) setLoading(false)
-      }
-    }
-
-    void load()
-    return () => { cancelled = true }
-  }, [initialCases])
-
-  async function refreshCases() {
-    setRefreshing(true)
-    try {
-      const all = await listEotCases()
-      const disputed = all.filter((c) => c.status === 'disputed').sort(byLastActivityDesc)
-      setCases(disputed)
-      setError(null)
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Unable to refresh disputes.')
-    } finally {
-      setRefreshing(false)
-    }
+  function refreshCases() {
+    void refetch()
   }
 
   const visible = useMemo(() => {
