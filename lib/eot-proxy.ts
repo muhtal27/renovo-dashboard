@@ -148,6 +148,7 @@ export async function proxyEotRequest(
       },
       body: requestBody.body,
       cache: 'no-store',
+      signal: AbortSignal.timeout(30_000),
     })
   } catch (error) {
     console.error('EOT proxy backend request failed', {

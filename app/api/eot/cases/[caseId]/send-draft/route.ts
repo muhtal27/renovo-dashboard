@@ -63,6 +63,19 @@ export async function POST(request: Request, context: RouteContext) {
     )
   }
 
+  if (reportUrl) {
+    try {
+      const parsed = new URL(reportUrl)
+      if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+        return NextResponse.json({ error: 'reportUrl must be an HTTP(S) URL.' }, { status: 400 })
+      }
+    } catch {
+      return NextResponse.json({ error: 'reportUrl is not a valid URL.' }, { status: 400 })
+    }
+  }
+
+  const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+
   const fromAddress = `${userName} via Renovo AI <checkout@renovoai.co.uk>`
   const subject = `Checkout Report \u2014 ${propertyAddress}`
 
@@ -74,12 +87,12 @@ export async function POST(request: Request, context: RouteContext) {
         replyTo: userEmail,
         subject,
         html: [
-          `<p>Dear ${landlordName || 'Landlord'},</p>`,
-          `<p>Please find the checkout report for <strong>${propertyAddress}</strong> (Ref: ${caseRef}).</p>`,
-          `<p>The full checkout report is available here:<br /><a href="${reportUrl}">${reportUrl}</a></p>`,
+          `<p>Dear ${esc(landlordName || 'Landlord')},</p>`,
+          `<p>Please find the checkout report for <strong>${esc(propertyAddress)}</strong> (Ref: ${esc(caseRef)}).</p>`,
+          reportUrl ? `<p>The full checkout report is available here:<br /><a href="${esc(reportUrl)}">${esc(reportUrl)}</a></p>` : '',
           `<p>This report contains the property condition assessment, recommended deductions, and supporting evidence. Please review the findings and let us know if you have any questions.</p>`,
-          `<p>Kind regards,<br />${userName}</p>`,
-        ].join('\n'),
+          `<p>Kind regards,<br />${esc(userName)}</p>`,
+        ].filter(Boolean).join('\n'),
       }),
 
       resend.emails.send({
@@ -88,12 +101,12 @@ export async function POST(request: Request, context: RouteContext) {
         replyTo: userEmail,
         subject,
         html: [
-          `<p>Dear ${tenantName || 'Tenant'},</p>`,
-          `<p>The checkout inspection for <strong>${propertyAddress}</strong> (Ref: ${caseRef}) has been completed.</p>`,
-          `<p>A summary of any proposed deductions and tenant liabilities is available in the checkout report:<br /><a href="${reportUrl}">${reportUrl}</a></p>`,
+          `<p>Dear ${esc(tenantName || 'Tenant')},</p>`,
+          `<p>The checkout inspection for <strong>${esc(propertyAddress)}</strong> (Ref: ${esc(caseRef)}) has been completed.</p>`,
+          reportUrl ? `<p>A summary of any proposed deductions and tenant liabilities is available in the checkout report:<br /><a href="${esc(reportUrl)}">${esc(reportUrl)}</a></p>` : '',
           `<p>Please review the report carefully. If you have any queries or wish to dispute any items, please respond to this email.</p>`,
-          `<p>Kind regards,<br />${userName}</p>`,
-        ].join('\n'),
+          `<p>Kind regards,<br />${esc(userName)}</p>`,
+        ].filter(Boolean).join('\n'),
       }),
     ])
 

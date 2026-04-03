@@ -24,8 +24,16 @@ export function getRequestIp(request: Request) {
   return realIp || 'unknown'
 }
 
+function pruneExpiredBuckets(now: number) {
+  if (rateLimitStore.size <= 100) return
+  for (const [key, bucket] of rateLimitStore) {
+    if (bucket.resetAt <= now) rateLimitStore.delete(key)
+  }
+}
+
 export function rateLimitRequest(request: Request, options: RateLimitOptions) {
   const now = Date.now()
+  pruneExpiredBuckets(now)
   const bucketKey = `${options.key}:${getRequestIp(request)}`
   const existing = rateLimitStore.get(bucketKey)
 
