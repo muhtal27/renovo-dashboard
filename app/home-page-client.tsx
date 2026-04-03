@@ -300,7 +300,7 @@ export default function HomePageClient() {
               </div>
             ))}
           </div>
-          <div className="mt-10 flex flex-col gap-2 border-t border-[#1e293b] pt-6 text-xs text-white/40 md:flex-row md:justify-between">
+          <div className="mt-10 flex flex-col gap-2 pt-6 text-xs text-white/40 md:flex-row md:justify-between">
             <span>Renovo AI Ltd &middot; SC833544 &middot; VAT GB483379648 &middot; ICO ZC112030</span>
             <span>&copy; 2026 Renovo AI Ltd</span>
           </div>
