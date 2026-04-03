@@ -52,19 +52,17 @@ export default function AboutClient() {
         <section className="mx-auto max-w-[1080px] px-6 py-24">
           <p className="app-kicker">The company</p>
           <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
-            Built from direct <em className="text-slate-400">operational experience</em>
+            One workflow. <em className="text-slate-400">Done properly.</em>
           </h2>
           <p className="mt-4 max-w-[640px] text-base leading-8 text-slate-500">
-            Renovo AI was founded by a practising end of tenancy property manager
-            who saw the same problem across every agency: checkout evidence
-            scattered across six tools, deduction reasoning rebuilt from memory,
-            and dispute outcomes determined by whether the file was complete when
-            it reached a deposit scheme.
+            Renovo AI is focused on one workflow category — turning checkout
+            evidence into reviewable, defensible deposit decisions — with human
+            approval at every stage.
           </p>
           <p className="mt-4 max-w-[640px] text-base leading-8 text-slate-500">
-            The company is not a broad property platform. It is focused on one
-            workflow category — turning checkout evidence into reviewable,
-            defensible deposit decisions — with human approval at every stage.
+            The platform handles liability comparison, deduction drafting,
+            evidence management, and dispute preparation. It is not a broad
+            property platform. It is purpose-built for end of tenancy operations.
           </p>
 
           <div className="mt-14 grid grid-cols-2 gap-y-8 md:grid-cols-4">

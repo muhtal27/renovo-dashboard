@@ -11,7 +11,7 @@ export const siteUrl = (
 ).replace(/\/+$/, '')
 export const defaultDescription =
   'Renovo AI automates end of tenancy work for UK property managers and letting agencies, from evidence review and issue assessment to claim ready output.'
-export const ogImagePath = '/og-image.jpg'
+export const ogImagePath = '/opengraph-image'
 
 const organizationId = `${siteUrl}#organization`
 const websiteId = `${siteUrl}#website`
