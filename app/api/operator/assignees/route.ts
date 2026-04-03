@@ -26,10 +26,12 @@ export async function GET() {
 
   const userIds = memberships.map((m: { user_id: string }) => m.user_id)
 
-  const { data: authUsers } = await supabase.auth.admin.listUsers({ perPage: 500 })
+  const authUsers = await Promise.all(
+    userIds.map((id) => supabase.auth.admin.getUserById(id).then((r) => r.data?.user ?? null))
+  )
 
   const userMap = new Map(
-    (authUsers?.users ?? []).map((u) => [u.id, u])
+    authUsers.filter(Boolean).map((u) => [u!.id, u!])
   )
 
   const assignees = userIds.map((userId: string) => {
@@ -44,5 +46,5 @@ export async function GET() {
     }
   })
 
-  return NextResponse.json({ assignees })
+  return NextResponse.json({ assignees }, { headers: { 'Cache-Control': 'no-store' } })
 }

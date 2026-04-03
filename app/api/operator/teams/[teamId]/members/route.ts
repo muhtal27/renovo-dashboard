@@ -40,10 +40,13 @@ export async function GET(
     return NextResponse.json({ error: 'Failed to load team members.' }, { status: 500 })
   }
 
-  // Resolve user details from auth
-  const { data: authUsers } = await supabase.auth.admin.listUsers({ perPage: 500 })
+  // Resolve user details from auth — fetch only the users in this team
+  const userIds = memberships.map((m: Record<string, unknown>) => m.user_id as string)
+  const authUsers = await Promise.all(
+    userIds.map((id) => supabase.auth.admin.getUserById(id).then((r) => r.data?.user ?? null))
+  )
   const userMap = new Map(
-    (authUsers?.users ?? []).map((u) => [u.id, u])
+    authUsers.filter(Boolean).map((u) => [u!.id, u!])
   )
 
   const members = memberships.map((m: Record<string, unknown>) => {

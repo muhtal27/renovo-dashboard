@@ -76,7 +76,8 @@ export async function POST(request: Request, context: RouteContext) {
 
   const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 
-  const fromAddress = `${userName} via Renovo AI <checkout@renovoai.co.uk>`
+  const fromDomain = process.env.RESEND_FROM_DOMAIN ?? 'renovoai.co.uk'
+  const fromAddress = `${userName} via Renovo AI <checkout@${fromDomain}>`
   const subject = `Checkout Report \u2014 ${propertyAddress}`
 
   try {

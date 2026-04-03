@@ -47,7 +47,7 @@ export type ActiveTenantMembershipResolution =
 function getActiveTenantSelectionCookieOptions(secure = false) {
   return {
     httpOnly: true,
-    sameSite: 'lax' as const,
+    sameSite: 'strict' as const,
     secure,
     path: '/',
     maxAge: 60 * 60 * 24 * 30,

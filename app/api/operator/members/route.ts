@@ -24,12 +24,14 @@ export async function GET() {
     return NextResponse.json({ error: 'Failed to load members.' }, { status: 500 })
   }
 
-  const { data: authUsers } = await supabase.auth.admin.listUsers({
-    perPage: 500,
-  })
+  const userIds = memberships.map((m: Record<string, unknown>) => m.user_id as string)
+
+  const authUsers = await Promise.all(
+    userIds.map((id) => supabase.auth.admin.getUserById(id).then((r) => r.data?.user ?? null))
+  )
 
   const userMap = new Map(
-    (authUsers?.users ?? []).map((u) => [u.id, u])
+    authUsers.filter(Boolean).map((u) => [u!.id, u!])
   )
 
   const members = memberships.map((m: Record<string, unknown>) => {
@@ -49,7 +51,7 @@ export async function GET() {
     }
   })
 
-  return NextResponse.json({ members })
+  return NextResponse.json({ members }, { headers: { 'Cache-Control': 'no-store' } })
 }
 
 export async function POST(request: Request) {
@@ -62,7 +64,7 @@ export async function POST(request: Request) {
   const body = await request.json()
   const { email, role } = body as { email?: string; role?: string }
 
-  if (!email || typeof email !== 'string' || !email.includes('@')) {
+  if (!email || typeof email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return NextResponse.json({ error: 'A valid email address is required.' }, { status: 400 })
   }
 
@@ -71,7 +73,7 @@ export async function POST(request: Request) {
   const supabase = getSupabaseServiceRoleClient()
   const tenantId = result.context.tenantId
 
-  // Check if user already exists in auth
+  // Look up user by email via Supabase's admin API
   const { data: existingUsers } = await supabase.auth.admin.listUsers({ perPage: 500 })
   let authUser = existingUsers?.users?.find(
     (u) => u.email?.toLowerCase() === email.toLowerCase()
