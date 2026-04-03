@@ -114,6 +114,25 @@ const resolveOperatorContext = cache(async (): Promise<OperatorContextResult> =>
   return buildOperatorContextResult(authResult)
 })
 
+// Short-lived in-memory cache for API route auth context.
+// Each client-side page load fires multiple /api/eot/* calls in quick succession;
+// without this cache every call repeats Supabase auth.getUser + profile + membership
+// lookups (3-4 DB round trips). The cache is keyed by access_token and lives for 10s.
+const apiContextCache = new Map<
+  string,
+  { result: OperatorContextResult; expiresAt: number }
+>()
+const API_CONTEXT_TTL_MS = 10_000
+
+function pruneApiContextCache() {
+  const now = Date.now()
+  for (const [key, entry] of apiContextCache) {
+    if (entry.expiresAt <= now) {
+      apiContextCache.delete(key)
+    }
+  }
+}
+
 async function resolveOperatorApiContext(): Promise<OperatorContextResult> {
   const authResult = await refreshOperatorSessionIfNeeded()
 
@@ -122,8 +141,27 @@ async function resolveOperatorApiContext(): Promise<OperatorContextResult> {
       status: 401,
       reason: authResult.reason,
     })
+    return buildOperatorContextResult(authResult)
   }
-  return buildOperatorContextResult(authResult)
+
+  const cacheKey = authResult.session.access_token
+  const now = Date.now()
+  const cached = apiContextCache.get(cacheKey)
+
+  if (cached && cached.expiresAt > now) {
+    return cached.result
+  }
+
+  const result = await buildOperatorContextResult(authResult)
+
+  apiContextCache.set(cacheKey, { result, expiresAt: now + API_CONTEXT_TTL_MS })
+
+  // Prune stale entries periodically (cheap, map is small)
+  if (apiContextCache.size > 20) {
+    pruneApiContextCache()
+  }
+
+  return result
 }
 
 export async function requireOperatorSession(returnTo: string) {

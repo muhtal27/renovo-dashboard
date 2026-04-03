@@ -8,9 +8,12 @@ function makeQueryClient() {
   return new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: 60_000,
+        staleTime: 2 * 60_000,
         gcTime: 5 * 60_000,
-        refetchOnWindowFocus: true,
+        // Disabled: the polling intervals on list queries already keep data
+        // fresh; focus-refetches on top of that fire redundant requests on
+        // every tab switch, which stacks with the auth-per-request cost.
+        refetchOnWindowFocus: false,
         retry: 1,
       },
     },

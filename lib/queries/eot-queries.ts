@@ -129,7 +129,7 @@ export function useInventoryFeedback(initialData?: FeedbackRow[] | null) {
       return issueResults.flat()
     },
     initialData: initialData ?? undefined,
-    staleTime: 60_000,
+    staleTime: 5 * 60_000,
   })
 }
 
