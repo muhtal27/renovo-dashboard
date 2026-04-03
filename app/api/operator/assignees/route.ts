@@ -40,5 +40,5 @@ export async function GET() {
     }
   })
 
-  return NextResponse.json({ assignees }, { headers: { 'Cache-Control': 'no-store' } })
+  return NextResponse.json({ assignees }, { headers: { 'Cache-Control': 'private, max-age=30, stale-while-revalidate=60' } })
 }

@@ -35,7 +35,7 @@ async function fetchEotJson<T>(
         membershipStatus: context.membershipStatus,
       }),
     },
-    cache: 'no-store',
+    next: { revalidate: 60 },
   })
 
   const text = await response.text()

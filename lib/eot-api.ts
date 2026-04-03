@@ -50,7 +50,6 @@ async function requestJson<T>(path: string, options: RequestOptions = {}): Promi
     method: options.method ?? 'GET',
     headers: options.body ? { 'Content-Type': 'application/json' } : undefined,
     body: options.body ? JSON.stringify(options.body) : undefined,
-    cache: 'no-store',
   })
 
   const text = await response.text()

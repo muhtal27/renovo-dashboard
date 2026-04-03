@@ -45,7 +45,7 @@ export async function GET() {
     }
   })
 
-  return NextResponse.json({ members }, { headers: { 'Cache-Control': 'no-store' } })
+  return NextResponse.json({ members }, { headers: { 'Cache-Control': 'private, max-age=30, stale-while-revalidate=60' } })
 }
 
 export async function POST(request: Request) {

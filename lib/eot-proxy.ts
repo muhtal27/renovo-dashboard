@@ -207,8 +207,16 @@ export async function proxyEotRequest(
     })
   }
 
+  const cacheControl =
+    request.method === 'GET' && response.ok
+      ? 'private, max-age=30, stale-while-revalidate=60'
+      : 'no-store'
+
   return new Response(text, {
     status: response.status,
-    headers: { 'Content-Type': contentType },
+    headers: {
+      'Content-Type': contentType,
+      'Cache-Control': cacheControl,
+    },
   })
 }
