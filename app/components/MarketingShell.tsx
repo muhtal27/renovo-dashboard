@@ -183,12 +183,12 @@ export function MarketingShell({
         {children}
       </main>
 
-      <footer className="border-t border-zinc-200 bg-white py-10 text-zinc-500">
+      <footer className="border-t border-[#1e293b] bg-[#0a0e1a] py-14">
         <div className="marketing-frame">
-          <div className="grid gap-10 border-b border-zinc-100 pb-10 md:grid-cols-2 xl:grid-cols-[2fr_1fr_1fr_1fr]">
+          <div className="grid gap-10 border-b border-[#1e293b] pb-10 md:grid-cols-2 xl:grid-cols-[2fr_1fr_1fr_1fr]">
             <div>
-              <Link href="/" className="text-base font-semibold tracking-[-0.02em] text-zinc-950">Renovo AI</Link>
-              <p className="mt-3 max-w-[320px] text-sm leading-6">
+              <Link href="/" className="text-lg font-bold tracking-tight text-white">Renovo AI</Link>
+              <p className="mt-3 max-w-[260px] text-[13px] leading-[1.7] text-slate-400">
                 End of tenancy automation for UK letting agencies. Checkouts, claims, and disputes
                 in one workflow.
               </p>
@@ -198,12 +198,12 @@ export function MarketingShell({
               <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-500">
                 Product
               </p>
-              <nav className="mt-4 grid gap-2" aria-label="Footer product links">
+              <nav className="mt-4 grid gap-0.5" aria-label="Footer product links">
                 {footerProductLinks.map((item) => (
                   <Link
                     key={item.label}
                     href={item.href}
-                    className="text-sm text-zinc-500 hover:text-zinc-950"
+                    className="text-[13px] leading-[2.3] text-white/50 transition-colors hover:text-white"
                   >
                     {item.label}
                   </Link>
@@ -215,17 +215,17 @@ export function MarketingShell({
               <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-500">
                 Company
               </p>
-              <nav className="mt-4 grid gap-2" aria-label="Footer company links">
+              <nav className="mt-4 grid gap-0.5" aria-label="Footer company links">
                 {footerCompanyLinks.map((item) => (
                   <Link
                     key={item.label}
                     href={item.href}
-                    className="text-sm text-zinc-500 hover:text-zinc-950"
+                    className="text-[13px] leading-[2.3] text-white/50 transition-colors hover:text-white"
                   >
                     {item.label}
                   </Link>
                 ))}
-                <SignInLink className="text-sm text-zinc-500 hover:text-zinc-950">
+                <SignInLink className="text-[13px] leading-[2.3] text-white/50 transition-colors hover:text-white">
                   Sign in
                 </SignInLink>
               </nav>
@@ -235,12 +235,12 @@ export function MarketingShell({
               <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-500">
                 Legal
               </p>
-              <nav className="mt-4 grid gap-2" aria-label="Footer legal links">
+              <nav className="mt-4 grid gap-0.5" aria-label="Footer legal links">
                 {footerLegalLinks.map((item) => (
                   <Link
                     key={item.label}
                     href={item.href}
-                    className="text-sm text-zinc-500 hover:text-zinc-950"
+                    className="text-[13px] leading-[2.3] text-white/50 transition-colors hover:text-white"
                   >
                     {item.label}
                   </Link>
@@ -249,7 +249,7 @@ export function MarketingShell({
             </div>
           </div>
 
-          <div className="mt-7 flex flex-col gap-2 text-xs text-zinc-400 md:flex-row md:items-center md:justify-between">
+          <div className="mt-10 flex flex-col gap-2 text-xs text-white/40 md:flex-row md:items-center md:justify-between">
             <span>Renovo AI Ltd · SC833544 · VAT GB483379648 · ICO ZC112030</span>
             <span>© 2026 Renovo AI Ltd</span>
           </div>

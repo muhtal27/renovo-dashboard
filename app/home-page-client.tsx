@@ -278,29 +278,29 @@ export default function HomePageClient() {
 
       </main>
 
-      {/* ── FOOTER ── */}
-      <footer className="border-t border-zinc-200 bg-white px-8 py-14 text-zinc-500 lg:px-10">
+      {/* ── DARK FOOTER ── */}
+      <footer className="border-t border-[#1e293b] bg-[#0a0e1a] px-8 py-14 lg:px-10">
         <div className="mx-auto max-w-[1280px]">
-          <div className="grid gap-10 border-b border-zinc-100 pb-10 md:grid-cols-2 xl:grid-cols-[2fr_1fr_1fr_1fr]">
+          <div className="grid gap-10 border-b border-[#1e293b] pb-10 md:grid-cols-2 xl:grid-cols-[2fr_1fr_1fr_1fr]">
             <div>
-              <Link href="/" className="text-base font-semibold tracking-[-0.02em] text-zinc-950">Renovo AI</Link>
-              <p className="mt-3 max-w-[320px] text-sm leading-6">End of tenancy automation for UK letting agencies. Checkouts, claims, and disputes in one workflow.</p>
+              <Link href="/" className="text-lg font-bold tracking-tight text-white">Renovo AI</Link>
+              <p className="mt-3 max-w-[260px] text-[13px] leading-[1.7] text-slate-400">End of tenancy automation for UK letting agencies. Checkouts, claims, and disputes in one workflow.</p>
             </div>
             {Object.entries(footerCols).map(([title, links]) => (
               <div key={title}>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-500">{title}</p>
-                <nav className="mt-4 grid gap-2">
+                <nav className="mt-4 grid gap-0.5">
                   {links.map((l) => (
-                    <Link key={l.href} href={l.href} className="text-sm text-zinc-500 hover:text-zinc-950">{l.label}</Link>
+                    <Link key={l.href} href={l.href} className="text-[13px] leading-[2.3] text-white/50 transition-colors hover:text-white">{l.label}</Link>
                   ))}
                   {title === "Company" && (
-                    <SignInLink className="text-sm text-zinc-500 hover:text-zinc-950">Sign in</SignInLink>
+                    <SignInLink className="text-[13px] leading-[2.3] text-white/50 transition-colors hover:text-white">Sign in</SignInLink>
                   )}
                 </nav>
               </div>
             ))}
           </div>
-          <div className="mt-7 flex flex-col gap-2 text-xs text-zinc-400 md:flex-row md:items-center md:justify-between">
+          <div className="mt-10 flex flex-col gap-2 border-t border-[#1e293b] pt-6 text-xs text-white/40 md:flex-row md:justify-between">
             <span>Renovo AI Ltd &middot; SC833544 &middot; VAT GB483379648 &middot; ICO ZC112030</span>
             <span>&copy; 2026 Renovo AI Ltd</span>
           </div>
