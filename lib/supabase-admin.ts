@@ -55,7 +55,7 @@ export function getSupabaseRlsClient(accessToken: string) {
   )
 }
 
-export function getSupabaseServiceRoleClient() {
+function buildServiceRoleClient() {
   return createClient(
     requireSupabaseUrl(),
     requireSupabaseServiceRoleKey(),
@@ -66,4 +66,13 @@ export function getSupabaseServiceRoleClient() {
       },
     }
   )
+}
+
+let _serviceRoleClient: ReturnType<typeof buildServiceRoleClient> | null = null
+
+export function getSupabaseServiceRoleClient() {
+  if (!_serviceRoleClient) {
+    _serviceRoleClient = buildServiceRoleClient()
+  }
+  return _serviceRoleClient
 }

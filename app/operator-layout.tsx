@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 import type { ReactNode } from 'react'
-import { useMemo, useState } from 'react'
+import { Suspense, useCallback, useMemo, useState } from 'react'
 import { Menu, Search } from 'lucide-react'
 import { OperatorNav } from '@/app/operator-nav'
 import { getOperatorLabel, type CurrentOperator } from '@/lib/operator-types'
@@ -237,19 +237,43 @@ function OperatorSearchForm({
   )
 }
 
+/**
+ * Wrapper that isolates useSearchParams() so the parent OperatorLayout
+ * does not re-render when URL search params change.
+ */
+function OperatorSearchFormBridge({
+  pathname,
+  searchPlaceholder,
+  searchTargetPath,
+}: {
+  pathname: string
+  searchPlaceholder: string
+  searchTargetPath: string
+}) {
+  const searchParams = useSearchParams()
+  const searchParamValue = searchParams.get('search') ?? ''
+
+  return (
+    <OperatorSearchForm
+      key={`${pathname}?${searchParamValue}`}
+      searchTargetPath={searchTargetPath}
+      searchPlaceholder={searchPlaceholder}
+      initialSearchValue={searchParamValue}
+    />
+  )
+}
+
 export function OperatorLayout({ children, operator }: OperatorLayoutProps) {
   const pathname = usePathname() ?? '/admin'
-  const searchParams = useSearchParams()
   const routeConfig = useMemo(() => getRouteConfig(pathname), [pathname])
   const breadcrumbs = routeConfig.breadcrumbs ?? []
-  const searchParamValue = searchParams.get('search') ?? ''
   const searchTargetPath = routeConfig.searchTargetPath ?? pathname
   const operatorLabel = getOperatorLabel(operator)
   const [signingOut, setSigningOut] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
 
-  async function handleSignOut() {
+  const handleSignOut = useCallback(async () => {
     setSigningOut(true)
     await fetch('/api/operator/session', {
       method: 'DELETE',
@@ -257,12 +281,16 @@ export function OperatorLayout({ children, operator }: OperatorLayoutProps) {
     })
     clearLegacySupabaseBrowserAuthArtifacts(process.env.NEXT_PUBLIC_SUPABASE_URL)
     window.location.href = '/login'
-  }
+  }, [])
 
   const displayName = operatorLabel?.trim() || operator.authUser?.email?.trim() || ''
   const operatorRole = operator.membership?.role ?? null
 
   const hasNestedBreadcrumbs = breadcrumbs.length > 1
+
+  const handleToggleCollapse = useCallback(() => setSidebarCollapsed((current) => !current), [])
+  const handleCloseMobile = useCallback(() => setMobileNavOpen(false), [])
+  const handleOpenMobile = useCallback(() => setMobileNavOpen(true), [])
 
   return (
     <main className="operator-app min-h-screen text-zinc-900">
@@ -271,10 +299,10 @@ export function OperatorLayout({ children, operator }: OperatorLayoutProps) {
           role={operatorRole}
           collapsed={sidebarCollapsed}
           mobileOpen={mobileNavOpen}
-          onToggleCollapse={() => setSidebarCollapsed((current) => !current)}
-          onCloseMobile={() => setMobileNavOpen(false)}
+          onToggleCollapse={handleToggleCollapse}
+          onCloseMobile={handleCloseMobile}
           signingOut={signingOut}
-          onSignOut={() => void handleSignOut()}
+          onSignOut={handleSignOut}
         />
 
         <div className="min-w-0 flex-1">
@@ -284,7 +312,7 @@ export function OperatorLayout({ children, operator }: OperatorLayoutProps) {
                 <div className="flex min-w-0 items-center gap-3">
                   <button
                     type="button"
-                    onClick={() => setMobileNavOpen(true)}
+                    onClick={handleOpenMobile}
                     className="flex h-7 w-7 items-center justify-center rounded-md border border-zinc-200 text-zinc-500 xl:hidden"
                     aria-label="Open navigation"
                   >
@@ -321,14 +349,15 @@ export function OperatorLayout({ children, operator }: OperatorLayoutProps) {
 
                 <div className="flex items-center gap-3">
                   <div className="hidden xl:block">
-                    <OperatorSearchForm
-                      key={`${pathname}?${searchParamValue}`}
-                      searchTargetPath={searchTargetPath}
-                      searchPlaceholder={
-                        routeConfig.searchPlaceholder ?? DEFAULT_ROUTE_CONFIG.searchPlaceholder ?? ''
-                      }
-                      initialSearchValue={searchParamValue}
-                    />
+                    <Suspense fallback={null}>
+                      <OperatorSearchFormBridge
+                        pathname={pathname}
+                        searchTargetPath={searchTargetPath}
+                        searchPlaceholder={
+                          routeConfig.searchPlaceholder ?? DEFAULT_ROUTE_CONFIG.searchPlaceholder ?? ''
+                        }
+                      />
+                    </Suspense>
                   </div>
 
                   <div className="hidden items-center gap-2 border-l border-zinc-200 pl-3 md:flex">

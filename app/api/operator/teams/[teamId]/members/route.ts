@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getOperatorMembershipContextForApi } from '@/lib/operator-server'
 import { OPERATOR_PERMISSIONS } from '@/lib/operator-rbac'
 import { getSupabaseServiceRoleClient } from '@/lib/supabase-admin'
+import { resolveAuthUsersByIds } from '@/lib/operator-auth-users'
 
 export async function GET(
   _request: Request,
@@ -40,14 +41,8 @@ export async function GET(
     return NextResponse.json({ error: 'Failed to load team members.' }, { status: 500 })
   }
 
-  // Resolve user details from auth — fetch only the users in this team
   const userIds = memberships.map((m: Record<string, unknown>) => m.user_id as string)
-  const authUsers = await Promise.all(
-    userIds.map((id) => supabase.auth.admin.getUserById(id).then((r) => r.data?.user ?? null))
-  )
-  const userMap = new Map(
-    authUsers.filter(Boolean).map((u) => [u!.id, u!])
-  )
+  const userMap = await resolveAuthUsersByIds(supabase, userIds)
 
   const members = memberships.map((m: Record<string, unknown>) => {
     const authUser = userMap.get(m.user_id as string)

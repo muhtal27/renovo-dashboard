@@ -10,8 +10,14 @@ export function ServiceWorkerRegistration() {
     if (!('serviceWorker' in navigator)) return
 
     navigator.serviceWorker.register('/sw.js').then((registration) => {
-      // Check for updates every 15 seconds
-      const interval = setInterval(() => registration.update(), 15_000)
+      // Check for updates when user returns to the tab (instead of every 15s)
+      function handleVisibilityChange() {
+        if (document.visibilityState === 'visible') {
+          registration.update()
+        }
+      }
+
+      document.addEventListener('visibilitychange', handleVisibilityChange)
 
       registration.addEventListener('updatefound', () => {
         const newWorker = registration.installing
@@ -29,7 +35,7 @@ export function ServiceWorkerRegistration() {
         })
       })
 
-      return () => clearInterval(interval)
+      return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
     })
 
     // Reload when new SW takes over
