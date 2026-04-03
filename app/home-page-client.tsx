@@ -79,7 +79,7 @@ export default function HomePageClient() {
             <SignInLink className="hidden text-sm font-medium text-white/50 transition-colors hover:text-white lg:inline-flex">
               Sign in
             </SignInLink>
-            <Link href="/contact" className="app-accent-button rounded-lg px-5 py-2.5 text-sm">Get started</Link>
+            <Link href="/contact" className="app-accent-button rounded-lg px-5 py-2.5 text-sm">Book a demo</Link>
           </div>
           <details className="group relative lg:hidden">
             <summary className="inline-flex min-h-10 list-none items-center rounded-md border border-white/20 px-3.5 py-2 text-sm font-medium text-white [&::-webkit-details-marker]:hidden">
@@ -93,7 +93,7 @@ export default function HomePageClient() {
               </nav>
               <div className="mt-3 grid gap-2 border-t border-zinc-200 pt-3">
                 <SignInLink className="rounded-md px-3 py-2 text-sm font-medium text-zinc-500 hover:bg-zinc-50 hover:text-zinc-950">Sign in</SignInLink>
-                <Link href="/contact" className="app-primary-button rounded-md px-4 py-2 text-center text-sm font-medium">Get started</Link>
+                <Link href="/contact" className="app-primary-button rounded-md px-4 py-2 text-center text-sm font-medium">Book a demo</Link>
               </div>
             </div>
           </details>
@@ -119,7 +119,7 @@ export default function HomePageClient() {
                 AI-powered liability comparison, deduction drafting, evidence management, and dispute pack preparation. Manager-approved at every stage.
               </p>
               <div className="mt-9 flex flex-wrap gap-3">
-                <Link href="/contact" className="app-accent-button rounded-lg px-6 py-3 text-sm">Get started &rarr;</Link>
+                <Link href="/contact" className="app-accent-button rounded-lg px-6 py-3 text-sm">Book a demo &rarr;</Link>
                 <Link href="/demo" className="app-outline-white rounded-lg px-6 py-3 text-sm">View demo</Link>
               </div>
             </div>
@@ -273,19 +273,6 @@ export default function HomePageClient() {
               ))}
             </div>
             <div className="mt-7"><Link href="/demo" className="text-sm font-medium text-emerald-500 hover:underline">View demo &rarr;</Link></div>
-          </div>
-        </section>
-
-        {/* ── INTEGRATIONS ── */}
-        <section className="mx-auto max-w-[1080px] px-8 py-24 lg:px-10">
-          <p className="text-[13px] font-semibold uppercase tracking-[0.1em] text-emerald-500">Integrations</p>
-          <h2 className="mt-3.5 text-[clamp(26px,3.5vw,42px)] font-bold leading-[1.15] tracking-[-0.03em]">Connects to your <em className="not-italic text-slate-400">existing agency software</em></h2>
-          <p className="mt-3.5 max-w-[560px] text-base leading-[1.85] text-slate-500">Designed around the CRM, inventory, and maintenance systems UK letting agents already use.</p>
-          <div className="mt-12 flex flex-wrap gap-2.5">
-            {["Reapit", "Arthur Online", "SME Professional", "Fixflo", "InventoryBase", "No Letting Go", "HelloReport"].map((n) => (
-              <span key={n} className="rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium transition-all hover:border-emerald-500 hover:bg-emerald-500/[0.08] hover:text-emerald-600">{n}</span>
-            ))}
-            <span className="rounded-full border border-dashed border-slate-300 px-5 py-2.5 text-sm font-medium text-slate-400">+ Custom integrations</span>
           </div>
         </section>
 

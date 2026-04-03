@@ -140,7 +140,7 @@ export function MarketingShell({
               href="/contact"
               className="app-primary-button rounded-md px-4 py-2 text-sm font-medium whitespace-nowrap"
             >
-              Get started
+              Book a demo
             </Link>
           </div>
 
@@ -170,7 +170,7 @@ export function MarketingShell({
                   href="/contact"
                   className="app-primary-button rounded-md px-4 py-2 text-center text-sm font-medium"
                 >
-                  Get started
+                  Book a demo
                 </Link>
               </div>
             </div>

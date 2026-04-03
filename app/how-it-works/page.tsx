@@ -96,7 +96,7 @@ export default function HowItWorksPage() {
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link href="/contact" className="app-primary-button rounded-md px-6 py-3 text-sm font-medium">
-              Get started &rarr;
+              Book a demo &rarr;
             </Link>
             <Link href="/demo" className="app-secondary-button rounded-md px-6 py-3 text-sm font-medium">
               View demo

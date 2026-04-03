@@ -112,7 +112,7 @@ export const pricingFaqs = [
   },
   {
     q: 'What integrations are supported?',
-    a: 'Standard integrations include Reapit, Arthur Online, SME Professional, Fixflo, InventoryBase, No Letting Go, and HelloReport. Enterprise customers can request custom integrations for additional CRM or inventory software.',
+    a: 'Renovo AI is designed to work with the CRM, inventory, and inspection systems UK letting agents already use. Integration support is expanding — contact us to discuss your setup.',
   },
 ] as const
 
@@ -147,10 +147,6 @@ export default function PricingPageClient() {
                 Full platform access with usage-based billing. No contracts, no
                 minimum commitment. Scale up or down as your portfolio moves.
               </p>
-              <p className="mt-4 bg-emerald-500/[0.06] px-4 py-3 text-sm text-slate-600">
-                One-time setup: £500 + VAT
-              </p>
-
               <div className="mt-6 border-t border-zinc-200 pt-6">
                 <p className="text-xs font-semibold uppercase tracking-[0.08em] text-slate-400">
                   Platform
@@ -181,7 +177,7 @@ export default function PricingPageClient() {
 
               <div className="mt-8">
                 <Link href="/contact" className="app-primary-button w-full rounded-md px-4 py-3 text-sm font-medium">
-                  Get started →
+                  Book a demo →
                 </Link>
                 <p className="mt-3 text-center text-xs text-slate-400">
                   Billed per completed checkout.
