@@ -27,7 +27,7 @@ const expectations = [
 export const metadata = createMarketingMetadata({
   title: 'Book a Demo | Renovo AI',
   description:
-    'Book a 30-minute product demo with Renovo AI. See how end of tenancy automation works for your letting agency.',
+    'Book a 45-minute product demo with Renovo AI. See how end of tenancy automation works for your letting agency.',
   path: '/book-demo',
 })
 
@@ -41,7 +41,7 @@ export default function BookDemoPage() {
             See Renovo AI on <em className="text-slate-400">your terms</em>
           </h1>
           <p className="page-copy max-w-[640px]">
-            A 30-minute walkthrough of the platform, tailored to your agency.
+            A 45-minute walkthrough of the platform, tailored to your agency.
             Pick a time that works and we will handle the rest.
           </p>
         </section>
@@ -49,7 +49,7 @@ export default function BookDemoPage() {
         {/* Booking CTA */}
         <section className="mx-auto w-full max-w-[640px] px-6 py-12">
           <div className="rounded-xl border border-zinc-200 bg-white px-8 py-10 text-center shadow-sm">
-            <p className="text-sm font-medium text-zinc-500">30 minutes · Microsoft Teams</p>
+            <p className="text-sm font-medium text-zinc-500">45 minutes · Microsoft Teams</p>
             <h2 className="mt-3 text-2xl font-bold tracking-tight text-zinc-950">
               Pick a time that works for you
             </h2>
@@ -78,7 +78,7 @@ export default function BookDemoPage() {
           <div className="mx-auto max-w-[1080px] px-6 py-24">
             <p className="app-kicker">What to expect</p>
             <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
-              30 minutes. <em className="text-slate-400">No slides.</em>
+              45 minutes. <em className="text-slate-400">No slides.</em>
             </h2>
             <p className="mt-3.5 max-w-[560px] text-base leading-8 text-slate-500">
               A live product walkthrough focused on how Renovo AI fits into
