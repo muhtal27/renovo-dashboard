@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { RefreshCcw } from 'lucide-react'
 import { listEotTenancies } from '@/lib/eot-api'
 import type { EotTenancyListItem } from '@/lib/eot-types'
@@ -61,8 +62,9 @@ export function TenanciesListClient({
   const [loading, setLoading] = useState(initialTenancies == null)
   const [error, setError] = useState<string | null>(null)
   const [refreshing, setRefreshing] = useState(false)
+  const searchParams = useSearchParams()
   const [view, setView] = useState<TenancyView>('all')
-  const [search, setSearch] = useState('')
+  const [search, setSearch] = useState(searchParams.get('search') ?? '')
 
   useEffect(() => {
     if (initialTenancies) return

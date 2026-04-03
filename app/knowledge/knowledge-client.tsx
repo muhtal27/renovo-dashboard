@@ -1,6 +1,7 @@
 'use client'
 
 import { useDeferredValue, useMemo, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Search } from 'lucide-react'
 import {
   DetailPanel,
@@ -223,9 +224,10 @@ function getRegionChipTone(regions: RegionFilter[]) {
 }
 
 export default function KnowledgeClient({ articles }: { articles: KnowledgeArticle[] }) {
+  const searchParams = useSearchParams()
   const [regionFilter, setRegionFilter] = useState<RegionFilter>('all')
   const [categoryFilter, setCategoryFilter] = useState('All')
-  const [searchQuery, setSearchQuery] = useState('')
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') ?? '')
   const [selectedArticleTitle, setSelectedArticleTitle] = useState<string | null>(null)
 
   const deferredSearchQuery = useDeferredValue(searchQuery)
