@@ -92,6 +92,30 @@ export async function getEotPortfolioSnapshot(context: OperatorTenantContext) {
   } satisfies EotPortfolioSnapshot
 }
 
+export async function getEotInventoryFeedbackSnapshot(context: OperatorTenantContext) {
+  const cases = await getEotCaseListSnapshot(context)
+  const casesWithIssues = cases.filter((c) => c.issue_count > 0)
+
+  const issueResults = await Promise.all(
+    casesWithIssues.map(async (caseItem) => {
+      const issues = await fetchEotJson<import('@/lib/eot-types').EotIssue[]>(
+        context,
+        `/api/eot/cases/${caseItem.id}/issues`
+      )
+      return issues.map((issue) => ({ issue, caseItem }))
+    })
+  )
+
+  return issueResults.flat()
+}
+
+export async function getEotTenancyListSnapshot(context: OperatorTenantContext) {
+  return fetchEotJson<import('@/lib/eot-types').EotTenancyListItem[]>(
+    context,
+    '/api/eot/tenancies'
+  )
+}
+
 export function getEotReportSummary(context: OperatorTenantContext) {
   return fetchEotJson<EotReportSummary>(context, '/api/eot/reports/summary')
 }

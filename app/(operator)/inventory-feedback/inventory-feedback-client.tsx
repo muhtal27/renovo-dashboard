@@ -49,8 +49,12 @@ function sumEstimatedCosts(rows: FeedbackRow[]): number {
 /*  Component                                                          */
 /* ------------------------------------------------------------------ */
 
-export function InventoryFeedbackClient() {
-  const { data: rows = [], isLoading: loading, error: queryError } = useInventoryFeedback()
+export function InventoryFeedbackClient({
+  initialData,
+}: {
+  initialData?: FeedbackRow[] | null
+}) {
+  const { data: rows = [], isLoading: loading, error: queryError } = useInventoryFeedback(initialData)
   const error = queryError ? (queryError instanceof Error ? queryError.message : 'Failed to load inventory feedback.') : null
 
   const [severityFilter, setSeverityFilter] = useState<SeverityFilter>('all')

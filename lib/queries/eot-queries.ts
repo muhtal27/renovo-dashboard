@@ -107,7 +107,7 @@ type FeedbackRow = {
   caseItem: EotCaseListItem
 }
 
-export function useInventoryFeedback() {
+export function useInventoryFeedback(initialData?: FeedbackRow[] | null) {
   return useQuery({
     queryKey: ['eot', 'inventory-feedback'],
     queryFn: async (): Promise<FeedbackRow[]> => {
@@ -123,6 +123,7 @@ export function useInventoryFeedback() {
 
       return issueResults.flat()
     },
+    initialData: initialData ?? undefined,
     staleTime: 60_000,
   })
 }
