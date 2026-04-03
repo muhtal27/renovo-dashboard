@@ -1,24 +1,41 @@
-import Link from 'next/link'
 import { MarketingShell } from '@/app/components/MarketingShell'
 import { createMarketingMetadata } from '@/lib/marketing-metadata'
 
-const values = [
+const whyNow = [
+  'End of tenancy is a £2B+ operational cost centre that still runs on email, Word documents, and spreadsheets.',
+  'The Renters\' Rights Act takes effect May 2026. Evidence standards for deposit deductions are rising across all four schemes.',
+  'We have a working product, paying customers, and a clear path to scale. You would be joining early enough to shape the product and the company.',
+] as const
+
+const whatWeLookFor = [
   {
-    title: 'Substance over signal',
-    body: 'We care about what actually ships, not how it looks in a standup. Clear thinking, honest assessment, and real output matter more than process theatre.',
+    title: 'What have you built?',
+    body: 'Show us something. A side project, a feature you shipped, an open source contribution, a product you launched. We want to see how you think through a problem and what you chose to do about it.',
   },
   {
-    title: 'Own the problem',
-    body: 'Everyone here works close to the customer and close to the product. If something is broken, you fix it. If something is unclear, you ask. No waiting for permission.',
+    title: 'What do you care about?',
+    body: 'We are not looking for people who just want a job. We want to know what pulls you in — what you read, what you tinker with, what problems you find yourself coming back to.',
   },
   {
-    title: 'Small team, high trust',
-    body: 'We operate with minimal hierarchy and maximum context. You will know why decisions are being made and have a direct say in how the product evolves.',
+    title: 'How do you work?',
+    body: 'Tell us about a time you had to figure something out with limited information. How did you decide what to do? What did you try first? What did you learn?',
   },
   {
-    title: 'Build for the long term',
-    body: 'We are solving a real operational problem for a real industry. The work compounds — better systems, better workflows, better outcomes for the teams that rely on us.',
+    title: 'Why this?',
+    body: 'Property technology is not glamorous. End of tenancy is a niche most people have never thought about. If something about this problem or this company interests you, we want to hear why.',
   },
+] as const
+
+const stack = [
+  'Next.js',
+  'React',
+  'TypeScript',
+  'Tailwind CSS',
+  'Supabase',
+  'PostgreSQL',
+  'FastAPI',
+  'Python',
+  'Vercel',
 ] as const
 
 export const metadata = createMarketingMetadata({
@@ -32,27 +49,48 @@ export default function CareersPage() {
   return (
     <MarketingShell currentPath="/careers">
       <div className="page-shell page-stack">
+
+        {/* Hero */}
         <section className="page-hero">
           <p className="app-kicker">Careers</p>
           <h1 className="page-title max-w-[820px]">
-            Build something that <em className="text-slate-400">matters</em>
+            Join Renovo AI
           </h1>
           <p className="page-copy max-w-[640px]">
-            Renovo AI is automating end of tenancy operations for UK letting agencies and
-            property managers. We are a small, focused team solving a real problem in an
-            industry that has been underserved by technology.
+            We are building the operating system for end of tenancy in the UK.
+            Small team. Real product. Real customers. A lot left to build.
           </p>
         </section>
 
-        {/* Values */}
+        {/* Why now */}
+        <section className="mx-auto max-w-[780px] px-6 py-24">
+          <p className="app-kicker">Why now</p>
+          <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
+            Timing <em className="text-slate-400">matters</em>
+          </h2>
+          <div className="mt-10 space-y-4">
+            {whyNow.map((item) => (
+              <div key={item} className="flex items-start gap-3 text-base leading-8 text-slate-500">
+                <span className="mt-[13px] h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
+                <span>{item}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* What we look for */}
         <section className="section-tinted">
           <div className="mx-auto max-w-[1080px] px-6 py-24">
-            <p className="app-kicker">How we work</p>
+            <p className="app-kicker">What we want to know</p>
             <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
-              What we <em className="text-slate-400">value</em>
+              Tell us about <em className="text-slate-400">you</em>
             </h2>
+            <p className="mt-3.5 max-w-[560px] text-base leading-8 text-slate-500">
+              We don&apos;t hire from CVs. We hire from conversations.
+              These are the things we actually want to know.
+            </p>
             <div className="mt-14 grid gap-10 md:grid-cols-2">
-              {values.map((item) => (
+              {whatWeLookFor.map((item) => (
                 <div key={item.title}>
                   <h3 className="text-[15px] font-semibold text-zinc-950">{item.title}</h3>
                   <p className="mt-2 text-sm leading-7 text-slate-500">{item.body}</p>
@@ -62,26 +100,59 @@ export default function CareersPage() {
           </div>
         </section>
 
-        {/* Open roles */}
+        {/* Stack */}
         <section className="mx-auto max-w-[780px] px-6 py-24">
-          <p className="app-kicker">Open roles</p>
+          <p className="app-kicker">What we use</p>
           <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
-            Current <em className="text-slate-400">opportunities</em>
+            Stack
           </h2>
-          <p className="mt-5 max-w-[560px] text-base leading-8 text-slate-500">
-            We don't have open roles listed right now, but we are always interested in
-            hearing from people who think they could contribute. If you have relevant
-            experience and want to work on this problem, get in touch.
-          </p>
-          <div className="mt-8">
-            <Link
-              href="/contact"
-              className="app-primary-button rounded-md px-6 py-3 text-sm font-medium"
-            >
-              Get in touch
-            </Link>
+          <div className="mt-8 flex flex-wrap gap-2.5">
+            {stack.map((name) => (
+              <span
+                key={name}
+                className="rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700"
+              >
+                {name}
+              </span>
+            ))}
           </div>
         </section>
+
+        {/* Open roles */}
+        <section className="section-tinted">
+          <div className="mx-auto max-w-[780px] px-6 py-24">
+            <p className="app-kicker">Open roles</p>
+            <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
+              Current <em className="text-slate-400">openings</em>
+            </h2>
+            <div className="mt-10 rounded-xl border border-zinc-200 bg-white px-6 py-8 text-center">
+              <p className="text-sm font-medium text-zinc-950">No open roles right now</p>
+              <p className="mx-auto mt-2 max-w-[420px] text-sm leading-7 text-slate-500">
+                We don&apos;t hire on a schedule. When we need someone, we move
+                fast. If you think you should be here, reach out anyway.
+              </p>
+            </div>
+
+            {/* CTA */}
+            <div className="mt-12 rounded-xl border border-zinc-200 bg-white p-8">
+              <h3 className="text-lg font-semibold text-zinc-950">Interested?</h3>
+              <p className="mt-2 max-w-[480px] text-sm leading-7 text-slate-500">
+                Send an email with a short note on what you would bring and
+                a link to something you have built. No cover letters. No CVs
+                unless you want to include one.
+              </p>
+              <div className="mt-6">
+                <a
+                  href="mailto:careers@renovoai.co.uk"
+                  className="app-primary-button inline-block rounded-md px-6 py-3 text-sm font-medium"
+                >
+                  careers@renovoai.co.uk
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+
       </div>
     </MarketingShell>
   )
