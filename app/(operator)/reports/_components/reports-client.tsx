@@ -26,7 +26,7 @@ function DistributionBar({
   return (
     <div className="space-y-2.5">
       {/* Stacked bar */}
-      <div className="flex h-2 overflow-hidden bg-zinc-100">
+      <div className="flex h-2 overflow-hidden bg-zinc-100" role="img" aria-label={`Distribution: ${items.filter((i) => i.value > 0).map((i) => `${i.label} ${i.value}`).join(', ')}`}>
         {items
           .filter((i) => i.value > 0)
           .map((i) => (
@@ -43,7 +43,7 @@ function DistributionBar({
           .filter((i) => i.value > 0)
           .map((i) => (
             <div key={i.label} className="flex items-center gap-1.5 text-xs">
-              <span className={`inline-block h-2 w-2 rounded-full ${i.color}`} />
+              <span className={`inline-block h-2 w-2 rounded-full ${i.color}`} aria-hidden="true" />
               <span className="text-zinc-500">{i.label}</span>
               <span className="font-medium text-zinc-950">{i.value}</span>
             </div>

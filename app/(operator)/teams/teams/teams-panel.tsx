@@ -236,7 +236,7 @@ export function TeamsPanel() {
                         <button
                           type="button"
                           onClick={() => handleDelete(team.id, team.name)}
-                          className="px-2 py-1 text-xs font-medium text-rose-600 opacity-0 transition hover:bg-rose-50 group-hover:opacity-100"
+                          className="px-2 py-1 text-xs font-medium text-rose-600 opacity-0 transition hover:bg-rose-50 group-hover:opacity-100 focus:opacity-100"
                         >
                           Delete
                         </button>

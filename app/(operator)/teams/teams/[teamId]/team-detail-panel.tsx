@@ -366,7 +366,7 @@ export function TeamDetailPanel({ teamId }: { teamId: string }) {
                     </select>
                   </td>
                   <td className="px-5 py-3 text-right">
-                    <div className="flex items-center justify-end gap-2 opacity-0 transition group-hover:opacity-100">
+                    <div className="flex items-center justify-end gap-2 opacity-0 transition group-hover:opacity-100 group-focus-within:opacity-100">
                       <button
                         onClick={() => handleRemove(member.teamMembershipId, member.email)}
                         className="rounded px-2 py-1 text-xs font-medium text-rose-600 transition hover:bg-rose-50"

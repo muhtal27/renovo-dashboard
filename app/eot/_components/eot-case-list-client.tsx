@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { FormEvent, useEffect, useMemo, useState } from 'react'
+import { FormEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { Check, ClipboardCopy, Copy, Plus, RefreshCcw } from 'lucide-react'
 import { createEotCase, EotApiError, listEotCases } from '@/lib/eot-api'
 import { byLastActivityDesc } from '@/lib/eot-dashboard'
@@ -31,6 +31,13 @@ function buildFullAddress(property: EotCaseListItem['property']): string {
 
 function CopyAddressButton({ address }: { address: string }) {
   const [copied, setCopied] = useState(false)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current)
+    }
+  }, [])
 
   if (!address) return null
 
@@ -42,7 +49,8 @@ function CopyAddressButton({ address }: { address: string }) {
         e.stopPropagation()
         void navigator.clipboard.writeText(address).then(() => {
           setCopied(true)
-          window.setTimeout(() => setCopied(false), 1500)
+          if (timerRef.current) clearTimeout(timerRef.current)
+          timerRef.current = setTimeout(() => setCopied(false), 1500)
         })
       }}
       className="ml-2 inline-flex items-center gap-1 text-xs text-zinc-400 transition hover:text-zinc-700"

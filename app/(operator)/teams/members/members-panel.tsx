@@ -290,6 +290,8 @@ export function MembersPanel() {
                     <td className="px-4 py-3">
                       <span className="inline-flex items-center gap-1.5 text-xs">
                         <span
+                          role="status"
+                          aria-label={member.status}
                           className={`h-1.5 w-1.5 rounded-full ${
                             member.status === 'active'
                               ? 'bg-emerald-500'
@@ -304,7 +306,7 @@ export function MembersPanel() {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <div className="flex items-center justify-end gap-2 opacity-0 transition group-hover:opacity-100">
+                      <div className="flex items-center justify-end gap-2 opacity-0 transition group-hover:opacity-100 group-focus-within:opacity-100">
                         {member.status === 'active' ? (
                           <button
                             type="button"
