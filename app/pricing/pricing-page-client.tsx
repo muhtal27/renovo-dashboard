@@ -176,7 +176,7 @@ export default function PricingPageClient() {
               </div>
 
               <div className="mt-8">
-                <Link href="/contact" className="app-primary-button w-full rounded-md px-4 py-3 text-sm font-medium">
+                <Link href="/book-demo" className="app-primary-button w-full rounded-md px-4 py-3 text-sm font-medium">
                   Book a demo →
                 </Link>
                 <p className="mt-3 text-center text-xs text-slate-400">

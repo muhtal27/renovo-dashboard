@@ -112,7 +112,7 @@ export default function PrivacyPage() {
             control, audit trail, and retention detail.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Link href="/contact" className="app-primary-button rounded-md px-6 py-3 text-sm font-medium">Book a demo &rarr;</Link>
+            <Link href="/book-demo" className="app-primary-button rounded-md px-6 py-3 text-sm font-medium">Book a demo &rarr;</Link>
             <Link href="/compliance" className="app-secondary-button rounded-md px-6 py-3 text-sm font-medium">View compliance</Link>
           </div>
         </section>

@@ -79,7 +79,7 @@ export default function HomePageClient() {
             <SignInLink className="hidden text-sm font-medium text-white/50 transition-colors hover:text-white lg:inline-flex">
               Sign in
             </SignInLink>
-            <Link href="/contact" className="app-accent-button rounded-lg px-5 py-2.5 text-sm">Book a demo</Link>
+            <Link href="/book-demo" className="app-accent-button rounded-lg px-5 py-2.5 text-sm">Book a demo</Link>
           </div>
           <details className="group relative lg:hidden">
             <summary className="inline-flex min-h-10 list-none items-center rounded-md border border-white/20 px-3.5 py-2 text-sm font-medium text-white [&::-webkit-details-marker]:hidden">
@@ -93,7 +93,7 @@ export default function HomePageClient() {
               </nav>
               <div className="mt-3 grid gap-2 border-t border-zinc-200 pt-3">
                 <SignInLink className="rounded-md px-3 py-2 text-sm font-medium text-zinc-500 hover:bg-zinc-50 hover:text-zinc-950">Sign in</SignInLink>
-                <Link href="/contact" className="app-primary-button rounded-md px-4 py-2 text-center text-sm font-medium">Book a demo</Link>
+                <Link href="/book-demo" className="app-primary-button rounded-md px-4 py-2 text-center text-sm font-medium">Book a demo</Link>
               </div>
             </div>
           </details>
@@ -119,7 +119,7 @@ export default function HomePageClient() {
                 AI-powered liability comparison, deduction drafting, evidence management, and dispute pack preparation. Manager-approved at every stage.
               </p>
               <div className="mt-9 flex flex-wrap gap-3">
-                <Link href="/contact" className="app-accent-button rounded-lg px-6 py-3 text-sm">Book a demo &rarr;</Link>
+                <Link href="/book-demo" className="app-accent-button rounded-lg px-6 py-3 text-sm">Book a demo &rarr;</Link>
                 <Link href="/demo" className="app-outline-white rounded-lg px-6 py-3 text-sm">View demo</Link>
               </div>
             </div>

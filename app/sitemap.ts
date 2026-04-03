@@ -11,6 +11,7 @@ const marketingRoutes: Array<{
   { path: '/pricing', changeFrequency: 'weekly', priority: 0.85 },
   { path: '/demo', changeFrequency: 'weekly', priority: 0.85 },
   { path: '/contact', changeFrequency: 'monthly', priority: 0.8 },
+  { path: '/book-demo', changeFrequency: 'monthly', priority: 0.85 },
   { path: '/about', changeFrequency: 'monthly', priority: 0.7 },
   { path: '/compliance', changeFrequency: 'monthly', priority: 0.65 },
   { path: '/integrations', changeFrequency: 'monthly', priority: 0.6 },

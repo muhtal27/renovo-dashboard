@@ -12,6 +12,7 @@ type MarketingShellProps = {
     | '/investors'
     | '/security'
     | '/careers'
+    | '/book-demo'
     | '/partnerships'
     | '/integrations'
     | '/pricing'
@@ -137,7 +138,7 @@ export function MarketingShell({
               Sign in
             </SignInLink>
             <Link
-              href="/contact"
+              href="/book-demo"
               className="app-primary-button rounded-md px-4 py-2 text-sm font-medium whitespace-nowrap"
             >
               Book a demo
@@ -167,7 +168,7 @@ export function MarketingShell({
                   Sign in
                 </SignInLink>
                 <Link
-                  href="/contact"
+                  href="/book-demo"
                   className="app-primary-button rounded-md px-4 py-2 text-center text-sm font-medium"
                 >
                   Book a demo
