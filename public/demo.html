@@ -31,15 +31,30 @@ tailwind.config = {
 // ═══════════════════════════════════════════════════════════════
 
 const CASES = [
-  {id:'CHK-2026-001',property:'17 Bruntsfield Place, Edinburgh EH1 4EQ',tenant:'Sarah Campbell',landlord:'Andrew Turnbull',deposit:1100,scheme:'SafeDeposits Scotland',start:'15 Mar 2024',end:'14 Mar 2026',ref:'SDS-2024-00847',status:'draft',priority:'high',issues:0,claim:0,lastActivity:'2 hours ago'},
-  {id:'CHK-2026-002',property:'42 Leith Walk, Edinburgh EH6 5HB',tenant:'James Murray',landlord:'Claire Henderson',deposit:950,scheme:'SafeDeposits Scotland',start:'01 Jun 2024',end:'31 May 2026',ref:'SDS-2024-01203',status:'review',priority:'high',issues:3,claim:210,lastActivity:'4 hours ago'},
-  {id:'CHK-2026-003',property:'8 Morningside Road, Edinburgh EH10 4DD',tenant:'Emma Wilson',landlord:'David Scott',deposit:1400,scheme:'mydeposits Scotland',start:'01 Sep 2023',end:'31 Aug 2025',ref:'MYD-2025-00412',status:'collecting_evidence',priority:'medium',issues:0,claim:0,lastActivity:'1 day ago'},
-  {id:'CHK-2026-004',property:'91 Gorgie Road, Edinburgh EH11 2LA',tenant:'Omar Rashid',landlord:'Fiona MacLeod',deposit:800,scheme:'SafeDeposits Scotland',start:'15 Jan 2024',end:'14 Jan 2026',ref:'SDS-2024-00561',status:'draft_sent',priority:'medium',issues:5,claim:340,lastActivity:'2 days ago'},
-  {id:'CHK-2026-005',property:'23 Dalry Road, Edinburgh EH11 2BQ',tenant:'Rachel Stewart',landlord:'Mark Thomson',deposit:1050,scheme:'SafeDeposits Scotland',start:'01 Apr 2024',end:'31 Mar 2026',ref:'SDS-2024-00923',status:'submitted',priority:'low',issues:2,claim:150,lastActivity:'3 days ago'},
-  {id:'CHK-2026-006',property:'156 Causewayside, Edinburgh EH9 1PN',tenant:'Liam O\'Brien',landlord:'Susan Gray',deposit:1250,scheme:'mydeposits Scotland',start:'01 Dec 2023',end:'30 Nov 2025',ref:'MYD-2025-00178',status:'disputed',priority:'high',issues:4,claim:485,lastActivity:'5 hours ago'},
-  {id:'CHK-2026-007',property:'3 Dean Path, Edinburgh EH4 3BA',tenant:'Priya Sharma',landlord:'Robert Allan',deposit:1600,scheme:'SafeDeposits Scotland',start:'15 Jul 2023',end:'14 Jul 2025',ref:'SDS-2025-00089',status:'resolved',priority:'low',issues:3,claim:270,lastActivity:'1 week ago'},
-  {id:'CHK-2026-008',property:'67 Easter Road, Edinburgh EH7 5PW',tenant:'Tom Henderson',landlord:'Karen White',deposit:875,scheme:'SafeDeposits Scotland',start:'01 Mar 2024',end:'28 Feb 2026',ref:'SDS-2024-00790',status:'ready_for_claim',priority:'medium',issues:2,claim:195,lastActivity:'6 hours ago'},
-  {id:'CHK-2026-009',property:'12 Stockbridge, Edinburgh EH3 6TZ',tenant:'Aisha Begum',landlord:'Neil Fraser',deposit:1350,scheme:'SafeDeposits Scotland',start:'15 May 2024',end:'14 May 2026',ref:'SDS-2024-01089',status:'analysis',priority:'high',issues:0,claim:0,lastActivity:'30 min ago'},
+  {id:'CHK-2026-001',property:'17 Bruntsfield Place, Edinburgh EH1 4EQ',tenant:'Sarah Campbell',landlord:'Andrew Turnbull',deposit:1100,scheme:'SafeDeposits Scotland',start:'15 Mar 2024',end:'14 Mar 2026',ref:'SDS-2024-00847',status:'draft',priority:'high',issues:0,claim:0,lastActivity:'2 hours ago',assignedTo:'Jamie Mitchell'},
+  {id:'CHK-2026-002',property:'42 Leith Walk, Edinburgh EH6 5HB',tenant:'James Murray',landlord:'Claire Henderson',deposit:950,scheme:'SafeDeposits Scotland',start:'01 Jun 2024',end:'31 May 2026',ref:'SDS-2024-01203',status:'review',priority:'high',issues:3,claim:210,lastActivity:'4 hours ago',assignedTo:'Sophie Grant'},
+  {id:'CHK-2026-003',property:'8 Morningside Road, Edinburgh EH10 4DD',tenant:'Emma Wilson',landlord:'David Scott',deposit:1400,scheme:'mydeposits Scotland',start:'01 Sep 2023',end:'31 Aug 2025',ref:'MYD-2025-00412',status:'collecting_evidence',priority:'medium',issues:0,claim:0,lastActivity:'1 day ago',assignedTo:'Ravi Patel'},
+  {id:'CHK-2026-004',property:'91 Gorgie Road, Edinburgh EH11 2LA',tenant:'Omar Rashid',landlord:'Fiona MacLeod',deposit:800,scheme:'SafeDeposits Scotland',start:'15 Jan 2024',end:'14 Jan 2026',ref:'SDS-2024-00561',status:'draft_sent',priority:'medium',issues:5,claim:340,lastActivity:'2 days ago',assignedTo:'Jamie Mitchell'},
+  {id:'CHK-2026-005',property:'23 Dalry Road, Edinburgh EH11 2BQ',tenant:'Rachel Stewart',landlord:'Mark Thomson',deposit:1050,scheme:'SafeDeposits Scotland',start:'01 Apr 2024',end:'31 Mar 2026',ref:'SDS-2024-00923',status:'submitted',priority:'low',issues:2,claim:150,lastActivity:'3 days ago',assignedTo:'Sophie Grant'},
+  {id:'CHK-2026-006',property:'156 Causewayside, Edinburgh EH9 1PN',tenant:'Liam O\'Brien',landlord:'Susan Gray',deposit:1250,scheme:'mydeposits Scotland',start:'01 Dec 2023',end:'30 Nov 2025',ref:'MYD-2025-00178',status:'disputed',priority:'high',issues:4,claim:485,lastActivity:'5 hours ago',assignedTo:'Jamie Mitchell'},
+  {id:'CHK-2026-007',property:'3 Dean Path, Edinburgh EH4 3BA',tenant:'Priya Sharma',landlord:'Robert Allan',deposit:1600,scheme:'SafeDeposits Scotland',start:'15 Jul 2023',end:'14 Jul 2025',ref:'SDS-2025-00089',status:'resolved',priority:'low',issues:3,claim:270,lastActivity:'1 week ago',assignedTo:'Ravi Patel'},
+  {id:'CHK-2026-008',property:'67 Easter Road, Edinburgh EH7 5PW',tenant:'Tom Henderson',landlord:'Karen White',deposit:875,scheme:'SafeDeposits Scotland',start:'01 Mar 2024',end:'28 Feb 2026',ref:'SDS-2024-00790',status:'ready_for_claim',priority:'medium',issues:2,claim:195,lastActivity:'6 hours ago',assignedTo:null},
+  {id:'CHK-2026-009',property:'12 Stockbridge, Edinburgh EH3 6TZ',tenant:'Aisha Begum',landlord:'Neil Fraser',deposit:1350,scheme:'SafeDeposits Scotland',start:'15 May 2024',end:'14 May 2026',ref:'SDS-2024-01089',status:'analysis',priority:'high',issues:0,claim:0,lastActivity:'30 min ago',assignedTo:null},
+]
+
+const TENANCIES = [
+  {id:'TEN-001',property:'17 Bruntsfield Place, Edinburgh EH1 4EQ',tenant:'Sarah Campbell',landlord:'Andrew Turnbull',deposit:1100,scheme:'SafeDeposits Scotland',start:'15 Mar 2024',end:'14 Mar 2026',email:'s.campbell@email.com',caseId:'CHK-2026-001',caseStatus:'draft'},
+  {id:'TEN-002',property:'42 Leith Walk, Edinburgh EH6 5HB',tenant:'James Murray',landlord:'Claire Henderson',deposit:950,scheme:'SafeDeposits Scotland',start:'01 Jun 2024',end:'31 May 2026',email:'j.murray@email.com',caseId:'CHK-2026-002',caseStatus:'review'},
+  {id:'TEN-003',property:'8 Morningside Road, Edinburgh EH10 4DD',tenant:'Emma Wilson',landlord:'David Scott',deposit:1400,scheme:'mydeposits Scotland',start:'01 Sep 2023',end:'31 Aug 2025',email:'e.wilson@email.com',caseId:'CHK-2026-003',caseStatus:'collecting_evidence'},
+  {id:'TEN-004',property:'91 Gorgie Road, Edinburgh EH11 2LA',tenant:'Omar Rashid',landlord:'Fiona MacLeod',deposit:800,scheme:'SafeDeposits Scotland',start:'15 Jan 2024',end:'14 Jan 2026',email:'o.rashid@email.com',caseId:'CHK-2026-004',caseStatus:'draft_sent'},
+  {id:'TEN-005',property:'23 Dalry Road, Edinburgh EH11 2BQ',tenant:'Rachel Stewart',landlord:'Mark Thomson',deposit:1050,scheme:'SafeDeposits Scotland',start:'01 Apr 2024',end:'31 Mar 2026',email:'r.stewart@email.com',caseId:'CHK-2026-005',caseStatus:'submitted'},
+  {id:'TEN-006',property:'156 Causewayside, Edinburgh EH9 1PN',tenant:'Liam O\'Brien',landlord:'Susan Gray',deposit:1250,scheme:'mydeposits Scotland',start:'01 Dec 2023',end:'30 Nov 2025',email:'l.obrien@email.com',caseId:'CHK-2026-006',caseStatus:'disputed'},
+  {id:'TEN-007',property:'3 Dean Path, Edinburgh EH4 3BA',tenant:'Priya Sharma',landlord:'Robert Allan',deposit:1600,scheme:'SafeDeposits Scotland',start:'15 Jul 2023',end:'14 Jul 2025',email:'p.sharma@email.com',caseId:'CHK-2026-007',caseStatus:'resolved'},
+  {id:'TEN-008',property:'67 Easter Road, Edinburgh EH7 5PW',tenant:'Tom Henderson',landlord:'Karen White',deposit:875,scheme:'SafeDeposits Scotland',start:'01 Mar 2024',end:'28 Feb 2026',email:'t.henderson@email.com',caseId:'CHK-2026-008',caseStatus:'ready_for_claim'},
+  {id:'TEN-009',property:'12 Stockbridge, Edinburgh EH3 6TZ',tenant:'Aisha Begum',landlord:'Neil Fraser',deposit:1350,scheme:'SafeDeposits Scotland',start:'15 May 2024',end:'14 May 2026',email:'a.begum@email.com',caseId:'CHK-2026-009',caseStatus:'analysis'},
+  {id:'TEN-010',property:'28 Marchmont Crescent, Edinburgh EH9 1HQ',tenant:'Craig Douglas',landlord:'Helen Murray',deposit:1050,scheme:'SafeDeposits Scotland',start:'01 Aug 2024',end:'31 Jul 2026',email:'c.douglas@email.com',caseId:null,caseStatus:null},
+  {id:'TEN-011',property:'5 Comely Bank Avenue, Edinburgh EH4 1EE',tenant:'Fiona MacKay',landlord:'Thomas Reid',deposit:1200,scheme:'mydeposits Scotland',start:'15 Oct 2024',end:'14 Oct 2026',email:'f.mackay@email.com',caseId:null,caseStatus:null},
+  {id:'TEN-012',property:'74 Newington Road, Edinburgh EH9 1QN',tenant:'Hamza Ali',landlord:'Margaret Campbell',deposit:925,scheme:'SafeDeposits Scotland',start:'01 Feb 2024',end:'31 Jan 2026',email:'h.ali@email.com',caseId:null,caseStatus:null},
 ]
 
 const MOCK_ISSUES = [
@@ -114,17 +129,30 @@ let state = {
   disputeFilter: 'all',
   guidanceRegion: 'all',
   guidanceSearch: '',
+  // tenancies
+  tenancyTab: 'all',
+  tenancySearch: '',
+  activeTenancyId: null,
+  // feedback
+  feedbackSearch: '',
+  feedbackSeverity: 'all',
+  feedbackDecision: 'all',
+  // admin allocation
+  allocationTab: 'unallocated',
 }
 
-function navigate(page, caseId) {
+function navigate(page, id) {
   state.page = page
   state.mobileSidebarOpen = false
-  if (caseId) {
-    state.activeCaseId = caseId
+  if (page === 'workspace' && id) {
+    state.activeCaseId = id
     state.workspaceStatus = 'draft'
     state.workspaceDocuments = []
     state.workspaceIssues = []
     state.workspaceLog = ['Case created — awaiting documents']
+  }
+  if (page === 'tenancy-detail' && id) {
+    state.activeTenancyId = id
   }
   render()
 }
@@ -142,6 +170,7 @@ function getCase() { return CASES.find(c => c.id === state.activeCaseId) || CASE
 
 function svgIcon(name) {
   const icons = {
+    tenancies: '<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21"/>',
     checkouts: '<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 00-1.883 2.542l.857 6a2.25 2.25 0 002.227 1.932H19.05a2.25 2.25 0 002.227-1.932l.857-6a2.25 2.25 0 00-1.883-2.542m-16.5 0V6A2.25 2.25 0 016 3.75h3.879a1.5 1.5 0 011.06.44l2.122 2.12a1.5 1.5 0 001.06.44H18A2.25 2.25 0 0120.25 9v.776"/>',
     disputes: '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>',
     feedback: '<path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"/>',
@@ -172,6 +201,7 @@ function renderSidebar(mobile = false) {
 
   const navGroups = [
     { label: 'Operations', items: [
+      { label: 'Tenancies', page: 'tenancies', icon: 'tenancies', active: p === 'tenancies' || p === 'tenancy-detail' },
       { label: 'Checkouts', page: 'checkouts', icon: 'checkouts', active: p === 'checkouts' || p === 'workspace' },
       { label: 'Disputes', page: 'disputes', icon: 'disputes', active: p === 'disputes' },
       { label: 'Inventory feedback', page: 'feedback', icon: 'feedback', active: p === 'feedback' },
@@ -241,6 +271,8 @@ function renderSidebar(mobile = false) {
 
 function getPageConfig() {
   const configs = {
+    tenancies: { title: 'Tenancies', breadcrumbs: [{label:'Tenancies'}] },
+    'tenancy-detail': { title: 'Tenancy detail', breadcrumbs: [{label:'Tenancies',link:'tenancies'},{label:'Tenancy detail'}] },
     checkouts: { title: 'Checkouts', breadcrumbs: [{label:'Checkouts'}] },
     workspace: { title: 'Checkout workspace', breadcrumbs: [{label:'Checkouts',link:'checkouts'},{label:'Checkout workspace'}] },
     disputes: { title: 'Disputes', breadcrumbs: [{label:'Checkouts',link:'checkouts'},{label:'Disputes'}] },
@@ -306,6 +338,7 @@ function renderCheckoutsPage() {
                 <th class="px-4 py-2.5">Property</th>
                 <th class="px-4 py-2.5">Tenant</th>
                 <th class="px-4 py-2.5">Status</th>
+                <th class="px-4 py-2.5">Assigned to</th>
                 <th class="px-4 py-2.5">Priority</th>
                 <th class="px-4 py-2.5 text-right">Deposit</th>
                 <th class="px-4 py-2.5 text-right">Claim</th>
@@ -324,6 +357,7 @@ function renderCheckoutsPage() {
                   </td>
                   <td class="px-4 py-3 text-sm text-zinc-700">${c.tenant}</td>
                   <td class="px-4 py-3">${badge(sm.label, sm.badgeCls)}</td>
+                  <td class="px-4 py-3 text-sm ${c.assignedTo ? 'text-zinc-700' : 'text-zinc-400'}">${c.assignedTo || 'Unassigned'}</td>
                   <td class="px-4 py-3">${badge(c.priority.charAt(0).toUpperCase() + c.priority.slice(1), priBadge)}</td>
                   <td class="px-4 py-3 text-right text-sm tabular-nums font-medium text-zinc-950">${fmt(c.deposit)}</td>
                   <td class="px-4 py-3 text-right text-sm tabular-nums font-medium ${c.claim > 0 ? 'text-zinc-950' : 'text-zinc-400'}">${c.claim > 0 ? fmt(c.claim) : '\u2014'}</td>
@@ -702,12 +736,295 @@ function renderDisputesPage() {
 }
 
 function renderFeedbackPage() {
+  // Build feedback rows from cases that have issues
+  const FEEDBACK_ISSUES = [
+    {issue:'Carpet stain in master bedroom',desc:'Red wine stain not in check-in report',property:'42 Leith Walk, Edinburgh EH6 5HB',tenant:'James Murray',severity:'high',decision:'charge',cost:185,status:'Reviewed',caseId:'CHK-2026-002'},
+    {issue:'Scuff marks on hallway walls',desc:'Deep scuffs exceeding fair wear and tear',property:'42 Leith Walk, Edinburgh EH6 5HB',tenant:'James Murray',severity:'medium',decision:'partial',cost:60,status:'Reviewed',caseId:'CHK-2026-002'},
+    {issue:'Missing shelf bracket in kitchen',desc:'Bracket present at check-in, now missing',property:'42 Leith Walk, Edinburgh EH6 5HB',tenant:'James Murray',severity:'low',decision:'charge',cost:25,status:'Reviewed',caseId:'CHK-2026-002'},
+    {issue:'Bathroom sealant deterioration',desc:'Mould growth around bath sealant',property:'91 Gorgie Road, Edinburgh EH11 2LA',tenant:'Omar Rashid',severity:'medium',decision:'no_charge',cost:0,status:'Reviewed',caseId:'CHK-2026-004'},
+    {issue:'Broken blind mechanism',desc:'Roller blind in bedroom jammed',property:'91 Gorgie Road, Edinburgh EH11 2LA',tenant:'Omar Rashid',severity:'medium',decision:'charge',cost:75,status:'Pending',caseId:'CHK-2026-004'},
+    {issue:'Oven cleaning required',desc:'Heavy grease buildup inside oven',property:'91 Gorgie Road, Edinburgh EH11 2LA',tenant:'Omar Rashid',severity:'high',decision:'charge',cost:120,status:'Pending',caseId:'CHK-2026-004'},
+    {issue:'Garden maintenance needed',desc:'Overgrown lawn and hedges',property:'91 Gorgie Road, Edinburgh EH11 2LA',tenant:'Omar Rashid',severity:'low',decision:'partial',cost:45,status:'Reviewed',caseId:'CHK-2026-004'},
+    {issue:'Scratch on kitchen worktop',desc:'Deep scratch near hob area',property:'91 Gorgie Road, Edinburgh EH11 2LA',tenant:'Omar Rashid',severity:'medium',decision:'charge',cost:100,status:'Reviewed',caseId:'CHK-2026-004'},
+    {issue:'Light fitting not working',desc:'Living room ceiling light intermittent',property:'23 Dalry Road, Edinburgh EH11 2BQ',tenant:'Rachel Stewart',severity:'low',decision:'pending',cost:0,status:'Pending',caseId:'CHK-2026-005'},
+    {issue:'Wall damage behind door',desc:'Door handle impact marks on wall',property:'23 Dalry Road, Edinburgh EH11 2BQ',tenant:'Rachel Stewart',severity:'medium',decision:'charge',cost:150,status:'Reviewed',caseId:'CHK-2026-005'},
+    {issue:'Damaged curtain rail',desc:'Curtain rail pulled from wall fixings',property:'156 Causewayside, Edinburgh EH9 1PN',tenant:'Liam O\'Brien',severity:'high',decision:'charge',cost:85,status:'Disputed',caseId:'CHK-2026-006'},
+    {issue:'Stained mattress protector',desc:'Large stain on provided mattress protector',property:'156 Causewayside, Edinburgh EH9 1PN',tenant:'Liam O\'Brien',severity:'medium',decision:'charge',cost:40,status:'Disputed',caseId:'CHK-2026-006'},
+    {issue:'Key not returned',desc:'One set of keys not returned at checkout',property:'156 Causewayside, Edinburgh EH9 1PN',tenant:'Liam O\'Brien',severity:'high',decision:'charge',cost:160,status:'Disputed',caseId:'CHK-2026-006'},
+    {issue:'General cleaning standard',desc:'Property left in reasonable state',property:'156 Causewayside, Edinburgh EH9 1PN',tenant:'Liam O\'Brien',severity:'low',decision:'no_charge',cost:0,status:'Reviewed',caseId:'CHK-2026-006'},
+  ]
+
+  const sevFilter = state.feedbackSeverity
+  const decFilter = state.feedbackDecision
+  const search = state.feedbackSearch.toLowerCase()
+
+  const filtered = FEEDBACK_ISSUES.filter(r => {
+    if (sevFilter !== 'all' && r.severity !== sevFilter) return false
+    if (decFilter !== 'all' && r.decision !== decFilter) return false
+    if (search && !r.issue.toLowerCase().includes(search) && !r.property.toLowerCase().includes(search) && !r.tenant.toLowerCase().includes(search)) return false
+    return true
+  })
+
+  const totalIssues = FEEDBACK_ISSUES.length
+  const highCount = FEEDBACK_ISSUES.filter(r => r.severity === 'high').length
+  const chargeCount = FEEDBACK_ISSUES.filter(r => r.decision === 'charge').length
+  const pendingCount = FEEDBACK_ISSUES.filter(r => r.decision === 'pending').length
+  const estRecovery = FEEDBACK_ISSUES.reduce((s, r) => s + r.cost, 0)
+
+  const sevBadge = s => s === 'high' ? 'border-rose-200 bg-rose-50 text-rose-700' : s === 'medium' ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-zinc-200 bg-zinc-100 text-zinc-700'
+  const decBadge = d => d === 'charge' ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : d === 'partial' ? 'border-amber-200 bg-amber-50 text-amber-700' : d === 'no_charge' ? 'border-zinc-200 bg-zinc-100 text-zinc-700' : 'border-sky-200 bg-sky-50 text-sky-700'
+  const decLabel = d => d === 'no_charge' ? 'No charge' : d === 'pending' ? 'Pending' : d.charAt(0).toUpperCase() + d.slice(1)
+
+  const hasFilters = sevFilter !== 'all' || decFilter !== 'all' || search
+
   return `
-    <div class="fade-in">
-      <div class="border border-zinc-200/80 bg-white px-6 py-10 text-center">
-        <p class="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Coming soon</p>
-        <h3 class="mt-3 text-lg font-semibold text-zinc-950">Inventory feedback</h3>
-        <p class="mt-2 text-sm text-zinc-500">Capture and review inventory clerk feedback to improve future report quality.</p>
+    <div class="fade-in space-y-5">
+      <!-- KPI stats -->
+      <div class="grid grid-cols-2 gap-4 md:grid-cols-5">
+        <div class="border border-zinc-200/80 bg-white px-4 py-3">
+          <p class="text-[11px] font-medium uppercase tracking-wide text-zinc-400">Total issues</p>
+          <p class="mt-1 text-2xl font-semibold tabular-nums text-zinc-950">${totalIssues}</p>
+        </div>
+        <div class="border border-zinc-200/80 bg-white px-4 py-3">
+          <p class="text-[11px] font-medium uppercase tracking-wide text-zinc-400">High severity</p>
+          <p class="mt-1 text-2xl font-semibold tabular-nums text-rose-700">${highCount}</p>
+        </div>
+        <div class="border border-zinc-200/80 bg-white px-4 py-3">
+          <p class="text-[11px] font-medium uppercase tracking-wide text-zinc-400">Charge recommended</p>
+          <p class="mt-1 text-2xl font-semibold tabular-nums text-emerald-700">${chargeCount}</p>
+        </div>
+        <div class="border border-zinc-200/80 bg-white px-4 py-3">
+          <p class="text-[11px] font-medium uppercase tracking-wide text-zinc-400">Pending decision</p>
+          <p class="mt-1 text-2xl font-semibold tabular-nums text-sky-700">${pendingCount}</p>
+        </div>
+        <div class="border border-zinc-200/80 bg-white px-4 py-3">
+          <p class="text-[11px] font-medium uppercase tracking-wide text-zinc-400">Est. recovery</p>
+          <p class="mt-1 text-2xl font-semibold tabular-nums text-zinc-950">${fmt(estRecovery)}</p>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="sticky top-0 z-10 flex flex-wrap items-center gap-3 bg-zinc-50/80 py-2 backdrop-blur">
+        <div class="relative flex-1 min-w-[200px]">
+          <input type="text" placeholder="Search by issue, property, or tenant..." value="${state.feedbackSearch}" oninput="state.feedbackSearch=this.value;render()" class="w-full border border-zinc-200 bg-white px-3 py-1.5 pl-8 text-sm text-zinc-700 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none">
+          <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-400">${svgIcon('search')}</span>
+        </div>
+        <select onchange="state.feedbackSeverity=this.value;render()" class="border border-zinc-200 bg-white px-3 py-1.5 text-sm text-zinc-700">
+          <option value="all" ${sevFilter==='all'?'selected':''}>All severities</option>
+          <option value="high" ${sevFilter==='high'?'selected':''}>High</option>
+          <option value="medium" ${sevFilter==='medium'?'selected':''}>Medium</option>
+          <option value="low" ${sevFilter==='low'?'selected':''}>Low</option>
+        </select>
+        <select onchange="state.feedbackDecision=this.value;render()" class="border border-zinc-200 bg-white px-3 py-1.5 text-sm text-zinc-700">
+          <option value="all" ${decFilter==='all'?'selected':''}>All decisions</option>
+          <option value="charge" ${decFilter==='charge'?'selected':''}>Charge</option>
+          <option value="partial" ${decFilter==='partial'?'selected':''}>Partial</option>
+          <option value="no_charge" ${decFilter==='no_charge'?'selected':''}>No charge</option>
+          <option value="pending" ${decFilter==='pending'?'selected':''}>Pending</option>
+        </select>
+        ${hasFilters ? `<button onclick="state.feedbackSearch='';state.feedbackSeverity='all';state.feedbackDecision='all';render()" class="text-xs font-medium text-zinc-500 hover:text-zinc-700">Clear filters</button>` : ''}
+        <span class="text-xs text-zinc-500">${filtered.length} of ${totalIssues} issues</span>
+      </div>
+
+      <!-- Table -->
+      <div class="overflow-hidden border border-zinc-200/80 bg-white">
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-left">
+            <thead class="bg-zinc-50/80">
+              <tr class="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
+                <th class="px-4 py-2.5">Issue</th>
+                <th class="px-4 py-2.5">Property</th>
+                <th class="px-4 py-2.5">Tenant</th>
+                <th class="px-4 py-2.5">Severity</th>
+                <th class="px-4 py-2.5">Decision</th>
+                <th class="px-4 py-2.5 text-right">Est. cost</th>
+                <th class="px-4 py-2.5">Status</th>
+                <th class="px-4 py-2.5">Case</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-zinc-100">
+              ${filtered.map(r => `
+                <tr class="hover:bg-zinc-50/70">
+                  <td class="px-4 py-3">
+                    <p class="text-sm font-medium text-zinc-950 truncate max-w-[200px]">${r.issue}</p>
+                    <p class="mt-0.5 text-xs text-zinc-400 truncate max-w-[200px]">${r.desc}</p>
+                  </td>
+                  <td class="px-4 py-3 text-sm text-zinc-700 truncate max-w-[180px]">${r.property}</td>
+                  <td class="px-4 py-3 text-sm text-zinc-700">${r.tenant}</td>
+                  <td class="px-4 py-3">${badge(r.severity.charAt(0).toUpperCase()+r.severity.slice(1), sevBadge(r.severity))}</td>
+                  <td class="px-4 py-3">${r.decision === 'pending' ? '<span class="text-xs text-zinc-400">Pending</span>' : badge(decLabel(r.decision), decBadge(r.decision))}</td>
+                  <td class="px-4 py-3 text-right text-sm tabular-nums font-medium text-zinc-950">${r.cost > 0 ? fmt(r.cost) : '\u2014'}</td>
+                  <td class="px-4 py-3">${badge(r.status, r.status === 'Disputed' ? 'border-rose-200 bg-rose-50 text-rose-700' : r.status === 'Pending' ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700')}</td>
+                  <td class="px-4 py-3"><a onclick="navigate('workspace','${r.caseId}')" class="text-xs font-medium text-emerald-600 hover:text-emerald-700 cursor-pointer">${r.caseId} &rarr;</a></td>
+                </tr>
+              `).join('')}
+              ${!filtered.length ? '<tr><td colspan="8" class="px-4 py-8 text-center text-sm text-zinc-500">No issues match your filters.</td></tr>' : ''}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`
+}
+
+function getTenancyStatus(t) {
+  if (t.caseStatus) return { label: STATUS_META[t.caseStatus]?.label || t.caseStatus, tone: 'sky', dot: 'bg-sky-500' }
+  const end = new Date(t.end.replace(/(\d{2}) (\w+) (\d{4})/, '$2 $1, $3'))
+  const now = new Date()
+  const daysLeft = Math.ceil((end - now) / (1000*60*60*24))
+  if (daysLeft < 0) return { label: 'Ended', tone: 'zinc', dot: 'bg-zinc-400' }
+  if (daysLeft <= 30) return { label: 'Ending in ' + daysLeft + 'd', tone: 'amber', dot: 'bg-amber-500' }
+  return { label: 'Active', tone: 'emerald', dot: 'bg-emerald-500' }
+}
+
+function renderTenanciesPage() {
+  const tab = state.tenancyTab
+  const search = state.tenancySearch.toLowerCase()
+
+  const allTenancies = TENANCIES
+  const active = allTenancies.filter(t => !t.caseStatus && getTenancyStatus(t).label === 'Active')
+  const ending = allTenancies.filter(t => getTenancyStatus(t).tone === 'amber')
+  const withCase = allTenancies.filter(t => t.caseId)
+  const noCase = allTenancies.filter(t => !t.caseId)
+
+  let filtered = allTenancies
+  if (tab === 'active') filtered = active
+  else if (tab === 'ending') filtered = ending
+  else if (tab === 'with_case') filtered = withCase
+  else if (tab === 'no_case') filtered = noCase
+
+  if (search) {
+    filtered = filtered.filter(t => t.property.toLowerCase().includes(search) || t.tenant.toLowerCase().includes(search))
+  }
+
+  const tabBtn = (key, label, count) => `<button onclick="state.tenancyTab='${key}';render()" class="whitespace-nowrap px-3 py-1.5 text-xs font-medium transition ${tab === key ? 'border border-zinc-900 bg-zinc-900 text-white' : 'border border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:text-zinc-900'}">${label} (${count})</button>`
+
+  return `
+    <div class="fade-in space-y-5">
+      <!-- Toolbar -->
+      <div class="flex flex-wrap items-center gap-3">
+        ${tabBtn('all', 'All', allTenancies.length)}
+        ${tabBtn('active', 'Active', active.length)}
+        ${tabBtn('ending', 'Ending soon', ending.length)}
+        ${tabBtn('with_case', 'With case', withCase.length)}
+        ${tabBtn('no_case', 'No case', noCase.length)}
+        <div class="ml-auto relative">
+          <input type="text" placeholder="Search tenancies..." value="${state.tenancySearch}" oninput="state.tenancySearch=this.value;render()" class="border border-zinc-200 bg-white px-3 py-1.5 pl-8 text-sm text-zinc-700 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none w-[200px]">
+          <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-400">${svgIcon('search')}</span>
+        </div>
+      </div>
+
+      <!-- List -->
+      <div class="border border-zinc-200/80 bg-white divide-y divide-zinc-100">
+        <!-- Header (hidden on mobile) -->
+        <div class="hidden md:grid md:grid-cols-[1fr_160px_140px_120px_100px] gap-4 px-4 py-2.5 bg-zinc-50/80 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
+          <span>Property / Tenant</span>
+          <span>Period</span>
+          <span>Deposit</span>
+          <span>Status</span>
+          <span>Case</span>
+        </div>
+        ${filtered.map(t => {
+          const st = getTenancyStatus(t)
+          return `
+          <div onclick="navigate('tenancy-detail','${t.id}')" class="grid grid-cols-1 sm:grid-cols-[1fr_160px] md:grid-cols-[1fr_160px_140px_120px_100px] gap-2 md:gap-4 px-4 py-3 cursor-pointer transition hover:bg-zinc-50/70 items-center">
+            <div class="min-w-0">
+              <p class="text-sm font-medium text-zinc-950 truncate">${t.property}</p>
+              <p class="mt-0.5 text-xs text-zinc-500"><span class="text-zinc-400">Tenant</span> ${t.tenant}</p>
+              ${t.landlord ? `<p class="text-xs text-zinc-400">${t.landlord}</p>` : ''}
+            </div>
+            <div class="text-sm text-zinc-600">${t.start} — ${t.end}</div>
+            <div>
+              <p class="text-sm font-medium tabular-nums text-zinc-950">${fmt(t.deposit)}</p>
+              <p class="text-xs text-zinc-400">${t.scheme}</p>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="h-2 w-2 rounded-full ${st.dot}"></span>
+              <span class="text-sm text-zinc-700">${st.label}</span>
+            </div>
+            <div class="text-sm ${t.caseId ? 'font-medium text-emerald-700' : 'text-zinc-400'}">${t.caseId ? 'Has case' : 'No case'}</div>
+          </div>`
+        }).join('')}
+        ${!filtered.length ? '<div class="px-4 py-8 text-center text-sm text-zinc-500">No tenancies match your filters.</div>' : ''}
+      </div>
+    </div>`
+}
+
+function renderTenancyDetailPage() {
+  const t = TENANCIES.find(t => t.id === state.activeTenancyId) || TENANCIES[0]
+  const st = getTenancyStatus(t)
+
+  const metaItem = (label, value) => `<div class="flex items-center justify-between border-b border-zinc-100 py-3"><dt class="text-sm text-zinc-500">${label}</dt><dd class="text-sm font-medium text-zinc-950">${value || '<span class="text-zinc-400">Not provided</span>'}</dd></div>`
+
+  return `
+    <div class="fade-in space-y-5">
+      <!-- Header -->
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <a onclick="navigate('tenancies')" class="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500 hover:text-zinc-700 cursor-pointer">${svgIcon('arrowLeft')} Back to tenancies</a>
+          <h2 class="mt-2 text-base font-semibold tracking-[-0.02em] text-zinc-950">${t.property}</h2>
+          <p class="mt-0.5 text-xs text-zinc-400">${t.id}</p>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="h-2 w-2 rounded-full ${st.dot}"></span>
+          ${badge(st.label, st.tone === 'emerald' ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : st.tone === 'amber' ? 'border-amber-200 bg-amber-50 text-amber-700' : st.tone === 'sky' ? 'border-sky-200 bg-sky-50 text-sky-700' : 'border-zinc-200 bg-zinc-100 text-zinc-700')}
+        </div>
+      </div>
+
+      <div class="grid gap-5 lg:grid-cols-[1fr_320px]">
+        <!-- Main column -->
+        <div class="space-y-5">
+          <!-- Residents -->
+          <section class="border border-zinc-200/80 bg-white px-6 py-5">
+            <h3 class="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Residents</h3>
+            <dl class="mt-3">
+              ${metaItem('Tenant', t.tenant)}
+              ${metaItem('Tenant email', t.email)}
+              ${metaItem('Landlord', t.landlord)}
+            </dl>
+          </section>
+
+          <!-- Property -->
+          <section class="border border-zinc-200/80 bg-white px-6 py-5">
+            <h3 class="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Property</h3>
+            <dl class="mt-3">
+              ${metaItem('Address', t.property)}
+              ${metaItem('Reference', t.id)}
+            </dl>
+          </section>
+
+          <!-- Tenancy period -->
+          <section class="border border-zinc-200/80 bg-white px-6 py-5">
+            <h3 class="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Tenancy period</h3>
+            <dl class="mt-3">
+              ${metaItem('Start date', t.start)}
+              ${metaItem('End date', t.end)}
+            </dl>
+          </section>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-5">
+          <!-- Deposit -->
+          <section class="border border-zinc-200/80 bg-white px-6 py-5">
+            <h3 class="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Deposit</h3>
+            <p class="mt-2 text-2xl font-semibold text-zinc-950">${fmt(t.deposit)}</p>
+            <p class="mt-1 text-xs text-zinc-500">${t.scheme}</p>
+          </section>
+
+          <!-- Checkout -->
+          <section class="border border-zinc-200/80 bg-white px-6 py-5">
+            <h3 class="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Checkout</h3>
+            ${t.caseId ? `
+              <div class="mt-3 space-y-3">
+                ${badge(STATUS_META[t.caseStatus]?.label || t.caseStatus, STATUS_META[t.caseStatus]?.badgeCls || 'border-zinc-200 bg-zinc-100 text-zinc-700')}
+                <button onclick="navigate('workspace','${t.caseId}')" class="mt-3 w-full border border-emerald-600 bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-700">Open checkout workspace</button>
+              </div>
+            ` : `
+              <p class="mt-3 text-sm text-zinc-500">No checkout case exists for this tenancy.</p>
+              <button onclick="alert('Demo — this would create a new checkout case for this tenancy.')" class="mt-3 w-full border border-zinc-900 bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800">Start checkout</button>
+            `}
+          </section>
+        </div>
       </div>
     </div>`
 }
@@ -795,16 +1112,45 @@ function renderAdminPage() {
       </section>
       <section class="border border-zinc-200/80 bg-white px-6 py-6">
         <h3 class="text-sm font-semibold text-zinc-950">Case allocation</h3>
-        <p class="mt-1 text-sm text-zinc-500">How incoming checkouts are assigned to property managers.</p>
-        <div class="mt-5 space-y-4">
-          <div class="flex items-start justify-between gap-4 border-b border-zinc-100 pb-4">
-            <div><p class="text-sm font-medium text-zinc-950">Auto-allocation</p><p class="mt-1 text-sm leading-6 text-zinc-600">Automatically assign incoming checkouts to the linked property manager.</p></div>
-            <span class="shrink-0 text-xs font-medium text-amber-600">Coming soon</span>
-          </div>
-          <div class="flex items-start justify-between gap-4">
-            <div><p class="text-sm font-medium text-zinc-950">Manual allocation</p><p class="mt-1 text-sm leading-6 text-zinc-600">A team lead manually assigns each checkout from the unallocated queue.</p></div>
-            <span class="shrink-0 text-xs font-medium text-amber-600">Coming soon</span>
-          </div>
+        <p class="mt-1 text-sm text-zinc-500">Assign incoming checkouts to team members.</p>
+        <div class="mt-4 flex items-center gap-2">
+          ${['unallocated','allocated','all_cases'].map(tab => {
+            const label = tab === 'unallocated' ? 'Unallocated' : tab === 'allocated' ? 'Allocated' : 'All'
+            const count = tab === 'unallocated' ? CASES.filter(c => !c.assignedTo).length : tab === 'allocated' ? CASES.filter(c => c.assignedTo).length : CASES.length
+            return `<button onclick="state.allocationTab='${tab}';render()" class="px-3 py-1.5 text-xs font-medium transition ${state.allocationTab === tab ? 'border border-zinc-900 bg-zinc-900 text-white' : 'border border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300'}">${label} (${count})</button>`
+          }).join('')}
+        </div>
+        <div class="mt-4 overflow-x-auto border border-zinc-200">
+          <table class="w-full text-sm">
+            <thead><tr class="border-b border-zinc-200 bg-zinc-50/80 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
+              <th class="px-4 py-2.5 text-left">Property</th>
+              <th class="px-4 py-2.5 text-left">Tenant</th>
+              <th class="px-4 py-2.5 text-left">Status</th>
+              <th class="px-4 py-2.5 text-left">Assigned to</th>
+              <th class="px-4 py-2.5 text-left">Action</th>
+            </tr></thead>
+            <tbody class="divide-y divide-zinc-100">
+              ${(() => {
+                const allocFiltered = state.allocationTab === 'unallocated' ? CASES.filter(c => !c.assignedTo) : state.allocationTab === 'allocated' ? CASES.filter(c => c.assignedTo) : CASES
+                return allocFiltered.map(c => {
+                  const sm = STATUS_META[c.status]
+                  const memberOptions = MEMBERS.filter(m => m.role !== 'viewer').map(m => `<option value="${m.name}" ${c.assignedTo === m.name ? 'selected' : ''}>${m.name}</option>`).join('')
+                  return `<tr class="hover:bg-zinc-50/70">
+                    <td class="px-4 py-2.5"><a onclick="navigate('workspace','${c.id}')" class="text-sm font-medium text-emerald-700 hover:text-emerald-800 cursor-pointer">${c.property.split(',')[0]}</a></td>
+                    <td class="px-4 py-2.5 text-zinc-700">${c.tenant}</td>
+                    <td class="px-4 py-2.5">${badge(sm.label, sm.badgeCls)}</td>
+                    <td class="px-4 py-2.5">
+                      <select onchange="CASES.find(x=>x.id==='${c.id}').assignedTo=this.value||null;render()" class="border border-zinc-200 bg-white px-2 py-1 text-xs text-zinc-700">
+                        <option value="" ${!c.assignedTo ? 'selected' : ''}>Unassigned</option>
+                        ${memberOptions}
+                      </select>
+                    </td>
+                    <td class="px-4 py-2.5">${c.assignedTo ? `<button onclick="CASES.find(x=>x.id==='${c.id}').assignedTo=null;render()" class="text-xs font-medium text-rose-600 hover:text-rose-700">Remove</button>` : '<span class="text-xs text-zinc-400">Select member</span>'}</td>
+                  </tr>`
+                }).join('')
+              })()}
+            </tbody>
+          </table>
         </div>
       </section>
       <section class="border border-zinc-200/80 bg-white px-6 py-6">
@@ -1078,6 +1424,8 @@ function handleStepClick(step) {
 function render() {
   const pageConfig = getPageConfig()
   const pageRenderers = {
+    tenancies: renderTenanciesPage,
+    'tenancy-detail': renderTenancyDetailPage,
     checkouts: renderCheckoutsPage,
     workspace: renderWorkspacePage,
     disputes: renderDisputesPage,
