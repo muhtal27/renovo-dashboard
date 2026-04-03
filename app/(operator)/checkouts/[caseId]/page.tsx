@@ -44,9 +44,13 @@ type PageProps = {
 }
 
 export default async function EotCasePage({ params }: PageProps) {
+  const t0 = performance.now()
   const context = await requireOperatorTenant('/checkouts')
+  const tAuth = performance.now()
   const { caseId } = await params
   const initialWorkspace = await getEotCaseWorkspaceSummarySnapshot(context, caseId).catch(() => null)
+  const tData = performance.now()
+  console.log(`[perf] EotCasePage caseId=${caseId} auth=${(tAuth - t0).toFixed(0)}ms data=${(tData - tAuth).toFixed(0)}ms total=${(tData - t0).toFixed(0)}ms`)
 
   return (
     <Suspense fallback={<WorkspaceSkeleton />}>
