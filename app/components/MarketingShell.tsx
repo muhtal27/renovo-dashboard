@@ -22,6 +22,7 @@ type MarketingShellProps = {
     | '/privacy'
     | '/terms'
     | '/complaints'
+    | '/insights'
   navAriaLabel?: string
 }
 
