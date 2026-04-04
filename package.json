@@ -23,6 +23,8 @@
     "smoke:headed": "dotenv -e .env.playwright -- sh -c 'if [ \"$PLAYWRIGHT_BASE_URL\" = \"http://localhost:3000\" ]; then unset PLAYWRIGHT_BASE_URL; fi; exec playwright test --project=chromium --headed'",
     "smoke:ui": "dotenv -e .env.playwright -- sh -c 'if [ \"$PLAYWRIGHT_BASE_URL\" = \"http://localhost:3000\" ]; then unset PLAYWRIGHT_BASE_URL; fi; exec playwright test --ui'",
     "smoke:local": "bash scripts/run-local-smoke.sh",
+    "perf": "bash tests/perf/run-perf.sh browser",
+    "perf:api": "bash tests/perf/run-perf.sh api",
     "test:routes": "tsx --test tests/operator-route-protection.test.ts",
     "typecheck": "tsc --noEmit",
     "pull:env:vercel": "bash scripts/pull-vercel-env.sh"

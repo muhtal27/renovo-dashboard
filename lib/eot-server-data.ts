@@ -23,7 +23,6 @@ async function fetchEotJson<T>(
   context: OperatorTenantContext,
   pathname: string
 ): Promise<T> {
-  const t0 = performance.now()
   const response = await fetch(buildBackendUrl(pathname), {
     method: 'GET',
     headers: {
@@ -59,7 +58,6 @@ async function fetchEotJson<T>(
     throw new Error(detail)
   }
 
-  console.log(`[perf] fetchEotJson ${pathname}: ${(performance.now() - t0).toFixed(0)}ms status=${response.status}`)
   return payload as T
 }
 

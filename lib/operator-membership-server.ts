@@ -126,8 +126,6 @@ export function getActiveTenantFailureDetail(
 export async function listActiveTenantMembershipsForUser(
   userId: string
 ): Promise<ActiveTenantMembership[]> {
-  const t0 = performance.now()
-  let queryCount = 1
   const supabase = getSupabaseServiceRoleClient()
 
   let result = await supabase
@@ -137,7 +135,6 @@ export async function listActiveTenantMembershipsForUser(
     .order('created_at', { ascending: true })
 
   if (result.error && isMissingColumnError(result.error, 'created_at')) {
-    queryCount++
     result = await supabase
       .from('tenant_memberships')
       .select('*')
@@ -145,11 +142,9 @@ export async function listActiveTenantMembershipsForUser(
   }
 
   if (result.error) {
-    console.log(`[perf] listActiveTenantMemberships: ${(performance.now() - t0).toFixed(0)}ms queries=${queryCount} result=error`)
     throw result.error
   }
 
-  console.log(`[perf] listActiveTenantMemberships: ${(performance.now() - t0).toFixed(0)}ms queries=${queryCount} rows=${result.data?.length ?? 0}`)
   const memberships = [...(result.data ?? [])]
     .filter(
       (membership): membership is RawOperatorMembership =>

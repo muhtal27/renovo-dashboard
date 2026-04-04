@@ -4,7 +4,7 @@ const baseURL = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000'
 const authFile = 'playwright/.auth/admin.json'
 
 export default defineConfig({
-  testDir: './tests/smoke',
+  testDir: './tests',
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
@@ -16,6 +16,7 @@ export default defineConfig({
   projects: [
     {
       name: 'setup',
+      testDir: './tests/smoke',
       testMatch: /auth\.setup\.ts/,
       use: {
         ...devices['Desktop Chrome'],
@@ -23,8 +24,19 @@ export default defineConfig({
     },
     {
       name: 'chromium',
+      testDir: './tests/smoke',
       dependencies: ['setup'],
       testIgnore: /auth\.setup\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: authFile,
+      },
+    },
+    {
+      name: 'perf',
+      testDir: './tests/perf',
+      // No setup dependency — auth state is injected before running.
+      // See tests/perf/run-perf.sh or generate via Supabase admin API.
       use: {
         ...devices['Desktop Chrome'],
         storageState: authFile,

@@ -75,12 +75,10 @@ async function buildOperatorContextResult(
     }
   }
 
-  const t0 = performance.now()
   const [profile, membershipResult] = await Promise.all([
     getOperatorProfileForUserId(authResult.user.id),
     resolveActiveTenantMembership(authResult.user.id),
   ])
-  console.log(`[perf] buildOperatorContextResult profile+membership: ${(performance.now() - t0).toFixed(0)}ms`)
 
   if (profile?.is_active === false) {
     return {
@@ -113,13 +111,8 @@ async function buildOperatorContextResult(
 }
 
 const resolveOperatorContext = cache(async (): Promise<OperatorContextResult> => {
-  const t0 = performance.now()
   const authResult = await readOperatorSessionIfNeeded()
-  const tAuth = performance.now()
-  console.log(`[perf] resolveOperatorContext session: ${(tAuth - t0).toFixed(0)}ms`)
-  const result = await buildOperatorContextResult(authResult)
-  console.log(`[perf] resolveOperatorContext total: ${(performance.now() - t0).toFixed(0)}ms`)
-  return result
+  return buildOperatorContextResult(authResult)
 })
 
 // Short-lived in-memory cache for API route auth context.

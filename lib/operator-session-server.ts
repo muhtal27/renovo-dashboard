@@ -66,7 +66,6 @@ export function toSafeOperatorAuthUser(user: User): OperatorAuthUser {
 }
 
 export async function getOperatorProfileForUserId(userId: string) {
-  const t0 = performance.now()
   try {
     const supabase = getSupabaseServiceRoleClient()
 
@@ -76,8 +75,6 @@ export async function getOperatorProfileForUserId(userId: string) {
       .eq('auth_user_id', userId)
       .is('deleted_at', null)
       .maybeSingle()
-
-    console.log(`[perf] getOperatorProfileForUserId: ${(performance.now() - t0).toFixed(0)}ms queries=1 result=${result.data ? 'found' : 'null'}`)
 
     if (result.error || !result.data || typeof result.data !== 'object') {
       return null
@@ -94,7 +91,6 @@ export async function getOperatorProfileForUserId(userId: string) {
       is_active: getOptionalBoolean(rawProfile, 'is_active'),
     } satisfies OperatorProfile
   } catch {
-    console.log(`[perf] getOperatorProfileForUserId: ${(performance.now() - t0).toFixed(0)}ms queries=1 result=catch`)
     return null
   }
 }
@@ -124,11 +120,9 @@ export async function validateOperatorSession(
     return { ok: false, reason: 'missing' }
   }
 
-  const t0 = performance.now()
   const authClient = getSupabaseServerAuthClient()
   let activeSession = sessionCookie
   let userResponse = await authClient.auth.getUser(sessionCookie.access_token)
-  const tGetUser = performance.now()
   let refreshed = false
 
   if ((userResponse.error || !userResponse.data.user) && sessionCookie.refresh_token) {
@@ -144,8 +138,6 @@ export async function validateOperatorSession(
       refreshed = true
     }
   }
-
-  console.log(`[perf] validateOperatorSession getUser: ${(tGetUser - t0).toFixed(0)}ms refreshed=${refreshed} total: ${(performance.now() - t0).toFixed(0)}ms`)
 
   if (userResponse.error || !userResponse.data.user) {
     return { ok: false, reason: 'invalid' }
