@@ -136,7 +136,7 @@ export default function HomePageClient() {
         <section className="mx-auto max-w-[1080px] px-8 py-24 lg:px-10">
           <p className="text-[13px] font-semibold uppercase tracking-[0.1em] text-emerald-500">The problem</p>
           <h2 className="mt-3.5 text-[clamp(26px,3.5vw,42px)] font-bold leading-[1.15] tracking-[-0.03em]">One checkout. <em className="not-italic text-slate-400">Six tools. No audit trail.</em></h2>
-          <p className="mt-3.5 max-w-[560px] text-base leading-[1.85] text-slate-500">Letting agents still manage end of tenancy across email threads, inventory apps, shared drives, Word documents, spreadsheets, and deposit portals. Nothing links together.</p>
+          <p className="mt-3.5 max-w-[560px] text-base leading-[1.85] text-slate-500">Property managers still manage end of tenancy across email threads, inventory apps, shared drives, Word documents, spreadsheets, and deposit portals. Nothing links together.</p>
           <div className="mt-12 flex flex-wrap gap-14">
             {([["6+", "Tools per checkout"], ["2-3h", "Admin per case"], ["0", "Audit trail"]] as const).map(([v, l]) => (
               <div key={l}><p className="text-5xl font-bold leading-[1.15] tracking-tight text-emerald-500">{v}</p><p className="mt-1 text-[13px] font-medium text-slate-500">{l}</p></div>
