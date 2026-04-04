@@ -294,7 +294,7 @@ export default function HomePageClient() {
                     <Link key={l.href} href={l.href} className="text-[13px] leading-[2.3] text-white/50 transition-colors hover:text-white">{l.label}</Link>
                   ))}
                   {title === "Company" && (
-                    <SignInLink className="text-[13px] leading-[2.3] text-white/50 transition-colors hover:text-white">Sign in</SignInLink>
+                    <Link href="/insights" className="text-[13px] leading-[2.3] text-white/50 transition-colors hover:text-white">Insights</Link>
                   )}
                 </nav>
               </div>
