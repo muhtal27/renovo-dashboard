@@ -3,7 +3,7 @@ import { createMarketingMetadata } from '@/lib/marketing-metadata'
 
 const whyNow = [
   'End of tenancy is a £2B+ operational cost centre that still runs on email, Word documents, and spreadsheets.',
-  'The Renters\' Rights Act takes effect May 2026. Evidence standards for deposit deductions are rising across all four schemes.',
+  'Evidence standards for deposit deductions are rising across all four schemes. Agencies need structured, defensible processes.',
   'We have a working product, paying customers, and a clear path to scale. You would be joining early enough to shape the product and the company.',
 ] as const
 

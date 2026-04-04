@@ -239,23 +239,6 @@ export default function HomePageClient() {
           </div>
         </section>
 
-        {/* ── REGULATORY ── */}
-        <section className="mx-auto max-w-[1080px] px-8 py-24 lg:px-10">
-          <p className="text-[13px] font-semibold uppercase tracking-[0.1em] text-emerald-500">Regulatory change</p>
-          <h2 className="mt-3.5 max-w-[700px] text-[clamp(26px,3.5vw,42px)] font-bold leading-[1.15] tracking-[-0.03em]">{"Renters' Rights Act"} <em className="not-italic text-slate-400">live from 1 May 2026</em></h2>
-          <div className="renovo-highlight mt-7 rounded-xl p-7">
-            <p className="text-[15px] leading-[1.85] text-slate-500">Section 21 is abolished. All assured shorthold tenancies become periodic. Prescribed information obligations are tightening. Agents in England who fail to comply risk <strong className="font-semibold text-slate-800">civil penalties up to &pound;7,000</strong>. Evidence standards for deposit deductions are rising across all four schemes.</p>
-          </div>
-          <div className="mt-10 grid gap-10 md:grid-cols-3">
-            {[
-              { h: "Higher evidence thresholds", p: "Every proposed deduction must be backed by documented reasoning, timestamped evidence, and a clear audit trail." },
-              { h: "Fair wear and tear built in", p: "Guidance on fair wear and tear, betterment, and tenancy length adjusted charges embedded in the review workflow." },
-              { h: "Repeatable, defensible output", p: "Structured assessment logic applied to every case, regardless of which property manager handles it." },
-            ].map((c) => (
-              <div key={c.h}><h3 className="text-[15px] font-semibold">{c.h}</h3><p className="mt-2 text-sm leading-[1.8] text-slate-500">{c.p}</p></div>
-            ))}
-          </div>
-        </section>
 
         {/* ── PLATFORM ── */}
         <section className="section-tinted">
