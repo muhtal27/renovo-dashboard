@@ -226,9 +226,9 @@ export function MarketingShell({
                     {item.label}
                   </Link>
                 ))}
-                <SignInLink className="text-[13px] leading-[2.3] text-white/50 transition-colors hover:text-white">
-                  Sign in
-                </SignInLink>
+                <Link href="/insights" className="text-[13px] leading-[2.3] text-white/50 transition-colors hover:text-white">
+                  Insights
+                </Link>
               </nav>
             </div>
 
