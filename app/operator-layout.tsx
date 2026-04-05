@@ -383,14 +383,14 @@ export function OperatorLayout({ children, operator }: OperatorLayoutProps) {
                   <Link
                     href="/guidance"
                     prefetch={false}
-                    title="Guidance"
-                    className={`flex h-8 w-8 items-center justify-center rounded-lg transition ${
+                    className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition ${
                       pathname.startsWith('/guidance')
                         ? 'bg-emerald-50 text-emerald-600'
-                        : 'text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600'
+                        : 'text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700'
                     }`}
                   >
                     <BookOpenText className="h-4 w-4" strokeWidth={2} />
+                    Guidance
                   </Link>
 
                   <div className="relative" ref={profileMenuRef}>
