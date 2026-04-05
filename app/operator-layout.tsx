@@ -3,8 +3,8 @@
 import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 import type { ReactNode } from 'react'
-import { Suspense, useCallback, useMemo, useState } from 'react'
-import { Menu, Search } from 'lucide-react'
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { ChevronDown, LogOut, Menu, Search, Settings, CreditCard } from 'lucide-react'
 import { OperatorNav } from '@/app/operator-nav'
 import { getOperatorLabel, type CurrentOperator } from '@/lib/operator-types'
 import { clearLegacySupabaseBrowserAuthArtifacts } from '@/lib/supabase-session'
@@ -175,7 +175,16 @@ const OPERATOR_ROUTE_CONFIG: Array<{
       pageTitle: 'Settings',
       pageDescription:
         'Review operator workspace defaults, access controls, and outbound communication readiness.',
-      breadcrumbs: [{ label: 'Account' }, { label: 'Settings' }],
+      breadcrumbs: [{ label: 'Account', href: '/account/billing' }, { label: 'Settings' }],
+    },
+  },
+  {
+    matches: (pathname) => pathname.startsWith('/account/billing'),
+    config: {
+      pageTitle: 'Billing',
+      pageDescription:
+        'Manage your subscription, payment methods, and billing history.',
+      breadcrumbs: [{ label: 'Account' }, { label: 'Billing' }],
     },
   },
 ]
@@ -272,6 +281,19 @@ export function OperatorLayout({ children, operator }: OperatorLayoutProps) {
   const [signingOut, setSigningOut] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false)
+  const profileMenuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!profileMenuOpen) return
+    function handleClickOutside(event: MouseEvent) {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
+        setProfileMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [profileMenuOpen])
 
   const handleSignOut = useCallback(async () => {
     setSigningOut(true)
@@ -301,8 +323,6 @@ export function OperatorLayout({ children, operator }: OperatorLayoutProps) {
           mobileOpen={mobileNavOpen}
           onToggleCollapse={handleToggleCollapse}
           onCloseMobile={handleCloseMobile}
-          signingOut={signingOut}
-          onSignOut={handleSignOut}
         />
 
         <div className="min-w-0 flex-1">
@@ -360,14 +380,58 @@ export function OperatorLayout({ children, operator }: OperatorLayoutProps) {
                     </Suspense>
                   </div>
 
-                  <div className="hidden items-center gap-2 border-l border-zinc-200 pl-3 md:flex">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-50 text-xs font-semibold text-emerald-700">
+                  <div className="relative" ref={profileMenuRef}>
+                    <button
+                      type="button"
+                      onClick={() => setProfileMenuOpen((prev) => !prev)}
+                      className="hidden items-center gap-2 border-l border-zinc-200 pl-3 transition hover:opacity-80 md:flex"
+                    >
+                      <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-50 text-xs font-semibold text-emerald-700">
+                        {getInitials(displayName)}
+                      </div>
+                      <span className="text-xs font-medium text-zinc-600">{displayName || 'Operator'}</span>
+                      <ChevronDown className="h-3 w-3 text-zinc-400" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setProfileMenuOpen((prev) => !prev)}
+                      className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-50 text-xs font-semibold text-emerald-700 md:hidden"
+                    >
                       {getInitials(displayName)}
-                    </div>
-                    <span className="text-xs font-medium text-zinc-600">{displayName || 'Operator'}</span>
-                  </div>
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-50 text-xs font-semibold text-emerald-700 md:hidden">
-                    {getInitials(displayName)}
+                    </button>
+
+                    {profileMenuOpen ? (
+                      <div className="absolute right-0 top-full z-50 mt-2 w-48 rounded-lg border border-zinc-200 bg-white py-1 shadow-lg">
+                        <Link
+                          href="/settings"
+                          prefetch={false}
+                          onClick={() => setProfileMenuOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-700 transition hover:bg-zinc-50"
+                        >
+                          <Settings className="h-4 w-4 text-zinc-400" />
+                          Settings
+                        </Link>
+                        <Link
+                          href="/account/billing"
+                          prefetch={false}
+                          onClick={() => setProfileMenuOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-700 transition hover:bg-zinc-50"
+                        >
+                          <CreditCard className="h-4 w-4 text-zinc-400" />
+                          Billing
+                        </Link>
+                        <div className="my-1 border-t border-zinc-100" />
+                        <button
+                          type="button"
+                          onClick={handleSignOut}
+                          disabled={signingOut}
+                          className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-zinc-700 transition hover:bg-zinc-50 disabled:opacity-60"
+                        >
+                          <LogOut className="h-4 w-4 text-zinc-400" />
+                          {signingOut ? 'Signing out...' : 'Sign out'}
+                        </button>
+                      </div>
+                    ) : null}
                   </div>
                 </div>
               </div>
