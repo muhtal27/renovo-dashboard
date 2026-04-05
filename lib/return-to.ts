@@ -1,4 +1,4 @@
-const DEFAULT_RETURN_TO = '/checkouts'
+const DEFAULT_RETURN_TO = '/tenancies'
 
 export function normalizeReturnTo(
   value: string | null | undefined,

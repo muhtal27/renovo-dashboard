@@ -113,7 +113,7 @@ export default function GlobalError({
               Try again
             </button>
             <a
-              href="/checkouts"
+              href="/tenancies"
               style={{
                 padding: '10px 20px',
                 fontSize: 14,

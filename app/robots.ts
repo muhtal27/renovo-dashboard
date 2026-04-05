@@ -10,7 +10,8 @@ export default function robots(): MetadataRoute.Robots {
         disallow: [
           '/admin',
           '/api/',
-          '/checkouts',
+          '/dashboard',
+          '/tenancies',
           '/deposit-scheme',
           '/disputes',
           '/guidance',

@@ -44,7 +44,7 @@ type PageProps = {
 }
 
 export default async function EotCasePage({ params }: PageProps) {
-  const context = await requireOperatorTenant('/checkouts')
+  const context = await requireOperatorTenant('/tenancies')
   const { caseId } = await params
   const initialWorkspace = await getEotCaseWorkspaceSummarySnapshot(context, caseId).catch(() => null)
 

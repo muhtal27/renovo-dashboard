@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: 'Renovo AI',
     short_name: 'Renovo',
     description: 'End of Tenancy Automation — deposit disputes, reports & compliance.',
-    start_url: '/checkouts',
+    start_url: '/tenancies',
     scope: '/',
     display: 'standalone',
     orientation: 'portrait-primary',

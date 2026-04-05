@@ -43,7 +43,7 @@ const OPERATOR_ROUTE_CONFIG: Array<{
         'Single-case operator review across evidence, issues, decision rationale, and submission readiness.',
       searchPlaceholder: 'Search this case by issue, evidence, recommendation, or message',
       breadcrumbs: [
-        { label: 'Checkouts', href: '/checkouts' },
+        { label: 'Tenancies', href: '/tenancies' },
         { label: 'Case workspace' },
       ],
     },
@@ -60,36 +60,12 @@ const OPERATOR_ROUTE_CONFIG: Array<{
     },
   },
   {
-    matches: (pathname) => pathname === '/checkouts',
-    config: {
-      pageTitle: 'Checkouts',
-      pageDescription:
-        'Operational checkout queue with live end-of-tenancy workflow state, dispute signals, and fast access into the workspace.',
-      searchPlaceholder: 'Search live checkouts by property, tenant, status, priority, or checkout ID',
-      searchTargetPath: '/checkouts',
-      breadcrumbs: [{ label: 'Checkouts' }],
-    },
-  },
-  {
-    matches: (pathname) => pathname.startsWith('/checkouts/'),
-    config: {
-      pageTitle: 'Checkout workspace',
-      pageDescription:
-        'Review live evidence, issues, recommendations, claim structure, and communication in a single operator workspace.',
-      searchPlaceholder: 'Filter this checkout by issue, evidence, recommendation, or message',
-      breadcrumbs: [
-        { label: 'Checkouts', href: '/checkouts' },
-        { label: 'Checkout workspace' },
-      ],
-    },
-  },
-  {
     matches: (pathname) => pathname === '/tenancies',
     config: {
       pageTitle: 'Tenancies',
       pageDescription:
-        'Cross-checkout tenancy view covering residents, deposits, property references, and checkout readiness.',
-      searchPlaceholder: 'Search tenancy records by property, tenant, reference, or checkout state',
+        'Operational checkout queue with live end-of-tenancy workflow state, dispute signals, and fast access into the workspace.',
+      searchPlaceholder: 'Search live tenancies by property, tenant, status, priority, or checkout ID',
       searchTargetPath: '/tenancies',
       breadcrumbs: [{ label: 'Tenancies' }],
     },
@@ -97,12 +73,36 @@ const OPERATOR_ROUTE_CONFIG: Array<{
   {
     matches: (pathname) => pathname.startsWith('/tenancies/'),
     config: {
-      pageTitle: 'Tenancy detail',
+      pageTitle: 'Tenancy workspace',
+      pageDescription:
+        'Review live evidence, issues, recommendations, claim structure, and communication in a single operator workspace.',
+      searchPlaceholder: 'Filter this tenancy by issue, evidence, recommendation, or message',
+      breadcrumbs: [
+        { label: 'Tenancies', href: '/tenancies' },
+        { label: 'Tenancy workspace' },
+      ],
+    },
+  },
+  {
+    matches: (pathname) => pathname === '/dashboard',
+    config: {
+      pageTitle: 'Dashboard',
+      pageDescription:
+        'Cross-checkout tenancy view covering residents, deposits, property references, and checkout readiness.',
+      searchPlaceholder: 'Search tenancy records by property, tenant, reference, or checkout state',
+      searchTargetPath: '/dashboard',
+      breadcrumbs: [{ label: 'Dashboard' }],
+    },
+  },
+  {
+    matches: (pathname) => pathname.startsWith('/dashboard/'),
+    config: {
+      pageTitle: 'Dashboard detail',
       pageDescription:
         'Full tenancy record with property, residents, deposit, period, and linked checkout case.',
       breadcrumbs: [
-        { label: 'Tenancies', href: '/tenancies' },
-        { label: 'Tenancy detail' },
+        { label: 'Dashboard', href: '/dashboard' },
+        { label: 'Dashboard detail' },
       ],
     },
   },
@@ -123,7 +123,7 @@ const OPERATOR_ROUTE_CONFIG: Array<{
         'Review disputed checkouts, contested issues, and the evidence-backed narratives needed for resolution.',
       searchPlaceholder: 'Search disputes by property, tenant, issue, severity, or dispute state',
       searchTargetPath: '/disputes',
-      breadcrumbs: [{ label: 'Checkouts', href: '/checkouts' }, { label: 'Disputes' }],
+      breadcrumbs: [{ label: 'Tenancies', href: '/tenancies' }, { label: 'Disputes' }],
     },
   },
   {

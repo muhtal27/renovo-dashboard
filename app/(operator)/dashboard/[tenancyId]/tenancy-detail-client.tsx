@@ -73,11 +73,11 @@ export function TenancyDetailClient({ tenancyId }: { tenancyId: string }) {
     return (
       <div className="space-y-4">
         <Link
-          href="/tenancies"
+          href="/dashboard"
           className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500 transition hover:text-zinc-700"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
-          Back to tenancies
+          Back to dashboard
         </Link>
         <SkeletonPanel />
       </div>
@@ -88,11 +88,11 @@ export function TenancyDetailClient({ tenancyId }: { tenancyId: string }) {
     return (
       <div className="space-y-4">
         <Link
-          href="/tenancies"
+          href="/dashboard"
           className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500 transition hover:text-zinc-700"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
-          Back to tenancies
+          Back to dashboard
         </Link>
         <EmptyState title="Unable to load tenancy" body={error ?? 'Tenancy not found.'} />
       </div>
@@ -112,11 +112,11 @@ export function TenancyDetailClient({ tenancyId }: { tenancyId: string }) {
       {/* Back link + header */}
       <div>
         <Link
-          href="/tenancies"
+          href="/dashboard"
           className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500 transition hover:text-zinc-700"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
-          Back to tenancies
+          Back to dashboard
         </Link>
 
         <div className="mt-3 flex flex-wrap items-start justify-between gap-4">
@@ -258,7 +258,7 @@ export function TenancyDetailClient({ tenancyId }: { tenancyId: string }) {
                     No checkout case exists for this tenancy yet.
                   </p>
                   <Link
-                    href="/checkouts"
+                    href="/tenancies"
                     className="inline-flex items-center gap-1.5 rounded-md bg-zinc-900 px-3.5 py-2 text-xs font-medium text-white transition hover:bg-zinc-800"
                   >
                     <Plus className="h-3.5 w-3.5" />

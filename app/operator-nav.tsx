@@ -48,16 +48,16 @@ const NAV_GROUPS: Array<{
     label: 'Operations',
     items: [
       {
-        label: 'Tenancies',
-        href: '/tenancies',
+        label: 'Dashboard',
+        href: '/dashboard',
         icon: Building2,
-        isActive: (pathname) => pathname === '/tenancies' || pathname.startsWith('/tenancies/'),
+        isActive: (pathname) => pathname === '/dashboard' || pathname.startsWith('/dashboard/'),
       },
       {
-        label: 'Checkouts',
-        href: '/checkouts',
+        label: 'Tenancies',
+        href: '/tenancies',
         icon: FolderKanban,
-        isActive: (pathname) => pathname === '/checkouts' || pathname.startsWith('/checkouts/'),
+        isActive: (pathname) => pathname === '/tenancies' || pathname.startsWith('/tenancies/'),
       },
       {
         label: 'Disputes',
@@ -195,7 +195,7 @@ function SidebarContent({
     <div className="flex h-full flex-col">
       <div className={cn('flex items-center gap-3', collapsed && !mobile ? 'justify-center' : 'justify-between')}>
         <Link
-          href="/checkouts"
+          href="/tenancies"
           prefetch={false}
           onClick={onNavigate}
           className="flex items-center gap-3 px-3 py-3"
