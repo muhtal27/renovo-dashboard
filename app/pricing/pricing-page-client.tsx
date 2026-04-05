@@ -217,6 +217,9 @@ export default function PricingPageClient() {
                 <p className="mt-3 text-center text-xs text-slate-500">
                   Annual agreement. Priced around your portfolio.
                 </p>
+                <Link href="/demo/calculator" className="mt-3 block text-center text-xs font-medium text-emerald-600 transition-colors hover:text-emerald-700">
+                  Estimate your savings →
+                </Link>
               </div>
             </article>
 

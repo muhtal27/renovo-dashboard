@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { MarketingShell } from '@/app/components/MarketingShell'
 import {
   createMarketingMetadata,
@@ -94,6 +95,15 @@ export default function DemoPage() {
                 AI-generated liability assessments across every workflow state.
               </p>
             </div>
+          </section>
+
+          <section className="mx-auto mt-10 max-w-4xl text-center">
+            <Link
+              href="/demo/calculator"
+              className="text-sm font-medium text-emerald-600 transition-colors hover:text-emerald-700"
+            >
+              Estimate your savings with our calculator →
+            </Link>
           </section>
 
         </div>
