@@ -20,12 +20,20 @@ const payAsYouGoFeatures = {
   ],
 } as const
 
+const growthFeatures = [
+  'Up to 25 users',
+  'Named support contact',
+  'Phone support (2hr response)',
+  'Multi-branch rollout support',
+  'Structured onboarding programme',
+] as const
+
 const enterpriseFeatures = [
   'Unlimited users across branches',
   'Unlimited portfolio capacity',
   'Custom audit trail retention',
   'Dedicated account manager',
-  'Priority phone support',
+  'Priority phone support (1hr)',
   'SLA and compliance review',
   'Multi-branch rollout support',
   'Bespoke onboarding programme',
@@ -60,33 +68,34 @@ const addons = [
   },
 ] as const
 
-const compareRows: ({ section: string } | { feature: string; payg: string; ent: string })[] = [
+const compareRows: ({ section: string } | { feature: string; payg: string; growth: string; ent: string })[] = [
   { section: 'Core platform' },
-  { feature: 'Active case workspace', payg: '✓', ent: '✓' },
-  { feature: 'Evidence upload and management', payg: '✓', ent: '✓' },
-  { feature: 'AI-drafted liability assessments', payg: '✓', ent: '✓' },
-  { feature: 'Manager approval workflow', payg: '✓', ent: '✓' },
-  { feature: 'Audit trail and claim output', payg: '✓', ent: '✓' },
-  { feature: 'Priority case tagging', payg: '✓', ent: '✓' },
-  { feature: 'Fair wear and tear guidance hub', payg: '✓', ent: '✓' },
-  { feature: 'Custom claim templates', payg: '✓', ent: '✓' },
-  { feature: 'Dispute pack generation', payg: '✓', ent: '✓' },
+  { feature: 'Active case workspace', payg: '✓', growth: '✓', ent: '✓' },
+  { feature: 'Evidence upload and management', payg: '✓', growth: '✓', ent: '✓' },
+  { feature: 'AI-drafted liability assessments', payg: '✓', growth: '✓', ent: '✓' },
+  { feature: 'Manager approval workflow', payg: '✓', growth: '✓', ent: '✓' },
+  { feature: 'Audit trail and claim output', payg: '✓', growth: '✓', ent: '✓' },
+  { feature: 'Priority case tagging', payg: '✓', growth: '✓', ent: '✓' },
+  { feature: 'Fair wear and tear guidance hub', payg: '✓', growth: '✓', ent: '✓' },
+  { feature: 'Custom claim templates', payg: '✓', growth: '✓', ent: '✓' },
+  { feature: 'Dispute pack generation', payg: '✓', growth: '✓', ent: '✓' },
   { section: 'Scale and access' },
-  { feature: 'Portfolio capacity', payg: 'Usage-based', ent: 'Unlimited' },
-  { feature: 'Team users', payg: 'Multi-user', ent: 'Unlimited' },
-  { feature: 'Audit trail retention', payg: 'Standard', ent: 'Custom' },
-  { feature: 'API access', payg: '—', ent: '✓' },
+  { feature: 'Setup fee', payg: '£500', growth: 'Waived', ent: 'Waived' },
+  { feature: 'Team users', payg: 'Up to 10', growth: 'Up to 25', ent: 'Unlimited' },
+  { feature: 'Minimum commitment', payg: 'None', growth: '1,000/year', ent: '2,000/year' },
+  { feature: 'Audit trail retention', payg: '24 months', growth: '24 months', ent: 'Custom' },
+  { feature: 'API access', payg: '—', growth: '—', ent: '✓' },
   { section: 'Support and onboarding' },
-  { feature: 'Email and chat support', payg: '✓', ent: '✓' },
-  { feature: 'Dedicated account manager', payg: '—', ent: '✓' },
-  { feature: 'Priority phone support', payg: '—', ent: '✓' },
-  { feature: 'Bespoke onboarding programme', payg: '—', ent: '✓' },
-  { feature: 'SLA and compliance review', payg: '—', ent: '✓' },
-  { feature: 'Multi-branch rollout support', payg: '—', ent: '✓' },
+  { feature: 'Email, chat, phone', payg: '4hr', growth: '2hr', ent: '1hr' },
+  { feature: 'Named support contact', payg: '—', growth: '✓', ent: '✓' },
+  { feature: 'Dedicated account manager', payg: '—', growth: '—', ent: '✓' },
+  { feature: 'QBRs', payg: '—', growth: '—', ent: '✓' },
+  { feature: 'Multi-branch rollout support', payg: '—', growth: '✓', ent: '✓' },
+  { feature: 'SLA and compliance review', payg: '—', growth: '—', ent: '✓' },
   { section: 'Integrations' },
-  { feature: 'Standard integrations', payg: '✓', ent: '✓' },
-  { feature: 'Custom CRM and inventory integrations', payg: '—', ent: '✓' },
-  { feature: 'SSO (Single Sign-On)', payg: 'Add-on', ent: 'Add-on' },
+  { feature: 'Standard integrations', payg: '✓', growth: '✓', ent: '✓' },
+  { feature: 'Custom CRM and inventory integrations', payg: '—', growth: '—', ent: '✓' },
+  { feature: 'SSO (Single Sign-On)', payg: 'Add-on', growth: 'Add-on', ent: 'Add-on' },
 ]
 
 export const pricingFaqs = [
@@ -99,8 +108,8 @@ export const pricingFaqs = [
     a: 'A completed checkout is one case processed through the Renovo AI workflow, from report intake through to deposit release or dispute pack generation. Drafts and incomplete cases are not billed.',
   },
   {
-    q: 'Can I move from Pay As You Go to Enterprise?',
-    a: 'Yes. You can upgrade at any time. Your existing case history and evidence trails carry over. We will work with you on the transition and onboarding.',
+    q: 'Can I upgrade from Pay As You Go?',
+    a: 'Yes. You can move to Growth or Enterprise at any time. Your existing case history and evidence trails carry over with no data loss.',
   },
   {
     q: 'Is VAT included?',
@@ -135,7 +144,7 @@ export default function PricingPageClient() {
 
         {/* ── PLAN CARDS ── */}
         <section className="page-card">
-          <div className="grid gap-6 lg:grid-cols-2">
+          <div className="grid gap-6 lg:grid-cols-3">
 
             {/* PAY AS YOU GO */}
             <article className="border border-zinc-200 bg-white p-7 text-zinc-950">
@@ -185,6 +194,44 @@ export default function PricingPageClient() {
               </div>
             </article>
 
+            {/* GROWTH */}
+            <article className="relative border-2 border-emerald-500 bg-white p-7 text-zinc-950">
+              <p className="inline-block bg-emerald-500/[0.08] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-600">
+                Committed
+              </p>
+              <h2 className="mt-4 text-3xl font-semibold tracking-[-0.03em]">Growth</h2>
+              <p className="mt-3 text-sm leading-7 text-slate-500">
+                For single or multi-branch agencies with committed volume.
+                Lower per-checkout rate with a 12-month agreement.
+              </p>
+
+              <div className="mt-6 border-t border-zinc-200 pt-6">
+                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-slate-400">
+                  Everything in Pay As You Go, plus
+                </p>
+                <ul className="mt-4 space-y-3">
+                  {growthFeatures.map((f) => (
+                    <li key={f} className="flex items-start gap-3 text-sm leading-7 text-slate-600">
+                      <span className="mt-1.5 text-sm font-semibold text-emerald-500">✓</span>
+                      <span>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="mt-8">
+                <Link href="/book-demo" className="app-primary-button w-full rounded-md px-4 py-3 text-sm font-medium">
+                  Book a demo →
+                </Link>
+                <p className="mt-3 text-center text-xs text-slate-500">
+                  12-month agreement. 1,000+ checkouts/year.
+                </p>
+                <Link href="/demo/calculator" className="mt-3 block text-center text-xs font-medium text-emerald-600 transition-colors hover:text-emerald-700">
+                  Estimate your savings →
+                </Link>
+              </div>
+            </article>
+
             {/* ENTERPRISE */}
             <article className="border border-zinc-300 bg-slate-50 p-7 text-zinc-950">
               <p className="inline-block bg-emerald-500/[0.08] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-600">
@@ -192,13 +239,13 @@ export default function PricingPageClient() {
               </p>
               <h2 className="mt-4 text-3xl font-semibold tracking-[-0.03em]">Enterprise</h2>
               <p className="mt-3 text-sm leading-7 text-slate-500">
-                For multi-branch agencies and portfolios above 5,000 tenancies.
+                For large portfolios processing 2,000+ checkouts per year.
                 Dedicated onboarding, custom integrations, and SLA-backed support.
               </p>
 
               <div className="mt-6 border-t border-zinc-300 pt-6">
                 <p className="text-xs font-semibold uppercase tracking-[0.08em] text-slate-400">
-                  Everything in Pay As You Go, plus
+                  Everything in Growth, plus
                 </p>
                 <ul className="mt-4 space-y-3">
                   {enterpriseFeatures.map((f) => (
@@ -255,8 +302,8 @@ export default function PricingPageClient() {
             Compare <em className="text-slate-400">plans</em>
           </h2>
           <p className="mt-3 text-base leading-8 text-slate-500">
-            Both plans include the full Renovo AI workflow. Enterprise adds scale,
-            dedicated support, and custom configuration.
+            Every plan includes the full Renovo AI workflow. Growth and Enterprise
+            add committed pricing, dedicated support, and scale.
           </p>
 
           <div className="mt-10 overflow-x-auto border border-zinc-200">
@@ -270,6 +317,9 @@ export default function PricingPageClient() {
                     Pay As You Go
                   </th>
                   <th className="px-5 py-3 text-center text-xs font-semibold uppercase tracking-[0.06em] text-slate-500">
+                    Growth
+                  </th>
+                  <th className="px-5 py-3 text-center text-xs font-semibold uppercase tracking-[0.06em] text-slate-500">
                     Enterprise
                   </th>
                 </tr>
@@ -279,7 +329,7 @@ export default function PricingPageClient() {
                   'section' in row ? (
                     <tr key={i}>
                       <td
-                        colSpan={3}
+                        colSpan={4}
                         className="bg-zinc-50 px-5 pb-2 pt-5 text-xs font-semibold uppercase tracking-[0.06em] text-zinc-400"
                       >
                         {row.section}
@@ -291,6 +341,11 @@ export default function PricingPageClient() {
                       <td className="px-5 py-3 text-center">
                         <span className={row.payg === '✓' ? 'font-semibold text-emerald-500' : row.payg === '—' ? 'text-slate-300' : 'text-slate-500'}>
                           {row.payg}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3 text-center">
+                        <span className={row.growth === '✓' ? 'font-semibold text-emerald-500' : row.growth === '—' ? 'text-slate-300' : 'text-slate-500'}>
+                          {row.growth}
                         </span>
                       </td>
                       <td className="px-5 py-3 text-center">
