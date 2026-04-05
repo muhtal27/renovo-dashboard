@@ -3,15 +3,6 @@
 import { useDeferredValue, useMemo, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Search } from 'lucide-react'
-import {
-  DetailPanel,
-  EmptyState,
-  FilterToolbar,
-  PageHeader,
-  SectionCard,
-  SectionHeading,
-  ToolbarPill,
-} from '@/app/operator-ui'
 
 export type RegionFilter = 'all' | 'england' | 'wales' | 'scotland' | 'northern-ireland'
 
@@ -34,38 +25,6 @@ type KnowledgeArticleRecord = {
 }
 
 const LAST_REVIEWED = 'March 2026'
-
-const REGION_OPTIONS: Array<{
-  value: RegionFilter
-  label: string
-  description: string
-}> = [
-  {
-    value: 'all',
-    label: 'All UK',
-    description: 'Cross-jurisdiction guidance that applies across deposit evidence, proportionality, and workflow discipline.',
-  },
-  {
-    value: 'england',
-    label: 'England',
-    description: 'Deposit scheme process, prescribed information, and deduction guidance grounded in the England-specific tenancy framework.',
-  },
-  {
-    value: 'wales',
-    label: 'Wales',
-    description: 'Occupation contract, notice, and deposit guidance for the Renting Homes (Wales) framework.',
-  },
-  {
-    value: 'scotland',
-    label: 'Scotland',
-    description: 'Scottish tenancy framework, approved schemes, tribunal context, and Scotland-specific deposit handling.',
-  },
-  {
-    value: 'northern-ireland',
-    label: 'Northern Ireland',
-    description: 'Northern Ireland deposit protection, dispute resolution, mediation, and tenancy-end compliance guidance.',
-  },
-]
 
 function getSourceTone(label: string) {
   switch (label) {
@@ -226,7 +185,6 @@ function getRegionChipTone(regions: RegionFilter[]) {
 export default function KnowledgeClient({ articles }: { articles: KnowledgeArticle[] }) {
   const searchParams = useSearchParams()
   const [regionFilter, setRegionFilter] = useState<RegionFilter>('all')
-  const [categoryFilter, setCategoryFilter] = useState('All')
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') ?? '')
   const [selectedArticleTitle, setSelectedArticleTitle] = useState<string | null>(null)
 
@@ -255,40 +213,16 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
     [articles]
   )
 
-  const regionCounts = useMemo(() => {
-    return Object.fromEntries(
-      REGION_OPTIONS.map((region) => [
-        region.value,
-        articleRecords.filter(({ article }) => isArticleInRegion(article, region.value)).length,
-      ])
-    ) as Record<RegionFilter, number>
-  }, [articleRecords])
+  const filteredRecords = useMemo(() => {
+    const normalizedQuery = deferredSearchQuery.trim().toLowerCase()
 
-  const baseArticleRecords = useMemo(
-    () => articleRecords.filter(({ article }) => isArticleInRegion(article, regionFilter)),
-    [articleRecords, regionFilter]
-  )
+    return articleRecords.filter(({ article, searchIndex }) => {
+      const regionMatch = isArticleInRegion(article, regionFilter)
+      const searchMatch = normalizedQuery.length === 0 || searchIndex.includes(normalizedQuery)
+      return regionMatch && searchMatch
+    })
+  }, [articleRecords, regionFilter, deferredSearchQuery])
 
-  const categoryFilters = useMemo(() => {
-    const dynamicCategories = Array.from(
-      new Set(baseArticleRecords.map(({ article }) => article.category))
-    ).sort()
-    return ['All', ...dynamicCategories]
-  }, [baseArticleRecords])
-
-  const categoryCounts = useMemo(() => {
-    const counts = new Map<string, number>([['All', baseArticleRecords.length]])
-
-    for (const category of categoryFilters.slice(1)) {
-      counts.set(
-        category,
-        baseArticleRecords.filter(({ article }) => article.category === category).length
-      )
-    }
-
-    return counts
-  }, [baseArticleRecords, categoryFilters])
-  const activeCategoryFilter = categoryFilters.includes(categoryFilter) ? categoryFilter : 'All'
   const activeSelectedArticle =
     selectedArticleTitle == null
       ? null
@@ -297,28 +231,8 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
             article.title === selectedArticleTitle && isArticleInRegion(article, regionFilter)
         ) ?? null
 
-  const visibleArticleRecords = useMemo(() => {
-    const normalizedQuery = deferredSearchQuery.trim().toLowerCase()
-
-    return baseArticleRecords.filter((record) => {
-      const matchesCategory =
-        activeCategoryFilter === 'All'
-          ? true
-          : record.article.category === activeCategoryFilter
-      const matchesSearch =
-        normalizedQuery.length === 0
-          ? true
-          : record.searchIndex.includes(normalizedQuery)
-
-      return matchesCategory && matchesSearch
-    })
-  }, [activeCategoryFilter, baseArticleRecords, deferredSearchQuery])
-
   const relatedArticleRecords = useMemo(() => {
-    if (!activeSelectedArticle) {
-      return []
-    }
-
+    if (!activeSelectedArticle) return []
     return articleRecords
       .filter(
         ({ article }) =>
@@ -328,210 +242,78 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
       .slice(0, 3)
   }, [activeSelectedArticle, articleRecords])
 
-  function clearSearch() {
-    setSearchQuery('')
-    setCategoryFilter('All')
-  }
+  const regionLabels: Array<{ value: RegionFilter; label: string }> = [
+    { value: 'all', label: 'All regions' },
+    { value: 'england', label: 'England' },
+    { value: 'wales', label: 'Wales' },
+    { value: 'scotland', label: 'Scotland' },
+    { value: 'northern-ireland', label: 'Northern Ireland' },
+  ]
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        eyebrow="Guidance"
-        title="Guidance hub"
-        description="Authoritative deposit, evidence, and dispute guidance for the operator team. Jurisdiction rules vary, so start with the tenancy location and keep the official source close to every decision."
-      />
+    <div className="space-y-5">
+      <div className="flex flex-wrap items-center gap-3">
+        {regionLabels.map(({ value, label }) => (
+          <button
+            key={value}
+            type="button"
+            onClick={() => setRegionFilter(value)}
+            className={`px-3 py-1.5 text-xs font-medium transition ${
+              regionFilter === value
+                ? 'border border-zinc-900 bg-zinc-900 text-white'
+                : 'border border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
 
-      <section className="grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_320px]">
-        <SectionCard className="px-6 py-6">
-          <SectionHeading
-            eyebrow="Jurisdictions"
-            title="Choose the governing ruleset"
-            description="Northern Ireland now sits alongside England, Wales, and Scotland as a first-class jurisdiction in the operator guidance model."
+        <label className="relative ml-auto block w-full sm:w-[280px]">
+          <span className="sr-only">Search guidance</span>
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+          <input
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="Search guidance..."
+            className="h-9 w-full border border-zinc-200 bg-white pl-9 pr-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none"
           />
+        </label>
+      </div>
 
-          <div className="mt-6 grid gap-3 md:grid-cols-2">
-            {REGION_OPTIONS.map((region) => {
-              const active = regionFilter === region.value
-
-              return (
-                <button
-                  key={region.value}
-                  type="button"
-                  onClick={() => setRegionFilter(region.value)}
-                  className={`border px-4 py-4 text-left transition ${
-                    active
-                      ? 'border-zinc-900 bg-zinc-900 text-white'
-                      : 'border-zinc-200 bg-zinc-50/70 hover:border-zinc-300 hover:bg-white'
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className={`text-sm font-semibold ${active ? 'text-white' : 'text-zinc-950'}`}>
-                        {region.label}
-                      </p>
-                      <p className={`mt-2 text-sm leading-6 ${active ? 'text-zinc-200' : 'text-zinc-600'}`}>
-                        {region.description}
-                      </p>
-                    </div>
-                    <span
-                      className={`inline-flex px-2.5 py-1 text-xs font-semibold ${
-                        active ? 'bg-white/10 text-white' : 'bg-white text-zinc-600'
-                      }`}
-                    >
-                      {regionCounts[region.value]}
-                    </span>
-                  </div>
-                </button>
-              )
-            })}
-          </div>
-
-          <div className="mt-6">
-            <FilterToolbar className="items-start">
-              <div className="flex flex-wrap items-center gap-2">
-                {categoryFilters.map((filter) => (
-                  <button
-                    key={filter}
-                    type="button"
-                    onClick={() => setCategoryFilter(filter)}
-                  >
-                    <ToolbarPill active={activeCategoryFilter === filter}>
-                      {filter}
-                      <span className="ml-2 text-xs opacity-70">({categoryCounts.get(filter) ?? 0})</span>
-                    </ToolbarPill>
-                  </button>
+      <div className="space-y-3">
+        {filteredRecords.length > 0 ? (
+          filteredRecords.map(({ article, regionLabel }) => (
+            <button
+              key={article.title}
+              type="button"
+              onClick={() => setSelectedArticleTitle(article.title)}
+              className="block w-full border border-zinc-200/80 bg-white px-5 py-4 text-left transition hover:border-zinc-300"
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0">
+                  <h3 className="text-sm font-semibold text-zinc-950">{article.title}</h3>
+                  <p className="mt-1 text-sm leading-6 text-zinc-600">{article.summary}</p>
+                </div>
+                <span className="shrink-0 border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-xs font-medium text-zinc-600">
+                  {article.category}
+                </span>
+              </div>
+              <div className="mt-2 flex items-center gap-2">
+                {article.regions.map((region, index) => (
+                  <span key={region} className="flex items-center gap-2">
+                    {index > 0 ? <span className="text-zinc-200">&middot;</span> : null}
+                    <span className="text-[10px] font-medium text-zinc-400">{region}</span>
+                  </span>
                 ))}
               </div>
-
-              <label className="relative block w-full lg:w-[320px]">
-                <span className="sr-only">Search guidance</span>
-                <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
-                <input
-                  value={searchQuery}
-                  onChange={(event) => setSearchQuery(event.target.value)}
-                  placeholder="Search the guidance library"
-                  className="h-11 w-full border border-zinc-200 bg-white pl-11 pr-4 text-sm text-zinc-900 placeholder:text-zinc-400"
-                />
-              </label>
-            </FilterToolbar>
+            </button>
+          ))
+        ) : (
+          <div className="border border-zinc-200/80 bg-white px-5 py-8 text-center text-sm text-zinc-500">
+            No articles match your filters.
           </div>
-        </SectionCard>
-
-        <DetailPanel
-          title="Library status"
-          description="The operator guidance library is curated for live decision support and should be checked alongside the tenancy location."
-        >
-          <div className="border border-zinc-200 bg-zinc-50/70 px-4 py-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
-              Current scope
-            </p>
-            <p className="mt-2 text-sm font-medium leading-6 text-zinc-900">
-              {REGION_OPTIONS.find((region) => region.value === regionFilter)?.label}
-            </p>
-          </div>
-          <div className="border border-zinc-200 bg-zinc-50/70 px-4 py-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
-              Visible articles
-            </p>
-            <p className="mt-2 text-sm font-medium leading-6 text-zinc-900">
-              {visibleArticleRecords.length} matching article{visibleArticleRecords.length === 1 ? '' : 's'}
-            </p>
-          </div>
-          <div className="border border-zinc-200 bg-zinc-50/70 px-4 py-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
-              Last reviewed
-            </p>
-            <p className="mt-2 text-sm font-medium leading-6 text-zinc-900">{LAST_REVIEWED}</p>
-          </div>
-          <div className="border border-zinc-200 bg-white px-4 py-4 text-sm leading-6 text-zinc-600">
-            Always follow the official scheme or government guidance for the tenancy location before confirming any deduction position or dispute path.
-          </div>
-        </DetailPanel>
-      </section>
-
-      {visibleArticleRecords.length > 0 ? (
-        <section className="grid gap-4 xl:grid-cols-2">
-          {visibleArticleRecords.map(({ article, regionLabel, summaryReadingTime }) => {
-
-            return (
-              <SectionCard key={article.title} className="px-6 py-6">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
-                        {article.category}
-                      </span>
-                      <span
-                        className={`inline-flex border px-2.5 py-1 text-xs font-medium ${getRegionChipTone(
-                          article.regions
-                        )}`}
-                      >
-                        {regionLabel}
-                      </span>
-                    </div>
-                    <p className="mt-1 text-xs text-zinc-400">{summaryReadingTime}</p>
-                    <h2 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-950">
-                      {article.title}
-                    </h2>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span
-                      className={`px-3 py-1 text-xs font-semibold ${getSourceTone(article.sourceLabel)}`}
-                    >
-                      {article.sourceLabel}
-                    </span>
-                    <span className="border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs font-medium text-zinc-500">
-                      Last reviewed {LAST_REVIEWED}
-                    </span>
-                  </div>
-                </div>
-
-                <p className="mt-4 text-sm leading-7 text-zinc-600">{article.summary}</p>
-
-                <div className="my-6 border-t border-zinc-200" />
-
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <a
-                    href={article.sourceHref}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:text-zinc-950"
-                  >
-                    Open source
-                  </a>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedArticleTitle(article.title)}
-                    className="inline-flex items-center border border-zinc-900 bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800"
-                  >
-                    Read article
-                  </button>
-                </div>
-              </SectionCard>
-            )
-          })}
-        </section>
-      ) : (
-        <SectionCard className="px-6 py-8 md:px-8">
-          <EmptyState
-            title={deferredSearchQuery.trim() ? 'No guidance matched your search' : 'No guidance matched the current filters'}
-            body={
-              deferredSearchQuery.trim()
-                ? `No guidance matched "${deferredSearchQuery.trim()}". Try a broader search or switch jurisdiction.`
-                : 'Try a broader category or switch jurisdiction to widen the current guidance set.'
-            }
-            action={
-              <button
-                type="button"
-                onClick={clearSearch}
-                className="inline-flex items-center border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:text-zinc-950"
-              >
-                Clear search
-              </button>
-            }
-          />
-        </SectionCard>
-      )}
+        )}
+      </div>
 
       {activeSelectedArticle ? (
         <div className="fixed inset-0 z-50 flex justify-end bg-zinc-950/35">
@@ -562,7 +344,7 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
                   </h2>
                   <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-zinc-500">
                     <span>{activeSelectedArticle.contentReadingTime}</span>
-                    <span className="text-zinc-300">•</span>
+                    <span className="text-zinc-300">&bull;</span>
                     <span>Last reviewed {LAST_REVIEWED}</span>
                   </div>
                 </div>
@@ -572,7 +354,7 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
                     onClick={() => window.print()}
                     className="cursor-pointer text-sm text-zinc-500 hover:text-zinc-700"
                   >
-                    Print article
+                    Print
                   </button>
                   <button
                     type="button"

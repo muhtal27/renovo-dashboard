@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 import type { ReactNode } from 'react'
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { ChevronDown, LogOut, Menu, Search, Settings, CreditCard } from 'lucide-react'
+import { BookOpenText, ChevronDown, LogOut, Menu, Search, Settings, CreditCard } from 'lucide-react'
 import { OperatorNav } from '@/app/operator-nav'
 import { getOperatorLabel, type CurrentOperator } from '@/lib/operator-types'
 import { clearLegacySupabaseBrowserAuthArtifacts } from '@/lib/supabase-session'
@@ -379,6 +379,19 @@ export function OperatorLayout({ children, operator }: OperatorLayoutProps) {
                       />
                     </Suspense>
                   </div>
+
+                  <Link
+                    href="/guidance"
+                    prefetch={false}
+                    title="Guidance"
+                    className={`flex h-8 w-8 items-center justify-center rounded-lg transition ${
+                      pathname.startsWith('/guidance')
+                        ? 'bg-emerald-50 text-emerald-600'
+                        : 'text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600'
+                    }`}
+                  >
+                    <BookOpenText className="h-4 w-4" strokeWidth={2} />
+                  </Link>
 
                   <div className="relative" ref={profileMenuRef}>
                     <button

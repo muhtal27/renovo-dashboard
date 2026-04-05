@@ -5,7 +5,6 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   BarChart3,
-  BookOpenText,
   Building2,
   ChevronLeft,
   ClipboardCheck,
@@ -76,12 +75,6 @@ const NAV_GROUPS: Array<{
         href: '/deposit-scheme',
         icon: Landmark,
         isActive: (pathname) => pathname.startsWith('/deposit-scheme'),
-      },
-      {
-        label: 'Guidance',
-        href: '/guidance',
-        icon: BookOpenText,
-        isActive: (pathname) => pathname.startsWith('/guidance'),
       },
     ],
   },
