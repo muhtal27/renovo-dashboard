@@ -80,7 +80,6 @@ const compareRows: ({ section: string } | { feature: string; payg: string; growt
   { feature: 'Custom claim templates', payg: '✓', growth: '✓', ent: '✓' },
   { feature: 'Dispute pack generation', payg: '✓', growth: '✓', ent: '✓' },
   { section: 'Scale and access' },
-  { feature: 'Setup fee', payg: '£500', growth: 'Waived', ent: 'Waived' },
   { feature: 'Team users', payg: 'Up to 10', growth: 'Up to 25', ent: 'Unlimited' },
   { feature: 'Minimum commitment', payg: 'None', growth: '1,000/year', ent: '2,000/year' },
   { feature: 'Audit trail retention', payg: '24 months', growth: '24 months', ent: 'Custom' },
