@@ -7,6 +7,7 @@ import {
   siteName,
   siteUrl,
 } from '@/lib/marketing-metadata'
+import { PwaSplash } from './components/PwaSplash'
 import { ServiceWorkerRegistration } from './components/ServiceWorkerRegistration'
 
 const dmSans = DM_Sans({
@@ -47,7 +48,7 @@ export const metadata: Metadata = {
   },
   appleWebApp: {
     capable: true,
-    statusBarStyle: 'default',
+    statusBarStyle: 'black-translucent',
     title: 'Renovo AI',
   },
   icons: {
@@ -61,6 +62,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: '#0a0a0a',
+  viewportFit: 'cover',
 }
 
 export default function RootLayout({
@@ -71,6 +73,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${dmSans.variable} ${instrumentSerif.variable}`}>
+        {/* Native-feel splash screen — visible instantly, dismissed after hydration */}
+        <div id="pwa-splash">
+          <img src="/renovo-ai-icon.svg" alt="" width={64} height={64} />
+          <span className="splash-name">Renovo AI</span>
+          <div className="splash-loader" />
+        </div>
+        <PwaSplash />
         {children}
         <ServiceWorkerRegistration />
       </body>
