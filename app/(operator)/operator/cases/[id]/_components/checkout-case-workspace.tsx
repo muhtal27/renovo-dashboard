@@ -1,19 +1,26 @@
 'use client'
 
-import { Check } from 'lucide-react'
+import {
+  Check,
+  ClipboardList,
+  ClipboardCheck,
+  Gauge,
+  Sparkles,
+  Eye,
+  Calculator,
+  Banknote,
+} from 'lucide-react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useTransition, type ComponentType } from 'react'
 import { formatAddress, formatDate } from '@/app/eot/_components/eot-ui'
 import { WorkspaceBadge } from '@/app/(operator)/operator/cases/[id]/_components/checkout-workspace-ui'
-import { StepOverview } from '@/app/(operator)/operator/cases/[id]/_components/step-overview'
-import { StepDraft } from '@/app/(operator)/operator/cases/[id]/_components/step-draft'
-import { StepEvidence } from '@/app/(operator)/operator/cases/[id]/_components/step-evidence'
+import { StepInventory } from '@/app/(operator)/operator/cases/[id]/_components/step-inventory'
+import { StepCheckoutReport } from '@/app/(operator)/operator/cases/[id]/_components/step-checkout-report'
+import { StepReadings } from '@/app/(operator)/operator/cases/[id]/_components/step-readings'
 import { StepAnalysis } from '@/app/(operator)/operator/cases/[id]/_components/step-analysis'
 import { StepReview } from '@/app/(operator)/operator/cases/[id]/_components/step-review'
-import { StepDraftSent } from '@/app/(operator)/operator/cases/[id]/_components/step-draft-sent'
-import { StepReady } from '@/app/(operator)/operator/cases/[id]/_components/step-ready'
-import { StepSubmitted } from '@/app/(operator)/operator/cases/[id]/_components/step-submitted'
-import { StepResolved } from '@/app/(operator)/operator/cases/[id]/_components/step-resolved'
+import { StepDeductions } from '@/app/(operator)/operator/cases/[id]/_components/step-deductions'
+import { StepRefund } from '@/app/(operator)/operator/cases/[id]/_components/step-refund'
 import { cn } from '@/lib/ui'
 import type { EotCaseStatus } from '@/lib/eot-types'
 import {
@@ -26,18 +33,23 @@ import {
 /*  Workflow step definitions                                     */
 /* ────────────────────────────────────────────────────────────── */
 
-const WORKFLOW_STEPS: { step: WorkspaceStep; label: string; status: EotCaseStatus | null }[] = [
-  { step: 'overview', label: 'Overview', status: null },
-  { step: 'draft', label: 'Draft', status: 'draft' },
-  { step: 'collecting-evidence', label: 'Evidence', status: 'collecting_evidence' },
-  { step: 'analysis', label: 'Analysing', status: 'analysis' },
-  { step: 'review', label: 'Review', status: 'review' },
-  { step: 'draft-sent', label: 'Draft sent', status: 'draft_sent' },
-  { step: 'ready-for-claim', label: 'Ready', status: 'ready_for_claim' },
-  { step: 'submitted', label: 'Submitted', status: 'submitted' },
-  { step: 'resolved', label: 'Resolved', status: 'resolved' },
+const WORKFLOW_STEPS: {
+  step: WorkspaceStep
+  label: string
+  icon: typeof ClipboardList
+  /** The first status that maps to this step */
+  statusStart: EotCaseStatus | null
+}[] = [
+  { step: 'inventory', label: 'Inventory', icon: ClipboardList, statusStart: null },
+  { step: 'checkout', label: 'Checkout', icon: ClipboardCheck, statusStart: 'draft' },
+  { step: 'readings', label: 'Readings', icon: Gauge, statusStart: 'collecting_evidence' },
+  { step: 'analysis', label: 'Analysis', icon: Sparkles, statusStart: 'analysis' },
+  { step: 'review', label: 'Review', icon: Eye, statusStart: 'review' },
+  { step: 'deductions', label: 'Deductions', icon: Calculator, statusStart: 'draft_sent' },
+  { step: 'refund', label: 'Refund', icon: Banknote, statusStart: 'submitted' },
 ]
 
+/** Ordered list of statuses for progress comparison */
 const STATUS_ORDER: EotCaseStatus[] = [
   'draft',
   'collecting_evidence',
@@ -55,73 +67,152 @@ function getStatusIndex(status: EotCaseStatus): number {
 }
 
 function statusToStep(status: EotCaseStatus): WorkspaceStep {
-  if (status === 'disputed') return 'resolved'
-  const match = WORKFLOW_STEPS.find((s) => s.status === status)
-  return match?.step ?? 'overview'
+  if (status === 'disputed') return 'refund'
+  if (status === 'resolved') return 'refund'
+  if (status === 'submitted') return 'refund'
+  if (status === 'ready_for_claim') return 'deductions'
+  if (status === 'draft_sent') return 'deductions'
+  if (status === 'review') return 'review'
+  if (status === 'analysis') return 'analysis'
+  if (status === 'collecting_evidence') return 'readings'
+  if (status === 'draft') return 'checkout'
+  return 'inventory'
+}
+
+/** Get the date to show under a step, if any */
+function getStepDate(step: WorkspaceStep, data: OperatorCheckoutWorkspaceData): string | null {
+  switch (step) {
+    case 'inventory':
+      return data.checkoutCase?.checkinDate ?? null
+    case 'checkout':
+      return data.checkoutCase?.checkoutDate ?? data.workspace.tenancy.end_date ?? null
+    default:
+      return null
+  }
 }
 
 /* ────────────────────────────────────────────────────────────── */
-/*  Clickable workflow navigation                                 */
+/*  Visual workflow navigation (competitor-style step bar)        */
 /* ────────────────────────────────────────────────────────────── */
 
 function WorkflowNav({
   activeStep,
   currentStatus,
+  data,
   onStepClick,
 }: {
   activeStep: WorkspaceStep
   currentStatus: EotCaseStatus
+  data: OperatorCheckoutWorkspaceData
   onStepClick: (step: WorkspaceStep) => void
 }) {
-  const currentIndex = getStatusIndex(currentStatus)
+  const currentStepKey = statusToStep(currentStatus)
+  const currentStepIdx = WORKFLOW_STEPS.findIndex((s) => s.step === currentStepKey)
   const isDisputed = currentStatus === 'disputed'
+  const isResolved = currentStatus === 'resolved'
 
   return (
-    <nav className="flex flex-wrap items-center gap-0.5" aria-label="Case workflow">
-      {WORKFLOW_STEPS.map((item, index) => {
-        const stepStatusIndex = item.status ? STATUS_ORDER.indexOf(item.status) : -1
-        const isComplete = !isDisputed && item.status != null && stepStatusIndex < currentIndex
-        const isCurrent = item.status === currentStatus || (isDisputed && item.step === 'resolved')
-        const isActive = item.step === activeStep
-        const isProcessing = isCurrent && currentStatus === 'analysis'
+    <nav className="w-full overflow-x-auto" aria-label="Case workflow">
+      <div className="flex items-start justify-between gap-0 min-w-[560px]">
+        {WORKFLOW_STEPS.map((item, index) => {
+          const stepIdx = index
+          const isComplete = stepIdx < currentStepIdx || (isResolved && stepIdx <= currentStepIdx)
+          const isCurrent = stepIdx === currentStepIdx && !isResolved
+          const isActive = item.step === activeStep
+          const isProcessing = isCurrent && currentStatus === 'analysis'
+          const isFuture = stepIdx > currentStepIdx
 
-        return (
-          <div key={item.step} className="flex items-center gap-0.5">
-            {index > 0 ? (
-              <div className={`h-px w-4 ${isComplete ? 'bg-emerald-300' : 'bg-zinc-200'}`} />
-            ) : null}
-            <button
-              type="button"
-              onClick={() => onStepClick(item.step)}
-              className={cn(
-                'flex items-center gap-1.5 px-2 py-1.5 text-[11px] font-medium transition-colors',
-                isActive
-                  ? 'bg-zinc-100 text-zinc-950'
-                  : isCurrent
-                    ? 'text-zinc-950 hover:bg-zinc-50'
-                    : isComplete
-                      ? 'text-emerald-600 hover:bg-emerald-50/50'
-                      : 'text-zinc-400 hover:bg-zinc-50 hover:text-zinc-600'
-              )}
-            >
-              {isComplete ? (
-                <Check className="h-3.5 w-3.5 text-emerald-500" strokeWidth={2.5} />
-              ) : isCurrent ? (
+          const Icon = item.icon
+          const dateLabel = getStepDate(item.step, data)
+
+          return (
+            <div key={item.step} className="flex items-start" style={{ flex: '1 1 0' }}>
+              {/* Connecting line (before this step) */}
+              {index > 0 ? (
+                <div className="flex-1 pt-[18px]">
+                  <div
+                    className={cn(
+                      'h-[2px] w-full',
+                      isComplete || isCurrent ? 'bg-sky-400' : 'bg-zinc-200'
+                    )}
+                  />
+                </div>
+              ) : null}
+
+              {/* Step column */}
+              <button
+                type="button"
+                onClick={() => onStepClick(item.step)}
+                className={cn(
+                  'group flex flex-col items-center gap-1.5 px-1',
+                  'transition-colors focus:outline-none',
+                  isActive ? 'opacity-100' : 'opacity-90 hover:opacity-100'
+                )}
+              >
+                {/* Icon circle */}
                 <div
-                  className={`h-2 w-2 rounded-full ${
-                    isProcessing ? 'animate-pulse bg-amber-500' : isDisputed ? 'bg-rose-500' : 'bg-zinc-900'
-                  }`}
-                />
-              ) : item.step === 'overview' ? (
-                <div className="h-2 w-2 rounded-full bg-zinc-400" />
-              ) : (
-                <div className="h-1.5 w-1.5 rounded-full bg-zinc-300" />
-              )}
-              {item.label}
-            </button>
-          </div>
-        )
-      })}
+                  className={cn(
+                    'relative flex h-9 w-9 items-center justify-center rounded-full border-2 transition-colors',
+                    isComplete
+                      ? 'border-sky-400 bg-sky-400 text-white'
+                      : isCurrent
+                        ? isDisputed
+                          ? 'border-rose-500 bg-rose-500 text-white'
+                          : isProcessing
+                            ? 'border-amber-500 bg-amber-500 text-white'
+                            : 'border-sky-500 bg-sky-500 text-white'
+                        : isActive
+                          ? 'border-sky-300 bg-sky-50 text-sky-600'
+                          : 'border-zinc-200 bg-white text-zinc-400 group-hover:border-zinc-300 group-hover:text-zinc-500'
+                  )}
+                >
+                  {isComplete ? (
+                    <Check className="h-4 w-4" strokeWidth={3} />
+                  ) : isProcessing ? (
+                    <div className="absolute inset-0 animate-ping rounded-full bg-amber-400 opacity-30" />
+                  ) : null}
+                  {isComplete ? null : <Icon className="h-4 w-4" strokeWidth={2} />}
+                </div>
+
+                {/* Label */}
+                <span
+                  className={cn(
+                    'text-[11px] font-semibold leading-tight',
+                    isComplete
+                      ? 'text-sky-600'
+                      : isCurrent
+                        ? isDisputed
+                          ? 'text-rose-600'
+                          : 'text-zinc-950'
+                        : isActive
+                          ? 'text-sky-600'
+                          : 'text-zinc-400 group-hover:text-zinc-600'
+                  )}
+                >
+                  {item.label}
+                </span>
+
+                {/* Date below label */}
+                {dateLabel ? (
+                  <span className="text-[10px] text-zinc-400">{formatDate(dateLabel)}</span>
+                ) : null}
+              </button>
+
+              {/* Connecting line (after this step) */}
+              {index < WORKFLOW_STEPS.length - 1 ? (
+                <div className="flex-1 pt-[18px]">
+                  <div
+                    className={cn(
+                      'h-[2px] w-full',
+                      isComplete ? 'bg-sky-400' : 'bg-zinc-200'
+                    )}
+                  />
+                </div>
+              ) : null}
+            </div>
+          )
+        })}
+      </div>
     </nav>
   )
 }
@@ -131,15 +222,13 @@ function WorkflowNav({
 /* ────────────────────────────────────────────────────────────── */
 
 const STEP_COMPONENTS: Record<WorkspaceStep, ComponentType<{ data: OperatorCheckoutWorkspaceData }>> = {
-  overview: StepOverview,
-  draft: StepDraft,
-  'collecting-evidence': StepEvidence,
+  inventory: StepInventory,
+  checkout: StepCheckoutReport,
+  readings: StepReadings,
   analysis: StepAnalysis,
   review: StepReview,
-  'draft-sent': StepDraftSent,
-  'ready-for-claim': StepReady,
-  submitted: StepSubmitted,
-  resolved: StepResolved,
+  deductions: StepDeductions,
+  refund: StepRefund,
 }
 
 /* ────────────────────────────────────────────────────────────── */
@@ -211,7 +300,7 @@ export function CheckoutCaseWorkspace({
       const nextParams = new URLSearchParams(searchParams.toString())
       nextParams.delete('tab')
 
-      if (step === 'overview') {
+      if (step === 'inventory') {
         nextParams.delete('step')
       } else {
         nextParams.set('step', step)
@@ -243,11 +332,12 @@ export function CheckoutCaseWorkspace({
           </div>
         </div>
 
-        {/* Workflow navigation */}
-        <div className="mt-5 border-t border-zinc-100 pt-4">
+        {/* Workflow navigation — competitor-style step bar */}
+        <div className="mt-6 border-t border-zinc-100 pt-5">
           <WorkflowNav
             activeStep={activeStep}
             currentStatus={currentStatus}
+            data={data}
             onStepClick={handleStepClick}
           />
         </div>

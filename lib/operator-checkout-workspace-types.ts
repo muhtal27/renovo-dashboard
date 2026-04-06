@@ -14,15 +14,13 @@ export const CHECKOUT_WORKSPACE_TABS = [
 export type CheckoutWorkspaceTab = (typeof CHECKOUT_WORKSPACE_TABS)[number]
 
 export const WORKSPACE_STEPS = [
-  'overview',
-  'draft',
-  'collecting-evidence',
+  'inventory',
+  'checkout',
+  'readings',
   'analysis',
   'review',
-  'draft-sent',
-  'ready-for-claim',
-  'submitted',
-  'resolved',
+  'deductions',
+  'refund',
 ] as const
 
 export type WorkspaceStep = (typeof WORKSPACE_STEPS)[number]
@@ -284,15 +282,16 @@ export function isWorkspaceStep(value: string | null | undefined): value is Work
 }
 
 export function normalizeWorkspaceStep(value: string | null | undefined): WorkspaceStep {
-  if (!value) return 'overview'
+  if (!value) return 'inventory'
   const v = value.toLowerCase().trim()
   if (isWorkspaceStep(v)) return v
+  // Legacy step aliases
+  if (v === 'overview') return 'inventory'
+  if (v === 'draft' || v === 'documents' || v === 'collecting-evidence') return 'checkout'
+  if (v === 'utilities') return 'readings'
   if (v === 'process') return 'analysis'
-  if (v === 'documents') return 'draft'
   if (v === 'defects') return 'review'
-  if (v === 'utilities') return 'overview'
-  if (v === 'negotiation') return 'ready-for-claim'
-  if (v === 'send-out' || v === 'sendout') return 'draft-sent'
-  if (v === 'submission') return 'submitted'
-  return 'overview'
+  if (v === 'draft-sent' || v === 'send-out' || v === 'sendout' || v === 'ready-for-claim' || v === 'negotiation') return 'deductions'
+  if (v === 'submitted' || v === 'resolved' || v === 'submission') return 'refund'
+  return 'inventory'
 }
