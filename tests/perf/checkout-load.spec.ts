@@ -3,7 +3,7 @@
  *
  * Scenarios covered:
  *   1. Single operator cold load of /checkouts (list page)
- *   2. Single operator cold load of /checkouts/[caseId] (workspace)
+ *   2. Single operator cold load of /operator/cases/[caseId] (workspace)
  *   3. Navigation cycle: list → workspace → list → workspace
  *   4. Concurrent operators loading workspaces simultaneously
  *   5. Mixed: some operators on list, some on workspace, with refreshes
@@ -138,7 +138,7 @@ async function findFirstCaseId(page: Page): Promise<string | null> {
 
   // 3. Scrape the list page DOM for a case link
   await page.goto('/checkouts', { waitUntil: 'domcontentloaded' })
-  const caseLink = page.locator('a[href*="/checkouts/"]').first()
+  const caseLink = page.locator('a[href*="/operator/cases/"]').first()
   try {
     await caseLink.waitFor({ timeout: 10_000 })
   } catch {
@@ -175,7 +175,7 @@ test.describe('perf: checkout list', () => {
 })
 
 // ---------------------------------------------------------------------------
-// Scenario 2: Single operator cold-loads /checkouts/[caseId]
+// Scenario 2: Single operator cold-loads /operator/cases/[caseId]
 // ---------------------------------------------------------------------------
 
 test.describe('perf: checkout workspace', () => {
@@ -183,8 +183,8 @@ test.describe('perf: checkout workspace', () => {
     const caseId = await findFirstCaseId(page)
     test.skip(!caseId, 'No cases found for tenant')
 
-    const t = await captureTimings(page, `/checkouts/${caseId}`)
-    logTimings(`/checkouts/${caseId} cold`, t)
+    const t = await captureTimings(page, `/operator/cases/${caseId}`)
+    logTimings(`/operator/cases/${caseId} cold`, t)
     expect(t.ttfb).toBeLessThan(3000)
     expect(t.fullLoad).toBeLessThan(8000)
   })
@@ -206,13 +206,13 @@ test.describe('perf: navigation cycle', () => {
     test.skip(!caseId, 'No cases found for tenant')
 
     // Navigate to workspace
-    results.push(await captureTimings(page, `/checkouts/${caseId}`))
+    results.push(await captureTimings(page, `/operator/cases/${caseId}`))
 
     // Back to list
     results.push(await captureTimings(page, '/checkouts'))
 
     // Back to workspace
-    results.push(await captureTimings(page, `/checkouts/${caseId}`))
+    results.push(await captureTimings(page, `/operator/cases/${caseId}`))
 
     for (const [i, t] of results.entries()) {
       logTimings(`nav-cycle step ${i + 1}`, t)
@@ -240,7 +240,7 @@ test.describe('perf: concurrent workspace loads', () => {
       const caseId = await findFirstCaseId(page)
       test.skip(!caseId, 'No cases found for tenant')
 
-      const t = await captureTimings(page, `/checkouts/${caseId}`)
+      const t = await captureTimings(page, `/operator/cases/${caseId}`)
       logTimings(`concurrent operator ${i + 1}`, t)
       expect(t.ttfb).toBeLessThan(5000)
     })
@@ -267,13 +267,13 @@ test.describe('perf: mixed operator behavior', () => {
     const caseId = await findFirstCaseId(page)
     test.skip(!caseId, 'No cases found for tenant')
 
-    const t = await captureTimings(page, `/checkouts/${caseId}`)
+    const t = await captureTimings(page, `/operator/cases/${caseId}`)
     logTimings('mixed-B workspace', t)
     // Stay on page for 5s (simulates reading)
     await page.waitForTimeout(5000)
     // Soft reload (React Query background refetch would fire at 60s, but
     // we test a manual reload)
-    const t2 = await captureTimings(page, `/checkouts/${caseId}`)
+    const t2 = await captureTimings(page, `/operator/cases/${caseId}`)
     logTimings('mixed-B workspace reload', t2)
   })
 
@@ -285,7 +285,7 @@ test.describe('perf: mixed operator behavior', () => {
       const caseId = await findFirstCaseId(page)
       test.skip(!caseId, 'No cases found for tenant')
 
-      const t2 = await captureTimings(page, `/checkouts/${caseId}`)
+      const t2 = await captureTimings(page, `/operator/cases/${caseId}`)
       logTimings(`mixed-C cycle ${cycle + 1} workspace`, t2)
     }
   })

@@ -245,7 +245,7 @@ export function TenancyDetailClient({ tenancyId }: { tenancyId: string }) {
                     />
                   </div>
                   <Link
-                    href={`/checkouts/${tenancy.case_id}`}
+                    href={`/operator/cases/${tenancy.case_id}`}
                     className="inline-flex items-center gap-1.5 rounded-md bg-emerald-600 px-3.5 py-2 text-xs font-medium text-white transition hover:bg-emerald-700"
                   >
                     <ExternalLink className="h-3.5 w-3.5" />

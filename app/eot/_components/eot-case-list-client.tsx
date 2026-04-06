@@ -278,7 +278,7 @@ export function EotCaseListClient({
       void invalidateCases()
       setFormState(DEFAULT_FORM_STATE)
       setCreateOpen(false)
-      router.push(`/checkouts/${workspace.case.id}`)
+      router.push(`/operator/cases/${workspace.case.id}`)
       router.refresh()
     } catch (createCaseError) {
       if (createCaseError instanceof EotApiError) {

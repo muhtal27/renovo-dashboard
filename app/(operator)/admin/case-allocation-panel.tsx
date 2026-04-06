@@ -190,7 +190,7 @@ export function CaseAllocationPanel() {
                   >
                     <td className="px-4 py-2.5">
                       <Link
-                        href={`/checkouts/${caseItem.id}`}
+                        href={`/operator/cases/${caseItem.id}`}
                         className="font-medium text-zinc-950 hover:underline"
                       >
                         {buildAddress(caseItem.property)}

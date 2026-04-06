@@ -303,7 +303,7 @@ export function InventoryFeedbackClient({
                       {/* Link to case */}
                       <td className="px-4 py-2.5 text-right">
                         <Link
-                          href={`/checkouts/${row.caseItem.id}`}
+                          href={`/operator/cases/${row.caseItem.id}`}
                           className="inline-flex items-center gap-1 text-xs font-medium text-zinc-600 transition hover:text-zinc-900"
                         >
                           Open

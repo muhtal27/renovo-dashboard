@@ -36,7 +36,7 @@ test('public routes remain unprotected', () => {
   assert.equal(shouldProtectPath('/'), false)
 })
 
-test('operator workspace keeps legacy route canonical and preview route explicit', () => {
-  assert.equal(getDefaultEotWorkspaceHref('case-123'), '/checkouts/case-123')
+test('operator workspace routes point to operator cases', () => {
+  assert.equal(getDefaultEotWorkspaceHref('case-123'), '/operator/cases/case-123')
   assert.equal(getPreviewCheckoutWorkspaceHref('case-123'), '/operator/cases/case-123')
 })
