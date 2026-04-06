@@ -203,7 +203,9 @@ function DefectRow({
               AI confidence
             </p>
             <span className="text-sm tabular-nums text-zinc-500">
-              {defect.aiConfidence != null ? `${Math.round(defect.aiConfidence * 100)}%` : '—'}
+              {defect.aiConfidence != null
+                ? `${defect.aiConfidence <= 1 ? Math.round(defect.aiConfidence * 100) : Math.round(defect.aiConfidence)}%`
+                : '—'}
             </span>
           </div>
         </div>
