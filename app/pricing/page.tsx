@@ -8,7 +8,7 @@ import {
 
 const title = 'Pricing | Renovo AI'
 const description =
-  'Simple pricing for letting agencies using Renovo AI to prepare end of tenancy deposit claims.'
+  'Simple monthly pricing for letting agents based on fully managed portfolio size. No setup fees, no contract, first month on us.'
 
 export const metadata = createMarketingMetadata({
   title,

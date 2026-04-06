@@ -9,27 +9,32 @@ const fmt = new Intl.NumberFormat("en-GB", {
   maximumFractionDigits: 0,
 });
 
-function getPlan(volume: number): { name: string; price: number } {
-  if (volume >= 3500) return { name: "Enterprise", price: 15 };
-  if (volume >= 2000) return { name: "Enterprise", price: 18 };
-  if (volume >= 1000) return { name: "Growth", price: 21 };
-  return { name: "Pay As You Go", price: 29 };
+const BLOCK_SIZE = 365;
+const BLOCK_PRICE = 179;
+
+function getBlocks(tenancies: number): number {
+  return Math.max(1, Math.ceil(tenancies / BLOCK_SIZE));
 }
 
 export default function CalculatorClient() {
-  const [volume, setVolume] = useState(1000);
+  const [tenancies, setTenancies] = useState(365);
 
-  const rawManualCostPerCheckout = 149 - ((volume / 300) - 1) * 1.5;
+  const blocks = getBlocks(tenancies);
+  const isEnterprise = blocks > 5;
+  const monthlyCost = blocks * BLOCK_PRICE;
+  const annualCost = monthlyCost * 12;
+
+  // Manual cost estimate: ~£140–149 per checkout, averaging ~2 checkouts per tenancy/year
+  const checkoutsPerYear = tenancies * 2;
+  const rawManualCostPerCheckout = 149 - ((checkoutsPerYear / 300) - 1) * 1.5;
   const manualCostPerCheckout = Math.max(140, Math.min(149, rawManualCostPerCheckout));
-  const manualAnnualCost = volume * manualCostPerCheckout;
+  const manualAnnualCost = checkoutsPerYear * manualCostPerCheckout;
 
-  const { name: planName, price: planPrice } = getPlan(volume);
-  const renovoAnnualCost = volume * planPrice;
-  const annualSaving = manualAnnualCost - renovoAnnualCost;
+  const annualSaving = manualAnnualCost - annualCost;
   const threeYearSaving = annualSaving * 3;
-  const fteFreed = volume / 300;
+  const fteFreed = checkoutsPerYear / 300;
 
-  const pct = ((volume - 100) / (5000 - 100)) * 100;
+  const pct = ((tenancies - 50) / (2000 - 50)) * 100;
 
   return (
     <main className="min-h-screen bg-white px-4 py-16 sm:px-6 lg:px-8">
@@ -47,23 +52,23 @@ export default function CalculatorClient() {
           {/* Left — Slider */}
           <div className="rounded-xl border border-zinc-200 bg-white p-6">
             <label
-              htmlFor="volume"
+              htmlFor="tenancies"
               className="block text-sm font-medium text-zinc-500"
             >
-              Annual checkout volume
+              Fully managed tenancies
             </label>
             <p className="mt-1 text-4xl font-bold text-zinc-950">
-              {volume.toLocaleString("en-GB")}
+              {tenancies.toLocaleString("en-GB")}
             </p>
 
             <input
-              id="volume"
+              id="tenancies"
               type="range"
-              min={100}
-              max={5000}
-              step={100}
-              value={volume}
-              onChange={(e) => setVolume(Number(e.target.value))}
+              min={50}
+              max={2000}
+              step={50}
+              value={tenancies}
+              onChange={(e) => setTenancies(Number(e.target.value))}
               className="mt-6 h-2 w-full cursor-pointer appearance-none rounded-full bg-zinc-200 outline-none
                 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:bg-emerald-500 [&::-webkit-slider-thumb]:shadow-md
                 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:bg-emerald-500 [&::-moz-range-thumb]:shadow-md
@@ -74,8 +79,8 @@ export default function CalculatorClient() {
             />
 
             <div className="mt-2 flex justify-between text-xs text-zinc-400">
-              <span>100</span>
-              <span>5,000</span>
+              <span>50</span>
+              <span>2,000</span>
             </div>
           </div>
 
@@ -85,10 +90,12 @@ export default function CalculatorClient() {
               Estimated annual saving
             </p>
             <p className="mt-2 text-5xl font-bold text-emerald-500">
-              {fmt.format(annualSaving)}
+              {isEnterprise ? "Custom" : fmt.format(annualSaving)}
             </p>
             <span className="mt-3 inline-block rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold uppercase text-emerald-600">
-              {planName}
+              {isEnterprise
+                ? "Enterprise"
+                : `${blocks} ${blocks === 1 ? "block" : "blocks"} · ${fmt.format(monthlyCost)}/mo`}
             </span>
           </div>
 
@@ -98,15 +105,21 @@ export default function CalculatorClient() {
 
             <div className="mt-4 space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-zinc-600">Manual cost</span>
+                <span className="text-sm text-zinc-600">Manual cost (est.)</span>
                 <span className="text-sm font-semibold text-zinc-950">
-                  {fmt.format(manualAnnualCost)}
+                  {fmt.format(manualAnnualCost)}/yr
                 </span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-zinc-600">Renovo AI cost</span>
                 <span className="text-sm font-semibold text-zinc-950">
-                  {fmt.format(renovoAnnualCost)}
+                  {isEnterprise ? "Custom" : `${fmt.format(annualCost)}/yr`}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-zinc-600">Portfolio blocks</span>
+                <span className="text-sm font-semibold text-zinc-950">
+                  {isEnterprise ? "6+" : blocks}
                 </span>
               </div>
               <div className="flex items-center justify-between">
@@ -115,18 +128,20 @@ export default function CalculatorClient() {
                   {fteFreed.toFixed(1)}
                 </span>
               </div>
-              <div className="border-t border-zinc-100 pt-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-zinc-950">
-                    3-year saving
-                  </span>
-                  <span className="text-lg font-bold text-emerald-500">
-                    {fmt.format(threeYearSaving)}
-                  </span>
+              {!isEnterprise && (
+                <div className="border-t border-zinc-100 pt-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-zinc-950">
+                      3-year saving
+                    </span>
+                    <span className="text-lg font-bold text-emerald-500">
+                      {fmt.format(threeYearSaving)}
+                    </span>
+                  </div>
                 </div>
-              </div>
+              )}
               <div className="text-xs text-zinc-400">
-                For a full breakdown, ask for our pricing brochure.
+                Let-only tenancies included at no extra cost.
               </div>
             </div>
           </div>
@@ -135,7 +150,7 @@ export default function CalculatorClient() {
         {/* CTA */}
         <div className="mt-10 text-center">
           <Link
-            href="/demo"
+            href="/book-demo"
             className="inline-block rounded-lg bg-emerald-500 px-8 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-600"
           >
             Book a demo
@@ -145,7 +160,7 @@ export default function CalculatorClient() {
         {/* Footnote */}
         <p className="mt-8 text-center text-xs text-zinc-400">
           Estimates based on industry benchmarks. Actual savings depend on your
-          staffing model and case mix.
+          staffing model and case mix. First month on us for new customers.
         </p>
       </div>
     </main>

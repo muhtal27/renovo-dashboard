@@ -1,114 +1,45 @@
 import Link from 'next/link'
 import { MarketingShell } from '@/app/components/MarketingShell'
 
-const payAsYouGoFeatures = {
-  platform: [
-    'Active case workspace',
-    'Evidence upload and management',
-    'AI-drafted liability assessments',
-    'Manager approval workflow',
-    'Audit trail and claim output',
-    'Priority case tagging',
-    'Fair wear and tear guidance hub',
-    'Custom claim templates',
-    'Dispute pack generation',
-  ],
-  team: [
-    'Multi-user access',
-    'Branch-level reporting',
-    'Email and chat support',
-  ],
-} as const
-
-const growthFeatures = [
-  'Up to 25 users',
-  'Named support contact',
-  'Phone support (2hr response)',
-  'Multi-branch rollout support',
-  'Structured onboarding programme',
+const platformFeatures = [
+  'Full case workspace',
+  'Evidence management',
+  'AI-drafted liability assessments',
+  'Manager approval workflow',
+  'Immutable audit trail',
+  'Dispute pack generation',
+  'Custom claim templates',
+  'Unlimited users',
 ] as const
 
-const enterpriseFeatures = [
-  'Unlimited users across branches',
-  'Unlimited portfolio capacity',
-  'Custom audit trail retention',
-  'Dedicated account manager',
-  'Priority phone support (1hr)',
-  'SLA and compliance review',
-  'Multi-branch rollout support',
-  'Bespoke onboarding programme',
-  'API access for internal tooling',
-  'Custom CRM and inventory integrations',
+const scaleExamples = [
+  { blocks: 1, tenancies: '365', price: '£179' },
+  { blocks: 2, tenancies: '730', price: '£358' },
+  { blocks: 3, tenancies: '1,095', price: '£537' },
+  { blocks: 4, tenancies: '1,460', price: '£716' },
+  { blocks: 5, tenancies: '1,825', price: '£895' },
 ] as const
-
-const addons = [
-  {
-    title: 'SSO (Single Sign-On)',
-    desc: "Sign in via your agency's identity provider. Supports Microsoft Entra ID and SAML-based providers.",
-  },
-  {
-    title: 'On-site technical support',
-    desc: 'Hands-on assistance during rollout. Includes staff training, workflow configuration, and live troubleshooting.',
-  },
-  {
-    title: 'Custom integrations',
-    desc: 'Connect Renovo AI to your CRM, inventory software, or internal systems beyond our standard integrations.',
-  },
-  {
-    title: 'Extended audit retention',
-    desc: 'Retain case records and evidence trails beyond the standard period. Configurable to your compliance needs.',
-  },
-  {
-    title: 'Dedicated onboarding',
-    desc: 'Structured implementation programme. Includes workspace setup, data migration support, and team walkthroughs.',
-  },
-  {
-    title: 'Analytics and reporting',
-    desc: 'Track checkout volume, dispute rates, resolution times, and operator workload across your portfolio.',
-  },
-] as const
-
-const compareRows: ({ section: string } | { feature: string; payg: string; growth: string; ent: string })[] = [
-  { section: 'Core platform' },
-  { feature: 'Active case workspace', payg: '✓', growth: '✓', ent: '✓' },
-  { feature: 'Evidence upload and management', payg: '✓', growth: '✓', ent: '✓' },
-  { feature: 'AI-drafted liability assessments', payg: '✓', growth: '✓', ent: '✓' },
-  { feature: 'Manager approval workflow', payg: '✓', growth: '✓', ent: '✓' },
-  { feature: 'Audit trail and claim output', payg: '✓', growth: '✓', ent: '✓' },
-  { feature: 'Priority case tagging', payg: '✓', growth: '✓', ent: '✓' },
-  { feature: 'Fair wear and tear guidance hub', payg: '✓', growth: '✓', ent: '✓' },
-  { feature: 'Custom claim templates', payg: '✓', growth: '✓', ent: '✓' },
-  { feature: 'Dispute pack generation', payg: '✓', growth: '✓', ent: '✓' },
-  { section: 'Scale and access' },
-  { feature: 'Team users', payg: 'Up to 10', growth: 'Up to 25', ent: 'Unlimited' },
-  { feature: 'Minimum commitment', payg: 'None', growth: '1,000/year', ent: '2,000/year' },
-  { feature: 'Audit trail retention', payg: '24 months', growth: '24 months', ent: 'Custom' },
-  { feature: 'API access', payg: '—', growth: '—', ent: '✓' },
-  { section: 'Support and onboarding' },
-  { feature: 'Email, chat, phone', payg: '4hr', growth: '2hr', ent: '1hr' },
-  { feature: 'Named support contact', payg: '—', growth: '✓', ent: '✓' },
-  { feature: 'Dedicated account manager', payg: '—', growth: '—', ent: '✓' },
-  { feature: 'QBRs', payg: '—', growth: '—', ent: '✓' },
-  { feature: 'Multi-branch rollout support', payg: '—', growth: '✓', ent: '✓' },
-  { feature: 'SLA and compliance review', payg: '—', growth: '—', ent: '✓' },
-  { section: 'Integrations' },
-  { feature: 'Standard integrations', payg: '✓', growth: '✓', ent: '✓' },
-  { feature: 'Custom CRM and inventory integrations', payg: '—', growth: '—', ent: '✓' },
-  { feature: 'SSO (Single Sign-On)', payg: 'Add-on', growth: 'Add-on', ent: 'Add-on' },
-]
 
 export const pricingFaqs = [
   {
-    q: 'How does Pay As You Go billing work?',
-    a: 'You are billed per completed checkout. There is no monthly subscription, no minimum spend, and no contract. Use Renovo AI when you need it and only pay for what you process.',
+    q: 'What counts toward pricing?',
+    a: 'Only fully managed tenancies count toward your portfolio size. Let-only tenancies are included at no extra cost.',
   },
   {
-    q: 'What counts as a completed checkout?',
-    a: 'A completed checkout is one case processed through the Renovo AI workflow, from report intake through to deposit release or dispute pack generation. Drafts and incomplete cases are not billed.',
+    q: 'Are let-only tenancies included?',
+    a: 'Yes. Let-only tenancies are included at no extra cost on every plan.',
   },
   {
-    q: 'Can I upgrade from Pay As You Go?',
-    a: 'Yes. You can move to Growth or Enterprise at any time. Your existing case history and evidence trails carry over with no data loss.',
+    q: 'Are there user limits?',
+    a: 'No. All plans include unlimited users across your team.',
+  },
+  {
+    q: 'Is there a contract?',
+    a: 'No. Standard plans are monthly rolling with no minimum commitment. Cancel anytime.',
+  },
+  {
+    q: 'How does Enterprise work?',
+    a: 'Enterprise starts above 5 portfolio blocks (1,825+ fully managed tenancies). It covers larger multi-branch portfolios with custom rollout, integrations, and tailored commercial terms.',
   },
   {
     q: 'Is VAT included?',
@@ -117,10 +48,6 @@ export const pricingFaqs = [
   {
     q: 'Where is data hosted?',
     a: 'All data is hosted in London, UK. Renovo AI complies with UK GDPR requirements. Role-based access and a full audit trail are enabled by default.',
-  },
-  {
-    q: 'What integrations are supported?',
-    a: 'Renovo AI is designed to work with the CRM, inventory, and inspection systems UK letting agents already use. Integration support is expanding — contact us to discuss your setup.',
   },
 ] as const
 
@@ -133,48 +60,56 @@ export default function PricingPageClient() {
         <section className="page-hero text-center">
           <p className="app-kicker">Pricing</p>
           <h1 className="page-title mx-auto max-w-[820px]">
-            Start small. <em className="text-slate-400">Scale when ready.</em>
+            Pricing for <em className="text-slate-400">managed portfolios</em>
           </h1>
           <p className="page-copy mx-auto max-w-[760px]">
-            Every plan includes the full Renovo AI workflow. Pay per checkout or
-            talk to us about a dedicated setup for your team.
+            Simple monthly pricing for letting agents, based on fully managed
+            portfolio size. No setup fees. No contract. First month on us.
           </p>
+        </section>
+
+        {/* ── TRUST STRIP ── */}
+        <section className="mx-auto flex max-w-[820px] flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm font-medium text-slate-500">
+          <span className="flex items-center gap-2">
+            <span className="text-emerald-500">✓</span> No setup fees
+          </span>
+          <span className="flex items-center gap-2">
+            <span className="text-emerald-500">✓</span> No contract
+          </span>
+          <span className="flex items-center gap-2">
+            <span className="text-emerald-500">✓</span> First month on us
+          </span>
+          <span className="flex items-center gap-2">
+            <span className="text-emerald-500">✓</span> Unlimited users
+          </span>
         </section>
 
         {/* ── PLAN CARDS ── */}
         <section className="page-card">
           <div className="grid gap-6 lg:grid-cols-3">
 
-            {/* PAY AS YOU GO */}
-            <article className="border border-zinc-200 bg-white p-7 text-zinc-950">
+            {/* PORTFOLIO LICENCE */}
+            <article className="relative border-2 border-emerald-500 bg-white p-7 text-zinc-950">
               <p className="inline-block bg-emerald-500/[0.08] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-600">
-                Flexible
+                Most popular
               </p>
-              <h2 className="mt-4 text-3xl font-semibold tracking-[-0.03em]">Pay As You Go</h2>
-              <p className="mt-3 text-sm leading-7 text-slate-500">
-                Full platform access with usage-based billing. No contracts, no
-                minimum commitment. Scale up or down as your portfolio moves.
-              </p>
-              <div className="mt-6 border-t border-zinc-200 pt-6">
-                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-slate-400">
-                  Platform
-                </p>
-                <ul className="mt-4 space-y-3">
-                  {payAsYouGoFeatures.platform.map((f) => (
-                    <li key={f} className="flex items-start gap-3 text-sm leading-7 text-slate-600">
-                      <span className="mt-1.5 text-sm font-semibold text-emerald-500">✓</span>
-                      <span>{f}</span>
-                    </li>
-                  ))}
-                </ul>
+              <h2 className="mt-4 text-3xl font-semibold tracking-[-0.03em]">Portfolio Licence</h2>
+              <div className="mt-3">
+                <span className="text-4xl font-bold tracking-tight text-zinc-950">£179</span>
+                <span className="text-base text-slate-500">/month + VAT</span>
               </div>
+              <p className="mt-2 text-sm leading-7 text-slate-500">
+                Up to 365 fully managed tenancies
+              </p>
 
               <div className="mt-6 border-t border-zinc-200 pt-6">
-                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-slate-400">
-                  Team
-                </p>
-                <ul className="mt-4 space-y-3">
-                  {payAsYouGoFeatures.team.map((f) => (
+                <ul className="space-y-3">
+                  {[
+                    'Let-only tenancies included at no extra cost',
+                    'Unlimited users',
+                    'Full Renovo AI workflow included',
+                    'No contract',
+                  ].map((f) => (
                     <li key={f} className="flex items-start gap-3 text-sm leading-7 text-slate-600">
                       <span className="mt-1.5 text-sm font-semibold text-emerald-500">✓</span>
                       <span>{f}</span>
@@ -185,31 +120,36 @@ export default function PricingPageClient() {
 
               <div className="mt-8">
                 <Link href="/book-demo" className="app-primary-button w-full rounded-md px-4 py-3 text-sm font-medium">
-                  Book a demo →
+                  Get started →
                 </Link>
-                <p className="mt-3 text-center text-xs text-slate-400">
-                  Billed per completed checkout.
+                <p className="mt-3 text-center text-xs text-slate-500">
+                  Your first month is on us.
                 </p>
               </div>
             </article>
 
-            {/* GROWTH */}
-            <article className="relative border-2 border-emerald-500 bg-white p-7 text-zinc-950">
+            {/* ADDITIONAL PORTFOLIO BLOCK */}
+            <article className="border border-zinc-200 bg-white p-7 text-zinc-950">
               <p className="inline-block bg-emerald-500/[0.08] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-600">
-                Committed
+                Scale
               </p>
-              <h2 className="mt-4 text-3xl font-semibold tracking-[-0.03em]">Growth</h2>
-              <p className="mt-3 text-sm leading-7 text-slate-500">
-                For single or multi-branch agencies with committed volume.
-                Lower per-checkout rate with a 12-month agreement.
+              <h2 className="mt-4 text-3xl font-semibold tracking-[-0.03em]">Additional Block</h2>
+              <div className="mt-3">
+                <span className="text-4xl font-bold tracking-tight text-zinc-950">+£179</span>
+                <span className="text-base text-slate-500">/month + VAT</span>
+              </div>
+              <p className="mt-2 text-sm leading-7 text-slate-500">
+                Add up to 365 more fully managed tenancies
               </p>
 
               <div className="mt-6 border-t border-zinc-200 pt-6">
-                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-slate-400">
-                  Everything in Pay As You Go, plus
-                </p>
-                <ul className="mt-4 space-y-3">
-                  {growthFeatures.map((f) => (
+                <ul className="space-y-3">
+                  {[
+                    'Stack blocks as your portfolio grows',
+                    'Let-only tenancies included at no extra cost',
+                    'Unlimited users',
+                    'Same full platform access',
+                  ].map((f) => (
                     <li key={f} className="flex items-start gap-3 text-sm leading-7 text-slate-600">
                       <span className="mt-1.5 text-sm font-semibold text-emerald-500">✓</span>
                       <span>{f}</span>
@@ -223,11 +163,8 @@ export default function PricingPageClient() {
                   Book a demo →
                 </Link>
                 <p className="mt-3 text-center text-xs text-slate-500">
-                  12-month agreement. 1,000+ checkouts/year.
+                  Add portfolio blocks as you grow.
                 </p>
-                <Link href="/demo/calculator" className="mt-3 block text-center text-xs font-medium text-emerald-600 transition-colors hover:text-emerald-700">
-                  Estimate your savings →
-                </Link>
               </div>
             </article>
 
@@ -237,17 +174,21 @@ export default function PricingPageClient() {
                 Tailored
               </p>
               <h2 className="mt-4 text-3xl font-semibold tracking-[-0.03em]">Enterprise</h2>
-              <p className="mt-3 text-sm leading-7 text-slate-500">
-                For large portfolios processing 2,000+ checkouts per year.
-                Dedicated onboarding, custom integrations, and SLA-backed support.
+              <div className="mt-3">
+                <span className="text-4xl font-bold tracking-tight text-zinc-950">Custom</span>
+              </div>
+              <p className="mt-2 text-sm leading-7 text-slate-500">
+                For portfolios above 5 blocks
               </p>
 
               <div className="mt-6 border-t border-zinc-300 pt-6">
-                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-slate-400">
-                  Everything in Growth, plus
-                </p>
-                <ul className="mt-4 space-y-3">
-                  {enterpriseFeatures.map((f) => (
+                <ul className="space-y-3">
+                  {[
+                    '1,825+ fully managed tenancies',
+                    'Multi-branch groups',
+                    'Custom rollout and integrations',
+                    'Tailored commercial terms',
+                  ].map((f) => (
                     <li key={f} className="flex items-start gap-3 text-sm leading-7 text-slate-700">
                       <span className="mt-1.5 text-sm font-semibold text-emerald-500">✓</span>
                       <span>{f}</span>
@@ -258,51 +199,48 @@ export default function PricingPageClient() {
 
               <div className="mt-8">
                 <Link href="/contact" className="app-primary-button w-full rounded-md px-4 py-3 text-sm font-medium">
-                  Talk to us →
+                  Talk to sales →
                 </Link>
                 <p className="mt-3 text-center text-xs text-slate-500">
-                  Annual agreement. Priced around your portfolio.
+                  Enterprise pricing starts above 5 portfolio blocks.
                 </p>
-                <Link href="/demo/calculator" className="mt-3 block text-center text-xs font-medium text-emerald-600 transition-colors hover:text-emerald-700">
-                  Estimate your savings →
-                </Link>
               </div>
             </article>
 
           </div>
         </section>
 
-        {/* ── ADD-ONS ── */}
+        {/* ── WHAT'S INCLUDED ── */}
         <section className="section-tinted">
           <div className="mx-auto max-w-[1080px] px-6 py-24">
-            <p className="app-kicker">Add-ons</p>
+            <p className="app-kicker">Included</p>
             <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
-              Optional <em className="text-slate-400">add-ons</em>
+              Every plan includes the <em className="text-slate-400">full platform</em>
             </h2>
             <p className="mt-3 text-base leading-8 text-slate-500">
-              Available on any plan. Add what your team needs.
+              No feature gates. Every Portfolio Licence includes the complete Renovo AI workflow.
             </p>
 
-            <div className="mt-10 grid gap-10 md:grid-cols-3">
-              {addons.map((a) => (
-                <div key={a.title}>
-                  <h3 className="text-[15px] font-semibold text-zinc-950">{a.title}</h3>
-                  <p className="mt-2 text-sm leading-7 text-slate-500">{a.desc}</p>
+            <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {platformFeatures.map((f) => (
+                <div key={f} className="flex items-start gap-3 rounded-lg border border-zinc-200 bg-white px-4 py-4">
+                  <span className="mt-0.5 text-sm font-semibold text-emerald-500">✓</span>
+                  <span className="text-sm font-medium text-zinc-700">{f}</span>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* ── COMPARE TABLE ── */}
+        {/* ── HOW IT SCALES ── */}
         <section className="mx-auto max-w-[1080px] px-6 py-24">
-          <p className="app-kicker">Compare</p>
+          <p className="app-kicker">How it scales</p>
           <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
-            Compare <em className="text-slate-400">plans</em>
+            Add blocks as <em className="text-slate-400">you grow</em>
           </h2>
-          <p className="mt-3 text-base leading-8 text-slate-500">
-            Every plan includes the full Renovo AI workflow. Growth and Enterprise
-            add committed pricing, dedicated support, and scale.
+          <p className="mt-3 max-w-[640px] text-base leading-8 text-slate-500">
+            Start with one Portfolio Licence for up to 365 fully managed tenancies, then add
+            blocks as your portfolio grows. Let-only tenancies are always included at no extra cost.
           </p>
 
           <div className="mt-10 overflow-x-auto border border-zinc-200">
@@ -310,51 +248,35 @@ export default function PricingPageClient() {
               <thead>
                 <tr className="border-b-2 border-zinc-200 bg-zinc-50">
                   <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-[0.06em] text-slate-500">
-                    Feature
+                    Blocks
                   </th>
-                  <th className="px-5 py-3 text-center text-xs font-semibold uppercase tracking-[0.06em] text-slate-500">
-                    Pay As You Go
+                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-[0.06em] text-slate-500">
+                    Fully managed tenancies
                   </th>
-                  <th className="px-5 py-3 text-center text-xs font-semibold uppercase tracking-[0.06em] text-slate-500">
-                    Growth
-                  </th>
-                  <th className="px-5 py-3 text-center text-xs font-semibold uppercase tracking-[0.06em] text-slate-500">
-                    Enterprise
+                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-[0.06em] text-slate-500">
+                    Monthly price
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {compareRows.map((row, i) =>
-                  'section' in row ? (
-                    <tr key={i}>
-                      <td
-                        colSpan={4}
-                        className="bg-zinc-50 px-5 pb-2 pt-5 text-xs font-semibold uppercase tracking-[0.06em] text-zinc-400"
-                      >
-                        {row.section}
-                      </td>
-                    </tr>
-                  ) : (
-                    <tr key={i} className="border-t border-zinc-100 bg-white">
-                      <td className="px-5 py-3 text-slate-700">{row.feature}</td>
-                      <td className="px-5 py-3 text-center">
-                        <span className={row.payg === '✓' ? 'font-semibold text-emerald-500' : row.payg === '—' ? 'text-slate-300' : 'text-slate-500'}>
-                          {row.payg}
-                        </span>
-                      </td>
-                      <td className="px-5 py-3 text-center">
-                        <span className={row.growth === '✓' ? 'font-semibold text-emerald-500' : row.growth === '—' ? 'text-slate-300' : 'text-slate-500'}>
-                          {row.growth}
-                        </span>
-                      </td>
-                      <td className="px-5 py-3 text-center">
-                        <span className={row.ent === '✓' ? 'font-semibold text-emerald-500' : row.ent === '—' ? 'text-slate-300' : 'text-slate-500'}>
-                          {row.ent}
-                        </span>
-                      </td>
-                    </tr>
-                  )
-                )}
+                {scaleExamples.map((row) => (
+                  <tr key={row.blocks} className="border-t border-zinc-100 bg-white">
+                    <td className="px-5 py-3 font-medium text-zinc-950">
+                      {row.blocks} {row.blocks === 1 ? 'block' : 'blocks'}
+                    </td>
+                    <td className="px-5 py-3 text-slate-600">Up to {row.tenancies}</td>
+                    <td className="px-5 py-3 font-medium text-zinc-950">{row.price}/mo + VAT</td>
+                  </tr>
+                ))}
+                <tr className="border-t border-zinc-200 bg-zinc-50">
+                  <td className="px-5 py-3 font-medium text-zinc-950">6+ blocks</td>
+                  <td className="px-5 py-3 text-slate-600">1,825+</td>
+                  <td className="px-5 py-3">
+                    <Link href="/contact" className="text-sm font-medium text-emerald-600 hover:text-emerald-700">
+                      Talk to sales →
+                    </Link>
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -380,8 +302,6 @@ export default function PricingPageClient() {
             </div>
           </div>
         </section>
-
-
 
       </div>
     </MarketingShell>
