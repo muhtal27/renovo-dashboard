@@ -295,6 +295,287 @@ const INTEGRATION_LIST: Integration[] = [
 ]
 
 // ---------------------------------------------------------------------------
+// Unmatched Email Queue
+// ---------------------------------------------------------------------------
+
+type UnmatchedItem = {
+  id: string
+  email_log_id: string
+  from_address: string
+  subject: string | null
+  attachment_urls: string[]
+  suggested_tenancy_ids: string[]
+  created_at: string
+  email_log?: {
+    attachment_count: number
+  } | null
+}
+
+type TenancyOption = {
+  id: string
+  label: string
+}
+
+function UnmatchedEmailQueue({
+  count,
+  onResolved,
+}: {
+  count: number
+  onResolved: () => void
+}) {
+  const [expanded, setExpanded] = useState(false)
+  const [items, setItems] = useState<UnmatchedItem[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function loadItems() {
+    setLoading(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/operator/inbound-email/unmatched')
+      if (!res.ok) throw new Error('Failed to load')
+      const data = await res.json()
+      setItems(data.items ?? [])
+    } catch {
+      setError('Failed to load unmatched emails.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  function handleExpand() {
+    if (!expanded) {
+      void loadItems()
+    }
+    setExpanded(!expanded)
+  }
+
+  return (
+    <section className="border border-amber-200 bg-amber-50 px-6 py-4 md:px-7">
+      <button
+        type="button"
+        onClick={handleExpand}
+        className="flex w-full items-center justify-between gap-4 text-left"
+      >
+        <div>
+          <p className="text-sm font-semibold text-amber-800">
+            {count} unmatched {count === 1 ? 'email' : 'emails'} pending review
+          </p>
+          <p className="mt-0.5 text-xs text-amber-600">
+            These emails could not be automatically matched to a property. Click to review.
+          </p>
+        </div>
+        <span className="shrink-0 text-xs font-medium text-amber-700">
+          {expanded ? 'Collapse' : 'Review'}
+        </span>
+      </button>
+
+      {expanded ? (
+        <div className="mt-4 space-y-3">
+          {loading ? (
+            <p className="py-4 text-center text-xs text-amber-600">Loading...</p>
+          ) : error ? (
+            <p className="py-4 text-center text-xs text-rose-600">{error}</p>
+          ) : items.length === 0 ? (
+            <p className="py-4 text-center text-xs text-amber-600">
+              No unmatched emails in the queue.
+            </p>
+          ) : (
+            items.map((item) => (
+              <UnmatchedEmailCard
+                key={item.id}
+                item={item}
+                onResolved={onResolved}
+              />
+            ))
+          )}
+        </div>
+      ) : null}
+    </section>
+  )
+}
+
+function UnmatchedEmailCard({
+  item,
+  onResolved,
+}: {
+  item: UnmatchedItem
+  onResolved: () => void
+}) {
+  const [tenancySearch, setTenancySearch] = useState('')
+  const [tenancyOptions, setTenancyOptions] = useState<TenancyOption[]>([])
+  const [searchLoading, setSearchLoading] = useState(false)
+  const [selectedTenancy, setSelectedTenancy] = useState<string | null>(null)
+  const [resolving, setResolving] = useState(false)
+  const [resolved, setResolved] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  // Load tenancy options on mount (suggested + searchable)
+  useEffect(() => {
+    void loadTenancies()
+  }, [])
+
+  async function loadTenancies() {
+    setSearchLoading(true)
+    try {
+      const res = await fetch('/api/eot/tenancies')
+      if (!res.ok) throw new Error('Failed to load')
+      const tenancies = (await res.json()) as Array<{
+        id: string
+        tenant_name: string
+        property: { name: string; address_line_1?: string; postcode?: string }
+      }>
+      setTenancyOptions(
+        tenancies.map((t) => ({
+          id: t.id,
+          label: `${t.property.address_line_1 || t.property.name}${t.property.postcode ? `, ${t.property.postcode}` : ''} — ${t.tenant_name}`,
+        }))
+      )
+    } catch {
+      // Silently fail — operator can still type
+    } finally {
+      setSearchLoading(false)
+    }
+  }
+
+  async function handleResolve() {
+    if (!selectedTenancy) return
+    setResolving(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/operator/inbound-email/unmatched', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          queue_item_id: item.id,
+          tenancy_id: selectedTenancy,
+        }),
+      })
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        throw new Error(body.error || 'Failed to resolve')
+      }
+      setResolved(true)
+      onResolved()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to resolve.')
+    } finally {
+      setResolving(false)
+    }
+  }
+
+  const filteredOptions = tenancySearch.trim()
+    ? tenancyOptions.filter((o) =>
+        o.label.toLowerCase().includes(tenancySearch.toLowerCase())
+      )
+    : tenancyOptions
+
+  const attachmentCount = item.email_log?.attachment_count ?? item.attachment_urls?.length ?? 0
+
+  if (resolved) {
+    return (
+      <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3">
+        <p className="text-xs font-medium text-emerald-700">
+          Resolved — email attached to tenancy.
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="rounded-lg border border-amber-200 bg-white px-4 py-4">
+      {/* Email details */}
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0 space-y-1">
+          <p className="text-sm font-semibold text-zinc-950">
+            {item.subject || '(no subject)'}
+          </p>
+          <p className="text-xs text-zinc-500">
+            From: <span className="font-medium text-zinc-700">{item.from_address}</span>
+          </p>
+          <p className="text-xs text-zinc-400">
+            {attachmentCount} attachment{attachmentCount !== 1 ? 's' : ''} ·{' '}
+            {new Date(item.created_at).toLocaleString('en-GB', {
+              day: 'numeric',
+              month: 'short',
+              hour: '2-digit',
+              minute: '2-digit',
+            })}
+          </p>
+        </div>
+      </div>
+
+      {/* Tenancy selector */}
+      <div className="mt-4">
+        <label className="block text-xs font-medium text-zinc-500">
+          Assign to tenancy
+        </label>
+        <input
+          type="text"
+          placeholder="Search by property address or tenant name..."
+          value={tenancySearch}
+          onChange={(e) => {
+            setTenancySearch(e.target.value)
+            setSelectedTenancy(null)
+          }}
+          className="mt-1 h-9 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300"
+        />
+
+        {/* Results */}
+        {searchLoading ? (
+          <p className="mt-2 text-xs text-zinc-400">Loading tenancies...</p>
+        ) : filteredOptions.length > 0 && !selectedTenancy ? (
+          <div className="mt-1 max-h-40 overflow-y-auto rounded-lg border border-zinc-200 bg-white">
+            {filteredOptions.slice(0, 8).map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                onClick={() => {
+                  setSelectedTenancy(option.id)
+                  setTenancySearch(option.label)
+                }}
+                className="w-full px-3 py-2 text-left text-xs text-zinc-700 transition hover:bg-zinc-50"
+              >
+                {option.label}
+              </button>
+            ))}
+            {filteredOptions.length > 8 ? (
+              <p className="px-3 py-1.5 text-xs text-zinc-400">
+                {filteredOptions.length - 8} more — refine your search
+              </p>
+            ) : null}
+          </div>
+        ) : tenancySearch.trim() && !selectedTenancy && filteredOptions.length === 0 ? (
+          <p className="mt-2 text-xs text-zinc-400">No tenancies match this search.</p>
+        ) : null}
+
+        {selectedTenancy ? (
+          <p className="mt-1.5 text-xs text-emerald-600">
+            Selected — ready to attach.
+          </p>
+        ) : null}
+
+        {error ? (
+          <p className="mt-2 text-xs text-rose-600">{error}</p>
+        ) : null}
+      </div>
+
+      {/* Actions */}
+      <div className="mt-3 flex items-center gap-2">
+        <button
+          type="button"
+          onClick={handleResolve}
+          disabled={!selectedTenancy || resolving}
+          className="rounded-lg bg-emerald-600 px-4 py-2 text-xs font-medium text-white transition hover:bg-emerald-700 disabled:opacity-50"
+        >
+          {resolving ? 'Attaching...' : 'Attach to tenancy'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // Email Ingestion Tab
 // ---------------------------------------------------------------------------
 
@@ -559,20 +840,12 @@ function EmailIngestionTab() {
         </div>
       </section>
 
-      {/* Unmatched queue count */}
+      {/* Unmatched queue */}
       {unmatchedCount > 0 ? (
-        <section className="border border-amber-200 bg-amber-50 px-6 py-4 md:px-7">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="text-sm font-semibold text-amber-800">
-                {unmatchedCount} unmatched {unmatchedCount === 1 ? 'email' : 'emails'} pending review
-              </p>
-              <p className="mt-0.5 text-xs text-amber-600">
-                These emails could not be automatically matched to a property.
-              </p>
-            </div>
-          </div>
-        </section>
+        <UnmatchedEmailQueue
+          count={unmatchedCount}
+          onResolved={() => void loadData()}
+        />
       ) : null}
 
       {/* Recent activity */}
