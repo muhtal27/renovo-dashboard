@@ -23,6 +23,7 @@ type MarketingShellProps = {
     | '/terms'
     | '/complaints'
     | '/insights'
+    | '/changelog'
   navAriaLabel?: string
 }
 
@@ -38,6 +39,7 @@ const footerProductLinks = [
   { label: 'Pricing', href: '/pricing' },
   { label: 'Demo', href: '/demo' },
   { label: 'Calculator', href: '/demo/calculator' },
+  { label: 'Changelog', href: '/changelog' },
 ] as const
 
 const footerCompanyLinks = [

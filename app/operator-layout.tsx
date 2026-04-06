@@ -4,10 +4,11 @@ import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 import type { ReactNode } from 'react'
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { BookOpenText, ChevronDown, LogOut, Menu, Search, Settings, CreditCard } from 'lucide-react'
+import { BookOpenText, ChevronDown, LogOut, Menu, Search, Settings, CreditCard, Sparkles } from 'lucide-react'
 import { OperatorNav } from '@/app/operator-nav'
 import { getOperatorLabel, type CurrentOperator } from '@/lib/operator-types'
 import { clearLegacySupabaseBrowserAuthArtifacts } from '@/lib/supabase-session'
+import { latestRelease } from '@/lib/changelog'
 
 type Breadcrumb = {
   label: string
@@ -370,6 +371,16 @@ export function OperatorLayout({ children, operator }: OperatorLayoutProps) {
                       />
                     </Suspense>
                   </div>
+
+                  <Link
+                    href="/changelog"
+                    prefetch={false}
+                    className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-700"
+                    title={`v${latestRelease.version} — ${latestRelease.title}`}
+                  >
+                    <Sparkles className="h-4 w-4" strokeWidth={2} />
+                    <span className="hidden lg:inline">What&apos;s new</span>
+                  </Link>
 
                   <Link
                     href="/guidance"
