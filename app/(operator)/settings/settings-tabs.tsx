@@ -456,7 +456,7 @@ function EmailIngestionTab() {
                 className="h-10 w-48 rounded-l-lg border border-r-0 border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300"
               />
               <span className="flex h-10 items-center rounded-r-lg border border-zinc-200 bg-zinc-50 px-3 text-sm text-zinc-500">
-                @reports.renovoai.co.uk
+                @renovoai.co.uk
               </span>
             </div>
             <p className="mt-1 text-xs text-zinc-400">
@@ -631,7 +631,7 @@ function EmailIngestionTab() {
           <p className="text-center text-sm text-zinc-400">
             No emails received yet. Send a test email to{' '}
             <span className="font-medium text-zinc-600">
-              {config.address_prefix}@reports.renovoai.co.uk
+              {config.address_prefix}@renovoai.co.uk
             </span>{' '}
             to verify the setup.
           </p>
