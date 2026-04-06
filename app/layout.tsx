@@ -73,12 +73,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${dmSans.variable} ${instrumentSerif.variable}`}>
-        {/* Native-feel splash screen — visible instantly, dismissed after hydration */}
-        <div id="pwa-splash">
-          <img src="/renovo-ai-icon.svg" alt="" width={64} height={64} />
-          <span className="splash-name">Renovo AI</span>
-          <div className="splash-loader" />
-        </div>
         <PwaSplash />
         {children}
         <ServiceWorkerRegistration />
