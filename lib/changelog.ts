@@ -38,6 +38,32 @@ export const CATEGORY_META: Record<
 
 export const changelog: ChangelogEntry[] = [
   {
+    version: '1.5.0',
+    date: '2026-04-06',
+    title: 'Editable defect review in case workspace',
+    summary:
+      'Operators can now override AI liability assignments, adjust costs, and exclude defects directly in the Review step before sending the draft report.',
+    changes: [
+      {
+        category: 'added',
+        items: [
+          'Inline defect editing in Review step — toggle liability (tenant/landlord/shared), adjust costs, and exclude items',
+          'Live claim summary with tenant liability, landlord cost, shared cost, and deposit comparison',
+          'Deposit vs claim warning when tenant liability exceeds the deposit held',
+          'Save review overrides with one-click persistence to the database',
+          'Reset button to restore all defects to AI-suggested values',
+        ],
+      },
+      {
+        category: 'improved',
+        items: [
+          'Review step now shows AI reasoning and confidence alongside editable fields',
+          'Original AI claim breakdown preserved as reference below operator overrides',
+        ],
+      },
+    ],
+  },
+  {
     version: '1.4.0',
     date: '2026-04-06',
     title: 'Unmatched email review & design consistency',
