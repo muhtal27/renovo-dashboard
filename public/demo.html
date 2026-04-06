@@ -20,16 +20,16 @@ tailwind.config = {
 @keyframes pulse-glow{0%,100%{opacity:1}50%{opacity:.5}}.anim-pulse{animation:pulse-glow 2s ease-in-out infinite}
 @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}.fade-in{animation:fadeIn .25s ease-out}
 @keyframes slideIn{from{transform:translateX(-100%)}to{transform:translateX(0)}}.slide-in{animation:slideIn .2s ease-out}
-*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#fff}
 ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#d4d4d8;border-radius:3px}
 </style>
 </head>
 <body>
 <div id="app"></div>
 <script>
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════���════════════════════════��══════════════════
 // MOCK DATA
-// ═══════════════════════════════════════════════════════════════
+// ═══════════��═══════════════════════════════════════════════════
 
 const CASES = [
   {id:'CHK-2026-001',property:'17 Bruntsfield Place, Edinburgh EH1 4EQ',tenant:'Sarah Campbell',landlord:'Andrew Turnbull',deposit:1100,scheme:'SafeDeposits Scotland',start:'15 Mar 2024',end:'14 Mar 2026',ref:'SDS-2024-00847',status:'draft',priority:'high',issues:0,claim:0,lastActivity:'2 hours ago',assignedTo:'Jamie Mitchell'},
@@ -111,14 +111,25 @@ const GUIDANCE_ARTICLES = [
   {title:'Pre-tenancy condition reports',category:'Evidence Standards',regions:['England','Wales','Scotland'],summary:'A thorough check-in report is the foundation of every deposit claim. Without it, deductions are difficult to support.'},
 ]
 
-// ═══════════════════════════════════════════════════════════════
+const INTEGRATIONS = [
+  {name:'SME Professional',desc:'Property management software for lettings agents.',features:['Pull properties','Push report URLs'],status:'Not configured'},
+  {name:'Reapit',desc:'Cloud-based estate agency and property management platform.',features:['Pull properties','Sync tenancy records'],status:'Not configured'},
+  {name:'FixFlo',desc:'Repair and maintenance reporting platform.',features:['Pull maintenance reports','Push checkout outcomes'],status:'Not configured'},
+  {name:'HelloReport',desc:'Inventory and property inspection software.',features:['Import inventory','Sync property conditions','Pull check-in/check-out'],status:'Not configured'},
+  {name:'No Letting Go',desc:'Professional inventory and property inspection services.',features:['Import inspection reports','Sync inventory','Pull mid-term data'],status:'Not configured'},
+  {name:'Inventory Base',desc:'Digital inventory app for property professionals.',features:['Import inventory','Sync check-in/check-out','Pull schedule of condition'],status:'Not configured'},
+  {name:'Inventory Hive',desc:'Cloud-based property reporting and compliance platform.',features:['Import property reports','Sync inspection data','Pull compliance docs'],status:'Not configured'},
+]
+
+// ════════��══════════════════════════════════════════════════════
 // STATE
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════���═══════════════════════════════
 
 let state = {
-  page: 'checkouts',
+  page: 'tenancies',
   sidebarCollapsed: false,
   mobileSidebarOpen: false,
+  profileMenuOpen: false,
   // workspace state
   activeCaseId: null,
   workspaceStatus: 'draft',
@@ -126,13 +137,13 @@ let state = {
   workspaceIssues: [],
   workspaceLog: ['Case created — awaiting documents'],
   // filters
-  checkoutFilter: 'all',
+  tenancyFilter: 'all',
   disputeFilter: 'all',
   guidanceRegion: 'all',
   guidanceSearch: '',
-  // tenancies
-  tenancyTab: 'all',
-  tenancySearch: '',
+  // dashboard (tenancy records)
+  dashboardTab: 'all',
+  dashboardSearch: '',
   activeTenancyId: null,
   // feedback
   feedbackSearch: '',
@@ -140,11 +151,15 @@ let state = {
   feedbackDecision: 'all',
   // admin allocation
   allocationTab: 'unallocated',
+  // settings
+  settingsTab: 'account',
+  selectedIntegration: 0,
 }
 
 function navigate(page, id) {
   state.page = page
   state.mobileSidebarOpen = false
+  state.profileMenuOpen = false
   if (page === 'workspace' && id) {
     state.activeCaseId = id
     state.workspaceStatus = 'draft'
@@ -152,15 +167,15 @@ function navigate(page, id) {
     state.workspaceIssues = []
     state.workspaceLog = ['Case created — awaiting documents']
   }
-  if (page === 'tenancy-detail' && id) {
+  if (page === 'dashboard-detail' && id) {
     state.activeTenancyId = id
   }
   render()
 }
 
-// ═══════════════════════════════════════════════════════════════
+// ════════��══════════════════════════��═══════════════════════════
 // HELPERS
-// ═══════════════════════════════════════════════════════════════
+// ═══════��══════════════════���════════════════════════════════════
 
 function fmt(n) { return '\u00a3' + Number(n).toLocaleString('en-GB', {minimumFractionDigits: 0, maximumFractionDigits: 0}) }
 function badge(label, cls) { return `<span class="inline-flex items-center border px-2 py-0.5 text-[11px] font-medium ${cls}">${label}</span>` }
@@ -171,28 +186,32 @@ function getCase() { return CASES.find(c => c.id === state.activeCaseId) || CASE
 
 function svgIcon(name) {
   const icons = {
-    tenancies: '<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21"/>',
-    checkouts: '<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 00-1.883 2.542l.857 6a2.25 2.25 0 002.227 1.932H19.05a2.25 2.25 0 002.227-1.932l.857-6a2.25 2.25 0 00-1.883-2.542m-16.5 0V6A2.25 2.25 0 016 3.75h3.879a1.5 1.5 0 011.06.44l2.122 2.12a1.5 1.5 0 001.06.44H18A2.25 2.25 0 0120.25 9v.776"/>',
-    disputes: '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>',
-    feedback: '<path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"/>',
-    'deposit-scheme': '<path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z"/>',
-    guidance: '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/>',
-    admin: '<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25a2.25 2.25 0 01-2.25-2.25v-2.25z"/>',
-    teams: '<path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/>',
-    reports: '<path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/>',
+    // Sidebar nav icons (matching lucide icons from operator-nav.tsx)
+    building2: '<path stroke-linecap="round" stroke-linejoin="round" d="M6 22V4a2 2 0 012-2h8a2 2 0 012 2v18ZM6 12H4a2 2 0 00-2 2v6a2 2 0 002 2h2M18 9h2a2 2 0 012 2v9a2 2 0 01-2 2h-2M10 6h4M10 10h4M10 14h4M10 18h4"/>',
+    folderKanban: '<path stroke-linecap="round" stroke-linejoin="round" d="M4 20h16a2 2 0 002-2V8a2 2 0 00-2-2h-7.93a2 2 0 01-1.66-.9l-.82-1.2A2 2 0 007.93 3H4a2 2 0 00-2 2v13c0 1.1.9 2 2 2ZM8 10v4M12 10v2M16 10v6"/>',
+    clipboardCheck: '<path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>',
+    messageSquareMore: '<path stroke-linecap="round" stroke-linejoin="round" d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2zM8 10h.01M12 10h.01M16 10h.01"/>',
+    landmark: '<path stroke-linecap="round" stroke-linejoin="round" d="M3 22h18M6 18v-7M10 18v-7M14 18v-7M18 18v-7M12 2l9 5H3z"/>',
+    layoutDashboard: '<path stroke-linecap="round" stroke-linejoin="round" d="M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z"/>',
+    users: '<path stroke-linecap="round" stroke-linejoin="round" d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>',
+    barChart3: '<path stroke-linecap="round" stroke-linejoin="round" d="M3 3v18h18M7 16v-3M12 16V8M17 16v-5"/>',
+    creditCard: '<path stroke-linecap="round" stroke-linejoin="round" d="M1 10h22M1 6a2 2 0 012-2h18a2 2 0 012 2v12a2 2 0 01-2 2H3a2 2 0 01-2-2z"/>',
+    bookOpenText: '<path stroke-linecap="round" stroke-linejoin="round" d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2zM22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7zM6 8h2M6 12h2M14 8h2M14 12h2"/>',
+    // Action icons
     settings: '<path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"/><circle cx="12" cy="12" r="3"/>',
     signout: '<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"/>',
     check: '<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>',
     menu: '<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>',
     x: '<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>',
     chevronLeft: '<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/>',
+    chevronDown: '<path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>',
     arrowLeft: '<path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/>',
     search: '<path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>',
   }
   return `<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">${icons[name] || ''}</svg>`
 }
 
-// ═══════════════════════════════════════════════════════════════
+// ══════��════════════════════════════════════════════════════════
 // SIDEBAR
 // ═══════════════════════════════════════════════════════════════
 
@@ -202,27 +221,26 @@ function renderSidebar(mobile = false) {
 
   const navGroups = [
     { label: 'Operations', items: [
-      { label: 'Tenancies', page: 'tenancies', icon: 'tenancies', active: p === 'tenancies' || p === 'tenancy-detail' },
-      { label: 'Checkouts', page: 'checkouts', icon: 'checkouts', active: p === 'checkouts' || p === 'workspace' },
-      { label: 'Disputes', page: 'disputes', icon: 'disputes', active: p === 'disputes' },
-      { label: 'Inventory feedback', page: 'feedback', icon: 'feedback', active: p === 'feedback' },
-      { label: 'Deposit Scheme', page: 'deposit-scheme', icon: 'deposit-scheme', active: p === 'deposit-scheme' },
-      { label: 'Guidance', page: 'guidance', icon: 'guidance', active: p === 'guidance' },
+      { label: 'Dashboard', page: 'dashboard', icon: 'building2', active: p === 'dashboard' || p === 'dashboard-detail' },
+      { label: 'Tenancies', page: 'tenancies', icon: 'folderKanban', active: p === 'tenancies' || p === 'workspace' },
+      { label: 'Disputes', page: 'disputes', icon: 'clipboardCheck', active: p === 'disputes' },
+      { label: 'Inventory feedback', page: 'feedback', icon: 'messageSquareMore', active: p === 'feedback' },
+      { label: 'Deposit Scheme', page: 'deposit-scheme', icon: 'landmark', active: p === 'deposit-scheme' },
     ]},
     { label: 'Management', items: [
-      { label: 'Admin', page: 'admin', icon: 'admin', active: p === 'admin' },
-      { label: 'Teams', page: 'teams', icon: 'teams', active: p === 'teams' },
-      { label: 'Reports / Analytics', page: 'reports', icon: 'reports', active: p === 'reports' },
+      { label: 'Admin', page: 'admin', icon: 'layoutDashboard', active: p === 'admin' },
+      { label: 'Teams', page: 'teams', icon: 'users', active: p === 'teams' },
+      { label: 'Reports / Analytics', page: 'reports', icon: 'barChart3', active: p === 'reports' },
     ]},
     { label: 'Account', items: [
-      { label: 'Settings', page: 'settings', icon: 'settings', active: p === 'settings' },
+      { label: 'Billing', page: 'billing', icon: 'creditCard', active: p === 'billing' },
     ]},
   ]
 
   return `
     <div class="flex h-full flex-col">
       <div class="flex items-center ${c ? 'justify-center' : 'justify-between'}">
-        <a onclick="navigate('checkouts')" class="flex items-center gap-3 px-3 py-3 cursor-pointer">
+        <a onclick="navigate('tenancies')" class="flex items-center gap-3 px-3 py-3 cursor-pointer">
           ${c ? `<div class="flex h-7 w-7 items-center justify-center rounded-md bg-emerald-600 text-white text-xs font-bold">R</div>` : `
             <div>
               <div class="flex items-center gap-2">
@@ -253,12 +271,6 @@ function renderSidebar(mobile = false) {
                   ${!c ? `<span class="truncate">${item.label}</span>` : ''}
                 </a>
               `).join('')}
-              ${group.label === 'Account' ? `
-                <button onclick="alert('Demo sign out — in the real app this ends your session.')" class="group flex w-full items-center gap-3 rounded-lg border border-transparent px-3 py-2.5 text-sm font-medium text-zinc-600 transition hover:border-zinc-200 hover:bg-white hover:text-zinc-950 ${c ? 'justify-center px-2' : ''}">
-                  <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-zinc-400 transition group-hover:text-zinc-600">${svgIcon('signout')}</span>
-                  ${!c ? '<span class="truncate">Sign out</span>' : ''}
-                </button>
-              ` : ''}
             </div>
           </div>
         `).join('')}
@@ -266,35 +278,36 @@ function renderSidebar(mobile = false) {
     </div>`
 }
 
-// ═══════════════════════════════════════════════════════════════
+// ═══════��═══════════════════════════════════════════════════════
 // PAGE CONFIGS
-// ═══════════════════════════════════════════════════════════════
+// ═════��══════════════════���══════════════════════════════════════
 
 function getPageConfig() {
   const configs = {
+    dashboard: { title: 'Dashboard', breadcrumbs: [{label:'Dashboard'}] },
+    'dashboard-detail': { title: 'Dashboard detail', breadcrumbs: [{label:'Dashboard',link:'dashboard'},{label:'Dashboard detail'}] },
     tenancies: { title: 'Tenancies', breadcrumbs: [{label:'Tenancies'}] },
-    'tenancy-detail': { title: 'Tenancy detail', breadcrumbs: [{label:'Tenancies',link:'tenancies'},{label:'Tenancy detail'}] },
-    checkouts: { title: 'Checkouts', breadcrumbs: [{label:'Checkouts'}] },
-    workspace: { title: 'Checkout workspace', breadcrumbs: [{label:'Checkouts',link:'checkouts'},{label:'Checkout workspace'}] },
-    disputes: { title: 'Disputes', breadcrumbs: [{label:'Checkouts',link:'checkouts'},{label:'Disputes'}] },
+    workspace: { title: 'Case workspace', breadcrumbs: [{label:'Tenancies',link:'tenancies'},{label:'Case workspace'}] },
+    disputes: { title: 'Disputes', breadcrumbs: [{label:'Tenancies',link:'tenancies'},{label:'Disputes'}] },
     feedback: { title: 'Inventory feedback', breadcrumbs: [{label:'Inventory feedback'}] },
     'deposit-scheme': { title: 'Deposit Scheme', breadcrumbs: [{label:'Deposit Scheme'}] },
     guidance: { title: 'Guidance', breadcrumbs: [{label:'Guidance'}] },
-    admin: { title: 'Admin', breadcrumbs: [{label:'Management'},{label:'Admin'}] },
-    teams: { title: 'Teams', breadcrumbs: [{label:'Management'},{label:'Teams'}] },
+    admin: { title: 'Admin', breadcrumbs: [{label:'Management',link:'reports'},{label:'Admin'}] },
+    teams: { title: 'Teams', breadcrumbs: [{label:'Management',link:'admin'},{label:'Teams'}] },
     reports: { title: 'Reports / Analytics', breadcrumbs: [{label:'Management'},{label:'Reports / Analytics'}] },
-    settings: { title: 'Settings', breadcrumbs: [{label:'Account'},{label:'Settings'}] },
+    settings: { title: 'Settings', breadcrumbs: [{label:'Account',link:'billing'},{label:'Settings'}] },
+    billing: { title: 'Billing', breadcrumbs: [{label:'Account'},{label:'Billing'}] },
   }
-  return configs[state.page] || configs.checkouts
+  return configs[state.page] || configs.tenancies
 }
 
-// ═══════════════════════════════════════════════════════════════
+// ═════════════���═══════════════════════════════���═════════════════
 // PAGE RENDERERS
-// ═══════════════════════════════════════════════════════════════
+// ═══════���════════════���══════════════════════════════════════════
 
-function renderCheckoutsPage() {
+function renderTenanciesPage() {
   const filters = ['all','draft','collecting_evidence','analysis','review','draft_sent','ready_for_claim','submitted','disputed','resolved']
-  const filtered = state.checkoutFilter === 'all' ? CASES : CASES.filter(c => c.status === state.checkoutFilter)
+  const filtered = state.tenancyFilter === 'all' ? CASES : CASES.filter(c => c.status === state.tenancyFilter)
 
   const statusCounts = {}
   CASES.forEach(c => { statusCounts[c.status] = (statusCounts[c.status] || 0) + 1 })
@@ -324,7 +337,7 @@ function renderCheckoutsPage() {
       <!-- Filters -->
       <div class="flex items-center gap-2 overflow-x-auto pb-1">
         ${filters.map(f => `
-          <button onclick="state.checkoutFilter='${f}';render()" class="whitespace-nowrap px-3 py-1.5 text-xs font-medium transition ${state.checkoutFilter === f ? 'border border-zinc-900 bg-zinc-900 text-white' : 'border border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:text-zinc-900'}">
+          <button onclick="state.tenancyFilter='${f}';render()" class="whitespace-nowrap px-3 py-1.5 text-xs font-medium transition ${state.tenancyFilter === f ? 'border border-zinc-900 bg-zinc-900 text-white' : 'border border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:text-zinc-900'}">
             ${f === 'all' ? 'All' : STATUS_META[f]?.label || f}${f !== 'all' && statusCounts[f] ? ` (${statusCounts[f]})` : ''}
           </button>
         `).join('')}
@@ -413,8 +426,8 @@ function renderWorkspacePage() {
           </p>
         </div>
         <div class="flex items-center gap-2">
-          <button onclick="navigate('checkouts')" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-zinc-600 transition hover:text-zinc-950">
-            ${svgIcon('arrowLeft')} Checkouts
+          <button onclick="navigate('tenancies')" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-zinc-600 transition hover:text-zinc-950">
+            ${svgIcon('arrowLeft')} Tenancies
           </button>
           ${badge(sm.label, sm.badgeCls)}
         </div>
@@ -737,7 +750,6 @@ function renderDisputesPage() {
 }
 
 function renderFeedbackPage() {
-  // Build feedback rows from cases that have issues
   const FEEDBACK_ISSUES = [
     {issue:'Carpet stain in master bedroom',desc:'Red wine stain not in check-in report',property:'42 Leith Walk, Edinburgh EH6 5HB',tenant:'James Murray',severity:'high',decision:'charge',cost:185,status:'Reviewed',caseId:'CHK-2026-002'},
     {issue:'Scuff marks on hallway walls',desc:'Deep scuffs exceeding fair wear and tear',property:'42 Leith Walk, Edinburgh EH6 5HB',tenant:'James Murray',severity:'medium',decision:'partial',cost:60,status:'Reviewed',caseId:'CHK-2026-002'},
@@ -877,9 +889,9 @@ function getTenancyStatus(t) {
   return { label: 'Active', tone: 'emerald', dot: 'bg-emerald-500' }
 }
 
-function renderTenanciesPage() {
-  const tab = state.tenancyTab
-  const search = state.tenancySearch.toLowerCase()
+function renderDashboardPage() {
+  const tab = state.dashboardTab
+  const search = state.dashboardSearch.toLowerCase()
 
   const allTenancies = TENANCIES
   const active = allTenancies.filter(t => !t.caseStatus && getTenancyStatus(t).label === 'Active')
@@ -897,7 +909,7 @@ function renderTenanciesPage() {
     filtered = filtered.filter(t => t.property.toLowerCase().includes(search) || t.tenant.toLowerCase().includes(search))
   }
 
-  const tabBtn = (key, label, count) => `<button onclick="state.tenancyTab='${key}';render()" class="whitespace-nowrap px-3 py-1.5 text-xs font-medium transition ${tab === key ? 'border border-zinc-900 bg-zinc-900 text-white' : 'border border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:text-zinc-900'}">${label} (${count})</button>`
+  const tabBtn = (key, label, count) => `<button onclick="state.dashboardTab='${key}';render()" class="whitespace-nowrap px-3 py-1.5 text-xs font-medium transition ${tab === key ? 'border border-zinc-900 bg-zinc-900 text-white' : 'border border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:text-zinc-900'}">${label} (${count})</button>`
 
   return `
     <div class="fade-in space-y-5">
@@ -909,7 +921,7 @@ function renderTenanciesPage() {
         ${tabBtn('with_case', 'With case', withCase.length)}
         ${tabBtn('no_case', 'No case', noCase.length)}
         <div class="ml-auto relative">
-          <input type="text" placeholder="Search tenancies..." value="${state.tenancySearch}" oninput="state.tenancySearch=this.value;render()" class="border border-zinc-200 bg-white px-3 py-1.5 pl-8 text-sm text-zinc-700 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none w-[200px]">
+          <input type="text" placeholder="Search tenancies..." value="${state.dashboardSearch}" oninput="state.dashboardSearch=this.value;render()" class="border border-zinc-200 bg-white px-3 py-1.5 pl-8 text-sm text-zinc-700 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none w-[200px]">
           <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-400">${svgIcon('search')}</span>
         </div>
       </div>
@@ -927,7 +939,7 @@ function renderTenanciesPage() {
         ${filtered.map(t => {
           const st = getTenancyStatus(t)
           return `
-          <div onclick="navigate('tenancy-detail','${t.id}')" class="grid grid-cols-1 sm:grid-cols-[1fr_160px] md:grid-cols-[1fr_160px_140px_120px_100px] gap-2 md:gap-4 px-4 py-3 cursor-pointer transition hover:bg-zinc-50/70 items-center">
+          <div onclick="navigate('dashboard-detail','${t.id}')" class="grid grid-cols-1 sm:grid-cols-[1fr_160px] md:grid-cols-[1fr_160px_140px_120px_100px] gap-2 md:gap-4 px-4 py-3 cursor-pointer transition hover:bg-zinc-50/70 items-center">
             <div class="min-w-0">
               <p class="text-sm font-medium text-zinc-950 truncate">${t.property}</p>
               <p class="mt-0.5 text-xs text-zinc-500"><span class="text-zinc-400">Tenant</span> ${t.tenant}</p>
@@ -950,7 +962,7 @@ function renderTenanciesPage() {
     </div>`
 }
 
-function renderTenancyDetailPage() {
+function renderDashboardDetailPage() {
   const t = TENANCIES.find(t => t.id === state.activeTenancyId) || TENANCIES[0]
   const st = getTenancyStatus(t)
 
@@ -961,7 +973,7 @@ function renderTenancyDetailPage() {
       <!-- Header -->
       <div class="flex items-start justify-between gap-4">
         <div>
-          <a onclick="navigate('tenancies')" class="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500 hover:text-zinc-700 cursor-pointer">${svgIcon('arrowLeft')} Back to tenancies</a>
+          <a onclick="navigate('dashboard')" class="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500 hover:text-zinc-700 cursor-pointer">${svgIcon('arrowLeft')} Back to dashboard</a>
           <h2 class="mt-2 text-base font-semibold tracking-[-0.02em] text-zinc-950">${t.property}</h2>
           <p class="mt-0.5 text-xs text-zinc-400">${t.id}</p>
         </div>
@@ -1018,7 +1030,7 @@ function renderTenancyDetailPage() {
             ${t.caseId ? `
               <div class="mt-3 space-y-3">
                 ${badge(STATUS_META[t.caseStatus]?.label || t.caseStatus, STATUS_META[t.caseStatus]?.badgeCls || 'border-zinc-200 bg-zinc-100 text-zinc-700')}
-                <button onclick="navigate('workspace','${t.caseId}')" class="mt-3 w-full border border-emerald-600 bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-700">Open checkout workspace</button>
+                <button onclick="navigate('workspace','${t.caseId}')" class="mt-3 w-full border border-emerald-600 bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-700">Open case workspace</button>
               </div>
             ` : `
               <p class="mt-3 text-sm text-zinc-500">No checkout case exists for this tenancy.</p>
@@ -1088,7 +1100,7 @@ function renderGuidancePage() {
               ${badge(a.category, 'border-zinc-200 bg-zinc-50 text-zinc-600')}
             </div>
             <div class="mt-2 flex items-center gap-2">
-              ${a.regions.map(r => `<span class="text-[10px] font-medium text-zinc-400">${r}</span>`).join('<span class="text-zinc-200">·</span>')}
+              ${a.regions.map(r => `<span class="text-[10px] font-medium text-zinc-400">${r}</span>`).join('<span class="text-zinc-200">&middot;</span>')}
             </div>
           </div>
         `).join('')}
@@ -1098,22 +1110,12 @@ function renderGuidancePage() {
 }
 
 function renderAdminPage() {
-  const integrations = ['Reapit', 'Arthur Online', 'Inventory Base', 'No Letting Go', 'Imfuna']
   return `
     <div class="fade-in space-y-6">
-      <section class="border border-zinc-200/80 bg-white px-6 py-6">
-        <h3 class="text-sm font-semibold text-zinc-950">Checkout intake</h3>
-        <p class="mt-1 text-sm text-zinc-500">Manage how end-of-tenancy checkouts arrive from inventory software.</p>
-        <div class="mt-5 overflow-hidden border border-zinc-200">
-          <table class="w-full text-sm">
-            <thead><tr class="border-b border-zinc-200 bg-zinc-50/80"><th class="px-4 py-2.5 text-left text-xs font-medium text-zinc-500">Platform</th><th class="px-4 py-2.5 text-left text-xs font-medium text-zinc-500">Status</th></tr></thead>
-            <tbody>${integrations.map(n => `<tr class="border-b border-zinc-100 last:border-0"><td class="px-4 py-2.5 font-medium text-zinc-950">${n}</td><td class="px-4 py-2.5"><span class="text-xs font-medium text-amber-600">Planned</span></td></tr>`).join('')}</tbody>
-          </table>
-        </div>
-      </section>
-      <section class="border border-zinc-200/80 bg-white px-6 py-6">
+      <!-- Case allocation -->
+      <section class="border border-zinc-200/80 bg-white px-6 py-6 md:px-7">
         <h3 class="text-sm font-semibold text-zinc-950">Case allocation</h3>
-        <p class="mt-1 text-sm text-zinc-500">Assign incoming checkouts to team members.</p>
+        <p class="mt-1 text-sm text-zinc-500">Assign incoming checkouts to property managers. Select a team member from the dropdown to allocate, or remove an existing assignment.</p>
         <div class="mt-4 flex items-center gap-2">
           ${['unallocated','allocated','all_cases'].map(tab => {
             const label = tab === 'unallocated' ? 'Unallocated' : tab === 'allocated' ? 'Allocated' : 'All'
@@ -1154,15 +1156,17 @@ function renderAdminPage() {
           </table>
         </div>
       </section>
-      <section class="border border-zinc-200/80 bg-white px-6 py-6">
+
+      <!-- Teams -->
+      <section class="border border-zinc-200/80 bg-white px-6 py-6 md:px-7">
         <h3 class="text-sm font-semibold text-zinc-950">Teams</h3>
         <p class="mt-1 text-sm text-zinc-500">Manage workspace members, roles, and team structure.</p>
         <div class="mt-5 grid gap-4 md:grid-cols-2">
           <a onclick="navigate('teams')" class="flex items-start gap-4 border border-zinc-200 px-5 py-4 transition hover:border-zinc-300 hover:bg-zinc-50/50 cursor-pointer">
-            <div><p class="text-sm font-medium text-zinc-950">Members</p><p class="mt-1 text-sm leading-6 text-zinc-600">Add, remove, and manage workspace members.</p></div>
+            <div><p class="text-sm font-medium text-zinc-950">Members</p><p class="mt-1 text-sm leading-6 text-zinc-600">Add, remove, and manage workspace members. Assign roles and control access.</p></div>
           </a>
           <a onclick="navigate('teams')" class="flex items-start gap-4 border border-zinc-200 px-5 py-4 transition hover:border-zinc-300 hover:bg-zinc-50/50 cursor-pointer">
-            <div><p class="text-sm font-medium text-zinc-950">Team groups</p><p class="mt-1 text-sm leading-6 text-zinc-600">Organise members into teams by portfolio or region.</p></div>
+            <div><p class="text-sm font-medium text-zinc-950">Team groups</p><p class="mt-1 text-sm leading-6 text-zinc-600">Organise members into teams by portfolio, region, or function.</p></div>
           </a>
         </div>
       </section>
@@ -1288,50 +1292,187 @@ function renderReportsPage() {
 }
 
 function renderSettingsPage() {
+  const tab = state.settingsTab
+  const tabBtn = (key, label) => `<button onclick="state.settingsTab='${key}';render()" class="inline-flex items-center border-b-2 px-2.5 pb-2 text-sm font-medium transition ${tab === key ? 'border-emerald-600 text-zinc-900' : 'border-transparent text-zinc-500 hover:border-zinc-300 hover:text-zinc-700'}">${label}</button>`
+
+  let content = ''
+
+  if (tab === 'account') {
+    content = `
+      <div class="space-y-6">
+        <section class="border border-zinc-200/80 bg-white px-6 py-6">
+          <h3 class="text-sm font-semibold text-zinc-950">Basic information</h3>
+          <div class="mt-5 grid gap-4 sm:grid-cols-2">
+            <div><label class="text-xs font-medium text-zinc-500">First name</label><input type="text" value="Jamie" class="mt-1 w-full border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none"></div>
+            <div><label class="text-xs font-medium text-zinc-500">Last name</label><input type="text" value="Mitchell" class="mt-1 w-full border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none"></div>
+            <div class="sm:col-span-2"><label class="text-xs font-medium text-zinc-500">Email</label><input type="email" value="j.mitchell@propertyfirst.co.uk" disabled class="mt-1 w-full border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-500"></div>
+          </div>
+          <div class="mt-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="relative h-5 w-9 cursor-pointer rounded-full bg-emerald-500 transition">
+                <div class="absolute right-0.5 top-0.5 h-4 w-4 rounded-full bg-white shadow transition"></div>
+              </div>
+              <span class="text-sm text-zinc-700">Receive email notifications</span>
+            </div>
+          </div>
+          <div class="mt-5">
+            <button onclick="alert('Demo — profile would be updated.')" class="border border-zinc-900 bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 transition">Update profile</button>
+          </div>
+        </section>
+
+        <section class="border border-zinc-200/80 bg-white px-6 py-6">
+          <h3 class="text-sm font-semibold text-zinc-950">Change password</h3>
+          <div class="mt-5 space-y-4 max-w-md">
+            <div><label class="text-xs font-medium text-zinc-500">Current password</label><input type="password" class="mt-1 w-full border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none"></div>
+            <div><label class="text-xs font-medium text-zinc-500">New password</label><input type="password" class="mt-1 w-full border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none"></div>
+            <div><label class="text-xs font-medium text-zinc-500">Confirm new password</label><input type="password" class="mt-1 w-full border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none"></div>
+          </div>
+          <div class="mt-5">
+            <button onclick="alert('Demo — password would be updated.')" class="border border-zinc-900 bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 transition">Update password</button>
+          </div>
+        </section>
+
+        <section class="border border-zinc-200/80 bg-white px-6 py-6">
+          <h3 class="text-sm font-semibold text-zinc-950">Two-factor authentication</h3>
+          <div class="mt-3 flex items-center gap-3">
+            ${badge('Not enabled', 'border-zinc-200 bg-zinc-100 text-zinc-600')}
+            <span class="text-sm text-zinc-500">Not yet configured</span>
+          </div>
+        </section>
+      </div>`
+  } else if (tab === 'team') {
+    content = `
+      <div class="space-y-6">
+        <section class="border border-zinc-200/80 bg-white px-6 py-6">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-semibold text-zinc-950">Your team</h3>
+            <button onclick="alert('Demo — invite form would appear.')" class="inline-flex items-center gap-1.5 border border-emerald-600 bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-emerald-700">Invite user</button>
+          </div>
+          <div class="mt-5 overflow-hidden border border-zinc-200">
+            <table class="min-w-full text-left">
+              <thead class="bg-zinc-50/80 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
+                <tr><th class="px-4 py-2.5">Name</th><th class="px-4 py-2.5">Email</th><th class="px-4 py-2.5">Date joined</th><th class="px-4 py-2.5">Permission level</th><th class="px-4 py-2.5">Status</th></tr>
+              </thead>
+              <tbody class="divide-y divide-zinc-100">
+                ${MEMBERS.map(m => `
+                  <tr class="hover:bg-zinc-50/70">
+                    <td class="px-4 py-3 text-sm font-medium text-zinc-950">${m.name}</td>
+                    <td class="px-4 py-3 text-sm text-zinc-600">${m.email}</td>
+                    <td class="px-4 py-3 text-sm text-zinc-500">${m.status === 'active' ? '12 Jan 2025' : '\u2014'}</td>
+                    <td class="px-4 py-3">${badge(m.role.charAt(0).toUpperCase() + m.role.slice(1), m.role === 'admin' ? 'border-violet-200 bg-violet-50 text-violet-700' : m.role === 'operator' ? 'border-sky-200 bg-sky-50 text-sky-700' : 'border-zinc-200 bg-zinc-100 text-zinc-600')}</td>
+                    <td class="px-4 py-3">${badge(m.status.charAt(0).toUpperCase() + m.status.slice(1), m.status === 'active' ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-amber-200 bg-amber-50 text-amber-700')}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>`
+  } else if (tab === 'integrations') {
+    const sel = INTEGRATIONS[state.selectedIntegration]
+    content = `
+      <div class="space-y-6">
+        <div class="flex items-center gap-2 overflow-x-auto pb-1">
+          ${INTEGRATIONS.map((intg, i) => `
+            <button onclick="state.selectedIntegration=${i};render()" class="whitespace-nowrap px-3 py-1.5 text-xs font-medium transition ${state.selectedIntegration === i ? 'border border-zinc-900 bg-zinc-900 text-white' : 'border border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:text-zinc-900'}">${intg.name}</button>
+          `).join('')}
+        </div>
+
+        <section class="border border-zinc-200/80 bg-white px-6 py-6">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <h3 class="text-sm font-semibold text-zinc-950">${sel.name}</h3>
+              <p class="mt-1 text-sm text-zinc-500">${sel.desc}</p>
+            </div>
+            ${badge(sel.status, 'border-zinc-200 bg-zinc-100 text-zinc-600')}
+          </div>
+          <div class="mt-5">
+            <p class="text-xs font-medium text-zinc-500">Features</p>
+            <ul class="mt-2 space-y-1.5">
+              ${sel.features.map(f => `<li class="flex items-center gap-2 text-sm text-zinc-700"><svg class="h-3.5 w-3.5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>${f}</li>`).join('')}
+            </ul>
+          </div>
+          <div class="mt-6 space-y-4 max-w-md">
+            <div><label class="text-xs font-medium text-zinc-500">API key</label><input type="text" placeholder="Enter your API key" class="mt-1 w-full border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none"></div>
+            <div><label class="text-xs font-medium text-zinc-500">Integration status</label>
+              <select class="mt-1 w-full border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-700">
+                <option>Inactive</option><option>Active</option>
+              </select>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="relative h-5 w-9 cursor-pointer rounded-full bg-zinc-200 transition">
+                <div class="absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white shadow transition"></div>
+              </div>
+              <span class="text-sm text-zinc-700">Automatically sync properties overnight</span>
+            </div>
+          </div>
+        </section>
+      </div>`
+  }
+
   return `
     <div class="fade-in space-y-6">
-      <section class="border border-zinc-200/80 bg-white px-6 py-6">
-        <h3 class="text-sm font-semibold text-zinc-950">Operator defaults</h3>
-        <p class="mt-1 text-sm text-zinc-500">Default settings applied to new checkouts and operator workflows.</p>
-        <div class="mt-5 space-y-3">
-          <div class="flex items-center justify-between border-b border-zinc-100 py-3">
-            <div><p class="text-sm text-zinc-700">Default deposit scheme</p></div>
-            <p class="text-sm font-medium text-zinc-950">SafeDeposits Scotland</p>
+      <div class="flex items-center gap-4 border-b border-zinc-200">
+        ${tabBtn('account', 'Account')}
+        ${tabBtn('team', 'Team')}
+        ${tabBtn('integrations', 'Integrations')}
+      </div>
+      ${content}
+    </div>`
+}
+
+function renderBillingPage() {
+  return `
+    <div class="fade-in space-y-6">
+      <!-- Current plan -->
+      <section class="border border-zinc-200/80 bg-white px-6 py-6 md:px-7">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-semibold text-zinc-950">Current plan</h3>
+          ${badge('Active', 'border-emerald-200 bg-emerald-50 text-emerald-700')}
+        </div>
+        <div class="mt-5 grid grid-cols-2 gap-4 xl:grid-cols-4">
+          <div>
+            <p class="text-[11px] font-medium uppercase tracking-wide text-zinc-400">Plan</p>
+            <p class="mt-1 text-sm font-medium text-zinc-950">Growth</p>
           </div>
-          <div class="flex items-center justify-between border-b border-zinc-100 py-3">
-            <div><p class="text-sm text-zinc-700">Auto-analyse on evidence complete</p></div>
-            <p class="text-sm font-medium text-zinc-950">Enabled</p>
+          <div>
+            <p class="text-[11px] font-medium uppercase tracking-wide text-zinc-400">Billing cycle</p>
+            <p class="mt-1 text-sm font-medium text-zinc-950">Monthly</p>
           </div>
-          <div class="flex items-center justify-between py-3">
-            <div><p class="text-sm text-zinc-700">Draft email review required</p></div>
-            <p class="text-sm font-medium text-zinc-950">Yes</p>
+          <div>
+            <p class="text-[11px] font-medium uppercase tracking-wide text-zinc-400">Next invoice</p>
+            <p class="mt-1 text-sm font-medium text-zinc-500">&mdash;</p>
+          </div>
+          <div>
+            <p class="text-[11px] font-medium uppercase tracking-wide text-zinc-400">Checkouts this month</p>
+            <p class="mt-1 text-sm font-medium text-zinc-500">&mdash;</p>
           </div>
         </div>
       </section>
-      <section class="border border-zinc-200/80 bg-white px-6 py-6">
-        <h3 class="text-sm font-semibold text-zinc-950">Outbound messaging</h3>
-        <p class="mt-1 text-sm text-zinc-500">Email delivery configuration for checkout reports and notifications.</p>
-        <div class="mt-5 space-y-3">
-          <div class="flex items-center justify-between border-b border-zinc-100 py-3">
-            <div><p class="text-sm text-zinc-700">Email provider</p></div>
-            <p class="text-sm font-medium text-zinc-950">Resend</p>
-          </div>
-          <div class="flex items-center justify-between border-b border-zinc-100 py-3">
-            <div><p class="text-sm text-zinc-700">Sending domain</p></div>
-            <p class="text-sm font-medium text-emerald-700">Verified</p>
-          </div>
-          <div class="flex items-center justify-between py-3">
-            <div><p class="text-sm text-zinc-700">Reply-to address</p></div>
-            <p class="text-sm font-medium text-zinc-950">support@propertyfirst.co.uk</p>
-          </div>
+
+      <!-- Payment method -->
+      <section class="border border-zinc-200/80 bg-white px-6 py-6 md:px-7">
+        <h3 class="text-sm font-semibold text-zinc-950">Payment method</h3>
+        <p class="mt-1 text-sm text-zinc-500">Manage the card or payment method on file.</p>
+        <div class="mt-5 py-6 text-center">
+          <p class="text-sm text-zinc-500">No payment method on file. Contact support to set up billing.</p>
+        </div>
+      </section>
+
+      <!-- Billing history -->
+      <section class="border border-zinc-200/80 bg-white px-6 py-6 md:px-7">
+        <h3 class="text-sm font-semibold text-zinc-950">Billing history</h3>
+        <p class="mt-1 text-sm text-zinc-500">Past invoices and payment records.</p>
+        <div class="mt-5 py-6 text-center">
+          <p class="text-sm text-zinc-500">No billing history yet.</p>
         </div>
       </section>
     </div>`
 }
 
-// ═══════════════════════════════════════════════════════════════
+// ════��════════════════════════════════════════��═════════════════
 // WORKFLOW ACTIONS
-// ═══════════════════════════════════════════════════════════════
+// ═══════════��═══════════════��═══════════════════════════════════
 
 function handleUpload() {
   state.workspaceDocuments = ['Check-in report', 'Check-out report', 'Evidence photos (12)']
@@ -1401,12 +1542,9 @@ function handleReset() {
 }
 
 function handleStepClick(step) {
-  // Only allow clicking completed or current steps
   const currentIdx = WORKFLOW_STEPS.indexOf(state.workspaceStatus)
   const targetIdx = WORKFLOW_STEPS.indexOf(step)
   if (targetIdx <= currentIdx) {
-    // For completed steps, just show them (don't reset state)
-    // But we need issues populated for review+ steps
     if (targetIdx >= 3 && state.workspaceIssues.length === 0) {
       state.workspaceIssues = MOCK_ISSUES
     }
@@ -1418,16 +1556,16 @@ function handleStepClick(step) {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════
+// ═══════��══════════════════════════��════════════════════════════
 // MAIN RENDER
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════��═════════════════════════════════════���═
 
 function render() {
   const pageConfig = getPageConfig()
   const pageRenderers = {
+    dashboard: renderDashboardPage,
+    'dashboard-detail': renderDashboardDetailPage,
     tenancies: renderTenanciesPage,
-    'tenancy-detail': renderTenancyDetailPage,
-    checkouts: renderCheckoutsPage,
     workspace: renderWorkspacePage,
     disputes: renderDisputesPage,
     feedback: renderFeedbackPage,
@@ -1437,8 +1575,11 @@ function render() {
     teams: renderTeamsPage,
     reports: renderReportsPage,
     settings: renderSettingsPage,
+    billing: renderBillingPage,
   }
-  const pageContent = (pageRenderers[state.page] || renderCheckoutsPage)()
+  const pageContent = (pageRenderers[state.page] || renderTenanciesPage)()
+
+  const isGuidancePage = state.page === 'guidance'
 
   document.getElementById('app').innerHTML = `
     <main class="min-h-screen text-zinc-900">
@@ -1480,14 +1621,41 @@ function render() {
                   </div>
                 </div>
                 <div class="flex items-center gap-3">
+                  <!-- Guidance link -->
+                  <a onclick="navigate('guidance')" class="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition cursor-pointer ${isGuidancePage ? 'bg-emerald-50 text-emerald-600' : 'text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700'}">
+                    ${svgIcon('bookOpenText')}
+                    Guidance
+                  </a>
                   <!-- Demo badge -->
                   <span class="hidden md:inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11px] font-medium text-emerald-700">
                     <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
                     Interactive demo
                   </span>
-                  <div class="hidden items-center gap-2 border-l border-zinc-200 pl-3 md:flex">
-                    <div class="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-50 text-xs font-semibold text-emerald-700">JM</div>
-                    <span class="text-xs font-medium text-zinc-600">Jamie Mitchell</span>
+                  <!-- Profile dropdown -->
+                  <div class="relative">
+                    <button onclick="state.profileMenuOpen=!state.profileMenuOpen;render()" class="hidden items-center gap-2 border-l border-zinc-200 pl-3 transition hover:opacity-80 md:flex">
+                      <div class="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-50 text-xs font-semibold text-emerald-700">JM</div>
+                      <span class="text-xs font-medium text-zinc-600">Jamie Mitchell</span>
+                      ${svgIcon('chevronDown')}
+                    </button>
+                    <button onclick="state.profileMenuOpen=!state.profileMenuOpen;render()" class="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-50 text-xs font-semibold text-emerald-700 md:hidden">JM</button>
+                    ${state.profileMenuOpen ? `
+                      <div class="absolute right-0 top-full z-50 mt-2 w-48 rounded-lg border border-zinc-200 bg-white py-1 shadow-lg">
+                        <a onclick="state.profileMenuOpen=false;navigate('settings')" class="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-700 transition hover:bg-zinc-50 cursor-pointer">
+                          ${svgIcon('settings')}
+                          Settings
+                        </a>
+                        <a onclick="state.profileMenuOpen=false;navigate('billing')" class="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-700 transition hover:bg-zinc-50 cursor-pointer">
+                          ${svgIcon('creditCard')}
+                          Billing
+                        </a>
+                        <div class="my-1 border-t border-zinc-100"></div>
+                        <button onclick="alert('Demo sign out — in the real app this ends your session.')" class="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-zinc-700 transition hover:bg-zinc-50">
+                          ${svgIcon('signout')}
+                          Sign out
+                        </button>
+                      </div>
+                    ` : ''}
                   </div>
                 </div>
               </div>
@@ -1507,6 +1675,14 @@ function render() {
       </div>
     </main>`
 }
+
+// Close profile menu on outside click
+document.addEventListener('click', function(e) {
+  if (state.profileMenuOpen && !e.target.closest('.relative')) {
+    state.profileMenuOpen = false
+    render()
+  }
+})
 
 // Boot
 render()
