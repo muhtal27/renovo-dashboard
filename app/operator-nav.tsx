@@ -89,7 +89,7 @@ const NAV_GROUPS: Array<{
         requiredPermission: OPERATOR_PERMISSIONS.MANAGE_USERS,
       },
       {
-        label: 'Reports / Analytics',
+        label: 'Reports',
         href: '/reports',
         icon: BarChart3,
         isActive: (pathname) => pathname.startsWith('/reports'),

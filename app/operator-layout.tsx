@@ -129,12 +129,12 @@ const OPERATOR_ROUTE_CONFIG: Array<{
   {
     matches: (pathname) => pathname.startsWith('/reports'),
     config: {
-      pageTitle: 'Reports / Analytics',
+      pageTitle: 'Reports',
       pageDescription:
         'Portfolio analytics for workflow mix, issue severity, evidence composition, and generated claim value.',
       searchPlaceholder: 'Search reports by property, tenant, workflow state, or recommendation',
       searchTargetPath: '/reports',
-      breadcrumbs: [{ label: 'Management' }, { label: 'Reports / Analytics' }],
+      breadcrumbs: [{ label: 'Management' }, { label: 'Reports' }],
     },
   },
   {

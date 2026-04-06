@@ -225,12 +225,11 @@ function renderSidebar(mobile = false) {
       { label: 'Tenancies', page: 'tenancies', icon: 'folderKanban', active: p === 'tenancies' || p === 'workspace' },
       { label: 'Disputes', page: 'disputes', icon: 'clipboardCheck', active: p === 'disputes' },
       { label: 'Inventory feedback', page: 'feedback', icon: 'messageSquareMore', active: p === 'feedback' },
-      { label: 'Deposit Scheme', page: 'deposit-scheme', icon: 'landmark', active: p === 'deposit-scheme' },
     ]},
     { label: 'Management', items: [
       { label: 'Admin', page: 'admin', icon: 'layoutDashboard', active: p === 'admin' },
       { label: 'Teams', page: 'teams', icon: 'users', active: p === 'teams' },
-      { label: 'Reports / Analytics', page: 'reports', icon: 'barChart3', active: p === 'reports' },
+      { label: 'Reports', page: 'reports', icon: 'barChart3', active: p === 'reports' },
     ]},
     { label: 'Account', items: [
       { label: 'Billing', page: 'billing', icon: 'creditCard', active: p === 'billing' },
@@ -294,7 +293,7 @@ function getPageConfig() {
     guidance: { title: 'Guidance', breadcrumbs: [{label:'Guidance'}] },
     admin: { title: 'Admin', breadcrumbs: [{label:'Management',link:'reports'},{label:'Admin'}] },
     teams: { title: 'Teams', breadcrumbs: [{label:'Management',link:'admin'},{label:'Teams'}] },
-    reports: { title: 'Reports / Analytics', breadcrumbs: [{label:'Management'},{label:'Reports / Analytics'}] },
+    reports: { title: 'Reports', breadcrumbs: [{label:'Management'},{label:'Reports'}] },
     settings: { title: 'Settings', breadcrumbs: [{label:'Account',link:'billing'},{label:'Settings'}] },
     billing: { title: 'Billing', breadcrumbs: [{label:'Account'},{label:'Billing'}] },
   }
