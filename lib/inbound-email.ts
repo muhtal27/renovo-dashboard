@@ -1,7 +1,7 @@
 /**
  * Shared types and helpers for the inbound email ingestion system.
  *
- * Inbound domain: renovoai.co.uk
+ * Inbound domain: in.renovoai.co.uk
  * Webhook provider: Resend (inbound emails)
  */
 
@@ -82,7 +82,7 @@ export type InboundUnmatchedQueueItem = {
 
 /**
  * Extract the local part (prefix) from a "to" address.
- * e.g. "reports+acme@renovoai.co.uk" → "reports+acme"
+ * e.g. "reports+acme@in.renovoai.co.uk" → "reports+acme"
  */
 export function extractAddressPrefix(toAddress: string): string {
   const [local] = toAddress.split('@')

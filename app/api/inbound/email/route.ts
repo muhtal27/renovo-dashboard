@@ -2,7 +2,7 @@
  * POST /api/inbound/email
  *
  * Webhook endpoint for Resend inbound emails.
- * Receives emails sent to *@renovoai.co.uk, matches them to
+ * Receives emails sent to *@in.renovoai.co.uk, matches them to
  * a tenant config, runs address matching, stores attachments in
  * Supabase Storage, and either auto-attaches to a case or queues
  * for operator review.
