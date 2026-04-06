@@ -127,15 +127,6 @@ const OPERATOR_ROUTE_CONFIG: Array<{
     },
   },
   {
-    matches: (pathname) => pathname.startsWith('/deposit-scheme'),
-    config: {
-      pageTitle: 'Deposit Scheme',
-      pageDescription:
-        'Reference guide to government-approved tenancy deposit protection schemes across the UK.',
-      breadcrumbs: [{ label: 'Deposit Scheme' }],
-    },
-  },
-  {
     matches: (pathname) => pathname.startsWith('/reports'),
     config: {
       pageTitle: 'Reports / Analytics',

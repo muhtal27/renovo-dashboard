@@ -116,17 +116,13 @@ export function useInventoryFeedback(initialData?: FeedbackRow[] | null) {
   return useQuery({
     queryKey: ['eot', 'inventory-feedback'],
     queryFn: async (): Promise<FeedbackRow[]> => {
-      const cases = await listEotCases()
-      const casesWithIssues = cases.filter((c) => c.issue_count > 0)
-
-      const issueResults = await Promise.all(
-        casesWithIssues.map(async (c) => {
-          const issues = await listEotCaseIssues(c.id)
-          return issues.map((issue) => ({ issue, caseItem: c }))
-        })
-      )
-
-      return issueResults.flat()
+      const res = await fetch('/api/eot/feedback')
+      if (!res.ok) {
+        const body = await res.json().catch(() => null)
+        const detail = body?.detail ?? `Request failed with status ${res.status}.`
+        throw new Error(detail)
+      }
+      return res.json()
     },
     initialData: initialData ?? undefined,
     staleTime: 5 * 60_000,
