@@ -13,7 +13,6 @@ import {
   formatCurrency,
   formatEnumLabel,
 } from '@/app/eot/_components/eot-ui'
-import { KPIStatCard } from '@/app/operator-ui'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -119,15 +118,6 @@ export function InventoryFeedbackClient({
 
   return (
     <div className="space-y-4">
-      {/* KPI row */}
-      <div className="grid grid-cols-2 gap-6 border-b border-zinc-200 pb-4 xl:grid-cols-5">
-        <KPIStatCard label="Total issues" value={stats.total} />
-        <KPIStatCard label="High severity" value={stats.high} tone={stats.high > 0 ? 'danger' : 'default'} />
-        <KPIStatCard label="Charge recommended" value={chargeRecommended} tone={chargeRecommended > 0 ? 'warning' : 'default'} />
-        <KPIStatCard label="Pending decision" value={pendingDecision} />
-        <KPIStatCard label="Est. recovery" value={formatCurrency(totalEstimatedCost)} tone="accent" />
-      </div>
-
       {/* Toolbar */}
       <div className="sticky top-0 z-10 border-b border-zinc-200 bg-white/95 py-2 backdrop-blur">
         <div className="flex items-center justify-between gap-3">
@@ -145,6 +135,16 @@ export function InventoryFeedbackClient({
           </div>
 
           <div className="flex items-center gap-2">
+            <div className="hidden items-center gap-4 border-r border-zinc-200 pr-3 xl:flex">
+              <span className="text-xs text-zinc-400">
+                Pending{' '}
+                <span className="font-semibold tabular-nums text-zinc-700">{pendingDecision}</span>
+              </span>
+              <span className="text-xs text-zinc-400">
+                Recovery{' '}
+                <span className="font-semibold tabular-nums text-emerald-600">{formatCurrency(totalEstimatedCost)}</span>
+              </span>
+            </div>
             <select
               value={decisionFilter}
               onChange={(e) => setDecisionFilter(e.target.value as DecisionFilter)}

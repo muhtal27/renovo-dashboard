@@ -14,7 +14,6 @@ import {
   formatDateTime,
   formatEnumLabel,
 } from '@/app/eot/_components/eot-ui'
-import { KPIStatCard } from '@/app/operator-ui'
 
 function buildFullAddress(property: EotCaseListItem['property']): string {
   const parts = [property.address_line_1, property.city, property.postcode]
@@ -85,14 +84,6 @@ export function DisputeListClient({
 
   return (
     <div className="space-y-4">
-      {/* KPI row */}
-      <div className="grid grid-cols-2 gap-6 border-b border-zinc-200 pb-4 xl:grid-cols-4">
-        <KPIStatCard label="Active disputes" value={stats.total} />
-        <KPIStatCard label="High priority" value={stats.high} tone={stats.high > 0 ? 'danger' : 'default'} />
-        <KPIStatCard label="Deposit at risk" value={formatCurrency(totalDeposit)} />
-        <KPIStatCard label="Total issues" value={totalIssues} />
-      </div>
-
       {/* Toolbar */}
       <div className="sticky top-0 z-10 border-b border-zinc-200 bg-white/95 py-2 backdrop-blur">
         <div className="flex items-center justify-between gap-3">
@@ -110,6 +101,16 @@ export function DisputeListClient({
           </div>
 
           <div className="flex items-center gap-2">
+            <div className="hidden items-center gap-4 border-r border-zinc-200 pr-3 xl:flex">
+              <span className="text-xs text-zinc-400">
+                Deposit at risk{' '}
+                <span className="font-semibold tabular-nums text-zinc-700">{formatCurrency(totalDeposit)}</span>
+              </span>
+              <span className="text-xs text-zinc-400">
+                Issues{' '}
+                <span className="font-semibold tabular-nums text-zinc-700">{totalIssues}</span>
+              </span>
+            </div>
             <input
               type="text"
               placeholder="Search disputes..."
