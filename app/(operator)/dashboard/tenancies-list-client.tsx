@@ -192,7 +192,7 @@ export function TenanciesListClient({
             return (
               <Link
                 key={tenancy.id}
-                href={`/tenancies/${tenancy.id}`}
+                href={tenancy.case_id ? `/operator/cases/${tenancy.case_id}` : `/dashboard/${tenancy.id}`}
                 prefetch={false}
                 className="grid grid-cols-1 items-start gap-x-6 border-b border-zinc-200 px-5 py-5 transition hover:bg-zinc-50/60 sm:grid-cols-[1fr_160px] md:grid-cols-[1fr_160px_140px_120px_100px]"
               >
