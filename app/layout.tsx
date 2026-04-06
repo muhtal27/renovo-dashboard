@@ -7,6 +7,7 @@ import {
   siteName,
   siteUrl,
 } from '@/lib/marketing-metadata'
+import { ConnectionStatus } from './components/ConnectionStatus'
 import { PwaSplash } from './components/PwaSplash'
 import { ServiceWorkerRegistration } from './components/ServiceWorkerRegistration'
 
@@ -74,6 +75,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${dmSans.variable} ${instrumentSerif.variable}`}>
         <PwaSplash />
+        <ConnectionStatus />
         {children}
         <ServiceWorkerRegistration />
       </body>

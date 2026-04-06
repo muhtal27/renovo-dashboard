@@ -33,6 +33,9 @@
 
 html {
   scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
+  /* Prevent pull-to-refresh / rubber-band bounce in standalone PWA */
+  overscroll-behavior: none;
 }
 
 body {
@@ -126,6 +129,8 @@ select {
     color 180ms ease,
     box-shadow 180ms ease,
     transform 180ms ease;
+  /* Faster taps — disable 300ms delay on touch devices */
+  touch-action: manipulation;
 }
 
 button {
