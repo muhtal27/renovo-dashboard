@@ -20,11 +20,15 @@ export default function AboutClient() {
         {/* WHO'S BEHIND IT */}
         <section className="mx-auto max-w-[1080px] px-6 py-24">
           <p className="app-kicker">Behind the product</p>
+          <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
+            Built from <em className="text-slate-400">real operations</em>
+          </h2>
           <p className="mt-5 max-w-[640px] text-base leading-8 text-slate-500">
-            Renovo AI was built by someone who manages end of tenancy operations
-            for residential lettings portfolios — to bring structure to the
-            checkout workflow, from evidence review and liability assessment
-            through to deposit resolution and dispute preparation.
+            Renovo AI was built by a team that manages end of tenancy operations
+            for residential lettings portfolios. The product exists to bring
+            structure to a process that is often fragmented — turning checkout
+            evidence into reviewable, defensible deposit decisions with a clear
+            trail at every step.
           </p>
         </section>
 
