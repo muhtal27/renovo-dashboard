@@ -9,8 +9,8 @@ import {
   ChevronLeft,
   ClipboardCheck,
   CreditCard,
+  Home,
   LayoutDashboard,
-  MessageSquareMore,
   Users,
   X,
 } from 'lucide-react'
@@ -47,20 +47,20 @@ const NAV_GROUPS: Array<{
       {
         label: 'Dashboard',
         href: '/dashboard',
+        icon: Home,
+        isActive: (pathname) => pathname === '/dashboard',
+      },
+      {
+        label: 'Tenancies',
+        href: '/tenancies',
         icon: Building2,
-        isActive: (pathname) => pathname === '/dashboard' || pathname.startsWith('/dashboard/'),
+        isActive: (pathname) => pathname === '/tenancies' || pathname.startsWith('/tenancies/'),
       },
       {
         label: 'Disputes',
         href: '/disputes',
         icon: ClipboardCheck,
         isActive: (pathname) => pathname.startsWith('/disputes') || pathname.startsWith('/issues'),
-      },
-      {
-        label: 'Inventory feedback',
-        href: '/inventory-feedback',
-        icon: MessageSquareMore,
-        isActive: (pathname) => pathname.startsWith('/inventory-feedback'),
       },
     ],
   },

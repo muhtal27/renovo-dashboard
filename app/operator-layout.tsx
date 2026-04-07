@@ -85,12 +85,14 @@ const OPERATOR_ROUTE_CONFIG: Array<{
     },
   },
   {
-    matches: (pathname) => pathname.startsWith('/inventory-feedback'),
+    matches: (pathname) => pathname === '/tenancies' || pathname.startsWith('/tenancies'),
     config: {
-      pageTitle: 'Inventory feedback',
+      pageTitle: 'Tenancies',
       pageDescription:
-        'Review issues identified across all checkout cases. Filter by severity, recommendation, and status to manage your inventory feedback queue.',
-      breadcrumbs: [{ label: 'Inventory feedback' }],
+        'View all tenancy records across your portfolio. Filter by active or archived status.',
+      searchPlaceholder: 'Search tenancies by property, tenant, or reference',
+      searchTargetPath: '/tenancies',
+      breadcrumbs: [{ label: 'Tenancies' }],
     },
   },
   {
