@@ -1,4 +1,3 @@
-import Image from "next/image"
 import { MarketingShell } from "@/app/components/MarketingShell"
 
 export default function AboutClient() {
@@ -20,32 +19,13 @@ export default function AboutClient() {
 
         {/* WHO'S BEHIND IT */}
         <section className="mx-auto max-w-[1080px] px-6 py-24">
-          <div className="grid items-center gap-14 md:grid-cols-[280px_1fr]">
-            <div className="relative mx-auto w-full max-w-[280px]">
-              <div className="aspect-[4/5] overflow-hidden rounded-xl border border-zinc-200 bg-zinc-100">
-                <Image
-                  src="/muhammad-headshot.jpg"
-                  alt="Muhammad Munawar — End of Tenancy Property Manager"
-                  width={560}
-                  height={700}
-                  className="h-full w-full object-cover"
-                />
-              </div>
-            </div>
-            <div>
-              <p className="app-kicker">Behind the product</p>
-              <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
-                Muhammad Munawar
-              </h2>
-              <p className="mt-2 text-sm font-medium text-emerald-600">End of Tenancy Property Manager</p>
-              <p className="mt-5 max-w-[540px] text-base leading-8 text-slate-500">
-                Muhammad manages end of tenancy operations for residential
-                lettings portfolios. He built Renovo AI to bring structure to
-                the checkout workflow — from evidence review and liability
-                assessment through to deposit resolution and dispute preparation.
-              </p>
-            </div>
-          </div>
+          <p className="app-kicker">Behind the product</p>
+          <p className="mt-5 max-w-[640px] text-base leading-8 text-slate-500">
+            Renovo AI was built by someone who manages end of tenancy operations
+            for residential lettings portfolios — to bring structure to the
+            checkout workflow, from evidence review and liability assessment
+            through to deposit resolution and dispute preparation.
+          </p>
         </section>
 
         {/* THE COMPANY */}
