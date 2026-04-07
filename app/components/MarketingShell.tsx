@@ -193,8 +193,7 @@ export function MarketingShell({
             <div>
               <Link href="/" className="text-lg font-bold tracking-tight text-white">Renovo AI</Link>
               <p className="mt-3 max-w-[260px] text-[13px] leading-[1.7] text-slate-400">
-                End of tenancy automation for UK letting agencies. Checkouts, claims, and disputes
-                in one workflow.
+                End of tenancy software for letting agencies.
               </p>
             </div>
 

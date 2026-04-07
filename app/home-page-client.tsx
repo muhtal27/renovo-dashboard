@@ -111,14 +111,14 @@ export default function HomePageClient() {
             <div>
               <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-[#1e293b] bg-white/[0.025] px-4 py-1.5 text-[13px] font-medium text-emerald-500">
                 <span className="renovo-pulse h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                End of tenancy automation
+                End of tenancy software for letting agencies
               </div>
               <h1 className="text-[clamp(32px,4.5vw,52px)] font-bold leading-[1.15] tracking-[-0.035em] text-white">
-                <span className="bg-gradient-to-br from-emerald-500 to-emerald-300 bg-clip-text text-transparent">Checkout reports in.</span><br />
-                <span className="text-white">Deposit decisions out.</span>
+                <span className="text-white">Bring control and consistency to every</span><br />
+                <span className="bg-gradient-to-br from-emerald-500 to-emerald-300 bg-clip-text text-transparent">end of tenancy claims</span>
               </h1>
               <p className="mt-5 max-w-[460px] text-[17px] leading-[1.75] text-slate-400">
-                AI-powered liability comparison, deduction drafting, evidence management, and dispute pack preparation. Manager-approved at every stage.
+                Renovo AI helps letting agencies manage evidence, deduction drafting, review, and dispute preparation in one structured workflow.
               </p>
               <div className="mt-9 flex flex-wrap gap-3">
                 <Link href="/book-demo" className="app-accent-button rounded-lg px-6 py-3 text-sm">Book a demo &rarr;</Link>
@@ -269,7 +269,7 @@ export default function HomePageClient() {
           <div className="grid gap-10 border-b border-[#1e293b] pb-10 md:grid-cols-2 xl:grid-cols-[2fr_1fr_1fr_1fr]">
             <div>
               <Link href="/" className="text-lg font-bold tracking-tight text-white">Renovo AI</Link>
-              <p className="mt-3 max-w-[260px] text-[13px] leading-[1.7] text-slate-400">End of tenancy automation for UK letting agencies. Checkouts, claims, and disputes in one workflow.</p>
+              <p className="mt-3 max-w-[260px] text-[13px] leading-[1.7] text-slate-400">End of tenancy software for letting agencies.</p>
             </div>
             {Object.entries(footerCols).map(([title, links]) => (
               <div key={title}>
