@@ -114,7 +114,7 @@ export default function HomePageClient() {
                 End of tenancy software for letting agencies
               </div>
               <h1 className="text-[clamp(32px,4.5vw,52px)] font-bold leading-[1.15] tracking-[-0.035em] text-white">
-                <span className="text-white">Bring control and consistency to every</span><br />
+                <span className="text-white">Bring control and consistency to</span><br />
                 <span className="bg-gradient-to-br from-emerald-500 to-emerald-300 bg-clip-text text-transparent">end of tenancy claims</span>
               </h1>
               <p className="mt-5 max-w-[460px] text-[17px] leading-[1.75] text-slate-400">
