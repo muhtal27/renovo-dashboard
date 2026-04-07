@@ -5,7 +5,6 @@ const PROTECTED_OPERATOR_ROUTES = [
   '/tenancy',
   '/disputes',
   '/recommendations',
-  '/deposit-scheme',
   '/reports',
   '/calls',
   '/guidance',

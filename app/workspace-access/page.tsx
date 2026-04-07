@@ -13,7 +13,7 @@ type SelectionState = {
 }
 
 function getSafeReturnTo() {
-  if (typeof window === 'undefined') return '/tenancies'
+  if (typeof window === 'undefined') return '/dashboard'
 
   return getReturnToFromSearch(window.location.search)
 }
@@ -255,16 +255,16 @@ export default function WorkspaceAccessPage() {
               <Link href={returnTo} className="app-primary-button rounded px-6 py-3 text-sm font-medium">
                 Continue to workspace
               </Link>
-              <Link href="/tenancies" className="app-secondary-button rounded px-6 py-3 text-sm font-medium">
-                Open tenancies
+              <Link href="/dashboard" className="app-secondary-button rounded px-6 py-3 text-sm font-medium">
+                Open dashboard
               </Link>
             </div>
           ) : null}
 
           {!loading && operator?.membership && reason === 'forbidden' ? (
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/tenancies" className="app-primary-button rounded px-6 py-3 text-sm font-medium">
-                Open tenancies
+              <Link href="/dashboard" className="app-primary-button rounded px-6 py-3 text-sm font-medium">
+                Open dashboard
               </Link>
               <Link href="/admin" className="app-secondary-button rounded px-6 py-3 text-sm font-medium">
                 Go to admin

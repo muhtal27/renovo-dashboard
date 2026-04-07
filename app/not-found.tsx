@@ -17,7 +17,7 @@ export default function NotFound() {
 
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           <Link
-            href="/tenancies"
+            href="/dashboard"
             className="rounded-md bg-zinc-950 px-5 py-2.5 text-sm font-medium text-white hover:bg-zinc-800"
           >
             Go to dashboard

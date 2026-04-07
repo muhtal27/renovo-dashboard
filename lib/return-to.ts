@@ -1,4 +1,4 @@
-const DEFAULT_RETURN_TO = '/tenancies'
+const DEFAULT_RETURN_TO = '/dashboard'
 
 export function normalizeReturnTo(
   value: string | null | undefined,

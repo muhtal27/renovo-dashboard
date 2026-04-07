@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 type PageProps = { params: Promise<{ tenancyId: string }> }
 
 export default async function TenancyDetailPage({ params }: PageProps) {
-  await requireOperatorTenant('/tenancies')
+  await requireOperatorTenant('/dashboard')
   const { tenancyId } = await params
 
   return <TenancyDetailClient tenancyId={tenancyId} />

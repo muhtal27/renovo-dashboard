@@ -52,7 +52,7 @@ export default function Error({
             Try again
           </button>
           <Link
-            href="/tenancies"
+            href="/dashboard"
             className="rounded-md border border-zinc-200 px-5 py-2.5 text-sm font-medium text-zinc-600 hover:bg-zinc-50"
           >
             Go to dashboard

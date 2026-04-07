@@ -44,7 +44,7 @@ const OPERATOR_ROUTE_CONFIG: Array<{
         'Single-case operator review across evidence, issues, decision rationale, and submission readiness.',
       searchPlaceholder: 'Search this case by issue, evidence, recommendation, or message',
       breadcrumbs: [
-        { label: 'Tenancies', href: '/tenancies' },
+        { label: 'Dashboard', href: '/dashboard' },
         { label: 'Case workspace' },
       ],
     },
@@ -60,30 +60,7 @@ const OPERATOR_ROUTE_CONFIG: Array<{
       breadcrumbs: [{ label: 'Management', href: '/reports' }, { label: 'Admin' }],
     },
   },
-  {
-    matches: (pathname) => pathname === '/tenancies',
-    config: {
-      pageTitle: 'Tenancies',
-      pageDescription:
-        'Operational checkout queue with live end-of-tenancy workflow state, dispute signals, and fast access into the workspace.',
-      searchPlaceholder: 'Search live tenancies by property, tenant, status, priority, or checkout ID',
-      searchTargetPath: '/tenancies',
-      breadcrumbs: [{ label: 'Tenancies' }],
-    },
-  },
-  {
-    matches: (pathname) => pathname.startsWith('/tenancies/'),
-    config: {
-      pageTitle: 'Tenancy workspace',
-      pageDescription:
-        'Review live evidence, issues, recommendations, claim structure, and communication in a single operator workspace.',
-      searchPlaceholder: 'Filter this tenancy by issue, evidence, recommendation, or message',
-      breadcrumbs: [
-        { label: 'Tenancies', href: '/tenancies' },
-        { label: 'Tenancy workspace' },
-      ],
-    },
-  },
+  // Legacy /tenancies routes redirect via page-level redirect()
   {
     matches: (pathname) => pathname === '/dashboard',
     config: {
@@ -124,7 +101,7 @@ const OPERATOR_ROUTE_CONFIG: Array<{
         'Review disputed checkouts, contested issues, and the evidence-backed narratives needed for resolution.',
       searchPlaceholder: 'Search disputes by property, tenant, issue, severity, or dispute state',
       searchTargetPath: '/disputes',
-      breadcrumbs: [{ label: 'Tenancies', href: '/tenancies' }, { label: 'Disputes' }],
+      breadcrumbs: [{ label: 'Dashboard', href: '/dashboard' }, { label: 'Disputes' }],
     },
   },
   {

@@ -1134,11 +1134,11 @@ export function EotWorkspaceClient({
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <Link
-            href="/tenancies"
+            href="/dashboard"
             className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-zinc-600 transition hover:text-zinc-950"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
-            Tenancies
+            Dashboard
           </Link>
           <button
             type="button"

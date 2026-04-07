@@ -9,7 +9,6 @@ import {
   ChevronLeft,
   ClipboardCheck,
   CreditCard,
-  FolderKanban,
   LayoutDashboard,
   MessageSquareMore,
   Users,
@@ -50,12 +49,6 @@ const NAV_GROUPS: Array<{
         href: '/dashboard',
         icon: Building2,
         isActive: (pathname) => pathname === '/dashboard' || pathname.startsWith('/dashboard/'),
-      },
-      {
-        label: 'Tenancies',
-        href: '/tenancies',
-        icon: FolderKanban,
-        isActive: (pathname) => pathname === '/tenancies' || pathname.startsWith('/tenancies/'),
       },
       {
         label: 'Disputes',
@@ -181,7 +174,7 @@ function SidebarContent({
     <div className="flex h-full flex-col">
       <div className={cn('flex items-center gap-3', collapsed && !mobile ? 'justify-center' : 'justify-between')}>
         <Link
-          href="/tenancies"
+          href="/dashboard"
           prefetch={false}
           onClick={onNavigate}
           className="flex items-center gap-3 px-3 py-3"

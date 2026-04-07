@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 }
 
 async function TenanciesList() {
-  const context = await requireOperatorTenant('/tenancies')
+  const context = await requireOperatorTenant('/dashboard')
   const initialTenancies = await getEotTenancyListSnapshot(context).catch(() => null)
 
   return <TenanciesListClient initialTenancies={initialTenancies} />

@@ -39,7 +39,7 @@ export default function LoginPage() {
   const [loadingSSO, setLoadingSSO] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [returnTo] = useState(() => {
-    if (typeof window === 'undefined') return '/tenancies'
+    if (typeof window === 'undefined') return '/dashboard'
 
     return getReturnToFromSearch(window.location.search)
   })
