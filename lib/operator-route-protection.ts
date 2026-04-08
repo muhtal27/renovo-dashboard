@@ -9,9 +9,12 @@ const PROTECTED_OPERATOR_ROUTES = [
   '/calls',
   '/guidance',
   '/settings',
+  '/account/billing',
+  '/inventory-feedback',
+  '/deposit-scheme',
 ] as const
 
-const PROTECTED_OPERATOR_PREFIXES = ['/tenancies/', '/dashboard/', '/cases/', '/operator/cases/', '/settings/', '/teams/'] as const
+const PROTECTED_OPERATOR_PREFIXES = ['/tenancies/', '/dashboard/', '/cases/', '/operator/cases/', '/settings/', '/teams/', '/account/'] as const
 
 const protectedOperatorRouteSet = new Set<string>(PROTECTED_OPERATOR_ROUTES)
 

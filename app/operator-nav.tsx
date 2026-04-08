@@ -54,7 +54,10 @@ const NAV_GROUPS: Array<{
         label: 'Tenancies',
         href: '/tenancies',
         icon: Building2,
-        isActive: (pathname) => pathname === '/tenancies' || pathname.startsWith('/tenancies/'),
+        isActive: (pathname) =>
+          pathname === '/tenancies' ||
+          pathname.startsWith('/tenancies/') ||
+          pathname.startsWith('/dashboard/'),
       },
       {
         label: 'Disputes',
@@ -174,7 +177,7 @@ function SidebarContent({
     <div className="flex h-full flex-col">
       <div className={cn('flex items-center gap-3', collapsed && !mobile ? 'justify-center' : 'justify-between')}>
         <Link
-          href="/dashboard"
+          href="/tenancies"
           prefetch={false}
           onClick={onNavigate}
           className="flex items-center gap-3 px-3 py-3"

@@ -29,7 +29,7 @@ type OperatorLayoutProps = {
 }
 
 const DEFAULT_ROUTE_CONFIG: ShellRouteConfig = {
-  searchPlaceholder: 'Search checkouts, tenancy, disputes, and guidance',
+  searchPlaceholder: 'Search tenancies, disputes, and guidance',
 }
 
 const OPERATOR_ROUTE_CONFIG: Array<{
@@ -44,7 +44,7 @@ const OPERATOR_ROUTE_CONFIG: Array<{
         'Single-case operator review across evidence, issues, decision rationale, and submission readiness.',
       searchPlaceholder: 'Search this case by issue, evidence, recommendation, or message',
       breadcrumbs: [
-        { label: 'Dashboard', href: '/dashboard' },
+        { label: 'Tenancies', href: '/tenancies' },
         { label: 'Case workspace' },
       ],
     },
@@ -60,32 +60,20 @@ const OPERATOR_ROUTE_CONFIG: Array<{
       breadcrumbs: [{ label: 'Management', href: '/reports' }, { label: 'Admin' }],
     },
   },
-  // Legacy /tenancies routes redirect via page-level redirect()
   {
     matches: (pathname) => pathname === '/dashboard',
     config: {
       pageTitle: 'Dashboard',
       pageDescription:
-        'Cross-checkout tenancy view covering residents, deposits, property references, and checkout readiness.',
-      searchPlaceholder: 'Search tenancy records by property, tenant, reference, or checkout state',
-      searchTargetPath: '/dashboard',
+        'Portfolio overview across tenancies, cases, deposits, and upcoming end dates.',
+      searchPlaceholder: 'Search tenancies, cases, or properties',
+      searchTargetPath: '/tenancies',
       breadcrumbs: [{ label: 'Dashboard' }],
     },
   },
   {
-    matches: (pathname) => pathname.startsWith('/dashboard/'),
-    config: {
-      pageTitle: 'Dashboard detail',
-      pageDescription:
-        'Full tenancy record with property, residents, deposit, period, and linked checkout case.',
-      breadcrumbs: [
-        { label: 'Dashboard', href: '/dashboard' },
-        { label: 'Dashboard detail' },
-      ],
-    },
-  },
-  {
-    matches: (pathname) => pathname === '/tenancies' || pathname.startsWith('/tenancies'),
+    matches: (pathname) =>
+      pathname === '/tenancies' || pathname.startsWith('/tenancies'),
     config: {
       pageTitle: 'Tenancies',
       pageDescription:
@@ -96,6 +84,18 @@ const OPERATOR_ROUTE_CONFIG: Array<{
     },
   },
   {
+    matches: (pathname) => pathname.startsWith('/dashboard/'),
+    config: {
+      pageTitle: 'Tenancy detail',
+      pageDescription:
+        'Full tenancy record with property, residents, deposit, period, and linked checkout case.',
+      breadcrumbs: [
+        { label: 'Tenancies', href: '/tenancies' },
+        { label: 'Tenancy detail' },
+      ],
+    },
+  },
+  {
     matches: (pathname) => pathname.startsWith('/disputes'),
     config: {
       pageTitle: 'Disputes',
@@ -103,7 +103,7 @@ const OPERATOR_ROUTE_CONFIG: Array<{
         'Review disputed checkouts, contested issues, and the evidence-backed narratives needed for resolution.',
       searchPlaceholder: 'Search disputes by property, tenant, issue, severity, or dispute state',
       searchTargetPath: '/disputes',
-      breadcrumbs: [{ label: 'Dashboard', href: '/dashboard' }, { label: 'Disputes' }],
+      breadcrumbs: [{ label: 'Tenancies', href: '/tenancies' }, { label: 'Disputes' }],
     },
   },
   {
