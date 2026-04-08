@@ -23,11 +23,11 @@ const scaleExamples = [
 export const pricingFaqs = [
   {
     q: 'What counts toward pricing?',
-    a: 'Only fully managed tenancies count toward your portfolio size. Let-only tenancies are included at no extra cost.',
+    a: 'Only fully managed tenancies count toward your block pricing. Let-only tenancies are free on every plan, including the Free tier.',
   },
   {
-    q: 'Are let-only tenancies included?',
-    a: 'Yes. Let-only tenancies are included at no extra cost on every plan.',
+    q: 'What is included in the Free plan?',
+    a: 'The Free plan covers let-only tenancies with the full Renovo AI workflow, unlimited users, and no credit card required. To manage fully managed tenancies, upgrade to a Block plan.',
   },
   {
     q: 'Are there user limits?',
@@ -63,8 +63,8 @@ export default function PricingPageClient() {
             Pricing for <em className="text-slate-400">managed portfolios</em>
           </h1>
           <p className="page-copy mx-auto max-w-[760px]">
-            Simple monthly pricing for letting agents, based on fully managed
-            portfolio size. No setup fees. No contract. First month on us.
+            Free for let-only portfolios. Simple block pricing for fully managed
+            tenancies. No setup fees. No contract.
           </p>
         </section>
 
@@ -77,7 +77,7 @@ export default function PricingPageClient() {
             <span className="text-emerald-500">✓</span> No contract
           </span>
           <span className="flex items-center gap-2">
-            <span className="text-emerald-500">✓</span> First month on us
+            <span className="text-emerald-500">✓</span> Free for let-only
           </span>
           <span className="flex items-center gap-2">
             <span className="text-emerald-500">✓</span> Unlimited users
@@ -88,27 +88,67 @@ export default function PricingPageClient() {
         <section className="page-card">
           <div className="grid gap-6 lg:grid-cols-3">
 
-            {/* PORTFOLIO LICENCE */}
+            {/* FREE */}
+            <article className="border border-zinc-200 bg-white p-7 text-zinc-950">
+              <p className="inline-block bg-emerald-500/[0.08] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-600">
+                Get started
+              </p>
+              <h2 className="mt-4 text-3xl font-semibold tracking-[-0.03em]">Free</h2>
+              <div className="mt-3">
+                <span className="text-4xl font-bold tracking-tight text-zinc-950">£0</span>
+                <span className="text-base text-slate-500">/month</span>
+              </div>
+              <p className="mt-2 text-sm leading-7 text-slate-500">
+                For let-only portfolios
+              </p>
+
+              <div className="mt-6 border-t border-zinc-200 pt-6">
+                <ul className="space-y-3">
+                  {[
+                    'Let-only tenancies only',
+                    'Unlimited users',
+                    'Full Renovo AI workflow included',
+                    'No credit card required',
+                  ].map((f) => (
+                    <li key={f} className="flex items-start gap-3 text-sm leading-7 text-slate-600">
+                      <span className="mt-1.5 text-sm font-semibold text-emerald-500">✓</span>
+                      <span>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="mt-8">
+                <Link href="/book-demo" className="app-primary-button w-full rounded-md px-4 py-3 text-sm font-medium">
+                  Get started free →
+                </Link>
+                <p className="mt-3 text-center text-xs text-slate-500">
+                  No commitment. No credit card.
+                </p>
+              </div>
+            </article>
+
+            {/* PORTFOLIO */}
             <article className="relative border-2 border-emerald-500 bg-white p-7 text-zinc-950">
               <p className="inline-block bg-emerald-500/[0.08] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-600">
                 Most popular
               </p>
-              <h2 className="mt-4 text-3xl font-semibold tracking-[-0.03em]">Portfolio Licence</h2>
+              <h2 className="mt-4 text-3xl font-semibold tracking-[-0.03em]">Portfolio</h2>
               <div className="mt-3">
                 <span className="text-4xl font-bold tracking-tight text-zinc-950">£179</span>
-                <span className="text-base text-slate-500">/month + VAT</span>
+                <span className="text-base text-slate-500">/block/month + VAT</span>
               </div>
               <p className="mt-2 text-sm leading-7 text-slate-500">
-                Up to 365 fully managed tenancies
+                Up to 365 fully managed tenancies per block
               </p>
 
               <div className="mt-6 border-t border-zinc-200 pt-6">
                 <ul className="space-y-3">
                   {[
                     'Let-only tenancies included at no extra cost',
+                    'Stack blocks as your portfolio grows',
                     'Unlimited users',
-                    'Full Renovo AI workflow included',
-                    'No contract',
+                    'Full platform access. No contract',
                   ].map((f) => (
                     <li key={f} className="flex items-start gap-3 text-sm leading-7 text-slate-600">
                       <span className="mt-1.5 text-sm font-semibold text-emerald-500">✓</span>
@@ -123,47 +163,7 @@ export default function PricingPageClient() {
                   Get started →
                 </Link>
                 <p className="mt-3 text-center text-xs text-slate-500">
-                  Your first month is on us.
-                </p>
-              </div>
-            </article>
-
-            {/* ADDITIONAL PORTFOLIO BLOCK */}
-            <article className="border border-zinc-200 bg-white p-7 text-zinc-950">
-              <p className="inline-block bg-emerald-500/[0.08] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-600">
-                Scale
-              </p>
-              <h2 className="mt-4 text-3xl font-semibold tracking-[-0.03em]">Additional Block</h2>
-              <div className="mt-3">
-                <span className="text-4xl font-bold tracking-tight text-zinc-950">+£179</span>
-                <span className="text-base text-slate-500">/month + VAT</span>
-              </div>
-              <p className="mt-2 text-sm leading-7 text-slate-500">
-                Add up to 365 more fully managed tenancies
-              </p>
-
-              <div className="mt-6 border-t border-zinc-200 pt-6">
-                <ul className="space-y-3">
-                  {[
-                    'Stack blocks as your portfolio grows',
-                    'Let-only tenancies included at no extra cost',
-                    'Unlimited users',
-                    'Same full platform access',
-                  ].map((f) => (
-                    <li key={f} className="flex items-start gap-3 text-sm leading-7 text-slate-600">
-                      <span className="mt-1.5 text-sm font-semibold text-emerald-500">✓</span>
-                      <span>{f}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="mt-8">
-                <Link href="/book-demo" className="app-primary-button w-full rounded-md px-4 py-3 text-sm font-medium">
-                  Book a demo →
-                </Link>
-                <p className="mt-3 text-center text-xs text-slate-500">
-                  Add portfolio blocks as you grow.
+                  First month on us.
                 </p>
               </div>
             </article>
@@ -218,7 +218,7 @@ export default function PricingPageClient() {
               Every plan includes the <em className="text-slate-400">full platform</em>
             </h2>
             <p className="mt-3 text-base leading-8 text-slate-500">
-              No feature gates. Every Portfolio Licence includes the complete Renovo AI workflow.
+              No feature gates. Every plan — including Free — includes the complete Renovo AI workflow.
             </p>
 
             <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -239,8 +239,8 @@ export default function PricingPageClient() {
             Add blocks as <em className="text-slate-400">you grow</em>
           </h2>
           <p className="mt-3 max-w-[640px] text-base leading-8 text-slate-500">
-            Start with one Portfolio Licence for up to 365 fully managed tenancies, then add
-            blocks as your portfolio grows. Let-only tenancies are always included at no extra cost.
+            Start free with let-only tenancies, then add blocks at £179/month each for up to
+            365 fully managed tenancies per block. Let-only tenancies are always free.
           </p>
 
           <div className="mt-10 overflow-x-auto border border-zinc-200">
