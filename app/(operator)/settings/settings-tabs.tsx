@@ -258,6 +258,16 @@ type Integration = {
 
 const INTEGRATION_LIST: Integration[] = [
   {
+    name: 'Street.co.uk',
+    description: 'Sync properties, tenancies, landlords, and maintenance data from Street.',
+    features: [
+      'Pull properties and addresses',
+      'Sync tenancy records and rent details',
+      'Import landlord contact details',
+      'Pull maintenance job history',
+    ],
+  },
+  {
     name: 'SME Professional',
     description: 'Pull properties and push report URLs to SME Professional.',
     features: ['Pull properties from SME', 'Push report URLs to SME'],
@@ -915,12 +925,382 @@ function EmailIngestionTab() {
 }
 
 // ---------------------------------------------------------------------------
+// Street.co.uk Integration Panel (live)
+// ---------------------------------------------------------------------------
+
+type StreetSyncLog = {
+  id: string
+  status: string
+  resource: string
+  records_created: number
+  records_updated: number
+  records_skipped: number
+  error_message: string | null
+  started_at: string
+  finished_at: string | null
+}
+
+type StreetStatus = {
+  connected: boolean
+  connection: {
+    id: string
+    base_url: string
+    label: string | null
+    last_synced_at: string | null
+  } | null
+  last_sync_logs: StreetSyncLog[]
+}
+
+function StreetIntegrationPanel() {
+  const [status, setStatus] = useState<StreetStatus | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [apiToken, setApiToken] = useState('')
+  const [label, setLabel] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [testing, setTesting] = useState(false)
+  const [syncing, setSyncing] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
+  const [testResult, setTestResult] = useState<{ ok: boolean; detail: string } | null>(null)
+
+  const loadStatus = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res = await fetch('/api/street/connection')
+      if (!res.ok) throw new Error('Failed to load')
+      const data = (await res.json()) as StreetStatus
+      setStatus(data)
+      if (data.connection?.label) setLabel(data.connection.label)
+    } catch {
+      setError('Failed to load Street.co.uk connection status.')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => { void loadStatus() }, [loadStatus])
+
+  async function handleSave() {
+    setSaving(true)
+    setError(null)
+    setSuccess(null)
+    setTestResult(null)
+    try {
+      const isUpdate = status?.connected
+      const res = await fetch('/api/street/connection', {
+        method: isUpdate ? 'PATCH' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...(apiToken.trim() ? { api_token: apiToken.trim() } : {}),
+          ...(label.trim() ? { label: label.trim() } : {}),
+        }),
+      })
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({})) as { detail?: string }
+        throw new Error(body.detail || 'Failed to save')
+      }
+      setApiToken('')
+      setSuccess(isUpdate ? 'Connection updated.' : 'Connection created successfully.')
+      await loadStatus()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function handleTest() {
+    setTesting(true)
+    setTestResult(null)
+    setError(null)
+    try {
+      const res = await fetch('/api/street/connection/test', { method: 'POST' })
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({})) as { detail?: string }
+        throw new Error(body.detail || 'Test failed')
+      }
+      const data = (await res.json()) as { ok: boolean; detail: string }
+      setTestResult(data)
+    } catch (err) {
+      setTestResult({ ok: false, detail: err instanceof Error ? err.message : 'Test failed.' })
+    } finally {
+      setTesting(false)
+    }
+  }
+
+  async function handleSync() {
+    setSyncing(true)
+    setError(null)
+    setSuccess(null)
+    try {
+      const res = await fetch('/api/street/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      })
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({})) as { detail?: string }
+        throw new Error(body.detail || 'Sync failed')
+      }
+      const logs = (await res.json()) as StreetSyncLog[]
+      const totalCreated = logs.reduce((s, l) => s + l.records_created, 0)
+      const totalUpdated = logs.reduce((s, l) => s + l.records_updated, 0)
+      const failed = logs.filter((l) => l.status === 'failed')
+      if (failed.length > 0) {
+        setError(`Sync partially failed: ${failed.map((l) => l.error_message).join('; ')}`)
+      } else {
+        setSuccess(`Sync complete. ${totalCreated} created, ${totalUpdated} updated.`)
+      }
+      await loadStatus()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Sync failed.')
+    } finally {
+      setSyncing(false)
+    }
+  }
+
+  async function handleDisconnect() {
+    setError(null)
+    setSuccess(null)
+    try {
+      await fetch('/api/street/connection', { method: 'DELETE' })
+      setSuccess('Connection removed.')
+      setApiToken('')
+      setLabel('')
+      await loadStatus()
+    } catch {
+      setError('Failed to disconnect.')
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="py-8 text-center text-sm text-zinc-400">
+        Loading Street.co.uk integration...
+      </div>
+    )
+  }
+
+  const connected = status?.connected ?? false
+
+  return (
+    <div className="space-y-6">
+      {/* Connection config */}
+      <section className="border border-zinc-200/80 bg-white px-6 py-6 md:px-7">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h3 className="text-sm font-semibold text-zinc-950">
+              Street.co.uk Connection
+            </h3>
+            <p className="mt-1 text-sm text-zinc-500">
+              Connect your Street.co.uk account to sync properties, tenancies, and more.
+            </p>
+          </div>
+          <span
+            className={cn(
+              'shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium',
+              connected
+                ? 'bg-emerald-50 text-emerald-700'
+                : 'bg-zinc-100 text-zinc-600'
+            )}
+          >
+            {connected ? 'Connected' : 'Not connected'}
+          </span>
+        </div>
+
+        {error ? (
+          <div className="mt-4 border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm text-rose-700">
+            {error}
+          </div>
+        ) : null}
+
+        {success ? (
+          <div className="mt-4 border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm text-emerald-700">
+            {success}
+          </div>
+        ) : null}
+
+        {testResult ? (
+          <div
+            className={cn(
+              'mt-4 border px-4 py-2.5 text-sm',
+              testResult.ok
+                ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                : 'border-rose-200 bg-rose-50 text-rose-700'
+            )}
+          >
+            {testResult.detail}
+          </div>
+        ) : null}
+
+        <div className="mt-5 max-w-md space-y-4">
+          <div>
+            <label htmlFor="street-label" className="block text-xs font-medium text-zinc-500">
+              Label (optional)
+            </label>
+            <input
+              id="street-label"
+              type="text"
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+              placeholder="e.g. Main office"
+              className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="street-api-token" className="block text-xs font-medium text-zinc-500">
+              API Token
+            </label>
+            <input
+              id="street-api-token"
+              type="password"
+              value={apiToken}
+              onChange={(e) => setApiToken(e.target.value)}
+              placeholder={connected ? '••••••••••••••••' : 'Paste your Street.co.uk API token'}
+              className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300"
+            />
+            <p className="mt-1 text-xs text-zinc-400">
+              Find this in Street &gt; Settings &gt; Account Administration &gt; Applications.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={saving || (!apiToken.trim() && !connected)}
+              className="rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:opacity-50"
+            >
+              {saving ? 'Saving...' : connected ? 'Update connection' : 'Connect'}
+            </button>
+
+            {connected ? (
+              <>
+                <button
+                  type="button"
+                  onClick={handleTest}
+                  disabled={testing}
+                  className="rounded-lg border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 disabled:opacity-50"
+                >
+                  {testing ? 'Testing...' : 'Test connection'}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDisconnect}
+                  className="rounded-lg border border-rose-200 bg-white px-5 py-2.5 text-sm font-medium text-rose-600 transition hover:bg-rose-50"
+                >
+                  Disconnect
+                </button>
+              </>
+            ) : null}
+          </div>
+        </div>
+      </section>
+
+      {/* Sync controls */}
+      {connected ? (
+        <section className="border border-zinc-200/80 bg-white px-6 py-6 md:px-7">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <h3 className="text-sm font-semibold text-zinc-950">Data sync</h3>
+              <p className="mt-1 text-sm text-zinc-500">
+                Pull properties and tenancies from Street.co.uk into Renovo.
+              </p>
+              {status?.connection?.last_synced_at ? (
+                <p className="mt-1 text-xs text-zinc-400">
+                  Last synced:{' '}
+                  {new Date(status.connection.last_synced_at).toLocaleString('en-GB', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </p>
+              ) : null}
+            </div>
+            <button
+              type="button"
+              onClick={handleSync}
+              disabled={syncing}
+              className="rounded-lg bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-50"
+            >
+              {syncing ? 'Syncing...' : 'Sync now'}
+            </button>
+          </div>
+
+          {/* Sync log history */}
+          {status?.last_sync_logs && status.last_sync_logs.length > 0 ? (
+            <div className="mt-5 overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-zinc-100 text-left text-xs font-medium text-zinc-500">
+                    <th className="pb-2.5 pr-4">Resource</th>
+                    <th className="pb-2.5 pr-4">Status</th>
+                    <th className="pb-2.5 pr-4">Created</th>
+                    <th className="pb-2.5 pr-4">Updated</th>
+                    <th className="pb-2.5 pr-4">Skipped</th>
+                    <th className="pb-2.5">Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {status.last_sync_logs.map((log) => (
+                    <tr key={log.id} className="border-b border-zinc-50 last:border-0">
+                      <td className="py-2.5 pr-4 font-medium text-zinc-950 capitalize">
+                        {log.resource}
+                      </td>
+                      <td className="py-2.5 pr-4">
+                        <span
+                          className={cn(
+                            'rounded-full px-2 py-0.5 text-xs font-medium',
+                            log.status === 'completed'
+                              ? 'bg-emerald-50 text-emerald-700'
+                              : log.status === 'failed'
+                                ? 'bg-rose-50 text-rose-700'
+                                : 'bg-amber-50 text-amber-700'
+                          )}
+                        >
+                          {log.status}
+                        </span>
+                      </td>
+                      <td className="py-2.5 pr-4 tabular-nums text-zinc-600">
+                        {log.records_created}
+                      </td>
+                      <td className="py-2.5 pr-4 tabular-nums text-zinc-600">
+                        {log.records_updated}
+                      </td>
+                      <td className="py-2.5 pr-4 tabular-nums text-zinc-600">
+                        {log.records_skipped}
+                      </td>
+                      <td className="whitespace-nowrap py-2.5 text-xs text-zinc-400">
+                        {new Date(log.started_at).toLocaleString('en-GB', {
+                          day: 'numeric',
+                          month: 'short',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : null}
+        </section>
+      ) : null}
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // Integrations Tab
 // ---------------------------------------------------------------------------
 
 function IntegrationsTab() {
-  const [activeIntegration, setActiveIntegration] = useState('SME Professional')
+  const [activeIntegration, setActiveIntegration] = useState('Street.co.uk')
   const selected = INTEGRATION_LIST.find((i) => i.name === activeIntegration) ?? INTEGRATION_LIST[0]
+  const isStreet = activeIntegration === 'Street.co.uk'
 
   return (
     <div className="space-y-6">
@@ -949,74 +1329,81 @@ function IntegrationsTab() {
         </div>
       </section>
 
-      <section className="border border-zinc-200/80 bg-white px-6 py-6 md:px-7">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h3 className="text-sm font-semibold text-zinc-950">
-              {selected.name} Integration
-            </h3>
-            <p className="mt-1 text-sm text-zinc-500">{selected.description}</p>
-          </div>
-          <span className="shrink-0 rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-medium text-zinc-600">
-            Not configured
-          </span>
-        </div>
-
-        <div className="mt-5 space-y-2">
-          {selected.features.map((feature) => (
-            <div key={feature} className="flex items-center gap-2 text-sm text-zinc-600">
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-zinc-100 text-zinc-400">
-                <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
+      {isStreet ? (
+        <StreetIntegrationPanel />
+      ) : (
+        <>
+          {/* Feature list for non-Street integrations */}
+          <section className="border border-zinc-200/80 bg-white px-6 py-6 md:px-7">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h3 className="text-sm font-semibold text-zinc-950">
+                  {selected.name} Integration
+                </h3>
+                <p className="mt-1 text-sm text-zinc-500">{selected.description}</p>
+              </div>
+              <span className="shrink-0 rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-medium text-zinc-600">
+                Not configured
               </span>
-              {feature}
             </div>
-          ))}
-        </div>
 
-        <div className="mt-6 max-w-md space-y-4">
-          <div>
-            <label htmlFor="api-key" className="block text-xs font-medium text-zinc-500">
-              API Key
-            </label>
-            <input
-              id="api-key"
-              type="text"
-              placeholder="Enter your API key"
-              className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="integration-status" className="block text-xs font-medium text-zinc-500">
-              Integration status
-            </label>
-            <select
-              id="integration-status"
-              className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300"
-            >
-              <option>Inactive</option>
-              <option>Active</option>
-            </select>
-          </div>
-
-          <div className="flex items-center justify-between rounded-lg border border-zinc-100 bg-zinc-50 px-4 py-3">
-            <div>
-              <p className="text-sm font-medium text-zinc-950">Automatically sync properties overnight</p>
-              <p className="text-xs text-zinc-500">Keep property data in sync with your PMS.</p>
+            <div className="mt-5 space-y-2">
+              {selected.features.map((feature) => (
+                <div key={feature} className="flex items-center gap-2 text-sm text-zinc-600">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-zinc-100 text-zinc-400">
+                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </span>
+                  {feature}
+                </div>
+              ))}
             </div>
-            <button
-              type="button"
-              className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-zinc-200 transition-colors focus:outline-none focus:ring-2 focus:ring-zinc-400 focus:ring-offset-2"
-              role="switch"
-              aria-checked="false"
-            >
-              <span className="pointer-events-none inline-block h-5 w-5 translate-x-0 rounded-full bg-white shadow ring-0 transition-transform" />
-            </button>
-          </div>
-        </div>
-      </section>
+
+            <div className="mt-6 max-w-md space-y-4">
+              <div>
+                <label htmlFor="api-key" className="block text-xs font-medium text-zinc-500">
+                  API Key
+                </label>
+                <input
+                  id="api-key"
+                  type="text"
+                  placeholder="Enter your API key"
+                  className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="integration-status" className="block text-xs font-medium text-zinc-500">
+                  Integration status
+                </label>
+                <select
+                  id="integration-status"
+                  className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300"
+                >
+                  <option>Inactive</option>
+                  <option>Active</option>
+                </select>
+              </div>
+
+              <div className="flex items-center justify-between rounded-lg border border-zinc-100 bg-zinc-50 px-4 py-3">
+                <div>
+                  <p className="text-sm font-medium text-zinc-950">Automatically sync properties overnight</p>
+                  <p className="text-xs text-zinc-500">Keep property data in sync with your PMS.</p>
+                </div>
+                <button
+                  type="button"
+                  className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-zinc-200 transition-colors focus:outline-none focus:ring-2 focus:ring-zinc-400 focus:ring-offset-2"
+                  role="switch"
+                  aria-checked="false"
+                >
+                  <span className="pointer-events-none inline-block h-5 w-5 translate-x-0 rounded-full bg-white shadow ring-0 transition-transform" />
+                </button>
+              </div>
+            </div>
+          </section>
+        </>
+      )}
     </div>
   )
 }
