@@ -1,12 +1,15 @@
 import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2026-03-25.dahlia',
-})
+function getStripe() {
+  return new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    apiVersion: '2026-03-25.dahlia',
+  })
+}
 
 export async function POST() {
   try {
+    const stripe = getStripe()
     const session = await stripe.checkout.sessions.create({
       ui_mode: 'embedded_page',
       line_items: [
