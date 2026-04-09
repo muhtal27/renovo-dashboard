@@ -133,7 +133,7 @@ export default function PricingPageClient() {
               <p className="inline-block bg-emerald-500/[0.08] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-600">
                 Most popular
               </p>
-              <h2 className="mt-4 text-3xl font-semibold tracking-[-0.03em]">Portfolio</h2>
+              <h2 className="mt-4 text-3xl font-semibold tracking-[-0.03em]">Portfolio 365</h2>
               <div className="mt-3">
                 <span className="text-4xl font-bold tracking-tight text-zinc-950">£179</span>
                 <span className="text-base text-slate-500">/block/month + VAT</span>
@@ -159,7 +159,7 @@ export default function PricingPageClient() {
               </div>
 
               <div className="mt-8">
-                <Link href="/book-demo" className="app-primary-button w-full rounded-md px-4 py-3 text-sm font-medium">
+                <Link href="/checkout" className="app-primary-button w-full rounded-md px-4 py-3 text-sm font-medium">
                   Get started →
                 </Link>
                 <p className="mt-3 text-center text-xs text-slate-500">
