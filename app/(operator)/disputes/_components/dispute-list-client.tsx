@@ -4,16 +4,18 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { useMemo, useState } from 'react'
 import { RefreshCcw } from 'lucide-react'
+import { toast } from 'sonner'
 import { useEotCases } from '@/lib/queries/eot-queries'
-import type { EotCaseListItem, EotCasePriority } from '@/lib/eot-types'
+import type { EotCaseListItem } from '@/lib/eot-types'
 import {
   EmptyState,
   SkeletonPanel,
   ToolbarPill,
   formatCurrency,
-  formatDateTime,
   formatEnumLabel,
 } from '@/app/eot/_components/eot-ui'
+import { useDebounce } from '@/lib/use-debounce'
+import { relativeTime } from '@/lib/relative-time'
 
 function buildFullAddress(property: EotCaseListItem['property']): string {
   const parts = [property.address_line_1, property.city, property.postcode]
@@ -44,9 +46,11 @@ export function DisputeListClient({
 
   const [view, setView] = useState<PriorityView>('all')
   const [search, setSearch] = useState(urlSearch)
+  const debouncedSearch = useDebounce(search, 250)
 
   function refreshCases() {
     void refetch()
+    toast.success('Disputes refreshed')
   }
 
   const stats = useMemo(() => ({
@@ -57,7 +61,7 @@ export function DisputeListClient({
   }), [cases])
 
   const visible = useMemo(() => {
-    const searchLower = search.toLowerCase()
+    const searchLower = debouncedSearch.toLowerCase()
     return cases.filter((c) => {
       if (view !== 'all' && c.priority !== view) return false
       if (searchLower) {
@@ -77,7 +81,7 @@ export function DisputeListClient({
       }
       return true
     })
-  }, [cases, view, search])
+  }, [cases, view, debouncedSearch])
 
   const totalDeposit = cases.reduce((sum, c) => sum + (c.deposit_amount ? Number(c.deposit_amount) : 0), 0)
   const totalIssues = cases.reduce((sum, c) => sum + c.issue_count, 0)
@@ -210,8 +214,8 @@ export function DisputeListClient({
                 <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
                   Activity
                 </p>
-                <p className="mt-0.5 text-xs text-zinc-500">
-                  {formatDateTime(c.last_activity_at)}
+                <p className="mt-0.5 text-xs text-zinc-500" title={c.last_activity_at}>
+                  {relativeTime(c.last_activity_at)}
                 </p>
               </div>
             </Link>

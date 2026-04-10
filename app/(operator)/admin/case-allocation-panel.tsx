@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { toast } from 'sonner'
 import { assignEotCase, listEotCases } from '@/lib/eot-api'
 import type { EotCaseListItem } from '@/lib/eot-types'
+import { ConfirmDialog } from '@/app/components/ConfirmDialog'
 
 type Assignee = {
   userId: string
@@ -32,6 +34,7 @@ export function CaseAllocationPanel() {
   const [assignError, setAssignError] = useState<string | null>(null)
   const [assigning, setAssigning] = useState<string | null>(null)
   const [filter, setFilter] = useState<'unallocated' | 'allocated' | 'all'>('unallocated')
+  const [confirmRemove, setConfirmRemove] = useState<{ caseId: string; address: string } | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -74,10 +77,16 @@ export function CaseAllocationPanel() {
       setCases((current) =>
         current.map((c) => (c.id === caseId ? { ...c, assigned_to: userId } : c))
       )
-    } catch (err) {
-      setAssignError(
-        err instanceof Error ? err.message : 'Failed to assign case.'
+      const memberName = userId ? memberMap.get(userId) : null
+      toast.success(
+        userId
+          ? `Case assigned to ${assigneeLabel(memberName!)}`
+          : 'Assignment removed'
       )
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to assign case.'
+      setAssignError(msg)
+      toast.error(msg)
     } finally {
       setAssigning(null)
     }
@@ -227,7 +236,12 @@ export function CaseAllocationPanel() {
                         <button
                           type="button"
                           disabled={isAssigning}
-                          onClick={() => void handleAssign(caseItem.id, null)}
+                          onClick={() =>
+                            setConfirmRemove({
+                              caseId: caseItem.id,
+                              address: buildAddress(caseItem.property),
+                            })
+                          }
                           className="text-xs font-medium text-rose-600 transition hover:text-rose-700 disabled:opacity-50"
                         >
                           {isAssigning ? 'Removing...' : 'Remove'}
@@ -245,6 +259,25 @@ export function CaseAllocationPanel() {
           </table>
         </div>
       )}
+
+      <ConfirmDialog
+        open={confirmRemove !== null}
+        title="Remove assignment"
+        description={
+          confirmRemove
+            ? `Are you sure you want to unassign the case for ${confirmRemove.address}? It will return to the unallocated queue.`
+            : ''
+        }
+        confirmLabel="Remove"
+        tone="danger"
+        onConfirm={() => {
+          if (confirmRemove) {
+            void handleAssign(confirmRemove.caseId, null)
+          }
+          setConfirmRemove(null)
+        }}
+        onCancel={() => setConfirmRemove(null)}
+      />
     </div>
   )
 }

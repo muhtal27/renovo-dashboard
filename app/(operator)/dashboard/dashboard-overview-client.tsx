@@ -7,9 +7,12 @@ import {
   ArrowRight,
   Building2,
   ClipboardCheck,
+  Eye,
   RefreshCcw,
   Scale,
+  UserX,
 } from 'lucide-react'
+import { toast } from 'sonner'
 import { useEotTenancies, useEotCases } from '@/lib/queries/eot-queries'
 import type { EotTenancyListItem, EotCaseListItem } from '@/lib/eot-types'
 import { KPIStatCard, SkeletonPanel } from '@/app/operator-ui'
@@ -18,6 +21,7 @@ import {
   formatDate,
   formatEnumLabel,
 } from '@/app/eot/_components/eot-ui'
+import { relativeTime } from '@/lib/relative-time'
 import { cn } from '@/lib/ui'
 
 function buildAddress(property: EotTenancyListItem['property']): string {
@@ -269,6 +273,87 @@ function EndingSoonTable({ tenancies }: { tenancies: EotTenancyListItem[] }) {
   )
 }
 
+function NeedsAttentionWidget({ cases }: { cases: EotCaseListItem[] }) {
+  const reviewCases = useMemo(
+    () => cases.filter((c) => c.status === 'review').slice(0, 5),
+    [cases]
+  )
+  const unassignedCases = useMemo(
+    () => cases.filter((c) => !c.assigned_to).slice(0, 5),
+    [cases]
+  )
+
+  if (reviewCases.length === 0 && unassignedCases.length === 0) return null
+
+  return (
+    <div className="grid gap-4 xl:grid-cols-2">
+      {reviewCases.length > 0 ? (
+        <div className="overflow-hidden rounded-xl border border-amber-200 bg-amber-50/30">
+          <div className="flex items-center gap-2 border-b border-amber-200 px-5 py-3">
+            <Eye className="h-4 w-4 text-amber-600" />
+            <h3 className="text-sm font-semibold text-zinc-950">Awaiting your review</h3>
+            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+              {reviewCases.length}
+            </span>
+          </div>
+          <div className="bg-white">
+            {reviewCases.map((c) => (
+              <Link
+                key={c.id}
+                href={`/operator/cases/${c.id}`}
+                prefetch={false}
+                className="flex items-center justify-between gap-4 border-b border-zinc-100 px-5 py-3 transition last:border-b-0 hover:bg-zinc-50/60"
+              >
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium text-zinc-950">
+                    {buildAddress(c.property)}
+                  </p>
+                  <p className="mt-0.5 truncate text-xs text-zinc-500">{c.tenant_name}</p>
+                </div>
+                <span className="shrink-0 text-xs text-zinc-400" title={c.last_activity_at}>
+                  {relativeTime(c.last_activity_at)}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {unassignedCases.length > 0 ? (
+        <div className="overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50/30">
+          <div className="flex items-center gap-2 border-b border-zinc-200 px-5 py-3">
+            <UserX className="h-4 w-4 text-zinc-500" />
+            <h3 className="text-sm font-semibold text-zinc-950">Unassigned cases</h3>
+            <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-600">
+              {unassignedCases.length}
+            </span>
+          </div>
+          <div className="bg-white">
+            {unassignedCases.map((c) => (
+              <Link
+                key={c.id}
+                href="/admin"
+                prefetch={false}
+                className="flex items-center justify-between gap-4 border-b border-zinc-100 px-5 py-3 transition last:border-b-0 hover:bg-zinc-50/60"
+              >
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium text-zinc-950">
+                    {buildAddress(c.property)}
+                  </p>
+                  <p className="mt-0.5 truncate text-xs text-zinc-500">{c.tenant_name}</p>
+                </div>
+                <span className="inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-medium text-zinc-600">
+                  {formatEnumLabel(c.status)}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
 function RecentCasesTable({ cases }: { cases: EotCaseListItem[] }) {
   const recentCases = useMemo(() => {
     return [...cases]
@@ -374,6 +459,7 @@ export function DashboardOverviewClient({
   function handleRefresh() {
     void refetchTenancies()
     void refetchCases()
+    toast.success('Dashboard refreshed')
   }
 
   if (loading) {
@@ -408,6 +494,7 @@ export function DashboardOverviewClient({
 
       <StatCards stats={stats} />
       <CaseSummaryCards stats={stats} />
+      <NeedsAttentionWidget cases={cases} />
       <EndingSoonTable tenancies={tenancies} />
       <RecentCasesTable cases={cases} />
     </div>

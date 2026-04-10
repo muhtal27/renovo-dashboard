@@ -1,6 +1,7 @@
 import './globals.css'
 import type { Metadata, Viewport } from 'next'
 import { DM_Sans, Instrument_Serif } from 'next/font/google'
+import { Toaster } from 'sonner'
 import {
   defaultDescription,
   ogImagePath,
@@ -76,6 +77,13 @@ export default function RootLayout({
       <body className={`${dmSans.variable} ${instrumentSerif.variable}`}>
         <PwaSplash />
         <ConnectionStatus />
+        <Toaster
+          position="bottom-right"
+          toastOptions={{
+            className: 'text-sm',
+            style: { fontFamily: 'var(--font-dm-sans)' },
+          }}
+        />
         {children}
         <ServiceWorkerRegistration />
       </body>

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { RefreshCcw } from 'lucide-react'
+import { toast } from 'sonner'
 import { useEotTenancies } from '@/lib/queries/eot-queries'
 import type { EotTenancyListItem } from '@/lib/eot-types'
 import {
@@ -14,6 +15,7 @@ import {
   formatEnumLabel,
 } from '@/app/eot/_components/eot-ui'
 import { cn } from '@/lib/ui'
+import { useDebounce } from '@/lib/use-debounce'
 
 type TenancyTab = 'active' | 'archive'
 
@@ -78,6 +80,7 @@ export function TenanciesPageClient({
   const searchParams = useSearchParams()
   const [tab, setTab] = useState<TenancyTab>('active')
   const [search, setSearch] = useState(searchParams.get('search') ?? '')
+  const debouncedSearch = useDebounce(search, 250)
 
   const counts = useMemo(() => {
     const active = tenancies.filter(isActiveTenancy).length
@@ -85,7 +88,7 @@ export function TenanciesPageClient({
   }, [tenancies])
 
   const filteredTenancies = useMemo(() => {
-    const searchLower = search.toLowerCase()
+    const searchLower = debouncedSearch.toLowerCase()
 
     return tenancies.filter((t) => {
       // Tab filter
@@ -112,7 +115,7 @@ export function TenanciesPageClient({
 
       return true
     })
-  }, [tenancies, tab, search])
+  }, [tenancies, tab, debouncedSearch])
 
   const tabs: Array<{ value: TenancyTab; label: string; count: number }> = [
     { value: 'active', label: 'Active', count: counts.active },
@@ -155,7 +158,10 @@ export function TenanciesPageClient({
             />
             <button
               type="button"
-              onClick={() => void refetch()}
+              onClick={() => {
+                void refetch()
+                toast.success('Tenancies refreshed')
+              }}
               className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-zinc-600 transition hover:text-zinc-950"
             >
               <RefreshCcw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} />

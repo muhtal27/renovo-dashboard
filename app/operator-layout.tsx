@@ -8,6 +8,9 @@ import { BookOpenText, ChevronDown, LogOut, Menu, Search, Settings, CreditCard, 
 import { OperatorNav } from '@/app/operator-nav'
 import { getOperatorLabel, type CurrentOperator } from '@/lib/operator-types'
 import { clearLegacySupabaseBrowserAuthArtifacts } from '@/lib/supabase-session'
+import { CommandPalette } from '@/app/components/CommandPalette'
+import { NotificationCenter } from '@/app/components/NotificationCenter'
+import { useEotCases } from '@/lib/queries/eot-queries'
 
 type Breadcrumb = {
   label: string
@@ -249,6 +252,7 @@ export function OperatorLayout({ children, operator, latestRelease }: OperatorLa
   const breadcrumbs = routeConfig.breadcrumbs ?? []
   const searchTargetPath = routeConfig.searchTargetPath ?? pathname
   const operatorLabel = getOperatorLabel(operator)
+  const { data: allCases = [] } = useEotCases()
   const [signingOut, setSigningOut] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
@@ -351,6 +355,19 @@ export function OperatorLayout({ children, operator, latestRelease }: OperatorLa
                     </Suspense>
                   </div>
 
+                  <button
+                    type="button"
+                    onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))}
+                    className="hidden items-center gap-1.5 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-xs text-zinc-400 transition hover:border-zinc-300 hover:bg-white hover:text-zinc-600 lg:flex"
+                    title="Quick search (⌘K)"
+                  >
+                    <Search className="h-3 w-3" />
+                    <span>Search...</span>
+                    <kbd className="ml-2 rounded border border-zinc-200 bg-white px-1 py-0.5 text-[10px] font-medium">⌘K</kbd>
+                  </button>
+
+                  <NotificationCenter cases={allCases} />
+
                   <Link
                     href="/changelog"
                     prefetch={false}
@@ -435,6 +452,7 @@ export function OperatorLayout({ children, operator, latestRelease }: OperatorLa
           </div>
         </div>
       </div>
+      <CommandPalette />
     </main>
   )
 }

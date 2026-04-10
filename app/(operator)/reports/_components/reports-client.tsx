@@ -1,11 +1,14 @@
 'use client'
 
+import { useCallback } from 'react'
 import Link from 'next/link'
+import { Download } from 'lucide-react'
+import { toast } from 'sonner'
 import {
   formatCurrency,
-  formatDateTime,
   formatEnumLabel,
 } from '@/app/eot/_components/eot-ui'
+import { relativeTime } from '@/lib/relative-time'
 import type { EotReportSummary } from '@/lib/eot-types'
 
 /* ────────────────────────────────────────────────────────────── */
@@ -134,6 +137,35 @@ export function ReportsClient({
   initialSummary?: EotReportSummary | null
   error?: string | null
 }) {
+  const performanceRows = initialSummary?.performance_rows ?? []
+
+  const handleExportCSV = useCallback(() => {
+    const headers = ['Property', 'Tenant', 'Status', 'Priority', 'Evidence', 'Issues', 'Claim Value', 'Last Activity']
+    const rows = performanceRows.map((row) => [
+      row.property_name,
+      row.tenant_name,
+      formatEnumLabel(row.status),
+      formatEnumLabel(row.priority),
+      String(row.evidence_count),
+      String(row.issue_count),
+      row.claim_total_amount ? String(row.claim_total_amount) : '',
+      row.last_activity_at,
+    ])
+
+    const csvContent = [headers, ...rows]
+      .map((row) => row.map((cell) => `"${cell.replace(/"/g, '""')}"`).join(','))
+      .join('\n')
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `renovo-report-${new Date().toISOString().slice(0, 10)}.csv`
+    link.click()
+    URL.revokeObjectURL(url)
+    toast.success('Report exported as CSV')
+  }, [performanceRows])
+
   if (error) {
     return (
       <div className="border border-zinc-200 bg-white px-6 py-10 text-center">
@@ -143,7 +175,7 @@ export function ReportsClient({
     )
   }
 
-  if (!initialSummary || initialSummary.performance_rows.length === 0) {
+  if (!initialSummary || performanceRows.length === 0) {
     return (
       <div className="border border-zinc-200 bg-white px-6 py-10 text-center">
         <h3 className="text-sm font-semibold text-zinc-950">No data yet</h3>
@@ -178,7 +210,17 @@ export function ReportsClient({
     <div className="space-y-6">
       {/* Key numbers */}
       <section className="border border-zinc-200/80 bg-white px-6 py-6 md:px-7">
-        <h3 className="text-sm font-semibold text-zinc-950">Portfolio overview</h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-zinc-950">Portfolio overview</h3>
+          <button
+            type="button"
+            onClick={handleExportCSV}
+            className="inline-flex items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-600 transition hover:bg-zinc-50 hover:text-zinc-950"
+          >
+            <Download className="h-3.5 w-3.5" />
+            Export CSV
+          </button>
+        </div>
         <dl className="mt-4 grid grid-cols-2 gap-x-12 gap-y-5 text-sm md:grid-cols-3 xl:grid-cols-6">
           <div>
             <dt className="text-xs text-zinc-500">Total cases</dt>
@@ -329,8 +371,8 @@ export function ReportsClient({
                       ? formatCurrency(row.claim_total_amount)
                       : <span className="text-zinc-400">—</span>}
                   </td>
-                  <td className="px-4 py-3 text-right text-xs text-zinc-400">
-                    {formatDateTime(row.last_activity_at)}
+                  <td className="px-4 py-3 text-right text-xs text-zinc-400" title={row.last_activity_at}>
+                    {relativeTime(row.last_activity_at)}
                   </td>
                 </tr>
               ))}
