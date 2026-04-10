@@ -367,7 +367,7 @@ export function OperatorLayout({ children, operator, latestRelease }: OperatorLa
                   <NotificationCenter />
 
                   <Link
-                    href="/changelog"
+                    href="/whats-new"
                     prefetch={false}
                     className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-700"
                     title={latestRelease ? `v${latestRelease.version} — ${latestRelease.title}` : 'Changelog'}
