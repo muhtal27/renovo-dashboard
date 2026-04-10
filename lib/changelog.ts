@@ -1,13 +1,18 @@
 /**
- * Changelog entries — add new releases at the TOP of the array.
+ * Changelog types, constants, and server-side data access.
  *
- * Each entry has:
- *  - version:  semver string shown as the release tag
- *  - date:     ISO date string (YYYY-MM-DD)
- *  - title:    short headline for the release
- *  - summary:  one-liner shown in the list view
- *  - changes:  grouped by category
+ * Entries are stored in the `changelog_entries` Supabase table.
+ * The GitHub Action at `.github/workflows/changelog.yml` creates new
+ * entries automatically on every push to main.
  */
+
+import 'server-only'
+
+import { getSupabaseServiceRoleClient } from '@/lib/supabase-admin'
+
+// ---------------------------------------------------------------------------
+// Types & constants
+// ---------------------------------------------------------------------------
 
 export type ChangelogCategory = 'added' | 'improved' | 'fixed' | 'removed'
 
@@ -33,148 +38,42 @@ export const CATEGORY_META: Record<
 }
 
 // ---------------------------------------------------------------------------
-// Releases — newest first
+// Server-side data access
 // ---------------------------------------------------------------------------
 
-export const changelog: ChangelogEntry[] = [
-  {
-    version: '1.5.0',
-    date: '2026-04-06',
-    title: 'Editable defect review in case workspace',
-    summary:
-      'Operators can now override AI liability assignments, adjust costs, and exclude defects directly in the Review step before sending the draft report.',
-    changes: [
-      {
-        category: 'added',
-        items: [
-          'Inline defect editing in Review step — toggle liability (tenant/landlord/shared), adjust costs, and exclude items',
-          'Live claim summary with tenant liability, landlord cost, shared cost, and deposit comparison',
-          'Deposit vs claim warning when tenant liability exceeds the deposit held',
-          'Save review overrides with one-click persistence to the database',
-          'Reset button to restore all defects to AI-suggested values',
-        ],
-      },
-      {
-        category: 'improved',
-        items: [
-          'Review step now shows AI reasoning and confidence alongside editable fields',
-          'Original AI claim breakdown preserved as reference below operator overrides',
-        ],
-      },
-    ],
-  },
-  {
-    version: '1.4.0',
-    date: '2026-04-06',
-    title: 'Unmatched email review & design consistency',
-    summary:
-      'Operators can now review and attach unmatched inbound emails directly from Settings. Disputes and Inventory Feedback pages redesigned to match the rest of the dashboard.',
-    changes: [
-      {
-        category: 'added',
-        items: [
-          'Interactive unmatched email review queue in Email Ingestion settings — view email details, search tenancies, and attach in one click',
-        ],
-      },
-      {
-        category: 'improved',
-        items: [
-          'Disputes page redesigned with row-based layout, ToolbarPill tabs, and inline KPI stats',
-          'Inventory Feedback page redesigned to match clean dashboard design language',
-          'Inventory Feedback now loads via a single aggregated API call instead of N+1 requests',
-          'Renamed "Reports / Analytics" to "Reports" across the dashboard',
-        ],
-      },
-      {
-        category: 'removed',
-        items: [
-          'Deposit Scheme tab removed from sidebar navigation',
-        ],
-      },
-    ],
-  },
-  {
-    version: '1.3.0',
-    date: '2026-04-06',
-    title: 'Case workspace redesign',
-    summary:
-      'Rebuilt the case workspace with a competitor-style step bar using domain-specific EOT steps: Inventory, Checkout, Readings, Analysis, Review, Deductions, Refund.',
-    changes: [
-      {
-        category: 'improved',
-        items: [
-          'Case workspace step bar redesigned with visual icon circles, connecting lines, and clear progress indicators',
-          'Steps now follow industry-standard EOT workflow instead of internal process states',
-        ],
-      },
-    ],
-  },
-  {
-    version: '1.2.0',
-    date: '2026-04-05',
-    title: 'Email ingestion system',
-    summary:
-      'Receive inventory reports via email at your dedicated address. Auto-matches to properties using sender, postcode, and address parsing.',
-    changes: [
-      {
-        category: 'added',
-        items: [
-          'Inbound email ingestion via Resend webhooks at *@in.renovoai.co.uk',
-          'Auto-matching engine using sender email, UK postcodes, and address fuzzy matching',
-          'Automatic attachment upload to Supabase Storage and linking to open cases',
-          'Email Ingestion settings tab with configuration, activity log, and unmatched queue',
-        ],
-      },
-    ],
-  },
-  {
-    version: '1.1.0',
-    date: '2026-04-05',
-    title: 'PWA and mobile experience',
-    summary:
-      'Native app feel with PWA splash screen, touch polish, offline indicator, and quick shortcuts.',
-    changes: [
-      {
-        category: 'added',
-        items: [
-          'Native splash screen for standalone PWA mode',
-          'Offline/online connection status bar',
-          'PWA shortcuts for Tenancies, Disputes, Dashboard, and Deposits',
-        ],
-      },
-      {
-        category: 'improved',
-        items: [
-          'Disabled tap highlight and rubber-band bounce for native feel',
-          'Instant taps with touch-action: manipulation (no 300ms delay)',
-          'Edge-to-edge viewport with safe-area insets',
-        ],
-      },
-    ],
-  },
-  {
-    version: '1.0.0',
-    date: '2026-04-04',
-    title: 'Initial release',
-    summary:
-      'End-of-tenancy automation platform for UK letting agencies with full case management, tenancy dashboard, dispute tracking, and team management.',
-    changes: [
-      {
-        category: 'added',
-        items: [
-          'Operator dashboard with tenancy management and case workspace',
-          'Automated evidence analysis and deduction recommendations',
-          'Dispute tracking with priority-based workflow',
-          'Inventory feedback aggregation across all cases',
-          'Team management with role-based access control',
-          'Reports and analytics for portfolio performance',
-          'Guidance library for EOT best practices',
-          'Portfolio-based pricing with billing management',
-        ],
-      },
-    ],
-  },
-]
+export async function getChangelog(): Promise<ChangelogEntry[]> {
+  const supabase = getSupabaseServiceRoleClient()
 
-/** Latest release — used for "What\'s new" indicators */
-export const latestRelease = changelog[0]
+  const { data, error } = await supabase
+    .from('changelog_entries')
+    .select('version, date, title, summary, changes')
+    .order('date', { ascending: false })
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    console.error('Failed to load changelog from database', error.message)
+    return []
+  }
+
+  return (data ?? []).map((row) => ({
+    version: row.version,
+    date: row.date,
+    title: row.title,
+    summary: row.summary,
+    changes: row.changes as ChangelogEntry['changes'],
+  }))
+}
+
+export async function getLatestRelease(): Promise<{ version: string; title: string } | null> {
+  const supabase = getSupabaseServiceRoleClient()
+
+  const { data } = await supabase
+    .from('changelog_entries')
+    .select('version, title')
+    .order('date', { ascending: false })
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  return data ?? null
+}

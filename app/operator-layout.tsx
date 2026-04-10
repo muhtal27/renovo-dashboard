@@ -8,7 +8,6 @@ import { BookOpenText, ChevronDown, LogOut, Menu, Search, Settings, CreditCard, 
 import { OperatorNav } from '@/app/operator-nav'
 import { getOperatorLabel, type CurrentOperator } from '@/lib/operator-types'
 import { clearLegacySupabaseBrowserAuthArtifacts } from '@/lib/supabase-session'
-import { latestRelease } from '@/lib/changelog'
 
 type Breadcrumb = {
   label: string
@@ -26,6 +25,7 @@ type ShellRouteConfig = {
 type OperatorLayoutProps = {
   children: ReactNode
   operator: CurrentOperator
+  latestRelease: { version: string; title: string } | null
 }
 
 const DEFAULT_ROUTE_CONFIG: ShellRouteConfig = {
@@ -243,7 +243,7 @@ function OperatorSearchFormBridge({
   )
 }
 
-export function OperatorLayout({ children, operator }: OperatorLayoutProps) {
+export function OperatorLayout({ children, operator, latestRelease }: OperatorLayoutProps) {
   const pathname = usePathname() ?? '/admin'
   const routeConfig = useMemo(() => getRouteConfig(pathname), [pathname])
   const breadcrumbs = routeConfig.breadcrumbs ?? []
@@ -355,7 +355,7 @@ export function OperatorLayout({ children, operator }: OperatorLayoutProps) {
                     href="/changelog"
                     prefetch={false}
                     className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-700"
-                    title={`v${latestRelease.version} — ${latestRelease.title}`}
+                    title={latestRelease ? `v${latestRelease.version} — ${latestRelease.title}` : 'Changelog'}
                   >
                     <Sparkles className="h-4 w-4" strokeWidth={2} />
                     <span className="hidden lg:inline">What&apos;s new</span>

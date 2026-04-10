@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { MarketingShell } from '@/app/components/MarketingShell'
-import { changelog, CATEGORY_META, type ChangelogEntry } from '@/lib/changelog'
+import { getChangelog, CATEGORY_META, type ChangelogEntry } from '@/lib/changelog'
 
 export const metadata: Metadata = {
   title: 'Changelog | Renovo AI',
@@ -70,7 +70,9 @@ function ReleaseCard({ entry }: { entry: ChangelogEntry }) {
   )
 }
 
-export default function ChangelogPage() {
+export default async function ChangelogPage() {
+  const changelog = await getChangelog()
+
   return (
     <MarketingShell currentPath="/changelog">
       <div className="mx-auto max-w-2xl px-6 py-20 md:py-28">

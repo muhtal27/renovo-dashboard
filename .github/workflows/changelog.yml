@@ -1,0 +1,178 @@
+name: Auto-update changelog
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  changelog:
+    runs-on: ubuntu-latest
+    # Skip if the push was made by this action (prevent loops)
+    if: "!contains(github.event.head_commit.message, '[changelog skip]')"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Collect commits since last changelog entry
+        id: commits
+        env:
+          SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          # Get the date of the latest changelog entry from Supabase
+          LATEST=$(curl -s \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            "${SUPABASE_URL}/rest/v1/changelog_entries?select=created_at&order=created_at.desc&limit=1" \
+          )
+          SINCE=$(echo "$LATEST" | jq -r '.[0].created_at // empty')
+
+          if [ -z "$SINCE" ]; then
+            echo "No existing changelog entries found, using last 7 days"
+            SINCE=$(date -u -d '7 days ago' '+%Y-%m-%dT%H:%M:%SZ' 2>/dev/null || date -u -v-7d '+%Y-%m-%dT%H:%M:%SZ')
+          fi
+
+          echo "Collecting commits since $SINCE"
+
+          # Get commit messages since that date, skip merge commits
+          MESSAGES=$(git log --since="$SINCE" --no-merges --pretty=format:"%s" HEAD)
+
+          if [ -z "$MESSAGES" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "No new commits since last changelog entry"
+            exit 0
+          fi
+
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+
+          # Write messages to file for the next step
+          echo "$MESSAGES" > /tmp/commit_messages.txt
+          echo "Found $(echo "$MESSAGES" | wc -l) commits"
+
+      - name: Generate and insert changelog entry
+        if: steps.commits.outputs.skip != 'true'
+        env:
+          SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          # Get current latest version
+          LATEST_VERSION=$(curl -s \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            "${SUPABASE_URL}/rest/v1/changelog_entries?select=version&order=date.desc,created_at.desc&limit=1" \
+            | jq -r '.[0].version // "1.0.0"')
+
+          echo "Current version: $LATEST_VERSION"
+
+          # Parse version and bump
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$LATEST_VERSION"
+
+          # Categorise commit messages
+          ADDED=""
+          IMPROVED=""
+          FIXED=""
+          REMOVED=""
+          HAS_FEATURE=false
+
+          while IFS= read -r msg; do
+            [ -z "$msg" ] && continue
+            # Skip changelog/CI noise
+            case "$msg" in
+              *"[changelog skip]"*|*"Merge "*|*"merge "*) continue ;;
+            esac
+
+            lower=$(echo "$msg" | tr '[:upper:]' '[:lower:]')
+            case "$lower" in
+              add*|*"feat:"*|*"feat("*|*"new "*|*"create "*|*"implement "*)
+                ADDED="${ADDED}$(echo "$msg" | sed 's/^[Aa]dd //' | sed 's/^feat[:(][^)]*) *//')\\n"
+                HAS_FEATURE=true ;;
+              fix*|*"bug:"*|*"bugfix"*|*"hotfix"*)
+                FIXED="${FIXED}$(echo "$msg" | sed 's/^[Ff]ix //')\\n" ;;
+              remov*|*"delete "*|*"drop "*)
+                REMOVED="${REMOVED}$(echo "$msg" | sed 's/^[Rr]emov[e]* //')\\n" ;;
+              *)
+                IMPROVED="${IMPROVED}${msg}\\n" ;;
+            esac
+          done < /tmp/commit_messages.txt
+
+          # Determine version bump
+          if [ "$HAS_FEATURE" = true ]; then
+            MINOR=$((MINOR + 1))
+            PATCH=0
+          else
+            PATCH=$((PATCH + 1))
+          fi
+          NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+          TODAY=$(date -u '+%Y-%m-%d')
+
+          echo "New version: $NEW_VERSION"
+
+          # Build changes JSON array
+          CHANGES="["
+          FIRST=true
+
+          for CAT_NAME in added improved fixed removed; do
+            eval "ITEMS=\$$( echo $CAT_NAME | tr '[:lower:]' '[:upper:]' )"
+            [ -z "$ITEMS" ] && continue
+
+            # Convert newline-separated items to JSON array
+            ITEMS_JSON=$(echo -e "$ITEMS" | sed '/^$/d' | jq -R . | jq -s .)
+
+            if [ "$FIRST" = true ]; then
+              FIRST=false
+            else
+              CHANGES="${CHANGES},"
+            fi
+            CHANGES="${CHANGES}{\"category\":\"${CAT_NAME}\",\"items\":${ITEMS_JSON}}"
+          done
+
+          CHANGES="${CHANGES}]"
+
+          # Build title from the most impactful category
+          if [ -n "$ADDED" ]; then
+            FIRST_ITEM=$(echo -e "$ADDED" | head -1)
+            TITLE=$(echo "$FIRST_ITEM" | cut -c1-60)
+          elif [ -n "$IMPROVED" ]; then
+            FIRST_ITEM=$(echo -e "$IMPROVED" | head -1)
+            TITLE=$(echo "$FIRST_ITEM" | cut -c1-60)
+          elif [ -n "$FIXED" ]; then
+            TITLE="Bug fixes and reliability improvements"
+          else
+            TITLE="Maintenance update"
+          fi
+
+          # Count total items
+          TOTAL=$(echo -e "${ADDED}${IMPROVED}${FIXED}${REMOVED}" | sed '/^$/d' | wc -l | tr -d ' ')
+          SUMMARY="${TOTAL} changes shipped in v${NEW_VERSION}."
+
+          echo "Title: $TITLE"
+          echo "Changes: $CHANGES"
+
+          # Insert into Supabase
+          PAYLOAD=$(jq -n \
+            --arg version "$NEW_VERSION" \
+            --arg date "$TODAY" \
+            --arg title "$TITLE" \
+            --arg summary "$SUMMARY" \
+            --argjson changes "$CHANGES" \
+            '{version: $version, date: $date, title: $title, summary: $summary, changes: $changes}')
+
+          RESPONSE=$(curl -s -w "\n%{http_code}" \
+            -X POST \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Content-Type: application/json" \
+            -H "Prefer: return=minimal" \
+            -d "$PAYLOAD" \
+            "${SUPABASE_URL}/rest/v1/changelog_entries")
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+          BODY=$(echo "$RESPONSE" | head -n -1)
+
+          if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
+            echo "Changelog v${NEW_VERSION} created successfully"
+          else
+            echo "Failed to create changelog entry (HTTP $HTTP_CODE): $BODY"
+            exit 1
+          fi
