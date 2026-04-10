@@ -31,7 +31,10 @@ export const eotKeys = {
 
 // ── Cases ───────────────────────────────────────────────────────────
 
-export function useEotCases(initialData?: EotCaseListItem[] | null) {
+export function useEotCases(
+  initialData?: EotCaseListItem[] | null,
+  options?: { enabled?: boolean },
+) {
   return useQuery({
     queryKey: eotKeys.cases,
     queryFn: async () => {
@@ -39,6 +42,7 @@ export function useEotCases(initialData?: EotCaseListItem[] | null) {
       return [...cases].sort(byLastActivityDesc)
     },
     initialData: initialData ?? undefined,
+    enabled: options?.enabled ?? true,
     refetchInterval: 60_000,
     refetchIntervalInBackground: false,
   })

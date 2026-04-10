@@ -10,7 +10,6 @@ import { getOperatorLabel, type CurrentOperator } from '@/lib/operator-types'
 import { clearLegacySupabaseBrowserAuthArtifacts } from '@/lib/supabase-session'
 import { CommandPalette } from '@/app/components/CommandPalette'
 import { NotificationCenter } from '@/app/components/NotificationCenter'
-import { useEotCases } from '@/lib/queries/eot-queries'
 
 type Breadcrumb = {
   label: string
@@ -252,7 +251,6 @@ export function OperatorLayout({ children, operator, latestRelease }: OperatorLa
   const breadcrumbs = routeConfig.breadcrumbs ?? []
   const searchTargetPath = routeConfig.searchTargetPath ?? pathname
   const operatorLabel = getOperatorLabel(operator)
-  const { data: allCases = [] } = useEotCases()
   const [signingOut, setSigningOut] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
@@ -366,7 +364,7 @@ export function OperatorLayout({ children, operator, latestRelease }: OperatorLa
                     <kbd className="ml-2 rounded border border-zinc-200 bg-white px-1 py-0.5 text-[10px] font-medium">⌘K</kbd>
                   </button>
 
-                  <NotificationCenter cases={allCases} />
+                  <NotificationCenter />
 
                   <Link
                     href="/changelog"

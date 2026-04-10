@@ -42,6 +42,11 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  compress: true,
+  productionBrowserSourceMaps: false,
+  experimental: {
+    optimizePackageImports: ['lucide-react', '@supabase/supabase-js', '@tanstack/react-query'],
+  },
   images: {
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [

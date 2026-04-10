@@ -124,7 +124,7 @@ const apiContextCache = new Map<
   string,
   { result: OperatorContextResult; expiresAt: number }
 >()
-const API_CONTEXT_TTL_MS = 10_000
+const API_CONTEXT_TTL_MS = 60_000
 
 function pruneApiContextCache() {
   const now = Date.now()

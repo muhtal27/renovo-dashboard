@@ -10,17 +10,11 @@ import {
   Calculator,
   Banknote,
 } from 'lucide-react'
+import dynamic from 'next/dynamic'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useTransition, type ComponentType } from 'react'
 import { formatAddress, formatDate } from '@/app/eot/_components/eot-ui'
 import { WorkspaceBadge } from '@/app/(operator)/operator/cases/[id]/_components/checkout-workspace-ui'
-import { StepInventory } from '@/app/(operator)/operator/cases/[id]/_components/step-inventory'
-import { StepCheckoutReport } from '@/app/(operator)/operator/cases/[id]/_components/step-checkout-report'
-import { StepReadings } from '@/app/(operator)/operator/cases/[id]/_components/step-readings'
-import { StepAnalysis } from '@/app/(operator)/operator/cases/[id]/_components/step-analysis'
-import { StepReview } from '@/app/(operator)/operator/cases/[id]/_components/step-review'
-import { StepDeductions } from '@/app/(operator)/operator/cases/[id]/_components/step-deductions'
-import { StepRefund } from '@/app/(operator)/operator/cases/[id]/_components/step-refund'
 import { cn } from '@/lib/ui'
 import type { EotCaseStatus } from '@/lib/eot-types'
 import {
@@ -222,13 +216,13 @@ function WorkflowNav({
 /* ────────────────────────────────────────────────────────────── */
 
 const STEP_COMPONENTS: Record<WorkspaceStep, ComponentType<{ data: OperatorCheckoutWorkspaceData }>> = {
-  inventory: StepInventory,
-  checkout: StepCheckoutReport,
-  readings: StepReadings,
-  analysis: StepAnalysis,
-  review: StepReview,
-  deductions: StepDeductions,
-  refund: StepRefund,
+  inventory: dynamic(() => import('./step-inventory').then((m) => m.StepInventory)),
+  checkout: dynamic(() => import('./step-checkout-report').then((m) => m.StepCheckoutReport)),
+  readings: dynamic(() => import('./step-readings').then((m) => m.StepReadings)),
+  analysis: dynamic(() => import('./step-analysis').then((m) => m.StepAnalysis)),
+  review: dynamic(() => import('./step-review').then((m) => m.StepReview)),
+  deductions: dynamic(() => import('./step-deductions').then((m) => m.StepDeductions)),
+  refund: dynamic(() => import('./step-refund').then((m) => m.StepRefund)),
 }
 
 /* ────────────────────────────────────────────────────────────── */

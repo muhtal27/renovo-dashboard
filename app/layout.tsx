@@ -8,9 +8,7 @@ import {
   siteName,
   siteUrl,
 } from '@/lib/marketing-metadata'
-import { ConnectionStatus } from './components/ConnectionStatus'
-import { PwaSplash } from './components/PwaSplash'
-import { ServiceWorkerRegistration } from './components/ServiceWorkerRegistration'
+import { ClientShell } from './components/ClientShell'
 
 const dmSans = DM_Sans({
   subsets: ['latin'],
@@ -75,8 +73,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${dmSans.variable} ${instrumentSerif.variable}`}>
-        <PwaSplash />
-        <ConnectionStatus />
+        <ClientShell />
         <Toaster
           position="bottom-right"
           toastOptions={{
@@ -85,7 +82,6 @@ export default function RootLayout({
           }}
         />
         {children}
-        <ServiceWorkerRegistration />
       </body>
     </html>
   )

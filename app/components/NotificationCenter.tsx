@@ -1,10 +1,11 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Bell, X } from 'lucide-react'
 import { cn } from '@/lib/ui'
 import { relativeTime } from '@/lib/relative-time'
+import { useEotCases } from '@/lib/queries/eot-queries'
 
 type Notification = {
   id: string
@@ -14,6 +15,16 @@ type Notification = {
   tone: 'default' | 'warning' | 'danger' | 'success'
   createdAt: string
   read: boolean
+}
+
+function readDismissedIds(): Set<string> {
+  if (typeof window === 'undefined') return new Set()
+  try {
+    const raw = localStorage.getItem('renovo:dismissed-notifications')
+    return raw ? new Set(JSON.parse(raw) as string[]) : new Set()
+  } catch {
+    return new Set()
+  }
 }
 
 function useCaseNotifications(
@@ -26,73 +37,80 @@ function useCaseNotifications(
     tenant_name: string
     last_activity_at: string
   }>
-): Notification[] {
-  const [dismissed] = useState<Set<string>>(() => {
-    if (typeof window === 'undefined') return new Set()
-    try {
-      const raw = localStorage.getItem('renovo:dismissed-notifications')
-      return raw ? new Set(JSON.parse(raw) as string[]) : new Set()
-    } catch {
-      return new Set()
-    }
-  })
+): { notifications: Notification[]; dismiss: (id: string) => void } {
+  const [dismissed, setDismissed] = useState<Set<string>>(readDismissedIds)
 
-  const notifications: Notification[] = []
+  const dismiss = useCallback((id: string) => {
+    setDismissed((prev) => {
+      const next = new Set(prev)
+      next.add(id)
+      try {
+        localStorage.setItem('renovo:dismissed-notifications', JSON.stringify([...next]))
+      } catch { /* localStorage unavailable */ }
+      return next
+    })
+  }, [])
 
-  for (const c of cases) {
-    const addr = c.property.address_line_1 || c.property.name
+  const notifications = useMemo(() => {
+    const result: Notification[] = []
 
-    if (c.status === 'review') {
-      const id = `review-${c.id}`
-      if (!dismissed.has(id)) {
-        notifications.push({
-          id,
-          title: 'Case ready for review',
-          body: `${addr} — ${c.tenant_name}`,
-          href: `/operator/cases/${c.id}`,
-          tone: 'warning',
-          createdAt: c.last_activity_at,
-          read: false,
-        })
+    for (const c of cases) {
+      const addr = c.property.address_line_1 || c.property.name
+
+      if (c.status === 'review') {
+        const id = `review-${c.id}`
+        if (!dismissed.has(id)) {
+          result.push({
+            id,
+            title: 'Case ready for review',
+            body: `${addr} — ${c.tenant_name}`,
+            href: `/operator/cases/${c.id}`,
+            tone: 'warning',
+            createdAt: c.last_activity_at,
+            read: false,
+          })
+        }
+      }
+
+      if (c.status === 'disputed') {
+        const id = `disputed-${c.id}`
+        if (!dismissed.has(id)) {
+          result.push({
+            id,
+            title: 'Case disputed',
+            body: `${addr} — ${c.tenant_name}`,
+            href: `/operator/cases/${c.id}?step=resolved`,
+            tone: 'danger',
+            createdAt: c.last_activity_at,
+            read: false,
+          })
+        }
+      }
+
+      if (!c.assigned_to) {
+        const id = `unassigned-${c.id}`
+        if (!dismissed.has(id)) {
+          result.push({
+            id,
+            title: 'Unassigned case',
+            body: `${addr} — ${c.tenant_name}`,
+            href: '/admin',
+            tone: 'default',
+            createdAt: c.last_activity_at,
+            read: false,
+          })
+        }
       }
     }
 
-    if (c.status === 'disputed') {
-      const id = `disputed-${c.id}`
-      if (!dismissed.has(id)) {
-        notifications.push({
-          id,
-          title: 'Case disputed',
-          body: `${addr} — ${c.tenant_name}`,
-          href: `/operator/cases/${c.id}?step=resolved`,
-          tone: 'danger',
-          createdAt: c.last_activity_at,
-          read: false,
-        })
-      }
-    }
+    result.sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    )
 
-    if (!c.assigned_to) {
-      const id = `unassigned-${c.id}`
-      if (!dismissed.has(id)) {
-        notifications.push({
-          id,
-          title: 'Unassigned case',
-          body: `${addr} — ${c.tenant_name}`,
-          href: '/admin',
-          tone: 'default',
-          createdAt: c.last_activity_at,
-          read: false,
-        })
-      }
-    }
-  }
+    return result
+  }, [cases, dismissed])
 
-  notifications.sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  )
-
-  return notifications
+  return { notifications, dismiss }
 }
 
 const TONE_DOT: Record<string, string> = {
@@ -102,22 +120,14 @@ const TONE_DOT: Record<string, string> = {
   success: 'bg-emerald-500',
 }
 
-export function NotificationCenter({
-  cases,
-}: {
-  cases: Array<{
-    id: string
-    status: string
-    priority: string
-    assigned_to: string | null
-    property: { name: string; address_line_1: string | null }
-    tenant_name: string
-    last_activity_at: string
-  }>
-}) {
+export function NotificationCenter() {
   const [open, setOpen] = useState(false)
+  const [hasOpened, setHasOpened] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
-  const notifications = useCaseNotifications(cases)
+
+  // Only start fetching cases after the panel has been opened once
+  const { data: cases = [] } = useEotCases(undefined, { enabled: hasOpened })
+  const { notifications, dismiss } = useCaseNotifications(cases)
   const unreadCount = notifications.filter((n) => !n.read).length
 
   useEffect(() => {
@@ -131,23 +141,11 @@ export function NotificationCenter({
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [open])
 
-  const handleDismiss = useCallback((id: string) => {
-    try {
-      const raw = localStorage.getItem('renovo:dismissed-notifications')
-      const current: string[] = raw ? (JSON.parse(raw) as string[]) : []
-      current.push(id)
-      localStorage.setItem('renovo:dismissed-notifications', JSON.stringify(current))
-    } catch {
-      // localStorage unavailable
-    }
-    window.location.reload()
-  }, [])
-
   return (
     <div className="relative" ref={ref}>
       <button
         type="button"
-        onClick={() => setOpen((prev) => !prev)}
+        onClick={() => { setOpen((prev) => !prev); setHasOpened(true) }}
         className="relative flex h-8 w-8 items-center justify-center rounded-lg text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-700"
         aria-label="Notifications"
       >
@@ -195,7 +193,7 @@ export function NotificationCenter({
                       onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
-                        handleDismiss(n.id)
+                        dismiss(n.id)
                       }}
                       className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-600"
                       aria-label="Dismiss"

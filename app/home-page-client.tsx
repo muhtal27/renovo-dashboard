@@ -128,7 +128,7 @@ export default function HomePageClient() {
             <div className="relative max-lg:mx-auto max-lg:max-w-[540px]">
               <div className="absolute -inset-0.5 z-0 rounded-[14px] bg-gradient-to-b from-emerald-500/20 to-transparent" />
               <div className="relative z-10 overflow-hidden rounded-xl bg-[#111827] shadow-[0_24px_64px_rgba(0,0,0,.45)]">
-                <Image src="/dashboard-preview.png" alt="Renovo AI checkout case workspace" width={1920} height={1080} className="block w-full" priority />
+                <Image src="/dashboard-preview.png" alt="Renovo AI checkout case workspace" width={1920} height={1080} className="block w-full" />
               </div>
             </div>
           </div>

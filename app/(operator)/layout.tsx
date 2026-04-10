@@ -9,13 +9,14 @@ export default async function OperatorRouteLayout({
 }: {
   children: ReactNode
 }) {
-  const operator = await getCurrentOperatorForLayout()
+  const [operator, latestRelease] = await Promise.all([
+    getCurrentOperatorForLayout(),
+    getLatestRelease(),
+  ])
 
   if (!operator) {
     return <>{children}</>
   }
-
-  const latestRelease = await getLatestRelease()
 
   return (
     <AppQueryClientProvider>

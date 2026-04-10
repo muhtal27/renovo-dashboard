@@ -8,6 +8,7 @@
 
 import 'server-only'
 
+import { unstable_cache } from 'next/cache'
 import { getSupabaseServiceRoleClient } from '@/lib/supabase-admin'
 
 // ---------------------------------------------------------------------------
@@ -64,7 +65,7 @@ export async function getChangelog(): Promise<ChangelogEntry[]> {
   }))
 }
 
-export async function getLatestRelease(): Promise<{ version: string; title: string } | null> {
+async function fetchLatestRelease(): Promise<{ version: string; title: string } | null> {
   const supabase = getSupabaseServiceRoleClient()
 
   const { data } = await supabase
@@ -77,3 +78,9 @@ export async function getLatestRelease(): Promise<{ version: string; title: stri
 
   return data ?? null
 }
+
+export const getLatestRelease = unstable_cache(
+  fetchLatestRelease,
+  ['latest-release'],
+  { revalidate: 86_400 },
+)
