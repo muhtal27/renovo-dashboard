@@ -229,6 +229,7 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
   const [, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const [saveSuccess, setSaveSuccess] = useState(false)
+  const [sendSuccess, setSendSuccess] = useState(false)
   const [activeTab, setActiveTab] = useState<ReviewTab>('defects')
 
   const caseId = data.workspace.case.id
@@ -351,6 +352,7 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
   async function handleSendDraft() {
     setIsSending(true)
     setError(null)
+    setSendSuccess(false)
     try {
       const propertyAddress = data.checkoutCase?.propertyAddress ?? 'Address not recorded'
       const caseRef = data.checkoutCase?.caseReference ?? caseId.slice(0, 8).toUpperCase()
@@ -359,9 +361,9 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          landlordEmail: landlordEmail ?? '',
+          landlordEmail: landlordEmail || undefined,
           landlordName,
-          tenantEmail: tenantEmail ?? '',
+          tenantEmail: tenantEmail || undefined,
           tenantName,
           propertyAddress,
           caseRef,
@@ -369,8 +371,9 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
       })
       if (!sendResponse.ok) {
         const err = await sendResponse.json().catch(() => null)
-        throw new Error(err?.detail || err?.error || 'Failed to send draft emails.')
+        throw new Error(err?.detail || err?.error || `Failed to send draft emails (${sendResponse.status}).`)
       }
+      setSendSuccess(true)
       const transitionResponse = await fetch(`/api/eot/cases/${caseId}/transition`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -657,15 +660,23 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
       {/* ---- Error ---- */}
       {error ? <p className="text-sm text-rose-700">{error}</p> : null}
 
+      {/* ---- Send success ---- */}
+      {sendSuccess ? (
+        <div className="flex items-center gap-2 rounded bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+          <Check className="h-4 w-4 shrink-0" />
+          Emails sent successfully. The case is moving to the deductions step.
+        </div>
+      ) : null}
+
       {/* ---- Send draft ---- */}
       {isReview ? (
         <div className="border-t border-zinc-200 pt-6">
           <p className="mb-3 text-sm text-zinc-600">
             Sending the draft will email the complete checkout report to{' '}
             <span className="font-medium text-zinc-950">{landlordName}</span>
-            {landlordEmail ? ` (${landlordEmail})` : ''} and tenant liabilities to{' '}
+            {landlordEmail ? ` (${landlordEmail})` : ' (no email set)'} and tenant liabilities to{' '}
             <span className="font-medium text-zinc-950">{tenantName}</span>
-            {tenantEmail ? ` (${tenantEmail})` : ''}.
+            {tenantEmail ? ` (${tenantEmail})` : ' (no email set)'}.
           </p>
           <WorkspaceActionButton
             disabled={!canSend || isSending}
@@ -673,7 +684,7 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
             onClick={handleSendDraft}
           >
             {isSending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-            Send draft to parties
+            {isSending ? 'Sending...' : 'Send draft to parties'}
           </WorkspaceActionButton>
           {!canSend && isReview ? (
             <p className="mt-2 text-xs text-zinc-500">

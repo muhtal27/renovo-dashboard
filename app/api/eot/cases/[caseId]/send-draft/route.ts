@@ -56,9 +56,16 @@ export async function POST(request: Request, context: RouteContext) {
     reportUrl,
   } = body
 
-  if (!landlordEmail || !tenantEmail || !propertyAddress || !caseRef) {
+  if (!propertyAddress || !caseRef) {
     return NextResponse.json(
-      { error: 'Missing required fields: landlordEmail, tenantEmail, propertyAddress, caseRef.' },
+      { error: 'Missing required fields: propertyAddress, caseRef.' },
+      { status: 400 }
+    )
+  }
+
+  if (!landlordEmail && !tenantEmail) {
+    return NextResponse.json(
+      { error: 'At least one recipient email (landlord or tenant) is required.' },
       { status: 400 }
     )
   }
@@ -81,53 +88,69 @@ export async function POST(request: Request, context: RouteContext) {
   const subject = `Checkout Report \u2014 ${propertyAddress}`
 
   try {
-    const [landlordResult, tenantResult] = await Promise.all([
-      resend.emails.send({
-        from: fromAddress,
-        to: landlordEmail,
-        replyTo: userEmail,
-        subject,
-        html: [
-          `<p>Dear ${esc(landlordName || 'Landlord')},</p>`,
-          `<p>Please find the checkout report for <strong>${esc(propertyAddress)}</strong> (Ref: ${esc(caseRef)}).</p>`,
-          reportUrl ? `<p>The full checkout report is available here:<br /><a href="${esc(reportUrl)}">${esc(reportUrl)}</a></p>` : '',
-          `<p>This report contains the property condition assessment, recommended deductions, and supporting evidence. Please review the findings and let us know if you have any questions.</p>`,
-          `<p>Kind regards,<br />${esc(userName)}</p>`,
-        ].filter(Boolean).join('\n'),
-      }),
+    const emailPromises: Promise<{ data: { id: string } | null; error: { message: string } | null }>[] = []
+    const recipients: string[] = []
 
-      resend.emails.send({
-        from: fromAddress,
-        to: tenantEmail,
-        replyTo: userEmail,
-        subject,
-        html: [
-          `<p>Dear ${esc(tenantName || 'Tenant')},</p>`,
-          `<p>The checkout inspection for <strong>${esc(propertyAddress)}</strong> (Ref: ${esc(caseRef)}) has been completed.</p>`,
-          reportUrl ? `<p>A summary of any proposed deductions and tenant liabilities is available in the checkout report:<br /><a href="${esc(reportUrl)}">${esc(reportUrl)}</a></p>` : '',
-          `<p>Please review the report carefully. If you have any queries or wish to dispute any items, please respond to this email.</p>`,
-          `<p>Kind regards,<br />${esc(userName)}</p>`,
-        ].filter(Boolean).join('\n'),
-      }),
-    ])
+    if (landlordEmail) {
+      recipients.push('landlord')
+      emailPromises.push(
+        resend.emails.send({
+          from: fromAddress,
+          to: landlordEmail,
+          replyTo: userEmail,
+          subject,
+          html: [
+            `<p>Dear ${esc(landlordName || 'Landlord')},</p>`,
+            `<p>Please find the checkout report for <strong>${esc(propertyAddress)}</strong> (Ref: ${esc(caseRef)}).</p>`,
+            reportUrl ? `<p>The full checkout report is available here:<br /><a href="${esc(reportUrl)}">${esc(reportUrl)}</a></p>` : '',
+            `<p>This report contains the property condition assessment, recommended deductions, and supporting evidence. Please review the findings and let us know if you have any questions.</p>`,
+            `<p>Kind regards,<br />${esc(userName)}</p>`,
+          ].filter(Boolean).join('\n'),
+        }),
+      )
+    }
+
+    if (tenantEmail) {
+      recipients.push('tenant')
+      emailPromises.push(
+        resend.emails.send({
+          from: fromAddress,
+          to: tenantEmail,
+          replyTo: userEmail,
+          subject,
+          html: [
+            `<p>Dear ${esc(tenantName || 'Tenant')},</p>`,
+            `<p>The checkout inspection for <strong>${esc(propertyAddress)}</strong> (Ref: ${esc(caseRef)}) has been completed.</p>`,
+            reportUrl ? `<p>A summary of any proposed deductions and tenant liabilities is available in the checkout report:<br /><a href="${esc(reportUrl)}">${esc(reportUrl)}</a></p>` : '',
+            `<p>Please review the report carefully. If you have any queries or wish to dispute any items, please respond to this email.</p>`,
+            `<p>Kind regards,<br />${esc(userName)}</p>`,
+          ].filter(Boolean).join('\n'),
+        }),
+      )
+    }
+
+    const results = await Promise.all(emailPromises)
 
     const errors: string[] = []
-    if (landlordResult.error) {
-      errors.push(`Landlord email failed: ${landlordResult.error.message}`)
-    }
-    if (tenantResult.error) {
-      errors.push(`Tenant email failed: ${tenantResult.error.message}`)
+    results.forEach((result, i) => {
+      if (result.error) {
+        errors.push(`${recipients[i]} email failed: ${result.error.message}`)
+      }
+    })
+
+    if (errors.length > 0 && errors.length === results.length) {
+      console.error('send-draft all emails failed', { caseId, errors })
+      return NextResponse.json({ ok: false, errors }, { status: 502 })
     }
 
     if (errors.length > 0) {
-      console.error('send-draft partial failure', { caseId, errors })
-      return NextResponse.json({ ok: false, errors }, { status: 502 })
+      console.warn('send-draft partial failure', { caseId, errors })
     }
 
     return NextResponse.json({
       ok: true,
-      landlordEmailId: landlordResult.data?.id ?? null,
-      tenantEmailId: tenantResult.data?.id ?? null,
+      sent: recipients.filter((_, i) => !results[i].error),
+      errors: errors.length > 0 ? errors : undefined,
     })
   } catch (error) {
     console.error('send-draft unexpected error', {
