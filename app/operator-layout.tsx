@@ -205,7 +205,7 @@ function OperatorSearchForm({
           value={searchValue}
           onChange={(event) => setSearchValue(event.target.value)}
           placeholder={searchPlaceholder}
-          className="h-10 w-[520px] rounded-lg border border-zinc-200 bg-zinc-50 pl-9 pr-20 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-300"
+          className="h-10 w-full max-w-[520px] rounded-lg border border-zinc-200 bg-zinc-50 pl-9 pr-20 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-300"
         />
         <Link
           href={searchAction}
@@ -340,8 +340,8 @@ export function OperatorLayout({ children, operator, latestRelease }: OperatorLa
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <div className="hidden xl:block">
+                <div className="flex min-w-0 items-center gap-3">
+                  <div className="hidden min-w-0 flex-1 xl:block">
                     <Suspense fallback={null}>
                       <OperatorSearchFormBridge
                         pathname={pathname}
@@ -356,7 +356,7 @@ export function OperatorLayout({ children, operator, latestRelease }: OperatorLa
                   <button
                     type="button"
                     onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))}
-                    className="hidden items-center gap-1.5 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-xs text-zinc-400 transition hover:border-zinc-300 hover:bg-white hover:text-zinc-600 lg:flex"
+                    className="hidden items-center gap-1.5 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-xs text-zinc-400 transition hover:border-zinc-300 hover:bg-white hover:text-zinc-600 lg:flex xl:hidden"
                     title="Quick search (⌘K)"
                   >
                     <Search className="h-3 w-3" />
