@@ -1,10 +1,11 @@
 'use client'
 
-import { AlertTriangle, Check, ChevronDown, ChevronRight, Eye, EyeOff, Filter, Loader2, RotateCcw, Save, SortAsc, Sparkles } from 'lucide-react'
+import { AlertTriangle, Check, ChevronDown, ChevronRight, Eye, EyeOff, Filter, Loader2, Maximize2, RotateCcw, Save, SortAsc, Sparkles } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { ConfirmDialog } from '@/app/components/ConfirmDialog'
+import { DefectDetailModal } from '@/app/(operator)/operator/cases/[id]/_components/defect-detail-modal'
 import {
   ConditionBadge,
   WorkspaceActionButton,
@@ -91,11 +92,13 @@ function DefectRow({
   edit,
   isReview,
   onChange,
+  onOpenDetail,
 }: {
   defect: CheckoutWorkspaceDefectRecord
   edit: DefectEditState
   isReview: boolean
   onChange: (id: string, patch: Partial<DefectEditState>) => void
+  onOpenDetail?: (defectId: string) => void
 }) {
   const effectiveCost = edit.excluded ? 0 : (edit.costAdjusted ?? 0)
   const aiLiability = defect.aiSuggestedLiability
@@ -142,22 +145,36 @@ function DefectRow({
           ) : null}
         </div>
 
-        {/* Exclude toggle */}
-        {isReview ? (
-          <button
-            type="button"
-            onClick={() => onChange(defect.id, { excluded: !edit.excluded })}
-            className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition ${
-              edit.excluded
-                ? 'bg-zinc-100 text-zinc-500 hover:bg-zinc-200'
-                : 'bg-white text-zinc-500 hover:bg-zinc-50'
-            }`}
-            title={edit.excluded ? 'Include this defect' : 'Exclude this defect'}
-          >
-            {edit.excluded ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-            {edit.excluded ? 'Excluded' : 'Include'}
-          </button>
-        ) : null}
+        <div className="flex items-center gap-1.5">
+          {/* View detail button */}
+          {onOpenDetail ? (
+            <button
+              type="button"
+              onClick={() => onOpenDetail(defect.id)}
+              className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-zinc-400 transition hover:bg-zinc-50 hover:text-zinc-600"
+              title="View details"
+            >
+              <Maximize2 className="h-3.5 w-3.5" />
+            </button>
+          ) : null}
+
+          {/* Exclude toggle */}
+          {isReview ? (
+            <button
+              type="button"
+              onClick={() => onChange(defect.id, { excluded: !edit.excluded })}
+              className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition ${
+                edit.excluded
+                  ? 'bg-zinc-100 text-zinc-500 hover:bg-zinc-200'
+                  : 'bg-white text-zinc-500 hover:bg-zinc-50'
+              }`}
+              title={edit.excluded ? 'Include this defect' : 'Exclude this defect'}
+            >
+              {edit.excluded ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+              {edit.excluded ? 'Excluded' : 'Include'}
+            </button>
+          ) : null}
+        </div>
       </div>
 
       {/* Editable fields */}
@@ -398,10 +415,14 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
   const isReview = caseStatus === 'review'
   const defects = data.defects
   const rooms = data.rooms
+  const evidence = data.workspace.evidence
   const recommendations = data.workspace.recommendations
   const issues = data.workspace.issues
   const claim = data.workspace.claim
   const breakdown = data.workspace.claimBreakdown
+
+  // Detail modal state
+  const [detailDefectId, setDetailDefectId] = useState<string | null>(null)
 
   const [edits, setEdits] = useState<Record<string, DefectEditState>>(() =>
     buildInitialEdits(defects)
@@ -500,6 +521,10 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
     for (const room of rooms) map.set(room.id, room)
     return map
   }, [rooms])
+
+  // Detail modal derived values (after roomMap is defined)
+  const detailDefect = detailDefectId ? defects.find((d) => d.id === detailDefectId) ?? null : null
+  const detailRoom = detailDefect ? roomMap.get(detailDefect.roomId) ?? null : null
 
   const filteredAndSorted = useMemo(() => {
     // Filter
@@ -944,6 +969,7 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
                             edit={edits[d.id] ?? { operatorLiability: null, costAdjusted: null, excluded: false }}
                             isReview={isReview}
                             onChange={handleEditChange}
+                            onOpenDetail={setDetailDefectId}
                           />
                         ))}
                       </div>
@@ -960,6 +986,7 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
                   edit={edits[d.id] ?? { operatorLiability: null, costAdjusted: null, excluded: false }}
                   isReview={isReview}
                   onChange={handleEditChange}
+                  onOpenDetail={setDetailDefectId}
                 />
               ))
             )}
@@ -1179,6 +1206,22 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
         onConfirm={handleSendDraft}
         onCancel={() => setShowSendConfirm(false)}
       />
+
+      {/* ---- Defect detail modal ---- */}
+      {detailDefect ? (
+        <DefectDetailModal
+          open={detailDefectId !== null}
+          defect={detailDefect}
+          room={detailRoom}
+          edit={edits[detailDefect.id] ?? { operatorLiability: null, costAdjusted: null, excluded: false }}
+          evidence={evidence}
+          isReview={isReview}
+          siblingDefects={filteredAndSorted}
+          onChange={handleEditChange}
+          onClose={() => setDetailDefectId(null)}
+          onNavigate={setDetailDefectId}
+        />
+      ) : null}
     </div>
   )
 }

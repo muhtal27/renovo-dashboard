@@ -1,7 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import { Maximize2 } from 'lucide-react'
 import { EmptyState, FilterToolbar } from '@/app/operator-ui'
+import { DefectDetailModal } from '@/app/(operator)/operator/cases/[id]/_components/defect-detail-modal'
 import {
   ConditionBadge,
   WorkspaceBadge,
@@ -105,6 +107,16 @@ function getExposureForLiability(
 export function CaseDefects({ data }: { data: OperatorCheckoutWorkspaceData }) {
   const [filter, setFilter] = useState<DefectFilter>('all')
   const [selectedDefectId, setSelectedDefectId] = useState<string | null>(data.defects[0]?.id ?? null)
+  const [detailDefectId, setDetailDefectId] = useState<string | null>(null)
+
+  const roomMap = useMemo(() => {
+    const map = new Map<string, (typeof data.rooms)[number]>()
+    for (const room of data.rooms) map.set(room.id, room)
+    return map
+  }, [data.rooms])
+
+  const detailDefect = detailDefectId ? data.defects.find((d) => d.id === detailDefectId) ?? null : null
+  const detailRoom = detailDefect ? roomMap.get(detailDefect.roomId) ?? null : null
 
   const sortedDefects = [...data.defects].sort((left, right) => {
     const costDifference = getPrimaryCost(right) - getPrimaryCost(left)
@@ -324,9 +336,22 @@ export function CaseDefects({ data }: { data: OperatorCheckoutWorkspaceData }) {
           </div>
 
           <div className="border-l-2 border-zinc-200 pl-4">
-            <h3 className="text-sm font-semibold text-zinc-950">
-              {selectedDefect ? selectedDefect.itemName : 'Defect detail'}
-            </h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-zinc-950">
+                {selectedDefect ? selectedDefect.itemName : 'Defect detail'}
+              </h3>
+              {selectedDefect ? (
+                <button
+                  type="button"
+                  onClick={() => setDetailDefectId(selectedDefect.id)}
+                  className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-zinc-400 transition hover:bg-zinc-50 hover:text-zinc-600"
+                  title="Open detail modal with evidence"
+                >
+                  <Maximize2 className="h-3.5 w-3.5" />
+                  Evidence
+                </button>
+              ) : null}
+            </div>
             {selectedDefect ? (
               <div className="mt-2 space-y-4">
                 <div className="flex flex-wrap items-center gap-2">
@@ -544,6 +569,29 @@ export function CaseDefects({ data }: { data: OperatorCheckoutWorkspaceData }) {
           </div>
         </div>
       </section>
+
+      {/* ---- Defect detail modal ---- */}
+      {detailDefect ? (
+        <DefectDetailModal
+          open={detailDefectId !== null}
+          defect={detailDefect}
+          room={detailRoom}
+          edit={{
+            operatorLiability: detailDefect.operatorLiability ?? detailDefect.aiSuggestedLiability,
+            costAdjusted: detailDefect.costAdjusted ?? detailDefect.costEstimate,
+            excluded: false,
+          }}
+          evidence={data.workspace.evidence}
+          isReview={false}
+          siblingDefects={sortedDefects}
+          onChange={() => {}}
+          onClose={() => setDetailDefectId(null)}
+          onNavigate={(id) => {
+            setDetailDefectId(id)
+            setSelectedDefectId(id)
+          }}
+        />
+      ) : null}
     </div>
   )
 }
