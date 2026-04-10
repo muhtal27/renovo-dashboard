@@ -562,7 +562,7 @@ export function WorkspaceTextInput({
   return (
     <input
       className={cn(
-        'h-11 w-full border border-zinc-200 bg-white px-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-slate-400 disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-500',
+        'h-11 w-full border border-zinc-200 bg-white px-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-sky-400 focus:ring-1 focus:ring-sky-400/30 disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-500',
         className
       )}
       {...props}
@@ -577,7 +577,7 @@ export function WorkspaceTextarea({
   return (
     <textarea
       className={cn(
-        'min-h-32 w-full border border-zinc-200 bg-white px-4 py-3 text-sm leading-6 text-zinc-900 placeholder:text-zinc-400 focus:border-slate-400 disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-500',
+        'min-h-32 w-full border border-zinc-200 bg-white px-4 py-3 text-sm leading-6 text-zinc-900 placeholder:text-zinc-400 focus:border-sky-400 focus:ring-1 focus:ring-sky-400/30 disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-500',
         className
       )}
       {...props}
@@ -592,7 +592,7 @@ export function WorkspaceSelect({
   return (
     <select
       className={cn(
-        'h-11 w-full border border-zinc-200 bg-white px-4 text-sm text-zinc-900 focus:border-slate-400 disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-500',
+        'h-11 w-full border border-zinc-200 bg-white px-4 text-sm text-zinc-900 focus:border-sky-400 focus:ring-1 focus:ring-sky-400/30 disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-500',
         className
       )}
       {...props}
@@ -609,5 +609,104 @@ export function WorkspaceTableRow({
     <tr className={cn('border-t border-zinc-200 first:border-t-0', className)} {...props}>
       {children}
     </tr>
+  )
+}
+
+/* ────────────────────────────────────────────────────────────── */
+/*  Skeleton loaders                                              */
+/* ────────────────────────────────────────────────────────────── */
+
+export function WorkspaceSkeleton({
+  className,
+  width,
+  height = 'h-4',
+}: {
+  className?: string
+  width?: string
+  height?: string
+}) {
+  return (
+    <div
+      className={cn(
+        'animate-pulse rounded bg-zinc-200',
+        height,
+        width ?? 'w-full',
+        className
+      )}
+    />
+  )
+}
+
+export function WorkspaceSkeletonRow({ columns = 4 }: { columns?: number }) {
+  return (
+    <div className="flex items-center gap-4 border-b border-zinc-100 px-4 py-3 last:border-0">
+      {Array.from({ length: columns }).map((_, i) => (
+        <WorkspaceSkeleton
+          key={i}
+          width={i === 0 ? 'w-1/3' : 'w-1/6'}
+          height="h-3.5"
+        />
+      ))}
+    </div>
+  )
+}
+
+export function WorkspaceSkeletonCard() {
+  return (
+    <div className="space-y-4 border border-zinc-200 px-5 py-5">
+      <WorkspaceSkeleton width="w-2/5" height="h-4" />
+      <WorkspaceSkeleton width="w-full" height="h-3" />
+      <WorkspaceSkeleton width="w-3/4" height="h-3" />
+      <div className="flex gap-3 pt-2">
+        <WorkspaceSkeleton width="w-20" height="h-8" />
+        <WorkspaceSkeleton width="w-20" height="h-8" />
+      </div>
+    </div>
+  )
+}
+
+export function WorkspaceSkeletonMetrics({ count = 4 }: { count?: number }) {
+  return (
+    <div className={cn('grid gap-3', count === 4 ? 'grid-cols-2 sm:grid-cols-4' : `grid-cols-${Math.min(count, 4)}`)}>
+      {Array.from({ length: count }).map((_, i) => (
+        <div key={i} className="border border-zinc-200 px-4 py-3 space-y-2">
+          <WorkspaceSkeleton width="w-2/3" height="h-3" />
+          <WorkspaceSkeleton width="w-1/2" height="h-6" />
+        </div>
+      ))}
+    </div>
+  )
+}
+
+/* ────────────────────────────────────────────────────────────── */
+/*  Empty state for workspace sections                            */
+/* ────────────────────────────────────────────────────────────── */
+
+export function WorkspaceEmptyState({
+  className,
+  icon,
+  title,
+  description,
+  action,
+}: {
+  className?: string
+  icon?: ReactNode
+  title: string
+  description?: string
+  action?: ReactNode
+}) {
+  return (
+    <div className={cn('flex flex-col items-center justify-center py-12 text-center', className)}>
+      {icon ? (
+        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 text-zinc-400">
+          {icon}
+        </div>
+      ) : null}
+      <p className="text-sm font-semibold text-zinc-600">{title}</p>
+      {description ? (
+        <p className="mt-1 max-w-sm text-sm text-zinc-400">{description}</p>
+      ) : null}
+      {action ? <div className="mt-4">{action}</div> : null}
+    </div>
   )
 }

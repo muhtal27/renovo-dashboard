@@ -3,6 +3,7 @@
 import { FileText, Loader2, Scale, Send, BookOpen, RefreshCw, Copy, Check } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
+import { toast } from 'sonner'
 import {
   WorkspaceActionButton,
   WorkspaceBadge,
@@ -87,9 +88,12 @@ export function AIAssistantPanel({ data }: { data: OperatorCheckoutWorkspaceData
         const err = await response.json().catch(() => null)
         throw new Error(err?.detail || err?.error || 'Failed to generate draft.')
       }
+      toast.success(`${DRAFT_TYPES.find((d) => d.type === draftType)?.label ?? 'Document'} generated successfully`)
       startTransition(() => { router.refresh() })
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to generate draft.')
+      const msg = e instanceof Error ? e.message : 'Failed to generate draft.'
+      setError(msg)
+      toast.error(msg)
     } finally {
       setGenerating(null)
     }
@@ -99,6 +103,7 @@ export function AIAssistantPanel({ data }: { data: OperatorCheckoutWorkspaceData
     try {
       await navigator.clipboard.writeText(content)
       setCopiedId(draftId)
+      toast.success('Copied to clipboard')
       setTimeout(() => setCopiedId(null), 2000)
     } catch {
       // Fallback: create a temporary textarea to copy
@@ -111,6 +116,7 @@ export function AIAssistantPanel({ data }: { data: OperatorCheckoutWorkspaceData
       document.execCommand('copy')
       document.body.removeChild(textarea)
       setCopiedId(draftId)
+      toast.success('Copied to clipboard')
       setTimeout(() => setCopiedId(null), 2000)
     }
   }

@@ -1,12 +1,16 @@
 'use client'
 
+import { WorkspaceBadge } from '@/app/(operator)/operator/cases/[id]/_components/checkout-workspace-ui'
 import { formatCurrency, formatDate, formatEnumLabel } from '@/app/eot/_components/eot-ui'
 import type { OperatorCheckoutWorkspaceData } from '@/lib/operator-checkout-workspace-types'
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({ title, badge, children }: { title: string; badge?: React.ReactNode; children: React.ReactNode }) {
   return (
     <section>
-      <h3 className="text-sm font-semibold text-zinc-950">{title}</h3>
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-zinc-950">{title}</h3>
+        {badge ?? null}
+      </div>
       {children}
     </section>
   )
@@ -55,9 +59,12 @@ export function StepReadings({ data }: { data: OperatorCheckoutWorkspaceData }) 
 
       <Divider />
 
-      <Section title="Utilities">
+      <Section
+        title="Utilities"
+        badge={data.utilities.length > 0 ? <WorkspaceBadge label={`${data.utilities.length} recorded`} tone="info" size="compact" /> : null}
+      >
         {data.utilities.length > 0 ? (
-          <div className="mt-3 overflow-hidden border border-zinc-200">
+          <div className="mt-3 overflow-x-auto border border-zinc-200">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-zinc-200 bg-zinc-50/80">
@@ -72,9 +79,9 @@ export function StepReadings({ data }: { data: OperatorCheckoutWorkspaceData }) 
                 {data.utilities.map((u) => (
                   <tr key={u.id} className="border-b border-zinc-100 last:border-0">
                     <td className="px-4 py-2.5 font-medium text-zinc-950">{formatEnumLabel(u.utilityType)}</td>
-                    <td className="px-4 py-2.5 text-zinc-600">{u.readingCheckin ?? '—'}</td>
-                    <td className="px-4 py-2.5 text-zinc-600">{u.readingCheckout ?? '—'}</td>
-                    <td className="px-4 py-2.5 text-zinc-600">{u.usageCalculated ?? '—'}</td>
+                    <td className="px-4 py-2.5 font-mono text-sm text-zinc-600">{u.readingCheckin ?? '—'}</td>
+                    <td className="px-4 py-2.5 font-mono text-sm text-zinc-600">{u.readingCheckout ?? '—'}</td>
+                    <td className="px-4 py-2.5 font-mono text-sm text-zinc-600">{u.usageCalculated ?? '—'}</td>
                     <td className="px-4 py-2.5 text-zinc-500">{u.meterLocation || '—'}</td>
                   </tr>
                 ))}
@@ -88,9 +95,27 @@ export function StepReadings({ data }: { data: OperatorCheckoutWorkspaceData }) 
 
       <Divider />
 
-      <Section title="Keys">
+      <Section
+        title="Keys"
+        badge={
+          data.keys.length > 0 ? (
+            <div className="flex items-center gap-1.5">
+              {(() => {
+                const returned = data.keys.filter((k) => k.status === 'returned').length
+                const outstanding = data.keys.filter((k) => k.status === 'outstanding').length
+                return (
+                  <>
+                    {returned > 0 ? <WorkspaceBadge label={`${returned} returned`} tone="accepted" size="compact" /> : null}
+                    {outstanding > 0 ? <WorkspaceBadge label={`${outstanding} outstanding`} tone="fail" size="compact" /> : null}
+                  </>
+                )
+              })()}
+            </div>
+          ) : null
+        }
+      >
         {data.keys.length > 0 ? (
-          <div className="mt-3 overflow-hidden border border-zinc-200">
+          <div className="mt-3 overflow-x-auto border border-zinc-200">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-zinc-200 bg-zinc-50/80">
@@ -104,19 +129,19 @@ export function StepReadings({ data }: { data: OperatorCheckoutWorkspaceData }) 
                 {data.keys.map((k) => (
                   <tr key={k.id} className="border-b border-zinc-100 last:border-0">
                     <td className="px-4 py-2.5 font-medium text-zinc-950">{k.setName}</td>
-                    <td className="px-4 py-2.5 text-zinc-600">{k.keyCount}</td>
+                    <td className="px-4 py-2.5 tabular-nums text-zinc-600">{k.keyCount}</td>
                     <td className="px-4 py-2.5">
-                      <span
-                        className={
+                      <WorkspaceBadge
+                        label={formatEnumLabel(k.status)}
+                        tone={
                           k.status === 'returned'
-                            ? 'text-emerald-700'
+                            ? 'accepted'
                             : k.status === 'outstanding'
-                              ? 'text-rose-700'
-                              : 'text-zinc-500'
+                              ? 'fail'
+                              : 'neutral'
                         }
-                      >
-                        {formatEnumLabel(k.status)}
-                      </span>
+                        size="compact"
+                      />
                     </td>
                     <td className="px-4 py-2.5 text-zinc-500">{k.details || '—'}</td>
                   </tr>
@@ -185,11 +210,27 @@ export function StepReadings({ data }: { data: OperatorCheckoutWorkspaceData }) 
 
       <Divider />
 
-      <Section title="Safety and compliance">
+      <Section
+        title="Safety and compliance"
+        badge={
+          data.detectors.length > 0 || data.compliance.length > 0 ? (
+            <div className="flex items-center gap-1.5">
+              {(() => {
+                const untestedCount = data.detectors.filter((d) => !d.tested).length
+                const failedChecks = data.compliance.filter((c) => c.passed === false).length
+                if (untestedCount > 0 || failedChecks > 0) {
+                  return <WorkspaceBadge label={`${untestedCount + failedChecks} attention`} tone="warning" size="compact" />
+                }
+                return <WorkspaceBadge label="All clear" tone="accepted" size="compact" />
+              })()}
+            </div>
+          ) : null
+        }
+      >
         {data.detectors.length > 0 ? (
           <>
             <p className="mt-2 text-xs font-medium text-zinc-500">Detectors</p>
-            <div className="mt-2 overflow-hidden border border-zinc-200">
+            <div className="mt-2 overflow-x-auto border border-zinc-200">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-zinc-200 bg-zinc-50/80">
@@ -205,9 +246,11 @@ export function StepReadings({ data }: { data: OperatorCheckoutWorkspaceData }) 
                       <td className="px-4 py-2.5 font-medium text-zinc-950">{formatEnumLabel(d.detectorType)}</td>
                       <td className="px-4 py-2.5 text-zinc-600">{d.location}</td>
                       <td className="px-4 py-2.5">
-                        <span className={d.tested ? 'text-emerald-700' : 'text-rose-700'}>
-                          {d.tested ? 'Yes' : 'No'}
-                        </span>
+                        <WorkspaceBadge
+                          label={d.tested ? 'Tested' : 'Not tested'}
+                          tone={d.tested ? 'pass' : 'fail'}
+                          size="compact"
+                        />
                       </td>
                       <td className="px-4 py-2.5 text-zinc-500">{formatDate(d.expiryDate)}</td>
                     </tr>
@@ -221,12 +264,12 @@ export function StepReadings({ data }: { data: OperatorCheckoutWorkspaceData }) 
         {data.compliance.length > 0 ? (
           <>
             <p className="mt-4 text-xs font-medium text-zinc-500">Compliance checks</p>
-            <div className="mt-2 overflow-hidden border border-zinc-200">
+            <div className="mt-2 overflow-x-auto border border-zinc-200">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-zinc-200 bg-zinc-50/80">
                     <th className="px-4 py-2.5 text-left text-xs font-medium text-zinc-500">Item</th>
-                    <th className="px-4 py-2.5 text-left text-xs font-medium text-zinc-500">Passed</th>
+                    <th className="px-4 py-2.5 text-left text-xs font-medium text-zinc-500">Result</th>
                     <th className="px-4 py-2.5 text-left text-xs font-medium text-zinc-500">Notes</th>
                   </tr>
                 </thead>
@@ -235,13 +278,11 @@ export function StepReadings({ data }: { data: OperatorCheckoutWorkspaceData }) 
                     <tr key={c.id} className="border-b border-zinc-100 last:border-0">
                       <td className="px-4 py-2.5 font-medium text-zinc-950">{c.checkItem}</td>
                       <td className="px-4 py-2.5">
-                        {c.passed === true ? (
-                          <span className="text-emerald-700">Yes</span>
-                        ) : c.passed === false ? (
-                          <span className="text-rose-700">No</span>
-                        ) : (
-                          <span className="text-zinc-400">Not assessed</span>
-                        )}
+                        <WorkspaceBadge
+                          label={c.passed === true ? 'Passed' : c.passed === false ? 'Failed' : 'Not assessed'}
+                          tone={c.passed === true ? 'pass' : c.passed === false ? 'fail' : 'neutral'}
+                          size="compact"
+                        />
                       </td>
                       <td className="px-4 py-2.5 text-zinc-500">{c.notes || '—'}</td>
                     </tr>

@@ -3,8 +3,13 @@
 import { Check, FileText, Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
+import { toast } from 'sonner'
 import { SupportingDocumentsPanel } from '@/app/(operator)/operator/cases/[id]/_components/supporting-documents-panel'
-import { WorkspaceActionButton } from '@/app/(operator)/operator/cases/[id]/_components/checkout-workspace-ui'
+import {
+  WorkspaceActionButton,
+  WorkspaceBadge,
+  WorkspaceProgressBar,
+} from '@/app/(operator)/operator/cases/[id]/_components/checkout-workspace-ui'
 import { formatDate, formatEnumLabel } from '@/app/eot/_components/eot-ui'
 import type { OperatorCheckoutWorkspaceData } from '@/lib/operator-checkout-workspace-types'
 
@@ -82,9 +87,12 @@ export function StepCheckoutReport({ data }: { data: OperatorCheckoutWorkspaceDa
         const err = await response.json().catch(() => null)
         throw new Error(err?.detail || 'Failed to update case status.')
       }
+      toast.success('Evidence collection started')
       startTransition(() => { router.refresh() })
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to update case status.')
+      const msg = e instanceof Error ? e.message : 'Failed to update case status.'
+      setError(msg)
+      toast.error(msg)
     } finally {
       setIsTransitioning(false)
     }
@@ -103,9 +111,12 @@ export function StepCheckoutReport({ data }: { data: OperatorCheckoutWorkspaceDa
         const err = await response.json().catch(() => null)
         throw new Error(err?.detail || 'Failed to update case status.')
       }
+      toast.success('AI analysis started')
       startTransition(() => { router.refresh() })
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to update case status.')
+      const msg = e instanceof Error ? e.message : 'Failed to update case status.'
+      setError(msg)
+      toast.error(msg)
     } finally {
       setIsTransitioning(false)
     }
@@ -114,11 +125,21 @@ export function StepCheckoutReport({ data }: { data: OperatorCheckoutWorkspaceDa
   return (
     <div className="space-y-6">
       <section>
-        <h3 className="text-sm font-semibold text-zinc-950">Core reports</h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-zinc-950">Core reports</h3>
+          <span className="text-xs tabular-nums text-zinc-400">{linkedCount}/3 linked</span>
+        </div>
         <p className="mt-1 text-sm text-zinc-500">
-          {linkedCount}/3 reports linked. Both check-in and check-out reports are required before
-          analysis can begin.
+          Both check-in and check-out reports are required before analysis can begin.
         </p>
+        <div className="mt-2">
+          <WorkspaceProgressBar
+            value={linkedCount}
+            max={3}
+            tone={linkedCount >= 2 ? 'success' : 'warning'}
+            showPercentage={false}
+          />
+        </div>
       </section>
 
       <div className="border border-zinc-200">
@@ -153,11 +174,21 @@ export function StepCheckoutReport({ data }: { data: OperatorCheckoutWorkspaceDa
 
       {data.documents.length > 0 ? (
         <section>
-          <h3 className="text-sm font-semibold text-zinc-950">Uploaded documents</h3>
-          <p className="mt-1 text-sm text-zinc-500">
-            {processedDocs.length} processed · {processingDocs.length} processing · {failedDocs.length} failed
-          </p>
-          <div className="mt-3 overflow-hidden border border-zinc-200">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-zinc-950">Uploaded documents</h3>
+            <div className="flex items-center gap-2">
+              {processedDocs.length > 0 ? (
+                <WorkspaceBadge label={`${processedDocs.length} processed`} tone="accepted" size="compact" />
+              ) : null}
+              {processingDocs.length > 0 ? (
+                <WorkspaceBadge label={`${processingDocs.length} processing`} tone="processing" size="compact" />
+              ) : null}
+              {failedDocs.length > 0 ? (
+                <WorkspaceBadge label={`${failedDocs.length} failed`} tone="fail" size="compact" />
+              ) : null}
+            </div>
+          </div>
+          <div className="mt-3 overflow-x-auto border border-zinc-200">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-zinc-200 bg-zinc-50/80">
@@ -174,19 +205,24 @@ export function StepCheckoutReport({ data }: { data: OperatorCheckoutWorkspaceDa
                     <td className="px-4 py-2.5 font-medium text-zinc-950">{doc.documentName}</td>
                     <td className="px-4 py-2.5 text-zinc-600">{formatEnumLabel(doc.documentType)}</td>
                     <td className="px-4 py-2.5">
-                      <span
-                        className={
-                          doc.processingStatus === 'processed'
-                            ? 'text-emerald-700'
-                            : doc.processingStatus === 'failed'
-                              ? 'text-rose-700'
-                              : doc.processingStatus === 'processing'
-                                ? 'text-amber-700'
-                                : 'text-zinc-500'
-                        }
-                      >
-                        {formatEnumLabel(doc.processingStatus)}
-                      </span>
+                      <div className="flex items-center gap-1.5">
+                        {doc.processingStatus === 'processing' ? (
+                          <Loader2 className="h-3 w-3 animate-spin text-amber-500" />
+                        ) : null}
+                        <WorkspaceBadge
+                          label={formatEnumLabel(doc.processingStatus)}
+                          tone={
+                            doc.processingStatus === 'processed'
+                              ? 'accepted'
+                              : doc.processingStatus === 'failed'
+                                ? 'fail'
+                                : doc.processingStatus === 'processing'
+                                  ? 'processing'
+                                  : 'neutral'
+                          }
+                          size="compact"
+                        />
+                      </div>
                     </td>
                     <td className="px-4 py-2.5 text-zinc-600">{doc.pageCount ?? '—'}</td>
                     <td className="px-4 py-2.5 text-zinc-500">{formatDate(doc.createdAt)}</td>
@@ -210,7 +246,7 @@ export function StepCheckoutReport({ data }: { data: OperatorCheckoutWorkspaceDa
       </section>
 
       {error ? (
-        <p className="text-sm text-rose-700">{error}</p>
+        <p className="text-sm text-rose-700" role="alert">{error}</p>
       ) : null}
 
       {caseStatus === 'draft' ? (

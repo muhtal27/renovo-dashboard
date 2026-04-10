@@ -1,5 +1,6 @@
 'use client'
 
+import { WorkspaceBadge } from '@/app/(operator)/operator/cases/[id]/_components/checkout-workspace-ui'
 import { formatDate, formatEnumLabel } from '@/app/eot/_components/eot-ui'
 import type { OperatorCheckoutWorkspaceData } from '@/lib/operator-checkout-workspace-types'
 
@@ -20,10 +21,13 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
   )
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({ title, badge, children }: { title: string; badge?: React.ReactNode; children: React.ReactNode }) {
   return (
     <section>
-      <h3 className="text-sm font-semibold text-zinc-950">{title}</h3>
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-zinc-950">{title}</h3>
+        {badge ?? null}
+      </div>
       {children}
     </section>
   )
@@ -45,7 +49,7 @@ function PersonTable({
   }
 
   return (
-    <div className="mt-3 overflow-hidden border border-zinc-200">
+    <div className="mt-3 overflow-x-auto border border-zinc-200">
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-zinc-200 bg-zinc-50/80">
@@ -112,7 +116,7 @@ export function StepInventory({ data }: { data: OperatorCheckoutWorkspaceData })
 
       <Divider />
 
-      <Section title="Check-in report">
+      <Section title="Check-in report" badge={checkIn ? <WorkspaceBadge label="Linked" tone="accepted" size="compact" /> : <WorkspaceBadge label="Missing" tone="neutral" size="compact" />}>
         {checkIn ? (
           <div className="mt-3 flex items-center gap-3 border border-zinc-200 px-4 py-3">
             <div className="flex h-8 w-8 items-center justify-center rounded bg-emerald-50 text-emerald-600">
@@ -136,11 +140,17 @@ export function StepInventory({ data }: { data: OperatorCheckoutWorkspaceData })
 
       <Divider />
 
-      <Section title="Tenants">
+      <Section
+        title="Tenants"
+        badge={<WorkspaceBadge label={`${tenants.length} recorded`} tone={tenants.length > 0 ? 'info' : 'neutral'} size="compact" />}
+      >
         <PersonTable people={tenants} emptyText="No tenants recorded." />
       </Section>
 
-      <Section title="Landlords">
+      <Section
+        title="Landlords"
+        badge={<WorkspaceBadge label={`${landlords.length} recorded`} tone={landlords.length > 0 ? 'info' : 'neutral'} size="compact" />}
+      >
         <PersonTable people={landlords} emptyText="No landlords recorded." />
       </Section>
 

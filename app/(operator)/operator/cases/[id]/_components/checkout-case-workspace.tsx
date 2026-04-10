@@ -15,7 +15,7 @@ import {
 } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { useTransition, type ComponentType } from 'react'
+import { useCallback, useEffect, useTransition, type ComponentType } from 'react'
 import { formatAddress, formatDate } from '@/app/eot/_components/eot-ui'
 import { WorkspaceBadge } from '@/app/(operator)/operator/cases/[id]/_components/checkout-workspace-ui'
 import { cn } from '@/lib/ui'
@@ -309,23 +309,55 @@ export function CheckoutCaseWorkspace({
   const lastModified = data.checkoutCase?.updatedAt ?? data.workspace.case.updated_at
   const assignedTo = data.checkoutCase?.assignedTo
 
-  function handleStepClick(step: WorkspaceStep) {
-    if (!pathname) return
+  const handleStepClick = useCallback(
+    (step: WorkspaceStep) => {
+      if (!pathname) return
 
-    startTransition(() => {
-      const nextParams = new URLSearchParams(searchParams.toString())
-      nextParams.delete('tab')
+      startTransition(() => {
+        const nextParams = new URLSearchParams(searchParams.toString())
+        nextParams.delete('tab')
 
-      if (step === 'inventory') {
-        nextParams.delete('step')
-      } else {
-        nextParams.set('step', step)
+        if (step === 'inventory') {
+          nextParams.delete('step')
+        } else {
+          nextParams.set('step', step)
+        }
+
+        const query = nextParams.toString()
+        router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false })
+      })
+    },
+    [pathname, router, searchParams, startTransition]
+  )
+
+  // Keyboard navigation: Ctrl+← / Ctrl+→ to move between steps
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      // Only trigger with Ctrl/Cmd modifier to avoid interfering with text editing
+      if (!e.ctrlKey && !e.metaKey) return
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return
+
+      // Don't trigger when inside input/textarea/select
+      const tag = (e.target as HTMLElement)?.tagName
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
+
+      e.preventDefault()
+      const currentIndex = WORKFLOW_STEPS.findIndex((s) => s.step === activeStep)
+      if (currentIndex < 0) return
+
+      const nextIndex =
+        e.key === 'ArrowRight'
+          ? Math.min(currentIndex + 1, WORKFLOW_STEPS.length - 1)
+          : Math.max(currentIndex - 1, 0)
+
+      if (nextIndex !== currentIndex) {
+        handleStepClick(WORKFLOW_STEPS[nextIndex].step)
       }
+    }
 
-      const query = nextParams.toString()
-      router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false })
-    })
-  }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [activeStep, handleStepClick])
 
   return (
     <div className="space-y-6">
