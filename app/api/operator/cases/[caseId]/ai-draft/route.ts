@@ -8,12 +8,15 @@ type RouteContext = {
   }>
 }
 
+export const maxDuration = 120
+
 export async function POST(request: Request, context: RouteContext) {
   const { caseId } = await context.params
   const response = await proxyEotRequest(
     request,
     `/operator/cases/${caseId}/ai-draft`,
-    OPERATOR_PERMISSIONS.GENERATE_CLAIM_OUTPUT
+    OPERATOR_PERMISSIONS.GENERATE_CLAIM_OUTPUT,
+    { timeoutMs: 120_000 }
   )
 
   if (response.ok) {

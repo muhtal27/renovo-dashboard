@@ -84,7 +84,8 @@ async function readSanitizedRequestBody(request: Request) {
 export async function proxyEotRequest(
   request: Request,
   backendPath: string,
-  requiredPermission?: OperatorPermission
+  requiredPermission?: OperatorPermission,
+  options?: { timeoutMs?: number }
 ) {
   const authResult = await getOperatorTenantContextForApi(requiredPermission)
 
@@ -148,7 +149,7 @@ export async function proxyEotRequest(
       },
       body: requestBody.body,
       cache: 'no-store',
-      signal: AbortSignal.timeout(30_000),
+      signal: AbortSignal.timeout(options?.timeoutMs ?? 30_000),
     })
   } catch (error) {
     console.error('EOT proxy backend request failed', {
