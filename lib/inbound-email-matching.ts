@@ -109,37 +109,21 @@ export async function matchInboundEmail(
     match_reason: null,
   }
 
+  const { email: senderEmail } = parseFromField(fromAddress)
+
   // -----------------------------------------------------------------------
-  // 1. Load all properties and tenancies for this tenant
+  // 1. Try matching by sender email → tenancy.tenant_email (narrowest query first)
   // -----------------------------------------------------------------------
 
-  const { data: properties } = await supabase
-    .from('properties')
-    .select('id, name, address_line_1, address_line_2, city, postcode, tenant_id')
-    .eq('tenant_id', tenantId)
-    .is('deleted_at', null)
-
-  if (!properties || properties.length === 0) return noMatch
-
-  const { data: tenancies } = await supabase
+  const { data: emailMatchedTenancies } = await supabase
     .from('tenancies')
     .select('id, property_id, tenant_email, tenant_name, end_date')
     .eq('tenant_id', tenantId)
+    .eq('tenant_email', senderEmail)
     .is('deleted_at', null)
+    .limit(10)
 
-  if (!tenancies || tenancies.length === 0) return noMatch
-
-  // -----------------------------------------------------------------------
-  // 2. Try matching by sender email → tenancy.tenant_email
-  // -----------------------------------------------------------------------
-
-  const { email: senderEmail } = parseFromField(fromAddress)
-
-  const emailMatchedTenancies = tenancies.filter(
-    (t: TenancyRow) => t.tenant_email?.toLowerCase() === senderEmail
-  )
-
-  if (emailMatchedTenancies.length === 1) {
+  if (emailMatchedTenancies && emailMatchedTenancies.length === 1) {
     const tenancy = emailMatchedTenancies[0] as TenancyRow
     const caseRow = await findOpenCase(supabase, tenancy.id)
     return {
@@ -154,20 +138,31 @@ export async function matchInboundEmail(
   }
 
   // -----------------------------------------------------------------------
-  // 3. Try matching by postcode in subject or body
+  // 2. Extract matching signals from the email content
   // -----------------------------------------------------------------------
 
   const searchText = [subject, bodyText ?? ''].join(' ')
   const postcodes = extractPostcodes(searchText)
+  const addressHints = extractAddressHints(subject)
+
+  // -----------------------------------------------------------------------
+  // 3. Try matching by postcode — query only properties with those postcodes
+  // -----------------------------------------------------------------------
 
   if (postcodes.length > 0) {
-    const postcodeMatchedProperties = (properties as PropertyRow[]).filter(
-      (p) => p.postcode && postcodes.includes(normalisePostcode(p.postcode))
-    )
+    const { data: postcodeProperties } = await supabase
+      .from('properties')
+      .select('id, name, address_line_1, postcode')
+      .eq('tenant_id', tenantId)
+      .in('postcode', postcodes)
+      .is('deleted_at', null)
+      .limit(50)
+
+    const postcodeMatchedProperties = (postcodeProperties ?? []) as PropertyRow[]
 
     if (postcodeMatchedProperties.length === 1) {
       const property = postcodeMatchedProperties[0]
-      const tenancy = findBestTenancy(tenancies as TenancyRow[], property.id)
+      const tenancy = await findBestTenancyForProperty(supabase, tenantId, property.id)
       const caseRow = tenancy ? await findOpenCase(supabase, tenancy.id) : null
       return {
         matched: true,
@@ -181,32 +176,34 @@ export async function matchInboundEmail(
     }
 
     // Multiple postcode matches — refine with address hints
-    if (postcodeMatchedProperties.length > 1) {
-      const addressHints = extractAddressHints(subject)
-      if (addressHints.length > 0) {
-        const refined = postcodeMatchedProperties.filter((p) => {
-          const normAddr = p.address_line_1 ? normaliseAddressLine(p.address_line_1) : ''
-          return addressHints.some((hint) => normAddr.includes(hint) || hint.includes(normAddr))
-        })
-        if (refined.length === 1) {
-          const property = refined[0]
-          const tenancy = findBestTenancy(tenancies as TenancyRow[], property.id)
-          const caseRow = tenancy ? await findOpenCase(supabase, tenancy.id) : null
-          return {
-            matched: true,
-            confidence: 'medium',
-            property_id: property.id,
-            tenancy_id: tenancy?.id ?? null,
-            case_id: caseRow?.id ?? null,
-            suggested_tenancy_ids: [],
-            match_reason: `Postcode + address hint matched property "${property.name}"`,
-          }
+    if (postcodeMatchedProperties.length > 1 && addressHints.length > 0) {
+      const refined = postcodeMatchedProperties.filter((p) => {
+        const normAddr = p.address_line_1 ? normaliseAddressLine(p.address_line_1) : ''
+        return addressHints.some((hint) => normAddr.includes(hint) || hint.includes(normAddr))
+      })
+      if (refined.length === 1) {
+        const property = refined[0]
+        const tenancy = await findBestTenancyForProperty(supabase, tenantId, property.id)
+        const caseRow = tenancy ? await findOpenCase(supabase, tenancy.id) : null
+        return {
+          matched: true,
+          confidence: 'medium',
+          property_id: property.id,
+          tenancy_id: tenancy?.id ?? null,
+          case_id: caseRow?.id ?? null,
+          suggested_tenancy_ids: [],
+          match_reason: `Postcode + address hint matched property "${property.name}"`,
         }
       }
+    }
 
-      // Return suggestions for the operator
-      const suggestedTenancyIds = postcodeMatchedProperties
-        .map((p) => findBestTenancy(tenancies as TenancyRow[], p.id))
+    if (postcodeMatchedProperties.length > 1) {
+      const suggestedTenancies = await Promise.all(
+        postcodeMatchedProperties.slice(0, 10).map((p) =>
+          findBestTenancyForProperty(supabase, tenantId, p.id)
+        )
+      )
+      const suggestedTenancyIds = suggestedTenancies
         .filter((t): t is TenancyRow => t !== null)
         .map((t) => t.id)
 
@@ -219,19 +216,25 @@ export async function matchInboundEmail(
   }
 
   // -----------------------------------------------------------------------
-  // 4. Try matching by address line in subject
+  // 4. Try matching by address line in subject (broader query, with limit)
   // -----------------------------------------------------------------------
 
-  const addressHints = extractAddressHints(subject)
   if (addressHints.length > 0) {
-    const addressMatched = (properties as PropertyRow[]).filter((p) => {
+    const { data: allProperties } = await supabase
+      .from('properties')
+      .select('id, name, address_line_1, postcode')
+      .eq('tenant_id', tenantId)
+      .is('deleted_at', null)
+      .limit(2000)
+
+    const addressMatched = (allProperties ?? []).filter((p) => {
       const normAddr = p.address_line_1 ? normaliseAddressLine(p.address_line_1) : ''
       return addressHints.some((hint) => normAddr.includes(hint) || hint.includes(normAddr))
     })
 
     if (addressMatched.length === 1) {
       const property = addressMatched[0]
-      const tenancy = findBestTenancy(tenancies as TenancyRow[], property.id)
+      const tenancy = await findBestTenancyForProperty(supabase, tenantId, property.id)
       const caseRow = tenancy ? await findOpenCase(supabase, tenancy.id) : null
       return {
         matched: true,
@@ -248,8 +251,6 @@ export async function matchInboundEmail(
   // -----------------------------------------------------------------------
   // 5. Try matching sender domain to known inventory provider domains
   // -----------------------------------------------------------------------
-  // Some inventory companies send from consistent domains. If only one
-  // property has an active case, we can suggest it.
 
   const senderDomain = extractDomain(senderEmail)
   const inventoryDomains = [
@@ -260,15 +261,20 @@ export async function matchInboundEmail(
   ]
 
   if (inventoryDomains.includes(senderDomain)) {
-    // Suggest all tenancies with open cases
-    const activeTenancyIds = tenancies
-      .filter((t: TenancyRow) => !t.end_date || new Date(t.end_date) >= new Date())
-      .map((t: TenancyRow) => t.id)
+    const { data: activeTenancies } = await supabase
+      .from('tenancies')
+      .select('id')
+      .eq('tenant_id', tenantId)
+      .is('deleted_at', null)
+      .gte('end_date', new Date().toISOString())
+      .limit(10)
+
+    const activeTenancyIds = (activeTenancies ?? []).map((t: { id: string }) => t.id)
 
     if (activeTenancyIds.length > 0) {
       return {
         ...noMatch,
-        suggested_tenancy_ids: activeTenancyIds.slice(0, 10),
+        suggested_tenancy_ids: activeTenancyIds,
         match_reason: `Known inventory provider domain "${senderDomain}" — needs operator review`,
       }
     }
@@ -282,21 +288,24 @@ export async function matchInboundEmail(
 // ---------------------------------------------------------------------------
 
 /**
- * Find the best tenancy for a property — prefer one without an end_date (active)
- * or with the latest end_date.
+ * Find the best tenancy for a property via a targeted DB query.
+ * Prefers active tenancies (no end_date) or the one with the latest end_date.
  */
-function findBestTenancy(tenancies: TenancyRow[], propertyId: string): TenancyRow | null {
-  const forProperty = tenancies.filter((t) => t.property_id === propertyId)
-  if (forProperty.length === 0) return null
-  // Prefer active (no end_date)
-  const active = forProperty.find((t) => !t.end_date)
-  if (active) return active
-  // Otherwise latest end_date
-  return forProperty.sort((a, b) => {
-    const da = a.end_date ? new Date(a.end_date).getTime() : 0
-    const db = b.end_date ? new Date(b.end_date).getTime() : 0
-    return db - da
-  })[0]
+async function findBestTenancyForProperty(
+  supabase: SupabaseClient,
+  tenantId: string,
+  propertyId: string
+): Promise<TenancyRow | null> {
+  const { data } = await supabase
+    .from('tenancies')
+    .select('id, property_id, tenant_email, tenant_name, end_date')
+    .eq('tenant_id', tenantId)
+    .eq('property_id', propertyId)
+    .is('deleted_at', null)
+    .order('end_date', { ascending: false, nullsFirst: true })
+    .limit(1)
+
+  return (data?.[0] as TenancyRow) ?? null
 }
 
 /**

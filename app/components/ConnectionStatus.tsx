@@ -10,14 +10,16 @@ export function ConnectionStatus() {
   const [status, setStatus] = useState<'online' | 'offline' | 'recovered'>('online')
 
   useEffect(() => {
+    let recoveryTimer: ReturnType<typeof setTimeout> | null = null
+
     function goOffline() {
+      if (recoveryTimer) clearTimeout(recoveryTimer)
       setStatus('offline')
     }
 
     function goOnline() {
       setStatus('recovered')
-      const t = setTimeout(() => setStatus('online'), 3000)
-      return () => clearTimeout(t)
+      recoveryTimer = setTimeout(() => setStatus('online'), 3000)
     }
 
     // Check initial state
@@ -26,6 +28,7 @@ export function ConnectionStatus() {
     window.addEventListener('offline', goOffline)
     window.addEventListener('online', goOnline)
     return () => {
+      if (recoveryTimer) clearTimeout(recoveryTimer)
       window.removeEventListener('offline', goOffline)
       window.removeEventListener('online', goOnline)
     }

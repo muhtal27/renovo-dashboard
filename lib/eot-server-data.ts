@@ -80,10 +80,39 @@ export async function getEotCaseWorkspaceSummarySnapshot(
   return fetchEotJson<EotCaseWorkspaceSummary>(context, `/api/eot/cases/${caseId}/summary`)
 }
 
+/**
+ * Run async tasks with bounded concurrency to avoid overwhelming the
+ * backend when the Next.js fetch cache is cold.
+ */
+async function mapCapped<T, R>(
+  items: T[],
+  fn: (item: T) => Promise<R>,
+  concurrency: number
+): Promise<R[]> {
+  const results: R[] = new Array(items.length)
+  let next = 0
+
+  async function worker() {
+    while (next < items.length) {
+      const idx = next++
+      results[idx] = await fn(items[idx])
+    }
+  }
+
+  await Promise.all(
+    Array.from({ length: Math.min(concurrency, items.length) }, () => worker())
+  )
+  return results
+}
+
+const BACKEND_CONCURRENCY = 6
+
 export async function getEotPortfolioSnapshot(context: OperatorTenantContext) {
   const cases = await getEotCaseListSnapshot(context)
-  const workspaces = await Promise.all(
-    cases.map((caseItem) => getEotCaseWorkspaceSnapshot(context, caseItem.id))
+  const workspaces = await mapCapped(
+    cases,
+    (c) => getEotCaseWorkspaceSnapshot(context, c.id),
+    BACKEND_CONCURRENCY
   )
 
   return {
@@ -96,14 +125,16 @@ export async function getEotInventoryFeedbackSnapshot(context: OperatorTenantCon
   const cases = await getEotCaseListSnapshot(context)
   const casesWithIssues = cases.filter((c) => c.issue_count > 0)
 
-  const issueResults = await Promise.all(
-    casesWithIssues.map(async (caseItem) => {
+  const issueResults = await mapCapped(
+    casesWithIssues,
+    async (caseItem) => {
       const issues = await fetchEotJson<import('@/lib/eot-types').EotIssue[]>(
         context,
         `/api/eot/cases/${caseItem.id}/issues`
       )
       return issues.map((issue) => ({ issue, caseItem }))
-    })
+    },
+    BACKEND_CONCURRENCY
   )
 
   return issueResults.flat()

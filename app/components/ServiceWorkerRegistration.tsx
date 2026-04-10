@@ -9,15 +9,16 @@ export function ServiceWorkerRegistration() {
   useEffect(() => {
     if (!('serviceWorker' in navigator)) return
 
+    let visibilityHandler: (() => void) | null = null
+
     navigator.serviceWorker.register('/sw.js').then((registration) => {
-      // Check for updates when user returns to the tab (instead of every 15s)
-      function handleVisibilityChange() {
+      visibilityHandler = () => {
         if (document.visibilityState === 'visible') {
           registration.update()
         }
       }
 
-      document.addEventListener('visibilitychange', handleVisibilityChange)
+      document.addEventListener('visibilitychange', visibilityHandler)
 
       registration.addEventListener('updatefound', () => {
         const newWorker = registration.installing
@@ -28,24 +29,29 @@ export function ServiceWorkerRegistration() {
             newWorker.state === 'installed' &&
             navigator.serviceWorker.controller
           ) {
-            // New version available
             setWaitingWorker(newWorker)
             setShowUpdate(true)
           }
         })
       })
-
-      return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
     })
 
     // Reload when new SW takes over
     let refreshing = false
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
+    function handleControllerChange() {
       if (!refreshing) {
         refreshing = true
         window.location.reload()
       }
-    })
+    }
+    navigator.serviceWorker.addEventListener('controllerchange', handleControllerChange)
+
+    return () => {
+      if (visibilityHandler) {
+        document.removeEventListener('visibilitychange', visibilityHandler)
+      }
+      navigator.serviceWorker.removeEventListener('controllerchange', handleControllerChange)
+    }
   }, [])
 
   if (!showUpdate) return null

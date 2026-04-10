@@ -128,16 +128,18 @@ export async function listActiveTenantMembershipsForUser(
 ): Promise<ActiveTenantMembership[]> {
   const supabase = getSupabaseServiceRoleClient()
 
+  const MEMBERSHIP_COLUMNS = 'id, tenant_id, user_id, role, status, deleted_at, created_at, updated_at'
+
   let result = await supabase
     .from('tenant_memberships')
-    .select('*')
+    .select(MEMBERSHIP_COLUMNS)
     .eq('user_id', userId)
     .order('created_at', { ascending: true })
 
   if (result.error && isMissingColumnError(result.error, 'created_at')) {
     result = await supabase
       .from('tenant_memberships')
-      .select('*')
+      .select(MEMBERSHIP_COLUMNS)
       .eq('user_id', userId)
   }
 
@@ -145,11 +147,8 @@ export async function listActiveTenantMembershipsForUser(
     throw result.error
   }
 
-  const memberships = [...(result.data ?? [])]
-    .filter(
-      (membership): membership is RawOperatorMembership =>
-        typeof membership === 'object' && membership !== null
-    )
+  const memberships = ([...(result.data ?? [])] as RawOperatorMembership[])
+    .filter((membership) => typeof membership === 'object' && membership !== null)
     .sort(compareMembershipOrder)
     .map((membership) => normalizeMembership(membership))
 

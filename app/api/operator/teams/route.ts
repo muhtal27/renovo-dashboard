@@ -15,7 +15,7 @@ export async function GET() {
 
   const { data: teams, error: teamsError } = await supabase
     .from('teams')
-    .select('*')
+    .select('id, name, description, created_at')
     .eq('tenant_id', tenantId)
     .is('deleted_at', null)
     .order('created_at', { ascending: true })

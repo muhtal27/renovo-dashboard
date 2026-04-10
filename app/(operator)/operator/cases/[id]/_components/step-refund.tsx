@@ -2,7 +2,7 @@
 
 import { Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useState, useTransition } from 'react'
+import { useMemo, useState, useTransition } from 'react'
 import { WorkspaceActionButton } from '@/app/(operator)/operator/cases/[id]/_components/checkout-workspace-ui'
 import { formatCurrency, formatDateTime } from '@/app/eot/_components/eot-ui'
 import { toTimestamp } from '@/lib/operator-checkout-workspace-helpers'
@@ -25,9 +25,12 @@ export function StepRefund({ data }: { data: OperatorCheckoutWorkspaceData }) {
   const totals = data.workspace.totals
   const summary = data.workspace.case.summary
 
-  const timelineItems = [...data.timeline]
-    .sort((a, b) => toTimestamp(b.eventDate) - toTimestamp(a.eventDate))
-    .slice(0, 10)
+  const timelineItems = useMemo(
+    () => [...data.timeline]
+      .sort((a, b) => toTimestamp(b.eventDate) - toTimestamp(a.eventDate))
+      .slice(0, 10),
+    [data.timeline]
+  )
 
   async function handleTransition(targetStatus: string) {
     setIsTransitioning(true)

@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { useMemo, useState } from 'react'
+import { memo, useMemo, useState } from 'react'
 import { TriangleAlert } from 'lucide-react'
 import {
   buildEvidenceTypeBreakdown,
@@ -41,7 +41,7 @@ type PortfolioViewMode =
   | 'claims'
   | 'reports'
 
-function DistributionBar({
+const DistributionBar = memo(function DistributionBar({
   items,
 }: {
   items: Array<{ label: string; value: number; tone?: string }>
@@ -75,7 +75,7 @@ function DistributionBar({
       })}
     </div>
   )
-}
+})
 
 export function EotPortfolioClient({
   mode,

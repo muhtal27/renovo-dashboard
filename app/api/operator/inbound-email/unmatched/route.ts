@@ -23,8 +23,8 @@ export async function GET() {
   const { data, error } = await supabase
     .from('inbound_unmatched_queue')
     .select(`
-      *,
-      email_log:inbound_email_log(*)
+      id, tenant_id, email_log_id, attachment_urls, suggested_tenancy_ids, match_reason, created_at,
+      email_log:inbound_email_log(id, from_address, subject, status, created_at)
     `)
     .eq('tenant_id', tenantId)
     .eq('resolved', false)
@@ -98,22 +98,32 @@ export async function POST(request: Request) {
     .maybeSingle()
 
   // Attach documents if there are attachment URLs and a case exists
+  let attachmentsLinked = 0
   if (openCase && queueItem.attachment_urls?.length > 0) {
-    for (const url of queueItem.attachment_urls as string[]) {
-      const filename = url.split('/').pop() ?? 'attachment'
-      await supabase.from('checkout_documents').insert({
-        case_id: openCase.id,
-        tenant_id: tenantId,
-        document_type: 'inventory_report',
-        document_name: filename,
-        file_path: url,
-        source: 'email',
-      })
+    const rows = (queueItem.attachment_urls as string[]).map((url) => ({
+      case_id: openCase.id,
+      tenant_id: tenantId,
+      document_type: 'inventory_report' as const,
+      document_name: url.split('/').pop() ?? 'attachment',
+      file_path: url,
+      source: 'email' as const,
+    }))
+
+    const { error: docError } = await supabase
+      .from('checkout_documents')
+      .insert(rows)
+
+    if (docError) {
+      return NextResponse.json(
+        { error: 'Failed to attach documents to case.' },
+        { status: 500 }
+      )
     }
+    attachmentsLinked = rows.length
   }
 
   // Mark queue item as resolved
-  await supabase
+  const { error: resolveError } = await supabase
     .from('inbound_unmatched_queue')
     .update({
       resolved: true,
@@ -123,8 +133,15 @@ export async function POST(request: Request) {
     })
     .eq('id', body.queue_item_id)
 
+  if (resolveError) {
+    return NextResponse.json(
+      { error: 'Failed to mark queue item as resolved.' },
+      { status: 500 }
+    )
+  }
+
   // Update the log entry
-  await supabase
+  const { error: logError } = await supabase
     .from('inbound_email_log')
     .update({
       status: 'matched',
@@ -134,9 +151,18 @@ export async function POST(request: Request) {
     })
     .eq('id', queueItem.email_log_id)
 
+  if (logError) {
+    // Queue item already resolved — log the failure but don't roll back
+    console.error('Failed to update inbound_email_log after resolving queue item', {
+      queueItemId: body.queue_item_id,
+      emailLogId: queueItem.email_log_id,
+      error: logError.message,
+    })
+  }
+
   return NextResponse.json({
     ok: true,
     case_id: openCase?.id ?? null,
-    attachments_linked: openCase ? queueItem.attachment_urls?.length ?? 0 : 0,
+    attachments_linked: attachmentsLinked,
   })
 }

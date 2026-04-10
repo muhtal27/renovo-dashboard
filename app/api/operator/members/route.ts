@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { getOperatorMembershipContextForApi } from '@/lib/operator-server'
 import { OPERATOR_PERMISSIONS } from '@/lib/operator-rbac'
 import { getSupabaseServiceRoleClient } from '@/lib/supabase-admin'
-import { resolveAuthUsersByIds } from '@/lib/operator-auth-users'
+import { resolveAuthUsersByIds, findAuthUserByEmail } from '@/lib/operator-auth-users'
 
 export async function GET() {
   const result = await getOperatorMembershipContextForApi(OPERATOR_PERMISSIONS.MANAGE_USERS)
@@ -16,7 +16,7 @@ export async function GET() {
 
   const { data: memberships, error: membershipError } = await supabase
     .from('tenant_memberships')
-    .select('*')
+    .select('id, user_id, role, status, created_at')
     .eq('tenant_id', tenantId)
     .is('deleted_at', null)
     .order('created_at', { ascending: true })
@@ -67,11 +67,8 @@ export async function POST(request: Request) {
   const supabase = getSupabaseServiceRoleClient()
   const tenantId = result.context.tenantId
 
-  // Look up user by email via Supabase's admin API
-  const { data: existingUsers } = await supabase.auth.admin.listUsers({ perPage: 500 })
-  let authUser = existingUsers?.users?.find(
-    (u) => u.email?.toLowerCase() === email.toLowerCase()
-  )
+  // Look up user by email via targeted paginated search
+  let authUser = await findAuthUserByEmail(supabase, email)
 
   // Create auth user if they don't exist
   if (!authUser) {

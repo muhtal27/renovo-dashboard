@@ -32,7 +32,7 @@ export async function GET(
 
   const { data: memberships, error: membershipError } = await supabase
     .from('team_memberships')
-    .select('*')
+    .select('id, user_id, role, created_at')
     .eq('team_id', teamId)
     .is('deleted_at', null)
     .order('created_at', { ascending: true })

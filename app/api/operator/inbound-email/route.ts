@@ -23,13 +23,13 @@ export async function GET() {
   const [configResult, logsResult, unmatchedResult] = await Promise.all([
     supabase
       .from('inbound_email_configs')
-      .select('*')
+      .select('id, tenant_id, address_prefix, is_active, allowed_sender_domains, updated_at')
       .eq('tenant_id', tenantId)
       .limit(1)
       .maybeSingle(),
     supabase
       .from('inbound_email_log')
-      .select('*')
+      .select('id, tenant_id, resend_email_id, from_address, subject, status, matched_property_id, matched_tenancy_id, matched_case_id, created_at')
       .eq('tenant_id', tenantId)
       .order('created_at', { ascending: false })
       .limit(20),
