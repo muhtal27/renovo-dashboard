@@ -11,6 +11,7 @@ import {
   CreditCard,
   Home,
   LayoutDashboard,
+  MessageSquare,
   Users,
   X,
 } from 'lucide-react'
@@ -58,6 +59,12 @@ const NAV_GROUPS: Array<{
           pathname === '/tenancies' ||
           pathname.startsWith('/tenancies/') ||
           pathname.startsWith('/dashboard/'),
+      },
+      {
+        label: 'Communications',
+        href: '/communications',
+        icon: MessageSquare,
+        isActive: (pathname) => pathname.startsWith('/communications'),
       },
       {
         label: 'Disputes',
