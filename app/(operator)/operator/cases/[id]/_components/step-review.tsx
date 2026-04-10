@@ -352,9 +352,20 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
     setIsSending(true)
     setError(null)
     try {
+      const propertyAddress = data.checkoutCase?.propertyAddress ?? 'Address not recorded'
+      const caseRef = data.checkoutCase?.caseReference ?? caseId.slice(0, 8).toUpperCase()
+
       const sendResponse = await fetch(`/api/eot/cases/${caseId}/send-draft`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          landlordEmail: landlordEmail ?? '',
+          landlordName,
+          tenantEmail: tenantEmail ?? '',
+          tenantName,
+          propertyAddress,
+          caseRef,
+        }),
       })
       if (!sendResponse.ok) {
         const err = await sendResponse.json().catch(() => null)
