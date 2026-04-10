@@ -1,13 +1,17 @@
 'use client'
 
-import { AlertTriangle, Check, Eye, EyeOff, Loader2, RotateCcw, Save, Sparkles } from 'lucide-react'
+import { AlertTriangle, Check, ChevronDown, ChevronRight, Eye, EyeOff, Filter, Loader2, RotateCcw, Save, SortAsc, Sparkles } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useState, useTransition } from 'react'
+import { toast } from 'sonner'
+import { ConfirmDialog } from '@/app/components/ConfirmDialog'
 import {
+  ConditionBadge,
   WorkspaceActionButton,
   WorkspaceBadge,
   WorkspaceNotice,
   WorkspaceOptionButton,
+  WorkspaceProgressBar,
 } from '@/app/(operator)/operator/cases/[id]/_components/checkout-workspace-ui'
 import { AIAssistantPanel } from '@/app/(operator)/operator/cases/[id]/_components/ai-assistant-panel'
 import { formatCurrency, formatEnumLabel } from '@/app/eot/_components/eot-ui'
@@ -15,6 +19,7 @@ import { cn } from '@/lib/ui'
 import type {
   CheckoutWorkspaceDefectRecord,
   CheckoutWorkspaceLiability,
+  CheckoutWorkspaceRoomRecord,
   OperatorCheckoutWorkspaceData,
 } from '@/lib/operator-checkout-workspace-types'
 
@@ -29,9 +34,6 @@ type DefectEditState = {
 }
 
 function isDefectExcluded(d: CheckoutWorkspaceDefectRecord): boolean {
-  // A defect is excluded if it was reviewed AND the operator explicitly zeroed the cost
-  // while clearing liability. We also check that the AI had originally suggested a non-zero
-  // cost to avoid false-positives on genuinely zero-cost items.
   if (!d.reviewedAt) return false
   if (d.costAdjusted !== 0) return false
   if (d.operatorLiability !== null) return false
@@ -54,6 +56,30 @@ const LIABILITY_OPTIONS: { value: CheckoutWorkspaceLiability; label: string; ton
   { value: 'tenant', label: 'Tenant', tone: 'tenant' },
   { value: 'landlord', label: 'Landlord', tone: 'landlord' },
   { value: 'shared', label: 'Shared', tone: 'shared' },
+]
+
+/* ------------------------------------------------------------------ */
+/*  Filter/sort types                                                  */
+/* ------------------------------------------------------------------ */
+
+type DefectFilter = 'all' | 'pending' | 'tenant' | 'landlord' | 'shared' | 'excluded'
+type DefectSort = 'room' | 'cost-desc' | 'cost-asc' | 'type' | 'confidence'
+
+const FILTER_OPTIONS: { value: DefectFilter; label: string }[] = [
+  { value: 'all', label: 'All' },
+  { value: 'pending', label: 'Pending' },
+  { value: 'tenant', label: 'Tenant' },
+  { value: 'landlord', label: 'Landlord' },
+  { value: 'shared', label: 'Shared' },
+  { value: 'excluded', label: 'Excluded' },
+]
+
+const SORT_OPTIONS: { value: DefectSort; label: string }[] = [
+  { value: 'room', label: 'By room' },
+  { value: 'cost-desc', label: 'Cost (high to low)' },
+  { value: 'cost-asc', label: 'Cost (low to high)' },
+  { value: 'type', label: 'By type' },
+  { value: 'confidence', label: 'AI confidence' },
 ]
 
 /* ------------------------------------------------------------------ */
@@ -89,15 +115,21 @@ function DefectRow({
       {/* Header row */}
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <p className="text-sm font-semibold text-zinc-950">{defect.itemName}</p>
             <WorkspaceBadge
               label={formatEnumLabel(defect.defectType)}
               size="compact"
               tone={defect.defectType === 'cleaning' ? 'cleaning' : 'maintenance'}
             />
+            {defect.conditionCurrent ? (
+              <ConditionBadge value={defect.conditionCurrent} />
+            ) : null}
             {edit.excluded ? (
               <WorkspaceBadge label="Excluded" size="compact" tone="neutral" />
+            ) : null}
+            {hasOverride ? (
+              <WorkspaceBadge label="Override" size="compact" tone="warning" />
             ) : null}
           </div>
           {defect.description ? (
@@ -227,6 +259,126 @@ function DefectRow({
 }
 
 /* ------------------------------------------------------------------ */
+/*  Room group header                                                  */
+/* ------------------------------------------------------------------ */
+
+function RoomGroupHeader({
+  room,
+  defectCount,
+  roomCost,
+  isExpanded,
+  onToggle,
+}: {
+  room: CheckoutWorkspaceRoomRecord | null
+  defectCount: number
+  roomCost: number
+  isExpanded: boolean
+  onToggle: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      className="flex w-full items-center gap-3 border border-zinc-200 bg-zinc-50/80 px-4 py-3 text-left transition-colors hover:bg-zinc-100/80"
+    >
+      {isExpanded ? (
+        <ChevronDown className="h-4 w-4 shrink-0 text-zinc-400" />
+      ) : (
+        <ChevronRight className="h-4 w-4 shrink-0 text-zinc-400" />
+      )}
+      <div className="flex flex-1 items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-semibold text-zinc-950">
+            {room?.roomName ?? 'Unassigned room'}
+          </span>
+          <span className="text-xs text-zinc-400">{defectCount} defect{defectCount !== 1 ? 's' : ''}</span>
+          {room?.conditionCheckin && room?.conditionCheckout ? (
+            <span className="hidden items-center gap-1 text-[10px] text-zinc-400 sm:inline-flex">
+              <ConditionBadge value={room.conditionCheckin} />
+              <span>→</span>
+              <ConditionBadge value={room.conditionCheckout} />
+            </span>
+          ) : null}
+        </div>
+        <span className="text-sm font-medium tabular-nums text-zinc-600">
+          {formatCurrency(roomCost)}
+        </span>
+      </div>
+    </button>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/*  Bulk actions bar                                                   */
+/* ------------------------------------------------------------------ */
+
+function BulkActionsBar({
+  defects,
+  edits,
+  onBulkLiability,
+  onAcceptAiSuggestions,
+  onExcludeBelow,
+}: {
+  defects: CheckoutWorkspaceDefectRecord[]
+  edits: Record<string, DefectEditState>
+  onBulkLiability: (liability: CheckoutWorkspaceLiability) => void
+  onAcceptAiSuggestions: () => void
+  onExcludeBelow: (threshold: number) => void
+}) {
+  const [showThresholdInput, setShowThresholdInput] = useState(false)
+  const [threshold, setThreshold] = useState('10')
+
+  const pendingCount = defects.filter((d) => {
+    const edit = edits[d.id]
+    return edit && !edit.excluded && !edit.operatorLiability
+  }).length
+
+  const aiSuggestedCount = defects.filter((d) => d.aiSuggestedLiability && !edits[d.id]?.excluded).length
+
+  return (
+    <div className="flex flex-wrap items-center gap-2 border border-zinc-200 bg-zinc-50/60 px-4 py-3">
+      <span className="mr-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Bulk:</span>
+      <WorkspaceActionButton tone="secondary" onClick={onAcceptAiSuggestions}>
+        <Sparkles className="h-3 w-3" />
+        Accept AI ({aiSuggestedCount})
+      </WorkspaceActionButton>
+      {LIABILITY_OPTIONS.map((opt) => (
+        <WorkspaceActionButton
+          key={opt.value}
+          tone="secondary"
+          onClick={() => onBulkLiability(opt.value)}
+        >
+          All {opt.label} ({pendingCount})
+        </WorkspaceActionButton>
+      ))}
+      {showThresholdInput ? (
+        <div className="flex items-center gap-1">
+          <span className="text-xs text-zinc-500">Exclude under £</span>
+          <input
+            type="number"
+            min="0"
+            step="1"
+            value={threshold}
+            onChange={(e) => setThreshold(e.target.value)}
+            className="h-7 w-16 border border-zinc-200 bg-white px-2 text-xs tabular-nums focus:border-slate-400 focus:outline-none"
+          />
+          <WorkspaceActionButton tone="secondary" onClick={() => {
+            onExcludeBelow(parseFloat(threshold) || 0)
+            setShowThresholdInput(false)
+          }}>
+            Apply
+          </WorkspaceActionButton>
+        </div>
+      ) : (
+        <WorkspaceActionButton tone="secondary" onClick={() => setShowThresholdInput(true)}>
+          Exclude under £…
+        </WorkspaceActionButton>
+      )}
+    </div>
+  )
+}
+
+/* ------------------------------------------------------------------ */
 /*  Main component                                                     */
 /* ------------------------------------------------------------------ */
 
@@ -238,14 +390,14 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
   const [isSaving, setIsSaving] = useState(false)
   const [, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
-  const [saveSuccess, setSaveSuccess] = useState(false)
-  const [sendSuccess, setSendSuccess] = useState(false)
   const [activeTab, setActiveTab] = useState<ReviewTab>('defects')
+  const [showSendConfirm, setShowSendConfirm] = useState(false)
 
   const caseId = data.workspace.case.id
   const caseStatus = data.workspace.case.status
   const isReview = caseStatus === 'review'
   const defects = data.defects
+  const rooms = data.rooms
   const recommendations = data.workspace.recommendations
   const issues = data.workspace.issues
   const claim = data.workspace.claim
@@ -255,7 +407,11 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
     buildInitialEdits(defects)
   )
   const [isDirty, setIsDirty] = useState(false)
-  const [showSendConfirm, setShowSendConfirm] = useState(false)
+
+  // Filter and sort
+  const [activeFilter, setActiveFilter] = useState<DefectFilter>('all')
+  const [activeSort, setActiveSort] = useState<DefectSort>('room')
+  const [collapsedRooms, setCollapsedRooms] = useState<Set<string>>(new Set())
 
   const handleEditChange = useCallback(
     (id: string, patch: Partial<DefectEditState>) => {
@@ -263,7 +419,6 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
         ...prev,
         [id]: { ...prev[id], ...patch },
       }))
-      setSaveSuccess(false)
       setIsDirty(true)
     },
     []
@@ -271,7 +426,6 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
 
   const handleResetAll = useCallback(() => {
     setEdits(buildInitialEdits(defects))
-    setSaveSuccess(false)
     setIsDirty(false)
   }, [defects])
 
@@ -285,14 +439,141 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
     return () => window.removeEventListener('beforeunload', handler)
   }, [isDirty])
 
+  /* ---- Bulk actions ---- */
+  const handleBulkLiability = useCallback(
+    (liability: CheckoutWorkspaceLiability) => {
+      setEdits((prev) => {
+        const next = { ...prev }
+        for (const d of defects) {
+          if (next[d.id] && !next[d.id].excluded && !next[d.id].operatorLiability) {
+            next[d.id] = { ...next[d.id], operatorLiability: liability }
+          }
+        }
+        return next
+      })
+      setIsDirty(true)
+    },
+    [defects]
+  )
+
+  const handleAcceptAiSuggestions = useCallback(() => {
+    setEdits((prev) => {
+      const next = { ...prev }
+      for (const d of defects) {
+        if (d.aiSuggestedLiability && next[d.id] && !next[d.id].excluded) {
+          next[d.id] = {
+            ...next[d.id],
+            operatorLiability: d.aiSuggestedLiability,
+            costAdjusted: next[d.id].costAdjusted ?? d.costEstimate,
+          }
+        }
+      }
+      return next
+    })
+    setIsDirty(true)
+    toast.success('AI suggestions accepted for all defects')
+  }, [defects])
+
+  const handleExcludeBelow = useCallback(
+    (threshold: number) => {
+      let count = 0
+      setEdits((prev) => {
+        const next = { ...prev }
+        for (const d of defects) {
+          const cost = next[d.id]?.costAdjusted ?? d.costEstimate ?? 0
+          if (cost < threshold && !next[d.id]?.excluded) {
+            next[d.id] = { ...next[d.id], excluded: true }
+            count++
+          }
+        }
+        return next
+      })
+      setIsDirty(true)
+      toast.success(`Excluded ${count} defects under £${threshold}`)
+    },
+    [defects]
+  )
+
+  /* ---- Room grouping, filtering, sorting ---- */
+  const roomMap = useMemo(() => {
+    const map = new Map<string, CheckoutWorkspaceRoomRecord>()
+    for (const room of rooms) map.set(room.id, room)
+    return map
+  }, [rooms])
+
+  const filteredAndSorted = useMemo(() => {
+    // Filter
+    let filtered = defects
+    if (activeFilter === 'pending') {
+      filtered = defects.filter((d) => {
+        const edit = edits[d.id]
+        return edit && !edit.excluded && !edit.operatorLiability
+      })
+    } else if (activeFilter === 'tenant') {
+      filtered = defects.filter((d) => edits[d.id]?.operatorLiability === 'tenant')
+    } else if (activeFilter === 'landlord') {
+      filtered = defects.filter((d) => edits[d.id]?.operatorLiability === 'landlord')
+    } else if (activeFilter === 'shared') {
+      filtered = defects.filter((d) => edits[d.id]?.operatorLiability === 'shared')
+    } else if (activeFilter === 'excluded') {
+      filtered = defects.filter((d) => edits[d.id]?.excluded)
+    }
+
+    // Sort
+    const sorted = [...filtered]
+    if (activeSort === 'cost-desc') {
+      sorted.sort((a, b) => (edits[b.id]?.costAdjusted ?? b.costEstimate ?? 0) - (edits[a.id]?.costAdjusted ?? a.costEstimate ?? 0))
+    } else if (activeSort === 'cost-asc') {
+      sorted.sort((a, b) => (edits[a.id]?.costAdjusted ?? a.costEstimate ?? 0) - (edits[b.id]?.costAdjusted ?? b.costEstimate ?? 0))
+    } else if (activeSort === 'type') {
+      sorted.sort((a, b) => a.defectType.localeCompare(b.defectType))
+    } else if (activeSort === 'confidence') {
+      sorted.sort((a, b) => (b.aiConfidence ?? 0) - (a.aiConfidence ?? 0))
+    } else {
+      // Sort by room (default)
+      sorted.sort((a, b) => {
+        const roomA = roomMap.get(a.roomId)
+        const roomB = roomMap.get(b.roomId)
+        return (roomA?.sortOrder ?? 999) - (roomB?.sortOrder ?? 999)
+      })
+    }
+
+    return sorted
+  }, [defects, edits, activeFilter, activeSort, roomMap])
+
+  // Group by room when sorting by room
+  const groupedByRoom = useMemo(() => {
+    if (activeSort !== 'room') return null
+
+    const groups: { roomId: string; room: CheckoutWorkspaceRoomRecord | null; defects: CheckoutWorkspaceDefectRecord[] }[] = []
+    const seen = new Map<string, number>()
+
+    for (const d of filteredAndSorted) {
+      const idx = seen.get(d.roomId)
+      if (idx != null) {
+        groups[idx].defects.push(d)
+      } else {
+        seen.set(d.roomId, groups.length)
+        groups.push({
+          roomId: d.roomId,
+          room: roomMap.get(d.roomId) ?? null,
+          defects: [d],
+        })
+      }
+    }
+
+    return groups
+  }, [filteredAndSorted, activeSort, roomMap])
+
   /* ---- Computed totals ---- */
-  const { tenantTotal, landlordTotal, sharedTotal, totalClaim, includedCount, excludedCount } =
+  const { tenantTotal, landlordTotal, sharedTotal, totalClaim, includedCount, excludedCount, reviewedCount } =
     useMemo(() => {
       let tenant = 0
       let landlord = 0
       let shared = 0
       let included = 0
       let excluded = 0
+      let reviewed = 0
 
       for (const d of defects) {
         const edit = edits[d.id]
@@ -301,6 +582,7 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
           continue
         }
         included++
+        if (edit.operatorLiability) reviewed++
         const cost = edit.costAdjusted ?? d.costEstimate ?? 0
         if (edit.operatorLiability === 'tenant') tenant += cost
         else if (edit.operatorLiability === 'landlord') landlord += cost
@@ -319,11 +601,13 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
         totalClaim: tenant,
         includedCount: included,
         excludedCount: excluded,
+        reviewedCount: reviewed,
       }
     }, [defects, edits])
 
   const depositHeld = data.checkoutCase?.depositHeld ?? 0
   const claimExceedsDeposit = depositHeld > 0 && totalClaim > depositHeld
+  const reviewProgress = includedCount > 0 ? Math.round((reviewedCount / includedCount) * 100) : 0
 
   function getIssueTitle(issueId: string) {
     return issues.find((i) => i.id === issueId)?.title ?? 'Untitled issue'
@@ -340,7 +624,6 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
   async function handleSaveOverrides() {
     setIsSaving(true)
     setError(null)
-    setSaveSuccess(false)
     try {
       const updates = defects.map((d) => {
         const edit = edits[d.id]
@@ -363,13 +646,15 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
         throw new Error(err?.error || 'Failed to save defect overrides.')
       }
 
-      setSaveSuccess(true)
       setIsDirty(false)
+      toast.success('Defect overrides saved successfully')
       startTransition(() => {
         router.refresh()
       })
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to save overrides.')
+      const msg = e instanceof Error ? e.message : 'Failed to save overrides.'
+      setError(msg)
+      toast.error(msg)
     } finally {
       setIsSaving(false)
     }
@@ -379,7 +664,7 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
   async function handleSendDraft() {
     setIsSending(true)
     setError(null)
-    setSendSuccess(false)
+    setShowSendConfirm(false)
     try {
       const propertyAddress = data.checkoutCase?.propertyAddress ?? 'Address not recorded'
       const caseRef = data.checkoutCase?.caseReference ?? caseId.slice(0, 8).toUpperCase()
@@ -400,7 +685,7 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
         const err = await sendResponse.json().catch(() => null)
         throw new Error(err?.detail || err?.error || `Failed to send draft emails (${sendResponse.status}).`)
       }
-      setSendSuccess(true)
+      toast.success('Emails sent successfully')
       const transitionResponse = await fetch(`/api/eot/cases/${caseId}/transition`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -414,13 +699,37 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
         router.refresh()
       })
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to send draft.')
+      const msg = e instanceof Error ? e.message : 'Failed to send draft.'
+      setError(msg)
+      toast.error(msg)
     } finally {
       setIsSending(false)
     }
   }
 
   const aiDraftCount = (data.aiDrafts ?? []).length
+
+  /* ---- Filter counts ---- */
+  const filterCounts = useMemo(() => {
+    const counts: Record<DefectFilter, number> = {
+      all: defects.length,
+      pending: 0,
+      tenant: 0,
+      landlord: 0,
+      shared: 0,
+      excluded: 0,
+    }
+    for (const d of defects) {
+      const edit = edits[d.id]
+      if (!edit) continue
+      if (edit.excluded) { counts.excluded++; continue }
+      if (edit.operatorLiability === 'tenant') counts.tenant++
+      else if (edit.operatorLiability === 'landlord') counts.landlord++
+      else if (edit.operatorLiability === 'shared') counts.shared++
+      else counts.pending++
+    }
+    return counts
+  }, [defects, edits])
 
   return (
     <div className="space-y-6">
@@ -472,6 +781,33 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
       {/* ---- Defect Review tab ---- */}
       {activeTab === 'defects' ? (
       <>
+      {/* ---- Review progress bar ---- */}
+      {defects.length > 0 ? (
+        <div className="flex items-center gap-4">
+          <div className="flex-1">
+            <div className="flex items-center justify-between mb-1.5">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
+                Review progress
+              </p>
+              <span className="text-xs tabular-nums text-zinc-500">
+                {reviewedCount}/{includedCount} reviewed
+              </span>
+            </div>
+            <WorkspaceProgressBar
+              value={reviewProgress}
+              max={100}
+              tone={reviewProgress === 100 ? 'success' : reviewProgress >= 50 ? 'warning' : 'danger'}
+            />
+          </div>
+          {reviewProgress === 100 && includedCount > 0 ? (
+            <div className="flex items-center gap-1 text-xs font-medium text-emerald-600">
+              <Check className="h-3.5 w-3.5" />
+              Complete
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+
       {/* ---- Deposit vs claim warning ---- */}
       {claimExceedsDeposit ? (
         <WorkspaceNotice
@@ -489,6 +825,64 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
         />
       ) : null}
 
+      {/* ---- Filter + Sort toolbar ---- */}
+      {defects.length > 0 ? (
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Filters */}
+          <div className="flex items-center gap-1">
+            <Filter className="h-3.5 w-3.5 text-zinc-400" />
+            {FILTER_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setActiveFilter(opt.value)}
+                className={cn(
+                  'rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
+                  activeFilter === opt.value
+                    ? 'bg-zinc-900 text-white'
+                    : 'bg-zinc-100 text-zinc-500 hover:bg-zinc-200 hover:text-zinc-700'
+                )}
+              >
+                {opt.label}
+                {filterCounts[opt.value] > 0 ? (
+                  <span className={cn(
+                    'ml-1 tabular-nums',
+                    activeFilter === opt.value ? 'text-zinc-300' : 'text-zinc-400'
+                  )}>
+                    {filterCounts[opt.value]}
+                  </span>
+                ) : null}
+              </button>
+            ))}
+          </div>
+
+          {/* Sort */}
+          <div className="flex items-center gap-1">
+            <SortAsc className="h-3.5 w-3.5 text-zinc-400" />
+            <select
+              value={activeSort}
+              onChange={(e) => setActiveSort(e.target.value as DefectSort)}
+              className="h-7 rounded-md border border-zinc-200 bg-white px-2 text-xs text-zinc-600 focus:border-slate-400 focus:outline-none"
+            >
+              {SORT_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+      ) : null}
+
+      {/* ---- Bulk actions ---- */}
+      {isReview && defects.length > 3 ? (
+        <BulkActionsBar
+          defects={defects}
+          edits={edits}
+          onBulkLiability={handleBulkLiability}
+          onAcceptAiSuggestions={handleAcceptAiSuggestions}
+          onExcludeBelow={handleExcludeBelow}
+        />
+      ) : null}
+
       {/* ---- Defects section ---- */}
       <section>
         <div className="flex items-center justify-between gap-3">
@@ -496,6 +890,7 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
             <h3 className="text-sm font-semibold text-zinc-950">Defects</h3>
             <span className="text-xs text-zinc-400">
               {includedCount} included{excludedCount > 0 ? ` · ${excludedCount} excluded` : ''}
+              {activeFilter !== 'all' ? ` · showing ${filteredAndSorted.length}` : ''}
             </span>
           </div>
           {isReview && defects.length > 0 ? (
@@ -512,18 +907,65 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
           ) : null}
         </div>
 
-        {defects.length > 0 ? (
+        {filteredAndSorted.length > 0 ? (
           <div className="mt-3 space-y-2">
-            {defects.map((d) => (
-              <DefectRow
-                key={d.id}
-                defect={d}
-                edit={edits[d.id] ?? { operatorLiability: null, costAdjusted: null, excluded: false }}
-                isReview={isReview}
-                onChange={handleEditChange}
-              />
-            ))}
+            {groupedByRoom ? (
+              // Grouped by room
+              groupedByRoom.map((group) => {
+                const isCollapsed = collapsedRooms.has(group.roomId)
+                const roomCost = group.defects.reduce((sum, d) => {
+                  const edit = edits[d.id]
+                  if (!edit || edit.excluded) return sum
+                  return sum + (edit.costAdjusted ?? d.costEstimate ?? 0)
+                }, 0)
+
+                return (
+                  <div key={group.roomId}>
+                    <RoomGroupHeader
+                      room={group.room}
+                      defectCount={group.defects.length}
+                      roomCost={roomCost}
+                      isExpanded={!isCollapsed}
+                      onToggle={() => {
+                        setCollapsedRooms((prev) => {
+                          const next = new Set(prev)
+                          if (next.has(group.roomId)) next.delete(group.roomId)
+                          else next.add(group.roomId)
+                          return next
+                        })
+                      }}
+                    />
+                    {!isCollapsed ? (
+                      <div className="ml-4 mt-1 space-y-2 border-l-2 border-zinc-100 pl-4">
+                        {group.defects.map((d) => (
+                          <DefectRow
+                            key={d.id}
+                            defect={d}
+                            edit={edits[d.id] ?? { operatorLiability: null, costAdjusted: null, excluded: false }}
+                            isReview={isReview}
+                            onChange={handleEditChange}
+                          />
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                )
+              })
+            ) : (
+              // Flat list (when not sorting by room)
+              filteredAndSorted.map((d) => (
+                <DefectRow
+                  key={d.id}
+                  defect={d}
+                  edit={edits[d.id] ?? { operatorLiability: null, costAdjusted: null, excluded: false }}
+                  isReview={isReview}
+                  onChange={handleEditChange}
+                />
+              ))
+            )}
           </div>
+        ) : defects.length > 0 ? (
+          <p className="mt-2 text-sm text-zinc-500">No defects match the current filter.</p>
         ) : (
           <p className="mt-2 text-sm text-zinc-500">No defects identified.</p>
         )}
@@ -543,11 +985,8 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
               )}
               Save review overrides
             </WorkspaceActionButton>
-            {saveSuccess ? (
-              <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600">
-                <Check className="h-3.5 w-3.5" />
-                Saved
-              </span>
+            {isDirty ? (
+              <span className="text-xs text-amber-600">Unsaved changes</span>
             ) : null}
           </div>
         ) : null}
@@ -692,14 +1131,6 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
       {/* ---- Error ---- */}
       {error ? <p className="text-sm text-rose-700">{error}</p> : null}
 
-      {/* ---- Send success ---- */}
-      {sendSuccess ? (
-        <div className="flex items-center gap-2 rounded bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-          <Check className="h-4 w-4 shrink-0" />
-          Emails sent successfully. The case is moving to the deductions step.
-        </div>
-      ) : null}
-
       {/* ---- Send draft ---- */}
       {isReview ? (
         <div className="border-t border-zinc-200 pt-6">
@@ -720,41 +1151,13 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
             />
           ) : null}
 
-          {showSendConfirm ? (
-            <div className="mt-3 border border-amber-200 bg-amber-50 px-4 py-4">
-              <p className="text-sm font-medium text-amber-900">
-                Are you sure you want to send the draft?
-              </p>
-              <p className="mt-1 text-xs text-amber-700">
-                This will email the checkout report to {[landlordEmail && 'landlord', tenantEmail && 'tenant'].filter(Boolean).join(' and ')}. This action cannot be undone.
-              </p>
-              <div className="mt-3 flex items-center gap-2">
-                <WorkspaceActionButton
-                  disabled={isSending}
-                  tone="primary"
-                  onClick={handleSendDraft}
-                >
-                  {isSending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                  {isSending ? 'Sending...' : 'Confirm and send'}
-                </WorkspaceActionButton>
-                <WorkspaceActionButton
-                  disabled={isSending}
-                  tone="secondary"
-                  onClick={() => setShowSendConfirm(false)}
-                >
-                  Cancel
-                </WorkspaceActionButton>
-              </div>
-            </div>
-          ) : (
-            <WorkspaceActionButton
-              disabled={!canSend || isSending || isDirty}
-              tone="primary"
-              onClick={() => setShowSendConfirm(true)}
-            >
-              Send draft to parties
-            </WorkspaceActionButton>
-          )}
+          <WorkspaceActionButton
+            disabled={!canSend || isSending || isDirty}
+            tone="primary"
+            onClick={() => setShowSendConfirm(true)}
+          >
+            Send draft to parties
+          </WorkspaceActionButton>
 
           {!canSend && isReview ? (
             <p className="mt-2 text-xs text-zinc-500">
@@ -765,6 +1168,17 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
       ) : null}
       </>
       ) : null}
+
+      {/* ---- Send confirmation modal ---- */}
+      <ConfirmDialog
+        open={showSendConfirm}
+        title="Send draft to parties?"
+        description={`This will email the checkout report to ${[landlordEmail && 'landlord', tenantEmail && 'tenant'].filter(Boolean).join(' and ')}. This action transitions the case to draft sent and cannot be undone.`}
+        confirmLabel={isSending ? 'Sending...' : 'Send emails'}
+        cancelLabel="Cancel"
+        onConfirm={handleSendDraft}
+        onCancel={() => setShowSendConfirm(false)}
+      />
     </div>
   )
 }

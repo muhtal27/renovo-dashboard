@@ -9,6 +9,9 @@ import {
   Eye,
   Calculator,
   Banknote,
+  User,
+  Clock,
+  Shield,
 } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
@@ -16,6 +19,7 @@ import { useTransition, type ComponentType } from 'react'
 import { formatAddress, formatDate } from '@/app/eot/_components/eot-ui'
 import { WorkspaceBadge } from '@/app/(operator)/operator/cases/[id]/_components/checkout-workspace-ui'
 import { cn } from '@/lib/ui'
+import { relativeTime } from '@/lib/relative-time'
 import type { EotCaseStatus } from '@/lib/eot-types'
 import {
   normalizeWorkspaceStep,
@@ -254,6 +258,21 @@ function getStatusPresentation(status: EotCaseStatus) {
 }
 
 /* ────────────────────────────────────────────────────────────── */
+/*  Deposit scheme labels                                         */
+/* ────────────────────────────────────────────────────────────── */
+
+function getDepositSchemeLabel(scheme: string | null | undefined): string | null {
+  if (!scheme) return null
+  switch (scheme) {
+    case 'tds': return 'TDS'
+    case 'dps': return 'DPS'
+    case 'mydeposits': return 'mydeposits'
+    case 'safedeposits_scotland': return 'SafeDeposits Scotland'
+    default: return scheme.toUpperCase()
+  }
+}
+
+/* ────────────────────────────────────────────────────────────── */
 /*  Main workspace                                                */
 /* ────────────────────────────────────────────────────────────── */
 
@@ -286,6 +305,10 @@ export function CheckoutCaseWorkspace({
   const caseReference =
     data.checkoutCase?.caseReference ?? data.workspace.case.id.slice(0, 8).toUpperCase()
 
+  const depositSchemeLabel = getDepositSchemeLabel(data.checkoutCase?.depositScheme)
+  const lastModified = data.checkoutCase?.updatedAt ?? data.workspace.case.updated_at
+  const assignedTo = data.checkoutCase?.assignedTo
+
   function handleStepClick(step: WorkspaceStep) {
     if (!pathname) return
 
@@ -308,9 +331,31 @@ export function CheckoutCaseWorkspace({
     <div className="space-y-6">
       {/* Case header */}
       <section className="border border-zinc-200/80 bg-white px-6 py-6 md:px-7">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
-          {`Case #${caseReference}`}
-        </p>
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
+            {`Case #${caseReference}`}
+          </p>
+          {/* Meta badges */}
+          <div className="flex flex-wrap items-center gap-2">
+            {assignedTo ? (
+              <span className="inline-flex items-center gap-1 text-[11px] text-zinc-400">
+                <User className="h-3 w-3" />
+                Assigned
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 text-[11px] text-amber-500">
+                <User className="h-3 w-3" />
+                Unassigned
+              </span>
+            )}
+            {lastModified ? (
+              <span className="inline-flex items-center gap-1 text-[11px] text-zinc-400">
+                <Clock className="h-3 w-3" />
+                {relativeTime(lastModified)}
+              </span>
+            ) : null}
+          </div>
+        </div>
         <div className="mt-3 flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
           <div className="min-w-0">
             <h1 className="text-[1.7rem] font-semibold tracking-[-0.04em] text-zinc-950 [overflow-wrap:anywhere]">
@@ -318,9 +363,17 @@ export function CheckoutCaseWorkspace({
             </h1>
             <div className="mt-2 flex flex-wrap items-center gap-2">
               <WorkspaceBadge label={status.label} tone={status.tone} />
+              {depositSchemeLabel ? (
+                <WorkspaceBadge label={depositSchemeLabel} tone="info" />
+              ) : null}
               <span className="text-xs text-zinc-400">
                 Checkout {formatDate(data.checkoutCase?.checkoutDate ?? data.workspace.tenancy.end_date)}
               </span>
+              {data.defects.length > 0 ? (
+                <span className="text-xs text-zinc-400">
+                  · {data.defects.length} defects · {data.rooms.length} rooms
+                </span>
+              ) : null}
             </div>
           </div>
         </div>

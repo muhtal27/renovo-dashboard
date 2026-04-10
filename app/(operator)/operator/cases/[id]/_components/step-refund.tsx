@@ -3,6 +3,8 @@
 import { Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useMemo, useState, useTransition } from 'react'
+import { toast } from 'sonner'
+import { ConfirmDialog } from '@/app/components/ConfirmDialog'
 import { WorkspaceActionButton } from '@/app/(operator)/operator/cases/[id]/_components/checkout-workspace-ui'
 import { formatCurrency, formatDateTime } from '@/app/eot/_components/eot-ui'
 import { toTimestamp } from '@/lib/operator-checkout-workspace-helpers'
@@ -36,6 +38,7 @@ export function StepRefund({ data }: { data: OperatorCheckoutWorkspaceData }) {
   async function handleTransition(targetStatus: string) {
     setIsTransitioning(true)
     setError(null)
+    setConfirmAction(null)
     try {
       const response = await fetch(`/api/eot/cases/${caseId}/transition`, {
         method: 'PATCH',
@@ -46,9 +49,12 @@ export function StepRefund({ data }: { data: OperatorCheckoutWorkspaceData }) {
         const err = await response.json().catch(() => null)
         throw new Error(err?.detail || 'Failed to update case status.')
       }
+      toast.success(targetStatus === 'resolved' ? 'Case resolved successfully' : 'Case flagged as disputed')
       startTransition(() => { router.refresh() })
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to update case status.')
+      const msg = e instanceof Error ? e.message : 'Failed to update case status.'
+      setError(msg)
+      toast.error(msg)
     } finally {
       setIsTransitioning(false)
     }
@@ -149,83 +155,51 @@ export function StepRefund({ data }: { data: OperatorCheckoutWorkspaceData }) {
       ) : null}
 
       {isSubmitted ? (
-        <div className="border-t border-zinc-200 pt-6">
-          {confirmAction ? (
-            <div className={`border px-4 py-4 ${confirmAction === 'disputed' ? 'border-rose-200 bg-rose-50' : 'border-amber-200 bg-amber-50'}`}>
-              <p className={`text-sm font-medium ${confirmAction === 'disputed' ? 'text-rose-900' : 'text-amber-900'}`}>
-                {confirmAction === 'disputed'
-                  ? 'Are you sure you want to flag this case as disputed?'
-                  : 'Are you sure you want to mark this case as resolved?'}
-              </p>
-              <p className={`mt-1 text-xs ${confirmAction === 'disputed' ? 'text-rose-700' : 'text-amber-700'}`}>
-                {confirmAction === 'disputed'
-                  ? 'This will move the case into dispute handling. You can resolve it later.'
-                  : 'This will close the case permanently.'}
-              </p>
-              <div className="mt-3 flex items-center gap-2">
-                <WorkspaceActionButton
-                  disabled={isTransitioning}
-                  tone={confirmAction === 'disputed' ? 'danger' : 'primary'}
-                  onClick={() => handleTransition(confirmAction)}
-                >
-                  {isTransitioning ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                  {confirmAction === 'disputed' ? 'Confirm dispute' : 'Confirm resolve'}
-                </WorkspaceActionButton>
-                <WorkspaceActionButton
-                  disabled={isTransitioning}
-                  tone="secondary"
-                  onClick={() => setConfirmAction(null)}
-                >
-                  Cancel
-                </WorkspaceActionButton>
-              </div>
-            </div>
-          ) : (
-            <div className="flex gap-3">
-              <WorkspaceActionButton
-                disabled={isTransitioning}
-                tone="primary"
-                onClick={() => setConfirmAction('resolved')}
-              >
-                Mark resolved
-              </WorkspaceActionButton>
-              <WorkspaceActionButton
-                disabled={isTransitioning}
-                tone="danger"
-                onClick={() => setConfirmAction('disputed')}
-              >
-                Flag dispute
-              </WorkspaceActionButton>
-            </div>
-          )}
+        <div className="flex gap-3 border-t border-zinc-200 pt-6">
+          <WorkspaceActionButton
+            disabled={isTransitioning}
+            tone="primary"
+            onClick={() => setConfirmAction('resolved')}
+          >
+            {isTransitioning ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+            Mark resolved
+          </WorkspaceActionButton>
+          <WorkspaceActionButton
+            disabled={isTransitioning}
+            tone="danger"
+            onClick={() => setConfirmAction('disputed')}
+          >
+            Flag dispute
+          </WorkspaceActionButton>
         </div>
       ) : isDisputed ? (
         <div className="border-t border-zinc-200 pt-6">
-          {confirmAction === 'resolved' ? (
-            <div className="border border-amber-200 bg-amber-50 px-4 py-4">
-              <p className="text-sm font-medium text-amber-900">
-                Are you sure you want to resolve this dispute?
-              </p>
-              <p className="mt-1 text-xs text-amber-700">
-                This will close the case permanently.
-              </p>
-              <div className="mt-3 flex items-center gap-2">
-                <WorkspaceActionButton disabled={isTransitioning} tone="primary" onClick={() => handleTransition('resolved')}>
-                  {isTransitioning ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                  Confirm resolve
-                </WorkspaceActionButton>
-                <WorkspaceActionButton disabled={isTransitioning} tone="secondary" onClick={() => setConfirmAction(null)}>
-                  Cancel
-                </WorkspaceActionButton>
-              </div>
-            </div>
-          ) : (
-            <WorkspaceActionButton disabled={isTransitioning} tone="primary" onClick={() => setConfirmAction('resolved')}>
-              Resolve dispute
-            </WorkspaceActionButton>
-          )}
+          <WorkspaceActionButton disabled={isTransitioning} tone="primary" onClick={() => setConfirmAction('resolved')}>
+            {isTransitioning ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+            Resolve dispute
+          </WorkspaceActionButton>
         </div>
       ) : null}
+
+      <ConfirmDialog
+        open={confirmAction === 'resolved'}
+        title="Mark this case as resolved?"
+        description="This will close the case permanently. This action cannot be undone."
+        confirmLabel="Resolve case"
+        cancelLabel="Cancel"
+        onConfirm={() => handleTransition('resolved')}
+        onCancel={() => setConfirmAction(null)}
+      />
+      <ConfirmDialog
+        open={confirmAction === 'disputed'}
+        title="Flag this case as disputed?"
+        description="This will move the case into dispute handling. You can resolve it later."
+        confirmLabel="Flag dispute"
+        cancelLabel="Cancel"
+        tone="danger"
+        onConfirm={() => handleTransition('disputed')}
+        onCancel={() => setConfirmAction(null)}
+      />
     </div>
   )
 }

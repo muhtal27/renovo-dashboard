@@ -3,6 +3,8 @@
 import { Check, Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
+import { toast } from 'sonner'
+import { ConfirmDialog } from '@/app/components/ConfirmDialog'
 import { WorkspaceActionButton } from '@/app/(operator)/operator/cases/[id]/_components/checkout-workspace-ui'
 import { formatCurrency, formatEnumLabel } from '@/app/eot/_components/eot-ui'
 import type { OperatorCheckoutWorkspaceData } from '@/lib/operator-checkout-workspace-types'
@@ -42,6 +44,7 @@ export function StepDeductions({ data }: { data: OperatorCheckoutWorkspaceData }
   async function handleTransition(targetStatus: string) {
     setIsTransitioning(true)
     setError(null)
+    setConfirmAction(null)
     try {
       const response = await fetch(`/api/eot/cases/${caseId}/transition`, {
         method: 'PATCH',
@@ -52,9 +55,12 @@ export function StepDeductions({ data }: { data: OperatorCheckoutWorkspaceData }
         const err = await response.json().catch(() => null)
         throw new Error(err?.detail || 'Failed to update case status.')
       }
+      toast.success(targetStatus === 'submitted' ? 'Claim submitted successfully' : 'Case status updated')
       startTransition(() => { router.refresh() })
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to update case status.')
+      const msg = e instanceof Error ? e.message : 'Failed to update case status.'
+      setError(msg)
+      toast.error(msg)
     } finally {
       setIsTransitioning(false)
     }
@@ -247,35 +253,23 @@ export function StepDeductions({ data }: { data: OperatorCheckoutWorkspaceData }
         </div>
       ) : isReady ? (
         <div className="border-t border-zinc-200 pt-6">
-          {confirmAction === 'submitted' ? (
-            <div className="border border-amber-200 bg-amber-50 px-4 py-4">
-              <p className="text-sm font-medium text-amber-900">
-                Are you sure you want to submit this claim?
-              </p>
-              <p className="mt-1 text-xs text-amber-700">
-                Once submitted, the case cannot be edited without dispute resolution.
-              </p>
-              <div className="mt-3 flex items-center gap-2">
-                <WorkspaceActionButton disabled={isTransitioning} tone="primary" onClick={() => handleTransition('submitted')}>
-                  {isTransitioning ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                  Confirm submission
-                </WorkspaceActionButton>
-                <WorkspaceActionButton disabled={isTransitioning} tone="secondary" onClick={() => setConfirmAction(null)}>
-                  Cancel
-                </WorkspaceActionButton>
-              </div>
-            </div>
-          ) : (
-            <>
-              <p className="mb-3 text-sm text-zinc-600">
-                Once submitted, the case moves to the submitted state and cannot be edited without dispute
-                resolution.
-              </p>
-              <WorkspaceActionButton disabled={isTransitioning} tone="primary" onClick={() => setConfirmAction('submitted')}>
-                Submit claim
-              </WorkspaceActionButton>
-            </>
-          )}
+          <p className="mb-3 text-sm text-zinc-600">
+            Once submitted, the case moves to the submitted state and cannot be edited without dispute
+            resolution.
+          </p>
+          <WorkspaceActionButton disabled={isTransitioning} tone="primary" onClick={() => setConfirmAction('submitted')}>
+            {isTransitioning ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+            Submit claim
+          </WorkspaceActionButton>
+          <ConfirmDialog
+            open={confirmAction === 'submitted'}
+            title="Submit this claim?"
+            description="Once submitted, the case cannot be edited without dispute resolution. This action is irreversible."
+            confirmLabel="Submit claim"
+            cancelLabel="Cancel"
+            onConfirm={() => handleTransition('submitted')}
+            onCancel={() => setConfirmAction(null)}
+          />
         </div>
       ) : null}
     </div>
