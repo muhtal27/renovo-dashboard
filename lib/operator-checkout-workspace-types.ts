@@ -76,6 +76,24 @@ export type CheckoutWorkspaceKeyStatus = 'returned' | 'outstanding' | 'not_appli
 
 export type CheckoutWorkspaceDetectorType = 'smoke_alarm' | 'heat_detector' | 'co_detector'
 
+export type AIDraftType =
+  | 'liability_assessment'
+  | 'proposed_charges'
+  | 'tenant_negotiation'
+  | 'combined_report'
+
+export type AIDraftRecord = {
+  id: string
+  caseId: string
+  draftType: AIDraftType
+  title: string | null
+  content: string
+  metadata: Record<string, unknown>
+  generatedAt: string
+  createdAt: string
+  updatedAt: string
+}
+
 export type CheckoutWorkspaceEmailDraftType = 'landlord_recommendation' | 'tenant_charges'
 
 export type CheckoutWorkspaceEmailDraftStatus = 'draft' | 'sent'
@@ -263,6 +281,7 @@ export type OperatorCheckoutWorkspaceData = {
   parking: CheckoutWorkspaceParkingRecord | null
   emailDrafts: CheckoutWorkspaceEmailDraftRecord[]
   timeline: CheckoutWorkspaceTimelineRecord[]
+  aiDrafts: AIDraftRecord[]
 }
 
 export function isCheckoutWorkspaceTab(value: string | null | undefined): value is CheckoutWorkspaceTab {

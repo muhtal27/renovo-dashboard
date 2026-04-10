@@ -9,6 +9,7 @@ import {
   isMissingRelationError,
 } from '@/lib/operator-schema-compat'
 import type {
+  AIDraftRecord,
   CheckoutWorkspaceCaseRecord,
   CheckoutWorkspaceComplianceRecord,
   CheckoutWorkspaceCouncilTaxRecord,
@@ -256,6 +257,20 @@ function normalizeCheckoutTimeline(row: RowRecord): CheckoutWorkspaceTimelineRec
   }
 }
 
+function normalizeAIDraft(row: RowRecord): AIDraftRecord {
+  return {
+    id: toRequiredString(row.id, ''),
+    caseId: toRequiredString(row.case_id, ''),
+    draftType: toRequiredString(row.draft_type, 'liability_assessment') as AIDraftRecord['draftType'],
+    title: toStringValue(row.title),
+    content: toRequiredString(row.content, ''),
+    metadata: typeof row.metadata === 'object' && row.metadata !== null ? row.metadata as Record<string, unknown> : {},
+    generatedAt: toRequiredString(row.generated_at, ''),
+    createdAt: toRequiredString(row.created_at, ''),
+    updatedAt: toRequiredString(row.updated_at, ''),
+  }
+}
+
 async function listCheckoutRows<TRecord>({
   table,
   tenantId,
@@ -327,6 +342,26 @@ async function getCheckoutSingleton<TRecord>({
   return isRowRecord(result.data) ? normalize(result.data) : null
 }
 
+async function loadAIDrafts(tenantId: string, caseId: string): Promise<AIDraftRecord[]> {
+  const supabase = getSupabaseServiceRoleClient()
+  const result = await supabase
+    .from('ai_drafts')
+    .select('*')
+    .eq('tenant_id', tenantId)
+    .eq('case_id', caseId)
+    .is('deleted_at', null)
+    .order('generated_at', { ascending: false })
+
+  if (result.error) {
+    if (isMissingRelationError(result.error, 'ai_drafts')) {
+      return []
+    }
+    throw result.error
+  }
+
+  return (result.data ?? []).filter(isRowRecord).map(normalizeAIDraft)
+}
+
 export async function getOperatorCheckoutWorkspaceData(caseId: string): Promise<OperatorCheckoutWorkspaceData> {
   const [workspace, context] = await Promise.all([
     getEotCaseWorkspace(caseId),
@@ -334,13 +369,16 @@ export async function getOperatorCheckoutWorkspaceData(caseId: string): Promise<
   ])
 
   const supabase = getSupabaseServiceRoleClient()
-  const checkoutCaseResult = await supabase
-    .from('checkout_cases')
-    .select('*')
-    .eq('tenant_id', context.tenantId)
-    .eq('case_id', caseId)
-    .is('deleted_at', null)
-    .maybeSingle()
+  const [checkoutCaseResult, aiDrafts] = await Promise.all([
+    supabase
+      .from('checkout_cases')
+      .select('*')
+      .eq('tenant_id', context.tenantId)
+      .eq('case_id', caseId)
+      .is('deleted_at', null)
+      .maybeSingle(),
+    loadAIDrafts(context.tenantId, caseId),
+  ])
 
   if (checkoutCaseResult.error) {
     if (isMissingRelationError(checkoutCaseResult.error, 'checkout_cases')) {
@@ -358,6 +396,7 @@ export async function getOperatorCheckoutWorkspaceData(caseId: string): Promise<
         parking: null,
         emailDrafts: [],
         timeline: [],
+        aiDrafts,
       }
     }
 
@@ -379,6 +418,7 @@ export async function getOperatorCheckoutWorkspaceData(caseId: string): Promise<
       parking: null,
       emailDrafts: [],
       timeline: [],
+      aiDrafts,
     }
   }
 
@@ -489,5 +529,6 @@ export async function getOperatorCheckoutWorkspaceData(caseId: string): Promise<
     parking,
     emailDrafts,
     timeline,
+    aiDrafts,
   }
 }

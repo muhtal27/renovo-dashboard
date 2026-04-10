@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertTriangle, Check, Eye, EyeOff, Loader2, RotateCcw, Save } from 'lucide-react'
+import { AlertTriangle, Check, Eye, EyeOff, Loader2, RotateCcw, Save, Sparkles } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useCallback, useMemo, useState, useTransition } from 'react'
 import {
@@ -9,7 +9,9 @@ import {
   WorkspaceNotice,
   WorkspaceOptionButton,
 } from '@/app/(operator)/operator/cases/[id]/_components/checkout-workspace-ui'
+import { AIAssistantPanel } from '@/app/(operator)/operator/cases/[id]/_components/ai-assistant-panel'
 import { formatCurrency, formatEnumLabel } from '@/app/eot/_components/eot-ui'
+import { cn } from '@/lib/ui'
 import type {
   CheckoutWorkspaceDefectRecord,
   CheckoutWorkspaceLiability,
@@ -218,6 +220,8 @@ function DefectRow({
 /*  Main component                                                     */
 /* ------------------------------------------------------------------ */
 
+type ReviewTab = 'defects' | 'ai-documents'
+
 export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
   const router = useRouter()
   const [isSending, setIsSending] = useState(false)
@@ -225,6 +229,7 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
   const [, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const [saveSuccess, setSaveSuccess] = useState(false)
+  const [activeTab, setActiveTab] = useState<ReviewTab>('defects')
 
   const caseId = data.workspace.case.id
   const caseStatus = data.workspace.case.status
@@ -374,8 +379,58 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
     }
   }
 
+  const aiDraftCount = (data.aiDrafts ?? []).length
+
   return (
     <div className="space-y-6">
+      {/* ---- Review sub-tabs ---- */}
+      <div className="flex items-center gap-1 border-b border-zinc-200">
+        <button
+          type="button"
+          onClick={() => setActiveTab('defects')}
+          className={cn(
+            'relative px-4 py-2.5 text-sm font-medium transition-colors',
+            activeTab === 'defects'
+              ? 'text-zinc-950'
+              : 'text-zinc-400 hover:text-zinc-600'
+          )}
+        >
+          Defect Review
+          {activeTab === 'defects' ? (
+            <span className="absolute inset-x-0 -bottom-px h-0.5 bg-zinc-950" />
+          ) : null}
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('ai-documents')}
+          className={cn(
+            'relative flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium transition-colors',
+            activeTab === 'ai-documents'
+              ? 'text-zinc-950'
+              : 'text-zinc-400 hover:text-zinc-600'
+          )}
+        >
+          <Sparkles className="h-3.5 w-3.5" />
+          AI Documents
+          {aiDraftCount > 0 ? (
+            <span className="ml-1 inline-flex h-4.5 min-w-[18px] items-center justify-center rounded-full bg-sky-100 px-1.5 text-[10px] font-semibold text-sky-700">
+              {aiDraftCount}
+            </span>
+          ) : null}
+          {activeTab === 'ai-documents' ? (
+            <span className="absolute inset-x-0 -bottom-px h-0.5 bg-zinc-950" />
+          ) : null}
+        </button>
+      </div>
+
+      {/* ---- AI Documents tab ---- */}
+      {activeTab === 'ai-documents' ? (
+        <AIAssistantPanel data={data} />
+      ) : null}
+
+      {/* ---- Defect Review tab ---- */}
+      {activeTab === 'defects' ? (
+      <>
       {/* ---- Deposit vs claim warning ---- */}
       {claimExceedsDeposit ? (
         <WorkspaceNotice
@@ -615,6 +670,8 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
             </p>
           ) : null}
         </div>
+      ) : null}
+      </>
       ) : null}
     </div>
   )
