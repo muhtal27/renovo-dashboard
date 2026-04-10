@@ -12,6 +12,7 @@ export function StepDeductions({ data }: { data: OperatorCheckoutWorkspaceData }
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
+  const [confirmAction, setConfirmAction] = useState<string | null>(null)
 
   const caseId = data.workspace.case.id
   const caseStatus = data.workspace.case.status
@@ -246,14 +247,35 @@ export function StepDeductions({ data }: { data: OperatorCheckoutWorkspaceData }
         </div>
       ) : isReady ? (
         <div className="border-t border-zinc-200 pt-6">
-          <p className="mb-3 text-sm text-zinc-600">
-            Once submitted, the case moves to the submitted state and cannot be edited without dispute
-            resolution.
-          </p>
-          <WorkspaceActionButton disabled={isTransitioning} tone="primary" onClick={() => handleTransition('submitted')}>
-            {isTransitioning ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-            Submit claim
-          </WorkspaceActionButton>
+          {confirmAction === 'submitted' ? (
+            <div className="border border-amber-200 bg-amber-50 px-4 py-4">
+              <p className="text-sm font-medium text-amber-900">
+                Are you sure you want to submit this claim?
+              </p>
+              <p className="mt-1 text-xs text-amber-700">
+                Once submitted, the case cannot be edited without dispute resolution.
+              </p>
+              <div className="mt-3 flex items-center gap-2">
+                <WorkspaceActionButton disabled={isTransitioning} tone="primary" onClick={() => handleTransition('submitted')}>
+                  {isTransitioning ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                  Confirm submission
+                </WorkspaceActionButton>
+                <WorkspaceActionButton disabled={isTransitioning} tone="secondary" onClick={() => setConfirmAction(null)}>
+                  Cancel
+                </WorkspaceActionButton>
+              </div>
+            </div>
+          ) : (
+            <>
+              <p className="mb-3 text-sm text-zinc-600">
+                Once submitted, the case moves to the submitted state and cannot be edited without dispute
+                resolution.
+              </p>
+              <WorkspaceActionButton disabled={isTransitioning} tone="primary" onClick={() => setConfirmAction('submitted')}>
+                Submit claim
+              </WorkspaceActionButton>
+            </>
+          )}
         </div>
       ) : null}
     </div>

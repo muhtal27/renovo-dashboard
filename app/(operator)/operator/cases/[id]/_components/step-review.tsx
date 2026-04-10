@@ -2,7 +2,7 @@
 
 import { AlertTriangle, Check, Eye, EyeOff, Loader2, RotateCcw, Save, Sparkles } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useCallback, useMemo, useState, useTransition } from 'react'
+import { useCallback, useEffect, useMemo, useState, useTransition } from 'react'
 import {
   WorkspaceActionButton,
   WorkspaceBadge,
@@ -28,13 +28,23 @@ type DefectEditState = {
   excluded: boolean
 }
 
+function isDefectExcluded(d: CheckoutWorkspaceDefectRecord): boolean {
+  // A defect is excluded if it was reviewed AND the operator explicitly zeroed the cost
+  // while clearing liability. We also check that the AI had originally suggested a non-zero
+  // cost to avoid false-positives on genuinely zero-cost items.
+  if (!d.reviewedAt) return false
+  if (d.costAdjusted !== 0) return false
+  if (d.operatorLiability !== null) return false
+  return d.costEstimate != null && d.costEstimate > 0
+}
+
 function buildInitialEdits(defects: CheckoutWorkspaceDefectRecord[]): Record<string, DefectEditState> {
   const map: Record<string, DefectEditState> = {}
   for (const d of defects) {
     map[d.id] = {
       operatorLiability: d.operatorLiability ?? d.aiSuggestedLiability,
       costAdjusted: d.costAdjusted ?? d.costEstimate,
-      excluded: d.costAdjusted === 0 && d.operatorLiability === null && d.reviewedAt !== null,
+      excluded: isDefectExcluded(d),
     }
   }
   return map
@@ -244,6 +254,8 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
   const [edits, setEdits] = useState<Record<string, DefectEditState>>(() =>
     buildInitialEdits(defects)
   )
+  const [isDirty, setIsDirty] = useState(false)
+  const [showSendConfirm, setShowSendConfirm] = useState(false)
 
   const handleEditChange = useCallback(
     (id: string, patch: Partial<DefectEditState>) => {
@@ -252,6 +264,7 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
         [id]: { ...prev[id], ...patch },
       }))
       setSaveSuccess(false)
+      setIsDirty(true)
     },
     []
   )
@@ -259,7 +272,18 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
   const handleResetAll = useCallback(() => {
     setEdits(buildInitialEdits(defects))
     setSaveSuccess(false)
+    setIsDirty(false)
   }, [defects])
+
+  // Warn on navigation away with unsaved changes
+  useEffect(() => {
+    if (!isDirty) return
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault()
+    }
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [isDirty])
 
   /* ---- Computed totals ---- */
   const { tenantTotal, landlordTotal, sharedTotal, totalClaim, includedCount, excludedCount } =
@@ -281,7 +305,9 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
         if (edit.operatorLiability === 'tenant') tenant += cost
         else if (edit.operatorLiability === 'landlord') landlord += cost
         else if (edit.operatorLiability === 'shared') {
-          tenant += cost / 2
+          const tenantShare = cost / 2
+          tenant += tenantShare
+          landlord += cost - tenantShare
           shared += cost
         }
       }
@@ -338,6 +364,7 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
       }
 
       setSaveSuccess(true)
+      setIsDirty(false)
       startTransition(() => {
         router.refresh()
       })
@@ -555,6 +582,11 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
             <p className="mt-1 text-lg font-semibold tabular-nums text-orange-700">
               {formatCurrency(sharedTotal)}
             </p>
+            {sharedTotal > 0 ? (
+              <p className="mt-0.5 text-[10px] text-zinc-500">
+                {formatCurrency(sharedTotal / 2)} tenant · {formatCurrency(sharedTotal / 2)} landlord
+              </p>
+            ) : null}
           </div>
           <div className="border border-zinc-200 px-4 py-3">
             <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
@@ -678,14 +710,52 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
             <span className="font-medium text-zinc-950">{tenantName}</span>
             {tenantEmail ? ` (${tenantEmail})` : ' (no email set)'}.
           </p>
-          <WorkspaceActionButton
-            disabled={!canSend || isSending}
-            tone="primary"
-            onClick={handleSendDraft}
-          >
-            {isSending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-            {isSending ? 'Sending...' : 'Send draft to parties'}
-          </WorkspaceActionButton>
+
+          {isDirty ? (
+            <WorkspaceNotice
+              tone="warning"
+              icon={<AlertTriangle className="h-4 w-4" />}
+              title="Unsaved changes"
+              body="You have unsaved defect overrides. Save your changes before sending the draft."
+            />
+          ) : null}
+
+          {showSendConfirm ? (
+            <div className="mt-3 border border-amber-200 bg-amber-50 px-4 py-4">
+              <p className="text-sm font-medium text-amber-900">
+                Are you sure you want to send the draft?
+              </p>
+              <p className="mt-1 text-xs text-amber-700">
+                This will email the checkout report to {[landlordEmail && 'landlord', tenantEmail && 'tenant'].filter(Boolean).join(' and ')}. This action cannot be undone.
+              </p>
+              <div className="mt-3 flex items-center gap-2">
+                <WorkspaceActionButton
+                  disabled={isSending}
+                  tone="primary"
+                  onClick={handleSendDraft}
+                >
+                  {isSending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                  {isSending ? 'Sending...' : 'Confirm and send'}
+                </WorkspaceActionButton>
+                <WorkspaceActionButton
+                  disabled={isSending}
+                  tone="secondary"
+                  onClick={() => setShowSendConfirm(false)}
+                >
+                  Cancel
+                </WorkspaceActionButton>
+              </div>
+            </div>
+          ) : (
+            <WorkspaceActionButton
+              disabled={!canSend || isSending || isDirty}
+              tone="primary"
+              onClick={() => setShowSendConfirm(true)}
+            >
+              Send draft to parties
+            </WorkspaceActionButton>
+          )}
+
           {!canSend && isReview ? (
             <p className="mt-2 text-xs text-zinc-500">
               At least one email address (landlord or tenant) is required to send the draft.

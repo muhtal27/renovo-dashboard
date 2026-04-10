@@ -12,6 +12,6 @@ export async function PATCH(request: Request, context: RouteContext) {
   return proxyEotRequest(
     request,
     `/api/eot/cases/${caseId}/transition`,
-    OPERATOR_PERMISSIONS.VIEW_CASE
+    OPERATOR_PERMISSIONS.EDIT_CASE
   )
 }

@@ -101,7 +101,17 @@ export function AIAssistantPanel({ data }: { data: OperatorCheckoutWorkspaceData
       setCopiedId(draftId)
       setTimeout(() => setCopiedId(null), 2000)
     } catch {
-      // Fallback: select text
+      // Fallback: create a temporary textarea to copy
+      const textarea = document.createElement('textarea')
+      textarea.value = content
+      textarea.style.position = 'fixed'
+      textarea.style.opacity = '0'
+      document.body.appendChild(textarea)
+      textarea.select()
+      document.execCommand('copy')
+      document.body.removeChild(textarea)
+      setCopiedId(draftId)
+      setTimeout(() => setCopiedId(null), 2000)
     }
   }
 

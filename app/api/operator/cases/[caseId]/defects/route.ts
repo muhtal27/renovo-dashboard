@@ -25,7 +25,7 @@ const VALID_LIABILITIES = ['tenant', 'landlord', 'shared', null]
 export async function PATCH(request: Request, context: RouteContext) {
   const { caseId } = await context.params
 
-  const authResult = await getOperatorTenantContextForApi(OPERATOR_PERMISSIONS.VIEW_CASE)
+  const authResult = await getOperatorTenantContextForApi(OPERATOR_PERMISSIONS.EDIT_CASE)
   if (!authResult.ok) {
     return NextResponse.json({ error: authResult.detail }, { status: authResult.status })
   }

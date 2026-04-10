@@ -197,27 +197,38 @@ export function CaseSendOut({ data }: { data: OperatorCheckoutWorkspaceData }) {
             </section>
 
             <section className="border border-zinc-200 bg-zinc-50/70 px-5 py-5">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Email status</p>
-                  <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-violet-700">2 sent</p>
-                </div>
-                <WorkspaceBadge label="Awaiting response" tone="sent" />
-              </div>
-              <dl className="mt-5 space-y-3">
-                <div className="flex items-start justify-between gap-4">
-                  <dt className="text-sm text-zinc-500">Landlord email</dt>
-                  <dd className="text-sm font-medium text-emerald-700">Delivered</dd>
-                </div>
-                <div className="flex items-start justify-between gap-4">
-                  <dt className="text-sm text-zinc-500">Tenant email</dt>
-                  <dd className="text-sm font-medium text-emerald-700">Delivered</dd>
-                </div>
-                <div className="flex items-start justify-between gap-4">
-                  <dt className="text-sm text-zinc-500">Attachment</dt>
-                  <dd className="text-sm font-medium text-zinc-950">Checkout report PDF</dd>
-                </div>
-              </dl>
+              {(() => {
+                const emailsSent = [landlordEmail, tenantEmail].filter(Boolean).length
+                return (
+                  <>
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Email status</p>
+                        <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-violet-700">{emailsSent} sent</p>
+                      </div>
+                      <WorkspaceBadge label="Awaiting response" tone="sent" />
+                    </div>
+                    <dl className="mt-5 space-y-3">
+                      <div className="flex items-start justify-between gap-4">
+                        <dt className="text-sm text-zinc-500">Landlord email</dt>
+                        <dd className={`text-sm font-medium ${landlordEmail ? 'text-emerald-700' : 'text-zinc-400'}`}>
+                          {landlordEmail ? 'Sent' : 'No email set'}
+                        </dd>
+                      </div>
+                      <div className="flex items-start justify-between gap-4">
+                        <dt className="text-sm text-zinc-500">Tenant email</dt>
+                        <dd className={`text-sm font-medium ${tenantEmail ? 'text-emerald-700' : 'text-zinc-400'}`}>
+                          {tenantEmail ? 'Sent' : 'No email set'}
+                        </dd>
+                      </div>
+                      <div className="flex items-start justify-between gap-4">
+                        <dt className="text-sm text-zinc-500">Attachment</dt>
+                        <dd className="text-sm font-medium text-zinc-950">Checkout report PDF</dd>
+                      </div>
+                    </dl>
+                  </>
+                )
+              })()}
             </section>
           </div>
         </div>

@@ -150,11 +150,11 @@ export function StepAnalysis({ data }: { data: OperatorCheckoutWorkspaceData }) 
         <p className="text-sm text-rose-700">{error}</p>
       ) : null}
 
-      {(caseStatus === 'analysis' || caseStatus === 'collecting_evidence') ? (
+      {(caseStatus === 'analysis' || caseStatus === 'collecting_evidence' || caseStatus === 'review') ? (
         <div className="border-t border-zinc-200 pt-6">
           <WorkspaceActionButton
             disabled={!canRun || isRunning}
-            tone="primary"
+            tone={isPastAnalysis ? 'secondary' : 'primary'}
             onClick={handleRunAnalysis}
           >
             {isRunning ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
@@ -163,6 +163,10 @@ export function StepAnalysis({ data }: { data: OperatorCheckoutWorkspaceData }) 
           {!canRun ? (
             <p className="mt-2 text-xs text-zinc-500">
               Both check-in and checkout reports must be linked before running analysis.
+            </p>
+          ) : isPastAnalysis ? (
+            <p className="mt-2 text-xs text-zinc-500">
+              Re-running will replace existing defects, recommendations, and claims with fresh analysis.
             </p>
           ) : null}
         </div>

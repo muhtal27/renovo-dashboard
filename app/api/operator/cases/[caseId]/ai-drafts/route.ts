@@ -1,4 +1,5 @@
 import { proxyEotRequest } from '@/lib/eot-proxy'
+import { OPERATOR_PERMISSIONS } from '@/lib/operator-rbac'
 
 type RouteContext = {
   params: Promise<{
@@ -8,5 +9,5 @@ type RouteContext = {
 
 export async function GET(request: Request, context: RouteContext) {
   const { caseId } = await context.params
-  return proxyEotRequest(request, `/operator/cases/${caseId}/ai-drafts`)
+  return proxyEotRequest(request, `/operator/cases/${caseId}/ai-drafts`, OPERATOR_PERMISSIONS.VIEW_CASE)
 }

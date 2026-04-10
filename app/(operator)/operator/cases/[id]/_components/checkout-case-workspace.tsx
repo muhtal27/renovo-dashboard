@@ -114,7 +114,6 @@ function WorkflowNav({
           const isCurrent = stepIdx === currentStepIdx && !isResolved
           const isActive = item.step === activeStep
           const isProcessing = isCurrent && currentStatus === 'analysis'
-          const isFuture = stepIdx > currentStepIdx
 
           const Icon = item.icon
           const dateLabel = getStepDate(item.step, data)
