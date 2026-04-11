@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { cn } from '@/lib/ui'
+import { ConfirmDialog } from '@/app/components/ConfirmDialog'
 
-const TABS = ['Account', 'Team', 'Integrations', 'Email Ingestion', 'Automation'] as const
+const TABS = ['Account', 'Team', 'Integrations', 'Email Ingestion', 'Automation', 'API Partners'] as const
 type Tab = (typeof TABS)[number]
 
 function AccountTab() {
@@ -2700,6 +2701,990 @@ function AutomationTab() {
   )
 }
 
+// ---------------------------------------------------------------------------
+// API Partners tab — manage partner API applications & keys
+// ---------------------------------------------------------------------------
+
+type PartnerApp = {
+  id: string
+  name: string
+  client_id: string
+  scopes: string[]
+  is_sandbox: boolean
+  rate_limit_per_minute: number
+  status: string
+  key_count: number
+  webhook_count: number
+  created_at: string
+  updated_at: string
+}
+
+type PartnerAppCreated = PartnerApp & { client_secret: string }
+
+type ApiKeyItem = {
+  id: string
+  name: string
+  key_prefix: string
+  scopes: string[]
+  status: string
+  expires_at: string | null
+  last_used_at: string | null
+  created_at: string
+}
+
+type ApiKeyCreated = ApiKeyItem & { raw_key: string }
+
+const ALL_SCOPES = [
+  'inventory:write',
+  'documents:write',
+  'documents:read',
+  'cases:read',
+  'webhooks:manage',
+] as const
+
+const SCOPE_LABELS: Record<string, string> = {
+  'inventory:write': 'Push inspections',
+  'documents:write': 'Push documents',
+  'documents:read': 'Download documents',
+  'cases:read': 'Query cases',
+  'webhooks:manage': 'Manage webhooks',
+}
+
+function SecretRevealBanner({
+  label,
+  value,
+  onDismiss,
+}: {
+  label: string
+  value: string
+  onDismiss: () => void
+}) {
+  const [copied, setCopied] = useState(false)
+
+  async function handleCopy() {
+    await navigator.clipboard.writeText(value)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  return (
+    <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-4">
+      <p className="text-sm font-semibold text-amber-800">{label}</p>
+      <p className="mt-1 text-xs text-amber-700">
+        This will not be shown again. Copy it now and store it securely.
+      </p>
+      <div className="mt-3 flex items-center gap-2">
+        <input
+          type="text"
+          readOnly
+          value={value}
+          className="h-9 flex-1 rounded-md border border-amber-200 bg-white px-3 font-mono text-xs text-zinc-900 focus:outline-none"
+        />
+        <button
+          type="button"
+          onClick={handleCopy}
+          className="rounded-md bg-amber-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-amber-700"
+        >
+          {copied ? 'Copied' : 'Copy'}
+        </button>
+      </div>
+      <button
+        type="button"
+        onClick={onDismiss}
+        className="mt-2 text-xs text-amber-600 underline hover:text-amber-800"
+      >
+        Dismiss
+      </button>
+    </div>
+  )
+}
+
+function ApiPartnersTab() {
+  // -- List view state --
+  const [apps, setApps] = useState<PartnerApp[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
+
+  // -- Create form state --
+  const [showCreateForm, setShowCreateForm] = useState(false)
+  const [formName, setFormName] = useState('')
+  const [formScopes, setFormScopes] = useState<string[]>([])
+  const [formSandbox, setFormSandbox] = useState(false)
+  const [formRateLimit, setFormRateLimit] = useState(300)
+  const [saving, setSaving] = useState(false)
+
+  // -- Detail view state --
+  const [selectedAppId, setSelectedAppId] = useState<string | null>(null)
+  const [selectedApp, setSelectedApp] = useState<PartnerApp | null>(null)
+  const [keys, setKeys] = useState<ApiKeyItem[]>([])
+  const [keysLoading, setKeysLoading] = useState(false)
+
+  // -- Edit state --
+  const [editing, setEditing] = useState(false)
+  const [editName, setEditName] = useState('')
+  const [editScopes, setEditScopes] = useState<string[]>([])
+  const [editRateLimit, setEditRateLimit] = useState(300)
+
+  // -- Key creation state --
+  const [showKeyForm, setShowKeyForm] = useState(false)
+  const [keyName, setKeyName] = useState('')
+  const [keyScopes, setKeyScopes] = useState<string[]>([])
+  const [keyExpiryDays, setKeyExpiryDays] = useState<string>('')
+
+  // -- Secret reveal --
+  const [revealedSecret, setRevealedSecret] = useState<{
+    label: string
+    value: string
+  } | null>(null)
+
+  // -- Confirm dialog --
+  const [confirmDialog, setConfirmDialog] = useState<{
+    title: string
+    description: string
+    tone: 'danger' | 'default'
+    onConfirm: () => void
+  } | null>(null)
+
+  // ---- Data fetching ----
+
+  const fetchApps = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res = await fetch('/api/operator/applications')
+      if (!res.ok) throw new Error('Failed to load applications')
+      const data = (await res.json()) as PartnerApp[]
+      setApps(data)
+    } catch {
+      setError('Failed to load applications.')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    void fetchApps()
+  }, [fetchApps])
+
+  async function fetchAppDetail(appId: string) {
+    try {
+      const res = await fetch(`/api/operator/applications/${appId}`)
+      if (!res.ok) throw new Error('Failed to load')
+      const data = (await res.json()) as PartnerApp
+      setSelectedApp(data)
+    } catch {
+      setError('Failed to load application details.')
+    }
+  }
+
+  async function fetchKeys(appId: string) {
+    setKeysLoading(true)
+    try {
+      const res = await fetch(`/api/operator/applications/${appId}/keys`)
+      if (!res.ok) throw new Error('Failed to load')
+      const data = (await res.json()) as ApiKeyItem[]
+      setKeys(data)
+    } catch {
+      setError('Failed to load API keys.')
+    } finally {
+      setKeysLoading(false)
+    }
+  }
+
+  function openDetail(app: PartnerApp) {
+    setSelectedAppId(app.id)
+    setSelectedApp(app)
+    setEditing(false)
+    setShowKeyForm(false)
+    setRevealedSecret(null)
+    void fetchKeys(app.id)
+  }
+
+  function closeDetail() {
+    setSelectedAppId(null)
+    setSelectedApp(null)
+    setKeys([])
+    setEditing(false)
+    setShowKeyForm(false)
+    setRevealedSecret(null)
+  }
+
+  // ---- Actions ----
+
+  async function handleCreateApp() {
+    setSaving(true)
+    setError(null)
+    setSuccess(null)
+    try {
+      const res = await fetch('/api/operator/applications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formName.trim(),
+          scopes: formScopes,
+          is_sandbox: formSandbox,
+          rate_limit_per_minute: formRateLimit,
+        }),
+      })
+      if (!res.ok) {
+        const body = (await res.json().catch(() => ({}))) as { detail?: string }
+        throw new Error(body.detail || 'Failed to create application')
+      }
+      const created = (await res.json()) as PartnerAppCreated
+      setRevealedSecret({
+        label: `Client Secret for "${created.name}"`,
+        value: created.client_secret,
+      })
+      setShowCreateForm(false)
+      setFormName('')
+      setFormScopes([])
+      setFormSandbox(false)
+      setFormRateLimit(300)
+      setSuccess('Application created.')
+      await fetchApps()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create application.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function handleUpdateApp() {
+    if (!selectedAppId) return
+    setSaving(true)
+    setError(null)
+    try {
+      const res = await fetch(`/api/operator/applications/${selectedAppId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: editName.trim(),
+          scopes: editScopes,
+          rate_limit_per_minute: editRateLimit,
+        }),
+      })
+      if (!res.ok) {
+        const body = (await res.json().catch(() => ({}))) as { detail?: string }
+        throw new Error(body.detail || 'Failed to update')
+      }
+      const updated = (await res.json()) as PartnerApp
+      setSelectedApp(updated)
+      setEditing(false)
+      setSuccess('Application updated.')
+      await fetchApps()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update application.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  function handleDeleteApp(app: PartnerApp) {
+    setConfirmDialog({
+      title: 'Delete application',
+      description: `This will revoke "${app.name}" and all its API keys. Partners using this application will lose access immediately.`,
+      tone: 'danger',
+      onConfirm: async () => {
+        setConfirmDialog(null)
+        setError(null)
+        try {
+          const res = await fetch(`/api/operator/applications/${app.id}`, {
+            method: 'DELETE',
+          })
+          if (!res.ok) throw new Error('Failed to delete')
+          if (selectedAppId === app.id) closeDetail()
+          setSuccess('Application deleted.')
+          await fetchApps()
+        } catch {
+          setError('Failed to delete application.')
+        }
+      },
+    })
+  }
+
+  async function handleCreateKey() {
+    if (!selectedAppId) return
+    setSaving(true)
+    setError(null)
+    try {
+      const payload: Record<string, unknown> = { name: keyName.trim() }
+      if (keyScopes.length > 0) payload.scopes = keyScopes
+      if (keyExpiryDays) payload.expires_in_days = parseInt(keyExpiryDays, 10)
+
+      const res = await fetch(`/api/operator/applications/${selectedAppId}/keys`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      if (!res.ok) {
+        const body = (await res.json().catch(() => ({}))) as { detail?: string }
+        throw new Error(body.detail || 'Failed to create key')
+      }
+      const created = (await res.json()) as ApiKeyCreated
+      setRevealedSecret({
+        label: `API Key "${created.name}"`,
+        value: created.raw_key,
+      })
+      setShowKeyForm(false)
+      setKeyName('')
+      setKeyScopes([])
+      setKeyExpiryDays('')
+      await fetchKeys(selectedAppId)
+      await fetchAppDetail(selectedAppId)
+      await fetchApps()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create key.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  function handleRevokeKey(key: ApiKeyItem) {
+    if (!selectedAppId) return
+    const appId = selectedAppId
+    setConfirmDialog({
+      title: 'Revoke API key',
+      description: `Revoke key "${key.name}" (${key.key_prefix}...)? Partners using this key will lose access immediately.`,
+      tone: 'danger',
+      onConfirm: async () => {
+        setConfirmDialog(null)
+        setError(null)
+        try {
+          const res = await fetch(
+            `/api/operator/applications/${appId}/keys/${key.id}`,
+            { method: 'DELETE' }
+          )
+          if (!res.ok) throw new Error('Failed to revoke')
+          setSuccess('Key revoked.')
+          await fetchKeys(appId)
+          await fetchAppDetail(appId)
+          await fetchApps()
+        } catch {
+          setError('Failed to revoke key.')
+        }
+      },
+    })
+  }
+
+  function handleRegenerateSecret() {
+    if (!selectedAppId || !selectedApp) return
+    const appId = selectedAppId
+    setConfirmDialog({
+      title: 'Regenerate client secret',
+      description: `This will invalidate the current secret for "${selectedApp.name}". All partners using the old secret must update their credentials.`,
+      tone: 'danger',
+      onConfirm: async () => {
+        setConfirmDialog(null)
+        setError(null)
+        try {
+          const res = await fetch(
+            `/api/operator/applications/${appId}/regenerate-secret`,
+            { method: 'POST' }
+          )
+          if (!res.ok) throw new Error('Failed to regenerate')
+          const data = (await res.json()) as { client_id: string; client_secret: string }
+          setRevealedSecret({
+            label: 'New Client Secret',
+            value: data.client_secret,
+          })
+          setSuccess('Client secret regenerated.')
+        } catch {
+          setError('Failed to regenerate secret.')
+        }
+      },
+    })
+  }
+
+  // ---- Render helpers ----
+
+  function startEdit() {
+    if (!selectedApp) return
+    setEditName(selectedApp.name)
+    setEditScopes([...selectedApp.scopes])
+    setEditRateLimit(selectedApp.rate_limit_per_minute)
+    setEditing(true)
+  }
+
+  function toggleScope(list: string[], setter: (v: string[]) => void, scope: string) {
+    setter(list.includes(scope) ? list.filter((s) => s !== scope) : [...list, scope])
+  }
+
+  // ---- Loading state ----
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20 text-sm text-zinc-400">
+        Loading...
+      </div>
+    )
+  }
+
+  // ---- Detail view ----
+
+  if (selectedAppId && selectedApp) {
+    return (
+      <div className="space-y-6">
+        {/* Confirm dialog */}
+        {confirmDialog && (
+          <ConfirmDialog
+            open
+            title={confirmDialog.title}
+            description={confirmDialog.description}
+            tone={confirmDialog.tone}
+            confirmLabel={confirmDialog.tone === 'danger' ? 'Yes, proceed' : 'Confirm'}
+            onConfirm={confirmDialog.onConfirm}
+            onCancel={() => setConfirmDialog(null)}
+          />
+        )}
+
+        {/* Back button */}
+        <button
+          type="button"
+          onClick={closeDetail}
+          className="text-sm text-zinc-500 hover:text-zinc-700"
+        >
+          &larr; Back to applications
+        </button>
+
+        {/* Alerts */}
+        {error && (
+          <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm text-rose-700">
+            {error}
+          </div>
+        )}
+        {success && (
+          <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm text-emerald-700">
+            {success}
+          </div>
+        )}
+
+        {/* Secret reveal */}
+        {revealedSecret && (
+          <SecretRevealBanner
+            label={revealedSecret.label}
+            value={revealedSecret.value}
+            onDismiss={() => setRevealedSecret(null)}
+          />
+        )}
+
+        {/* Application details */}
+        <section className="border border-zinc-200/80 bg-white px-6 py-6 md:px-7">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-zinc-950">
+              {editing ? 'Edit Application' : selectedApp.name}
+            </h3>
+            {!editing && (
+              <div className="flex items-center gap-2">
+                <span
+                  className={cn(
+                    'rounded-full px-2.5 py-0.5 text-xs font-medium',
+                    selectedApp.status === 'active'
+                      ? 'bg-emerald-100/80 text-emerald-700'
+                      : 'bg-zinc-100 text-zinc-600'
+                  )}
+                >
+                  {selectedApp.status}
+                </span>
+                {selectedApp.is_sandbox && (
+                  <span className="rounded-full bg-amber-100/80 px-2.5 py-0.5 text-xs font-medium text-amber-700">
+                    Sandbox
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+
+          {editing ? (
+            <div className="mt-5 max-w-md space-y-4">
+              <div>
+                <label className="block text-xs font-medium text-zinc-500">Name</label>
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-zinc-500">
+                  Rate limit (requests/min)
+                </label>
+                <input
+                  type="number"
+                  value={editRateLimit}
+                  onChange={(e) => setEditRateLimit(parseInt(e.target.value, 10) || 300)}
+                  min={1}
+                  max={10000}
+                  className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-zinc-500">Scopes</label>
+                <div className="mt-2 space-y-2">
+                  {ALL_SCOPES.map((scope) => (
+                    <label key={scope} className="flex items-center gap-2 text-sm text-zinc-700">
+                      <input
+                        type="checkbox"
+                        checked={editScopes.includes(scope)}
+                        onChange={() => toggleScope(editScopes, setEditScopes, scope)}
+                        className="rounded border-zinc-300"
+                      />
+                      <span>{SCOPE_LABELS[scope] || scope}</span>
+                      <span className="text-xs text-zinc-400">({scope})</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className="flex items-center gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={handleUpdateApp}
+                  disabled={saving || !editName.trim()}
+                  className="rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:opacity-50"
+                >
+                  {saving ? 'Saving...' : 'Save'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditing(false)}
+                  className="rounded-lg border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-zinc-600 transition hover:bg-zinc-50"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="mt-5 max-w-md space-y-3">
+              <div>
+                <span className="text-xs font-medium text-zinc-500">Client ID</span>
+                <p className="mt-0.5 font-mono text-sm text-zinc-900">{selectedApp.client_id}</p>
+              </div>
+              <div>
+                <span className="text-xs font-medium text-zinc-500">Scopes</span>
+                <div className="mt-1 flex flex-wrap gap-1.5">
+                  {selectedApp.scopes.length > 0 ? (
+                    selectedApp.scopes.map((s) => (
+                      <span
+                        key={s}
+                        className="rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs text-zinc-600"
+                      >
+                        {s}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-xs text-zinc-400">No scopes assigned</span>
+                  )}
+                </div>
+              </div>
+              <div>
+                <span className="text-xs font-medium text-zinc-500">Rate limit</span>
+                <p className="mt-0.5 text-sm text-zinc-900">
+                  {selectedApp.rate_limit_per_minute} req/min
+                </p>
+              </div>
+              <div>
+                <span className="text-xs font-medium text-zinc-500">Created</span>
+                <p className="mt-0.5 text-sm text-zinc-900">
+                  {new Date(selectedApp.created_at).toLocaleDateString()}
+                </p>
+              </div>
+              <div className="flex items-center gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={startEdit}
+                  className="rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-700"
+                >
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  onClick={handleRegenerateSecret}
+                  className="rounded-lg border border-rose-200 bg-white px-5 py-2.5 text-sm font-medium text-rose-600 transition hover:bg-rose-50"
+                >
+                  Regenerate Secret
+                </button>
+              </div>
+            </div>
+          )}
+        </section>
+
+        {/* API Keys section */}
+        <section className="border border-zinc-200/80 bg-white px-6 py-6 md:px-7">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-zinc-950">API Keys</h3>
+            {!showKeyForm && (
+              <button
+                type="button"
+                onClick={() => {
+                  setShowKeyForm(true)
+                  setKeyScopes([...selectedApp.scopes])
+                }}
+                className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-700"
+              >
+                Create Key
+              </button>
+            )}
+          </div>
+
+          {/* Key creation form */}
+          {showKeyForm && (
+            <div className="mt-4 rounded-lg border border-zinc-100 bg-zinc-50/50 px-4 py-4">
+              <div className="max-w-md space-y-3">
+                <div>
+                  <label className="block text-xs font-medium text-zinc-500">Key name</label>
+                  <input
+                    type="text"
+                    value={keyName}
+                    onChange={(e) => setKeyName(e.target.value)}
+                    placeholder="e.g. Production key"
+                    className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-zinc-500">
+                    Expires in (days, optional)
+                  </label>
+                  <input
+                    type="number"
+                    value={keyExpiryDays}
+                    onChange={(e) => setKeyExpiryDays(e.target.value)}
+                    placeholder="Leave empty for no expiry"
+                    min={1}
+                    max={365}
+                    className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-zinc-500">Scopes</label>
+                  <div className="mt-2 space-y-2">
+                    {selectedApp.scopes.map((scope) => (
+                      <label
+                        key={scope}
+                        className="flex items-center gap-2 text-sm text-zinc-700"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={keyScopes.includes(scope)}
+                          onChange={() => toggleScope(keyScopes, setKeyScopes, scope)}
+                          className="rounded border-zinc-300"
+                        />
+                        <span>{SCOPE_LABELS[scope] || scope}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={handleCreateKey}
+                    disabled={saving || !keyName.trim()}
+                    className="rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:opacity-50"
+                  >
+                    {saving ? 'Creating...' : 'Create Key'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowKeyForm(false)}
+                    className="rounded-lg border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-zinc-600 transition hover:bg-zinc-50"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Keys table */}
+          {keysLoading ? (
+            <p className="mt-4 text-sm text-zinc-400">Loading keys...</p>
+          ) : keys.length === 0 ? (
+            <p className="mt-4 text-sm text-zinc-400">No API keys created yet.</p>
+          ) : (
+            <div className="mt-4 overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-zinc-100 text-xs text-zinc-500">
+                    <th className="pb-2 pr-4 font-medium">Name</th>
+                    <th className="pb-2 pr-4 font-medium">Prefix</th>
+                    <th className="pb-2 pr-4 font-medium">Status</th>
+                    <th className="pb-2 pr-4 font-medium">Last used</th>
+                    <th className="pb-2 pr-4 font-medium">Expires</th>
+                    <th className="pb-2 font-medium"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {keys.map((key) => (
+                    <tr
+                      key={key.id}
+                      className="border-b border-zinc-50 last:border-0"
+                    >
+                      <td className="py-2.5 pr-4 text-zinc-900">{key.name}</td>
+                      <td className="py-2.5 pr-4 font-mono text-zinc-600">
+                        {key.key_prefix}...
+                      </td>
+                      <td className="py-2.5 pr-4">
+                        <span
+                          className={cn(
+                            'rounded-full px-2.5 py-0.5 text-xs font-medium',
+                            key.status === 'active'
+                              ? 'bg-emerald-100/80 text-emerald-700'
+                              : 'bg-zinc-100 text-zinc-600'
+                          )}
+                        >
+                          {key.status}
+                        </span>
+                      </td>
+                      <td className="py-2.5 pr-4 text-zinc-400">
+                        {key.last_used_at
+                          ? new Date(key.last_used_at).toLocaleDateString()
+                          : 'Never'}
+                      </td>
+                      <td className="py-2.5 pr-4 text-zinc-400">
+                        {key.expires_at
+                          ? new Date(key.expires_at).toLocaleDateString()
+                          : 'Never'}
+                      </td>
+                      <td className="py-2.5 text-right">
+                        {key.status === 'active' && (
+                          <button
+                            type="button"
+                            onClick={() => handleRevokeKey(key)}
+                            className="text-xs font-medium text-rose-600 hover:text-rose-800"
+                          >
+                            Revoke
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      </div>
+    )
+  }
+
+  // ---- List view ----
+
+  return (
+    <div className="space-y-6">
+      {/* Confirm dialog */}
+      {confirmDialog && (
+        <ConfirmDialog
+          open
+          title={confirmDialog.title}
+          description={confirmDialog.description}
+          tone={confirmDialog.tone}
+          confirmLabel={confirmDialog.tone === 'danger' ? 'Yes, proceed' : 'Confirm'}
+          onConfirm={confirmDialog.onConfirm}
+          onCancel={() => setConfirmDialog(null)}
+        />
+      )}
+
+      {/* Alerts */}
+      {error && (
+        <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm text-rose-700">
+          {error}
+        </div>
+      )}
+      {success && (
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm text-emerald-700">
+          {success}
+        </div>
+      )}
+
+      {/* Secret reveal */}
+      {revealedSecret && (
+        <SecretRevealBanner
+          label={revealedSecret.label}
+          value={revealedSecret.value}
+          onDismiss={() => setRevealedSecret(null)}
+        />
+      )}
+
+      {/* Applications section */}
+      <section className="border border-zinc-200/80 bg-white px-6 py-6 md:px-7">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-semibold text-zinc-950">API Applications</h3>
+            <p className="mt-1 text-sm text-zinc-500">
+              Manage partner applications that access your data via the public API.
+            </p>
+          </div>
+          {!showCreateForm && (
+            <button
+              type="button"
+              onClick={() => setShowCreateForm(true)}
+              className="rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-700"
+            >
+              Create Application
+            </button>
+          )}
+        </div>
+
+        {/* Create form */}
+        {showCreateForm && (
+          <div className="mt-5 rounded-lg border border-zinc-100 bg-zinc-50/50 px-4 py-4">
+            <h4 className="text-sm font-medium text-zinc-900">New Application</h4>
+            <div className="mt-3 max-w-md space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-zinc-500">Name</label>
+                <input
+                  type="text"
+                  value={formName}
+                  onChange={(e) => setFormName(e.target.value)}
+                  placeholder="e.g. NLG Integration"
+                  className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-zinc-500">Scopes</label>
+                <div className="mt-2 space-y-2">
+                  {ALL_SCOPES.map((scope) => (
+                    <label key={scope} className="flex items-center gap-2 text-sm text-zinc-700">
+                      <input
+                        type="checkbox"
+                        checked={formScopes.includes(scope)}
+                        onChange={() => toggleScope(formScopes, setFormScopes, scope)}
+                        className="rounded border-zinc-300"
+                      />
+                      <span>{SCOPE_LABELS[scope] || scope}</span>
+                      <span className="text-xs text-zinc-400">({scope})</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <label className="flex items-center gap-2 text-sm text-zinc-700">
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={formSandbox}
+                    onClick={() => setFormSandbox(!formSandbox)}
+                    className={cn(
+                      'relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors',
+                      formSandbox ? 'bg-emerald-500' : 'bg-zinc-200'
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        'pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow transition-transform',
+                        formSandbox ? 'translate-x-4' : 'translate-x-0'
+                      )}
+                    />
+                  </button>
+                  Sandbox mode
+                </label>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-zinc-500">
+                  Rate limit (requests/min)
+                </label>
+                <input
+                  type="number"
+                  value={formRateLimit}
+                  onChange={(e) => setFormRateLimit(parseInt(e.target.value, 10) || 300)}
+                  min={1}
+                  max={10000}
+                  className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300"
+                />
+              </div>
+              <div className="flex items-center gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={handleCreateApp}
+                  disabled={saving || !formName.trim()}
+                  className="rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:opacity-50"
+                >
+                  {saving ? 'Creating...' : 'Create'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowCreateForm(false)}
+                  className="rounded-lg border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-zinc-600 transition hover:bg-zinc-50"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Applications table */}
+        {apps.length === 0 ? (
+          <p className="mt-5 text-sm text-zinc-400">
+            No applications yet. Create one to generate API credentials for a partner.
+          </p>
+        ) : (
+          <div className="mt-5 overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-zinc-100 text-xs text-zinc-500">
+                  <th className="pb-2 pr-4 font-medium">Name</th>
+                  <th className="pb-2 pr-4 font-medium">Client ID</th>
+                  <th className="pb-2 pr-4 font-medium">Status</th>
+                  <th className="pb-2 pr-4 font-medium">Keys</th>
+                  <th className="pb-2 pr-4 font-medium">Created</th>
+                  <th className="pb-2 font-medium"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {apps.map((app) => (
+                  <tr key={app.id} className="border-b border-zinc-50 last:border-0">
+                    <td className="py-2.5 pr-4 text-zinc-900">{app.name}</td>
+                    <td className="py-2.5 pr-4 font-mono text-zinc-600">
+                      {app.client_id.slice(0, 8)}...
+                    </td>
+                    <td className="py-2.5 pr-4">
+                      <span
+                        className={cn(
+                          'rounded-full px-2.5 py-0.5 text-xs font-medium',
+                          app.status === 'active'
+                            ? 'bg-emerald-100/80 text-emerald-700'
+                            : 'bg-zinc-100 text-zinc-600'
+                        )}
+                      >
+                        {app.status}
+                      </span>
+                      {app.is_sandbox && (
+                        <span className="ml-1.5 rounded-full bg-amber-100/80 px-2.5 py-0.5 text-xs font-medium text-amber-700">
+                          Sandbox
+                        </span>
+                      )}
+                    </td>
+                    <td className="py-2.5 pr-4 text-zinc-600">{app.key_count}</td>
+                    <td className="py-2.5 pr-4 text-zinc-400">
+                      {new Date(app.created_at).toLocaleDateString()}
+                    </td>
+                    <td className="py-2.5 text-right">
+                      <button
+                        type="button"
+                        onClick={() => openDetail(app)}
+                        className="mr-3 text-xs font-medium text-emerald-600 hover:text-emerald-800"
+                      >
+                        View
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteApp(app)}
+                        className="text-xs font-medium text-rose-600 hover:text-rose-800"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+    </div>
+  )
+}
+
 export function SettingsTabs() {
   const [activeTab, setActiveTab] = useState<Tab>('Account')
 
@@ -2731,6 +3716,7 @@ export function SettingsTabs() {
         {activeTab === 'Integrations' ? <IntegrationsTab /> : null}
         {activeTab === 'Email Ingestion' ? <EmailIngestionTab /> : null}
         {activeTab === 'Automation' ? <AutomationTab /> : null}
+        {activeTab === 'API Partners' ? <ApiPartnersTab /> : null}
       </div>
     </div>
   )
