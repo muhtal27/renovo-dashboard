@@ -337,20 +337,17 @@ When API access arrives from any scheme:
 10. ~~**Webhook retries never execute**~~ — Fixed: added `process_pending_retries()` to `WebhookDeliveryService`, internal endpoint at `POST /api/internal/webhook-retries`, Vercel cron every 5 minutes
 11. ~~**`download_url` returns raw file_url**~~ — Fixed: generates Supabase signed URLs via storage client; falls back to raw URL if Supabase unavailable
 
-### Remaining cleanup
+### Remaining (see `docs/integrations/REMAINING-ISSUES.md` for full handoff)
 12. **Street.co.uk migration** — old StreetConnection/StreetSyncLog tables still exist alongside the new generic framework. Plan migration.
 13. **Partner onboarding UI** — Settings page has no UI for managing API applications or API keys.
 
 ## Files to read first in next session
 
 1. `docs/integrations/HANDOFF.md` — this file
-2. `docs/integrations/00-overview.md` — architecture and glossary
-3. `docs/integrations/06-rule-engine-v1.md` — rule engine spec
-4. `backend/app/services/rule_engine.py` — rule engine core (conditions, actions, RuleEngine class)
-5. `backend/app/services/rule_templates.py` — default rule templates
-6. `backend/app/api/integrations/automation.py` — rule CRUD + template API
-7. `backend/app/services/integration_events.py` — event dispatcher (calls rule engine inline)
-8. `backend/app/integrations/base.py` — connector interface
-9. `backend/app/integrations/reapit/connector.py` — working connector example
-10. `backend/app/api/v1/router.py` — public API router assembly
-11. `backend/app/services/webhook_delivery.py` — outbound webhook engine
+2. `docs/integrations/REMAINING-ISSUES.md` — detailed handoff for issues 12 + 13
+3. `docs/integrations/00-overview.md` — architecture and glossary
+4. `backend/app/integrations/reapit/connector.py` — working connector example (model for Street migration)
+5. `backend/app/services/street_sync.py` — Street business logic to port
+6. `backend/app/repositories/public_api.py` — existing CRUD for API partner models
+7. `backend/app/api/v1/auth.py` — public API auth flow
+8. `app/(operator)/settings/settings-tabs.tsx` — frontend settings patterns
