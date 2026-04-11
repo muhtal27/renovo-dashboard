@@ -140,6 +140,13 @@ export type EotClaim = {
   breakdown: Array<Record<string, unknown>>
   generated_at: string
   updated_at: string
+  scheme_provider: string | null
+  scheme_reference: string | null
+  scheme_status: string | null
+  submitted_at: string | null
+  outcome: Record<string, unknown> | null
+  outcome_received_at: string | null
+  adjudicator_notes: string | null
 }
 
 export type EotMessage = {
@@ -301,6 +308,34 @@ export type CreateEotMessageInput = {
   sender_id: string
   content: string
   attachments: Array<Record<string, unknown>>
+}
+
+// ── Deposit scheme types ─────────────────────────────────────────
+
+export type EotClaimSubmissionResult = {
+  case_id: string
+  claim_id: string
+  scheme_provider: string | null
+  scheme_reference: string | null
+  scheme_status: string | null
+  submitted_at: string | null
+}
+
+export type EotClaimStatusResult = {
+  scheme_provider: string | null
+  scheme_reference: string | null
+  scheme_status: string | null
+  outcome: Record<string, unknown> | null
+  outcome_received_at: string | null
+  adjudicator_notes: string | null
+  submitted_at: string | null
+}
+
+export type EotEvidenceFileInput = {
+  name: string
+  document_type: string
+  url: string
+  mime_type: string | null
 }
 
 // ── Analytics dashboard types ────────────────────────────────────

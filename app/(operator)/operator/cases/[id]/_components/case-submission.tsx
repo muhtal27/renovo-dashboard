@@ -1,8 +1,9 @@
 'use client'
 
-import { Loader2 } from 'lucide-react'
+import { CheckCircle2, Loader2, RefreshCw, Upload } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState, useTransition } from 'react'
+import { toast } from 'sonner'
 import { ActivityTimeline, EmptyState } from '@/app/operator-ui'
 import { ClaimSummaryCard } from '@/app/(operator)/operator/cases/[id]/_components/claim-summary-card'
 import { MessageThreadCard } from '@/app/(operator)/operator/cases/[id]/_components/message-thread-card'
@@ -22,7 +23,12 @@ import {
   formatDateTime,
   formatEnumLabel,
 } from '@/app/eot/_components/eot-ui'
-import { getEotCaseSubmission } from '@/lib/eot-api'
+import {
+  checkClaimStatus,
+  getEotCaseSubmission,
+  submitClaimToScheme,
+  uploadEvidenceToScheme,
+} from '@/lib/eot-api'
 import { toTimestamp } from '@/lib/operator-checkout-workspace-helpers'
 import type { OperatorCheckoutWorkspaceData } from '@/lib/operator-checkout-workspace-types'
 import type { EotCaseSubmission, EotIssue } from '@/lib/eot-types'
@@ -209,9 +215,14 @@ export function CaseSubmission({ data }: { data: OperatorCheckoutWorkspaceData }
   const [submissionData, setSubmissionData] = useState<EotCaseSubmission | null>(null)
   const [submissionError, setSubmissionError] = useState<string | null>(null)
   const [isLoadingSubmission, setIsLoadingSubmission] = useState(false)
+  const [isSubmittingToScheme, setIsSubmittingToScheme] = useState(false)
+  const [isCheckingStatus, setIsCheckingStatus] = useState(false)
+  const [isUploadingEvidence, setIsUploadingEvidence] = useState(false)
+  const [schemeStatusData, setSchemeStatusData] = useState<import('@/lib/eot-types').EotClaimStatusResult | null>(null)
 
   const caseStatus = data.workspace.case.status
   const caseId = data.workspace.case.id
+  const claim = data.workspace.claim
 
   async function handleTransition(targetStatus: string) {
     setIsTransitioning(true)
@@ -231,6 +242,70 @@ export function CaseSubmission({ data }: { data: OperatorCheckoutWorkspaceData }
       setTransitionError(error instanceof Error ? error.message : 'Failed to update case status.')
     } finally {
       setIsTransitioning(false)
+    }
+  }
+
+  async function handleSubmitToScheme() {
+    setIsSubmittingToScheme(true)
+    setTransitionError(null)
+    try {
+      const result = await submitClaimToScheme(caseId)
+      toast.success(
+        result.scheme_reference
+          ? `Claim submitted to ${formatEnumLabel(result.scheme_provider ?? 'scheme')}: ${result.scheme_reference}`
+          : 'Claim submitted to deposit scheme'
+      )
+      startTransition(() => { router.refresh() })
+    } catch (error: any) {
+      // 503 = no scheme connected, fall back to plain transition
+      if (error?.status === 503) {
+        toast('No deposit scheme connected. Submitting as manual claim.')
+        await handleTransition('submitted')
+        return
+      }
+      setTransitionError(
+        error instanceof Error ? error.message : 'Failed to submit claim to deposit scheme.'
+      )
+    } finally {
+      setIsSubmittingToScheme(false)
+    }
+  }
+
+  async function handleCheckStatus() {
+    setIsCheckingStatus(true)
+    try {
+      const status = await checkClaimStatus(caseId)
+      setSchemeStatusData(status)
+      toast.success(`Status: ${formatEnumLabel(status.scheme_status ?? 'unknown')}`)
+      startTransition(() => { router.refresh() })
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to check claim status.')
+    } finally {
+      setIsCheckingStatus(false)
+    }
+  }
+
+  async function handleUploadEvidence() {
+    // Upload all case documents to the scheme
+    const docs = data.workspace.documents
+    if (docs.length === 0) {
+      toast.error('No documents to upload. Add documents to the case first.')
+      return
+    }
+    setIsUploadingEvidence(true)
+    try {
+      const files = docs.map((doc) => ({
+        name: doc.name,
+        document_type: doc.document_type,
+        url: doc.file_url,
+        mime_type: null,
+      }))
+      await uploadEvidenceToScheme(caseId, files)
+      toast.success(`${files.length} document${files.length !== 1 ? 's' : ''} uploaded to scheme`)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to upload evidence.')
+    } finally {
+      setIsUploadingEvidence(false)
     }
   }
 
@@ -596,71 +671,175 @@ export function CaseSubmission({ data }: { data: OperatorCheckoutWorkspaceData }
         <WorkspaceNotice body={transitionError} title="Transition failed" tone="warning" />
       ) : null}
 
+      {/* ── Submit to deposit scheme ── */}
       {caseStatus === 'ready_for_claim' ? (
         <section className="border border-zinc-200 bg-zinc-50/70 px-6 py-5">
-          <h3 className="text-sm font-semibold text-zinc-950">Submit claim</h3>
+          <h3 className="text-sm font-semibold text-zinc-950">Submit to deposit scheme</h3>
           <p className="mt-1 text-sm leading-6 text-zinc-600">
-            The case is ready for formal submission. Once submitted, the case moves to the submitted
-            state and cannot be edited further without dispute resolution.
+            Submit your claim to the connected deposit scheme (TDS, DPS, etc). The claim breakdown,
+            evidence, and tenancy details will be sent automatically. If no scheme is connected, the
+            case will be marked as submitted for manual processing.
           </p>
           <div className="mt-4">
             <WorkspaceActionButton
-              disabled={isTransitioning || isRefreshing}
+              disabled={isSubmittingToScheme || isTransitioning || isRefreshing}
               tone="primary"
-              onClick={() => handleTransition('submitted')}
+              onClick={handleSubmitToScheme}
             >
-              {isTransitioning ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-              Submit claim
+              {isSubmittingToScheme ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+              Submit to scheme
             </WorkspaceActionButton>
           </div>
         </section>
       ) : null}
 
-      {caseStatus === 'submitted' ? (
+      {/* ── Deposit scheme tracking (submitted/disputed) ── */}
+      {(caseStatus === 'submitted' || caseStatus === 'disputed') ? (
         <section className="border border-zinc-200 bg-zinc-50/70 px-6 py-5">
-          <h3 className="text-sm font-semibold text-zinc-950">Resolution</h3>
-          <p className="mt-1 text-sm leading-6 text-zinc-600">
-            The claim has been submitted. Mark the case as resolved once the outcome is confirmed, or
-            flag a dispute if the claim is being contested.
-          </p>
+          <h3 className="text-sm font-semibold text-zinc-950">Deposit scheme tracking</h3>
+
+          {/* Scheme info bar */}
+          {(claim?.scheme_provider || schemeStatusData?.scheme_provider) ? (
+            <div className="mt-3 flex flex-wrap items-center gap-3 rounded-md border border-zinc-200 bg-white px-4 py-3">
+              <span className={`h-2.5 w-2.5 rounded-full ${caseStatus === 'disputed' ? 'bg-rose-500' : 'bg-emerald-500'}`} />
+              <span className="text-sm font-semibold text-zinc-950">
+                {formatEnumLabel(schemeStatusData?.scheme_provider ?? claim?.scheme_provider ?? '')}
+              </span>
+              {(schemeStatusData?.scheme_reference ?? claim?.scheme_reference) ? (
+                <span className="rounded-md bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-600">
+                  Ref: {schemeStatusData?.scheme_reference ?? claim?.scheme_reference}
+                </span>
+              ) : null}
+              <WorkspaceBadge
+                label={formatEnumLabel(schemeStatusData?.scheme_status ?? claim?.scheme_status ?? caseStatus)}
+                tone={caseStatus === 'disputed' ? 'disputed' : 'submitted'}
+              />
+            </div>
+          ) : (
+            <p className="mt-2 text-sm text-zinc-500">
+              No deposit scheme reference recorded. This claim may have been submitted manually.
+            </p>
+          )}
+
+          {/* Action buttons */}
           <div className="mt-4 flex flex-wrap gap-3">
             <WorkspaceActionButton
-              disabled={isTransitioning || isRefreshing}
+              disabled={isUploadingEvidence || isRefreshing}
               tone="primary"
-              onClick={() => handleTransition('resolved')}
+              onClick={handleUploadEvidence}
             >
-              {isTransitioning ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-              Mark resolved
+              {isUploadingEvidence ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+              Upload evidence to scheme
             </WorkspaceActionButton>
             <WorkspaceActionButton
-              disabled={isTransitioning || isRefreshing}
-              tone="danger"
-              onClick={() => handleTransition('disputed')}
+              disabled={isCheckingStatus || isRefreshing}
+              tone="primary"
+              onClick={handleCheckStatus}
             >
-              {isTransitioning ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-              Flag dispute
+              {isCheckingStatus ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+              Check status
             </WorkspaceActionButton>
+          </div>
+
+          {/* Outcome display */}
+          {(schemeStatusData?.outcome ?? claim?.outcome) ? (
+            <div className="mt-4 rounded-md border border-emerald-200 bg-emerald-50 px-5 py-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-700">
+                Adjudication outcome
+              </p>
+              <dl className="mt-3 grid gap-3 sm:grid-cols-3">
+                {(schemeStatusData?.outcome ?? claim?.outcome)?.amount_awarded != null ? (
+                  <div>
+                    <dt className="text-xs text-emerald-600">Amount awarded</dt>
+                    <dd className="mt-0.5 text-lg font-semibold text-emerald-900">
+                      {formatCurrency(String((schemeStatusData?.outcome ?? claim?.outcome)?.amount_awarded ?? '0'))}
+                    </dd>
+                  </div>
+                ) : null}
+                {(schemeStatusData?.outcome ?? claim?.outcome)?.amount_to_landlord != null ? (
+                  <div>
+                    <dt className="text-xs text-emerald-600">To landlord</dt>
+                    <dd className="mt-0.5 text-lg font-semibold text-emerald-900">
+                      {formatCurrency(String((schemeStatusData?.outcome ?? claim?.outcome)?.amount_to_landlord ?? '0'))}
+                    </dd>
+                  </div>
+                ) : null}
+                {(schemeStatusData?.outcome ?? claim?.outcome)?.amount_to_tenant != null ? (
+                  <div>
+                    <dt className="text-xs text-zinc-500">To tenant</dt>
+                    <dd className="mt-0.5 text-lg font-semibold text-zinc-700">
+                      {formatCurrency(String((schemeStatusData?.outcome ?? claim?.outcome)?.amount_to_tenant ?? '0'))}
+                    </dd>
+                  </div>
+                ) : null}
+              </dl>
+              {(schemeStatusData?.adjudicator_notes ?? claim?.adjudicator_notes) ? (
+                <div className="mt-4 border-t border-emerald-200 pt-3">
+                  <p className="text-xs font-medium text-emerald-700">Adjudicator notes</p>
+                  <p className="mt-1 text-sm leading-relaxed text-emerald-900">
+                    {schemeStatusData?.adjudicator_notes ?? claim?.adjudicator_notes}
+                  </p>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+
+          {/* Resolution actions */}
+          <div className="mt-4 border-t border-zinc-200 pt-4">
+            <h4 className="text-sm font-semibold text-zinc-950">
+              {caseStatus === 'disputed' ? 'Dispute resolution' : 'Resolution'}
+            </h4>
+            <p className="mt-1 text-sm leading-6 text-zinc-600">
+              {caseStatus === 'disputed'
+                ? 'This case is under dispute. Resolve once the adjudication outcome is confirmed.'
+                : 'Mark as resolved once the outcome is confirmed, or flag a dispute if contested.'}
+            </p>
+            <div className="mt-3 flex flex-wrap gap-3">
+              <WorkspaceActionButton
+                disabled={isTransitioning || isRefreshing}
+                tone="primary"
+                onClick={() => handleTransition('resolved')}
+              >
+                {isTransitioning ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                {caseStatus === 'disputed' ? 'Resolve dispute' : 'Mark resolved'}
+              </WorkspaceActionButton>
+              {caseStatus === 'submitted' ? (
+                <WorkspaceActionButton
+                  disabled={isTransitioning || isRefreshing}
+                  tone="danger"
+                  onClick={() => handleTransition('disputed')}
+                >
+                  {isTransitioning ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                  Flag dispute
+                </WorkspaceActionButton>
+              ) : null}
+            </div>
           </div>
         </section>
       ) : null}
 
-      {caseStatus === 'disputed' ? (
-        <section className="border border-zinc-200 bg-zinc-50/70 px-6 py-5">
-          <h3 className="text-sm font-semibold text-zinc-950">Dispute resolution</h3>
-          <p className="mt-1 text-sm leading-6 text-zinc-600">
-            This case is currently under dispute. Once the dispute has been resolved, mark it as
-            resolved to close the case.
-          </p>
-          <div className="mt-4">
-            <WorkspaceActionButton
-              disabled={isTransitioning || isRefreshing}
-              tone="primary"
-              onClick={() => handleTransition('resolved')}
-            >
-              {isTransitioning ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-              Resolve dispute
-            </WorkspaceActionButton>
-          </div>
+      {/* ── Resolved with outcome ── */}
+      {caseStatus === 'resolved' && (claim?.outcome ?? schemeStatusData?.outcome) ? (
+        <section className="border border-emerald-200 bg-emerald-50/50 px-6 py-5">
+          <h3 className="text-sm font-semibold text-emerald-900">Case resolved</h3>
+          {claim?.scheme_reference ? (
+            <p className="mt-1 text-sm text-emerald-700">
+              {formatEnumLabel(claim.scheme_provider ?? '')} ref: {claim.scheme_reference}
+            </p>
+          ) : null}
+          <dl className="mt-3 grid gap-3 sm:grid-cols-3">
+            {(claim?.outcome as any)?.amount_awarded != null ? (
+              <div>
+                <dt className="text-xs text-emerald-600">Amount awarded</dt>
+                <dd className="mt-0.5 text-lg font-semibold text-emerald-900">
+                  {formatCurrency(String((claim?.outcome as any)?.amount_awarded ?? '0'))}
+                </dd>
+              </div>
+            ) : null}
+          </dl>
+          {claim?.adjudicator_notes ? (
+            <p className="mt-3 text-sm leading-relaxed text-emerald-800">{claim.adjudicator_notes}</p>
+          ) : null}
         </section>
       ) : null}
     </div>

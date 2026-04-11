@@ -164,6 +164,29 @@ export function createEotMessage(input: CreateEotMessageInput) {
   })
 }
 
+export function submitClaimToScheme(caseId: string) {
+  return requestJson<import('@/lib/eot-types').EotClaimSubmissionResult>(
+    `/api/integrations/cases/${caseId}/submit-claim`,
+    { method: 'POST' },
+  )
+}
+
+export function uploadEvidenceToScheme(
+  caseId: string,
+  files: import('@/lib/eot-types').EotEvidenceFileInput[],
+) {
+  return requestJson<{ status: string }>(
+    `/api/integrations/cases/${caseId}/upload-evidence`,
+    { method: 'POST', body: { files } },
+  )
+}
+
+export function checkClaimStatus(caseId: string) {
+  return requestJson<import('@/lib/eot-types').EotClaimStatusResult>(
+    `/api/integrations/cases/${caseId}/claim-status`,
+  )
+}
+
 export function getEotAnalyticsDashboard(days: number = 30) {
   return requestJson<import('@/lib/eot-types').EotAnalyticsDashboard>(
     '/api/eot/reports/analytics',
