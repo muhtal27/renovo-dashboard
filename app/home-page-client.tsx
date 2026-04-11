@@ -32,7 +32,7 @@ const footerCols = {
     { href: "/how-it-works", label: "How it works" },
     { href: "/pricing", label: "Pricing" },
     { href: "/demo", label: "Demo" },
-    { href: "/demo/calculator", label: "Calculator" },
+    { href: "/developers", label: "API Docs" },
     { href: "/changelog", label: "Changelog" },
   ],
   Company: [
