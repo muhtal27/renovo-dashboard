@@ -1014,20 +1014,43 @@ function StreetIntegrationPanel() {
   const [apiToken, setApiToken] = useState('')
   const [label, setLabel] = useState('')
   const [saving, setSaving] = useState(false)
-  const [testing, setTesting] = useState(false)
   const [syncing, setSyncing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
-  const [testResult, setTestResult] = useState<{ ok: boolean; detail: string } | null>(null)
 
   const loadStatus = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await fetch('/api/street/connection')
+      const res = await fetch('/api/integrations/connections')
       if (!res.ok) throw new Error('Failed to load')
-      const data = (await res.json()) as StreetStatus
-      setStatus(data)
-      if (data.connection?.label) setLabel(data.connection.label)
+      const connections = (await res.json()) as Array<{
+        id: string
+        provider: string
+        status: string
+        health_status: string
+        last_synced_at: string | null
+        config: Record<string, unknown>
+        created_at: string
+      }>
+      const street = connections.find((c) => c.provider === 'street')
+
+      if (street && street.status !== 'pending') {
+        const logsRes = await fetch(`/api/integrations/connections/${street.id}/sync-logs`)
+        const logs = logsRes.ok ? await logsRes.json() : []
+        setStatus({
+          connected: true,
+          connection: {
+            id: street.id,
+            base_url: (street.config?.base_url as string) || '',
+            label: (street.config?.label as string) || null,
+            last_synced_at: street.last_synced_at,
+          },
+          last_sync_logs: logs,
+        })
+        if (street.config?.label) setLabel(street.config.label as string)
+      } else {
+        setStatus({ connected: false, connection: null, last_sync_logs: [] })
+      }
     } catch {
       setError('Failed to load Street.co.uk connection status.')
     } finally {
@@ -1041,72 +1064,48 @@ function StreetIntegrationPanel() {
     setSaving(true)
     setError(null)
     setSuccess(null)
-    setTestResult(null)
     try {
-      const isUpdate = status?.connected
-      const res = await fetch('/api/street/connection', {
-        method: isUpdate ? 'PATCH' : 'POST',
+      if (!apiToken.trim()) throw new Error('API token is required')
+      const res = await fetch('/api/integrations/connections', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...(apiToken.trim() ? { api_token: apiToken.trim() } : {}),
-          ...(label.trim() ? { label: label.trim() } : {}),
+          provider: 'street',
+          display_name: label.trim() || 'Street.co.uk',
+          credentials: { api_token: apiToken.trim() },
+          config: { label: label.trim() || null },
         }),
       })
       if (!res.ok) {
-        const body = await res.json().catch(() => ({})) as { detail?: string }
-        throw new Error(body.detail || 'Failed to save')
+        const body = (await res.json().catch(() => ({}))) as { detail?: string }
+        throw new Error(body.detail || 'Failed to connect')
       }
       setApiToken('')
-      setSuccess(isUpdate ? 'Connection updated.' : 'Connection created successfully.')
+      setSuccess('Street.co.uk connected successfully.')
       await loadStatus()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save.')
+      setError(err instanceof Error ? err.message : 'Failed to connect.')
     } finally {
       setSaving(false)
     }
   }
 
-  async function handleTest() {
-    setTesting(true)
-    setTestResult(null)
-    setError(null)
-    try {
-      const res = await fetch('/api/street/connection/test', { method: 'POST' })
-      const data = await res.json().catch(() => ({})) as { ok?: boolean; detail?: string }
-      if (!res.ok) {
-        throw new Error(data.detail || 'Test failed')
-      }
-      setTestResult({ ok: data.ok ?? true, detail: data.detail ?? 'Connection successful' })
-    } catch (err) {
-      setTestResult({ ok: false, detail: err instanceof Error ? err.message : 'Test failed.' })
-    } finally {
-      setTesting(false)
-    }
-  }
-
   async function handleSync() {
+    if (!status?.connection) return
     setSyncing(true)
     setError(null)
     setSuccess(null)
     try {
-      const res = await fetch('/api/street/sync', {
+      const res = await fetch(`/api/integrations/connections/${status.connection.id}/sync`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({}),
       })
       if (!res.ok) {
-        const body = await res.json().catch(() => ({})) as { detail?: string }
+        const body = (await res.json().catch(() => ({}))) as { detail?: string }
         throw new Error(body.detail || 'Sync failed')
       }
-      const logs = (await res.json()) as StreetSyncLog[]
-      const totalCreated = logs.reduce((s, l) => s + l.records_created, 0)
-      const totalUpdated = logs.reduce((s, l) => s + l.records_updated, 0)
-      const failed = logs.filter((l) => l.status === 'failed')
-      if (failed.length > 0) {
-        setError(`Sync partially failed: ${failed.map((l) => l.error_message).join('; ')}`)
-      } else {
-        setSuccess(`Sync complete. ${totalCreated} created, ${totalUpdated} updated.`)
-      }
+      setSuccess('Sync triggered.')
       await loadStatus()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Sync failed.')
@@ -1116,16 +1115,23 @@ function StreetIntegrationPanel() {
   }
 
   async function handleDisconnect() {
+    if (!status?.connection) return
     setError(null)
     setSuccess(null)
     try {
-      await fetch('/api/street/connection', { method: 'DELETE' })
+      const res = await fetch(`/api/integrations/connections/${status.connection.id}`, {
+        method: 'DELETE',
+      })
+      if (!res.ok) {
+        const body = (await res.json().catch(() => ({}))) as { detail?: string }
+        throw new Error(body.detail || 'Failed to disconnect')
+      }
       setSuccess('Connection removed.')
       setApiToken('')
       setLabel('')
       await loadStatus()
-    } catch {
-      setError('Failed to disconnect.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to disconnect.')
     }
   }
 
@@ -1176,19 +1182,6 @@ function StreetIntegrationPanel() {
           </div>
         ) : null}
 
-        {testResult ? (
-          <div
-            className={cn(
-              'mt-4 border px-4 py-2.5 text-sm',
-              testResult.ok
-                ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-                : 'border-rose-200 bg-rose-50 text-rose-700'
-            )}
-          >
-            {testResult.detail}
-          </div>
-        ) : null}
-
         <div className="mt-5 max-w-md space-y-4">
           <div>
             <label htmlFor="street-label" className="block text-xs font-medium text-zinc-500">
@@ -1222,34 +1215,24 @@ function StreetIntegrationPanel() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={handleSave}
-              disabled={saving || (!apiToken.trim() && !connected)}
-              className="rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:opacity-50"
-            >
-              {saving ? 'Saving...' : connected ? 'Update connection' : 'Connect'}
-            </button>
-
-            {connected ? (
-              <>
-                <button
-                  type="button"
-                  onClick={handleTest}
-                  disabled={testing}
-                  className="rounded-lg border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 disabled:opacity-50"
-                >
-                  {testing ? 'Testing...' : 'Test connection'}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleDisconnect}
-                  className="rounded-lg border border-rose-200 bg-white px-5 py-2.5 text-sm font-medium text-rose-600 transition hover:bg-rose-50"
-                >
-                  Disconnect
-                </button>
-              </>
-            ) : null}
+            {!connected ? (
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={saving || !apiToken.trim()}
+                className="rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:opacity-50"
+              >
+                {saving ? 'Connecting...' : 'Connect'}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleDisconnect}
+                className="rounded-lg border border-rose-200 bg-white px-5 py-2.5 text-sm font-medium text-rose-600 transition hover:bg-rose-50"
+              >
+                Disconnect
+              </button>
+            )}
           </div>
         </div>
       </section>
