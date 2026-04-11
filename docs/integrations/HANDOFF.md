@@ -1,6 +1,6 @@
 # Integration Platform — Session Handoff
 
-> Updated: 2026-04-11 after completing Phase 1, Phase 2, Phase 3, bug sweep, Phase 4, and Phase 5
+> Updated: 2026-04-11 after completing Phase 1-5, bug sweep, and known issue fixes (10 of 13 resolved)
 
 ## What was built
 
@@ -234,8 +234,10 @@ Trigger-condition-action automation system for agencies.
 - 5 deposit scheme connectors registered (stubs, returning 503)
 - 3 deposit scheme API endpoints live (submit-claim, upload-evidence, claim-status)
 - 11 existing cases queryable via the public API
-- 34 bug fixes + 12 code smell/cleanup fixes deployed
+- 34 bug fixes + 12 code smell/cleanup fixes + 10 known issue fixes deployed
 - Rule engine v1 deployed with 7 conditions, 6 actions, 4 templates
+- Webhook retry cron running every 5 minutes via Vercel cron
+- Document download URLs now use Supabase signed URLs (1hr expiry)
 - 5 event emission points wired (case status, sync, tenancy lifecycle, inspections)
 - Automation tab live in Settings (rule CRUD, execution log, templates)
 
@@ -322,20 +324,18 @@ When API access arrives from any scheme:
 
 ## Remaining known issues
 
-### Needs architectural decision
-1. **Health state overwritten after partial sync** — if 3 resources fail and 1 succeeds, consecutive_failures resets to 0
-2. **`run_pull` commits mid-loop** — per-resource commits break atomicity
-3. **Webhook intake has no tenant_id filter** — relies on UUID unguessability
-4. **Token cache keyed per customer_id but token may not be customer-scoped** — needs Reapit investigation
-5. **`_get_public_key` uses sync httpx in async context** — blocks event loop
-6. **`on_connect` doesn't check for duplicate webhooks** — retries register duplicates
-7. **Double commit in `create_inspection`** — race window for duplicate on crash
-8. **Idempotency cache returns JSONResponse bypassing response pipeline**
-
-### Needs external infrastructure
-9. **Rate limiting needs Redis** — headers are present but misleading (Remaining always = Limit)
-10. **Webhook retries never execute** — no background task/scheduler calls `list_pending()`
-11. **`download_url` returns raw file_url** — needs Supabase signed URL generation
+### Resolved (this session)
+1. ~~**Health state overwritten after partial sync**~~ — Fixed: only mark healthy if ALL resources succeed; mixed results preserve failure count and set DEGRADED
+2. ~~**`run_pull` commits mid-loop**~~ — Fixed: changed mid-loop `commit()` to `flush()` for atomic final commit
+3. **Webhook intake has no tenant_id filter** — Accepted: existing signature verification per-connector is the security layer; UUID unguessability is defense-in-depth
+4. ~~**Token cache keyed per customer_id**~~ — Fixed: cache key now `"{client_id}:{customer_id}"` to prevent cross-tenant token sharing
+5. ~~**`_get_public_key` uses sync httpx in async context**~~ — Fixed: converted to async with `httpx.AsyncClient`; `verify_webhook_signature` now async throughout the chain
+6. ~~**`on_connect` doesn't check for duplicate webhooks**~~ — Fixed: lists existing webhooks before creation, skips already-registered topics
+7. ~~**Double commit in `create_inspection`**~~ — Fixed: single atomic commit for inspection + idempotency cache
+8. ~~**Idempotency cache returns JSONResponse bypassing response pipeline**~~ — Fixed: returns `CachedIdempotencyResponse` dataclass; endpoint validates through response model
+9. ~~**Rate limiting headers misleading**~~ — Fixed: removed `X-RateLimit-Remaining` and `X-RateLimit-Reset`; only `X-RateLimit-Limit` (informational) remains. Enforcement deferred until Redis.
+10. ~~**Webhook retries never execute**~~ — Fixed: added `process_pending_retries()` to `WebhookDeliveryService`, internal endpoint at `POST /api/internal/webhook-retries`, Vercel cron every 5 minutes
+11. ~~**`download_url` returns raw file_url**~~ — Fixed: generates Supabase signed URLs via storage client; falls back to raw URL if Supabase unavailable
 
 ### Remaining cleanup
 12. **Street.co.uk migration** — old StreetConnection/StreetSyncLog tables still exist alongside the new generic framework. Plan migration.
