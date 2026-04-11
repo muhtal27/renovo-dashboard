@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Download } from 'lucide-react'
 import { toast } from 'sonner'
@@ -9,7 +10,8 @@ import {
   formatEnumLabel,
 } from '@/app/eot/_components/eot-ui'
 import { relativeTime } from '@/lib/relative-time'
-import type { EotReportSummary } from '@/lib/eot-types'
+import type { EotReportSummary, EotAnalyticsDashboard } from '@/lib/eot-types'
+import { AnalyticsClient } from './analytics-client'
 
 /* ────────────────────────────────────────────────────────────── */
 /*  Distribution bar                                              */
@@ -127,65 +129,27 @@ function priorityTextColor(priority: string) {
 }
 
 /* ────────────────────────────────────────────────────────────── */
-/*  Main component                                                */
+/*  Tab bar                                                       */
 /* ────────────────────────────────────────────────────────────── */
 
-export function ReportsClient({
+const TABS = [
+  { id: 'overview', label: 'Overview' },
+  { id: 'analytics', label: 'Analytics' },
+] as const
+
+type TabId = (typeof TABS)[number]['id']
+
+/* ────────────────────────────────────────────────────────────── */
+/*  Overview content (original reports)                            */
+/* ────────────────────────────────────────────────────────────── */
+
+function OverviewContent({
   initialSummary,
-  error,
+  onExportCSV,
 }: {
-  initialSummary?: EotReportSummary | null
-  error?: string | null
+  initialSummary: EotReportSummary
+  onExportCSV: () => void
 }) {
-  const performanceRows = initialSummary?.performance_rows ?? []
-
-  const handleExportCSV = useCallback(() => {
-    const headers = ['Property', 'Tenant', 'Status', 'Priority', 'Evidence', 'Issues', 'Claim Value', 'Last Activity']
-    const rows = performanceRows.map((row) => [
-      row.property_name,
-      row.tenant_name,
-      formatEnumLabel(row.status),
-      formatEnumLabel(row.priority),
-      String(row.evidence_count),
-      String(row.issue_count),
-      row.claim_total_amount ? String(row.claim_total_amount) : '',
-      row.last_activity_at,
-    ])
-
-    const csvContent = [headers, ...rows]
-      .map((row) => row.map((cell) => `"${cell.replace(/"/g, '""')}"`).join(','))
-      .join('\n')
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `renovo-report-${new Date().toISOString().slice(0, 10)}.csv`
-    link.click()
-    URL.revokeObjectURL(url)
-    toast.success('Report exported as CSV')
-  }, [performanceRows])
-
-  if (error) {
-    return (
-      <div className="border border-zinc-200 bg-white px-6 py-10 text-center">
-        <h3 className="text-sm font-semibold text-zinc-950">Unable to load reports</h3>
-        <p className="mt-1 text-sm text-zinc-500">{error}</p>
-      </div>
-    )
-  }
-
-  if (!initialSummary || performanceRows.length === 0) {
-    return (
-      <div className="border border-zinc-200 bg-white px-6 py-10 text-center">
-        <h3 className="text-sm font-semibold text-zinc-950">No data yet</h3>
-        <p className="mt-1 text-sm text-zinc-500">
-          Create the first checkout to populate the reports.
-        </p>
-      </div>
-    )
-  }
-
   const { stats, status_breakdown, issue_severity_breakdown, performance_rows } = initialSummary
 
   const statusItems = Object.entries(status_breakdown)
@@ -214,7 +178,7 @@ export function ReportsClient({
           <h3 className="text-sm font-semibold text-zinc-950">Portfolio overview</h3>
           <button
             type="button"
-            onClick={handleExportCSV}
+            onClick={onExportCSV}
             className="inline-flex items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-600 transition hover:bg-zinc-50 hover:text-zinc-950"
           >
             <Download className="h-3.5 w-3.5" />
@@ -369,7 +333,7 @@ export function ReportsClient({
                   <td className="px-4 py-3 text-right font-medium tabular-nums text-zinc-950">
                     {row.claim_total_amount
                       ? formatCurrency(row.claim_total_amount)
-                      : <span className="text-zinc-400">—</span>}
+                      : <span className="text-zinc-400">&mdash;</span>}
                   </td>
                   <td className="px-4 py-3 text-right text-xs text-zinc-400" title={row.last_activity_at}>
                     {relativeTime(row.last_activity_at)}
@@ -380,6 +344,111 @@ export function ReportsClient({
           </table>
         </div>
       </section>
+    </div>
+  )
+}
+
+/* ────────────────────────────────────────────────────────────── */
+/*  Main component                                                */
+/* ────────────────────────────────────────────────────────────── */
+
+export function ReportsClient({
+  initialSummary,
+  initialAnalytics,
+  error,
+}: {
+  initialSummary?: EotReportSummary | null
+  initialAnalytics?: EotAnalyticsDashboard | null
+  error?: string | null
+}) {
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const activeTab = (searchParams.get('tab') as TabId) || 'overview'
+  const performanceRows = initialSummary?.performance_rows ?? []
+
+  const handleExportCSV = useCallback(() => {
+    const headers = ['Property', 'Tenant', 'Status', 'Priority', 'Evidence', 'Issues', 'Claim Value', 'Last Activity']
+    const rows = performanceRows.map((row) => [
+      row.property_name,
+      row.tenant_name,
+      formatEnumLabel(row.status),
+      formatEnumLabel(row.priority),
+      String(row.evidence_count),
+      String(row.issue_count),
+      row.claim_total_amount ? String(row.claim_total_amount) : '',
+      row.last_activity_at,
+    ])
+
+    const csvContent = [headers, ...rows]
+      .map((row) => row.map((cell) => `"${cell.replace(/"/g, '""')}"`).join(','))
+      .join('\n')
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `renovo-report-${new Date().toISOString().slice(0, 10)}.csv`
+    link.click()
+    URL.revokeObjectURL(url)
+    toast.success('Report exported as CSV')
+  }, [performanceRows])
+
+  if (error) {
+    return (
+      <div className="border border-zinc-200 bg-white px-6 py-10 text-center">
+        <h3 className="text-sm font-semibold text-zinc-950">Unable to load reports</h3>
+        <p className="mt-1 text-sm text-zinc-500">{error}</p>
+      </div>
+    )
+  }
+
+  if (!initialSummary || performanceRows.length === 0) {
+    return (
+      <div className="border border-zinc-200 bg-white px-6 py-10 text-center">
+        <h3 className="text-sm font-semibold text-zinc-950">No data yet</h3>
+        <p className="mt-1 text-sm text-zinc-500">
+          Create the first checkout to populate the reports.
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Tab bar */}
+      <div className="flex items-center gap-1 border-b border-zinc-200">
+        {TABS.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => {
+              const params = new URLSearchParams(searchParams.toString())
+              if (tab.id === 'overview') {
+                params.delete('tab')
+              } else {
+                params.set('tab', tab.id)
+              }
+              const qs = params.toString()
+              router.replace(`/reports${qs ? `?${qs}` : ''}`, { scroll: false })
+            }}
+            className={`-mb-px border-b-2 px-4 py-2.5 text-sm font-medium transition ${
+              activeTab === tab.id
+                ? 'border-zinc-950 text-zinc-950'
+                : 'border-transparent text-zinc-400 hover:text-zinc-600'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab content */}
+      {activeTab === 'overview' && (
+        <OverviewContent initialSummary={initialSummary} onExportCSV={handleExportCSV} />
+      )}
+      {activeTab === 'analytics' && (
+        <AnalyticsClient initialData={initialAnalytics} />
+      )}
     </div>
   )
 }

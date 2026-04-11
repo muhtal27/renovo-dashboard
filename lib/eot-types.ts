@@ -302,3 +302,65 @@ export type CreateEotMessageInput = {
   content: string
   attachments: Array<Record<string, unknown>>
 }
+
+// ── Analytics dashboard types ────────────────────────────────────
+
+export type EotCaseThroughputWeek = {
+  week_start: string
+  created: number
+  resolved: number
+}
+
+export type EotResolutionTimeByStage = {
+  stage: string
+  avg_days: number
+  case_count: number
+}
+
+export type EotResolutionTimeSummary = {
+  overall_avg_days: number
+  previous_period_avg_days: number | null
+  by_stage: EotResolutionTimeByStage[]
+}
+
+export type EotClaimRecoveryMetrics = {
+  total_claimed: string
+  total_recovered: string
+  success_rate: number
+  cases_with_claims: number
+  avg_claim_per_case: string
+}
+
+export type EotTeamMemberWorkload = {
+  user_id: string
+  display_name: string
+  total_cases: number
+  resolved_cases: number
+  avg_resolution_days: number | null
+}
+
+export type EotIntegrationConnectionHealth = {
+  connection_id: string
+  provider: string
+  display_name: string | null
+  status: string
+  health_status: string
+  consecutive_failures: number
+  last_synced_at: string | null
+  sync_success_rate: number
+  dead_letter_count: number
+}
+
+export type EotIntegrationHealthSummary = {
+  connections: EotIntegrationConnectionHealth[]
+  total_dead_letters: number
+}
+
+export type EotAnalyticsDashboard = {
+  period_days: number
+  throughput: EotCaseThroughputWeek[]
+  resolution_time: EotResolutionTimeSummary
+  claim_recovery: EotClaimRecoveryMetrics
+  team_workload: EotTeamMemberWorkload[]
+  integration_health: EotIntegrationHealthSummary
+}

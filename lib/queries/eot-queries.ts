@@ -27,6 +27,7 @@ export const eotKeys = {
   caseIssues: (caseId: string) => ['eot', 'case', caseId, 'issues'] as const,
   tenancies: ['eot', 'tenancies'] as const,
   assignees: ['operator', 'assignees'] as const,
+  analyticsDashboard: (days: number) => ['eot', 'analytics', days] as const,
 }
 
 // ── Cases ───────────────────────────────────────────────────────────
@@ -141,6 +142,18 @@ export function useInvalidateEotCases() {
     queryClient.invalidateQueries({ queryKey: eotKeys.cases })
     broadcastInvalidation([eotKeys.cases])
   }
+}
+
+export function useEotAnalyticsDashboard(
+  days: number = 30,
+  initialData?: import('@/lib/eot-types').EotAnalyticsDashboard | null,
+) {
+  return useQuery({
+    queryKey: eotKeys.analyticsDashboard(days),
+    queryFn: () => import('@/lib/eot-api').then((m) => m.getEotAnalyticsDashboard(days)),
+    initialData: initialData ?? undefined,
+    staleTime: 5 * 60_000,
+  })
 }
 
 export function useInvalidateEotCase(caseId: string) {

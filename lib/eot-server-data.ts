@@ -150,3 +150,10 @@ export async function getEotTenancyListSnapshot(context: OperatorTenantContext) 
 export function getEotReportSummary(context: OperatorTenantContext) {
   return fetchEotJson<EotReportSummary>(context, '/api/eot/reports/summary')
 }
+
+export function getEotAnalyticsDashboard(context: OperatorTenantContext, days: number = 30) {
+  return fetchEotJson<import('@/lib/eot-types').EotAnalyticsDashboard>(
+    context,
+    `/api/eot/reports/analytics?days=${days}`,
+  )
+}

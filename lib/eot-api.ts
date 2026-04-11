@@ -163,3 +163,10 @@ export function createEotMessage(input: CreateEotMessageInput) {
     body: input,
   })
 }
+
+export function getEotAnalyticsDashboard(days: number = 30) {
+  return requestJson<import('@/lib/eot-types').EotAnalyticsDashboard>(
+    '/api/eot/reports/analytics',
+    { searchParams: { days } },
+  )
+}

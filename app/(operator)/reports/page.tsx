@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
 import type { Metadata } from 'next'
 import { ReportsClient } from '@/app/(operator)/reports/_components/reports-client'
-import { getEotReportSummary } from '@/lib/eot-server-data'
+import { getEotReportSummary, getEotAnalyticsDashboard } from '@/lib/eot-server-data'
 import { OPERATOR_PERMISSIONS } from '@/lib/operator-rbac'
 import { requireOperatorPermission } from '@/lib/operator-server'
 import { SkeletonPanel } from '@/app/operator-ui'
@@ -12,19 +12,28 @@ export const metadata: Metadata = {
 
 async function ReportsContent() {
   const context = await requireOperatorPermission('/reports', OPERATOR_PERMISSIONS.VIEW_REPORTING)
-  const initialSummary = await getEotReportSummary(context).catch((error) => ({
-    data: null,
-    error:
-      error instanceof Error
-        ? error.message
-        : 'Unable to load the reporting summary.',
-  }))
+
+  const [initialSummary, initialAnalytics] = await Promise.all([
+    getEotReportSummary(context).catch((error) => ({
+      data: null as null,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Unable to load the reporting summary.',
+    })),
+    getEotAnalyticsDashboard(context).catch(() => null),
+  ])
 
   if ('error' in initialSummary) {
     return <ReportsClient error={initialSummary.error} />
   }
 
-  return <ReportsClient initialSummary={initialSummary} />
+  return (
+    <ReportsClient
+      initialSummary={initialSummary}
+      initialAnalytics={initialAnalytics}
+    />
+  )
 }
 
 export default function ReportsPage() {
