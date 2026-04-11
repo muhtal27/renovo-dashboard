@@ -236,7 +236,7 @@ Trigger-condition-action automation system for agencies.
 - 11 existing cases queryable via the public API
 - 34 bug fixes + 12 code smell/cleanup fixes + 10 known issue fixes deployed
 - Rule engine v1 deployed with 7 conditions, 6 actions, 4 templates
-- Webhook retry cron running every 5 minutes via Vercel cron
+- Webhook retry cron running daily at 3am UTC via Vercel cron (Hobby plan limit)
 - Document download URLs now use Supabase signed URLs (1hr expiry)
 - 5 event emission points wired (case status, sync, tenancy lifecycle, inspections)
 - Automation tab live in Settings (rule CRUD, execution log, templates)
