@@ -274,8 +274,14 @@ const INTEGRATION_LIST: Integration[] = [
   },
   {
     name: 'Reapit',
-    description: 'Sync property and tenancy data with Reapit Foundations.',
-    features: ['Pull properties from Reapit', 'Sync tenancy records'],
+    description: 'Sync property and tenancy data with Reapit Foundations via the Reapit Marketplace.',
+    features: [
+      'Pull properties and addresses from Reapit',
+      'Sync tenancy records with tenant and landlord contacts',
+      'Receive real-time updates via webhooks',
+      'Push case status notes as journal entries',
+      'Attach generated documents to properties',
+    ],
   },
   {
     name: 'FixFlo',
@@ -1294,6 +1300,339 @@ function StreetIntegrationPanel() {
 }
 
 // ---------------------------------------------------------------------------
+// Reapit Integration Panel
+// ---------------------------------------------------------------------------
+
+type ReapitConnectionStatus = {
+  connected: boolean
+  connection: {
+    id: string
+    provider: string
+    status: string
+    health_status: string
+    last_synced_at: string | null
+    created_at: string
+  } | null
+  sync_logs: Array<{
+    id: string
+    resource: string
+    status: string
+    records_created: number
+    records_updated: number
+    records_skipped: number
+    started_at: string
+    error_message: string | null
+  }>
+}
+
+function ReapitIntegrationPanel() {
+  const [status, setStatus] = useState<ReapitConnectionStatus | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [connecting, setConnecting] = useState(false)
+  const [syncing, setSyncing] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
+
+  // Read flash messages from URL after OAuth callback redirect
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const reapitParam = params.get('reapit')
+    if (reapitParam === 'connected') {
+      setSuccess('Reapit connected successfully. Initial sync is running.')
+      // Clean URL
+      const url = new URL(window.location.href)
+      url.searchParams.delete('reapit')
+      window.history.replaceState({}, '', url.toString())
+    } else if (reapitParam === 'error') {
+      const reason = params.get('reason') || 'unknown'
+      const messages: Record<string, string> = {
+        missing_params: 'OAuth callback missing required parameters.',
+        invalid_state: 'OAuth state verification failed. Please try again.',
+        token_exchange: 'Failed to exchange authorization code with Reapit.',
+        session_expired: 'Your session expired during the OAuth flow. Please try again.',
+        activation_failed: 'Failed to activate the Reapit connection.',
+        not_configured: 'Reapit integration is not configured on the server.',
+      }
+      setError(messages[reason] || `Connection failed: ${reason}`)
+      const url = new URL(window.location.href)
+      url.searchParams.delete('reapit')
+      url.searchParams.delete('reason')
+      window.history.replaceState({}, '', url.toString())
+    }
+  }, [])
+
+  const loadStatus = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res = await fetch('/api/integrations/connections')
+      if (!res.ok) throw new Error('Failed to load')
+      const connections = (await res.json()) as Array<{
+        id: string
+        provider: string
+        status: string
+        health_status: string
+        last_synced_at: string | null
+        created_at: string
+      }>
+      const reapit = connections.find((c) => c.provider === 'reapit')
+
+      if (reapit && reapit.status !== 'pending') {
+        // Fetch sync logs for this connection
+        const logsRes = await fetch(`/api/integrations/connections/${reapit.id}/sync-logs`)
+        const logs = logsRes.ok ? await logsRes.json() : []
+        setStatus({ connected: true, connection: reapit, sync_logs: logs })
+      } else {
+        setStatus({ connected: false, connection: null, sync_logs: [] })
+      }
+    } catch {
+      setError('Failed to load Reapit connection status.')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => { void loadStatus() }, [loadStatus])
+
+  async function handleConnect() {
+    setConnecting(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/reapit/authorize', { method: 'POST' })
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({})) as { detail?: string }
+        throw new Error(body.detail || 'Failed to start OAuth flow')
+      }
+      const data = await res.json() as { authorize_url: string }
+      // Redirect browser to Reapit OAuth
+      window.location.href = data.authorize_url
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to connect.')
+      setConnecting(false)
+    }
+  }
+
+  async function handleSync() {
+    if (!status?.connection) return
+    setSyncing(true)
+    setError(null)
+    setSuccess(null)
+    try {
+      const res = await fetch(`/api/integrations/connections/${status.connection.id}/sync`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      })
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({})) as { detail?: string }
+        throw new Error(body.detail || 'Sync failed')
+      }
+      const logs = (await res.json()) as Array<{ status: string; records_created: number; records_updated: number; error_message: string | null }>
+      const totalCreated = logs.reduce((s, l) => s + l.records_created, 0)
+      const totalUpdated = logs.reduce((s, l) => s + l.records_updated, 0)
+      const failed = logs.filter((l) => l.status === 'failed')
+      if (failed.length > 0) {
+        setError(`Sync partially failed: ${failed.map((l) => l.error_message).join('; ')}`)
+      } else {
+        setSuccess(`Sync complete. ${totalCreated} created, ${totalUpdated} updated.`)
+      }
+      await loadStatus()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Sync failed.')
+    } finally {
+      setSyncing(false)
+    }
+  }
+
+  async function handleDisconnect() {
+    if (!status?.connection) return
+    setError(null)
+    setSuccess(null)
+    try {
+      await fetch(`/api/integrations/connections/${status.connection.id}`, { method: 'DELETE' })
+      setSuccess('Reapit disconnected.')
+      await loadStatus()
+    } catch {
+      setError('Failed to disconnect.')
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="py-8 text-center text-sm text-zinc-400">
+        Loading Reapit integration...
+      </div>
+    )
+  }
+
+  const connected = status?.connected ?? false
+
+  return (
+    <div className="space-y-6">
+      {/* Connection config */}
+      <section className="border border-zinc-200/80 bg-white px-6 py-6 md:px-7">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h3 className="text-sm font-semibold text-zinc-950">
+              Reapit Foundations
+            </h3>
+            <p className="mt-1 text-sm text-zinc-500">
+              Connect your Reapit account to sync properties, tenancies, and push case updates back.
+            </p>
+          </div>
+          <span
+            className={cn(
+              'shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium',
+              connected
+                ? status?.connection?.health_status === 'healthy'
+                  ? 'bg-emerald-50 text-emerald-700'
+                  : 'bg-amber-50 text-amber-700'
+                : 'bg-zinc-100 text-zinc-600'
+            )}
+          >
+            {connected
+              ? status?.connection?.health_status === 'healthy'
+                ? 'Connected'
+                : `Connected (${status?.connection?.health_status})`
+              : 'Not connected'}
+          </span>
+        </div>
+
+        {error ? (
+          <div className="mt-4 border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm text-rose-700">
+            {error}
+          </div>
+        ) : null}
+
+        {success ? (
+          <div className="mt-4 border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm text-emerald-700">
+            {success}
+          </div>
+        ) : null}
+
+        <div className="mt-5 flex flex-wrap items-center gap-2">
+          {!connected ? (
+            <button
+              type="button"
+              onClick={handleConnect}
+              disabled={connecting}
+              className="rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:opacity-50"
+            >
+              {connecting ? 'Redirecting to Reapit...' : 'Connect to Reapit'}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleDisconnect}
+              className="rounded-lg border border-rose-200 bg-white px-5 py-2.5 text-sm font-medium text-rose-600 transition hover:bg-rose-50"
+            >
+              Disconnect
+            </button>
+          )}
+        </div>
+
+        {!connected ? (
+          <p className="mt-3 text-xs text-zinc-400">
+            You&apos;ll be redirected to Reapit to authorize Renovo. Requires a Reapit Foundations account.
+          </p>
+        ) : null}
+      </section>
+
+      {/* Sync controls */}
+      {connected && status?.connection ? (
+        <section className="border border-zinc-200/80 bg-white px-6 py-6 md:px-7">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <h3 className="text-sm font-semibold text-zinc-950">Data sync</h3>
+              <p className="mt-1 text-sm text-zinc-500">
+                Pull properties and tenancies from Reapit into Renovo.
+              </p>
+              {status.connection.last_synced_at ? (
+                <p className="mt-1 text-xs text-zinc-400">
+                  Last synced:{' '}
+                  {new Date(status.connection.last_synced_at).toLocaleString('en-GB', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </p>
+              ) : null}
+            </div>
+            <button
+              type="button"
+              onClick={handleSync}
+              disabled={syncing}
+              className="rounded-lg bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-50"
+            >
+              {syncing ? 'Syncing...' : 'Sync now'}
+            </button>
+          </div>
+
+          {/* Sync log history */}
+          {status.sync_logs.length > 0 ? (
+            <div className="mt-5 overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-zinc-100 text-left text-xs font-medium text-zinc-500">
+                    <th className="pb-2.5 pr-4">Resource</th>
+                    <th className="pb-2.5 pr-4">Status</th>
+                    <th className="pb-2.5 pr-4">Created</th>
+                    <th className="pb-2.5 pr-4">Updated</th>
+                    <th className="pb-2.5 pr-4">Skipped</th>
+                    <th className="pb-2.5">Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {status.sync_logs.map((log) => (
+                    <tr key={log.id} className="border-b border-zinc-50 last:border-0">
+                      <td className="py-2.5 pr-4 font-medium text-zinc-950 capitalize">
+                        {log.resource}
+                      </td>
+                      <td className="py-2.5 pr-4">
+                        <span
+                          className={cn(
+                            'rounded-full px-2 py-0.5 text-xs font-medium',
+                            log.status === 'completed'
+                              ? 'bg-emerald-50 text-emerald-700'
+                              : log.status === 'failed'
+                                ? 'bg-rose-50 text-rose-700'
+                                : 'bg-amber-50 text-amber-700'
+                          )}
+                        >
+                          {log.status}
+                        </span>
+                      </td>
+                      <td className="py-2.5 pr-4 tabular-nums text-zinc-600">
+                        {log.records_created}
+                      </td>
+                      <td className="py-2.5 pr-4 tabular-nums text-zinc-600">
+                        {log.records_updated}
+                      </td>
+                      <td className="py-2.5 pr-4 tabular-nums text-zinc-600">
+                        {log.records_skipped}
+                      </td>
+                      <td className="whitespace-nowrap py-2.5 text-xs text-zinc-400">
+                        {new Date(log.started_at).toLocaleString('en-GB', {
+                          day: 'numeric',
+                          month: 'short',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : null}
+        </section>
+      ) : null}
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // Integrations Tab
 // ---------------------------------------------------------------------------
 
@@ -1301,6 +1640,7 @@ function IntegrationsTab() {
   const [activeIntegration, setActiveIntegration] = useState('Street.co.uk')
   const selected = INTEGRATION_LIST.find((i) => i.name === activeIntegration) ?? INTEGRATION_LIST[0]
   const isStreet = activeIntegration === 'Street.co.uk'
+  const isReapit = activeIntegration === 'Reapit'
 
   return (
     <div className="space-y-6">
@@ -1331,6 +1671,8 @@ function IntegrationsTab() {
 
       {isStreet ? (
         <StreetIntegrationPanel />
+      ) : isReapit ? (
+        <ReapitIntegrationPanel />
       ) : (
         <>
           {/* Feature list for non-Street integrations */}
