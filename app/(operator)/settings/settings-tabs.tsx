@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { cn } from '@/lib/ui'
 
-const TABS = ['Account', 'Team', 'Integrations', 'Email Ingestion'] as const
+const TABS = ['Account', 'Team', 'Integrations', 'Email Ingestion', 'Automation'] as const
 type Tab = (typeof TABS)[number]
 
 function AccountTab() {
@@ -1071,12 +1071,11 @@ function StreetIntegrationPanel() {
     setError(null)
     try {
       const res = await fetch('/api/street/connection/test', { method: 'POST' })
+      const data = await res.json().catch(() => ({})) as { ok?: boolean; detail?: string }
       if (!res.ok) {
-        const body = await res.json().catch(() => ({})) as { detail?: string }
-        throw new Error(body.detail || 'Test failed')
+        throw new Error(data.detail || 'Test failed')
       }
-      const data = (await res.json()) as { ok: boolean; detail: string }
-      setTestResult(data)
+      setTestResult({ ok: data.ok ?? true, detail: data.detail ?? 'Connection successful' })
     } catch (err) {
       setTestResult({ ok: false, detail: err instanceof Error ? err.message : 'Test failed.' })
     } finally {
@@ -1448,12 +1447,11 @@ function ReapitIntegrationPanel() {
     setError(null)
     try {
       const res = await fetch('/api/reapit/test', { method: 'POST' })
+      const data = await res.json().catch(() => ({})) as { ok?: boolean; detail?: string }
       if (!res.ok) {
-        const body = await res.json().catch(() => ({})) as { detail?: string }
-        throw new Error(body.detail || 'Test failed')
+        throw new Error(data.detail || 'Test failed')
       }
-      const data = (await res.json()) as { ok: boolean; detail: string }
-      setTestResult(data)
+      setTestResult({ ok: data.ok ?? true, detail: data.detail ?? 'Connection successful' })
     } catch (err) {
       setTestResult({ ok: false, detail: err instanceof Error ? err.message : 'Test failed.' })
     } finally {
@@ -1876,6 +1874,832 @@ function IntegrationsTab() {
   )
 }
 
+// =====================================================================
+// AUTOMATION TAB
+// =====================================================================
+
+type AutomationRule = {
+  id: string
+  name: string
+  description: string | null
+  is_active: boolean
+  trigger_event: string
+  conditions: Array<{ type: string; params: Record<string, unknown> }>
+  action_type: string
+  action_params: Record<string, unknown>
+  priority: number
+  created_by: string | null
+  created_at: string
+  updated_at: string
+}
+
+type ExecutionLog = {
+  id: string
+  rule_id: string
+  trigger_event: string
+  conditions_met: boolean
+  action_taken: string | null
+  action_result: Record<string, unknown> | null
+  executed_at: string
+  duration_ms: number | null
+}
+
+type RuleTemplate = {
+  id: string
+  name: string
+  description: string
+  trigger_event: string
+  conditions: Array<{ type: string; params: Record<string, unknown> }>
+  action_type: string
+  action_params: Record<string, unknown>
+}
+
+const TRIGGER_LABELS: Record<string, string> = {
+  'tenancy.ending_soon': 'Tenancy ending soon',
+  'tenancy.ended': 'Tenancy ended',
+  'inspection.received': 'Inspection received',
+  'case.status_changed': 'Case status changed',
+  'case.document_generated': 'Document generated',
+  'connection.sync_completed': 'Sync completed',
+  'claim.deadline_approaching': 'Claim deadline approaching',
+}
+
+const ACTION_LABELS: Record<string, string> = {
+  create_case: 'Create case',
+  assign_case: 'Assign case',
+  send_notification: 'Send notification',
+  change_case_status: 'Change case status',
+  start_analysis: 'Start AI analysis',
+  log_timeline_event: 'Log timeline event',
+}
+
+const CONDITION_LABELS: Record<string, string> = {
+  'tenancy.end_date_within_days': 'End date within N days',
+  'tenancy.deposit_scheme_is': 'Deposit scheme is',
+  'case.status_is': 'Case status is',
+  'case.priority_is': 'Case priority is',
+  'case.has_no_assignee': 'Case has no assignee',
+  'inspection.type_is': 'Inspection type is',
+  'property.postcode_starts_with': 'Postcode starts with',
+}
+
+const AUTOMATION_SUB_TABS = ['Rules', 'Execution Log'] as const
+type AutomationSubTab = (typeof AUTOMATION_SUB_TABS)[number]
+
+function AutomationTab() {
+  const [subTab, setSubTab] = useState<AutomationSubTab>('Rules')
+  const [rules, setRules] = useState<AutomationRule[]>([])
+  const [logs, setLogs] = useState<ExecutionLog[]>([])
+  const [templates, setTemplates] = useState<RuleTemplate[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
+
+  // Create rule form state
+  const [showCreateForm, setShowCreateForm] = useState(false)
+  const [formName, setFormName] = useState('')
+  const [formDescription, setFormDescription] = useState('')
+  const [formTrigger, setFormTrigger] = useState('')
+  const [formAction, setFormAction] = useState('')
+  const [formConditions, setFormConditions] = useState<
+    Array<{ type: string; params: Record<string, string> }>
+  >([])
+  const [formActionParams, setFormActionParams] = useState<Record<string, string>>({})
+  const [saving, setSaving] = useState(false)
+
+  // Edit state
+  const [editingRuleId, setEditingRuleId] = useState<string | null>(null)
+
+  const fetchRules = useCallback(async () => {
+    try {
+      const res = await fetch('/api/integrations/automation/rules')
+      if (!res.ok) throw new Error('Failed to load rules')
+      const data = await res.json()
+      setRules(data)
+    } catch {
+      setError('Failed to load automation rules')
+    }
+  }, [])
+
+  const fetchLogs = useCallback(async () => {
+    try {
+      const res = await fetch('/api/integrations/automation/logs?limit=50')
+      if (!res.ok) throw new Error('Failed to load logs')
+      const data = await res.json()
+      setLogs(data)
+    } catch {
+      // Silent fail for logs
+    }
+  }, [])
+
+  const fetchTemplates = useCallback(async () => {
+    try {
+      const res = await fetch('/api/integrations/automation/templates')
+      if (!res.ok) throw new Error('Failed to load templates')
+      const data = await res.json()
+      setTemplates(data)
+    } catch {
+      // Silent fail for templates
+    }
+  }, [])
+
+  useEffect(() => {
+    setLoading(true)
+    Promise.all([fetchRules(), fetchTemplates(), fetchLogs()]).finally(() =>
+      setLoading(false)
+    )
+  }, [fetchRules, fetchTemplates, fetchLogs])
+
+  async function handleToggle(ruleId: string) {
+    setError(null)
+    try {
+      const res = await fetch(`/api/integrations/automation/rules/${ruleId}/toggle`, {
+        method: 'PATCH',
+      })
+      if (!res.ok) throw new Error('Failed to toggle rule')
+      await fetchRules()
+    } catch {
+      setError('Failed to toggle rule')
+    }
+  }
+
+  async function handleDelete(ruleId: string) {
+    setError(null)
+    try {
+      const res = await fetch(`/api/integrations/automation/rules/${ruleId}`, {
+        method: 'DELETE',
+      })
+      if (!res.ok) throw new Error('Failed to delete rule')
+      setSuccess('Rule deleted')
+      await fetchRules()
+      setTimeout(() => setSuccess(null), 3000)
+    } catch {
+      setError('Failed to delete rule')
+    }
+  }
+
+  async function handleActivateTemplate(templateId: string) {
+    setError(null)
+    try {
+      const res = await fetch(
+        `/api/integrations/automation/templates/${templateId}/activate`,
+        { method: 'POST' }
+      )
+      if (!res.ok) throw new Error('Failed to activate template')
+      setSuccess('Template activated as inactive rule. Enable it when ready.')
+      await fetchRules()
+      setTimeout(() => setSuccess(null), 5000)
+    } catch {
+      setError('Failed to activate template')
+    }
+  }
+
+  function resetForm() {
+    setFormName('')
+    setFormDescription('')
+    setFormTrigger('')
+    setFormAction('')
+    setFormConditions([])
+    setFormActionParams({})
+    setShowCreateForm(false)
+    setEditingRuleId(null)
+  }
+
+  function startEdit(rule: AutomationRule) {
+    setEditingRuleId(rule.id)
+    setFormName(rule.name)
+    setFormDescription(rule.description || '')
+    setFormTrigger(rule.trigger_event)
+    setFormAction(rule.action_type)
+    setFormConditions(
+      (rule.conditions || []).map((c) => ({
+        type: c.type,
+        params: Object.fromEntries(
+          Object.entries(c.params || {}).map(([k, v]) => [k, String(v)])
+        ),
+      }))
+    )
+    setFormActionParams(
+      Object.fromEntries(
+        Object.entries(rule.action_params || {}).map(([k, v]) => [k, String(v)])
+      )
+    )
+    setShowCreateForm(true)
+  }
+
+  async function handleSaveRule() {
+    if (!formName.trim() || !formTrigger || !formAction) {
+      setError('Name, trigger, and action are required')
+      return
+    }
+    setSaving(true)
+    setError(null)
+    try {
+      const payload = {
+        name: formName.trim(),
+        description: formDescription.trim() || null,
+        trigger_event: formTrigger,
+        conditions: formConditions.map((c) => ({
+          type: c.type,
+          params: Object.fromEntries(
+            Object.entries(c.params).map(([k, v]) => {
+              const num = Number(v)
+              return [k, !isNaN(num) && v !== '' ? num : v]
+            })
+          ),
+        })),
+        action_type: formAction,
+        action_params: Object.fromEntries(
+          Object.entries(formActionParams).map(([k, v]) => {
+            const num = Number(v)
+            return [k, !isNaN(num) && v !== '' ? num : v]
+          })
+        ),
+      }
+
+      const isEdit = editingRuleId !== null
+      const url = isEdit
+        ? `/api/integrations/automation/rules/${editingRuleId}`
+        : '/api/integrations/automation/rules'
+      const method = isEdit ? 'PUT' : 'POST'
+
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.detail || 'Failed to save rule')
+      }
+      setSuccess(isEdit ? 'Rule updated' : 'Rule created')
+      resetForm()
+      await fetchRules()
+      setTimeout(() => setSuccess(null), 3000)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save rule')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  function addCondition() {
+    if (formConditions.length >= 3) return
+    setFormConditions([...formConditions, { type: '', params: {} }])
+  }
+
+  function removeCondition(index: number) {
+    setFormConditions(formConditions.filter((_, i) => i !== index))
+  }
+
+  function updateCondition(
+    index: number,
+    field: 'type' | 'params',
+    value: string | Record<string, string>
+  ) {
+    const updated = [...formConditions]
+    if (field === 'type') {
+      updated[index] = { type: value as string, params: {} }
+    } else {
+      updated[index] = { ...updated[index], params: value as Record<string, string> }
+    }
+    setFormConditions(updated)
+  }
+
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="h-16 animate-pulse rounded-lg bg-zinc-100" />
+        ))}
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Sub-tabs */}
+      <div className="flex gap-4">
+        {AUTOMATION_SUB_TABS.map((tab) => (
+          <button
+            key={tab}
+            type="button"
+            onClick={() => setSubTab(tab)}
+            className={cn(
+              'rounded-lg px-4 py-2 text-sm font-medium transition',
+              subTab === tab
+                ? 'bg-zinc-900 text-white'
+                : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
+            )}
+          >
+            {tab}
+          </button>
+        ))}
+      </div>
+
+      {/* Alerts */}
+      {error && (
+        <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm text-rose-700">
+          {error}
+        </div>
+      )}
+      {success && (
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm text-emerald-700">
+          {success}
+        </div>
+      )}
+
+      {subTab === 'Rules' && (
+        <>
+          {/* Rules list */}
+          <section className="border border-zinc-200/80 bg-white px-6 py-6 md:px-7">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-semibold text-zinc-950">Automation Rules</h3>
+                <p className="mt-1 text-sm text-zinc-500">
+                  Rules trigger actions automatically when events occur.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  resetForm()
+                  setShowCreateForm(true)
+                }}
+                className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-700"
+              >
+                Create rule
+              </button>
+            </div>
+
+            {rules.length === 0 && !showCreateForm ? (
+              <div className="mt-6 rounded-lg border border-zinc-100 bg-zinc-50 px-4 py-8 text-center">
+                <p className="text-sm font-medium text-zinc-600">No automation rules yet</p>
+                <p className="mt-1 text-sm text-zinc-400">
+                  Create a rule or activate a template below to get started.
+                </p>
+              </div>
+            ) : (
+              <div className="mt-5 overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-zinc-100 text-left text-xs font-medium text-zinc-500">
+                      <th className="pb-2.5 pr-4">Name</th>
+                      <th className="pb-2.5 pr-4">Trigger</th>
+                      <th className="pb-2.5 pr-4">Action</th>
+                      <th className="pb-2.5 pr-4">Status</th>
+                      <th className="pb-2.5">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rules.map((rule) => (
+                      <tr key={rule.id} className="border-b border-zinc-50 last:border-0">
+                        <td className="py-3 pr-4">
+                          <div className="font-medium text-zinc-950">{rule.name}</div>
+                          {rule.description && (
+                            <div className="mt-0.5 text-xs text-zinc-400">{rule.description}</div>
+                          )}
+                        </td>
+                        <td className="py-3 pr-4 text-zinc-600">
+                          {TRIGGER_LABELS[rule.trigger_event] || rule.trigger_event}
+                        </td>
+                        <td className="py-3 pr-4 text-zinc-600">
+                          {ACTION_LABELS[rule.action_type] || rule.action_type}
+                        </td>
+                        <td className="py-3 pr-4">
+                          <button
+                            type="button"
+                            onClick={() => handleToggle(rule.id)}
+                            className="group flex items-center gap-2"
+                          >
+                            <div
+                              role="switch"
+                              aria-checked={rule.is_active}
+                              className={cn(
+                                'relative inline-flex h-5 w-9 items-center rounded-full transition-colors',
+                                rule.is_active ? 'bg-emerald-500' : 'bg-zinc-300'
+                              )}
+                            >
+                              <span
+                                className={cn(
+                                  'inline-block h-3.5 w-3.5 rounded-full bg-white transition-transform',
+                                  rule.is_active ? 'translate-x-4' : 'translate-x-1'
+                                )}
+                              />
+                            </div>
+                            <span
+                              className={cn(
+                                'text-xs font-medium',
+                                rule.is_active ? 'text-emerald-700' : 'text-zinc-400'
+                              )}
+                            >
+                              {rule.is_active ? 'Active' : 'Inactive'}
+                            </span>
+                          </button>
+                        </td>
+                        <td className="py-3">
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() => startEdit(rule)}
+                              className="rounded px-2 py-1 text-xs font-medium text-zinc-600 hover:bg-zinc-100"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDelete(rule.id)}
+                              className="rounded px-2 py-1 text-xs font-medium text-rose-600 hover:bg-rose-50"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
+
+          {/* Create/Edit form */}
+          {showCreateForm && (
+            <section className="border border-zinc-200/80 bg-white px-6 py-6 md:px-7">
+              <h3 className="text-sm font-semibold text-zinc-950">
+                {editingRuleId ? 'Edit Rule' : 'Create Rule'}
+              </h3>
+
+              <div className="mt-5 max-w-lg space-y-4">
+                {/* Name */}
+                <div>
+                  <label className="block text-xs font-medium text-zinc-500">Rule name</label>
+                  <input
+                    type="text"
+                    value={formName}
+                    onChange={(e) => setFormName(e.target.value)}
+                    placeholder="e.g., Auto-create case on checkout"
+                    className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300"
+                  />
+                </div>
+
+                {/* Description */}
+                <div>
+                  <label className="block text-xs font-medium text-zinc-500">
+                    Description (optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={formDescription}
+                    onChange={(e) => setFormDescription(e.target.value)}
+                    placeholder="What does this rule do?"
+                    className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300"
+                  />
+                </div>
+
+                {/* Trigger */}
+                <div>
+                  <label className="block text-xs font-medium text-zinc-500">When this happens</label>
+                  <select
+                    value={formTrigger}
+                    onChange={(e) => setFormTrigger(e.target.value)}
+                    className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300"
+                  >
+                    <option value="">Select trigger...</option>
+                    {Object.entries(TRIGGER_LABELS).map(([value, label]) => (
+                      <option key={value} value={value}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Conditions */}
+                <div>
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-medium text-zinc-500">
+                      Only if (conditions)
+                    </label>
+                    {formConditions.length < 3 && (
+                      <button
+                        type="button"
+                        onClick={addCondition}
+                        className="text-xs font-medium text-emerald-600 hover:text-emerald-700"
+                      >
+                        + Add condition
+                      </button>
+                    )}
+                  </div>
+                  {formConditions.length === 0 && (
+                    <p className="mt-1 text-xs text-zinc-400">
+                      No conditions — rule fires on every matching event.
+                    </p>
+                  )}
+                  {formConditions.map((cond, idx) => (
+                    <div key={idx} className="mt-2 flex gap-2">
+                      <select
+                        value={cond.type}
+                        onChange={(e) => updateCondition(idx, 'type', e.target.value)}
+                        className="h-9 flex-1 rounded-lg border border-zinc-200 bg-white px-2 text-sm text-zinc-900"
+                      >
+                        <option value="">Select condition...</option>
+                        {Object.entries(CONDITION_LABELS).map(([value, label]) => (
+                          <option key={value} value={value}>
+                            {label}
+                          </option>
+                        ))}
+                      </select>
+                      {cond.type && cond.type !== 'case.has_no_assignee' && (
+                        <input
+                          type="text"
+                          value={Object.values(cond.params)[0] || ''}
+                          onChange={(e) => {
+                            const paramKey =
+                              cond.type === 'tenancy.end_date_within_days'
+                                ? 'days'
+                                : cond.type === 'tenancy.deposit_scheme_is'
+                                  ? 'scheme'
+                                  : cond.type === 'case.status_is'
+                                    ? 'status'
+                                    : cond.type === 'case.priority_is'
+                                      ? 'priority'
+                                      : cond.type === 'inspection.type_is'
+                                        ? 'type'
+                                        : cond.type === 'property.postcode_starts_with'
+                                          ? 'prefix'
+                                          : 'value'
+                            updateCondition(idx, 'params', { [paramKey]: e.target.value })
+                          }}
+                          placeholder={
+                            cond.type === 'tenancy.end_date_within_days'
+                              ? '30'
+                              : cond.type === 'case.status_is'
+                                ? 'review'
+                                : 'value'
+                          }
+                          className="h-9 w-28 rounded-lg border border-zinc-200 bg-white px-2 text-sm text-zinc-900"
+                        />
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => removeCondition(idx)}
+                        className="h-9 rounded px-2 text-xs text-rose-500 hover:bg-rose-50"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Action */}
+                <div>
+                  <label className="block text-xs font-medium text-zinc-500">Then do this</label>
+                  <select
+                    value={formAction}
+                    onChange={(e) => {
+                      setFormAction(e.target.value)
+                      setFormActionParams({})
+                    }}
+                    className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300"
+                  >
+                    <option value="">Select action...</option>
+                    {Object.entries(ACTION_LABELS).map(([value, label]) => (
+                      <option key={value} value={value}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Action params (dynamic based on action type) */}
+                {formAction === 'create_case' && (
+                  <div>
+                    <label className="block text-xs font-medium text-zinc-500">Priority</label>
+                    <select
+                      value={formActionParams.priority || 'medium'}
+                      onChange={(e) =>
+                        setFormActionParams({ ...formActionParams, priority: e.target.value })
+                      }
+                      className="mt-1 h-9 w-full rounded-lg border border-zinc-200 bg-white px-2 text-sm"
+                    >
+                      <option value="low">Low</option>
+                      <option value="medium">Medium</option>
+                      <option value="high">High</option>
+                    </select>
+                  </div>
+                )}
+
+                {formAction === 'change_case_status' && (
+                  <div>
+                    <label className="block text-xs font-medium text-zinc-500">Target status</label>
+                    <select
+                      value={formActionParams.status || ''}
+                      onChange={(e) =>
+                        setFormActionParams({ ...formActionParams, status: e.target.value })
+                      }
+                      className="mt-1 h-9 w-full rounded-lg border border-zinc-200 bg-white px-2 text-sm"
+                    >
+                      <option value="">Select status...</option>
+                      <option value="draft">Draft</option>
+                      <option value="collecting_evidence">Collecting Evidence</option>
+                      <option value="analysis">Analysis</option>
+                      <option value="review">Review</option>
+                    </select>
+                  </div>
+                )}
+
+                {formAction === 'assign_case' && (
+                  <div>
+                    <label className="block text-xs font-medium text-zinc-500">
+                      Assignment method
+                    </label>
+                    <select
+                      value={formActionParams.user_id || 'least_loaded'}
+                      onChange={(e) =>
+                        setFormActionParams({ ...formActionParams, user_id: e.target.value })
+                      }
+                      className="mt-1 h-9 w-full rounded-lg border border-zinc-200 bg-white px-2 text-sm"
+                    >
+                      <option value="least_loaded">Least loaded operator</option>
+                      <option value="round_robin">Round robin</option>
+                    </select>
+                  </div>
+                )}
+
+                {formAction === 'send_notification' && (
+                  <div>
+                    <label className="block text-xs font-medium text-zinc-500">Channel</label>
+                    <select
+                      value={formActionParams.channel || 'in_app'}
+                      onChange={(e) =>
+                        setFormActionParams({ ...formActionParams, channel: e.target.value })
+                      }
+                      className="mt-1 h-9 w-full rounded-lg border border-zinc-200 bg-white px-2 text-sm"
+                    >
+                      <option value="in_app">In-app</option>
+                      <option value="email">Email</option>
+                    </select>
+                  </div>
+                )}
+
+                {formAction === 'log_timeline_event' && (
+                  <div>
+                    <label className="block text-xs font-medium text-zinc-500">Description</label>
+                    <input
+                      type="text"
+                      value={formActionParams.description || ''}
+                      onChange={(e) =>
+                        setFormActionParams({ ...formActionParams, description: e.target.value })
+                      }
+                      placeholder="Action logged by automation"
+                      className="mt-1 h-9 w-full rounded-lg border border-zinc-200 bg-white px-2 text-sm"
+                    />
+                  </div>
+                )}
+
+                {/* Buttons */}
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={handleSaveRule}
+                    disabled={saving}
+                    className="rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:opacity-50"
+                  >
+                    {saving ? 'Saving...' : editingRuleId ? 'Update rule' : 'Create rule'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="rounded-lg border border-zinc-200 px-5 py-2.5 text-sm font-medium text-zinc-600 transition hover:bg-zinc-50"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* Templates */}
+          {templates.length > 0 && (
+            <section className="border border-zinc-200/80 bg-white px-6 py-6 md:px-7">
+              <h3 className="text-sm font-semibold text-zinc-950">Quick Start Templates</h3>
+              <p className="mt-1 text-sm text-zinc-500">
+                Activate a template to create an inactive rule you can customise.
+              </p>
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                {templates.map((tmpl) => (
+                  <div
+                    key={tmpl.id}
+                    className="rounded-lg border border-zinc-100 bg-zinc-50 px-4 py-3"
+                  >
+                    <p className="text-sm font-medium text-zinc-900">{tmpl.name}</p>
+                    <p className="mt-0.5 text-xs text-zinc-500">{tmpl.description}</p>
+                    <div className="mt-2 flex gap-2">
+                      <span className="rounded-full bg-sky-50 px-2 py-0.5 text-xs font-medium text-sky-700">
+                        {TRIGGER_LABELS[tmpl.trigger_event] || tmpl.trigger_event}
+                      </span>
+                      <span className="rounded-full bg-violet-50 px-2 py-0.5 text-xs font-medium text-violet-700">
+                        {ACTION_LABELS[tmpl.action_type] || tmpl.action_type}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleActivateTemplate(tmpl.id)}
+                      className="mt-3 rounded-lg border border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-700 transition hover:bg-zinc-100"
+                    >
+                      Activate template
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+        </>
+      )}
+
+      {subTab === 'Execution Log' && (
+        <section className="border border-zinc-200/80 bg-white px-6 py-6 md:px-7">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-semibold text-zinc-950">Execution Log</h3>
+              <p className="mt-1 text-sm text-zinc-500">
+                Recent rule evaluations and their outcomes.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={fetchLogs}
+              className="rounded-lg border border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-600 transition hover:bg-zinc-50"
+            >
+              Refresh
+            </button>
+          </div>
+
+          {logs.length === 0 ? (
+            <div className="mt-6 rounded-lg border border-zinc-100 bg-zinc-50 px-4 py-8 text-center">
+              <p className="text-sm font-medium text-zinc-600">No executions yet</p>
+              <p className="mt-1 text-sm text-zinc-400">
+                Logs will appear here when rules are triggered.
+              </p>
+            </div>
+          ) : (
+            <div className="mt-5 overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-zinc-100 text-left text-xs font-medium text-zinc-500">
+                    <th className="pb-2.5 pr-4">Trigger</th>
+                    <th className="pb-2.5 pr-4">Result</th>
+                    <th className="pb-2.5 pr-4">Action</th>
+                    <th className="pb-2.5 pr-4">Duration</th>
+                    <th className="pb-2.5">Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {logs.map((log) => (
+                    <tr key={log.id} className="border-b border-zinc-50 last:border-0">
+                      <td className="py-2.5 pr-4 text-zinc-600">
+                        {TRIGGER_LABELS[log.trigger_event] || log.trigger_event}
+                      </td>
+                      <td className="py-2.5 pr-4">
+                        {log.conditions_met ? (
+                          log.action_result && 'error' in log.action_result ? (
+                            <span className="rounded-full bg-rose-50 px-2 py-0.5 text-xs font-medium text-rose-700">
+                              Failed
+                            </span>
+                          ) : (
+                            <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
+                              Executed
+                            </span>
+                          )
+                        ) : (
+                          <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-500">
+                            Skipped
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-2.5 pr-4 text-zinc-600">
+                        {log.action_taken
+                          ? ACTION_LABELS[log.action_taken] || log.action_taken
+                          : '-'}
+                      </td>
+                      <td className="py-2.5 pr-4 text-zinc-400">
+                        {log.duration_ms != null ? `${log.duration_ms}ms` : '-'}
+                      </td>
+                      <td className="py-2.5 text-zinc-400">
+                        {new Date(log.executed_at).toLocaleString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      )}
+    </div>
+  )
+}
+
 export function SettingsTabs() {
   const [activeTab, setActiveTab] = useState<Tab>('Account')
 
@@ -1906,6 +2730,7 @@ export function SettingsTabs() {
         {activeTab === 'Team' ? <TeamTab /> : null}
         {activeTab === 'Integrations' ? <IntegrationsTab /> : null}
         {activeTab === 'Email Ingestion' ? <EmailIngestionTab /> : null}
+        {activeTab === 'Automation' ? <AutomationTab /> : null}
       </div>
     </div>
   )

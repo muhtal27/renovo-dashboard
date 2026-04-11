@@ -1,6 +1,6 @@
 # Integration Platform — Session Handoff
 
-> Updated: 2026-04-11 after completing Phase 1, Phase 2, Phase 3, bug sweep, and Phase 4
+> Updated: 2026-04-11 after completing Phase 1, Phase 2, Phase 3, bug sweep, Phase 4, and Phase 5
 
 ## What was built
 
@@ -123,6 +123,46 @@ All registered with `ConnectorType.DEPOSIT_SCHEME`, capabilities: `SUBMIT_CLAIM`
 - Scheme status tracker on `step-submitted.tsx` with status badges
 - 5 deposit scheme entries in Settings with "Coming soon" panels
 
+### Phase 5: Rule Engine v1
+Trigger-condition-action automation system for agencies.
+
+**Database** (migration `20260411_0004`):
+- `automation_rules` — per-tenant rule definitions (trigger_event, conditions JSONB, action_type, action_params JSONB, priority, soft-delete)
+- `rule_execution_log` — append-only audit trail for every rule evaluation
+
+**Rule engine core** (`backend/app/services/rule_engine.py`):
+- `RuleEngine.process_event(tenant_id, event_type, payload)` — evaluates matching active rules sequentially
+- 7 condition evaluators (dict registry): tenancy.end_date_within_days, tenancy.deposit_scheme_is, case.status_is, case.priority_is, case.has_no_assignee, inspection.type_is, property.postcode_starts_with
+- 6 action executors (dict registry): create_case (sync), assign_case (sync, supports round_robin/least_loaded), send_notification (async, v1 stub), change_case_status (sync), start_analysis (async fire-and-forget), log_timeline_event (sync)
+- Loop prevention via `contextvars.ContextVar` — re-entrant events persist for audit but don't re-trigger rule evaluation
+- Failure isolation — each rule wrapped in try/except, failures never block other rules
+
+**Event wiring** (5 callsites connected):
+- `IntegrationEventDispatcher.emit()` now calls `RuleEngine.process_event()` inline after persisting each event
+- `EOTService.transition_case_status()` emits `case.status_changed`
+- `IntegrationSyncService.run_pull()` emits `connection.sync_completed` after each resource sync
+- `SyncProcessor.process_tenancies()` emits `tenancy.ending_soon` (<=60 days) and `tenancy.ended`
+- Public API `create_inspection` emits `inspection.received`
+
+**Backend API** (`backend/app/api/integrations/automation.py`, mounted at `/api/integrations/automation`):
+- `GET/POST /rules` — list and create rules
+- `GET/PUT/DELETE /rules/{rule_id}` — single rule CRUD
+- `PATCH /rules/{rule_id}/toggle` — enable/disable toggle
+- `GET /logs` — execution log (filterable by rule_id)
+- `GET /templates` — 4 default templates
+- `POST /templates/{template_id}/activate` — create inactive rule from template
+
+**Frontend**:
+- 6 proxy routes at `app/api/integrations/automation/`
+- "Automation" tab in Settings with Rules sub-view (CRUD table, create/edit wizard, templates) and Execution Log sub-view
+- Rule wizard: trigger dropdown -> conditions (0-3 with params) -> action with params -> name
+
+**Default templates** (`backend/app/services/rule_templates.py`):
+1. Auto-create case 28 days before tenancy end
+2. Auto-create case on checkout inspection received
+3. Notify manager when case reaches review
+4. Alert on claim deadline (7 days)
+
 ### Bug Sweep (34 fixes applied this session)
 
 **Phase 1 fixes (6):**
@@ -168,6 +208,24 @@ All registered with `ConnectorType.DEPOSIT_SCHEME`, capabilities: `SUBMIT_CLAIM`
 34. Content-Type enforcement on OAuth token endpoint
 35. `handleDisconnect` checks response status in frontend
 
+### Code smell sweep (9 fixes applied this session)
+
+36. Removed unused `ConnectionListResponse` schema from `schemas.py` and import from `router.py`
+37. `apply_mapping` now logs warning on non-string/non-callable values instead of silent `None`
+38. Moved lazy imports (`Capability`, `SyncProcessor`, `IntegrationEventDispatcher`) to top-level in `integration_sync.py`
+39. `_resolve_path` now supports list indexing (e.g., `"rooms[0].name"`)
+40. Sync log count fields now have Python-side `default=0` alongside `server_default`
+41. `IntegrationEventDispatcher.emit()` docstring updated (now says "persisted immediately, then rule engine invoked inline")
+42. Fixed `handleTest` double-parsing response body in both Street and Reapit panels (parse once, branch on status)
+43. Token cache bounded to 100 entries with expired-entry eviction on each insert
+44. Added duplicate webhook URL prevention (`409 duplicate_webhook` on `POST /v1/webhooks`)
+
+### Cleanup applied this session
+
+45. Removed `/debug-pull` endpoint from `backend/app/api/reapit/router.py` and `app/api/reapit/debug-pull/route.ts`
+46. `__pycache__` confirmed not tracked in git (`.gitignore` covers it)
+47. Inspection → Case pipeline now handled by rule engine template "Auto-create case on checkout received"
+
 ### Current state
 - Reapit sandbox (SBOX) connected in production — 1,000 properties + 636 tenancies synced
 - Public API v1 live at `https://backend.renovoai.co.uk/v1/`
@@ -176,7 +234,10 @@ All registered with `ConnectorType.DEPOSIT_SCHEME`, capabilities: `SUBMIT_CLAIM`
 - 5 deposit scheme connectors registered (stubs, returning 503)
 - 3 deposit scheme API endpoints live (submit-claim, upload-evidence, claim-status)
 - 11 existing cases queryable via the public API
-- 34 bug fixes deployed
+- 34 bug fixes + 12 code smell/cleanup fixes deployed
+- Rule engine v1 deployed with 7 conditions, 6 actions, 4 templates
+- 5 event emission points wired (case status, sync, tenancy lifecycle, inspections)
+- Automation tab live in Settings (rule CRUD, execution log, templates)
 
 ## Key technical decisions
 
@@ -196,6 +257,10 @@ All registered with `ConnectorType.DEPOSIT_SCHEME`, capabilities: `SUBMIT_CLAIM`
 14. **Deposit scheme stubs return 503** — full code path exercised, real API swapped in per-connector when access arrives.
 15. **Shared DepositSchemeConnectorBase** — reduces duplication across 5 near-identical connectors while keeping each independently registerable.
 16. **Dual storage for scheme references** — `scheme_reference` on Claim (fast queries) + ExternalRef (framework consistency).
+17. **Rule engine runs inline** — called synchronously from `IntegrationEventDispatcher.emit()` after persisting each event. No background consumer needed.
+18. **Loop prevention via contextvars** — `_rule_engine_processing` ContextVar prevents re-entrant rule evaluation. Actions that emit events (e.g., `change_case_status`) persist events for audit but don't re-trigger rules.
+19. **Async actions use asyncio.create_task()** — `send_notification` and `start_analysis` fire-and-forget since `BackgroundTasks` isn't available in service context.
+20. **send_notification is a v1 stub** — logs intent but doesn't deliver. Requires notification infrastructure (not yet built).
 
 ## Environment variables (Vercel backend project)
 
@@ -242,11 +307,12 @@ When API access arrives from any scheme:
 | SafeDeposits Scotland | Pending | developer support |
 | LPS | Pending | developer support |
 
-### Phase 5: Rule engine + polish
-Spec: `docs/integrations/06-rule-engine-v1.md`
-- `automation_rules` + `rule_execution_log` tables
-- Trigger→condition→action engine
-- Settings UI for rule management
+### Phase 5 improvements (post-v1)
+- **Notification delivery** — wire `send_notification` action to actual email/in-app infrastructure
+- **Scheduled triggers** — daily background scan for `tenancy.ending_soon` and `claim.deadline_approaching` (currently detection depends on sync frequency)
+- **Rule retry** — automatic retry for failed actions (currently operator must manually re-trigger)
+- **Rule versioning** — currently relies on soft-delete + audit log
+- **Cross-tenant templates** — agency group shared templates (marketplace)
 
 ### NLG onboarding (post-Phase 3)
 - Create NLG sandbox tenant with test data
@@ -254,7 +320,7 @@ Spec: `docs/integrations/06-rule-engine-v1.md`
 - Write NLG-specific integration guide
 - Support NLG through initial integration
 
-## Remaining known issues (not yet fixed)
+## Remaining known issues
 
 ### Needs architectural decision
 1. **Health state overwritten after partial sync** — if 3 resources fail and 1 succeeds, consecutive_failures resets to 0
@@ -271,34 +337,20 @@ Spec: `docs/integrations/06-rule-engine-v1.md`
 10. **Webhook retries never execute** — no background task/scheduler calls `list_pending()`
 11. **`download_url` returns raw file_url** — needs Supabase signed URL generation
 
-### Code smells (low priority)
-12. `ConnectionListResponse` schema defined but never used
-13. `apply_mapping` silently ignores non-string/non-callable values
-14. Lazy imports of `Capability` and `SyncProcessor` inside methods
-15. `_resolve_path` doesn't handle list indexing
-16. Sync log count fields rely on `server_default`
-17. `IntegrationEventDispatcher.emit()` docstring says "persisted" but only flushes
-18. `handleTest` double-parses response body (works by coincidence)
-19. Token and pubkey caches grow unbounded
-20. No duplicate webhook URL prevention in public API
-
-## Cleanup items
-
-1. **Remove debug-pull endpoint** — `backend/app/api/reapit/router.py` has `/debug-pull` (now production-guarded but should be removed entirely) and `app/api/reapit/debug-pull/route.ts` frontend proxy.
-2. **Remove tracked __pycache__** — run `git rm -r --cached '*.pyc'` if needed.
-3. **Street.co.uk migration** — old StreetConnection/StreetSyncLog tables still exist alongside the new generic framework. Plan migration.
-4. **Partner onboarding UI** — Settings page has no UI for managing API applications or API keys.
-5. **Inspection → Case pipeline** — `POST /v1/inspections` creates Inspection but does NOT auto-create a Case.
+### Remaining cleanup
+12. **Street.co.uk migration** — old StreetConnection/StreetSyncLog tables still exist alongside the new generic framework. Plan migration.
+13. **Partner onboarding UI** — Settings page has no UI for managing API applications or API keys.
 
 ## Files to read first in next session
 
 1. `docs/integrations/HANDOFF.md` — this file
 2. `docs/integrations/00-overview.md` — architecture and glossary
-3. `docs/integrations/09-phased-implementation-plan.md` — full phase breakdown with tickets
-4. `backend/app/integrations/deposit_scheme_base.py` — shared deposit scheme base class
-5. `backend/app/services/claim_submission.py` — claim submission orchestration
-6. `backend/app/api/integrations/deposit_scheme.py` — deposit scheme API router
-7. `backend/app/integrations/base.py` — connector interface
-8. `backend/app/integrations/reapit/connector.py` — working connector example
-9. `backend/app/api/v1/router.py` — public API router assembly
-10. `backend/app/services/webhook_delivery.py` — outbound webhook engine
+3. `docs/integrations/06-rule-engine-v1.md` — rule engine spec
+4. `backend/app/services/rule_engine.py` — rule engine core (conditions, actions, RuleEngine class)
+5. `backend/app/services/rule_templates.py` — default rule templates
+6. `backend/app/api/integrations/automation.py` — rule CRUD + template API
+7. `backend/app/services/integration_events.py` — event dispatcher (calls rule engine inline)
+8. `backend/app/integrations/base.py` — connector interface
+9. `backend/app/integrations/reapit/connector.py` — working connector example
+10. `backend/app/api/v1/router.py` — public API router assembly
+11. `backend/app/services/webhook_delivery.py` — outbound webhook engine

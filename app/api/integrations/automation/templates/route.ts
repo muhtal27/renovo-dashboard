@@ -1,10 +1,10 @@
 import { proxyEotRequest } from '@/lib/eot-proxy'
 import { OPERATOR_PERMISSIONS } from '@/lib/operator-rbac'
 
-export async function POST(request: Request) {
+export async function GET(request: Request) {
   return proxyEotRequest(
     request,
-    '/api/integrations/reapit/debug-pull',
+    '/api/integrations/automation/templates',
     OPERATOR_PERMISSIONS.MANAGE_SETTINGS
   )
 }
