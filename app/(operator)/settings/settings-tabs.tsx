@@ -1448,11 +1448,15 @@ function ReapitIntegrationPanel() {
     setError(null)
     setSuccess(null)
     try {
-      await fetch(`/api/integrations/connections/${status.connection.id}`, { method: 'DELETE' })
+      const res = await fetch(`/api/integrations/connections/${status.connection.id}`, { method: 'DELETE' })
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({})) as { detail?: string }
+        throw new Error(body.detail || 'Disconnect failed')
+      }
       setSuccess('Reapit disconnected.')
       await loadStatus()
-    } catch {
-      setError('Failed to disconnect.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to disconnect.')
     }
   }
 
