@@ -1328,38 +1328,13 @@ type ReapitConnectionStatus = {
 function ReapitIntegrationPanel() {
   const [status, setStatus] = useState<ReapitConnectionStatus | null>(null)
   const [loading, setLoading] = useState(true)
-  const [connecting, setConnecting] = useState(false)
+  const [customerId, setCustomerId] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [testing, setTesting] = useState(false)
   const [syncing, setSyncing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
-
-  // Read flash messages from URL after OAuth callback redirect
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const reapitParam = params.get('reapit')
-    if (reapitParam === 'connected') {
-      setSuccess('Reapit connected successfully. Initial sync is running.')
-      // Clean URL
-      const url = new URL(window.location.href)
-      url.searchParams.delete('reapit')
-      window.history.replaceState({}, '', url.toString())
-    } else if (reapitParam === 'error') {
-      const reason = params.get('reason') || 'unknown'
-      const messages: Record<string, string> = {
-        missing_params: 'OAuth callback missing required parameters.',
-        invalid_state: 'OAuth state verification failed. Please try again.',
-        token_exchange: 'Failed to exchange authorization code with Reapit.',
-        session_expired: 'Your session expired during the OAuth flow. Please try again.',
-        activation_failed: 'Failed to activate the Reapit connection.',
-        not_configured: 'Reapit integration is not configured on the server.',
-      }
-      setError(messages[reason] || `Connection failed: ${reason}`)
-      const url = new URL(window.location.href)
-      url.searchParams.delete('reapit')
-      url.searchParams.delete('reason')
-      window.history.replaceState({}, '', url.toString())
-    }
-  }, [])
+  const [testResult, setTestResult] = useState<{ ok: boolean; detail: string } | null>(null)
 
   const loadStatus = useCallback(async () => {
     setLoading(true)
@@ -1377,7 +1352,6 @@ function ReapitIntegrationPanel() {
       const reapit = connections.find((c) => c.provider === 'reapit')
 
       if (reapit && reapit.status !== 'pending') {
-        // Fetch sync logs for this connection
         const logsRes = await fetch(`/api/integrations/connections/${reapit.id}/sync-logs`)
         const logs = logsRes.ok ? await logsRes.json() : []
         setStatus({ connected: true, connection: reapit, sync_logs: logs })
@@ -1394,20 +1368,46 @@ function ReapitIntegrationPanel() {
   useEffect(() => { void loadStatus() }, [loadStatus])
 
   async function handleConnect() {
-    setConnecting(true)
+    setSaving(true)
     setError(null)
+    setSuccess(null)
+    setTestResult(null)
     try {
-      const res = await fetch('/api/reapit/authorize', { method: 'POST' })
+      const res = await fetch('/api/reapit/authorize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customer_id: customerId.trim() }),
+      })
       if (!res.ok) {
         const body = await res.json().catch(() => ({})) as { detail?: string }
-        throw new Error(body.detail || 'Failed to start OAuth flow')
+        throw new Error(body.detail || 'Failed to connect')
       }
-      const data = await res.json() as { authorize_url: string }
-      // Redirect browser to Reapit OAuth
-      window.location.href = data.authorize_url
+      setCustomerId('')
+      setSuccess('Reapit connected successfully. Initial sync is running.')
+      await loadStatus()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to connect.')
-      setConnecting(false)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function handleTest() {
+    setTesting(true)
+    setTestResult(null)
+    setError(null)
+    try {
+      const res = await fetch('/api/reapit/test', { method: 'POST' })
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({})) as { detail?: string }
+        throw new Error(body.detail || 'Test failed')
+      }
+      const data = (await res.json()) as { ok: boolean; detail: string }
+      setTestResult(data)
+    } catch (err) {
+      setTestResult({ ok: false, detail: err instanceof Error ? err.message : 'Test failed.' })
+    } finally {
+      setTesting(false)
     }
   }
 
@@ -1509,17 +1509,57 @@ function ReapitIntegrationPanel() {
           </div>
         ) : null}
 
-        <div className="mt-5 flex flex-wrap items-center gap-2">
-          {!connected ? (
+        {testResult ? (
+          <div
+            className={cn(
+              'mt-4 border px-4 py-2.5 text-sm',
+              testResult.ok
+                ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                : 'border-rose-200 bg-rose-50 text-rose-700'
+            )}
+          >
+            {testResult.detail}
+          </div>
+        ) : null}
+
+        {!connected ? (
+          <div className="mt-5 max-w-md space-y-4">
+            <div>
+              <label htmlFor="reapit-customer-id" className="block text-xs font-medium text-zinc-500">
+                Reapit Customer ID
+              </label>
+              <input
+                id="reapit-customer-id"
+                type="text"
+                value={customerId}
+                onChange={(e) => setCustomerId(e.target.value)}
+                placeholder="e.g. SBOX (sandbox) or your live customer ID"
+                className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300"
+              />
+              <p className="mt-1 text-xs text-zinc-400">
+                First install Renovo from the Reapit AppMarket. Your Customer ID is shown in the Reapit Developer Portal under Installations.
+              </p>
+            </div>
+
             <button
               type="button"
               onClick={handleConnect}
-              disabled={connecting}
+              disabled={saving || !customerId.trim()}
               className="rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:opacity-50"
             >
-              {connecting ? 'Redirecting to Reapit...' : 'Connect to Reapit'}
+              {saving ? 'Connecting...' : 'Connect'}
             </button>
-          ) : (
+          </div>
+        ) : (
+          <div className="mt-5 flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={handleTest}
+              disabled={testing}
+              className="rounded-lg border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 disabled:opacity-50"
+            >
+              {testing ? 'Testing...' : 'Test connection'}
+            </button>
             <button
               type="button"
               onClick={handleDisconnect}
@@ -1527,14 +1567,8 @@ function ReapitIntegrationPanel() {
             >
               Disconnect
             </button>
-          )}
-        </div>
-
-        {!connected ? (
-          <p className="mt-3 text-xs text-zinc-400">
-            You&apos;ll be redirected to Reapit to authorize Renovo. Requires a Reapit Foundations account.
-          </p>
-        ) : null}
+          </div>
+        )}
       </section>
 
       {/* Sync controls */}
