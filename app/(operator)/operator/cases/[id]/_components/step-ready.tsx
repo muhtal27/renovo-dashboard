@@ -145,7 +145,7 @@ export function StepReady({ data }: { data: OperatorCheckoutWorkspaceData }) {
             </WorkspaceActionButton>
             <WorkspaceActionButton
               disabled={isTransitioning || isSubmittingToScheme}
-              tone="default"
+              tone="secondary"
               onClick={async () => {
                 setIsSubmittingToScheme(true)
                 setError(null)
