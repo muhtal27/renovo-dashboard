@@ -11,8 +11,16 @@ import type { OperatorCheckoutWorkspaceData } from '@/lib/operator-checkout-work
 export function StepSubmitted({ data }: { data: OperatorCheckoutWorkspaceData }) {
   const router = useRouter()
   const [isTransitioning, setIsTransitioning] = useState(false)
+  const [isCheckingStatus, setIsCheckingStatus] = useState(false)
   const [, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
+  const [schemeStatus, setSchemeStatus] = useState<{
+    scheme_provider: string | null
+    scheme_reference: string | null
+    scheme_status: string | null
+    adjudicator_notes: string | null
+    submitted_at: string | null
+  } | null>(null)
 
   const caseId = data.workspace.case.id
   const caseStatus = data.workspace.case.status
@@ -90,6 +98,75 @@ export function StepSubmitted({ data }: { data: OperatorCheckoutWorkspaceData })
             </dd>
           </div>
         </dl>
+      </section>
+
+      <section>
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-zinc-950">Deposit scheme</h3>
+          <button
+            type="button"
+            disabled={isCheckingStatus}
+            onClick={async () => {
+              setIsCheckingStatus(true)
+              try {
+                const res = await fetch(`/api/integrations/cases/${caseId}/claim-status`)
+                if (res.status === 503) {
+                  setSchemeStatus(null)
+                  return
+                }
+                if (res.ok) {
+                  const data = await res.json()
+                  setSchemeStatus(data)
+                }
+              } catch {
+                // Silently ignore — scheme status is supplementary
+              } finally {
+                setIsCheckingStatus(false)
+              }
+            }}
+            className="text-xs font-medium text-indigo-600 hover:text-indigo-800 disabled:opacity-50"
+          >
+            {isCheckingStatus ? 'Checking...' : 'Check status'}
+          </button>
+        </div>
+        {schemeStatus?.scheme_provider ? (
+          <div className="mt-3 rounded-lg border border-zinc-200 bg-zinc-50/50 p-4">
+            <dl className="grid grid-cols-2 gap-x-8 gap-y-3 text-sm xl:grid-cols-3">
+              <div>
+                <dt className="text-xs text-zinc-500">Scheme</dt>
+                <dd className="mt-0.5 font-medium text-zinc-950">{schemeStatus.scheme_provider}</dd>
+              </div>
+              <div>
+                <dt className="text-xs text-zinc-500">Reference</dt>
+                <dd className="mt-0.5 font-medium text-zinc-950">{schemeStatus.scheme_reference || '—'}</dd>
+              </div>
+              <div>
+                <dt className="text-xs text-zinc-500">Status</dt>
+                <dd className="mt-0.5">
+                  <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+                    schemeStatus.scheme_status === 'submitted' ? 'bg-blue-50 text-blue-700' :
+                    schemeStatus.scheme_status === 'under_review' ? 'bg-amber-50 text-amber-700' :
+                    schemeStatus.scheme_status === 'resolved' ? 'bg-emerald-50 text-emerald-700' :
+                    schemeStatus.scheme_status === 'disputed' ? 'bg-rose-50 text-rose-700' :
+                    'bg-zinc-100 text-zinc-600'
+                  }`}>
+                    {schemeStatus.scheme_status || 'unknown'}
+                  </span>
+                </dd>
+              </div>
+            </dl>
+            {schemeStatus.adjudicator_notes ? (
+              <div className="mt-3 border-t border-zinc-200 pt-3">
+                <p className="text-xs text-zinc-500">Adjudicator notes</p>
+                <p className="mt-1 text-sm text-zinc-700">{schemeStatus.adjudicator_notes}</p>
+              </div>
+            ) : null}
+          </div>
+        ) : (
+          <p className="mt-2 text-sm text-zinc-500">
+            No deposit scheme submission linked. Click &quot;Check status&quot; to refresh.
+          </p>
+        )}
       </section>
 
       {timelineItems.length > 0 ? (

@@ -308,6 +308,56 @@ const INTEGRATION_LIST: Integration[] = [
     description: 'Connect property reports and inspection data from Inventory Hive.',
     features: ['Import property reports', 'Sync inspection data', 'Pull compliance documents'],
   },
+  {
+    name: 'TDS',
+    description: 'Submit deposit claims and track disputes with the Tenancy Deposit Scheme.',
+    features: [
+      'Submit deposit claims directly',
+      'Upload evidence bundles',
+      'Track dispute status in real time',
+      'Auto-update case on scheme decision',
+    ],
+  },
+  {
+    name: 'DPS',
+    description: 'Submit deposit claims and track disputes with the Deposit Protection Service.',
+    features: [
+      'Submit deposit claims directly',
+      'Upload evidence bundles',
+      'Track dispute status in real time',
+      'Auto-update case on scheme decision',
+    ],
+  },
+  {
+    name: 'mydeposits',
+    description: 'Submit deposit claims and track disputes with mydeposits.',
+    features: [
+      'Submit deposit claims directly',
+      'Upload evidence bundles',
+      'Track dispute status in real time',
+      'Auto-update case on scheme decision',
+    ],
+  },
+  {
+    name: 'SafeDeposits Scotland',
+    description: 'Submit deposit claims and track disputes with SafeDeposits Scotland.',
+    features: [
+      'Submit deposit claims directly',
+      'Upload evidence bundles',
+      'Track dispute status in real time',
+      'Auto-update case on scheme decision',
+    ],
+  },
+  {
+    name: 'LPS',
+    description: 'Submit deposit claims and track disputes with the Letting Protection Service Scotland.',
+    features: [
+      'Submit deposit claims directly',
+      'Upload evidence bundles',
+      'Track dispute status in real time',
+      'Auto-update case on scheme decision',
+    ],
+  },
 ]
 
 // ---------------------------------------------------------------------------
@@ -1679,6 +1729,8 @@ function IntegrationsTab() {
   const selected = INTEGRATION_LIST.find((i) => i.name === activeIntegration) ?? INTEGRATION_LIST[0]
   const isStreet = activeIntegration === 'Street.co.uk'
   const isReapit = activeIntegration === 'Reapit'
+  const DEPOSIT_SCHEMES = ['TDS', 'DPS', 'mydeposits', 'SafeDeposits Scotland', 'LPS']
+  const isDepositScheme = DEPOSIT_SCHEMES.includes(activeIntegration)
 
   return (
     <div className="space-y-6">
@@ -1711,6 +1763,42 @@ function IntegrationsTab() {
         <StreetIntegrationPanel />
       ) : isReapit ? (
         <ReapitIntegrationPanel />
+      ) : isDepositScheme ? (
+        <section className="border border-zinc-200/80 bg-white px-6 py-6 md:px-7">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h3 className="text-sm font-semibold text-zinc-950">
+                {selected.name} Integration
+              </h3>
+              <p className="mt-1 text-sm text-zinc-500">{selected.description}</p>
+            </div>
+            <span className="shrink-0 rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700">
+              Coming soon
+            </span>
+          </div>
+
+          <div className="mt-5 space-y-2">
+            {selected.features.map((feature) => (
+              <div key={feature} className="flex items-center gap-2 text-sm text-zinc-600">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-zinc-100 text-zinc-400">
+                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </span>
+                {feature}
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-6 rounded-lg border border-amber-200 bg-amber-50/50 p-4">
+            <p className="text-sm font-medium text-amber-800">API access pending</p>
+            <p className="mt-1 text-sm text-amber-700">
+              Direct integration with {selected.name} requires API access from the scheme provider.
+              Once access is granted, you&apos;ll be able to submit claims, upload evidence, and track
+              disputes directly from Renovo.
+            </p>
+          </div>
+        </section>
       ) : (
         <>
           {/* Feature list for non-Street integrations */}

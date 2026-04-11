@@ -10,8 +10,10 @@ import type { OperatorCheckoutWorkspaceData } from '@/lib/operator-checkout-work
 export function StepReady({ data }: { data: OperatorCheckoutWorkspaceData }) {
   const router = useRouter()
   const [isTransitioning, setIsTransitioning] = useState(false)
+  const [isSubmittingToScheme, setIsSubmittingToScheme] = useState(false)
   const [, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
+  const [schemeInfo, setSchemeInfo] = useState<string | null>(null)
 
   const caseId = data.workspace.case.id
   const caseStatus = data.workspace.case.status
@@ -136,10 +138,45 @@ export function StepReady({ data }: { data: OperatorCheckoutWorkspaceData }) {
             Once submitted, the case moves to the submitted state and cannot be edited without dispute
             resolution.
           </p>
-          <WorkspaceActionButton disabled={isTransitioning} tone="primary" onClick={handleSubmit}>
-            {isTransitioning ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-            Submit claim
-          </WorkspaceActionButton>
+          <div className="flex flex-wrap items-center gap-3">
+            <WorkspaceActionButton disabled={isTransitioning || isSubmittingToScheme} tone="primary" onClick={handleSubmit}>
+              {isTransitioning ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+              Submit claim
+            </WorkspaceActionButton>
+            <WorkspaceActionButton
+              disabled={isTransitioning || isSubmittingToScheme}
+              tone="default"
+              onClick={async () => {
+                setIsSubmittingToScheme(true)
+                setError(null)
+                setSchemeInfo(null)
+                try {
+                  const res = await fetch(`/api/integrations/cases/${caseId}/submit-claim`, {
+                    method: 'POST',
+                  })
+                  if (res.status === 503) {
+                    setSchemeInfo('Deposit scheme integration is not yet configured. Connect a scheme in Settings.')
+                    return
+                  }
+                  if (!res.ok) {
+                    const err = await res.json().catch(() => null)
+                    throw new Error(err?.detail || 'Failed to submit to deposit scheme.')
+                  }
+                  startTransition(() => { router.refresh() })
+                } catch (e) {
+                  setError(e instanceof Error ? e.message : 'Failed to submit to deposit scheme.')
+                } finally {
+                  setIsSubmittingToScheme(false)
+                }
+              }}
+            >
+              {isSubmittingToScheme ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+              Submit to deposit scheme
+            </WorkspaceActionButton>
+          </div>
+          {schemeInfo ? (
+            <p className="mt-3 text-sm text-amber-700">{schemeInfo}</p>
+          ) : null}
         </div>
       ) : null}
     </div>
