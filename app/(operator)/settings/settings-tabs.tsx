@@ -2869,11 +2869,14 @@ function ApiPartnersTab() {
   async function fetchAppDetail(appId: string) {
     try {
       const res = await fetch(`/api/operator/applications/${appId}`)
-      if (!res.ok) throw new Error('Failed to load')
+      if (!res.ok) {
+        const body = (await res.json().catch(() => ({}))) as { detail?: string }
+        throw new Error(body.detail || `Failed to load app (${res.status})`)
+      }
       const data = (await res.json()) as PartnerApp
       setSelectedApp(data)
-    } catch {
-      setError('Failed to load application details.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load application details.')
     }
   }
 
@@ -2881,11 +2884,14 @@ function ApiPartnersTab() {
     setKeysLoading(true)
     try {
       const res = await fetch(`/api/operator/applications/${appId}/keys`)
-      if (!res.ok) throw new Error('Failed to load')
+      if (!res.ok) {
+        const body = (await res.json().catch(() => ({}))) as { detail?: string }
+        throw new Error(body.detail || `Failed to load keys (${res.status})`)
+      }
       const data = (await res.json()) as ApiKeyItem[]
       setKeys(data)
-    } catch {
-      setError('Failed to load API keys.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load API keys.')
     } finally {
       setKeysLoading(false)
     }
@@ -2897,6 +2903,8 @@ function ApiPartnersTab() {
     setEditing(false)
     setShowKeyForm(false)
     setRevealedSecret(null)
+    setError(null)
+    setSuccess(null)
     void fetchKeys(app.id)
   }
 
