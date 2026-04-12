@@ -1,17 +1,22 @@
 'use client'
 
-import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   BarChart3,
+  BookOpenText,
   Building2,
   ChevronLeft,
-  ClipboardCheck,
+  ChevronRight,
+  ClipboardList,
   CreditCard,
   Home,
-  LayoutDashboard,
+  Landmark,
   MessageSquare,
+  Settings,
+  ShieldAlert,
+  SlidersHorizontal,
+  Sparkles,
   Users,
   X,
 } from 'lucide-react'
@@ -28,12 +33,14 @@ type OperatorNavProps = {
   mobileOpen: boolean
   onToggleCollapse: () => void
   onCloseMobile: () => void
+  displayName?: string
+  initials?: string
 }
 
 type NavItem = {
   label: string
   href: string
-  icon: typeof LayoutDashboard
+  icon: typeof Home
   isActive: (pathname: string) => boolean
   requiredPermission?: (typeof OPERATOR_PERMISSIONS)[keyof typeof OPERATOR_PERMISSIONS]
 }
@@ -69,7 +76,7 @@ const NAV_GROUPS: Array<{
       {
         label: 'Disputes',
         href: '/disputes',
-        icon: ClipboardCheck,
+        icon: ShieldAlert,
         isActive: (pathname) => pathname.startsWith('/disputes') || pathname.startsWith('/issues'),
       },
     ],
@@ -80,7 +87,7 @@ const NAV_GROUPS: Array<{
       {
         label: 'Admin',
         href: '/admin',
-        icon: LayoutDashboard,
+        icon: SlidersHorizontal,
         isActive: (pathname) => pathname.startsWith('/admin'),
       },
       {
@@ -101,8 +108,43 @@ const NAV_GROUPS: Array<{
     ],
   },
   {
+    label: 'Resources',
+    items: [
+      {
+        label: 'Guidance',
+        href: '/guidance',
+        icon: BookOpenText,
+        isActive: (pathname) => pathname.startsWith('/guidance'),
+      },
+      {
+        label: 'Deposit Schemes',
+        href: '/deposit-scheme',
+        icon: Landmark,
+        isActive: (pathname) => pathname.startsWith('/deposit-scheme'),
+      },
+      {
+        label: 'Inventory Feedback',
+        href: '/inventory-feedback',
+        icon: ClipboardList,
+        isActive: (pathname) => pathname.startsWith('/inventory-feedback'),
+      },
+      {
+        label: "What's New",
+        href: '/whats-new',
+        icon: Sparkles,
+        isActive: (pathname) => pathname.startsWith('/whats-new'),
+      },
+    ],
+  },
+  {
     label: 'Account',
     items: [
+      {
+        label: 'Settings',
+        href: '/settings',
+        icon: Settings,
+        isActive: (pathname) => pathname.startsWith('/settings'),
+      },
       {
         label: 'Billing',
         href: '/account/billing',
@@ -133,25 +175,25 @@ function NavLink({
       onClick={onNavigate}
       title={collapsed ? item.label : undefined}
       className={cn(
-        'group relative flex items-center gap-2.5 rounded-[10px] border px-3 py-2 text-[13px] font-medium transition-all duration-150',
+        'group relative flex items-center gap-2.5 rounded-[10px] border px-2.5 py-2 text-[13px] font-medium transition-all duration-150',
         active
-          ? 'border-zinc-200 bg-white text-zinc-900 shadow-[0_1px_3px_rgba(0,0,0,0.04)]'
-          : 'border-transparent text-zinc-500 hover:border-zinc-200 hover:bg-white hover:text-zinc-900',
+          ? 'border-zinc-200 bg-white text-zinc-900 shadow-[0_1px_2px_rgba(0,0,0,0.04)]'
+          : 'border-transparent text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900',
         collapsed && 'justify-center px-2'
       )}
     >
       {active ? (
-        <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-emerald-500" />
+        <span className="absolute -left-px top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-emerald-500" />
       ) : null}
       <span
         className={cn(
-          'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-150',
+          'flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all duration-150',
           active
             ? 'bg-emerald-50 text-emerald-600'
             : 'text-zinc-400 group-hover:text-zinc-600'
         )}
       >
-        <Icon className="h-4 w-4" strokeWidth={2} />
+        <Icon className="h-[18px] w-[18px]" strokeWidth={2} />
       </span>
       {!collapsed ? <span className="truncate">{item.label}</span> : null}
     </Link>
@@ -165,6 +207,8 @@ function SidebarContent({
   onToggleCollapse,
   onNavigate,
   mobile,
+  displayName,
+  initials,
 }: {
   pathname: string
   role?: OperatorRole | null
@@ -172,6 +216,8 @@ function SidebarContent({
   onToggleCollapse: () => void
   onNavigate?: () => void
   mobile?: boolean
+  displayName?: string
+  initials?: string
 }) {
   const visibleGroups = NAV_GROUPS.map((group) => ({
     ...group,
@@ -180,61 +226,83 @@ function SidebarContent({
     ),
   })).filter((group) => group.items.length > 0)
 
+  const isCollapsed = collapsed && !mobile
+
   return (
     <div className="flex h-full flex-col">
-      <div className={cn('flex items-center gap-3', collapsed && !mobile ? 'justify-center' : 'justify-between')}>
+      {/* Brand */}
+      <div className={cn('flex items-center', isCollapsed ? 'justify-center px-2 pt-4' : 'justify-between px-4 pt-4')}>
         <Link
-          href="/tenancies"
+          href="/dashboard"
           prefetch={false}
           onClick={onNavigate}
-          className="flex items-center gap-3 px-3 py-3"
+          className="flex items-center gap-2.5"
         >
-          <div className="flex items-center gap-3">
-            {collapsed && !mobile ? (
-              <Image src="/logo-new.svg" alt="Renovo AI" width={28} height={28} className="h-7 w-7 object-contain" />
-            ) : null}
-            {!collapsed || mobile ? (
-              <div>
-                <Image src="/logo-new.svg" alt="Renovo AI" width={108} height={22} className="h-[18px] w-auto" />
-                <p className="mt-1 text-[13px] font-medium tracking-[-0.01em] text-zinc-500">
-                  End of Tenancy
-                </p>
-              </div>
-            ) : null}
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-emerald-600 text-xs font-bold text-white">
+            R
           </div>
+          {!isCollapsed ? (
+            <div>
+              <p className="text-sm font-semibold tracking-tight text-zinc-900">Renovo AI</p>
+              <p className="text-[11px] font-medium text-zinc-400">End of Tenancy</p>
+            </div>
+          ) : null}
         </Link>
 
-        <button
-          type="button"
-          onClick={onToggleCollapse}
-          className="hidden h-8 w-8 items-center justify-center rounded-md text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 xl:flex"
-          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        >
-          <ChevronLeft className={cn('h-4 w-4 transition', collapsed && 'rotate-180')} />
-        </button>
+        {!mobile ? (
+          <button
+            type="button"
+            onClick={onToggleCollapse}
+            className="hidden h-7 w-7 items-center justify-center rounded-md text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-700 xl:flex"
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            {isCollapsed ? (
+              <ChevronRight className="h-4 w-4" />
+            ) : (
+              <ChevronLeft className="h-4 w-4" />
+            )}
+          </button>
+        ) : null}
       </div>
 
-      <div className="mt-8 space-y-6 pb-6">
+      {/* Nav groups */}
+      <div className={cn('mt-7 flex-1 space-y-6 overflow-y-auto pb-4', isCollapsed ? 'px-2' : 'px-2.5')}>
         {visibleGroups.map((group) => (
           <div key={group.label}>
-            {!collapsed || mobile ? (
-              <p className="px-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-600/70">
+            {!isCollapsed ? (
+              <p className="px-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-600/70">
                 {group.label}
               </p>
             ) : null}
-            <div className={cn('space-y-0.5', (!collapsed || mobile) && 'mt-3')}>
+            <div className={cn('space-y-0.5', !isCollapsed && 'mt-1.5')}>
               {group.items.map((item) => (
                 <NavLink
                   key={item.href}
                   item={item}
                   active={item.isActive(pathname)}
-                  collapsed={collapsed && !mobile}
+                  collapsed={isCollapsed}
                   onNavigate={onNavigate}
                 />
               ))}
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Footer — user info */}
+      <div className={cn(
+        'border-t border-zinc-100 py-3',
+        isCollapsed ? 'flex justify-center px-2' : 'flex items-center gap-2.5 px-4'
+      )}>
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-xs font-semibold text-emerald-700">
+          {initials || 'R'}
+        </div>
+        {!isCollapsed ? (
+          <div className="min-w-0">
+            <p className="truncate text-[13px] font-medium text-zinc-900">{displayName || 'Operator'}</p>
+            <p className="truncate text-[11px] text-zinc-400">Property Manager</p>
+          </div>
+        ) : null}
       </div>
     </div>
   )
@@ -246,38 +314,45 @@ export function OperatorNav({
   mobileOpen,
   onToggleCollapse,
   onCloseMobile,
+  displayName,
+  initials,
 }: OperatorNavProps) {
   const pathname = usePathname()
 
   return (
     <>
+      {/* Desktop sidebar */}
       <aside
         className={cn(
           'hidden xl:block xl:border-r xl:border-zinc-200 xl:bg-white',
-          collapsed ? 'xl:w-[80px]' : 'xl:w-[264px]'
+          collapsed ? 'xl:w-[72px]' : 'xl:w-[260px]'
         )}
+        style={{ transition: 'width 0.2s ease' }}
       >
-        <div className="sticky top-0 h-screen overflow-y-auto px-4 py-4">
+        <div className="sticky top-0 h-screen overflow-hidden">
           <SidebarContent
             pathname={pathname}
             role={role}
             collapsed={collapsed}
             onToggleCollapse={onToggleCollapse}
+            displayName={displayName}
+            initials={initials}
           />
         </div>
       </aside>
 
+      {/* Mobile sidebar overlay */}
       {mobileOpen ? (
         <div className="fixed inset-0 z-50 bg-zinc-950/30 xl:hidden" onClick={onCloseMobile}>
           <aside
-            className="absolute inset-y-0 left-0 flex w-[84vw] max-w-[320px] flex-col overflow-y-auto bg-white px-4 py-4 shadow-lg"
+            className="absolute inset-y-0 left-0 flex w-[84vw] max-w-[300px] flex-col overflow-y-auto bg-white shadow-lg"
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="mb-4 flex justify-end">
+            <div className="flex justify-end px-3 pt-3">
               <button
                 type="button"
                 onClick={onCloseMobile}
-                className="flex h-8 w-8 items-center justify-center rounded-md text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950"
+                className="flex h-7 w-7 items-center justify-center rounded-md text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-700"
                 aria-label="Close navigation"
               >
                 <X className="h-4 w-4" />
@@ -290,6 +365,8 @@ export function OperatorNav({
               onToggleCollapse={onCloseMobile}
               onNavigate={onCloseMobile}
               mobile
+              displayName={displayName}
+              initials={initials}
             />
           </aside>
         </div>
