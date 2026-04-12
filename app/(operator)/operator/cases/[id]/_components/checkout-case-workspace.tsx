@@ -161,7 +161,7 @@ function WorkflowNav({
                             : 'border-sky-500 bg-sky-500 text-white'
                         : isActive
                           ? 'border-sky-300 bg-sky-50 text-sky-600'
-                          : 'border-zinc-200/60 bg-white text-zinc-400 group-hover:border-zinc-300 group-hover:text-zinc-500'
+                          : 'border-zinc-200 bg-white text-zinc-400 group-hover:border-zinc-300 group-hover:text-zinc-500'
                   )}
                 >
                   {isComplete ? (
@@ -371,7 +371,7 @@ export function CheckoutCaseWorkspace({
   return (
     <div className="space-y-6 animate-fade-in-up">
       {/* Case header */}
-      <section className="border border-zinc-200/60 bg-white px-6 py-6 md:px-7">
+      <section className="border border-zinc-200 bg-white px-6 py-6 md:px-7">
         <div className="flex items-center justify-between gap-3">
           <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
             {`Case #${caseReference}`}
@@ -441,7 +441,7 @@ export function CheckoutCaseWorkspace({
       {/* Step content */}
       <section
         aria-busy={isPending}
-        className="border border-zinc-200/60 bg-white px-6 py-6 md:px-7"
+        className="border border-zinc-200 bg-white px-6 py-6 md:px-7"
       >
         {isPending ? (
           <div className="space-y-6 animate-fade-in-up">
