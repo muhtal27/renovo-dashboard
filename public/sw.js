@@ -101,8 +101,10 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  // Everything else → network only
-  event.respondWith(fetch(request))
+  // Everything else → network only, silent fallback
+  event.respondWith(
+    fetch(request).catch(() => caches.match(request))
+  )
 })
 
 // ── Notify clients when a new version is available ──
