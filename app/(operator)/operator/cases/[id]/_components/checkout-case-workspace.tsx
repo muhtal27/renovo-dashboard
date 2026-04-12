@@ -112,7 +112,7 @@ function WorkflowNav({
 
   return (
     <nav className="w-full overflow-x-auto scrollbar-none" aria-label="Case workflow">
-      <div className="flex items-start justify-between gap-0 min-w-[480px]">
+      <div className="flex min-w-[480px]">
         {WORKFLOW_STEPS.map((item, index) => {
           const stepIdx = index
           const isComplete = stepIdx < currentStepIdx || (isResolved && stepIdx <= currentStepIdx)
@@ -121,93 +121,33 @@ function WorkflowNav({
           const isProcessing = isCurrent && currentStatus === 'analysis'
 
           const Icon = item.icon
-          const dateLabel = getStepDate(item.step, data)
 
           return (
-            <div key={item.step} className="flex items-start" style={{ flex: '1 1 0' }}>
-              {/* Connecting line (before this step) */}
-              {index > 0 ? (
-                <div className="flex-1 pt-[16px] sm:pt-[18px]">
-                  <div
-                    className={cn(
-                      'h-[2px] w-full',
-                      isComplete || isCurrent ? 'bg-sky-400' : 'bg-zinc-200/60'
-                    )}
-                  />
-                </div>
-              ) : null}
-
-              {/* Step column */}
-              <button
-                type="button"
-                onClick={() => onStepClick(item.step)}
-                className={cn(
-                  'group flex flex-col items-center gap-1.5 px-1',
-                  'transition-colors focus:outline-none',
-                  isActive ? 'opacity-100' : 'opacity-90 hover:opacity-100'
-                )}
-              >
-                {/* Icon circle */}
-                <div
-                  className={cn(
-                    'relative flex h-8 w-8 items-center justify-center rounded-full border-2 transition-colors sm:h-9 sm:w-9',
-                    isComplete
-                      ? 'border-sky-400 bg-sky-400 text-white'
-                      : isCurrent
-                        ? isDisputed
-                          ? 'border-rose-500 bg-rose-500 text-white'
-                          : isProcessing
-                            ? 'border-amber-500 bg-amber-500 text-white'
-                            : 'border-sky-500 bg-sky-500 text-white'
-                        : isActive
-                          ? 'border-sky-300 bg-sky-50 text-sky-600'
-                          : 'border-zinc-200 bg-white text-zinc-400 group-hover:border-zinc-300 group-hover:text-zinc-500'
-                  )}
-                >
-                  {isComplete ? (
-                    <Check className="h-4 w-4" strokeWidth={3} />
-                  ) : isProcessing ? (
-                    <div className="absolute inset-0 animate-ping rounded-full bg-amber-400 opacity-30" />
-                  ) : null}
-                  {isComplete ? null : <Icon className="h-4 w-4" strokeWidth={2} />}
-                </div>
-
-                {/* Label */}
-                <span
-                  className={cn(
-                    'text-[11px] font-semibold leading-tight',
-                    isComplete
-                      ? 'text-sky-600'
-                      : isCurrent
-                        ? isDisputed
-                          ? 'text-rose-600'
-                          : 'text-zinc-950'
-                        : isActive
-                          ? 'text-sky-600'
-                          : 'text-zinc-400 group-hover:text-zinc-600'
-                  )}
-                >
-                  {item.label}
+            <button
+              key={item.step}
+              type="button"
+              onClick={() => onStepClick(item.step)}
+              className={cn(
+                'flex flex-1 items-center justify-center gap-1.5 border-b-2 px-2 py-3 text-xs font-medium transition-all',
+                isActive
+                  ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                  : isComplete
+                    ? 'border-emerald-300 text-emerald-600 hover:bg-zinc-50'
+                    : 'border-transparent text-zinc-500 hover:bg-zinc-50',
+              )}
+              style={{ whiteSpace: 'nowrap' }}
+            >
+              {isComplete ? (
+                <span className="text-emerald-500">
+                  <Check className="h-3.5 w-3.5" strokeWidth={2.5} />
                 </span>
-
-                {/* Date below label */}
-                {dateLabel ? (
-                  <span className="text-[10px] text-zinc-400">{formatDate(dateLabel)}</span>
-                ) : null}
-              </button>
-
-              {/* Connecting line (after this step) */}
-              {index < WORKFLOW_STEPS.length - 1 ? (
-                <div className="flex-1 pt-[16px] sm:pt-[18px]">
-                  <div
-                    className={cn(
-                      'h-[2px] w-full',
-                      isComplete ? 'bg-sky-400' : 'bg-zinc-200/60'
-                    )}
-                  />
-                </div>
-              ) : null}
-            </div>
+              ) : (
+                <span className={cn('opacity-60', isActive && 'opacity-100')}>
+                  <Icon className="h-3.5 w-3.5" strokeWidth={2} />
+                </span>
+              )}
+              <span className="hidden sm:inline">{item.label}</span>
+            </button>
           )
         })}
       </div>
@@ -371,7 +311,7 @@ export function CheckoutCaseWorkspace({
   return (
     <div className="space-y-6 animate-fade-in-up">
       {/* Case header */}
-      <section className="border border-zinc-200 bg-white px-6 py-6 md:px-7">
+      <section className="overflow-hidden rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
         <div className="flex items-center justify-between gap-3">
           <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
             {`Case #${caseReference}`}
@@ -419,8 +359,8 @@ export function CheckoutCaseWorkspace({
           </div>
         </div>
 
-        {/* Workflow navigation — competitor-style step bar */}
-        <div className="mt-6 border-t border-zinc-100/80 pt-5">
+        {/* Workflow navigation — tab-style step bar */}
+        <div className="mt-6 border-t border-zinc-100 pt-0">
           <WorkflowNav
             activeStep={activeStep}
             currentStatus={currentStatus}
@@ -441,7 +381,7 @@ export function CheckoutCaseWorkspace({
       {/* Step content */}
       <section
         aria-busy={isPending}
-        className="border border-zinc-200 bg-white px-6 py-6 md:px-7"
+        className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7"
       >
         {isPending ? (
           <div className="space-y-6 animate-fade-in-up">

@@ -7,15 +7,14 @@ import { RefreshCcw } from 'lucide-react'
 import { toast } from 'sonner'
 import { useEotCases } from '@/lib/queries/eot-queries'
 import type { EotCaseListItem } from '@/lib/eot-types'
+import { EmptyState, SkeletonPanel } from '@/app/operator-ui'
 import {
-  EmptyState,
-  SkeletonPanel,
-  ToolbarPill,
   formatCurrency,
   formatEnumLabel,
 } from '@/app/eot/_components/eot-ui'
 import { useDebounce } from '@/lib/use-debounce'
 import { relativeTime } from '@/lib/relative-time'
+import { cn } from '@/lib/ui'
 
 function buildFullAddress(property: EotCaseListItem['property']): string {
   const parts = [property.address_line_1, property.city, property.postcode]
@@ -24,10 +23,16 @@ function buildFullAddress(property: EotCaseListItem['property']): string {
   return parts || property.name
 }
 
-const PRIORITY_DOT: Record<string, string> = {
-  high: 'bg-rose-500',
-  medium: 'bg-amber-500',
-  low: 'bg-emerald-500',
+const PRIORITY_BORDER: Record<string, string> = {
+  high: 'border-l-rose-500',
+  medium: 'border-l-amber-500',
+  low: 'border-l-zinc-300',
+}
+
+const PRIORITY_BADGE: Record<string, string> = {
+  high: 'bg-rose-50 text-rose-700',
+  medium: 'bg-amber-50 text-amber-700',
+  low: 'bg-zinc-100 text-zinc-600',
 }
 
 type PriorityView = 'all' | 'high' | 'medium' | 'low'
@@ -84,57 +89,62 @@ export function DisputeListClient({
   }, [cases, view, debouncedSearch])
 
   const totalDeposit = cases.reduce((sum, c) => sum + (c.deposit_amount ? Number(c.deposit_amount) : 0), 0)
-  const totalIssues = cases.reduce((sum, c) => sum + c.issue_count, 0)
+
+  const filters: Array<{ key: PriorityView; label: string; count: number }> = [
+    { key: 'all', label: 'All', count: stats.total },
+    { key: 'high', label: 'High', count: stats.high },
+    { key: 'medium', label: 'Medium', count: stats.medium },
+    { key: 'low', label: 'Low', count: stats.low },
+  ]
 
   return (
-    <div className="animate-fade-in-up space-y-4">
-      {/* Toolbar */}
-      <div className="sticky top-0 z-10 border-b border-zinc-200 bg-white/98 py-2">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-0">
-            {([
-              { value: 'all' as const, label: `All (${stats.total})` },
-              { value: 'high' as const, label: `High (${stats.high})` },
-              { value: 'medium' as const, label: `Medium (${stats.medium})` },
-              { value: 'low' as const, label: `Low (${stats.low})` },
-            ] as const).map((tab) => (
-              <button key={tab.value} type="button" onClick={() => setView(tab.value)}>
-                <ToolbarPill active={view === tab.value}>{tab.label}</ToolbarPill>
-              </button>
-            ))}
-          </div>
-
-          <div className="flex items-center gap-2">
-            <div className="hidden items-center gap-4 border-r border-zinc-200 pr-3 xl:flex">
-              <span className="text-xs text-zinc-400">
-                Deposit at risk{' '}
-                <span className="font-semibold tabular-nums text-zinc-700">{formatCurrency(totalDeposit)}</span>
-              </span>
-              <span className="text-xs text-zinc-400">
-                Issues{' '}
-                <span className="font-semibold tabular-nums text-zinc-700">{totalIssues}</span>
-              </span>
-            </div>
-            <input
-              type="text"
-              placeholder="Search disputes..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="h-7 w-48 border border-zinc-200 bg-white px-2.5 text-xs text-zinc-700 outline-none transition focus:border-emerald-300 focus:ring-2 focus:ring-emerald-100"
-            />
-            <button
-              type="button"
-              onClick={() => void refreshCases()}
-              className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-zinc-600 transition hover:text-zinc-950"
-            >
-              <RefreshCcw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} />
-              Refresh
-            </button>
-          </div>
+    <div className="space-y-5">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-bold tracking-tight text-zinc-900">Disputes</h2>
+          <p className="mt-0.5 text-sm text-zinc-500">
+            {stats.total} disputed case{stats.total !== 1 ? 's' : ''} &middot; {formatCurrency(totalDeposit)} at risk
+          </p>
         </div>
+        <button
+          type="button"
+          onClick={() => void refreshCases()}
+          className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-50"
+        >
+          <RefreshCcw className={cn('h-3.5 w-3.5', refreshing && 'animate-spin')} />
+        </button>
       </div>
 
-      {/* List */}
+      {/* Filter pills + search */}
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="flex items-center gap-1.5">
+          {filters.map((f) => (
+            <button
+              key={f.key}
+              type="button"
+              onClick={() => setView(f.key)}
+              className={cn(
+                'rounded-full px-3 py-1 text-xs font-medium transition',
+                view === f.key
+                  ? 'bg-zinc-900 text-white'
+                  : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200',
+              )}
+            >
+              {f.label} ({f.count})
+            </button>
+          ))}
+        </div>
+        <input
+          type="text"
+          placeholder="Search..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="h-[34px] w-[200px] rounded-lg border border-zinc-200 bg-white px-3 text-[13px] text-zinc-700 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
+        />
+      </div>
+
+      {/* Dispute cards */}
       {loading ? (
         <div className="grid gap-4 xl:grid-cols-2">
           <SkeletonPanel />
@@ -144,82 +154,54 @@ export function DisputeListClient({
         <EmptyState title="Unable to load disputes" body={error} />
       ) : visible.length === 0 ? (
         <EmptyState
-          title={cases.length === 0 ? 'No active disputes' : 'No disputes match this view'}
+          title={cases.length === 0 ? 'No active disputes' : 'No disputes match'}
           body={
             cases.length === 0
-              ? 'Cases that are flagged as disputed will appear here.'
-              : 'Adjust the priority filter or search to widen the results.'
+              ? 'Cases that are disputed will appear here.'
+              : 'Adjust the priority filter or search.'
           }
         />
       ) : (
-        <div className="space-y-0">
-          {visible.map((c) => (
-            <Link
-              key={c.id}
-              href={`/operator/cases/${c.id}?step=resolved`}
-              prefetch={false}
-              className="modern-table-row grid grid-cols-1 items-start gap-x-6 border-b border-zinc-200 px-5 py-5 transition sm:grid-cols-[1fr_140px] md:grid-cols-[1fr_140px_120px_120px_100px]"
-            >
-              {/* Property + tenant */}
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-zinc-950">
-                  {buildFullAddress(c.property)}
-                </p>
-                <p className="mt-1 truncate text-sm text-zinc-500">
-                  <span className="text-xs text-zinc-400">Tenant </span>
-                  {c.tenant_name}
-                </p>
-                {c.landlord_name ? (
-                  <p className="mt-0.5 truncate text-xs text-zinc-400">
-                    Landlord: {c.landlord_name}
-                  </p>
-                ) : null}
-              </div>
-
-              {/* Priority */}
-              <div className="hidden sm:block">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
-                  Priority
-                </p>
-                <p className="mt-1 flex items-center gap-1.5 text-xs">
-                  <span
-                    className={`h-1.5 w-1.5 shrink-0 rounded-full ${PRIORITY_DOT[c.priority] ?? 'bg-zinc-400'}`}
-                  />
-                  <span className="font-medium text-zinc-700">{formatEnumLabel(c.priority)}</span>
-                </p>
-              </div>
-
-              {/* Deposit */}
-              <div className="hidden md:block">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
-                  Deposit
-                </p>
-                <p className="mt-0.5 text-sm font-semibold tabular-nums text-zinc-950">
-                  {c.deposit_amount ? formatCurrency(Number(c.deposit_amount)) : '—'}
-                </p>
-              </div>
-
-              {/* Issues */}
-              <div className="hidden md:block">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
-                  Issues
-                </p>
-                <p className="mt-0.5 text-sm font-semibold tabular-nums text-zinc-950">
-                  {c.issue_count}
-                </p>
-              </div>
-
-              {/* Last activity */}
-              <div className="hidden md:block">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
-                  Activity
-                </p>
-                <p className="mt-0.5 text-xs text-zinc-500" title={c.last_activity_at}>
-                  {relativeTime(c.last_activity_at)}
-                </p>
-              </div>
-            </Link>
-          ))}
+        <div className="space-y-3">
+          {visible.map((c) => {
+            const address = buildFullAddress(c.property)
+            const priBorder = PRIORITY_BORDER[c.priority] ?? 'border-l-zinc-300'
+            const priBadge = PRIORITY_BADGE[c.priority] ?? PRIORITY_BADGE.low
+            return (
+              <Link
+                key={c.id}
+                href={`/operator/cases/${c.id}?step=refund`}
+                prefetch={false}
+                className={cn(
+                  'block rounded-xl border border-zinc-200 border-l-[3px] bg-white px-5 py-4 transition hover:shadow-sm',
+                  priBorder,
+                )}
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-zinc-950">{address}</p>
+                    <p className="mt-1 truncate text-[13px] text-zinc-500">{c.tenant_name}</p>
+                    {c.landlord_name ? (
+                      <p className="mt-0.5 truncate text-xs text-zinc-400">Landlord: {c.landlord_name}</p>
+                    ) : null}
+                  </div>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <span className={cn('rounded-full px-2.5 py-0.5 text-[11px] font-semibold', priBadge)}>
+                      {formatEnumLabel(c.priority)}
+                    </span>
+                    <span className="rounded-full bg-rose-50 px-2.5 py-0.5 text-[11px] font-semibold text-rose-700">
+                      Disputed
+                    </span>
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center gap-4 text-xs text-zinc-400">
+                  <span>Deposit: <span className="font-semibold tabular-nums text-zinc-700">{c.deposit_amount ? formatCurrency(Number(c.deposit_amount)) : '\u2014'}</span></span>
+                  <span>{c.issue_count} issues</span>
+                  <span>{relativeTime(c.last_activity_at)}</span>
+                </div>
+              </Link>
+            )
+          })}
         </div>
       )}
     </div>
