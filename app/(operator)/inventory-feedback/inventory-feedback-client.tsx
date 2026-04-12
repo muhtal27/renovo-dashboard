@@ -6,13 +6,11 @@ import { RefreshCcw } from 'lucide-react'
 import { useInventoryFeedback } from '@/lib/queries/eot-queries'
 import type { EotCaseListItem, EotIssue, EotRecommendationDecision } from '@/lib/eot-types'
 import {
-  EmptyState,
-  SkeletonPanel,
   StatusBadge,
-  ToolbarPill,
   formatCurrency,
   formatEnumLabel,
 } from '@/app/eot/_components/eot-ui'
+import { EmptyState, SkeletonPanel } from '@/app/operator-ui'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -117,62 +115,65 @@ export function InventoryFeedbackClient({
   }, [rows, view, decisionFilter, search])
 
   return (
-    <div className="animate-fade-in-up space-y-4">
-      {/* Toolbar */}
-      <div className="sticky top-0 z-10 border-b border-zinc-200 bg-white py-2">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-0">
-            {([
-              { value: 'all' as const, label: `All (${stats.total})` },
-              { value: 'high' as const, label: `High (${stats.high})` },
-              { value: 'medium' as const, label: `Medium (${stats.medium})` },
-              { value: 'low' as const, label: `Low (${stats.low})` },
-            ] as const).map((tab) => (
-              <button key={tab.value} type="button" onClick={() => setView(tab.value)}>
-                <ToolbarPill active={view === tab.value}>{tab.label}</ToolbarPill>
-              </button>
-            ))}
-          </div>
-
-          <div className="flex items-center gap-2">
-            <div className="hidden items-center gap-4 border-r border-zinc-200 pr-3 xl:flex">
-              <span className="text-xs text-zinc-400">
-                Pending{' '}
-                <span className="font-semibold tabular-nums text-zinc-700">{pendingDecision}</span>
-              </span>
-              <span className="text-xs text-zinc-400">
-                Recovery{' '}
-                <span className="font-semibold tabular-nums text-emerald-600">{formatCurrency(totalEstimatedCost)}</span>
-              </span>
-            </div>
-            <select
-              value={decisionFilter}
-              onChange={(e) => setDecisionFilter(e.target.value as DecisionFilter)}
-              className="h-7 rounded-md border border-zinc-200 bg-white px-2 text-xs text-zinc-700"
-            >
-              <option value="all">All decisions</option>
-              <option value="charge">Charge</option>
-              <option value="partial">Partial</option>
-              <option value="no_charge">No charge</option>
-              <option value="pending">Pending</option>
-            </select>
-            <input
-              type="text"
-              placeholder="Search issues..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="h-7 w-48 border border-zinc-200 bg-white px-2.5 text-xs text-zinc-700 outline-none transition focus:border-emerald-300 focus:ring-2 focus:ring-emerald-100"
-            />
-            <button
-              type="button"
-              onClick={() => void refreshFeedback()}
-              className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-zinc-600 transition hover:text-zinc-950"
-            >
-              <RefreshCcw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} />
-              Refresh
-            </button>
-          </div>
+    <div className="space-y-5">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-bold tracking-tight text-zinc-900">Inventory Feedback</h2>
+          <p className="mt-0.5 text-sm text-zinc-500">
+            {stats.total} issues &middot; {pendingDecision} pending &middot; {formatCurrency(totalEstimatedCost)} estimated recovery
+          </p>
         </div>
+        <button
+          type="button"
+          onClick={() => void refreshFeedback()}
+          className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-50"
+        >
+          <RefreshCcw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} />
+        </button>
+      </div>
+
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="flex items-center gap-1.5">
+          {([
+            { value: 'all' as const, label: `All (${stats.total})` },
+            { value: 'high' as const, label: `High (${stats.high})` },
+            { value: 'medium' as const, label: `Medium (${stats.medium})` },
+            { value: 'low' as const, label: `Low (${stats.low})` },
+          ] as const).map((tab) => (
+            <button
+              key={tab.value}
+              type="button"
+              onClick={() => setView(tab.value)}
+              className={`rounded-full px-3 py-1 text-xs font-medium transition ${
+                view === tab.value
+                  ? 'bg-zinc-900 text-white'
+                  : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+        <select
+          value={decisionFilter}
+          onChange={(e) => setDecisionFilter(e.target.value as DecisionFilter)}
+          className="h-[34px] rounded-lg border border-zinc-200 bg-white px-2.5 text-xs text-zinc-700"
+        >
+          <option value="all">All decisions</option>
+          <option value="charge">Charge</option>
+          <option value="partial">Partial</option>
+          <option value="no_charge">No charge</option>
+          <option value="pending">Pending</option>
+        </select>
+        <input
+          type="text"
+          placeholder="Search..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="h-[34px] w-[200px] rounded-lg border border-zinc-200 bg-white px-3 text-[13px] text-zinc-700 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
+        />
       </div>
 
       {/* List */}
