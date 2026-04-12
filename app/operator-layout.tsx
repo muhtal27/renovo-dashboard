@@ -4,12 +4,13 @@ import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 import type { ReactNode } from 'react'
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Bell, ChevronDown, LogOut, Menu, Search, Settings, CreditCard } from 'lucide-react'
+import { Bot, ChevronDown, LogOut, Menu, Search, Settings, CreditCard } from 'lucide-react'
 import { OperatorNav } from '@/app/operator-nav'
 import { getOperatorLabel, type CurrentOperator } from '@/lib/operator-types'
 import { clearLegacySupabaseBrowserAuthArtifacts } from '@/lib/supabase-session'
 import { CommandPalette } from '@/app/components/CommandPalette'
 import { NotificationCenter } from '@/app/components/NotificationCenter'
+import { AiPanel } from '@/app/components/AiPanel'
 
 type Breadcrumb = {
   label: string
@@ -247,6 +248,7 @@ export function OperatorLayout({ children, operator, latestRelease }: OperatorLa
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const [profileMenuOpen, setProfileMenuOpen] = useState(false)
+  const [aiPanelOpen, setAiPanelOpen] = useState(false)
   const profileMenuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -360,6 +362,16 @@ export function OperatorLayout({ children, operator, latestRelease }: OperatorLa
                 <kbd className="rounded border border-zinc-200 bg-zinc-50 px-1.5 py-0.5 text-[11px] font-medium text-zinc-400">⌘K</kbd>
               </button>
 
+              {/* AI Assistant */}
+              <button
+                type="button"
+                onClick={() => setAiPanelOpen((prev) => !prev)}
+                className="flex h-9 w-9 items-center justify-center rounded-[10px] text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900"
+                title="AI Assistant"
+              >
+                <Bot className="h-[18px] w-[18px]" />
+              </button>
+
               {/* Notifications */}
               <NotificationCenter />
 
@@ -422,6 +434,7 @@ export function OperatorLayout({ children, operator, latestRelease }: OperatorLa
         </div>
       </div>
       <CommandPalette />
+      <AiPanel open={aiPanelOpen} onClose={() => setAiPanelOpen(false)} />
     </main>
   )
 }
