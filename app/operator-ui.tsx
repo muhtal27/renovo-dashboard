@@ -74,6 +74,7 @@ export function KPIStatCard({
   label,
   value,
   trend,
+  icon,
   tone = 'default',
   className,
 }: {
@@ -81,6 +82,7 @@ export function KPIStatCard({
   value: ReactNode
   detail?: ReactNode
   trend?: ReactNode
+  icon?: ReactNode
   tone?: 'default' | 'accent' | 'danger' | 'warning'
   className?: string
 }) {
@@ -93,12 +95,30 @@ export function KPIStatCard({
           ? 'text-amber-600'
           : 'text-zinc-950'
 
+  const iconBg =
+    tone === 'accent'
+      ? 'bg-emerald-100/80 text-emerald-600'
+      : tone === 'danger'
+        ? 'bg-rose-100/80 text-rose-600'
+        : tone === 'warning'
+          ? 'bg-amber-100/80 text-amber-600'
+          : 'bg-zinc-100/80 text-zinc-500'
+
   return (
-    <div className={cn('py-2', className)}>
-      <span className="text-[11px] font-medium uppercase tracking-wide text-zinc-400">{label}</span>
-      <div className="mt-0.5 flex items-baseline gap-1.5">
-        <span className={cn('text-xl font-semibold tabular-nums leading-tight', valueColor)}>{value}</span>
-        {trend ? <span className="text-[11px] text-zinc-400">{trend}</span> : null}
+    <div className={cn('flex items-start gap-3 py-2', className)}>
+      {icon ? (
+        <div className={cn('flex h-9 w-9 shrink-0 items-center justify-center rounded-xl', iconBg)}>
+          {icon}
+        </div>
+      ) : null}
+      <div className="min-w-0">
+        <span className="text-[11px] font-medium uppercase tracking-wide text-zinc-400">{label}</span>
+        <div className="mt-0.5 flex items-baseline gap-1.5">
+          <span className={cn('animate-count-up text-2xl font-bold tabular-nums leading-tight tracking-tight', valueColor)}>
+            {value}
+          </span>
+          {trend ? <span className="text-[11px] font-medium text-zinc-400">{trend}</span> : null}
+        </div>
       </div>
     </div>
   )
@@ -275,13 +295,6 @@ export function SkeletonPanel({
   className?: string
 }) {
   return (
-    <div className={cn('animate-pulse py-4', className)}>
-      <div className="h-3 w-24 rounded bg-zinc-100" />
-      <div className="mt-3 h-6 w-40 rounded bg-zinc-100" />
-      <div className="mt-4 space-y-2">
-        <div className="h-3 rounded bg-zinc-50" />
-        <div className="h-3 w-11/12 rounded bg-zinc-50" />
-      </div>
-    </div>
+    <div className={cn('skeleton-shimmer rounded-2xl', className)} />
   )
 }

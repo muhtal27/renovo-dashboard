@@ -133,21 +133,21 @@ function NavLink({
       onClick={onNavigate}
       title={collapsed ? item.label : undefined}
       className={cn(
-        'group relative flex items-center gap-3 rounded-lg border px-3 py-2.5 text-sm font-medium transition',
+        'group relative flex items-center gap-3 rounded-xl border px-3 py-2.5 text-sm font-medium transition-all duration-200',
         active
-          ? 'border-zinc-200 bg-white text-zinc-950 shadow-[0_2px_8px_rgba(0,0,0,0.04)]'
-          : 'border-transparent text-zinc-600 hover:border-zinc-200 hover:bg-white hover:text-zinc-950',
+          ? 'border-emerald-200/50 bg-gradient-to-r from-emerald-50/80 to-white text-zinc-950 shadow-[0_2px_8px_rgba(16,185,129,0.08)]'
+          : 'border-transparent text-zinc-500 hover:border-zinc-200/60 hover:bg-white/80 hover:text-zinc-900',
         collapsed && 'justify-center px-2'
       )}
     >
       {active ? (
-        <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-emerald-500" />
+        <span className="absolute left-0 top-1/2 h-6 w-[3px] -translate-y-1/2 rounded-r-full bg-emerald-500 shadow-[2px_0_8px_rgba(16,185,129,0.3)]" />
       ) : null}
       <span
         className={cn(
-          'flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition',
+          'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200',
           active
-            ? 'bg-emerald-50 text-emerald-600'
+            ? 'bg-emerald-100/80 text-emerald-600'
             : 'text-zinc-400 group-hover:text-zinc-600'
         )}
       >
@@ -253,7 +253,7 @@ export function OperatorNav({
     <>
       <aside
         className={cn(
-          'hidden xl:block xl:border-r xl:border-zinc-200/80 xl:bg-zinc-50/80',
+          'hidden xl:block xl:border-r xl:border-zinc-200/40 xl:bg-gradient-to-b xl:from-zinc-50/90 xl:to-white/60',
           collapsed ? 'xl:w-[80px]' : 'xl:w-[264px]'
         )}
       >
@@ -270,7 +270,7 @@ export function OperatorNav({
       {mobileOpen ? (
         <div className="fixed inset-0 z-50 bg-zinc-950/30 xl:hidden" onClick={onCloseMobile}>
           <aside
-            className="absolute inset-y-0 left-0 flex w-[84vw] max-w-[320px] flex-col overflow-y-auto bg-zinc-50 px-4 py-4"
+            className="absolute inset-y-0 left-0 flex w-[84vw] max-w-[320px] flex-col overflow-y-auto bg-gradient-to-b from-zinc-50 to-white px-4 py-4"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="mb-4 flex justify-end">

@@ -205,7 +205,7 @@ function OperatorSearchForm({
           value={searchValue}
           onChange={(event) => setSearchValue(event.target.value)}
           placeholder={searchPlaceholder}
-          className="h-10 w-full max-w-[520px] rounded-lg border border-zinc-200 bg-zinc-50 pl-9 pr-20 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-300"
+          className="h-10 w-full max-w-[520px] rounded-xl border border-zinc-200/60 bg-white/60 pl-9 pr-20 text-sm text-zinc-900 backdrop-blur-sm placeholder:text-zinc-400 focus:border-emerald-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-100"
         />
         <Link
           href={searchAction}
@@ -300,13 +300,13 @@ export function OperatorLayout({ children, operator, latestRelease }: OperatorLa
 
         <div className="min-w-0 flex-1">
           <div className="mx-auto flex min-h-screen w-full max-w-[1600px] flex-col px-4 py-3 md:px-6 xl:px-8">
-            <header className="border-b border-zinc-200 pb-3">
+            <header className="border-b border-zinc-200/60 pb-3">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex min-w-0 items-center gap-3">
                   <button
                     type="button"
                     onClick={handleOpenMobile}
-                    className="flex h-7 w-7 items-center justify-center rounded-md border border-zinc-200 text-zinc-500 xl:hidden"
+                    className="flex h-8 w-8 items-center justify-center rounded-xl border border-zinc-200/60 bg-white/60 text-zinc-500 backdrop-blur-sm transition hover:bg-white hover:text-zinc-700 xl:hidden"
                     aria-label="Open navigation"
                   >
                     <Menu className="h-3.5 w-3.5" />
@@ -410,7 +410,7 @@ export function OperatorLayout({ children, operator, latestRelease }: OperatorLa
                     </button>
 
                     {profileMenuOpen ? (
-                      <div className="absolute right-0 top-full z-50 mt-2 w-48 rounded-lg border border-zinc-200 bg-white py-1 shadow-lg">
+                      <div className="absolute right-0 top-full z-50 mt-2 w-48 rounded-xl border border-zinc-200/60 bg-white/95 py-1.5 shadow-lg backdrop-blur-md">
                         <Link
                           href="/settings"
                           prefetch={false}

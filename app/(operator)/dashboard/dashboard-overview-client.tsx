@@ -5,12 +5,19 @@ import { useMemo } from 'react'
 import {
   AlertTriangle,
   ArrowRight,
+  ArrowUpRight,
   Building2,
+  Calendar,
   ClipboardCheck,
+  Clock,
   Eye,
+  Layers,
+  PoundSterling,
   RefreshCcw,
   Scale,
+  TrendingUp,
   UserX,
+  Zap,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useEotTenancies, useEotCases } from '@/lib/queries/eot-queries'
@@ -89,34 +96,153 @@ function computeStats(
   }
 }
 
+function getGreeting(): string {
+  const hour = new Date().getHours()
+  if (hour < 12) return 'Good morning'
+  if (hour < 17) return 'Good afternoon'
+  return 'Good evening'
+}
+
+function GreetingHeader({
+  stats,
+  refreshing,
+  onRefresh,
+}: {
+  stats: DashboardStats
+  refreshing: boolean
+  onRefresh: () => void
+}) {
+  return (
+    <div className="animate-fade-in-up relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 px-6 py-6 text-white shadow-lg md:px-8 md:py-8">
+      <div className="absolute inset-0 dot-pattern opacity-30" />
+      <div className="absolute -right-16 -top-16 h-56 w-56 rounded-full bg-emerald-500/10 blur-3xl" />
+      <div className="absolute -bottom-12 -left-12 h-40 w-40 rounded-full bg-emerald-400/8 blur-2xl" />
+
+      <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-xl font-bold tracking-tight text-white md:text-2xl">
+            {getGreeting()}
+          </h1>
+          <p className="mt-1 text-sm text-zinc-400">
+            Here&apos;s your portfolio overview for today
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onRefresh}
+          className="inline-flex items-center gap-2 self-start rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-white/90 backdrop-blur-sm transition hover:border-white/20 hover:bg-white/10"
+        >
+          <RefreshCcw className={cn('h-3.5 w-3.5', refreshing && 'animate-spin')} />
+          Refresh
+        </button>
+      </div>
+
+      <div className="relative mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+        <QuickStat
+          label="Portfolio"
+          value={stats.totalTenancies}
+          suffix="tenancies"
+          icon={<Layers className="h-3.5 w-3.5" />}
+        />
+        <QuickStat
+          label="Active"
+          value={stats.activeTenancies}
+          suffix="live"
+          icon={<Zap className="h-3.5 w-3.5" />}
+          accent
+        />
+        <QuickStat
+          label="Ending soon"
+          value={stats.endingSoon}
+          suffix="in 30d"
+          icon={<Clock className="h-3.5 w-3.5" />}
+          warning={stats.endingSoon > 0}
+        />
+        <QuickStat
+          label="Deposits"
+          value={formatCurrency(stats.totalDepositValue)}
+          icon={<PoundSterling className="h-3.5 w-3.5" />}
+        />
+      </div>
+    </div>
+  )
+}
+
+function QuickStat({
+  label,
+  value,
+  suffix,
+  icon,
+  accent,
+  warning,
+}: {
+  label: string
+  value: React.ReactNode
+  suffix?: string
+  icon: React.ReactNode
+  accent?: boolean
+  warning?: boolean
+}) {
+  return (
+    <div className="rounded-xl border border-white/8 bg-white/5 px-3.5 py-3 backdrop-blur-sm">
+      <div className="flex items-center gap-1.5">
+        <span className={cn(
+          'text-zinc-500',
+          accent && 'text-emerald-400',
+          warning && 'text-amber-400',
+        )}>
+          {icon}
+        </span>
+        <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">{label}</span>
+      </div>
+      <div className="mt-1.5 flex items-baseline gap-1.5">
+        <span className={cn(
+          'text-lg font-bold tabular-nums leading-none',
+          accent ? 'text-emerald-400' : warning ? 'text-amber-400' : 'text-white',
+        )}>
+          {value}
+        </span>
+        {suffix ? <span className="text-[10px] text-zinc-500">{suffix}</span> : null}
+      </div>
+    </div>
+  )
+}
+
 function StatCards({ stats }: { stats: DashboardStats }) {
   return (
-    <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-zinc-200 bg-zinc-200 md:grid-cols-4">
-      <div className="bg-white px-5 py-4">
+    <div className="animate-fade-in-up grid grid-cols-2 gap-3 md:grid-cols-4" style={{ animationDelay: '80ms' }}>
+      <div className="stat-card-gradient rounded-2xl px-5 py-4">
         <KPIStatCard
           label="Total tenancies"
           value={stats.totalTenancies}
+          icon={<Building2 className="h-4 w-4" />}
           tone="default"
         />
       </div>
-      <div className="bg-white px-5 py-4">
+      <div className="stat-card-gradient stat-card-emerald rounded-2xl px-5 py-4">
         <KPIStatCard
           label="Active tenancies"
           value={stats.activeTenancies}
+          icon={<TrendingUp className="h-4 w-4" />}
           tone="accent"
         />
       </div>
-      <div className="bg-white px-5 py-4">
+      <div className={cn(
+        'stat-card-gradient rounded-2xl px-5 py-4',
+        stats.endingSoon > 0 && 'stat-card-amber',
+      )}>
         <KPIStatCard
-          label="Ending within 30 days"
+          label="Ending within 30d"
           value={stats.endingSoon}
+          icon={<Calendar className="h-4 w-4" />}
           tone={stats.endingSoon > 0 ? 'warning' : 'default'}
         />
       </div>
-      <div className="bg-white px-5 py-4">
+      <div className="stat-card-gradient rounded-2xl px-5 py-4">
         <KPIStatCard
           label="Deposit value"
           value={formatCurrency(stats.totalDepositValue)}
+          icon={<PoundSterling className="h-4 w-4" />}
           tone="default"
         />
       </div>
@@ -126,42 +252,51 @@ function StatCards({ stats }: { stats: DashboardStats }) {
 
 function CaseSummaryCards({ stats }: { stats: DashboardStats }) {
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+    <div className="animate-fade-in-up grid grid-cols-1 gap-3 sm:grid-cols-3" style={{ animationDelay: '160ms' }}>
       <Link
         href="/tenancies"
-        className="group flex items-start gap-4 rounded-xl border border-zinc-200 bg-white px-5 py-4 transition hover:border-zinc-300 hover:shadow-sm"
+        className="group relative overflow-hidden rounded-2xl border border-emerald-100 bg-gradient-to-br from-white to-emerald-50/40 px-5 py-5 shadow-sm transition-all duration-200 hover:border-emerald-200 hover:shadow-md hover:-translate-y-0.5"
       >
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
-          <Building2 className="h-5 w-5" />
+        <div className="absolute -right-4 -top-4 h-20 w-20 rounded-full bg-emerald-100/50 blur-2xl transition-all group-hover:bg-emerald-100/80" />
+        <div className="relative flex items-start gap-4">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-100/80 text-emerald-600 shadow-sm">
+            <Building2 className="h-5 w-5" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="animate-count-up text-3xl font-bold tabular-nums tracking-tight text-zinc-950">{stats.totalCases}</p>
+            <p className="mt-0.5 text-sm font-medium text-zinc-500">Active cases</p>
+          </div>
+          <ArrowUpRight className="mt-0.5 h-4 w-4 text-zinc-300 transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-emerald-500" />
         </div>
-        <div className="min-w-0">
-          <p className="text-2xl font-semibold tabular-nums text-zinc-950">{stats.totalCases}</p>
-          <p className="mt-0.5 text-sm text-zinc-500">Active cases</p>
-        </div>
-        <ArrowRight className="ml-auto mt-1 h-4 w-4 text-zinc-300 transition group-hover:text-zinc-500" />
       </Link>
 
       <Link
         href="/disputes"
-        className="group flex items-start gap-4 rounded-xl border border-zinc-200 bg-white px-5 py-4 transition hover:border-zinc-300 hover:shadow-sm"
+        className="group relative overflow-hidden rounded-2xl border border-rose-100 bg-gradient-to-br from-white to-rose-50/40 px-5 py-5 shadow-sm transition-all duration-200 hover:border-rose-200 hover:shadow-md hover:-translate-y-0.5"
       >
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-rose-50 text-rose-600">
-          <Scale className="h-5 w-5" />
+        <div className="absolute -right-4 -top-4 h-20 w-20 rounded-full bg-rose-100/50 blur-2xl transition-all group-hover:bg-rose-100/80" />
+        <div className="relative flex items-start gap-4">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-rose-100/80 text-rose-600 shadow-sm">
+            <Scale className="h-5 w-5" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="animate-count-up text-3xl font-bold tabular-nums tracking-tight text-zinc-950">{stats.disputedCases}</p>
+            <p className="mt-0.5 text-sm font-medium text-zinc-500">Disputed cases</p>
+          </div>
+          <ArrowUpRight className="mt-0.5 h-4 w-4 text-zinc-300 transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-rose-500" />
         </div>
-        <div className="min-w-0">
-          <p className="text-2xl font-semibold tabular-nums text-zinc-950">{stats.disputedCases}</p>
-          <p className="mt-0.5 text-sm text-zinc-500">Disputed cases</p>
-        </div>
-        <ArrowRight className="ml-auto mt-1 h-4 w-4 text-zinc-300 transition group-hover:text-zinc-500" />
       </Link>
 
-      <div className="flex items-start gap-4 rounded-xl border border-zinc-200 bg-white px-5 py-4">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
-          <ClipboardCheck className="h-5 w-5" />
-        </div>
-        <div className="min-w-0">
-          <p className="text-2xl font-semibold tabular-nums text-zinc-950">{stats.casesNeedingAttention}</p>
-          <p className="mt-0.5 text-sm text-zinc-500">Cases needing attention</p>
+      <div className="relative overflow-hidden rounded-2xl border border-amber-100 bg-gradient-to-br from-white to-amber-50/40 px-5 py-5 shadow-sm">
+        <div className="absolute -right-4 -top-4 h-20 w-20 rounded-full bg-amber-100/50 blur-2xl" />
+        <div className="relative flex items-start gap-4">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-100/80 text-amber-600 shadow-sm">
+            <ClipboardCheck className="h-5 w-5" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="animate-count-up text-3xl font-bold tabular-nums tracking-tight text-zinc-950">{stats.casesNeedingAttention}</p>
+            <p className="mt-0.5 text-sm font-medium text-zinc-500">Need attention</p>
+          </div>
         </div>
       </div>
     </div>
@@ -185,32 +320,37 @@ function EndingSoonTable({ tenancies }: { tenancies: EotTenancyListItem[] }) {
 
   if (endingSoon.length === 0) {
     return (
-      <div className="rounded-xl border border-zinc-200 bg-white px-6 py-10 text-center">
-        <p className="text-sm text-zinc-500">No tenancies ending in the next 60 days.</p>
+      <div className="animate-fade-in-up rounded-2xl border border-dashed border-zinc-200 bg-white/60 px-6 py-12 text-center backdrop-blur-sm" style={{ animationDelay: '320ms' }}>
+        <Calendar className="mx-auto h-8 w-8 text-zinc-300" />
+        <p className="mt-3 text-sm font-medium text-zinc-500">No tenancies ending in the next 60 days</p>
+        <p className="mt-1 text-xs text-zinc-400">All tenancies are on track</p>
       </div>
     )
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
-      <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-3">
-        <div className="flex items-center gap-2">
-          <AlertTriangle className="h-4 w-4 text-amber-500" />
+    <div className="animate-fade-in-up overflow-hidden rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm backdrop-blur-sm" style={{ animationDelay: '320ms' }}>
+      <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-3.5">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-100/80">
+            <AlertTriangle className="h-3.5 w-3.5 text-amber-600" />
+          </div>
           <h3 className="text-sm font-semibold text-zinc-950">Tenancies ending soon</h3>
-          <span className="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">
+          <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-semibold tabular-nums text-amber-700">
             {endingSoon.length}
           </span>
         </div>
         <Link
           href="/tenancies"
           prefetch={false}
-          className="text-xs font-medium text-emerald-600 transition hover:text-emerald-700"
+          className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 transition hover:text-emerald-700"
         >
-          View all tenancies
+          View all
+          <ArrowRight className="h-3 w-3" />
         </Link>
       </div>
       <div>
-        {endingSoon.map((tenancy) => {
+        {endingSoon.map((tenancy, i) => {
           const address = buildAddress(tenancy.property)
           const endDate = new Date(tenancy.end_date!)
           const daysLeft = Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
@@ -224,22 +364,26 @@ function EndingSoonTable({ tenancies }: { tenancies: EotTenancyListItem[] }) {
                   : `/dashboard/${tenancy.id}`
               }
               prefetch={false}
-              className="flex items-center gap-4 border-b border-zinc-100 px-5 py-3.5 transition last:border-b-0 hover:bg-zinc-50/60"
+              className="modern-table-row flex items-center gap-4 border-b border-zinc-100/80 px-5 py-3.5 last:border-b-0"
+              style={{ animationDelay: `${i * 30}ms` }}
             >
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-zinc-100/80 text-xs font-bold tabular-nums text-zinc-500">
+                {daysLeft}d
+              </div>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium text-zinc-950">{address}</p>
-                <p className="mt-0.5 truncate text-xs text-zinc-500">{tenancy.tenant_name}</p>
+                <p className="mt-0.5 truncate text-xs text-zinc-400">{tenancy.tenant_name}</p>
               </div>
               <div className="hidden text-right sm:block">
-                <p className="text-xs text-zinc-500">Ends {formatDate(tenancy.end_date)}</p>
+                <p className="text-xs text-zinc-400">Ends {formatDate(tenancy.end_date)}</p>
                 <p
                   className={cn(
-                    'mt-0.5 text-xs font-medium',
+                    'mt-0.5 text-xs font-semibold',
                     daysLeft <= 7
                       ? 'text-rose-600'
                       : daysLeft <= 30
                         ? 'text-amber-600'
-                        : 'text-zinc-500'
+                        : 'text-zinc-400'
                   )}
                 >
                   {daysLeft} day{daysLeft !== 1 ? 's' : ''} left
@@ -251,16 +395,16 @@ function EndingSoonTable({ tenancies }: { tenancies: EotTenancyListItem[] }) {
                     {formatCurrency(Number(tenancy.deposit_amount))}
                   </p>
                 ) : (
-                  <p className="text-xs text-zinc-400">No deposit</p>
+                  <p className="text-xs text-zinc-300">No deposit</p>
                 )}
               </div>
               <div className="hidden md:block">
                 {tenancy.case_id ? (
-                  <span className="inline-flex items-center rounded-full bg-sky-50 px-2.5 py-0.5 text-xs font-medium text-sky-700">
+                  <span className="inline-flex items-center rounded-full bg-sky-50 px-2.5 py-0.5 text-[11px] font-semibold text-sky-700">
                     {tenancy.case_status ? formatEnumLabel(tenancy.case_status) : 'Has case'}
                   </span>
                 ) : (
-                  <span className="inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-medium text-zinc-500">
+                  <span className="inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-0.5 text-[11px] font-medium text-zinc-400">
                     No case
                   </span>
                 )}
@@ -286,31 +430,33 @@ function NeedsAttentionWidget({ cases }: { cases: EotCaseListItem[] }) {
   if (reviewCases.length === 0 && unassignedCases.length === 0) return null
 
   return (
-    <div className="grid gap-4 xl:grid-cols-2">
+    <div className="animate-fade-in-up grid gap-3 xl:grid-cols-2" style={{ animationDelay: '240ms' }}>
       {reviewCases.length > 0 ? (
-        <div className="overflow-hidden rounded-xl border border-amber-200 bg-amber-50/30">
-          <div className="flex items-center gap-2 border-b border-amber-200 px-5 py-3">
-            <Eye className="h-4 w-4 text-amber-600" />
+        <div className="overflow-hidden rounded-2xl border border-amber-200/60 bg-gradient-to-br from-amber-50/50 to-white shadow-sm">
+          <div className="flex items-center gap-2.5 border-b border-amber-100 px-5 py-3.5">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-100/80">
+              <Eye className="h-3.5 w-3.5 text-amber-600" />
+            </div>
             <h3 className="text-sm font-semibold text-zinc-950">Awaiting your review</h3>
-            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+            <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-semibold tabular-nums text-amber-700">
               {reviewCases.length}
             </span>
           </div>
-          <div className="bg-white">
+          <div className="bg-white/60">
             {reviewCases.map((c) => (
               <Link
                 key={c.id}
                 href={`/operator/cases/${c.id}`}
                 prefetch={false}
-                className="flex items-center justify-between gap-4 border-b border-zinc-100 px-5 py-3 transition last:border-b-0 hover:bg-zinc-50/60"
+                className="modern-table-row flex items-center justify-between gap-4 border-b border-zinc-100/60 px-5 py-3 last:border-b-0"
               >
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium text-zinc-950">
                     {buildAddress(c.property)}
                   </p>
-                  <p className="mt-0.5 truncate text-xs text-zinc-500">{c.tenant_name}</p>
+                  <p className="mt-0.5 truncate text-xs text-zinc-400">{c.tenant_name}</p>
                 </div>
-                <span className="shrink-0 text-xs text-zinc-400" title={c.last_activity_at}>
+                <span className="shrink-0 text-[11px] font-medium text-zinc-400" title={c.last_activity_at}>
                   {relativeTime(c.last_activity_at)}
                 </span>
               </Link>
@@ -320,29 +466,31 @@ function NeedsAttentionWidget({ cases }: { cases: EotCaseListItem[] }) {
       ) : null}
 
       {unassignedCases.length > 0 ? (
-        <div className="overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50/30">
-          <div className="flex items-center gap-2 border-b border-zinc-200 px-5 py-3">
-            <UserX className="h-4 w-4 text-zinc-500" />
+        <div className="overflow-hidden rounded-2xl border border-zinc-200/60 bg-gradient-to-br from-zinc-50/50 to-white shadow-sm">
+          <div className="flex items-center gap-2.5 border-b border-zinc-100 px-5 py-3.5">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-zinc-100/80">
+              <UserX className="h-3.5 w-3.5 text-zinc-500" />
+            </div>
             <h3 className="text-sm font-semibold text-zinc-950">Unassigned cases</h3>
-            <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-600">
+            <span className="rounded-full bg-zinc-100 px-2.5 py-0.5 text-[11px] font-semibold tabular-nums text-zinc-600">
               {unassignedCases.length}
             </span>
           </div>
-          <div className="bg-white">
+          <div className="bg-white/60">
             {unassignedCases.map((c) => (
               <Link
                 key={c.id}
                 href="/admin"
                 prefetch={false}
-                className="flex items-center justify-between gap-4 border-b border-zinc-100 px-5 py-3 transition last:border-b-0 hover:bg-zinc-50/60"
+                className="modern-table-row flex items-center justify-between gap-4 border-b border-zinc-100/60 px-5 py-3 last:border-b-0"
               >
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium text-zinc-950">
                     {buildAddress(c.property)}
                   </p>
-                  <p className="mt-0.5 truncate text-xs text-zinc-500">{c.tenant_name}</p>
+                  <p className="mt-0.5 truncate text-xs text-zinc-400">{c.tenant_name}</p>
                 </div>
-                <span className="inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-medium text-zinc-600">
+                <span className="inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-0.5 text-[11px] font-medium text-zinc-500">
                   {formatEnumLabel(c.status)}
                 </span>
               </Link>
@@ -363,57 +511,66 @@ function RecentCasesTable({ cases }: { cases: EotCaseListItem[] }) {
 
   if (recentCases.length === 0) {
     return (
-      <div className="rounded-xl border border-zinc-200 bg-white px-6 py-10 text-center">
-        <p className="text-sm text-zinc-500">No cases yet.</p>
+      <div className="animate-fade-in-up rounded-2xl border border-dashed border-zinc-200 bg-white/60 px-6 py-12 text-center backdrop-blur-sm" style={{ animationDelay: '400ms' }}>
+        <ClipboardCheck className="mx-auto h-8 w-8 text-zinc-300" />
+        <p className="mt-3 text-sm font-medium text-zinc-500">No cases yet</p>
+        <p className="mt-1 text-xs text-zinc-400">Cases will appear here once created</p>
       </div>
     )
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
-      <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-3">
-        <h3 className="text-sm font-semibold text-zinc-950">Recent case activity</h3>
+    <div className="animate-fade-in-up overflow-hidden rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm backdrop-blur-sm" style={{ animationDelay: '400ms' }}>
+      <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-3.5">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-100/80">
+            <ClipboardCheck className="h-3.5 w-3.5 text-emerald-600" />
+          </div>
+          <h3 className="text-sm font-semibold text-zinc-950">Recent case activity</h3>
+        </div>
         <Link
           href="/tenancies"
           prefetch={false}
-          className="text-xs font-medium text-emerald-600 transition hover:text-emerald-700"
+          className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 transition hover:text-emerald-700"
         >
-          View all cases
+          View all
+          <ArrowRight className="h-3 w-3" />
         </Link>
       </div>
       <div>
-        {recentCases.map((c) => {
+        {recentCases.map((c, i) => {
           const address = buildAddress(c.property)
           return (
             <Link
               key={c.id}
               href={`/operator/cases/${c.id}`}
               prefetch={false}
-              className="flex items-center gap-4 border-b border-zinc-100 px-5 py-3.5 transition last:border-b-0 hover:bg-zinc-50/60"
+              className="modern-table-row flex items-center gap-4 border-b border-zinc-100/80 px-5 py-3.5 last:border-b-0"
+              style={{ animationDelay: `${i * 30}ms` }}
             >
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium text-zinc-950">{address}</p>
-                <p className="mt-0.5 truncate text-xs text-zinc-500">{c.tenant_name}</p>
+                <p className="mt-0.5 truncate text-xs text-zinc-400">{c.tenant_name}</p>
               </div>
               <div className="hidden sm:block">
                 <span
                   className={cn(
-                    'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
+                    'inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold',
                     c.status === 'review'
-                      ? 'bg-amber-50 text-amber-700'
+                      ? 'bg-amber-50 text-amber-700 ring-1 ring-amber-200/50'
                       : c.status === 'submitted' || c.status === 'resolved'
-                        ? 'bg-emerald-50 text-emerald-700'
-                        : 'bg-zinc-100 text-zinc-600'
+                        ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/50'
+                        : 'bg-zinc-100 text-zinc-500'
                   )}
                 >
                   {formatEnumLabel(c.status)}
                 </span>
               </div>
               <div className="hidden text-right md:block">
-                <p className="text-xs text-zinc-400">
+                <p className="text-[11px] tabular-nums text-zinc-400">
                   {c.issue_count} issue{c.issue_count !== 1 ? 's' : ''}
                 </p>
-                <p className="text-xs text-zinc-400">
+                <p className="text-[11px] tabular-nums text-zinc-400">
                   {c.evidence_count} evidence
                 </p>
               </div>
@@ -465,11 +622,17 @@ export function DashboardOverviewClient({
   if (loading) {
     return (
       <div className="space-y-4">
-        <SkeletonPanel className="h-24" />
-        <div className="grid gap-4 sm:grid-cols-3">
+        <SkeletonPanel className="h-[180px]" />
+        <div className="grid gap-3 md:grid-cols-4">
           <SkeletonPanel className="h-24" />
           <SkeletonPanel className="h-24" />
           <SkeletonPanel className="h-24" />
+          <SkeletonPanel className="h-24" />
+        </div>
+        <div className="grid gap-3 sm:grid-cols-3">
+          <SkeletonPanel className="h-28" />
+          <SkeletonPanel className="h-28" />
+          <SkeletonPanel className="h-28" />
         </div>
         <SkeletonPanel className="h-[300px]" />
       </div>
@@ -477,21 +640,8 @@ export function DashboardOverviewClient({
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm text-zinc-500">Portfolio overview across all tenancies and cases.</p>
-        </div>
-        <button
-          type="button"
-          onClick={handleRefresh}
-          className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950"
-        >
-          <RefreshCcw className={cn('h-3.5 w-3.5', refreshing && 'animate-spin')} />
-          Refresh
-        </button>
-      </div>
-
+    <div className="space-y-5">
+      <GreetingHeader stats={stats} refreshing={refreshing} onRefresh={handleRefresh} />
       <StatCards stats={stats} />
       <CaseSummaryCards stats={stats} />
       <NeedsAttentionWidget cases={cases} />
