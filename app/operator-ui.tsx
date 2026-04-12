@@ -24,12 +24,12 @@ export function PageHeader({
     >
       <div className="min-w-0">
         {eyebrow && !title ? (
-          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-600">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-600/70">
             {eyebrow}
           </p>
         ) : null}
         {title ? (
-          <h2 className="text-sm font-semibold text-zinc-950">{title}</h2>
+          <h2 className="text-[15px] font-semibold tracking-tight text-zinc-900">{title}</h2>
         ) : null}
       </div>
       {actions ? <div className="flex flex-shrink-0 flex-wrap items-center gap-2">{actions}</div> : null}
@@ -45,7 +45,7 @@ export function SectionCard({
   className?: string
 }) {
   return (
-    <section className={cn('border-b border-zinc-200/60 pb-4', className)}>
+    <section className={cn('border-b border-zinc-100 pb-5', className)}>
       {children}
     </section>
   )
@@ -64,7 +64,7 @@ export function SectionHeading({
 }) {
   return (
     <div className={cn('flex items-center justify-between gap-3', className)}>
-      <h3 className="text-sm font-semibold text-zinc-950">{title}</h3>
+      <h3 className="text-[13px] font-semibold text-zinc-900">{title}</h3>
       {aside ? <div className="flex shrink-0 flex-wrap items-center gap-2">{aside}</div> : null}
     </div>
   )
@@ -97,24 +97,24 @@ export function KPIStatCard({
 
   const iconBg =
     tone === 'accent'
-      ? 'bg-emerald-100/80 text-emerald-600'
+      ? 'bg-emerald-50 text-emerald-600'
       : tone === 'danger'
-        ? 'bg-rose-100/80 text-rose-600'
+        ? 'bg-rose-50 text-rose-600'
         : tone === 'warning'
-          ? 'bg-amber-100/80 text-amber-600'
-          : 'bg-zinc-100/80 text-zinc-500'
+          ? 'bg-amber-50 text-amber-600'
+          : 'bg-zinc-50 text-zinc-500'
 
   return (
     <div className={cn('flex items-start gap-3 py-2', className)}>
       {icon ? (
-        <div className={cn('flex h-9 w-9 shrink-0 items-center justify-center rounded-xl', iconBg)}>
+        <div className={cn('flex h-9 w-9 shrink-0 items-center justify-center rounded-lg', iconBg)}>
           {icon}
         </div>
       ) : null}
       <div className="min-w-0">
-        <span className="text-[11px] font-medium uppercase tracking-wide text-zinc-400">{label}</span>
-        <div className="mt-0.5 flex items-baseline gap-1.5">
-          <span className={cn('animate-count-up text-2xl font-bold tabular-nums leading-tight tracking-tight', valueColor)}>
+        <span className="text-[11px] font-medium uppercase tracking-[0.06em] text-zinc-500">{label}</span>
+        <div className="mt-1 flex items-baseline gap-1.5">
+          <span className={cn('animate-count-up text-2xl font-bold tabular-nums leading-none tracking-tight', valueColor)}>
             {value}
           </span>
           {trend ? <span className="text-[11px] font-medium text-zinc-400">{trend}</span> : null}
@@ -136,10 +136,10 @@ export function ToolbarPill({
   return (
     <span
       className={cn(
-        'inline-flex items-center border-b-2 px-2.5 pb-2 text-sm font-medium transition',
+        'inline-flex items-center border-b-2 px-3 pb-2.5 text-[13px] font-medium transition',
         active
-          ? 'border-emerald-600 text-zinc-900'
-          : 'border-transparent text-zinc-500 hover:border-zinc-300 hover:text-zinc-700',
+          ? 'border-zinc-900 text-zinc-900'
+          : 'border-transparent text-zinc-400 hover:border-zinc-200 hover:text-zinc-700',
         className
       )}
     >
@@ -178,8 +178,8 @@ export function DetailPanel({
   className?: string
 }) {
   return (
-    <aside className={cn('border-l-2 border-zinc-200/60 pl-4', className)}>
-      <h3 className="text-sm font-semibold text-zinc-950">{title}</h3>
+    <aside className={cn('border-l-2 border-zinc-200 pl-4', className)}>
+      <h3 className="text-[13px] font-semibold text-zinc-900">{title}</h3>
       <div className="mt-3 space-y-0">{children}</div>
     </aside>
   )
@@ -199,10 +199,10 @@ export function EmptyState({
   className?: string
 }) {
   return (
-    <div className={cn('rounded-2xl border border-dashed border-zinc-200/60 bg-white/60 px-6 py-12 text-center backdrop-blur-sm', className)}>
-      {icon ? <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center text-zinc-300">{icon}</div> : null}
-      <p className="text-sm font-semibold text-zinc-950">{title}</p>
-      <p className="mt-1 text-sm text-zinc-500">{body}</p>
+    <div className={cn('rounded-xl border-2 border-dashed border-zinc-200 bg-zinc-50/50 px-6 py-12 text-center', className)}>
+      {icon ? <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center text-zinc-400">{icon}</div> : null}
+      <p className="text-sm font-semibold text-zinc-900">{title}</p>
+      <p className="mt-1 text-[13px] text-zinc-500">{body}</p>
       {action ? <div className="mt-4">{action}</div> : null}
     </div>
   )
@@ -252,11 +252,11 @@ export function ActivityTimeline({
                 : 'bg-zinc-400'
 
         return (
-          <div key={item.id} className="flex gap-3 border-b border-zinc-100 py-2.5 last:border-b-0">
+          <div key={item.id} className="flex gap-3 border-b border-zinc-100 py-3 last:border-b-0">
             <span className={cn('mt-1.5 h-2 w-2 shrink-0 rounded-full', toneClass)} />
             <div className="min-w-0 flex-1">
               <div className="flex items-baseline justify-between gap-3">
-                <p className="text-sm font-medium text-zinc-900">{item.title}</p>
+                <p className="text-[13px] font-medium text-zinc-900">{item.title}</p>
                 {item.meta ? <span className="shrink-0 text-[11px] text-zinc-400">{item.meta}</span> : null}
               </div>
               <p className="mt-0.5 text-sm text-zinc-500">{item.detail}</p>
@@ -282,7 +282,7 @@ export function ProgressBar({
   return (
     <div className={cn('space-y-1', className)}>
       {label ? <div className="flex items-center justify-between gap-3 text-xs text-zinc-500">{label}</div> : null}
-      <div className="h-1.5 overflow-hidden rounded-full bg-zinc-100">
+      <div className="h-[5px] overflow-hidden rounded-full bg-zinc-100">
         <div
           className="h-full rounded-full bg-emerald-500 transition-all duration-500"
           style={{ width: `${clamped}%` }}
@@ -298,6 +298,6 @@ export function SkeletonPanel({
   className?: string
 }) {
   return (
-    <div className={cn('skeleton-shimmer rounded-2xl', className)} />
+    <div className={cn('skeleton-shimmer rounded-xl', className)} />
   )
 }
