@@ -91,7 +91,7 @@ export default async function DepositSchemePage() {
 
       {DEPOSIT_SCHEMES.map((group) => (
         <section key={group.region}>
-          <div className="flex items-end gap-8 border-b border-zinc-200/60 pb-3">
+          <div className="flex items-end gap-8 border-b border-zinc-200 pb-3">
             <h2 className="text-sm font-semibold text-zinc-950">{group.region}</h2>
             <span className="text-xs tabular-nums text-zinc-500">
               {group.schemes.length} scheme{group.schemes.length !== 1 ? 's' : ''}
@@ -100,7 +100,7 @@ export default async function DepositSchemePage() {
 
           <div className="mt-4 space-y-3">
             {group.schemes.map((scheme) => (
-              <div key={scheme.name} className="border-l-2 border-zinc-200/60 py-3 pl-5 animate-fade-in-up">
+              <div key={scheme.name} className="border-l-2 border-zinc-200 py-3 pl-5 animate-fade-in-up">
                 <div className="flex items-baseline gap-3">
                   <h3 className="text-sm font-semibold text-zinc-950">{scheme.name}</h3>
                   <a

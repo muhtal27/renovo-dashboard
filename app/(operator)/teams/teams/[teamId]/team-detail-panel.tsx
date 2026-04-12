@@ -159,7 +159,7 @@ export function TeamDetailPanel({ teamId }: { teamId: string }) {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="skeleton-shimmer rounded-2xl space-y-3 py-8">
+        <div className="skeleton-shimmer rounded-xl space-y-3 py-8">
           <div className="h-6 w-48 rounded bg-zinc-100" />
           <div className="h-4 w-32 rounded bg-zinc-50" />
           {[1, 2, 3].map((i) => (
@@ -184,7 +184,7 @@ export function TeamDetailPanel({ teamId }: { teamId: string }) {
           action={
             <Link
               href="/teams/teams"
-              className="inline-flex items-center gap-1.5 rounded-md border border-zinc-200/60 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:text-zinc-950"
+              className="inline-flex items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:text-zinc-950"
             >
               <ArrowLeft className="h-4 w-4" strokeWidth={2} />
               Back to teams
@@ -204,7 +204,7 @@ export function TeamDetailPanel({ teamId }: { teamId: string }) {
           <div className="flex items-center gap-2">
             <Link
               href="/teams/teams"
-              className="inline-flex items-center gap-1.5 rounded-md border border-zinc-200/60 bg-white px-3 py-2 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:text-zinc-950"
+              className="inline-flex items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:text-zinc-950"
             >
               <ArrowLeft className="h-4 w-4" strokeWidth={2} />
               All teams
@@ -239,7 +239,7 @@ export function TeamDetailPanel({ teamId }: { teamId: string }) {
       {showAdd ? (
         <form
           onSubmit={handleAdd}
-          className="rounded-2xl border border-zinc-200/60 bg-white/80 backdrop-blur-sm p-5 shadow-sm"
+          className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm"
         >
           <p className="text-sm font-semibold text-zinc-950">Add a workspace member to this team</p>
           <p className="mt-1 text-sm text-zinc-500">
@@ -301,7 +301,7 @@ export function TeamDetailPanel({ teamId }: { teamId: string }) {
                 <button
                   type="button"
                   onClick={() => { setShowAdd(false); setSelectedUserId(''); setError(null) }}
-                  className="rounded-md border border-zinc-200/60 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:border-zinc-300"
+                  className="rounded-md border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:border-zinc-300"
                 >
                   Cancel
                 </button>
@@ -326,10 +326,10 @@ export function TeamDetailPanel({ teamId }: { teamId: string }) {
           }
         />
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-zinc-200/60">
+        <div className="overflow-hidden rounded-xl border border-zinc-200">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-zinc-200/60 bg-zinc-50/60">
+              <tr className="border-b border-zinc-200 bg-zinc-50/60">
                 <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
                   Member
                 </th>
@@ -356,7 +356,7 @@ export function TeamDetailPanel({ teamId }: { teamId: string }) {
                     <select
                       value={member.role}
                       onChange={(e) => handleRoleChange(member.teamMembershipId, e.target.value)}
-                      className="rounded border border-transparent bg-transparent px-1 py-0.5 text-sm outline-none transition hover:border-zinc-200/60 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                      className="rounded border border-transparent bg-transparent px-1 py-0.5 text-sm outline-none transition hover:border-zinc-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
                     >
                       {TEAM_ROLE_OPTIONS.map((opt) => (
                         <option key={opt.value} value={opt.value}>

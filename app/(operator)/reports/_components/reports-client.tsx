@@ -173,13 +173,13 @@ function OverviewContent({
   return (
     <div className="space-y-6">
       {/* Key numbers */}
-      <section className="rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm backdrop-blur-sm px-6 py-6 md:px-7">
+      <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold text-zinc-950">Portfolio overview</h3>
           <button
             type="button"
             onClick={onExportCSV}
-            className="inline-flex items-center gap-1.5 rounded-md border border-zinc-200/60 bg-white px-3 py-1.5 text-xs font-medium text-zinc-600 transition hover:bg-zinc-50 hover:text-zinc-950"
+            className="inline-flex items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-600 transition hover:bg-zinc-50 hover:text-zinc-950"
           >
             <Download className="h-3.5 w-3.5" />
             Export CSV
@@ -227,14 +227,14 @@ function OverviewContent({
 
       {/* Distributions */}
       <div className="grid gap-6 xl:grid-cols-2">
-        <section className="rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm backdrop-blur-sm px-6 py-6 md:px-7">
+        <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
           <h3 className="text-sm font-semibold text-zinc-950">Case status distribution</h3>
           <div className="mt-4">
             <DistributionBar items={statusItems} />
           </div>
         </section>
 
-        <section className="rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm backdrop-blur-sm px-6 py-6 md:px-7">
+        <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
           <h3 className="text-sm font-semibold text-zinc-950">Issue severity breakdown</h3>
           <div className="mt-4">
             <DistributionBar items={severityItems} />
@@ -243,7 +243,7 @@ function OverviewContent({
       </div>
 
       {/* Submission readiness */}
-      <section className="rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm backdrop-blur-sm px-6 py-6 md:px-7">
+      <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
         <h3 className="text-sm font-semibold text-zinc-950">Submission readiness</h3>
         <dl className="mt-4 grid grid-cols-2 gap-x-12 gap-y-4 text-sm xl:grid-cols-5">
           <div>
@@ -272,16 +272,16 @@ function OverviewContent({
       </section>
 
       {/* Performance table */}
-      <section className="rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm backdrop-blur-sm px-6 py-6 md:px-7">
+      <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
         <h3 className="text-sm font-semibold text-zinc-950">Case performance</h3>
         <p className="mt-1 text-sm text-zinc-500">
           {performance_rows.length} case{performance_rows.length !== 1 ? 's' : ''} in the live
           portfolio.
         </p>
-        <div className="mt-4 overflow-hidden rounded-xl border border-zinc-200/60">
+        <div className="mt-4 overflow-hidden rounded-xl border border-zinc-200">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-zinc-200/60 bg-zinc-50/60">
+              <tr className="border-b border-zinc-200 bg-zinc-50/60">
                 <th className="px-4 py-2.5 text-left text-xs font-medium text-zinc-500">
                   Property
                 </th>
@@ -395,7 +395,7 @@ export function ReportsClient({
 
   if (error) {
     return (
-      <div className="rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm backdrop-blur-sm px-6 py-10 text-center">
+      <div className="rounded-xl border border-zinc-200 bg-white px-6 py-10 text-center">
         <h3 className="text-sm font-semibold text-zinc-950">Unable to load reports</h3>
         <p className="mt-1 text-sm text-zinc-500">{error}</p>
       </div>
@@ -404,7 +404,7 @@ export function ReportsClient({
 
   if (!initialSummary || performanceRows.length === 0) {
     return (
-      <div className="rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm backdrop-blur-sm px-6 py-10 text-center">
+      <div className="rounded-xl border border-zinc-200 bg-white px-6 py-10 text-center">
         <h3 className="text-sm font-semibold text-zinc-950">No data yet</h3>
         <p className="mt-1 text-sm text-zinc-500">
           Create the first checkout to populate the reports.
@@ -416,7 +416,7 @@ export function ReportsClient({
   return (
     <div className="space-y-6 animate-fade-in-up">
       {/* Tab bar */}
-      <div className="flex items-center gap-1 border-b border-zinc-200/60">
+      <div className="flex items-center gap-1 border-b border-zinc-200">
         {TABS.map((tab) => (
           <button
             key={tab.id}

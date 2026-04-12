@@ -80,7 +80,7 @@ export function BillingPageClient() {
     <div className="space-y-6 animate-fade-in-up">
 
       {/* ── Plan overview ── */}
-      <section className="border border-zinc-200/60 bg-white/80 backdrop-blur-sm shadow-sm px-6 py-6 md:px-7">
+      <section className="border border-zinc-200 bg-white shadow-sm px-6 py-6 md:px-7">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h3 className="text-sm font-semibold text-zinc-950">Current plan</h3>
@@ -125,7 +125,7 @@ export function BillingPageClient() {
       </section>
 
       {/* ── Usage ── */}
-      <section className="border border-zinc-200/60 bg-white/80 backdrop-blur-sm shadow-sm px-6 py-6 md:px-7">
+      <section className="border border-zinc-200 bg-white shadow-sm px-6 py-6 md:px-7">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h3 className="text-sm font-semibold text-zinc-950">Usage</h3>
@@ -135,7 +135,7 @@ export function BillingPageClient() {
           </div>
         </div>
 
-        <div className="mt-5 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-zinc-200/60 bg-zinc-200 md:grid-cols-4">
+        <div className="mt-5 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-zinc-200 bg-zinc-200 md:grid-cols-4">
           <div className="bg-white px-5 py-4">
             <KPIStatCard label="Fully managed" value={mockUsage.fullyManagedTenancies} tone="default" />
           </div>
@@ -180,7 +180,7 @@ export function BillingPageClient() {
       </section>
 
       {/* ── Manage blocks ── */}
-      <section className="border border-zinc-200/60 bg-white/80 backdrop-blur-sm shadow-sm px-6 py-6 md:px-7">
+      <section className="border border-zinc-200 bg-white shadow-sm px-6 py-6 md:px-7">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h3 className="text-sm font-semibold text-zinc-950">Manage portfolio blocks</h3>
@@ -199,7 +199,7 @@ export function BillingPageClient() {
               type="button"
               onClick={() => setBlocks((b) => Math.max(1, b - 1))}
               disabled={blocks <= 1}
-              className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200/60 text-zinc-600 transition hover:border-zinc-300 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 text-zinc-600 transition hover:border-zinc-300 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-40"
             >
               <Minus className="h-4 w-4" />
             </button>
@@ -213,7 +213,7 @@ export function BillingPageClient() {
               type="button"
               onClick={() => setBlocks((b) => Math.min(5, b + 1))}
               disabled={blocks >= 5}
-              className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200/60 text-zinc-600 transition hover:border-zinc-300 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 text-zinc-600 transition hover:border-zinc-300 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-40"
             >
               <Plus className="h-4 w-4" />
             </button>
@@ -248,7 +248,7 @@ export function BillingPageClient() {
               <button
                 type="button"
                 onClick={() => setBlocks(mockSubscription.blocks)}
-                className="rounded-md border border-zinc-200/60 px-4 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-50"
+                className="rounded-md border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-50"
               >
                 Cancel
               </button>
@@ -275,7 +275,7 @@ export function BillingPageClient() {
       </section>
 
       {/* ── Payment method ── */}
-      <section className="border border-zinc-200/60 bg-white/80 backdrop-blur-sm shadow-sm px-6 py-6 md:px-7">
+      <section className="border border-zinc-200 bg-white shadow-sm px-6 py-6 md:px-7">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h3 className="text-sm font-semibold text-zinc-950">Payment method</h3>
@@ -285,7 +285,7 @@ export function BillingPageClient() {
           </div>
           <button
             type="button"
-            className="rounded-md border border-zinc-200/60 px-3 py-1.5 text-xs font-medium text-zinc-600 transition hover:bg-zinc-50"
+            className="rounded-md border border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-600 transition hover:bg-zinc-50"
           >
             Update
           </button>
@@ -293,7 +293,7 @@ export function BillingPageClient() {
 
         {mockPaymentMethod ? (
           <div className="mt-5 flex items-center gap-4 rounded-lg border border-zinc-100/80 bg-zinc-50/80 px-4 py-3.5">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white border border-zinc-200/60">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white border border-zinc-200">
               <CreditCard className="h-5 w-5 text-zinc-400" />
             </div>
             <div className="min-w-0 flex-1">
@@ -317,7 +317,7 @@ export function BillingPageClient() {
       </section>
 
       {/* ── Billing history ── */}
-      <section className="border border-zinc-200/60 bg-white/80 backdrop-blur-sm shadow-sm px-6 py-6 md:px-7">
+      <section className="border border-zinc-200 bg-white shadow-sm px-6 py-6 md:px-7">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h3 className="text-sm font-semibold text-zinc-950">Billing history</h3>
@@ -331,7 +331,7 @@ export function BillingPageClient() {
         </div>
 
         {mockInvoices.length > 0 ? (
-          <div className="mt-5 overflow-hidden rounded-2xl border border-zinc-100/80">
+          <div className="mt-5 overflow-hidden rounded-xl border border-zinc-100/80">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-zinc-100/80 bg-zinc-50/60">
@@ -382,7 +382,7 @@ export function BillingPageClient() {
       </section>
 
       {/* ── Manage on Stripe ── */}
-      <div className="flex items-center justify-between rounded-lg border border-zinc-200/60 bg-zinc-50/80 px-6 py-4">
+      <div className="flex items-center justify-between rounded-lg border border-zinc-200 bg-zinc-50/80 px-6 py-4">
         <p className="text-sm text-zinc-500">
           Need to manage payment details, download receipts, or cancel your subscription?
         </p>
@@ -390,7 +390,7 @@ export function BillingPageClient() {
           href="https://billing.stripe.com/p/login/test"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-zinc-200/60 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
         >
           Stripe portal
           <ExternalLink className="h-3.5 w-3.5" />
@@ -400,7 +400,7 @@ export function BillingPageClient() {
       {/* ── Confirmation modal ── */}
       {showConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="mx-4 w-full max-w-md rounded-2xl border border-zinc-200/60 bg-white p-6 shadow-xl backdrop-blur-sm">
+          <div className="mx-4 w-full max-w-md rounded-xl border border-zinc-200 bg-white p-6 shadow-xl backdrop-blur-sm">
             <h3 className="text-base font-semibold text-zinc-950">Confirm subscription change</h3>
             <p className="mt-2 text-sm text-zinc-500">
               You are changing from{' '}
@@ -417,7 +417,7 @@ export function BillingPageClient() {
               <button
                 type="button"
                 onClick={() => setShowConfirm(false)}
-                className="rounded-md border border-zinc-200/60 px-4 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-50"
+                className="rounded-md border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-50"
               >
                 Cancel
               </button>

@@ -536,7 +536,7 @@ function FinancialOverview({
     <div className="animate-fade-in-up grid grid-cols-2 gap-3 lg:grid-cols-4" style={{ animationDelay: '160ms' }}>
       <Link
         href="/tenancies"
-        className="group relative overflow-hidden rounded-2xl border border-emerald-100 bg-gradient-to-br from-white to-emerald-50/40 px-5 py-5 shadow-sm transition-all duration-200 hover:border-emerald-200 hover:shadow-md hover:-translate-y-0.5"
+        className="group relative overflow-hidden rounded-xl border border-emerald-100 bg-gradient-to-br from-white to-emerald-50/40 px-5 py-5 shadow-sm transition-all duration-200 hover:border-emerald-200 hover:shadow-md hover:-translate-y-0.5"
       >
         <div className="absolute -right-4 -top-4 h-20 w-20 rounded-full bg-emerald-100/50 blur-2xl transition-all group-hover:bg-emerald-100/80" />
         <div className="relative">
@@ -556,7 +556,7 @@ function FinancialOverview({
 
       <Link
         href="/tenancies"
-        className="group relative overflow-hidden rounded-2xl border border-sky-100 bg-gradient-to-br from-white to-sky-50/40 px-5 py-5 shadow-sm transition-all duration-200 hover:border-sky-200 hover:shadow-md hover:-translate-y-0.5"
+        className="group relative overflow-hidden rounded-xl border border-sky-100 bg-gradient-to-br from-white to-sky-50/40 px-5 py-5 shadow-sm transition-all duration-200 hover:border-sky-200 hover:shadow-md hover:-translate-y-0.5"
       >
         <div className="absolute -right-4 -top-4 h-20 w-20 rounded-full bg-sky-100/50 blur-2xl transition-all group-hover:bg-sky-100/80" />
         <div className="relative">
@@ -578,7 +578,7 @@ function FinancialOverview({
 
       <Link
         href="/disputes"
-        className="group relative overflow-hidden rounded-2xl border border-rose-100 bg-gradient-to-br from-white to-rose-50/40 px-5 py-5 shadow-sm transition-all duration-200 hover:border-rose-200 hover:shadow-md hover:-translate-y-0.5"
+        className="group relative overflow-hidden rounded-xl border border-rose-100 bg-gradient-to-br from-white to-rose-50/40 px-5 py-5 shadow-sm transition-all duration-200 hover:border-rose-200 hover:shadow-md hover:-translate-y-0.5"
       >
         <div className="absolute -right-4 -top-4 h-20 w-20 rounded-full bg-rose-100/50 blur-2xl transition-all group-hover:bg-rose-100/80" />
         <div className="relative">
@@ -598,7 +598,7 @@ function FinancialOverview({
         <ArrowUpRight className="absolute right-3 top-3 h-4 w-4 text-zinc-300 transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-rose-500" />
       </Link>
 
-      <div className="relative overflow-hidden rounded-2xl border border-violet-100 bg-gradient-to-br from-white to-violet-50/40 px-5 py-5 shadow-sm">
+      <div className="relative overflow-hidden rounded-xl border border-violet-100 bg-gradient-to-br from-white to-violet-50/40 px-5 py-5 shadow-sm">
         <div className="absolute -right-4 -top-4 h-20 w-20 rounded-full bg-violet-100/50 blur-2xl" />
         <div className="relative">
           <div className="flex items-center gap-2">
@@ -661,7 +661,7 @@ function ActionCenter({ items }: { items: ActionItem[] }) {
   if (items.length === 0) {
     return (
       <div
-        className="animate-fade-in-up rounded-2xl border border-dashed border-emerald-200 bg-emerald-50/30 px-6 py-12 text-center backdrop-blur-sm"
+        className="animate-fade-in-up rounded-xl border border-dashed border-emerald-200 bg-emerald-50/30 px-6 py-12 text-center backdrop-blur-sm"
         style={{ animationDelay: '240ms' }}
       >
         <CheckCircle2 className="mx-auto h-8 w-8 text-emerald-400" />
@@ -800,7 +800,7 @@ function TenancyLifecycle({ tenancies }: { tenancies: EotTenancyListItem[] }) {
   if (endingSoon.length === 0) {
     return (
       <div
-        className="animate-fade-in-up rounded-2xl border border-dashed border-zinc-200 bg-white/60 px-6 py-12 text-center backdrop-blur-sm"
+        className="animate-fade-in-up rounded-xl border border-dashed border-zinc-200 bg-white px-6 py-12 text-center backdrop-blur-sm"
         style={{ animationDelay: '320ms' }}
       >
         <Calendar className="mx-auto h-8 w-8 text-zinc-300" />
@@ -934,7 +934,7 @@ function RecentCasesTable({
   if (recentCases.length === 0) {
     return (
       <div
-        className="animate-fade-in-up rounded-2xl border border-dashed border-zinc-200 bg-white/60 px-6 py-12 text-center backdrop-blur-sm"
+        className="animate-fade-in-up rounded-xl border border-dashed border-zinc-200 bg-white px-6 py-12 text-center backdrop-blur-sm"
         style={{ animationDelay: '400ms' }}
       >
         <ClipboardCheck className="mx-auto h-8 w-8 text-zinc-300" />
