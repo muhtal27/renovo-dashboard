@@ -207,11 +207,11 @@ export function CommandPalette() {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-start justify-center bg-zinc-950/40 pt-[20vh] backdrop-blur-sm"
+      className="fixed inset-0 z-[100] flex items-start justify-center bg-zinc-950/40 pt-[20vh]"
       onClick={handleClose}
     >
       <div
-        className="w-full max-w-lg overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-2xl"
+        className="w-full max-w-[520px] overflow-hidden rounded-[14px] border border-zinc-200 bg-white shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center gap-3 border-b border-zinc-200 px-4 py-3">
