@@ -18,8 +18,17 @@
   --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.06);
   --shadow-strong: 0 16px 44px rgba(0, 0, 0, 0.08);
   --shadow-card: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
-  --shadow-card-hover: 0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+  --shadow-card-hover: 0 4px 16px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04);
   --shadow-glow-emerald: 0 0 0 1px rgba(16,185,129,0.08), 0 4px 20px rgba(16,185,129,0.10);
+  /* Redesign tokens */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.08);
 }
 
 @theme inline {
@@ -155,8 +164,8 @@ textarea:focus-visible,
 select:focus-visible,
 summary:focus-visible {
   box-shadow:
-    0 0 0 2px rgba(255, 253, 249, 0.98),
-    0 0 0 5px rgba(47, 87, 75, 0.3);
+    0 0 0 2px #ffffff,
+    0 0 0 4px rgba(16, 185, 129, 0.3);
 }
 
 a:focus-visible,
@@ -174,7 +183,7 @@ a:focus-visible {
 }
 
 ::selection {
-  background: rgba(31, 107, 88, 0.18);
+  background: rgba(16, 185, 129, 0.12);
   color: var(--foreground);
 }
 
@@ -198,61 +207,70 @@ a:focus-visible {
 }
 
 .app-surface {
-  background: rgba(255, 255, 255, 0.92);
+  background: #ffffff;
   border: 1px solid var(--line);
-  border-radius: 12px;
-  box-shadow: var(--shadow-soft);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
 }
 
 .app-surface-strong {
   background: var(--panel-strong);
   border: 1px solid var(--line);
-  border-radius: 12px;
-  box-shadow: var(--shadow-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
 }
 
 .app-pill {
   align-items: center;
-  background: rgba(255, 255, 255, 0.95);
+  background: #ffffff;
   border: 1px solid var(--line);
-  color: #3d3b37;
+  border-radius: var(--radius-xl);
+  color: var(--muted);
   display: inline-flex;
   justify-content: center;
   line-height: 1.15;
-  min-height: 2.5rem;
+  min-height: 2.25rem;
   text-align: center;
   vertical-align: middle;
+  font-weight: 500;
+  font-size: 0.8125rem;
 }
 
 .app-pill:hover {
-  background: #fff;
+  background: var(--warm-soft);
   border-color: var(--line-strong);
+  color: var(--foreground);
 }
 
 .app-pill-active {
   align-items: center;
-  background: var(--accent-soft);
-  border: 1px solid rgba(15, 110, 86, 0.25);
+  background: var(--foreground);
+  border: 1px solid var(--foreground);
+  border-radius: var(--radius-xl);
   box-shadow: none;
-  color: var(--accent-strong);
+  color: #ffffff;
   display: inline-flex;
   justify-content: center;
   line-height: 1.15;
-  min-height: 2.5rem;
+  min-height: 2.25rem;
   text-align: center;
   vertical-align: middle;
+  font-weight: 600;
+  font-size: 0.8125rem;
 }
 
 .app-primary-button {
   align-items: center;
   background: #18181b;
   border: 1px solid #18181b;
+  border-radius: var(--radius-md);
   box-shadow: none;
   color: #ffffff;
   display: inline-flex;
+  font-weight: 600;
   justify-content: center;
   line-height: 1.15;
-  min-height: 2.75rem;
+  min-height: 2.5rem;
   text-align: center;
   vertical-align: middle;
 }
@@ -264,25 +282,28 @@ a:focus-visible {
 
 .app-primary-button:disabled {
   box-shadow: none;
+  opacity: 0.5;
 }
 
 .app-secondary-button {
   align-items: center;
-  background: transparent;
-  border: 1px solid #e4e4e7;
-  color: #18181b;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  color: var(--foreground);
   box-shadow: none;
   display: inline-flex;
+  font-weight: 500;
   justify-content: center;
   line-height: 1.15;
-  min-height: 2.75rem;
+  min-height: 2.5rem;
   text-align: center;
   vertical-align: middle;
 }
 
 .app-secondary-button:hover {
-  background: #fafafa;
-  border-color: #d4d4d8;
+  background: var(--warm-soft);
+  border-color: var(--line-strong);
 }
 
 .app-tertiary-button {
@@ -340,11 +361,12 @@ a:focus-visible {
 .app-select,
 .app-textarea {
   width: 100%;
-  border-radius: 0.5rem;
-  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--line);
   background: #fff;
   color: var(--foreground);
   box-shadow: none;
+  font-size: 0.8125rem;
 }
 
 .app-field[aria-invalid='true'],
@@ -374,14 +396,22 @@ a:focus-visible {
 .app-field:hover,
 .app-select:hover,
 .app-textarea:hover {
-  border-color: #d4d4d8;
+  border-color: var(--line-strong);
+}
+
+.app-field:focus,
+.app-select:focus,
+.app-textarea:focus {
+  border-color: #34d399;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+  outline: none;
 }
 
 .app-field:disabled,
 .app-select:disabled,
 .app-textarea:disabled {
-  background: rgba(244, 239, 231, 0.72);
-  color: #8b8072;
+  background: var(--warm-soft);
+  color: #a1a1aa;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -399,19 +429,22 @@ a:focus-visible {
 }
 
 .app-card-muted {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.86) 0%, rgba(250, 246, 240, 0.82) 100%);
-  border: 1px solid rgba(84, 67, 47, 0.12);
+  background: var(--warm-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
 }
 
 .app-card-warm {
-  background: linear-gradient(180deg, rgba(252, 248, 242, 0.98) 0%, rgba(247, 240, 230, 0.96) 100%);
-  border: 1px solid rgba(171, 125, 71, 0.18);
+  background: var(--warm-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
 }
 
 .app-empty-state {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.78) 0%, rgba(248, 244, 238, 0.82) 100%);
-  border: 1px dashed rgba(84, 67, 47, 0.2);
-  color: #7a7064;
+  background: var(--warm-soft);
+  border: 2px dashed var(--line);
+  border-radius: var(--radius-md);
+  color: var(--muted);
 }
 
 .app-live-pill {
@@ -442,7 +475,7 @@ a:focus-visible {
   content: "";
   position: fixed;
   inset: 0;
-  background: linear-gradient(145deg, #f8fafb 0%, #f1f5f4 40%, #f5f3f0 100%);
+  background: #fafafa;
   z-index: -1;
 }
 
@@ -491,28 +524,28 @@ a:focus-visible {
 }
 
 .glass-card {
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(12px) saturate(1.4);
-  -webkit-backdrop-filter: blur(12px) saturate(1.4);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  box-shadow: var(--shadow-card);
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-xs);
 }
 
 .glass-card:hover {
-  background: rgba(255, 255, 255, 0.88);
-  box-shadow: var(--shadow-card-hover);
+  border-color: var(--line-strong);
+  box-shadow: var(--shadow-sm);
 }
 
 .stat-card-gradient {
-  background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(250,250,250,0.9) 100%);
-  border: 1px solid rgba(228,228,231,0.6);
-  box-shadow: var(--shadow-card);
-  transition: all 0.25s ease;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-xs);
+  transition: all 0.2s ease;
 }
 
 .stat-card-gradient:hover {
-  box-shadow: var(--shadow-card-hover);
-  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+  border-color: var(--line-strong);
 }
 
 .stat-card-emerald {
@@ -723,24 +756,23 @@ a:focus-visible {
 
 .app-accent-button {
   align-items: center;
-  background: #10b981;
-  border: 1px solid #10b981;
+  background: #059669;
+  border: 1px solid #059669;
+  border-radius: var(--radius-md);
   box-shadow: none;
-  color: #0a0e1a;
+  color: #ffffff;
   display: inline-flex;
   font-weight: 600;
   justify-content: center;
   line-height: 1.15;
-  min-height: 2.75rem;
+  min-height: 2.5rem;
   text-align: center;
   vertical-align: middle;
 }
 
 .app-accent-button:hover {
-  background: #0ea472;
-  border-color: #0ea472;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 24px rgba(16, 185, 129, 0.25);
+  background: #047857;
+  border-color: #047857;
 }
 
 .app-outline-white {
