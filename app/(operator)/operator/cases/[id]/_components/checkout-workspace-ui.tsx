@@ -236,10 +236,10 @@ export function WorkspaceMetricCard({
   const valueClassName = tone === 'default' ? 'text-zinc-950' : METRIC_STYLES[tone].split(' ').at(-1) ?? 'text-zinc-950'
 
   return (
-    <div className={cn('py-2', className)}>
-      <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-zinc-500">{label}</p>
-      <div className={cn('mt-1 text-xl font-bold tabular-nums leading-none', valueClassName)}>{value}</div>
-      {detail ? <div className="mt-1 text-[11px] text-zinc-400">{detail}</div> : null}
+    <div className={cn('rounded-xl border border-zinc-200 bg-white px-4 py-4', className)}>
+      <p className="text-xs font-medium text-zinc-500">{label}</p>
+      <div className={cn('mt-2 text-xl font-bold tabular-nums leading-none', valueClassName)}>{value}</div>
+      {detail ? <div className="mt-1.5 text-[11px] text-zinc-400">{detail}</div> : null}
     </div>
   )
 }
@@ -274,9 +274,9 @@ export function WorkspaceProgressBar({
         </div>
       ) : null}
       <div className="flex items-center gap-3">
-        <div className="h-1.5 flex-1 overflow-hidden bg-zinc-100">
+        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-zinc-100">
           <div
-            className={cn('h-full transition-[width]', PROGRESS_FILL_STYLES[tone])}
+            className={cn('h-full rounded-full transition-[width]', PROGRESS_FILL_STYLES[tone])}
             style={{ width: `${percentage}%` }}
           />
         </div>
@@ -316,7 +316,7 @@ export function WorkspaceNotice({
   tone?: WorkspaceNoticeTone
 }) {
   return (
-    <div className={cn('border px-4 py-4', NOTICE_STYLES[tone], className)}>
+    <div className={cn('rounded-xl border border-l-[3px] px-4 py-4', NOTICE_STYLES[tone], className)}>
       <div className="flex items-start gap-3">
         {icon ? <div className="mt-0.5 shrink-0">{icon}</div> : null}
         <div className="min-w-0 flex-1">
@@ -465,7 +465,7 @@ export function WorkspaceOptionButton({
   return (
     <button
       className={cn(
-        'inline-flex min-h-10 items-center justify-center border px-4 py-2 text-sm font-medium transition',
+        'inline-flex min-h-10 items-center justify-center rounded-lg border px-4 py-2 text-sm font-medium transition',
         selected ? toneStyles.active : toneStyles.idle,
         props.disabled ? 'cursor-not-allowed opacity-60 hover:border-zinc-200 hover:text-inherit' : null,
         className
@@ -496,7 +496,7 @@ export function WorkspaceSelectableCard({
   return (
     <button
       className={cn(
-        'w-full border px-5 py-5 text-left transition',
+        'w-full rounded-xl border px-5 py-5 text-left transition',
         selected ? toneStyles.active : cn('bg-white', toneStyles.idle),
         props.disabled ? 'cursor-not-allowed opacity-60 hover:border-zinc-200 hover:text-inherit' : null,
         className
@@ -523,7 +523,7 @@ export function WorkspaceActionButton({
   return (
     <button
       className={cn(
-        'inline-flex min-h-10 items-center justify-center gap-2 border px-4 py-2 text-sm font-medium transition',
+        'inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition',
         'disabled:cursor-not-allowed disabled:border-zinc-200 disabled:bg-zinc-100 disabled:text-zinc-500',
         ACTION_BUTTON_STYLES[tone],
         className
@@ -562,7 +562,7 @@ export function WorkspaceTextInput({
   return (
     <input
       className={cn(
-        'h-11 w-full border border-zinc-200 bg-white px-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-sky-400 focus:ring-1 focus:ring-sky-400/30 disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-500',
+        'h-11 w-full rounded-lg border border-zinc-200 bg-white px-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-400 focus:outline-none focus:ring-[3px] focus:ring-emerald-500/10 disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-500',
         className
       )}
       {...props}
@@ -577,7 +577,7 @@ export function WorkspaceTextarea({
   return (
     <textarea
       className={cn(
-        'min-h-32 w-full border border-zinc-200 bg-white px-4 py-3 text-sm leading-6 text-zinc-900 placeholder:text-zinc-400 focus:border-sky-400 focus:ring-1 focus:ring-sky-400/30 disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-500',
+        'min-h-32 w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm leading-6 text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-400 focus:outline-none focus:ring-[3px] focus:ring-emerald-500/10 disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-500',
         className
       )}
       {...props}
@@ -592,7 +592,7 @@ export function WorkspaceSelect({
   return (
     <select
       className={cn(
-        'h-11 w-full border border-zinc-200 bg-white px-4 text-sm text-zinc-900 focus:border-sky-400 focus:ring-1 focus:ring-sky-400/30 disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-500',
+        'h-11 w-full rounded-lg border border-zinc-200 bg-white px-4 text-sm text-zinc-900 focus:border-emerald-400 focus:outline-none focus:ring-[3px] focus:ring-emerald-500/10 disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-500',
         className
       )}
       {...props}
@@ -653,7 +653,7 @@ export function WorkspaceSkeletonRow({ columns = 4 }: { columns?: number }) {
 
 export function WorkspaceSkeletonCard() {
   return (
-    <div className="space-y-4 border border-zinc-200 px-5 py-5">
+    <div className="space-y-4 rounded-xl border border-zinc-200 px-5 py-5">
       <WorkspaceSkeleton width="w-2/5" height="h-4" />
       <WorkspaceSkeleton width="w-full" height="h-3" />
       <WorkspaceSkeleton width="w-3/4" height="h-3" />
@@ -669,7 +669,7 @@ export function WorkspaceSkeletonMetrics({ count = 4 }: { count?: number }) {
   return (
     <div className={cn('grid gap-3', count === 4 ? 'grid-cols-2 sm:grid-cols-4' : `grid-cols-${Math.min(count, 4)}`)}>
       {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="border border-zinc-200 px-4 py-3 space-y-2">
+        <div key={i} className="rounded-xl border border-zinc-200 px-4 py-3 space-y-2">
           <WorkspaceSkeleton width="w-2/3" height="h-3" />
           <WorkspaceSkeleton width="w-1/2" height="h-6" />
         </div>
