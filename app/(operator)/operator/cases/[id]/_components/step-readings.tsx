@@ -1,6 +1,7 @@
 'use client'
 
-import { WorkspaceBadge } from '@/app/(operator)/operator/cases/[id]/_components/checkout-workspace-ui'
+import { Info } from 'lucide-react'
+import { WorkspaceBadge, WorkspaceNotice } from '@/app/(operator)/operator/cases/[id]/_components/checkout-workspace-ui'
 import { formatCurrency, formatDate, formatEnumLabel } from '@/app/eot/_components/eot-ui'
 import type { OperatorCheckoutWorkspaceData } from '@/lib/operator-checkout-workspace-types'
 
@@ -16,8 +17,27 @@ function Section({ title, badge, children }: { title: string; badge?: React.Reac
   )
 }
 
+function Field({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div>
+      <dt className="text-xs text-zinc-500">{label}</dt>
+      <dd className="mt-0.5 font-medium text-zinc-950">{value || '—'}</dd>
+    </div>
+  )
+}
+
 function Divider() {
   return <div className="border-t border-zinc-100" />
+}
+
+/** Map utility type to its expected unit */
+function getUtilityUnit(type: string): string {
+  const normalized = type.toLowerCase()
+  if (normalized.includes('electric')) return 'kWh'
+  if (normalized.includes('gas')) return 'm³'
+  if (normalized.includes('water')) return 'm³'
+  if (normalized.includes('oil')) return 'litres'
+  return ''
 }
 
 export function StepReadings({ data }: { data: OperatorCheckoutWorkspaceData }) {
@@ -25,35 +45,36 @@ export function StepReadings({ data }: { data: OperatorCheckoutWorkspaceData }) 
   const depositScheme = data.checkoutCase?.depositScheme
   const monthlyRent = data.workspace.overview.monthlyRent
   const rentArrears = data.workspace.overview.rentArrears
+  const keysReturned = data.keys.filter((k) => k.status === 'returned').length
+  const keysOutstanding = data.keys.filter((k) => k.status === 'outstanding').length
+  const untestedDetectors = data.detectors.filter((d) => !d.tested).length
+  const failedCompliance = data.compliance.filter((c) => c.passed === false).length
+  const safetyAttentionCount = untestedDetectors + failedCompliance
 
   return (
     <div className="space-y-8">
+      <WorkspaceNotice
+        tone="info"
+        icon={<Info className="h-4 w-4" />}
+        title="Read-only view"
+        body="Readings and financial data are synced from the source reports. To update, re-upload the relevant checkout or check-in report."
+      />
+
       <Section title="Financial">
         <dl className="mt-3 grid grid-cols-2 gap-x-12 gap-y-4 text-sm xl:grid-cols-4">
-          <div>
-            <dt className="text-xs text-zinc-500">Deposit held</dt>
-            <dd className="mt-0.5 font-medium text-zinc-950">{deposit != null ? formatCurrency(deposit) : '—'}</dd>
-          </div>
-          <div>
-            <dt className="text-xs text-zinc-500">Deposit scheme</dt>
-            <dd className="mt-0.5 font-medium text-zinc-950">{depositScheme ? formatEnumLabel(depositScheme) : '—'}</dd>
-          </div>
-          <div>
-            <dt className="text-xs text-zinc-500">Monthly rent</dt>
-            <dd className="mt-0.5 font-medium text-zinc-950">{monthlyRent != null ? formatCurrency(monthlyRent) : '—'}</dd>
-          </div>
-          <div>
-            <dt className="text-xs text-zinc-500">Rent arrears</dt>
-            <dd className="mt-0.5 font-medium text-zinc-950">
-              {rentArrears != null && rentArrears > 0 ? (
+          <Field label="Deposit held" value={deposit != null ? formatCurrency(deposit) : null} />
+          <Field label="Deposit scheme" value={depositScheme ? formatEnumLabel(depositScheme) : null} />
+          <Field label="Monthly rent" value={monthlyRent != null ? formatCurrency(monthlyRent) : null} />
+          <Field
+            label="Rent arrears"
+            value={
+              rentArrears != null && rentArrears > 0 ? (
                 <span className="text-rose-700">{formatCurrency(rentArrears)}</span>
               ) : rentArrears != null ? (
                 'None'
-              ) : (
-                '—'
-              )}
-            </dd>
-          </div>
+              ) : null
+            }
+          />
         </dl>
       </Section>
 
@@ -72,19 +93,24 @@ export function StepReadings({ data }: { data: OperatorCheckoutWorkspaceData }) 
                   <th className="px-4 py-2.5 text-left text-xs font-medium text-zinc-500">Check-in reading</th>
                   <th className="px-4 py-2.5 text-left text-xs font-medium text-zinc-500">Checkout reading</th>
                   <th className="px-4 py-2.5 text-left text-xs font-medium text-zinc-500">Usage</th>
+                  <th className="px-4 py-2.5 text-left text-xs font-medium text-zinc-500">Unit</th>
                   <th className="px-4 py-2.5 text-left text-xs font-medium text-zinc-500">Meter location</th>
                 </tr>
               </thead>
               <tbody>
-                {data.utilities.map((u) => (
-                  <tr key={u.id} className="border-b border-zinc-100 last:border-0">
-                    <td className="px-4 py-2.5 font-medium text-zinc-950">{formatEnumLabel(u.utilityType)}</td>
-                    <td className="px-4 py-2.5 font-mono text-sm text-zinc-600">{u.readingCheckin ?? '—'}</td>
-                    <td className="px-4 py-2.5 font-mono text-sm text-zinc-600">{u.readingCheckout ?? '—'}</td>
-                    <td className="px-4 py-2.5 font-mono text-sm text-zinc-600">{u.usageCalculated ?? '—'}</td>
-                    <td className="px-4 py-2.5 text-zinc-500">{u.meterLocation || '—'}</td>
-                  </tr>
-                ))}
+                {data.utilities.map((u) => {
+                  const unit = getUtilityUnit(u.utilityType)
+                  return (
+                    <tr key={u.id} className="border-b border-zinc-100 last:border-0">
+                      <td className="px-4 py-2.5 font-medium text-zinc-950">{formatEnumLabel(u.utilityType)}</td>
+                      <td className="px-4 py-2.5 font-mono text-sm text-zinc-600">{u.readingCheckin ?? '—'}</td>
+                      <td className="px-4 py-2.5 font-mono text-sm text-zinc-600">{u.readingCheckout ?? '—'}</td>
+                      <td className="px-4 py-2.5 font-mono text-sm text-zinc-600">{u.usageCalculated ?? '—'}</td>
+                      <td className="px-4 py-2.5 text-xs text-zinc-400">{unit || '—'}</td>
+                      <td className="px-4 py-2.5 text-zinc-500">{u.meterLocation || '—'}</td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>
@@ -100,16 +126,8 @@ export function StepReadings({ data }: { data: OperatorCheckoutWorkspaceData }) 
         badge={
           data.keys.length > 0 ? (
             <div className="flex items-center gap-1.5">
-              {(() => {
-                const returned = data.keys.filter((k) => k.status === 'returned').length
-                const outstanding = data.keys.filter((k) => k.status === 'outstanding').length
-                return (
-                  <>
-                    {returned > 0 ? <WorkspaceBadge label={`${returned} returned`} tone="accepted" size="compact" /> : null}
-                    {outstanding > 0 ? <WorkspaceBadge label={`${outstanding} outstanding`} tone="fail" size="compact" /> : null}
-                  </>
-                )
-              })()}
+              {keysReturned > 0 ? <WorkspaceBadge label={`${keysReturned} returned`} tone="accepted" size="compact" /> : null}
+              {keysOutstanding > 0 ? <WorkspaceBadge label={`${keysOutstanding} outstanding`} tone="fail" size="compact" /> : null}
             </div>
           ) : null
         }
@@ -159,18 +177,9 @@ export function StepReadings({ data }: { data: OperatorCheckoutWorkspaceData }) 
       <Section title="Parking">
         {data.parking ? (
           <dl className="mt-3 grid grid-cols-2 gap-x-12 gap-y-4 text-sm xl:grid-cols-4">
-            <div>
-              <dt className="text-xs text-zinc-500">Zone</dt>
-              <dd className="mt-0.5 font-medium text-zinc-950">{data.parking.zone || '—'}</dd>
-            </div>
-            <div>
-              <dt className="text-xs text-zinc-500">Permit number</dt>
-              <dd className="mt-0.5 font-medium text-zinc-950">{data.parking.permitNumber || '—'}</dd>
-            </div>
-            <div>
-              <dt className="text-xs text-zinc-500">Status</dt>
-              <dd className="mt-0.5 font-medium text-zinc-950">{formatEnumLabel(data.parking.status)}</dd>
-            </div>
+            <Field label="Zone" value={data.parking.zone} />
+            <Field label="Permit number" value={data.parking.permitNumber} />
+            <Field label="Status" value={formatEnumLabel(data.parking.status)} />
           </dl>
         ) : (
           <p className="mt-2 text-sm text-zinc-500">No parking details recorded.</p>
@@ -182,26 +191,20 @@ export function StepReadings({ data }: { data: OperatorCheckoutWorkspaceData }) 
       <Section title="Council tax">
         {data.councilTax ? (
           <dl className="mt-3 grid grid-cols-2 gap-x-12 gap-y-4 text-sm xl:grid-cols-4">
-            <div>
-              <dt className="text-xs text-zinc-500">Council</dt>
-              <dd className="mt-0.5 font-medium text-zinc-950">{data.councilTax.councilName || '—'}</dd>
-            </div>
-            <div>
-              <dt className="text-xs text-zinc-500">Band</dt>
-              <dd className="mt-0.5 font-medium text-zinc-950">{data.councilTax.band || '—'}</dd>
-            </div>
-            <div>
-              <dt className="text-xs text-zinc-500">Council notified</dt>
-              <dd className="mt-0.5 font-medium text-zinc-950">
-                {data.councilTax.councilNotified ? (
+            <Field label="Council" value={data.councilTax.councilName} />
+            <Field label="Band" value={data.councilTax.band} />
+            <Field
+              label="Council notified"
+              value={
+                data.councilTax.councilNotified ? (
                   <span className="text-emerald-700">
                     Yes{data.councilTax.notifiedAt ? ` — ${formatDate(data.councilTax.notifiedAt)}` : ''}
                   </span>
                 ) : (
                   <span className="text-amber-700">No</span>
-                )}
-              </dd>
-            </div>
+                )
+              }
+            />
           </dl>
         ) : (
           <p className="mt-2 text-sm text-zinc-500">No council tax details recorded.</p>
@@ -214,16 +217,9 @@ export function StepReadings({ data }: { data: OperatorCheckoutWorkspaceData }) 
         title="Safety and compliance"
         badge={
           data.detectors.length > 0 || data.compliance.length > 0 ? (
-            <div className="flex items-center gap-1.5">
-              {(() => {
-                const untestedCount = data.detectors.filter((d) => !d.tested).length
-                const failedChecks = data.compliance.filter((c) => c.passed === false).length
-                if (untestedCount > 0 || failedChecks > 0) {
-                  return <WorkspaceBadge label={`${untestedCount + failedChecks} attention`} tone="warning" size="compact" />
-                }
-                return <WorkspaceBadge label="All clear" tone="accepted" size="compact" />
-              })()}
-            </div>
+            safetyAttentionCount > 0
+              ? <WorkspaceBadge label={`${safetyAttentionCount} attention`} tone="warning" size="compact" />
+              : <WorkspaceBadge label="All clear" tone="accepted" size="compact" />
           ) : null
         }
       >

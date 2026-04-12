@@ -151,7 +151,7 @@ function DefectRow({
             <button
               type="button"
               onClick={() => onOpenDetail(defect.id)}
-              className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-zinc-400 transition hover:bg-zinc-50 hover:text-zinc-600"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-zinc-400 transition hover:bg-zinc-50 hover:text-zinc-600"
               title="View details"
             >
               <Maximize2 className="h-3.5 w-3.5" />
@@ -163,7 +163,7 @@ function DefectRow({
             <button
               type="button"
               onClick={() => onChange(defect.id, { excluded: !edit.excluded })}
-              className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition ${
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium transition ${
                 edit.excluded
                   ? 'bg-zinc-100 text-zinc-500 hover:bg-zinc-200'
                   : 'bg-white text-zinc-500 hover:bg-zinc-50'
@@ -171,7 +171,7 @@ function DefectRow({
               title={edit.excluded ? 'Include this defect' : 'Exclude this defect'}
             >
               {edit.excluded ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-              {edit.excluded ? 'Excluded' : 'Include'}
+              {edit.excluded ? 'Include' : 'Exclude'}
             </button>
           ) : null}
         </div>
@@ -364,8 +364,9 @@ function BulkActionsBar({
           key={opt.value}
           tone="secondary"
           onClick={() => onBulkLiability(opt.value)}
+          title={`Assign all ${pendingCount} unassigned defects as ${opt.label}`}
         >
-          All {opt.label} ({pendingCount})
+          Unassigned → {opt.label} ({pendingCount})
         </WorkspaceActionButton>
       ))}
       {showThresholdInput ? (
@@ -450,14 +451,19 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
     setIsDirty(false)
   }, [defects])
 
-  // Warn on navigation away with unsaved changes
+  // Warn on navigation away with unsaved changes (browser + step nav)
   useEffect(() => {
+    const w = window as unknown as Record<string, boolean>
+    w.__workspaceDirty = isDirty
     if (!isDirty) return
     const handler = (e: BeforeUnloadEvent) => {
       e.preventDefault()
     }
     window.addEventListener('beforeunload', handler)
-    return () => window.removeEventListener('beforeunload', handler)
+    return () => {
+      window.removeEventListener('beforeunload', handler)
+      w.__workspaceDirty = false
+    }
   }, [isDirty])
 
   /* ---- Bulk actions ---- */
@@ -788,7 +794,7 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
           <Sparkles className="h-3.5 w-3.5" />
           AI Documents
           {aiDraftCount > 0 ? (
-            <span className="ml-1 inline-flex h-4.5 min-w-[18px] items-center justify-center rounded-full bg-sky-100 px-1.5 text-[10px] font-semibold text-sky-700">
+            <span className="ml-1 inline-flex h-4.5 min-w-[18px] items-center justify-center bg-sky-100 px-1.5 text-[10px] font-semibold text-sky-700">
               {aiDraftCount}
             </span>
           ) : null}
@@ -862,7 +868,7 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
                 type="button"
                 onClick={() => setActiveFilter(opt.value)}
                 className={cn(
-                  'rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
+                  'px-2.5 py-1 text-xs font-medium transition-colors',
                   activeFilter === opt.value
                     ? 'bg-zinc-900 text-white'
                     : 'bg-zinc-100 text-zinc-500 hover:bg-zinc-200 hover:text-zinc-700'
@@ -887,7 +893,7 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
             <select
               value={activeSort}
               onChange={(e) => setActiveSort(e.target.value as DefectSort)}
-              className="h-7 rounded-md border border-zinc-200 bg-white px-2 text-xs text-zinc-600 focus:border-slate-400 focus:outline-none"
+              className="h-7 border border-zinc-200 bg-white px-2 text-xs text-zinc-600 focus:border-slate-400 focus:outline-none"
             >
               {SORT_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -992,16 +998,28 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
             )}
           </div>
         ) : defects.length > 0 ? (
-          <p className="mt-2 text-sm text-zinc-500">No defects match the current filter.</p>
+          <div className="mt-2 flex items-center gap-3">
+            <p className="text-sm text-zinc-500">No defects match the current filter.</p>
+            <button
+              type="button"
+              onClick={() => setActiveFilter('all')}
+              className="text-xs font-medium text-sky-600 hover:text-sky-700"
+            >
+              Clear filter
+            </button>
+          </div>
         ) : (
           <p className="mt-2 text-sm text-zinc-500">No defects identified.</p>
         )}
 
-        {/* Save overrides button */}
+        {/* Save overrides — sticky bar when dirty */}
         {isReview && defects.length > 0 ? (
-          <div className="mt-4 flex items-center gap-3">
+          <div className={cn(
+            'mt-4 flex items-center gap-3',
+            isDirty ? 'sticky bottom-0 z-10 -mx-6 border-t border-amber-200 bg-amber-50/95 px-6 py-3 backdrop-blur-sm md:-mx-7 md:px-7' : ''
+          )}>
             <WorkspaceActionButton
-              tone="secondary"
+              tone={isDirty ? 'primary' : 'secondary'}
               disabled={isSaving}
               onClick={handleSaveOverrides}
             >
@@ -1175,6 +1193,16 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
               icon={<AlertTriangle className="h-4 w-4" />}
               title="Unsaved changes"
               body="You have unsaved defect overrides. Save your changes before sending the draft."
+              actions={
+                <WorkspaceActionButton
+                  tone="secondary"
+                  disabled={isSaving}
+                  onClick={handleSaveOverrides}
+                >
+                  {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                  Save now
+                </WorkspaceActionButton>
+              }
             />
           ) : null}
 

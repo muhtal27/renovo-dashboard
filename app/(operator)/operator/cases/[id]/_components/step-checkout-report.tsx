@@ -58,7 +58,6 @@ export function StepCheckoutReport({ data }: { data: OperatorCheckoutWorkspaceDa
   const router = useRouter()
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [, startTransition] = useTransition()
-  const [error, setError] = useState<string | null>(null)
 
   const caseId = data.workspace.case.id
   const caseStatus = data.workspace.case.status
@@ -67,7 +66,7 @@ export function StepCheckoutReport({ data }: { data: OperatorCheckoutWorkspaceDa
   const checkOut = data.workspace.reportDocuments.checkOut
   const tenancyAgreement = data.workspace.reportDocuments.tenancyAgreement
 
-  const linkedCount = [checkIn, checkOut, tenancyAgreement].filter(Boolean).length
+  const requiredLinked = [checkIn, checkOut].filter(Boolean).length
   const hasMinimumReports = Boolean(checkIn) && Boolean(checkOut)
 
   const processedDocs = data.documents.filter((d) => d.processingStatus === 'processed')
@@ -76,7 +75,6 @@ export function StepCheckoutReport({ data }: { data: OperatorCheckoutWorkspaceDa
 
   async function handleStartEvidence() {
     setIsTransitioning(true)
-    setError(null)
     try {
       const response = await fetch(`/api/eot/cases/${caseId}/transition`, {
         method: 'PATCH',
@@ -91,7 +89,6 @@ export function StepCheckoutReport({ data }: { data: OperatorCheckoutWorkspaceDa
       startTransition(() => { router.refresh() })
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Failed to update case status.'
-      setError(msg)
       toast.error(msg)
     } finally {
       setIsTransitioning(false)
@@ -100,7 +97,6 @@ export function StepCheckoutReport({ data }: { data: OperatorCheckoutWorkspaceDa
 
   async function handleRunAnalysis() {
     setIsTransitioning(true)
-    setError(null)
     try {
       const response = await fetch(`/api/eot/cases/${caseId}/transition`, {
         method: 'PATCH',
@@ -115,7 +111,6 @@ export function StepCheckoutReport({ data }: { data: OperatorCheckoutWorkspaceDa
       startTransition(() => { router.refresh() })
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Failed to update case status.'
-      setError(msg)
       toast.error(msg)
     } finally {
       setIsTransitioning(false)
@@ -127,20 +122,29 @@ export function StepCheckoutReport({ data }: { data: OperatorCheckoutWorkspaceDa
       <section>
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold text-zinc-950">Core reports</h3>
-          <span className="text-xs tabular-nums text-zinc-400">{linkedCount}/3 linked</span>
+          <span className="text-xs tabular-nums text-zinc-400">
+            {requiredLinked}/2 required{tenancyAgreement ? ' · +1 optional' : ''}
+          </span>
         </div>
         <p className="mt-1 text-sm text-zinc-500">
           Both check-in and check-out reports are required before analysis can begin.
+          {' '}Tenancy agreement is optional but recommended.
         </p>
         <div className="mt-2">
           <WorkspaceProgressBar
-            value={linkedCount}
-            max={3}
-            tone={linkedCount >= 2 ? 'success' : 'warning'}
+            value={requiredLinked}
+            max={2}
+            tone={requiredLinked === 2 ? 'success' : 'warning'}
             showPercentage={false}
           />
         </div>
       </section>
+
+      {!hasMinimumReports ? (
+        <p className="text-xs text-zinc-400">
+          Upload documents via the supporting documents section below — they will be automatically classified and linked.
+        </p>
+      ) : null}
 
       <div className="border border-zinc-200">
         <DocumentRow
@@ -245,15 +249,12 @@ export function StepCheckoutReport({ data }: { data: OperatorCheckoutWorkspaceDa
         </div>
       </section>
 
-      {error ? (
-        <p className="text-sm text-rose-700" role="alert">{error}</p>
-      ) : null}
-
       {caseStatus === 'draft' ? (
         <div className="border-t border-zinc-200 pt-6">
           <WorkspaceActionButton
             disabled={!hasMinimumReports || isTransitioning}
             tone="primary"
+            title={!hasMinimumReports ? 'Link both check-in and checkout reports to proceed' : undefined}
             onClick={handleStartEvidence}
           >
             {isTransitioning ? <Loader2 className="h-4 w-4 animate-spin" /> : null}

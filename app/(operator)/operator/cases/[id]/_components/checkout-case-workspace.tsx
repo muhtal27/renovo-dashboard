@@ -11,13 +11,14 @@ import {
   Banknote,
   User,
   Clock,
+  Keyboard,
   Shield,
 } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useTransition, type ComponentType } from 'react'
 import { formatAddress, formatDate } from '@/app/eot/_components/eot-ui'
-import { WorkspaceBadge } from '@/app/(operator)/operator/cases/[id]/_components/checkout-workspace-ui'
+import { WorkspaceBadge, WorkspaceSkeleton, WorkspaceSkeletonCard, WorkspaceSkeletonMetrics } from '@/app/(operator)/operator/cases/[id]/_components/checkout-workspace-ui'
 import { cn } from '@/lib/ui'
 import { relativeTime } from '@/lib/relative-time'
 import type { EotCaseStatus } from '@/lib/eot-types'
@@ -110,8 +111,8 @@ function WorkflowNav({
   const isResolved = currentStatus === 'resolved'
 
   return (
-    <nav className="w-full overflow-x-auto" aria-label="Case workflow">
-      <div className="flex items-start justify-between gap-0 min-w-[560px]">
+    <nav className="w-full overflow-x-auto scrollbar-none" aria-label="Case workflow">
+      <div className="flex items-start justify-between gap-0 min-w-[480px]">
         {WORKFLOW_STEPS.map((item, index) => {
           const stepIdx = index
           const isComplete = stepIdx < currentStepIdx || (isResolved && stepIdx <= currentStepIdx)
@@ -126,7 +127,7 @@ function WorkflowNav({
             <div key={item.step} className="flex items-start" style={{ flex: '1 1 0' }}>
               {/* Connecting line (before this step) */}
               {index > 0 ? (
-                <div className="flex-1 pt-[18px]">
+                <div className="flex-1 pt-[16px] sm:pt-[18px]">
                   <div
                     className={cn(
                       'h-[2px] w-full',
@@ -149,7 +150,7 @@ function WorkflowNav({
                 {/* Icon circle */}
                 <div
                   className={cn(
-                    'relative flex h-9 w-9 items-center justify-center rounded-full border-2 transition-colors',
+                    'relative flex h-8 w-8 items-center justify-center rounded-full border-2 transition-colors sm:h-9 sm:w-9',
                     isComplete
                       ? 'border-sky-400 bg-sky-400 text-white'
                       : isCurrent
@@ -197,7 +198,7 @@ function WorkflowNav({
 
               {/* Connecting line (after this step) */}
               {index < WORKFLOW_STEPS.length - 1 ? (
-                <div className="flex-1 pt-[18px]">
+                <div className="flex-1 pt-[16px] sm:pt-[18px]">
                   <div
                     className={cn(
                       'h-[2px] w-full',
@@ -313,6 +314,14 @@ export function CheckoutCaseWorkspace({
     (step: WorkspaceStep) => {
       if (!pathname) return
 
+      // Guard against navigating away with unsaved changes (#21)
+      if (
+        (window as unknown as Record<string, boolean>).__workspaceDirty &&
+        !window.confirm('You have unsaved changes. Discard and switch steps?')
+      ) {
+        return
+      }
+
       startTransition(() => {
         const nextParams = new URLSearchParams(searchParams.toString())
         nextParams.delete('tab')
@@ -372,7 +381,7 @@ export function CheckoutCaseWorkspace({
             {assignedTo ? (
               <span className="inline-flex items-center gap-1 text-[11px] text-zinc-400">
                 <User className="h-3 w-3" />
-                Assigned
+                {assignedTo}
               </span>
             ) : (
               <span className="inline-flex items-center gap-1 text-[11px] text-amber-500">
@@ -390,9 +399,9 @@ export function CheckoutCaseWorkspace({
         </div>
         <div className="mt-3 flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
           <div className="min-w-0">
-            <h1 className="text-[1.7rem] font-semibold tracking-[-0.04em] text-zinc-950 [overflow-wrap:anywhere]">
+            <h2 className="text-[1.7rem] font-semibold tracking-[-0.04em] text-zinc-950 [overflow-wrap:anywhere]">
               {propertyAddress}
-            </h1>
+            </h2>
             <div className="mt-2 flex flex-wrap items-center gap-2">
               <WorkspaceBadge label={status.label} tone={status.tone} />
               {depositSchemeLabel ? (
@@ -418,18 +427,33 @@ export function CheckoutCaseWorkspace({
             data={data}
             onStepClick={handleStepClick}
           />
+          <p className="mt-2 hidden items-center gap-1 text-[10px] text-zinc-400 sm:flex">
+            <Keyboard className="h-3 w-3" />
+            <kbd className="border border-zinc-200 bg-zinc-50 px-1 py-0.5 text-[9px] font-medium">Ctrl</kbd>
+            <span>+</span>
+            <kbd className="border border-zinc-200 bg-zinc-50 px-1 py-0.5 text-[9px] font-medium">&larr;</kbd>
+            <kbd className="border border-zinc-200 bg-zinc-50 px-1 py-0.5 text-[9px] font-medium">&rarr;</kbd>
+            <span>to navigate steps</span>
+          </p>
         </div>
       </section>
 
       {/* Step content */}
       <section
         aria-busy={isPending}
-        className={cn(
-          'border border-zinc-200/60 bg-white px-6 py-6 md:px-7',
-          isPending ? 'opacity-80' : null
-        )}
+        className="border border-zinc-200/60 bg-white px-6 py-6 md:px-7"
       >
-        <ActiveStepComponent data={data} />
+        {isPending ? (
+          <div className="space-y-6 animate-fade-in-up">
+            <WorkspaceSkeletonMetrics count={4} />
+            <WorkspaceSkeleton width="w-1/3" height="h-4" />
+            <WorkspaceSkeleton width="w-full" height="h-3" />
+            <WorkspaceSkeleton width="w-2/3" height="h-3" />
+            <WorkspaceSkeletonCard />
+          </div>
+        ) : (
+          <ActiveStepComponent data={data} />
+        )}
       </section>
     </div>
   )

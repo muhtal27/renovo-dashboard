@@ -39,11 +39,12 @@ export function StepRefund({ data }: { data: OperatorCheckoutWorkspaceData }) {
   const totals = data.workspace.totals
   const summary = data.workspace.case.summary
 
-  const schemeProvider = schemeStatusData?.scheme_provider ?? (claim as any)?.scheme_provider ?? null
-  const schemeRef = schemeStatusData?.scheme_reference ?? (claim as any)?.scheme_reference ?? null
-  const schemeStatus = schemeStatusData?.scheme_status ?? (claim as any)?.scheme_status ?? null
-  const outcome = schemeStatusData?.outcome ?? (claim as any)?.outcome ?? null
-  const adjudicatorNotes = schemeStatusData?.adjudicator_notes ?? (claim as any)?.adjudicator_notes ?? null
+  const claimRecord = claim as Record<string, unknown> | null
+  const schemeProvider = schemeStatusData?.scheme_provider ?? (claimRecord?.scheme_provider as string | null) ?? null
+  const schemeRef = schemeStatusData?.scheme_reference ?? (claimRecord?.scheme_reference as string | null) ?? null
+  const schemeStatus = schemeStatusData?.scheme_status ?? (claimRecord?.scheme_status as string | null) ?? null
+  const outcome = schemeStatusData?.outcome ?? (claimRecord?.outcome as EotClaimStatusResult['outcome']) ?? null
+  const adjudicatorNotes = schemeStatusData?.adjudicator_notes ?? (claimRecord?.adjudicator_notes as string | null) ?? null
 
   const timelineItems = useMemo(
     () => [...data.timeline]
@@ -88,8 +89,8 @@ export function StepRefund({ data }: { data: OperatorCheckoutWorkspaceData }) {
           : 'Claim submitted to deposit scheme'
       )
       startTransition(() => { router.refresh() })
-    } catch (err: any) {
-      if (err?.status === 503) {
+    } catch (err: unknown) {
+      if (err instanceof Error && 'status' in err && (err as Record<string, unknown>).status === 503) {
         toast('No deposit scheme connected. Submitting as manual claim.')
         await handleTransition('submitted')
         return
@@ -214,11 +215,11 @@ export function StepRefund({ data }: { data: OperatorCheckoutWorkspaceData }) {
       {(isSubmitted || isDisputed) && schemeProvider ? (
         <section>
           <h3 className="text-sm font-semibold text-zinc-950">Deposit scheme tracking</h3>
-          <div className="mt-3 flex flex-wrap items-center gap-3 rounded-md border border-zinc-200 bg-white px-4 py-3">
-            <span className={`h-2.5 w-2.5 rounded-full ${isDisputed ? 'bg-rose-500' : 'bg-emerald-500'}`} />
+          <div className="mt-3 flex flex-wrap items-center gap-3 border border-zinc-200 bg-white px-4 py-3">
+            <span className={`h-2.5 w-2.5 ${isDisputed ? 'bg-rose-500' : 'bg-emerald-500'}`} />
             <span className="text-sm font-semibold text-zinc-950">{formatEnumLabel(schemeProvider)}</span>
             {schemeRef ? (
-              <span className="rounded-md bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-600">
+              <span className="bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-600">
                 Ref: {schemeRef}
               </span>
             ) : null}
@@ -239,7 +240,7 @@ export function StepRefund({ data }: { data: OperatorCheckoutWorkspaceData }) {
             </WorkspaceActionButton>
             <WorkspaceActionButton
               disabled={isCheckingStatus}
-              tone="primary"
+              tone="secondary"
               onClick={handleCheckStatus}
             >
               {isCheckingStatus ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
@@ -251,7 +252,7 @@ export function StepRefund({ data }: { data: OperatorCheckoutWorkspaceData }) {
 
       {/* Outcome display */}
       {outcome ? (
-        <section className="rounded-md border border-emerald-200 bg-emerald-50 px-5 py-4">
+        <section className="border border-emerald-200 bg-emerald-50 px-5 py-4">
           <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-700">
             Adjudication outcome
           </p>
@@ -304,7 +305,7 @@ export function StepRefund({ data }: { data: OperatorCheckoutWorkspaceData }) {
             {timelineItems.map((item) => (
               <div key={item.id} className="flex items-start justify-between border-b border-zinc-100 py-2.5 last:border-0">
                 <div>
-                  <p className="text-sm font-medium text-zinc-950">{item.eventType}</p>
+                  <p className="text-sm font-medium text-zinc-950">{formatEnumLabel(item.eventType)}</p>
                   <p className="text-xs text-zinc-500">{item.eventDescription}</p>
                 </div>
                 <span className="shrink-0 text-xs text-zinc-400">{formatDateTime(item.eventDate)}</span>
@@ -324,11 +325,23 @@ export function StepRefund({ data }: { data: OperatorCheckoutWorkspaceData }) {
           <WorkspaceActionButton
             disabled={isSubmittingToScheme || isTransitioning}
             tone="primary"
-            onClick={handleSubmitToScheme}
+            onClick={() => setConfirmAction('submit_scheme')}
           >
             {isSubmittingToScheme ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
             Submit to deposit scheme
           </WorkspaceActionButton>
+          <ConfirmDialog
+            open={confirmAction === 'submit_scheme'}
+            title="Submit claim to deposit scheme?"
+            description="This will submit the claim to the connected deposit scheme. Ensure all deductions and evidence are finalised before proceeding."
+            confirmLabel="Submit to scheme"
+            cancelLabel="Cancel"
+            onConfirm={() => {
+              setConfirmAction(null)
+              handleSubmitToScheme()
+            }}
+            onCancel={() => setConfirmAction(null)}
+          />
         </div>
       ) : null}
 

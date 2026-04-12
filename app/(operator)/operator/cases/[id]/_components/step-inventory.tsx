@@ -104,7 +104,7 @@ export function StepInventory({ data }: { data: OperatorCheckoutWorkspaceData })
       <Divider />
 
       <Section title="Tenancy">
-        <dl className="mt-3 grid grid-cols-2 gap-x-12 gap-y-4 text-sm xl:grid-cols-4">
+        <dl className="mt-3 grid grid-cols-2 gap-x-12 gap-y-4 text-sm xl:grid-cols-3">
           <Field label="Tenancy start" value={formatDate(tenancy.start_date)} />
           <Field label="Tenancy end" value={formatDate(tenancy.end_date)} />
           <Field label="Check-in date" value={formatDate(data.checkoutCase?.checkinDate)} />
@@ -131,7 +131,6 @@ export function StepInventory({ data }: { data: OperatorCheckoutWorkspaceData })
                 {checkIn.source ? ` · ${checkIn.source}` : ''}
               </p>
             </div>
-            <span className="ml-auto text-xs font-medium text-emerald-700">Linked</span>
           </div>
         ) : (
           <p className="mt-2 text-sm text-zinc-500">No check-in report linked yet.</p>
@@ -146,6 +145,8 @@ export function StepInventory({ data }: { data: OperatorCheckoutWorkspaceData })
       >
         <PersonTable people={tenants} emptyText="No tenants recorded." />
       </Section>
+
+      <Divider />
 
       <Section
         title="Landlords"

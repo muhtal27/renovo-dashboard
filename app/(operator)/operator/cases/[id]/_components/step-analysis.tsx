@@ -2,7 +2,7 @@
 
 import { AlertTriangle, Check, CheckCircle2, Loader2, XCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useState, useTransition } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { ConfirmDialog } from '@/app/components/ConfirmDialog'
 import {
@@ -25,6 +25,15 @@ export function StepAnalysis({ data }: { data: OperatorCheckoutWorkspaceData }) 
   const caseId = data.workspace.case.id
   const caseStatus = data.workspace.case.status
   const isAnalysing = caseStatus === 'analysis'
+
+  // Auto-refresh while analysis is in progress (#19)
+  useEffect(() => {
+    if (!isAnalysing) return
+    const interval = setInterval(() => {
+      startTransition(() => { router.refresh() })
+    }, 8000)
+    return () => clearInterval(interval)
+  }, [isAnalysing, router, startTransition])
   const isPastAnalysis = ['review', 'draft_sent', 'ready_for_claim', 'submitted', 'resolved', 'disputed'].includes(caseStatus)
 
   const hasCheckIn = Boolean(data.workspace.reportDocuments.checkIn)
@@ -155,17 +164,13 @@ export function StepAnalysis({ data }: { data: OperatorCheckoutWorkspaceData }) 
               <div className="border border-zinc-200 px-4 py-3">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Defects</p>
                 <p className="mt-1 text-xl font-semibold tabular-nums text-zinc-950">{defectCount}</p>
-                <div className="mt-1 flex flex-wrap gap-1">
-                  {tenantLiabilityCount > 0 ? (
-                    <span className="text-[10px] text-fuchsia-600">{tenantLiabilityCount} tenant</span>
-                  ) : null}
-                  {landlordLiabilityCount > 0 ? (
-                    <span className="text-[10px] text-sky-600">{landlordLiabilityCount > 0 && tenantLiabilityCount > 0 ? ' · ' : ''}{landlordLiabilityCount} landlord</span>
-                  ) : null}
-                  {sharedLiabilityCount > 0 ? (
-                    <span className="text-[10px] text-orange-600">{(tenantLiabilityCount > 0 || landlordLiabilityCount > 0) ? ' · ' : ''}{sharedLiabilityCount} shared</span>
-                  ) : null}
-                </div>
+                <p className="mt-1 text-[10px] text-zinc-500">
+                  {[
+                    tenantLiabilityCount > 0 ? `${tenantLiabilityCount} tenant` : null,
+                    landlordLiabilityCount > 0 ? `${landlordLiabilityCount} landlord` : null,
+                    sharedLiabilityCount > 0 ? `${sharedLiabilityCount} shared` : null,
+                  ].filter(Boolean).join(' · ')}
+                </p>
               </div>
               <div className="border border-zinc-200 px-4 py-3">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Estimated cost</p>
@@ -214,7 +219,7 @@ export function StepAnalysis({ data }: { data: OperatorCheckoutWorkspaceData }) 
                           </td>
                           <td className="px-4 py-2.5 text-center">
                             {hasDeclined ? (
-                              <WorkspaceBadge label="Declined" tone="warning" size="compact" />
+                              <WorkspaceBadge label="Deteriorated" tone="warning" size="compact" />
                             ) : room.conditionCheckin && room.conditionCheckout ? (
                               <WorkspaceBadge label="No change" tone="accepted" size="compact" />
                             ) : (
@@ -242,7 +247,7 @@ export function StepAnalysis({ data }: { data: OperatorCheckoutWorkspaceData }) 
       {error ? <p className="text-sm text-rose-700" role="alert">{error}</p> : null}
 
       {/* Action buttons */}
-      {(caseStatus === 'analysis' || caseStatus === 'collecting_evidence' || caseStatus === 'review') ? (
+      {(caseStatus === 'analysis' || caseStatus === 'collecting_evidence' || isPastAnalysis) ? (
         <div className="border-t border-zinc-200 pt-6">
           <WorkspaceActionButton
             disabled={!canRun || isRunning}

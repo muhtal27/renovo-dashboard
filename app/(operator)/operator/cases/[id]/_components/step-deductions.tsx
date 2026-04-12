@@ -22,6 +22,7 @@ import {
   WorkspaceBadge,
   WorkspaceMetricCard,
   WorkspaceNotice,
+  WorkspaceOptionButton,
   WorkspaceProgressBar,
 } from '@/app/(operator)/operator/cases/[id]/_components/checkout-workspace-ui'
 import { MessageThreadCard } from '@/app/(operator)/operator/cases/[id]/_components/message-thread-card'
@@ -74,36 +75,33 @@ function NegotiationActions({
   return (
     <div className="flex flex-wrap items-center gap-2">
       {currentStatus !== 'agreed' ? (
-        <button
-          type="button"
+        <WorkspaceActionButton
           disabled={saving}
+          tone="success"
           onClick={() => setConfirmAction('agreed')}
-          className="inline-flex h-8 items-center gap-1.5 border border-emerald-200 bg-emerald-50 px-3 text-xs font-medium text-emerald-700 transition hover:bg-emerald-100 disabled:opacity-50"
         >
           <Check className="h-3 w-3" />
           Mark Agreed
-        </button>
+        </WorkspaceActionButton>
       ) : null}
       {currentStatus !== 'disputed' ? (
-        <button
-          type="button"
+        <WorkspaceActionButton
           disabled={saving}
+          tone="danger"
           onClick={() => setConfirmAction('disputed')}
-          className="inline-flex h-8 items-center gap-1.5 border border-rose-200 bg-rose-50 px-3 text-xs font-medium text-rose-700 transition hover:bg-rose-100 disabled:opacity-50"
         >
           <X className="h-3 w-3" />
           Mark Disputed
-        </button>
+        </WorkspaceActionButton>
       ) : null}
       {currentStatus !== 'pending' && currentStatus ? (
-        <button
-          type="button"
+        <WorkspaceActionButton
           disabled={saving}
+          tone="secondary"
           onClick={() => handleStatusChange('pending')}
-          className="inline-flex h-8 items-center gap-1.5 border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-600 transition hover:bg-zinc-50 disabled:opacity-50"
         >
           Reset to Pending
-        </button>
+        </WorkspaceActionButton>
       ) : null}
 
       <ConfirmDialog
@@ -171,29 +169,28 @@ function NegotiationNotes({
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           rows={4}
-          className="w-full border border-zinc-200 bg-white px-3 py-2 text-sm leading-6 text-zinc-900 placeholder:text-zinc-400 focus:border-sky-400 focus:ring-1 focus:ring-sky-400/30"
+          disabled={saving}
+          className="w-full border border-zinc-200 bg-white px-3 py-2 text-sm leading-6 text-zinc-900 placeholder:text-zinc-400 focus:border-sky-400 focus:ring-1 focus:ring-sky-400/30 disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-500"
           placeholder="Add negotiation notes, key points, agreements..."
         />
         <div className="mt-2 flex gap-2">
-          <button
-            type="button"
+          <WorkspaceActionButton
             onClick={handleSave}
             disabled={saving}
-            className="inline-flex h-7 items-center gap-1 border border-zinc-900 bg-zinc-900 px-2.5 text-[11px] font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
+            tone="primary"
           >
             {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
             Save
-          </button>
-          <button
-            type="button"
+          </WorkspaceActionButton>
+          <WorkspaceActionButton
             onClick={() => {
               setEditing(false)
               setNotes(initialNotes ?? '')
             }}
-            className="inline-flex h-7 items-center border border-zinc-200 bg-white px-2.5 text-[11px] font-medium text-zinc-600 hover:bg-zinc-50"
+            tone="secondary"
           >
             Cancel
-          </button>
+          </WorkspaceActionButton>
         </div>
       </div>
     )
@@ -313,19 +310,15 @@ function EmailDraftCompose({
           </p>
           <div className="mt-2 flex gap-2">
             {(['both', 'landlord', 'tenant'] as const).map((option) => (
-              <button
+              <WorkspaceOptionButton
                 key={option}
-                type="button"
+                selected={sendTo === option}
+                tone="default"
                 onClick={() => setSendTo(option)}
-                className={cn(
-                  'inline-flex h-8 items-center border px-3 text-xs font-medium transition',
-                  sendTo === option
-                    ? 'border-zinc-900 bg-zinc-900 text-white'
-                    : 'border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50'
-                )}
+                className="px-3 py-1.5 text-xs"
               >
                 {option === 'both' ? 'Both parties' : option === 'landlord' ? 'Landlord only' : 'Tenant only'}
-              </button>
+              </WorkspaceOptionButton>
             ))}
           </div>
         </div>
@@ -398,12 +391,30 @@ function EmailDraftCompose({
             <p className="mt-1 text-sm text-zinc-900">Checkout Report — {propertyAddress}</p>
             <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Body preview</p>
             <div className="mt-1 text-sm leading-6 text-zinc-600">
-              <p>Dear {sendTo !== 'tenant' ? landlordName : tenantName},</p>
-              <p className="mt-2">
-                {sendTo !== 'tenant'
-                  ? `Please find the checkout report for ${propertyAddress} (Ref: ${caseRef}). This report contains the property condition assessment, recommended deductions, and supporting evidence.`
-                  : `The checkout inspection for ${propertyAddress} (Ref: ${caseRef}) has been completed. Please review the report carefully. If you have any queries or wish to dispute any items, please respond to this email.`}
-              </p>
+              {sendTo === 'both' ? (
+                <>
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-400">Landlord version</p>
+                  <p>Dear {landlordName},</p>
+                  <p className="mt-1">
+                    Please find the checkout report for {propertyAddress} (Ref: {caseRef}). This report contains the property condition assessment, recommended deductions, and supporting evidence.
+                  </p>
+                  <div className="my-3 border-t border-zinc-200" />
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-400">Tenant version</p>
+                  <p>Dear {tenantName},</p>
+                  <p className="mt-1">
+                    The checkout inspection for {propertyAddress} (Ref: {caseRef}) has been completed. Please review the report carefully. If you have any queries or wish to dispute any items, please respond to this email.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p>Dear {sendTo === 'landlord' ? landlordName : tenantName},</p>
+                  <p className="mt-2">
+                    {sendTo === 'landlord'
+                      ? `Please find the checkout report for ${propertyAddress} (Ref: ${caseRef}). This report contains the property condition assessment, recommended deductions, and supporting evidence.`
+                      : `The checkout inspection for ${propertyAddress} (Ref: ${caseRef}) has been completed. Please review the report carefully. If you have any queries or wish to dispute any items, please respond to this email.`}
+                  </p>
+                </>
+              )}
             </div>
           </div>
         ) : null}
@@ -418,22 +429,17 @@ function EmailDraftCompose({
         ) : null}
 
         <div className="flex justify-end gap-2 border-t border-zinc-100 pt-3">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="inline-flex h-9 items-center border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
-          >
+          <WorkspaceActionButton tone="secondary" onClick={onCancel}>
             Cancel
-          </button>
-          <button
-            type="button"
+          </WorkspaceActionButton>
+          <WorkspaceActionButton
+            tone="primary"
             onClick={handleSend}
             disabled={sending || !canSend}
-            className="inline-flex h-9 items-center gap-1.5 border border-zinc-900 bg-zinc-900 px-4 text-sm font-medium text-white hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {sending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
             {sending ? 'Sending...' : 'Send Email'}
-          </button>
+          </WorkspaceActionButton>
         </div>
       </div>
     </div>
@@ -521,7 +527,7 @@ export function StepDeductions({ data }: { data: OperatorCheckoutWorkspaceData }
   return (
     <div className="space-y-6">
       {/* ── Negotiation status bar ── */}
-      <div className="flex flex-wrap items-end gap-6 border-b border-zinc-200 pb-4">
+      <div className="grid grid-cols-2 gap-4 border-b border-zinc-200 pb-4 lg:grid-cols-4">
         <WorkspaceMetricCard
           label="Negotiation"
           value={negotiationPresentation.label}
@@ -578,14 +584,10 @@ export function StepDeductions({ data }: { data: OperatorCheckoutWorkspaceData }
         <div className="flex items-center justify-between gap-3">
           <h3 className="text-sm font-semibold text-zinc-950">Send checkout report</h3>
           {!showEmailCompose ? (
-            <button
-              type="button"
-              onClick={() => setShowEmailCompose(true)}
-              className="inline-flex h-8 items-center gap-1.5 border border-zinc-900 bg-zinc-900 px-3 text-xs font-medium text-white hover:bg-zinc-800"
-            >
+            <WorkspaceActionButton tone="primary" onClick={() => setShowEmailCompose(true)}>
               <Mail className="h-3 w-3" />
               Compose email
-            </button>
+            </WorkspaceActionButton>
           ) : null}
         </div>
 
@@ -793,7 +795,7 @@ export function StepDeductions({ data }: { data: OperatorCheckoutWorkspaceData }
               tone="secondary"
               onClick={() => handleTransition('draft_sent')}
             >
-              Back to deductions
+              Revert to draft sent
             </WorkspaceActionButton>
           </div>
           <ConfirmDialog
