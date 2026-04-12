@@ -76,22 +76,11 @@ export default async function WhatsNewPage() {
 
   return (
     <div className="mx-auto max-w-2xl animate-fade-in-up">
-      <header className="mb-10">
-        <Link
-          href="/dashboard"
-          prefetch={false}
-          className="mb-4 inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500 transition hover:text-zinc-700"
-        >
-          <ArrowLeft className="h-3 w-3" />
-          Back to dashboard
-        </Link>
-        <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-600">
-          Changelog
-        </p>
-        <h1 className="mt-2 text-2xl font-bold tracking-tight text-zinc-950">
+      <header className="mb-8">
+        <h2 className="text-lg font-bold tracking-tight text-zinc-900">
           What&apos;s new
-        </h1>
-        <p className="mt-2 text-sm text-zinc-500">
+        </h2>
+        <p className="mt-0.5 text-sm text-zinc-500">
           Latest features, improvements, and fixes.
         </p>
       </header>

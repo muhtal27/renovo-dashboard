@@ -77,15 +77,11 @@ export default async function DepositSchemePage() {
   return (
     <div className="space-y-8 px-6 py-6 md:px-7 animate-fade-in-up">
       <div className="max-w-3xl">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
-          Deposit Scheme
-        </p>
-        <h1 className="mt-2 text-[1.5rem] font-semibold tracking-[-0.03em] text-zinc-950">
-          Tenancy deposit protection schemes
-        </h1>
-        <p className="mt-2 text-sm leading-6 text-zinc-600">
-          All UK tenancy deposits must be registered with a government-approved scheme. Below are
-          the approved schemes by region for reference when processing end-of-tenancy claims.
+        <h2 className="text-lg font-bold tracking-tight text-zinc-900">
+          Deposit Schemes
+        </h2>
+        <p className="mt-1 text-sm text-zinc-500">
+          Government-approved tenancy deposit protection schemes by region.
         </p>
       </div>
 

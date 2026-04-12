@@ -68,15 +68,9 @@ export function CommunicationHub({
   return (
     <div className="animate-fade-in-up space-y-5">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-600">
-            Communications
-          </p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-[-0.04em] text-zinc-950">
-            Communication Centre
-          </h1>
-        </div>
+      <div>
+        <h2 className="text-lg font-bold tracking-tight text-zinc-900">Communication Centre</h2>
+        <p className="mt-0.5 text-sm text-zinc-500">Messages, conversations, and templates</p>
       </div>
 
       {/* Tab bar */}
