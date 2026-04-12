@@ -65,19 +65,18 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  // Next.js hashed static assets → cache-first (hash changes on new builds)
+  // Next.js hashed static assets → network-first (ensures fresh code on deploy)
   if (url.pathname.startsWith('/_next/static/')) {
     event.respondWith(
-      caches.match(request).then((cached) => {
-        if (cached) return cached
-        return fetch(request).then((response) => {
+      fetch(request)
+        .then((response) => {
           if (response.ok) {
             const clone = response.clone()
             caches.open(CACHE_NAME).then((cache) => cache.put(request, clone))
           }
           return response
         })
-      })
+        .catch(() => caches.match(request))
     )
     return
   }
