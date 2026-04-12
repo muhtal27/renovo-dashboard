@@ -258,10 +258,10 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
             key={value}
             type="button"
             onClick={() => setRegionFilter(value)}
-            className={`px-3 py-1.5 text-xs font-medium transition ${
+            className={`rounded-full px-3 py-1 text-xs font-medium transition ${
               regionFilter === value
-                ? 'border border-zinc-900 bg-zinc-900 text-white'
-                : 'border border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300'
+                ? 'bg-zinc-900 text-white'
+                : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
             }`}
           >
             {label}
