@@ -74,16 +74,18 @@ async function requestJson<T>(path: string, options: RequestOptions = {}): Promi
   return payload as T
 }
 
-export function listEotTenancies() {
-  return requestJson<EotTenancyListItem[]>('/api/eot/tenancies')
+export async function listEotTenancies() {
+  const page = await requestJson<{ items: EotTenancyListItem[] }>('/api/eot/tenancies')
+  return page.items
 }
 
 export function getEotTenancy(tenancyId: string) {
   return requestJson<EotTenancyListItem>(`/api/eot/tenancies/${tenancyId}`)
 }
 
-export function listEotCases() {
-  return requestJson<EotCaseListItem[]>('/api/eot/cases')
+export async function listEotCases() {
+  const page = await requestJson<{ items: EotCaseListItem[] }>('/api/eot/cases')
+  return page.items
 }
 
 export function getEotCaseWorkspace(caseId: string) {
@@ -105,8 +107,9 @@ export function listEotCaseEvidence(caseId: string, options: PageOptions = {}) {
   })
 }
 
-export function listEotCaseIssues(caseId: string) {
-  return requestJson<EotIssue[]>(`/api/eot/cases/${caseId}/issues`)
+export async function listEotCaseIssues(caseId: string) {
+  const page = await requestJson<{ items: EotIssue[] }>(`/api/eot/cases/${caseId}/issues`)
+  return page.items
 }
 
 export function listEotCaseMessages(caseId: string, options: PageOptions = {}) {
@@ -121,8 +124,9 @@ export function listEotCaseDocuments(caseId: string, options: PageOptions = {}) 
   })
 }
 
-export function getEotCaseTimeline(caseId: string) {
-  return requestJson<EotCaseTimelineItem[]>(`/api/eot/cases/${caseId}/timeline`)
+export async function getEotCaseTimeline(caseId: string) {
+  const page = await requestJson<{ items: EotCaseTimelineItem[] }>(`/api/eot/cases/${caseId}/timeline`)
+  return page.items
 }
 
 export function getEotCaseSubmission(caseId: string) {

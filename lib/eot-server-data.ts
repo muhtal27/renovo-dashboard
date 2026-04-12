@@ -62,8 +62,8 @@ async function fetchEotJson<T>(
 }
 
 export async function getEotCaseListSnapshot(context: OperatorTenantContext) {
-  const cases = await fetchEotJson<EotCaseListItem[]>(context, '/api/eot/cases')
-  return [...cases].sort(byLastActivityDesc)
+  const page = await fetchEotJson<{ items: EotCaseListItem[] }>(context, '/api/eot/cases')
+  return [...page.items].sort(byLastActivityDesc)
 }
 
 async function getEotCaseWorkspaceSnapshot(
@@ -128,11 +128,11 @@ export async function getEotInventoryFeedbackSnapshot(context: OperatorTenantCon
   const issueResults = await mapCapped(
     casesWithIssues,
     async (caseItem) => {
-      const issues = await fetchEotJson<import('@/lib/eot-types').EotIssue[]>(
+      const page = await fetchEotJson<{ items: import('@/lib/eot-types').EotIssue[] }>(
         context,
         `/api/eot/cases/${caseItem.id}/issues`
       )
-      return issues.map((issue) => ({ issue, caseItem }))
+      return page.items.map((issue) => ({ issue, caseItem }))
     },
     BACKEND_CONCURRENCY
   )
@@ -141,10 +141,11 @@ export async function getEotInventoryFeedbackSnapshot(context: OperatorTenantCon
 }
 
 export async function getEotTenancyListSnapshot(context: OperatorTenantContext) {
-  return fetchEotJson<import('@/lib/eot-types').EotTenancyListItem[]>(
+  const page = await fetchEotJson<{ items: import('@/lib/eot-types').EotTenancyListItem[] }>(
     context,
     '/api/eot/tenancies'
   )
+  return page.items
 }
 
 export function getEotReportSummary(context: OperatorTenantContext) {

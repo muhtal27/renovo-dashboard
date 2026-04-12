@@ -487,11 +487,12 @@ function UnmatchedEmailCard({
     try {
       const res = await fetch('/api/eot/tenancies')
       if (!res.ok) throw new Error('Failed to load')
-      const tenancies = (await res.json()) as Array<{
+      const data = (await res.json()) as { items: Array<{
         id: string
         tenant_name: string
         property: { name: string; address_line_1?: string; postcode?: string }
-      }>
+      }> }
+      const tenancies = data.items
       setTenancyOptions(
         tenancies.map((t) => ({
           id: t.id,
