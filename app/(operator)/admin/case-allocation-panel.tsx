@@ -167,10 +167,10 @@ export function CaseAllocationPanel() {
               : 'No cases found.'}
         </p>
       ) : (
-        <div className="overflow-hidden border border-zinc-200/60">
+        <div className="overflow-hidden border border-zinc-200">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-zinc-200/60 bg-zinc-50/60">
+              <tr className="border-b border-zinc-200 bg-zinc-50/60">
                 <th className="px-4 py-2.5 text-left text-xs font-medium text-zinc-500">
                   Property
                 </th>
@@ -221,7 +221,7 @@ export function CaseAllocationPanel() {
                           const value = e.target.value || null
                           void handleAssign(caseItem.id, value)
                         }}
-                        className="h-7 w-full max-w-[200px] border border-zinc-200/60 bg-white px-2 text-xs text-zinc-700 disabled:opacity-50"
+                        className="h-7 w-full max-w-[200px] border border-zinc-200 bg-white px-2 text-xs text-zinc-700 disabled:opacity-50"
                       >
                         <option value="">Unassigned</option>
                         {members.map((m) => (

@@ -89,7 +89,7 @@ export function DisputeListClient({
   return (
     <div className="animate-fade-in-up space-y-4">
       {/* Toolbar */}
-      <div className="sticky top-0 z-10 border-b border-zinc-200/60 bg-white/95 py-2 backdrop-blur">
+      <div className="sticky top-0 z-10 border-b border-zinc-200 bg-white/98 py-2">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-0">
             {([
@@ -105,7 +105,7 @@ export function DisputeListClient({
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="hidden items-center gap-4 border-r border-zinc-200/60 pr-3 xl:flex">
+            <div className="hidden items-center gap-4 border-r border-zinc-200 pr-3 xl:flex">
               <span className="text-xs text-zinc-400">
                 Deposit at risk{' '}
                 <span className="font-semibold tabular-nums text-zinc-700">{formatCurrency(totalDeposit)}</span>
@@ -120,7 +120,7 @@ export function DisputeListClient({
               placeholder="Search disputes..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-7 w-48 border border-zinc-200/60 bg-white/60 px-2.5 text-xs text-zinc-700 outline-none transition focus:border-emerald-300 focus:ring-2 focus:ring-emerald-100"
+              className="h-7 w-48 border border-zinc-200 bg-white px-2.5 text-xs text-zinc-700 outline-none transition focus:border-emerald-300 focus:ring-2 focus:ring-emerald-100"
             />
             <button
               type="button"
@@ -158,7 +158,7 @@ export function DisputeListClient({
               key={c.id}
               href={`/operator/cases/${c.id}?step=resolved`}
               prefetch={false}
-              className="modern-table-row grid grid-cols-1 items-start gap-x-6 border-b border-zinc-200/60 px-5 py-5 transition sm:grid-cols-[1fr_140px] md:grid-cols-[1fr_140px_120px_120px_100px]"
+              className="modern-table-row grid grid-cols-1 items-start gap-x-6 border-b border-zinc-200 px-5 py-5 transition sm:grid-cols-[1fr_140px] md:grid-cols-[1fr_140px_120px_120px_100px]"
             >
               {/* Property + tenant */}
               <div className="min-w-0">

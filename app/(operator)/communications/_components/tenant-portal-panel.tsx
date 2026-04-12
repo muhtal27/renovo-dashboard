@@ -64,7 +64,7 @@ function ConversationCard({
   )
 
   return (
-    <div className="rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm backdrop-blur-sm">
+    <div className="rounded-xl border border-zinc-200 bg-white">
       <button
         type="button"
         onClick={onToggle}
@@ -197,7 +197,7 @@ export function TenantPortalPanel() {
           type="button"
           onClick={fetchData}
           disabled={loading}
-          className="flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200/60 bg-white text-zinc-500 hover:bg-zinc-50 disabled:opacity-50"
+          className="flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-500 hover:bg-zinc-50 disabled:opacity-50"
         >
           <RefreshCw className={cn('h-3.5 w-3.5', loading && 'animate-spin')} />
         </button>
@@ -206,7 +206,7 @@ export function TenantPortalPanel() {
       {/* Stats */}
       {!loading && conversations.length > 0 ? (
         <div className="grid grid-cols-3 gap-3">
-          <div className="rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm backdrop-blur-sm px-4 py-3">
+          <div className="rounded-xl border border-zinc-200 bg-white px-4 py-3">
             <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-400">
               Active Conversations
             </p>
@@ -214,7 +214,7 @@ export function TenantPortalPanel() {
               {conversations.length}
             </p>
           </div>
-          <div className="rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm backdrop-blur-sm px-4 py-3">
+          <div className="rounded-xl border border-zinc-200 bg-white px-4 py-3">
             <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-400">
               Tenant Messages
             </p>
@@ -226,7 +226,7 @@ export function TenantPortalPanel() {
               )}
             </p>
           </div>
-          <div className="rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm backdrop-blur-sm px-4 py-3">
+          <div className="rounded-xl border border-zinc-200 bg-white px-4 py-3">
             <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-400">
               Awaiting Response
             </p>
@@ -246,7 +246,7 @@ export function TenantPortalPanel() {
           {Array.from({ length: 3 }).map((_, i) => (
             <div
               key={i}
-              className="skeleton-shimmer rounded-2xl border border-zinc-200/60 bg-white/80 px-5 py-4"
+              className="skeleton-shimmer rounded-xl border border-zinc-200 bg-white px-5 py-4"
             >
               <div className="flex gap-2">
                 <div className="h-5 w-16 rounded bg-zinc-100" />
@@ -258,7 +258,7 @@ export function TenantPortalPanel() {
           ))}
         </div>
       ) : conversations.length === 0 ? (
-        <div className="rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm backdrop-blur-sm">
+        <div className="rounded-xl border border-zinc-200 bg-white">
           <EmptyState
             title="No tenant conversations"
             body="When tenants send messages on their cases, conversations will appear here."

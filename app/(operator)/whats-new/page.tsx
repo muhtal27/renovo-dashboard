@@ -25,7 +25,7 @@ function ReleaseCard({ entry }: { entry: ChangelogEntry }) {
   return (
     <article
       id={`v${entry.version}`}
-      className="scroll-mt-24 border-b border-zinc-200/60 py-10 first:pt-0 last:border-0 animate-fade-in-up"
+      className="scroll-mt-24 border-b border-zinc-200 py-10 first:pt-0 last:border-0 animate-fade-in-up"
     >
       <div className="flex flex-wrap items-baseline gap-3">
         <h2 className="text-lg font-semibold tracking-tight text-zinc-950">

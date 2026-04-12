@@ -199,8 +199,8 @@ export function WorkspaceBadge({
   return (
     <span
       className={cn(
-        'inline-flex items-center border font-medium',
-        size === 'compact' ? 'px-2 py-0.5 text-[11px]' : 'px-2.5 py-1 text-xs',
+        'inline-flex items-center rounded-full border font-semibold',
+        size === 'compact' ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-0.5 text-[11px]',
         BADGE_STYLES[tone],
         className
       )}
@@ -237,9 +237,9 @@ export function WorkspaceMetricCard({
 
   return (
     <div className={cn('py-2', className)}>
-      <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-400">{label}</p>
-      <div className={cn('mt-0.5 text-xl font-semibold tabular-nums leading-tight', valueClassName)}>{value}</div>
-      {detail ? <div className="mt-0.5 text-xs text-zinc-500">{detail}</div> : null}
+      <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-zinc-500">{label}</p>
+      <div className={cn('mt-1 text-xl font-bold tabular-nums leading-none', valueClassName)}>{value}</div>
+      {detail ? <div className="mt-1 text-[11px] text-zinc-400">{detail}</div> : null}
     </div>
   )
 }

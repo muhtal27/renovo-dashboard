@@ -161,7 +161,7 @@ function StatCard({
     : 'text-zinc-950'
 
   return (
-    <div className={cn('flex items-center gap-3 rounded-2xl border border-zinc-200/60 bg-white/80 px-4 py-3 shadow-sm backdrop-blur-sm', className)}>
+    <div className={cn('flex items-center gap-3 rounded-xl border border-zinc-200 bg-white px-4 py-3 shadow-sm backdrop-blur-sm', className)}>
       <span className={iconColor}>{icon}</span>
       <div>
         <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">{label}</p>
@@ -357,7 +357,7 @@ function ConversationThread({
         </div>
         <Link
           href={`/operator/cases/${conversation.case_id}`}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200/60 bg-white px-3 py-1.5 text-[11px] font-semibold text-zinc-700 transition hover:bg-zinc-50"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-[11px] font-semibold text-zinc-700 transition hover:bg-zinc-50"
         >
           Open Case
           <ArrowUpRight className="h-3 w-3" />
@@ -376,7 +376,7 @@ function ConversationThread({
               >
                 <div
                   className={cn(
-                    'max-w-[80%] rounded-2xl px-4 py-3',
+                    'max-w-[80%] rounded-xl px-4 py-3',
                     isManager
                       ? 'rounded-br-md bg-emerald-600 text-white'
                       : msg.sender_type === 'tenant'
@@ -433,7 +433,7 @@ function ConversationThread({
                   key={template.id}
                   type="button"
                   onClick={() => insertTemplate(template)}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200/60 bg-white px-3 py-2 text-left transition hover:border-emerald-300 hover:bg-emerald-50"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-left transition hover:border-emerald-300 hover:bg-emerald-50"
                 >
                   <FileText className="h-3 w-3 shrink-0 text-zinc-400" />
                   <div className="min-w-0">
@@ -450,7 +450,7 @@ function ConversationThread({
       )}
 
       {/* Reply form */}
-      <div className="border-t border-zinc-200/60 bg-white px-5 py-3">
+      <div className="border-t border-zinc-200 bg-white px-5 py-3">
         <div className="flex items-center gap-2 mb-2">
           <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">Reply to:</span>
           <button
@@ -499,7 +499,7 @@ function ConversationThread({
             onKeyDown={handleKeyDown}
             placeholder={`Message ${replyRecipient}...`}
             rows={2}
-            className="flex-1 resize-none rounded-xl border border-zinc-200/60 bg-zinc-50 px-3 py-2 text-sm leading-6 text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-300 focus:bg-white focus:ring-2 focus:ring-emerald-100"
+            className="flex-1 resize-none rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm leading-6 text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-300 focus:bg-white focus:ring-2 focus:ring-emerald-100"
           />
           <button
             type="button"
@@ -609,7 +609,7 @@ function ComposeOverlay({
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center bg-zinc-900/50 backdrop-blur-sm pt-20">
-      <div className="w-full max-w-2xl rounded-2xl border border-zinc-200/60 bg-white shadow-xl">
+      <div className="w-full max-w-2xl rounded-xl border border-zinc-200 bg-white shadow-xl">
         <div className="flex items-center justify-between border-b border-zinc-100 px-6 py-4">
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100/80">
@@ -655,10 +655,10 @@ function ComposeOverlay({
                     value={caseSearch}
                     onChange={(e) => setCaseSearch(e.target.value)}
                     placeholder="Search by property or tenant..."
-                    className="h-10 w-full rounded-lg border border-zinc-200/60 bg-white pl-9 pr-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-300 focus:ring-2 focus:ring-emerald-100"
+                    className="h-10 w-full rounded-lg border border-zinc-200 bg-white pl-9 pr-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-300 focus:ring-2 focus:ring-emerald-100"
                   />
                 </div>
-                <div className="mt-1 max-h-40 overflow-y-auto rounded-lg border border-zinc-200/60 bg-white">
+                <div className="mt-1 max-h-40 overflow-y-auto rounded-lg border border-zinc-200 bg-white">
                   {casesLoading ? (
                     <p className="px-3 py-4 text-center text-xs text-zinc-400">Loading cases...</p>
                   ) : filteredCases.length === 0 ? (
@@ -696,7 +696,7 @@ function ComposeOverlay({
               <select
                 value={recipientType}
                 onChange={(e) => setRecipientType(e.target.value as 'tenant' | 'landlord')}
-                className="mt-1 h-10 w-full rounded-lg border border-zinc-200/60 bg-white px-3 text-sm text-zinc-900 focus:border-emerald-300 focus:ring-2 focus:ring-emerald-100"
+                className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 focus:border-emerald-300 focus:ring-2 focus:ring-emerald-100"
               >
                 <option value="tenant">Tenant</option>
                 <option value="landlord">Landlord</option>
@@ -711,14 +711,14 @@ function ComposeOverlay({
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
                 placeholder="Optional subject line"
-                className="mt-1 h-10 w-full rounded-lg border border-zinc-200/60 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-300 focus:ring-2 focus:ring-emerald-100"
+                className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-300 focus:ring-2 focus:ring-emerald-100"
               />
             </div>
           </div>
 
           {/* Template picker */}
           {showTemplates && templates.length > 0 && (
-            <div className="rounded-xl border border-zinc-200/60 bg-zinc-50/80 p-3">
+            <div className="rounded-xl border border-zinc-200 bg-zinc-50/80 p-3">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Choose Template</p>
                 <button type="button" onClick={() => setShowTemplates(false)} className="text-zinc-400 hover:text-zinc-600">
@@ -735,7 +735,7 @@ function ComposeOverlay({
                       setShowTemplates(false)
                       toast.success(`Template "${t.name}" inserted`)
                     }}
-                    className="rounded-lg border border-zinc-200/60 bg-white px-3 py-2 text-left transition hover:border-emerald-300"
+                    className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-left transition hover:border-emerald-300"
                   >
                     <p className="text-xs font-medium text-zinc-900">{t.name}</p>
                     <p className="mt-0.5 text-[10px] text-zinc-400">{t.body.slice(0, 60)}...</p>
@@ -768,7 +768,7 @@ function ComposeOverlay({
               onChange={(e) => setContent(e.target.value)}
               placeholder="Type your message..."
               rows={6}
-              className="mt-1 w-full rounded-lg border border-zinc-200/60 bg-white px-3 py-2 text-sm leading-6 text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-300 focus:ring-2 focus:ring-emerald-100"
+              className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm leading-6 text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-300 focus:ring-2 focus:ring-emerald-100"
             />
           </div>
 
@@ -777,7 +777,7 @@ function ComposeOverlay({
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex h-10 items-center gap-2 rounded-lg border border-zinc-200/60 bg-white px-4 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+              className="inline-flex h-10 items-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
             >
               Cancel
             </button>
@@ -938,7 +938,7 @@ export function ConversationsPanel() {
                 'inline-flex h-8 items-center rounded-lg border px-3 text-xs font-medium transition',
                 filter === f.value
                   ? 'border-emerald-600 bg-emerald-600 text-white'
-                  : 'border-zinc-200/60 bg-white text-zinc-600 hover:bg-zinc-50',
+                  : 'border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50',
               )}
             >
               {f.label}
@@ -959,14 +959,14 @@ export function ConversationsPanel() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search conversations..."
-              className="h-8 w-56 rounded-lg border border-zinc-200/60 bg-white pl-9 pr-3 text-xs text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-300 focus:ring-2 focus:ring-emerald-100"
+              className="h-8 w-56 rounded-lg border border-zinc-200 bg-white pl-9 pr-3 text-xs text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-300 focus:ring-2 focus:ring-emerald-100"
             />
           </div>
           <button
             type="button"
             onClick={fetchMessages}
             disabled={loading}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200/60 bg-white text-zinc-500 hover:bg-zinc-50 disabled:opacity-50"
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-500 hover:bg-zinc-50 disabled:opacity-50"
             title="Refresh"
           >
             <RefreshCw className={cn('h-3.5 w-3.5', loading && 'animate-spin')} />
@@ -986,7 +986,7 @@ export function ConversationsPanel() {
       {loading ? (
         <div className="grid gap-4 lg:grid-cols-5">
           <div className="lg:col-span-2">
-            <div className="space-y-0 rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm">
+            <div className="space-y-0 rounded-xl border border-zinc-200 bg-white shadow-sm">
               {Array.from({ length: 5 }).map((_, i) => (
                 <div key={i} className="skeleton-shimmer border-b border-zinc-100/80 px-4 py-4 last:border-b-0">
                   <div className="flex gap-2">
@@ -1001,11 +1001,11 @@ export function ConversationsPanel() {
             </div>
           </div>
           <div className="lg:col-span-3">
-            <div className="skeleton-shimmer h-96 rounded-2xl border border-zinc-200/60" />
+            <div className="skeleton-shimmer h-96 rounded-xl border border-zinc-200" />
           </div>
         </div>
       ) : filteredConversations.length === 0 ? (
-        <div className="rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm backdrop-blur-sm">
+        <div className="rounded-xl border border-zinc-200 bg-white">
           <EmptyState
             icon={<MessageSquare className="h-8 w-8" />}
             title={search ? 'No conversations match your search' : 'No conversations yet'}
@@ -1031,7 +1031,7 @@ export function ConversationsPanel() {
           {/* Conversation list */}
           <div
             className={cn(
-              'overflow-hidden rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm backdrop-blur-sm lg:col-span-2',
+              'overflow-hidden rounded-xl border border-zinc-200 bg-white lg:col-span-2',
               // On mobile, hide list when a conversation is selected
               selectedConversation && 'hidden lg:block',
             )}
@@ -1048,7 +1048,7 @@ export function ConversationsPanel() {
           {/* Thread pane */}
           <div
             className={cn(
-              'overflow-hidden rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm backdrop-blur-sm lg:col-span-3',
+              'overflow-hidden rounded-xl border border-zinc-200 bg-white lg:col-span-3',
               // On mobile, hide thread when no conversation selected
               !selectedConversation && 'hidden lg:block',
             )}

@@ -50,11 +50,11 @@ export function ConfirmDialog({
 
   return (
     <div
-      className="fixed inset-0 z-[110] flex items-center justify-center bg-zinc-950/40 backdrop-blur-sm"
+      className="fixed inset-0 z-[110] flex items-center justify-center bg-zinc-950/40"
       onClick={onCancel}
     >
       <div
-        className="w-full max-w-sm rounded-xl border border-zinc-200 bg-white p-6 shadow-2xl"
+        className="w-full max-w-sm rounded-[14px] border border-zinc-200 bg-white p-6 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <h3 className="text-sm font-semibold text-zinc-950">{title}</h3>
@@ -65,7 +65,7 @@ export function ConfirmDialog({
             ref={cancelRef}
             type="button"
             onClick={onCancel}
-            className="rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 transition hover:bg-zinc-50"
+            className="rounded-lg border border-zinc-200 bg-white px-3.5 py-1.5 text-[13px] font-medium text-zinc-700 transition hover:bg-zinc-50"
           >
             {cancelLabel}
           </button>
@@ -73,7 +73,7 @@ export function ConfirmDialog({
             type="button"
             onClick={onConfirm}
             className={cn(
-              'rounded-md px-3 py-1.5 text-xs font-medium text-white transition',
+              'rounded-lg px-3.5 py-1.5 text-[13px] font-semibold text-white transition',
               tone === 'danger'
                 ? 'bg-rose-600 hover:bg-rose-700'
                 : 'bg-emerald-600 hover:bg-emerald-700'

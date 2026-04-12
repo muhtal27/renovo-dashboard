@@ -132,7 +132,7 @@ export function TeamsPanel() {
 
       {/* Create form */}
       {showCreate ? (
-        <section className="border border-zinc-200/60 bg-white/80 shadow-sm px-5 py-5">
+        <section className="border border-zinc-200 bg-white shadow-sm px-5 py-5">
           <p className="text-sm font-semibold text-zinc-950">Create a new team</p>
           <p className="mt-1 text-sm text-zinc-500">
             Teams let you organise workspace members into groups — e.g. by property portfolio or
@@ -145,14 +145,14 @@ export function TeamsPanel() {
               placeholder="e.g. North London Team"
               value={teamName}
               onChange={(e) => setTeamName(e.target.value)}
-              className="h-9 w-full border border-zinc-200/60 bg-zinc-50 px-3 text-sm text-zinc-900 outline-none focus:border-zinc-400 focus:bg-white"
+              className="h-9 w-full border border-zinc-200 bg-zinc-50 px-3 text-sm text-zinc-900 outline-none focus:border-zinc-400 focus:bg-white"
             />
             <input
               type="text"
               placeholder="Description (optional)"
               value={teamDescription}
               onChange={(e) => setTeamDescription(e.target.value)}
-              className="h-9 w-full border border-zinc-200/60 bg-zinc-50 px-3 text-sm text-zinc-900 outline-none focus:border-zinc-400 focus:bg-white"
+              className="h-9 w-full border border-zinc-200 bg-zinc-50 px-3 text-sm text-zinc-900 outline-none focus:border-zinc-400 focus:bg-white"
             />
             <div className="flex gap-2">
               <button
@@ -171,7 +171,7 @@ export function TeamsPanel() {
                   setTeamDescription('')
                   setError(null)
                 }}
-                className="border border-zinc-200/60 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
+                className="border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
               >
                 Cancel
               </button>
@@ -181,7 +181,7 @@ export function TeamsPanel() {
       ) : null}
 
       {/* Teams list */}
-      <section className="border border-zinc-200/60 bg-white/80 backdrop-blur-sm shadow-sm px-6 py-6 md:px-7">
+      <section className="border border-zinc-200 bg-white shadow-sm px-6 py-6 md:px-7">
         <h3 className="text-sm font-semibold text-zinc-950">Team groups</h3>
         <p className="mt-1 text-sm text-zinc-500">
           {teams.length} team{teams.length !== 1 ? 's' : ''}
@@ -190,7 +190,7 @@ export function TeamsPanel() {
         {loading ? (
           <div className="mt-4 space-y-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-14 skeleton-shimmer rounded-2xl border border-zinc-100/80 bg-zinc-50" />
+              <div key={i} className="h-14 skeleton-shimmer rounded-xl border border-zinc-100/80 bg-zinc-50" />
             ))}
           </div>
         ) : teams.length === 0 ? (
@@ -206,10 +206,10 @@ export function TeamsPanel() {
             </button>
           </div>
         ) : (
-          <div className="mt-4 overflow-hidden border border-zinc-200/60">
+          <div className="mt-4 overflow-hidden border border-zinc-200">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-zinc-200/60 bg-zinc-50/60">
+                <tr className="border-b border-zinc-200 bg-zinc-50/60">
                   <th className="px-4 py-2.5 text-left text-xs font-medium text-zinc-500">Team</th>
                   <th className="px-4 py-2.5 text-left text-xs font-medium text-zinc-500">
                     Description
@@ -242,7 +242,7 @@ export function TeamsPanel() {
                         </button>
                         <Link
                           href={`/teams/teams/${team.id}`}
-                          className="inline-flex items-center gap-1 border border-zinc-200/60 bg-white px-2.5 py-1 text-xs font-medium text-zinc-700 transition hover:border-zinc-300"
+                          className="inline-flex items-center gap-1 border border-zinc-200 bg-white px-2.5 py-1 text-xs font-medium text-zinc-700 transition hover:border-zinc-300"
                         >
                           Manage
                           <ChevronRight className="h-3 w-3" />
