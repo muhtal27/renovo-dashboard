@@ -1,6 +1,6 @@
 'use client'
 
-import { Inbox, FileText, UserCircle, Building } from 'lucide-react'
+import { MessageSquare, FileText } from 'lucide-react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useTransition } from 'react'
 import dynamic from 'next/dynamic'
@@ -10,38 +10,25 @@ import {
   type CommunicationHubTab,
 } from '@/lib/communication-hub-types'
 
-const InboxPanel = dynamic(() =>
-  import('./inbox-panel').then((m) => m.InboxPanel)
+const ConversationsPanel = dynamic(() =>
+  import('./conversations-panel').then((m) => m.ConversationsPanel)
 )
 const TemplatePanel = dynamic(() =>
   import('./template-panel').then((m) => m.TemplatePanel)
-)
-const TenantPortalPanel = dynamic(() =>
-  import('./tenant-portal-panel').then((m) => m.TenantPortalPanel)
-)
-const LandlordPortalPanel = dynamic(() =>
-  import('./landlord-portal-panel').then((m) => m.LandlordPortalPanel)
 )
 
 const HUB_TABS: {
   id: CommunicationHubTab
   label: string
-  icon: typeof Inbox
+  icon: typeof MessageSquare
 }[] = [
-  { id: 'inbox', label: 'Unified Inbox', icon: Inbox },
+  { id: 'conversations', label: 'Conversations', icon: MessageSquare },
   { id: 'templates', label: 'Templates', icon: FileText },
-  { id: 'tenant-portal', label: 'Tenant Portal', icon: UserCircle },
-  { id: 'landlord-portal', label: 'Landlord Portal', icon: Building },
 ]
 
-const TAB_COMPONENTS: Record<
-  CommunicationHubTab,
-  React.ComponentType
-> = {
-  inbox: InboxPanel,
+const TAB_COMPONENTS: Record<CommunicationHubTab, React.ComponentType> = {
+  conversations: ConversationsPanel,
   templates: TemplatePanel,
-  'tenant-portal': TenantPortalPanel,
-  'landlord-portal': LandlordPortalPanel,
 }
 
 export function CommunicationHub({
@@ -64,7 +51,7 @@ export function CommunicationHub({
       if (!pathname) return
       startTransition(() => {
         const params = new URLSearchParams(searchParams.toString())
-        if (tab === 'inbox') {
+        if (tab === 'conversations') {
           params.delete('tab')
         } else {
           params.set('tab', tab)
@@ -79,7 +66,7 @@ export function CommunicationHub({
   )
 
   return (
-    <div className="animate-fade-in-up space-y-6">
+    <div className="animate-fade-in-up space-y-5">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -87,7 +74,7 @@ export function CommunicationHub({
             Communications
           </p>
           <h1 className="mt-1 text-2xl font-semibold tracking-[-0.04em] text-zinc-950">
-            Communication Hub
+            Communication Centre
           </h1>
         </div>
       </div>

@@ -5,10 +5,8 @@ import type { EotMessageSenderType } from '@/lib/eot-types'
 /* ────────────────────────────────────────────────────────────── */
 
 export const COMMUNICATION_HUB_TABS = [
-  'inbox',
+  'conversations',
   'templates',
-  'tenant-portal',
-  'landlord-portal',
 ] as const
 
 export type CommunicationHubTab = (typeof COMMUNICATION_HUB_TABS)[number]
@@ -21,10 +19,16 @@ export function isCommunicationHubTab(
   )
 }
 
+/** Map legacy tab names to new equivalents */
 export function normalizeCommunicationHubTab(
   value: string | null | undefined
 ): CommunicationHubTab {
-  return isCommunicationHubTab(value) ? value : 'inbox'
+  if (isCommunicationHubTab(value)) return value
+  // Map legacy tabs to conversations
+  if (value === 'inbox' || value === 'tenant-portal' || value === 'landlord-portal') {
+    return 'conversations'
+  }
+  return 'conversations'
 }
 
 /* ────────────────────────────────────────────────────────────── */
