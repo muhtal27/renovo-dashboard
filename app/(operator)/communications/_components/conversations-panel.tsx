@@ -161,7 +161,7 @@ function StatCard({
     : 'text-zinc-950'
 
   return (
-    <div className={cn('flex items-center gap-3 rounded-xl border border-zinc-200 bg-white px-4 py-3 shadow-sm backdrop-blur-sm', className)}>
+    <div className={cn('flex items-center gap-3 rounded-xl border border-zinc-200 bg-white px-4 py-3 shadow-sm', className)}>
       <span className={iconColor}>{icon}</span>
       <div>
         <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">{label}</p>
@@ -608,7 +608,7 @@ function ComposeOverlay({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center bg-zinc-900/50 backdrop-blur-sm pt-20">
+    <div className="fixed inset-0 z-50 flex items-start justify-center bg-zinc-900/50 pt-20">
       <div className="w-full max-w-2xl rounded-xl border border-zinc-200 bg-white shadow-xl">
         <div className="flex items-center justify-between border-b border-zinc-100 px-6 py-4">
           <div className="flex items-center gap-2.5">

@@ -21,7 +21,7 @@ export default function InsightsClient() {
 
         {/* COMING SOON */}
         <section className="mx-auto max-w-[1080px] px-6 py-24 text-center">
-          <div className="rounded-2xl border border-zinc-200 bg-zinc-50 px-8 py-16">
+          <div className="rounded-xl border border-zinc-200 bg-zinc-50 px-8 py-16">
             <p className="text-4xl font-bold tracking-tight text-zinc-950">Coming soon</p>
             <p className="mx-auto mt-4 max-w-[480px] text-base leading-7 text-slate-500">
               We are preparing our first insights on the UK end of tenancy landscape.

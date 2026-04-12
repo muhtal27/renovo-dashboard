@@ -4,7 +4,7 @@ export default function OfflinePage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-white px-6 text-center">
       <div className="mx-auto max-w-[400px]">
-        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-100">
+        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-xl bg-zinc-100">
           <svg
             width="28"
             height="28"

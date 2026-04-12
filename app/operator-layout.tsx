@@ -205,7 +205,7 @@ function OperatorSearchForm({
           value={searchValue}
           onChange={(event) => setSearchValue(event.target.value)}
           placeholder={searchPlaceholder}
-          className="h-10 w-full max-w-[520px] rounded-xl border border-zinc-200/60 bg-white/60 pl-9 pr-20 text-sm text-zinc-900 backdrop-blur-sm placeholder:text-zinc-400 focus:border-emerald-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-100"
+          className="h-10 w-full max-w-[520px] rounded-xl border border-zinc-200 bg-white pl-9 pr-20 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-100"
         />
         <Link
           href={searchAction}

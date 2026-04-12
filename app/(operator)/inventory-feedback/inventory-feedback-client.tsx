@@ -119,7 +119,7 @@ export function InventoryFeedbackClient({
   return (
     <div className="animate-fade-in-up space-y-4">
       {/* Toolbar */}
-      <div className="sticky top-0 z-10 border-b border-zinc-200 bg-white/95 py-2 backdrop-blur">
+      <div className="sticky top-0 z-10 border-b border-zinc-200 bg-white py-2">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-0">
             {([

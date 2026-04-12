@@ -400,7 +400,7 @@ export function BillingPageClient() {
       {/* ── Confirmation modal ── */}
       {showConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="mx-4 w-full max-w-md rounded-xl border border-zinc-200 bg-white p-6 shadow-xl backdrop-blur-sm">
+          <div className="mx-4 w-full max-w-md rounded-xl border border-zinc-200 bg-white p-6 shadow-xl ">
             <h3 className="text-base font-semibold text-zinc-950">Confirm subscription change</h3>
             <p className="mt-2 text-sm text-zinc-500">
               You are changing from{' '}

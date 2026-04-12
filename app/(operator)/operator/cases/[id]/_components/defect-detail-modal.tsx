@@ -127,7 +127,7 @@ function EvidenceGallery({
             {/* Overlay actions */}
             <div className="absolute inset-0 flex items-end justify-between bg-gradient-to-t from-zinc-950/40 to-transparent p-3 opacity-0 transition-opacity group-hover:opacity-100">
               {current.area ? (
-                <span className="rounded-md bg-zinc-950/60 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm">
+                <span className="rounded-md bg-zinc-950/60 px-2 py-0.5 text-[10px] font-medium text-white ">
                   {current.area}
                 </span>
               ) : (
@@ -136,7 +136,7 @@ function EvidenceGallery({
               <button
                 type="button"
                 onClick={() => setLightbox(true)}
-                className="rounded-md bg-zinc-950/60 p-1.5 text-white backdrop-blur-sm transition hover:bg-zinc-950/80"
+                className="rounded-md bg-zinc-950/60 p-1.5 text-white  transition hover:bg-zinc-950/80"
                 title="View full size"
               >
                 <ZoomIn className="h-3.5 w-3.5" />
@@ -195,7 +195,7 @@ function EvidenceGallery({
       {/* Lightbox */}
       {lightbox && current ? (
         <div
-          className="fixed inset-0 z-[120] flex items-center justify-center bg-zinc-950/80 backdrop-blur-sm"
+          className="fixed inset-0 z-[120] flex items-center justify-center bg-zinc-950/80 "
           onClick={() => setLightbox(false)}
         >
           <div
@@ -216,7 +216,7 @@ function EvidenceGallery({
             </button>
             {/* Nav in lightbox */}
             {images.length > 1 ? (
-              <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-3 rounded-lg bg-zinc-900/80 px-4 py-2 backdrop-blur-sm">
+              <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-3 rounded-lg bg-zinc-900/80 px-4 py-2 ">
                 <button
                   type="button"
                   onClick={() => setActiveIndex((prev) => Math.max(0, prev - 1))}
@@ -393,7 +393,7 @@ export function DefectDetailModal({
 
   return (
     <div
-      className="fixed inset-0 z-[110] flex items-start justify-center overflow-y-auto bg-zinc-950/50 backdrop-blur-sm"
+      className="fixed inset-0 z-[110] flex items-start justify-center overflow-y-auto bg-zinc-950/50 "
       onClick={onClose}
     >
       <div

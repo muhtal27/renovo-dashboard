@@ -165,19 +165,19 @@ export default function WorkspaceAccessPage() {
           <p className="mt-4 max-w-2xl text-[15px] leading-8 text-zinc-600">{body}</p>
 
           {operator?.authUser ? (
-            <div className="mt-6 rounded-2xl border border-zinc-200 bg-zinc-50 px-5 py-4 text-sm text-zinc-600">
+            <div className="mt-6 rounded-xl border border-zinc-200 bg-zinc-50 px-5 py-4 text-sm text-zinc-600">
               Signed in as <span className="font-medium text-zinc-950">{operatorLabel || operator.authUser.email || 'Operator account'}</span>
             </div>
           ) : null}
 
           {loading ? (
-            <div className="mt-8 rounded-2xl border border-zinc-200 bg-zinc-50 px-5 py-5 text-sm text-zinc-600">
+            <div className="mt-8 rounded-xl border border-zinc-200 bg-zinc-50 px-5 py-5 text-sm text-zinc-600">
               Loading access details...
             </div>
           ) : null}
 
           {error ? (
-            <div className="mt-8 rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">
+            <div className="mt-8 rounded-xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">
               {error}
             </div>
           ) : null}
@@ -216,7 +216,7 @@ export default function WorkspaceAccessPage() {
                     type="button"
                     onClick={() => handleSelectMembership(membership.id)}
                     disabled={selectionState.loading}
-                    className="flex w-full items-center justify-between rounded-2xl border border-zinc-200 bg-zinc-50 px-5 py-4 text-left transition hover:border-zinc-300 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="flex w-full items-center justify-between rounded-xl border border-zinc-200 bg-zinc-50 px-5 py-4 text-left transition hover:border-zinc-300 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     <span>
                       <span className="block text-base text-zinc-950">Workspace {membership.tenant_id}</span>
@@ -232,7 +232,7 @@ export default function WorkspaceAccessPage() {
               })}
 
               {selectionState.error ? (
-                <div className="rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">
+                <div className="rounded-xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">
                   {selectionState.error}
                 </div>
               ) : null}

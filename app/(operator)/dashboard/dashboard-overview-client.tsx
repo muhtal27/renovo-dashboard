@@ -357,7 +357,7 @@ function CommandHeader({
           <button
             type="button"
             onClick={onRefresh}
-            className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm font-medium text-white/70 backdrop-blur-sm transition hover:border-white/20 hover:bg-white/10"
+            className="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm font-medium text-zinc-600  transition hover:bg-zinc-50 hover:text-zinc-900"
             title="Refresh dashboard"
           >
             <RefreshCcw className={cn('h-3.5 w-3.5', refreshing && 'animate-spin')} />
@@ -661,7 +661,7 @@ function ActionCenter({ items }: { items: ActionItem[] }) {
   if (items.length === 0) {
     return (
       <div
-        className="animate-fade-in-up rounded-xl border border-dashed border-emerald-200 bg-emerald-50/30 px-6 py-12 text-center backdrop-blur-sm"
+        className="animate-fade-in-up rounded-xl border border-dashed border-emerald-200 bg-emerald-50/30 px-6 py-12 text-center "
         style={{ animationDelay: '240ms' }}
       >
         <CheckCircle2 className="mx-auto h-8 w-8 text-emerald-400" />
@@ -706,7 +706,7 @@ function ActionCenter({ items }: { items: ActionItem[] }) {
                 <span
                   className={cn(
                     'rounded-full px-1.5 py-0.5 text-[10px] font-semibold tabular-nums',
-                    activeTab === tab.id ? 'bg-white/20 text-white' : 'bg-zinc-200/60 text-zinc-500',
+                    activeTab === tab.id ? 'bg-emerald-100 text-emerald-700' : 'bg-zinc-100 text-zinc-500',
                   )}
                 >
                   {count}
@@ -800,7 +800,7 @@ function TenancyLifecycle({ tenancies }: { tenancies: EotTenancyListItem[] }) {
   if (endingSoon.length === 0) {
     return (
       <div
-        className="animate-fade-in-up rounded-xl border border-dashed border-zinc-200 bg-white px-6 py-12 text-center backdrop-blur-sm"
+        className="animate-fade-in-up rounded-xl border border-dashed border-zinc-200 bg-white px-6 py-12 text-center "
         style={{ animationDelay: '320ms' }}
       >
         <Calendar className="mx-auto h-8 w-8 text-zinc-300" />
@@ -934,7 +934,7 @@ function RecentCasesTable({
   if (recentCases.length === 0) {
     return (
       <div
-        className="animate-fade-in-up rounded-xl border border-dashed border-zinc-200 bg-white px-6 py-12 text-center backdrop-blur-sm"
+        className="animate-fade-in-up rounded-xl border border-dashed border-zinc-200 bg-white px-6 py-12 text-center "
         style={{ animationDelay: '400ms' }}
       >
         <ClipboardCheck className="mx-auto h-8 w-8 text-zinc-300" />

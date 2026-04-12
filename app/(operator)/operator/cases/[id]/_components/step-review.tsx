@@ -1016,7 +1016,7 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
         {isReview && defects.length > 0 ? (
           <div className={cn(
             'mt-4 flex items-center gap-3',
-            isDirty ? 'sticky bottom-0 z-10 -mx-6 border-t border-amber-200 bg-amber-50/95 px-6 py-3 backdrop-blur-sm md:-mx-7 md:px-7' : ''
+            isDirty ? 'sticky bottom-0 z-10 -mx-6 border-t border-amber-200 bg-amber-50/95 px-6 py-3  md:-mx-7 md:px-7' : ''
           )}>
             <WorkspaceActionButton
               tone={isDirty ? 'primary' : 'secondary'}

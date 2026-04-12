@@ -13,7 +13,7 @@ export default async function AdminPage() {
   return (
     <div className="space-y-6">
       {/* Allocation */}
-      <section className="border border-zinc-200/80 bg-white px-6 py-6 md:px-7">
+      <section className="border border-zinc-200 bg-white px-6 py-6 md:px-7">
         <h3 className="text-sm font-semibold text-zinc-950">Case allocation</h3>
         <p className="mt-1 text-sm text-zinc-500">
           Assign incoming checkouts to property managers. Select a team member from the dropdown to
@@ -26,7 +26,7 @@ export default async function AdminPage() {
       </section>
 
       {/* Teams */}
-      <section className="border border-zinc-200/80 bg-white px-6 py-6 md:px-7">
+      <section className="border border-zinc-200 bg-white px-6 py-6 md:px-7">
         <h3 className="text-sm font-semibold text-zinc-950">Teams</h3>
         <p className="mt-1 text-sm text-zinc-500">
           Manage workspace members, roles, and team structure.

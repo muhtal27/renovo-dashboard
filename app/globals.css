@@ -306,36 +306,6 @@ a:focus-visible {
   border-color: var(--line-strong);
 }
 
-.app-tertiary-button {
-  align-items: center;
-  background: rgba(248, 244, 238, 0.92);
-  border: 1px solid rgba(84, 67, 47, 0.14);
-  color: #5c5448;
-  display: inline-flex;
-  justify-content: center;
-  line-height: 1.15;
-  min-height: 2.75rem;
-  text-align: center;
-  vertical-align: middle;
-}
-
-.app-tertiary-button:hover {
-  background: #fffaf3;
-  border-color: rgba(84, 67, 47, 0.24);
-}
-
-.app-selected-card {
-  background: linear-gradient(180deg, #f3f7f4 0%, #e8efea 100%);
-  border: 1px solid rgba(71, 111, 99, 0.28);
-  color: var(--foreground);
-  box-shadow: 0 18px 34px rgba(71, 111, 99, 0.12);
-}
-
-.app-selected-chip {
-  background: rgba(71, 111, 99, 0.1);
-  border: 1px solid rgba(71, 111, 99, 0.18);
-  color: var(--accent-strong);
-}
 
 .app-kicker {
   color: var(--muted);
@@ -428,33 +398,11 @@ a:focus-visible {
   }
 }
 
-.app-card-muted {
-  background: var(--warm-soft);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-}
-
-.app-card-warm {
-  background: var(--warm-soft);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-}
-
 .app-empty-state {
   background: var(--warm-soft);
   border: 2px dashed var(--line);
   border-radius: var(--radius-md);
   color: var(--muted);
-}
-
-.app-live-pill {
-  background: rgba(230, 239, 233, 0.88);
-  border: 1px solid rgba(71, 111, 99, 0.18);
-  color: var(--accent-strong);
-}
-
-.app-divider {
-  border-color: rgba(84, 67, 47, 0.12);
 }
 
 .operator-app h1,
@@ -523,57 +471,12 @@ a:focus-visible {
   animation: shimmer 1.8s ease-in-out infinite;
 }
 
-.glass-card {
-  background: #ffffff;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-xs);
-}
-
-.glass-card:hover {
-  border-color: var(--line-strong);
-  box-shadow: var(--shadow-sm);
-}
-
-.stat-card-gradient {
-  background: #ffffff;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-xs);
-  transition: all 0.2s ease;
-}
-
-.stat-card-gradient:hover {
-  box-shadow: var(--shadow-sm);
-  border-color: var(--line-strong);
-}
-
-.stat-card-emerald {
-  background: linear-gradient(135deg, rgba(236,253,245,0.8) 0%, rgba(209,250,229,0.4) 100%);
-  border: 1px solid rgba(16,185,129,0.15);
-}
-
-.stat-card-amber {
-  background: linear-gradient(135deg, rgba(255,251,235,0.8) 0%, rgba(254,243,199,0.4) 100%);
-  border: 1px solid rgba(245,158,11,0.15);
-}
-
-.stat-card-rose {
-  background: linear-gradient(135deg, rgba(255,241,242,0.8) 0%, rgba(254,226,226,0.4) 100%);
-  border: 1px solid rgba(244,63,94,0.15);
-}
-
 .modern-table-row {
   transition: all 0.15s ease;
 }
 
 .modern-table-row:hover {
   background: rgba(16,185,129,0.03);
-}
-
-.dot-pattern {
-  background-image: radial-gradient(circle, rgba(16,185,129,0.06) 1px, transparent 1px);
-  background-size: 20px 20px;
 }
 
 .marketing-frame {
