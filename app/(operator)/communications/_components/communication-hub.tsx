@@ -80,7 +80,7 @@ export function CommunicationHub({
       </div>
 
       {/* Tab bar */}
-      <div className="border-b border-zinc-200/60">
+      <div className="border-b border-zinc-200">
         <nav className="flex gap-1 overflow-x-auto" aria-label="Communication sections">
           {HUB_TABS.map((tab) => {
             const Icon = tab.icon
