@@ -45,7 +45,7 @@ export function SectionCard({
   className?: string
 }) {
   return (
-    <section className={cn('border-b border-zinc-200 pb-4', className)}>
+    <section className={cn('border-b border-zinc-200/60 pb-4', className)}>
       {children}
     </section>
   )
@@ -178,7 +178,7 @@ export function DetailPanel({
   className?: string
 }) {
   return (
-    <aside className={cn('border-l-2 border-zinc-200 pl-4', className)}>
+    <aside className={cn('border-l-2 border-zinc-200/60 pl-4', className)}>
       <h3 className="text-sm font-semibold text-zinc-950">{title}</h3>
       <div className="mt-3 space-y-0">{children}</div>
     </aside>
@@ -186,21 +186,24 @@ export function DetailPanel({
 }
 
 export function EmptyState({
+  icon,
   title,
   body,
   action,
   className,
 }: {
+  icon?: ReactNode
   title: string
   body: string
   action?: ReactNode
   className?: string
 }) {
   return (
-    <div className={cn('py-8 text-center', className)}>
+    <div className={cn('rounded-2xl border border-dashed border-zinc-200/60 bg-white/60 px-6 py-12 text-center backdrop-blur-sm', className)}>
+      {icon ? <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center text-zinc-300">{icon}</div> : null}
       <p className="text-sm font-semibold text-zinc-950">{title}</p>
       <p className="mt-1 text-sm text-zinc-500">{body}</p>
-      {action ? <div className="mt-3">{action}</div> : null}
+      {action ? <div className="mt-4">{action}</div> : null}
     </div>
   )
 }

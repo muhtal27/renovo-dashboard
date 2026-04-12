@@ -123,9 +123,9 @@ export function TenanciesPageClient({
   ]
 
   return (
-    <div className="space-y-4">
+    <div className="animate-fade-in-up space-y-4">
       {/* Tabs + toolbar */}
-      <div className="sticky top-0 z-10 border-b border-zinc-200 bg-white/95 backdrop-blur">
+      <div className="sticky top-0 z-10 border-b border-zinc-200/60 bg-white/95 backdrop-blur">
         <div className="flex items-center justify-between gap-3 py-2">
           <div className="flex items-center gap-0">
             {tabs.map((t) => (
@@ -154,7 +154,7 @@ export function TenanciesPageClient({
               placeholder="Search tenancies..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-7 w-48 border border-zinc-200 bg-white px-2.5 text-xs text-zinc-700 outline-none transition focus:border-zinc-400"
+              className="h-7 w-48 border border-zinc-200/60 bg-white/60 px-2.5 text-xs text-zinc-700 outline-none transition focus:border-emerald-300 focus:ring-2 focus:ring-emerald-100"
             />
             <button
               type="button"
@@ -209,7 +209,7 @@ export function TenanciesPageClient({
                     : `/dashboard/${tenancy.id}`
                 }
                 prefetch={false}
-                className="grid grid-cols-1 items-start gap-x-6 border-b border-zinc-200 px-5 py-5 transition hover:bg-zinc-50/60 sm:grid-cols-[1fr_160px] md:grid-cols-[1fr_160px_140px_120px_100px]"
+                className="modern-table-row grid grid-cols-1 items-start gap-x-6 border-b border-zinc-200/60 px-5 py-5 transition sm:grid-cols-[1fr_160px] md:grid-cols-[1fr_160px_140px_120px_100px]"
               >
                 {/* Property + tenant */}
                 <div className="min-w-0">

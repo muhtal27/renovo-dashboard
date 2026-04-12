@@ -120,7 +120,7 @@ export function CaseAllocationPanel() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 animate-fade-in-up">
       {/* Inline assign error */}
       {assignError ? (
         <div className="flex items-center justify-between gap-3 border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm text-rose-700">
@@ -148,7 +148,7 @@ export function CaseAllocationPanel() {
             onClick={() => setFilter(tab.value)}
             className={`px-3 py-1.5 text-xs font-medium transition ${
               filter === tab.value
-                ? 'bg-zinc-900 text-white'
+                ? 'bg-emerald-600 text-white'
                 : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
             }`}
           >
@@ -167,10 +167,10 @@ export function CaseAllocationPanel() {
               : 'No cases found.'}
         </p>
       ) : (
-        <div className="overflow-hidden border border-zinc-200">
+        <div className="overflow-hidden border border-zinc-200/60">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-zinc-200 bg-zinc-50/80">
+              <tr className="border-b border-zinc-200/60 bg-zinc-50/60">
                 <th className="px-4 py-2.5 text-left text-xs font-medium text-zinc-500">
                   Property
                 </th>
@@ -195,7 +195,7 @@ export function CaseAllocationPanel() {
                 return (
                   <tr
                     key={caseItem.id}
-                    className="border-b border-zinc-100 last:border-0"
+                    className="border-b border-zinc-100/80 last:border-0 transition modern-table-row"
                   >
                     <td className="px-4 py-2.5">
                       <Link
@@ -221,7 +221,7 @@ export function CaseAllocationPanel() {
                           const value = e.target.value || null
                           void handleAssign(caseItem.id, value)
                         }}
-                        className="h-7 w-full max-w-[200px] border border-zinc-200 bg-white px-2 text-xs text-zinc-700 disabled:opacity-50"
+                        className="h-7 w-full max-w-[200px] border border-zinc-200/60 bg-white px-2 text-xs text-zinc-700 disabled:opacity-50"
                       >
                         <option value="">Unassigned</option>
                         {members.map((m) => (

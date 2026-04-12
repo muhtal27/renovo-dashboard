@@ -78,8 +78,8 @@ function ComposeForm({
   }
 
   return (
-    <div className="border border-zinc-200 bg-white">
-      <div className="flex items-center justify-between border-b border-zinc-200 px-5 py-3">
+    <div className="rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm backdrop-blur-sm">
+      <div className="flex items-center justify-between border-b border-zinc-200/60 px-5 py-3">
         <h3 className="text-sm font-semibold text-zinc-950">Compose Message</h3>
         <button
           type="button"
@@ -100,7 +100,7 @@ function ComposeForm({
             value={caseId}
             onChange={(e) => setCaseId(e.target.value)}
             placeholder="Enter case ID"
-            className="mt-1 h-10 w-full border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-sky-400 focus:ring-1 focus:ring-sky-400/30"
+            className="mt-1 h-10 w-full rounded-lg border border-zinc-200/60 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-300 focus:ring-2 focus:ring-emerald-100"
           />
         </div>
 
@@ -114,7 +114,7 @@ function ComposeForm({
               onChange={(e) =>
                 setRecipientType(e.target.value as 'tenant' | 'landlord')
               }
-              className="mt-1 h-10 w-full border border-zinc-200 bg-white px-3 text-sm text-zinc-900 focus:border-sky-400 focus:ring-1 focus:ring-sky-400/30"
+              className="mt-1 h-10 w-full rounded-lg border border-zinc-200/60 bg-white px-3 text-sm text-zinc-900 focus:border-emerald-300 focus:ring-2 focus:ring-emerald-100"
             >
               <option value="tenant">Tenant</option>
               <option value="landlord">Landlord</option>
@@ -129,7 +129,7 @@ function ComposeForm({
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
               placeholder="Optional subject"
-              className="mt-1 h-10 w-full border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-sky-400 focus:ring-1 focus:ring-sky-400/30"
+              className="mt-1 h-10 w-full rounded-lg border border-zinc-200/60 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-300 focus:ring-2 focus:ring-emerald-100"
             />
           </div>
         </div>
@@ -143,7 +143,7 @@ function ComposeForm({
             onChange={(e) => setContent(e.target.value)}
             placeholder="Type your message..."
             rows={5}
-            className="mt-1 w-full border border-zinc-200 bg-white px-3 py-2 text-sm leading-6 text-zinc-900 placeholder:text-zinc-400 focus:border-sky-400 focus:ring-1 focus:ring-sky-400/30"
+            className="mt-1 w-full rounded-lg border border-zinc-200/60 bg-white px-3 py-2 text-sm leading-6 text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-300 focus:ring-2 focus:ring-emerald-100"
           />
         </div>
 
@@ -151,7 +151,7 @@ function ComposeForm({
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex h-10 items-center gap-2 border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+            className="inline-flex h-10 items-center gap-2 rounded-lg border border-zinc-200/60 bg-white px-4 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
           >
             Cancel
           </button>
@@ -159,7 +159,7 @@ function ComposeForm({
             type="button"
             onClick={handleSend}
             disabled={sending || !caseId.trim() || !content.trim()}
-            className="inline-flex h-10 items-center gap-2 border border-zinc-900 bg-zinc-900 px-4 text-sm font-medium text-white hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex h-10 items-center gap-2 rounded-lg border border-zinc-900 bg-zinc-900 px-4 text-sm font-medium text-white hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Send className="h-3.5 w-3.5" />
             {sending ? 'Sending...' : 'Send'}
@@ -184,7 +184,7 @@ function MessageRow({
       type="button"
       onClick={onSelect}
       className={cn(
-        'flex w-full items-start gap-3 border-b border-zinc-100 px-5 py-4 text-left transition last:border-b-0 hover:bg-zinc-50',
+        'modern-table-row flex w-full items-start gap-3 border-b border-zinc-100/80 px-5 py-4 text-left transition last:border-b-0',
         selected && 'bg-sky-50/50'
       )}
     >
@@ -222,8 +222,8 @@ function MessageRow({
 
 function MessageDetail({ message }: { message: InboxMessage }) {
   return (
-    <div className="border border-zinc-200 bg-white">
-      <div className="border-b border-zinc-200 px-5 py-4">
+    <div className="rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm backdrop-blur-sm">
+      <div className="border-b border-zinc-200/60 px-5 py-4">
         <div className="flex flex-wrap items-center gap-2">
           <StatusBadge
             label={formatEnumLabel(message.sender_type)}
@@ -306,7 +306,7 @@ export function InboxPanel() {
     : null
 
   return (
-    <div className="space-y-4">
+    <div className="animate-fade-in-up space-y-4">
       {/* Toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
@@ -319,10 +319,10 @@ export function InboxPanel() {
                 setSelectedId(null)
               }}
               className={cn(
-                'inline-flex h-8 items-center border px-3 text-xs font-medium transition',
+                'inline-flex h-8 items-center rounded-lg border px-3 text-xs font-medium transition',
                 channel === f.value
-                  ? 'border-zinc-900 bg-zinc-900 text-white'
-                  : 'border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50'
+                  ? 'border-emerald-600 bg-emerald-600 text-white'
+                  : 'border-zinc-200/60 bg-white text-zinc-600 hover:bg-zinc-50'
               )}
             >
               {f.label}
@@ -339,21 +339,21 @@ export function InboxPanel() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search messages..."
-              className="h-8 w-56 border border-zinc-200 bg-white pl-9 pr-3 text-xs text-zinc-900 placeholder:text-zinc-400 focus:border-sky-400 focus:ring-1 focus:ring-sky-400/30"
+              className="h-8 w-56 rounded-lg border border-zinc-200/60 bg-white pl-9 pr-3 text-xs text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-300 focus:ring-2 focus:ring-emerald-100"
             />
           </div>
           <button
             type="button"
             onClick={fetchMessages}
             disabled={loading}
-            className="flex h-8 w-8 items-center justify-center border border-zinc-200 bg-white text-zinc-500 hover:bg-zinc-50 disabled:opacity-50"
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200/60 bg-white text-zinc-500 hover:bg-zinc-50 disabled:opacity-50"
           >
             <RefreshCw className={cn('h-3.5 w-3.5', loading && 'animate-spin')} />
           </button>
           <button
             type="button"
             onClick={() => setComposing(true)}
-            className="inline-flex h-8 items-center gap-1.5 border border-zinc-900 bg-zinc-900 px-3 text-xs font-medium text-white hover:bg-zinc-800"
+            className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-zinc-900 bg-zinc-900 px-3 text-xs font-medium text-white hover:bg-zinc-800"
           >
             <Send className="h-3 w-3" />
             Compose
@@ -371,11 +371,11 @@ export function InboxPanel() {
 
       {/* Content */}
       {loading ? (
-        <div className="space-y-0 border border-zinc-200 bg-white">
+        <div className="space-y-0 rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm backdrop-blur-sm">
           {Array.from({ length: 5 }).map((_, i) => (
             <div
               key={i}
-              className="animate-pulse border-b border-zinc-100 px-5 py-4 last:border-b-0"
+              className="skeleton-shimmer rounded-2xl border-b border-zinc-100/80 px-5 py-4 last:border-b-0"
             >
               <div className="flex gap-2">
                 <div className="h-5 w-16 rounded bg-zinc-100" />
@@ -387,7 +387,7 @@ export function InboxPanel() {
           ))}
         </div>
       ) : filteredMessages.length === 0 ? (
-        <div className="border border-zinc-200 bg-white">
+        <div className="rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm backdrop-blur-sm">
           <EmptyState
             title="No messages found"
             body={
@@ -410,7 +410,7 @@ export function InboxPanel() {
       ) : (
         <div className="grid gap-4 lg:grid-cols-5">
           {/* Message list */}
-          <div className="border border-zinc-200 bg-white lg:col-span-2">
+          <div className="rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm backdrop-blur-sm lg:col-span-2">
             {filteredMessages.map((message) => (
               <MessageRow
                 key={message.id}
@@ -426,7 +426,7 @@ export function InboxPanel() {
             {selectedMessage ? (
               <MessageDetail message={selectedMessage} />
             ) : (
-              <div className="border border-zinc-200 bg-white">
+              <div className="rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm backdrop-blur-sm">
                 <EmptyState
                   title="Select a message"
                   body="Click a message on the left to view details."

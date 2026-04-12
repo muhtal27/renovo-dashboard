@@ -62,7 +62,7 @@ export function StatusBadge({
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-md border px-2.5 py-1 text-xs font-medium',
+        'inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ring-1 ring-inset',
         getToneClass(tone),
         className
       )}
@@ -90,7 +90,7 @@ export function MetaItem({
   className?: string
 }) {
   return (
-    <div className={cn('border-b border-zinc-200 py-3', className)}>
+    <div className={cn('border-b border-zinc-200/60 py-3', className)}>
       <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">{label}</p>
       <div className="mt-2 text-sm font-medium leading-6 text-zinc-900">{value}</div>
     </div>
@@ -127,7 +127,7 @@ export function WorkspaceSection({
   className?: string
 }) {
   return (
-    <section className={cn('border-b border-zinc-200 pb-4', className)}>
+    <section className={cn('border-b border-zinc-200/60 pb-4', className)}>
       <div className="flex items-center justify-between gap-3">
         <h3 className="text-sm font-semibold text-zinc-950">{title}</h3>
         {aside ? <div className="flex shrink-0 flex-wrap items-center gap-2">{aside}</div> : null}

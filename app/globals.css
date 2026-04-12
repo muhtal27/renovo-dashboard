@@ -790,6 +790,10 @@ a:focus-visible {
 .bg-\[\#0a0e1a\] h1,
 .bg-\[\#0a0e1a\] h2,
 .bg-\[\#0a0e1a\] h3,
-.bg-\[\#0a0e1a\] h4 {
+.bg-\[\#0a0e1a\] h4,
+.dark-header h1,
+.dark-header h2,
+.dark-header h3,
+.dark-header h4 {
   color: #fff;
 }

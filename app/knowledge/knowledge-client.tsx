@@ -44,7 +44,7 @@ function getSourceTone(label: string) {
     case 'SafeDeposits Scotland':
       return 'border border-blue-200 bg-blue-50 text-blue-800'
     default:
-      return 'border border-zinc-200 bg-zinc-50 text-zinc-700'
+      return 'border border-zinc-200/60 bg-zinc-50 text-zinc-700'
   }
 }
 
@@ -179,7 +179,7 @@ function getRegionChipTone(regions: RegionFilter[]) {
     return 'border-cyan-200 bg-cyan-50 text-cyan-700'
   }
 
-  return 'border-zinc-200 bg-zinc-100 text-zinc-700'
+  return 'border-zinc-200/60 bg-zinc-100 text-zinc-700'
 }
 
 export default function KnowledgeClient({ articles }: { articles: KnowledgeArticle[] }) {
@@ -261,7 +261,7 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
             className={`px-3 py-1.5 text-xs font-medium transition ${
               regionFilter === value
                 ? 'border border-zinc-900 bg-zinc-900 text-white'
-                : 'border border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300'
+                : 'border border-zinc-200/60 bg-white text-zinc-600 hover:border-zinc-300'
             }`}
           >
             {label}
@@ -275,7 +275,7 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
             placeholder="Search guidance..."
-            className="h-9 w-full border border-zinc-200 bg-white pl-9 pr-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none"
+            className="h-9 w-full rounded-lg border border-zinc-200/60 bg-white pl-9 pr-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none"
           />
         </label>
       </div>
@@ -287,14 +287,14 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
               key={article.title}
               type="button"
               onClick={() => setSelectedArticleTitle(article.title)}
-              className="block w-full border border-zinc-200/80 bg-white px-5 py-4 text-left transition hover:border-zinc-300"
+              className="block w-full rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm px-5 py-4 text-left transition hover:border-zinc-300 animate-fade-in-up"
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
                   <h3 className="text-sm font-semibold text-zinc-950">{article.title}</h3>
                   <p className="mt-1 text-sm leading-6 text-zinc-600">{article.summary}</p>
                 </div>
-                <span className="shrink-0 border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-xs font-medium text-zinc-600">
+                <span className="shrink-0 border border-zinc-200/60 bg-zinc-50 px-2.5 py-1 text-xs font-medium text-zinc-600">
                   {article.category}
                 </span>
               </div>
@@ -309,7 +309,7 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
             </button>
           ))
         ) : (
-          <div className="border border-zinc-200/80 bg-white px-5 py-8 text-center text-sm text-zinc-500">
+          <div className="rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm px-5 py-8 text-center text-sm text-zinc-500">
             No articles match your filters.
           </div>
         )}
@@ -323,8 +323,8 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
             className="flex-1 cursor-default"
             aria-label="Close article panel"
           />
-          <aside className="relative flex h-full w-full max-w-2xl flex-col border-l border-zinc-200 bg-white">
-            <div className="border-b border-zinc-200 px-6 py-5">
+          <aside className="relative flex h-full w-full max-w-2xl flex-col border-l border-zinc-200/60 bg-white">
+            <div className="border-b border-zinc-200/60 px-6 py-5">
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
@@ -390,7 +390,7 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
 
               {relatedArticleRecords.length > 0 ? (
                 <>
-                  <div className="my-6 border-t border-zinc-200" />
+                  <div className="my-6 border-t border-zinc-200/60" />
                   <div>
                     <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-zinc-500">
                       More in this category
@@ -401,7 +401,7 @@ export default function KnowledgeClient({ articles }: { articles: KnowledgeArtic
                           key={article.title}
                           type="button"
                           onClick={() => setSelectedArticleTitle(article.title)}
-                          className="border border-zinc-200 bg-zinc-50/70 px-4 py-4 text-left transition hover:border-zinc-300 hover:bg-white"
+                          className="rounded-2xl border border-zinc-200/60 bg-zinc-50/70 px-4 py-4 text-left transition hover:border-zinc-300 hover:bg-white"
                         >
                           <div className="flex items-center justify-between gap-3">
                             <span className="text-sm font-medium text-zinc-900">

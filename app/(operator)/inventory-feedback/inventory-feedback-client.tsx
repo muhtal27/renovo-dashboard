@@ -117,9 +117,9 @@ export function InventoryFeedbackClient({
   }, [rows, view, decisionFilter, search])
 
   return (
-    <div className="space-y-4">
+    <div className="animate-fade-in-up space-y-4">
       {/* Toolbar */}
-      <div className="sticky top-0 z-10 border-b border-zinc-200 bg-white/95 py-2 backdrop-blur">
+      <div className="sticky top-0 z-10 border-b border-zinc-200/60 bg-white/95 py-2 backdrop-blur">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-0">
             {([
@@ -135,7 +135,7 @@ export function InventoryFeedbackClient({
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="hidden items-center gap-4 border-r border-zinc-200 pr-3 xl:flex">
+            <div className="hidden items-center gap-4 border-r border-zinc-200/60 pr-3 xl:flex">
               <span className="text-xs text-zinc-400">
                 Pending{' '}
                 <span className="font-semibold tabular-nums text-zinc-700">{pendingDecision}</span>
@@ -148,7 +148,7 @@ export function InventoryFeedbackClient({
             <select
               value={decisionFilter}
               onChange={(e) => setDecisionFilter(e.target.value as DecisionFilter)}
-              className="h-7 rounded-md border border-zinc-200 bg-white px-2 text-xs text-zinc-700"
+              className="h-7 rounded-md border border-zinc-200/60 bg-white/60 px-2 text-xs text-zinc-700"
             >
               <option value="all">All decisions</option>
               <option value="charge">Charge</option>
@@ -161,7 +161,7 @@ export function InventoryFeedbackClient({
               placeholder="Search issues..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-7 w-48 border border-zinc-200 bg-white px-2.5 text-xs text-zinc-700 outline-none transition focus:border-zinc-400"
+              className="h-7 w-48 border border-zinc-200/60 bg-white/60 px-2.5 text-xs text-zinc-700 outline-none transition focus:border-emerald-300 focus:ring-2 focus:ring-emerald-100"
             />
             <button
               type="button"
@@ -201,7 +201,7 @@ export function InventoryFeedbackClient({
                 key={row.issue.id}
                 href={`/operator/cases/${row.caseItem.id}`}
                 prefetch={false}
-                className="grid grid-cols-1 items-start gap-x-6 border-b border-zinc-200 px-5 py-5 transition hover:bg-zinc-50/60 sm:grid-cols-[1fr_120px] md:grid-cols-[1fr_120px_100px_100px_100px]"
+                className="modern-table-row grid grid-cols-1 items-start gap-x-6 border-b border-zinc-200/60 px-5 py-5 transition sm:grid-cols-[1fr_120px] md:grid-cols-[1fr_120px_100px_100px_100px]"
               >
                 {/* Issue + property + tenant */}
                 <div className="min-w-0">

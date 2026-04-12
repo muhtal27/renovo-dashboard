@@ -79,7 +79,7 @@ export function CommunicationHub({
   )
 
   return (
-    <div className="space-y-6">
+    <div className="animate-fade-in-up space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -93,7 +93,7 @@ export function CommunicationHub({
       </div>
 
       {/* Tab bar */}
-      <div className="border-b border-zinc-200">
+      <div className="border-b border-zinc-200/60">
         <nav className="flex gap-1 overflow-x-auto" aria-label="Communication sections">
           {HUB_TABS.map((tab) => {
             const Icon = tab.icon
@@ -109,7 +109,7 @@ export function CommunicationHub({
                 className={cn(
                   'inline-flex min-h-11 items-center gap-2 border-b-2 px-4 pb-3 pt-2 text-sm font-medium whitespace-nowrap transition',
                   selected
-                    ? 'border-zinc-900 text-zinc-950'
+                    ? 'border-emerald-600 text-zinc-950'
                     : 'border-transparent text-zinc-500 hover:text-zinc-900'
                 )}
               >

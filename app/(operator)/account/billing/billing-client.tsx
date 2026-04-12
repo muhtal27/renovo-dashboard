@@ -77,10 +77,10 @@ export function BillingPageClient() {
   const isOverCapacity = mockUsage.fullyManagedTenancies > capacity
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in-up">
 
       {/* ── Plan overview ── */}
-      <section className="border border-zinc-200/80 bg-white px-6 py-6 md:px-7">
+      <section className="border border-zinc-200/60 bg-white/80 backdrop-blur-sm shadow-sm px-6 py-6 md:px-7">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h3 className="text-sm font-semibold text-zinc-950">Current plan</h3>
@@ -125,7 +125,7 @@ export function BillingPageClient() {
       </section>
 
       {/* ── Usage ── */}
-      <section className="border border-zinc-200/80 bg-white px-6 py-6 md:px-7">
+      <section className="border border-zinc-200/60 bg-white/80 backdrop-blur-sm shadow-sm px-6 py-6 md:px-7">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h3 className="text-sm font-semibold text-zinc-950">Usage</h3>
@@ -135,7 +135,7 @@ export function BillingPageClient() {
           </div>
         </div>
 
-        <div className="mt-5 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-zinc-200 bg-zinc-200 md:grid-cols-4">
+        <div className="mt-5 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-zinc-200/60 bg-zinc-200 md:grid-cols-4">
           <div className="bg-white px-5 py-4">
             <KPIStatCard label="Fully managed" value={mockUsage.fullyManagedTenancies} tone="default" />
           </div>
@@ -180,7 +180,7 @@ export function BillingPageClient() {
       </section>
 
       {/* ── Manage blocks ── */}
-      <section className="border border-zinc-200/80 bg-white px-6 py-6 md:px-7">
+      <section className="border border-zinc-200/60 bg-white/80 backdrop-blur-sm shadow-sm px-6 py-6 md:px-7">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h3 className="text-sm font-semibold text-zinc-950">Manage portfolio blocks</h3>
@@ -199,7 +199,7 @@ export function BillingPageClient() {
               type="button"
               onClick={() => setBlocks((b) => Math.max(1, b - 1))}
               disabled={blocks <= 1}
-              className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 text-zinc-600 transition hover:border-zinc-300 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200/60 text-zinc-600 transition hover:border-zinc-300 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-40"
             >
               <Minus className="h-4 w-4" />
             </button>
@@ -213,7 +213,7 @@ export function BillingPageClient() {
               type="button"
               onClick={() => setBlocks((b) => Math.min(5, b + 1))}
               disabled={blocks >= 5}
-              className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 text-zinc-600 transition hover:border-zinc-300 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200/60 text-zinc-600 transition hover:border-zinc-300 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-40"
             >
               <Plus className="h-4 w-4" />
             </button>
@@ -232,7 +232,7 @@ export function BillingPageClient() {
         </div>
 
         {blocks !== mockSubscription.blocks && (
-          <div className="mt-6 flex flex-col gap-3 border-t border-zinc-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mt-6 flex flex-col gap-3 border-t border-zinc-100/80 pt-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2 text-sm">
               <TrendingUp className="h-4 w-4 text-emerald-600" />
               <span className="text-zinc-600">
@@ -248,7 +248,7 @@ export function BillingPageClient() {
               <button
                 type="button"
                 onClick={() => setBlocks(mockSubscription.blocks)}
-                className="rounded-md border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-50"
+                className="rounded-md border border-zinc-200/60 px-4 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-50"
               >
                 Cancel
               </button>
@@ -275,7 +275,7 @@ export function BillingPageClient() {
       </section>
 
       {/* ── Payment method ── */}
-      <section className="border border-zinc-200/80 bg-white px-6 py-6 md:px-7">
+      <section className="border border-zinc-200/60 bg-white/80 backdrop-blur-sm shadow-sm px-6 py-6 md:px-7">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h3 className="text-sm font-semibold text-zinc-950">Payment method</h3>
@@ -285,15 +285,15 @@ export function BillingPageClient() {
           </div>
           <button
             type="button"
-            className="rounded-md border border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-600 transition hover:bg-zinc-50"
+            className="rounded-md border border-zinc-200/60 px-3 py-1.5 text-xs font-medium text-zinc-600 transition hover:bg-zinc-50"
           >
             Update
           </button>
         </div>
 
         {mockPaymentMethod ? (
-          <div className="mt-5 flex items-center gap-4 rounded-lg border border-zinc-100 bg-zinc-50/80 px-4 py-3.5">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white border border-zinc-200">
+          <div className="mt-5 flex items-center gap-4 rounded-lg border border-zinc-100/80 bg-zinc-50/80 px-4 py-3.5">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white border border-zinc-200/60">
               <CreditCard className="h-5 w-5 text-zinc-400" />
             </div>
             <div className="min-w-0 flex-1">
@@ -307,7 +307,7 @@ export function BillingPageClient() {
             <Shield className="h-4 w-4 text-emerald-500" />
           </div>
         ) : (
-          <div className="mt-5 rounded-lg border border-zinc-100 bg-zinc-50 px-4 py-3 text-sm text-zinc-500">
+          <div className="mt-5 rounded-lg border border-zinc-100/80 bg-zinc-50 px-4 py-3 text-sm text-zinc-500">
             No payment method on file.{' '}
             <Link href="/checkout" className="font-medium text-emerald-600 hover:text-emerald-700">
               Add a payment method
@@ -317,7 +317,7 @@ export function BillingPageClient() {
       </section>
 
       {/* ── Billing history ── */}
-      <section className="border border-zinc-200/80 bg-white px-6 py-6 md:px-7">
+      <section className="border border-zinc-200/60 bg-white/80 backdrop-blur-sm shadow-sm px-6 py-6 md:px-7">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h3 className="text-sm font-semibold text-zinc-950">Billing history</h3>
@@ -331,10 +331,10 @@ export function BillingPageClient() {
         </div>
 
         {mockInvoices.length > 0 ? (
-          <div className="mt-5 overflow-hidden rounded-lg border border-zinc-100">
+          <div className="mt-5 overflow-hidden rounded-2xl border border-zinc-100/80">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-zinc-100 bg-zinc-50/80">
+                <tr className="border-b border-zinc-100/80 bg-zinc-50/60">
                   <th className="px-4 py-2.5 text-left text-xs font-medium text-zinc-500">Date</th>
                   <th className="px-4 py-2.5 text-left text-xs font-medium text-zinc-500">Amount</th>
                   <th className="px-4 py-2.5 text-left text-xs font-medium text-zinc-500">Status</th>
@@ -343,7 +343,7 @@ export function BillingPageClient() {
               </thead>
               <tbody>
                 {mockInvoices.map((inv) => (
-                  <tr key={inv.id} className="border-b border-zinc-50 last:border-b-0">
+                  <tr key={inv.id} className="border-b border-zinc-50 last:border-b-0 transition modern-table-row">
                     <td className="px-4 py-3 font-medium text-zinc-950">{formatDate(inv.date)}</td>
                     <td className="px-4 py-3 tabular-nums text-zinc-700">{formatGBP(inv.amount)}</td>
                     <td className="px-4 py-3">
@@ -375,14 +375,14 @@ export function BillingPageClient() {
             </table>
           </div>
         ) : (
-          <div className="mt-5 rounded-lg border border-zinc-100 bg-zinc-50 px-4 py-3 text-sm text-zinc-500">
+          <div className="mt-5 rounded-lg border border-zinc-100/80 bg-zinc-50 px-4 py-3 text-sm text-zinc-500">
             No billing history yet.
           </div>
         )}
       </section>
 
       {/* ── Manage on Stripe ── */}
-      <div className="flex items-center justify-between rounded-lg border border-zinc-200/80 bg-zinc-50/80 px-6 py-4">
+      <div className="flex items-center justify-between rounded-lg border border-zinc-200/60 bg-zinc-50/80 px-6 py-4">
         <p className="text-sm text-zinc-500">
           Need to manage payment details, download receipts, or cancel your subscription?
         </p>
@@ -390,7 +390,7 @@ export function BillingPageClient() {
           href="https://billing.stripe.com/p/login/test"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-zinc-200/60 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
         >
           Stripe portal
           <ExternalLink className="h-3.5 w-3.5" />
@@ -400,7 +400,7 @@ export function BillingPageClient() {
       {/* ── Confirmation modal ── */}
       {showConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="mx-4 w-full max-w-md rounded-xl border border-zinc-200 bg-white p-6 shadow-xl">
+          <div className="mx-4 w-full max-w-md rounded-2xl border border-zinc-200/60 bg-white p-6 shadow-xl backdrop-blur-sm">
             <h3 className="text-base font-semibold text-zinc-950">Confirm subscription change</h3>
             <p className="mt-2 text-sm text-zinc-500">
               You are changing from{' '}
@@ -417,7 +417,7 @@ export function BillingPageClient() {
               <button
                 type="button"
                 onClick={() => setShowConfirm(false)}
-                className="rounded-md border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-50"
+                className="rounded-md border border-zinc-200/60 px-4 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-50"
               >
                 Cancel
               </button>

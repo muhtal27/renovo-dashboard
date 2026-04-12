@@ -40,7 +40,7 @@ export function AnalyticsClient({
 
   if (!data) {
     return (
-      <div className="border border-zinc-200 bg-white px-6 py-10 text-center">
+      <div className="rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm backdrop-blur-sm px-6 py-10 text-center">
         <h3 className="text-sm font-semibold text-zinc-950">No analytics data</h3>
         <p className="mt-1 text-sm text-zinc-500">
           Create cases and process claims to populate analytics.
@@ -50,7 +50,7 @@ export function AnalyticsClient({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in-up">
       {/* Period selector */}
       <div className="flex items-center gap-1.5">
         {PERIOD_OPTIONS.map((opt) => (
@@ -71,7 +71,7 @@ export function AnalyticsClient({
 
       {/* Case throughput + Resolution time */}
       <div className="grid gap-6 xl:grid-cols-2">
-        <section className="border border-zinc-200/80 bg-white px-6 py-6 md:px-7">
+        <section className="rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm backdrop-blur-sm px-6 py-6 md:px-7">
           <h3 className="text-sm font-semibold text-zinc-950">Case throughput</h3>
           <p className="mt-1 text-xs text-zinc-400">Cases created vs resolved per week</p>
           <div className="mt-4">
@@ -79,7 +79,7 @@ export function AnalyticsClient({
           </div>
         </section>
 
-        <section className="border border-zinc-200/80 bg-white px-6 py-6 md:px-7">
+        <section className="rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm backdrop-blur-sm px-6 py-6 md:px-7">
           <h3 className="text-sm font-semibold text-zinc-950">Resolution time</h3>
           <p className="mt-1 text-xs text-zinc-400">How long cases take to resolve</p>
           <div className="mt-4">
@@ -89,7 +89,7 @@ export function AnalyticsClient({
       </div>
 
       {/* Claim recovery */}
-      <section className="border border-zinc-200/80 bg-white px-6 py-6 md:px-7">
+      <section className="rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm backdrop-blur-sm px-6 py-6 md:px-7">
         <h3 className="text-sm font-semibold text-zinc-950">Claim recovery</h3>
         <p className="mt-1 text-xs text-zinc-400">Deposit claim performance</p>
         <div className="mt-4">
@@ -98,7 +98,7 @@ export function AnalyticsClient({
       </section>
 
       {/* Team workload */}
-      <section className="border border-zinc-200/80 bg-white px-6 py-6 md:px-7">
+      <section className="rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm backdrop-blur-sm px-6 py-6 md:px-7">
         <h3 className="text-sm font-semibold text-zinc-950">Team workload</h3>
         <p className="mt-1 text-xs text-zinc-400">Case distribution across team members</p>
         <div className="mt-4">
@@ -107,7 +107,7 @@ export function AnalyticsClient({
       </section>
 
       {/* Integration health */}
-      <section className="border border-zinc-200/80 bg-white px-6 py-6 md:px-7">
+      <section className="rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm backdrop-blur-sm px-6 py-6 md:px-7">
         <h3 className="text-sm font-semibold text-zinc-950">Integration health</h3>
         <p className="mt-1 text-xs text-zinc-400">Connected systems and sync status</p>
         <div className="mt-4">

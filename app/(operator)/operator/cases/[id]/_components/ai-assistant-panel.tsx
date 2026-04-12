@@ -154,7 +154,7 @@ export function AIAssistantPanel({ data }: { data: OperatorCheckoutWorkspaceData
                   'border px-4 py-4 transition-colors ' +
                   (selectedDraftType === item.type
                     ? 'border-zinc-950 bg-zinc-50/60'
-                    : 'border-zinc-200 hover:border-zinc-300')
+                    : 'border-zinc-200/60 hover:border-zinc-300')
                 }
               >
                 <div className="flex items-start gap-3">
@@ -219,7 +219,7 @@ export function AIAssistantPanel({ data }: { data: OperatorCheckoutWorkspaceData
                 tone={getDraftTypeTone(selectedDraft.draftType)}
               />
               <button
-                className="flex items-center gap-1.5 rounded border border-zinc-200 px-2.5 py-1.5 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-50"
+                className="flex items-center gap-1.5 rounded border border-zinc-200/60 px-2.5 py-1.5 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-50"
                 onClick={() => handleCopy(selectedDraft.id, selectedDraft.content)}
                 type="button"
               >
@@ -237,7 +237,7 @@ export function AIAssistantPanel({ data }: { data: OperatorCheckoutWorkspaceData
               </button>
             </div>
           </div>
-          <div className="mt-3 max-h-[600px] overflow-y-auto border border-zinc-200 bg-white px-6 py-5">
+          <div className="mt-3 max-h-[600px] overflow-y-auto border border-zinc-200/60 bg-white px-6 py-5">
             <pre className="whitespace-pre-wrap font-sans text-sm leading-7 text-zinc-700 [overflow-wrap:anywhere]">
               {selectedDraft.content}
             </pre>
@@ -258,10 +258,10 @@ export function AIAssistantPanel({ data }: { data: OperatorCheckoutWorkspaceData
       {existingDrafts.length > 0 ? (
         <section>
           <h3 className="text-sm font-semibold text-zinc-950">Generated documents</h3>
-          <div className="mt-3 overflow-hidden border border-zinc-200">
+          <div className="mt-3 overflow-hidden border border-zinc-200/60">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-zinc-200 bg-zinc-50/80">
+                <tr className="border-b border-zinc-200/60 bg-zinc-50/60">
                   <th className="px-4 py-2.5 text-left text-xs font-medium text-zinc-500">Document</th>
                   <th className="px-4 py-2.5 text-left text-xs font-medium text-zinc-500">Type</th>
                   <th className="px-4 py-2.5 text-right text-xs font-medium text-zinc-500">Generated</th>
@@ -273,7 +273,7 @@ export function AIAssistantPanel({ data }: { data: OperatorCheckoutWorkspaceData
                   return (
                     <tr
                       key={draft.id}
-                      className="cursor-pointer border-b border-zinc-100 transition-colors last:border-0 hover:bg-zinc-50/50"
+                      className="cursor-pointer border-b border-zinc-100/80 transition-colors last:border-0 hover:bg-zinc-50/50"
                       onClick={() => setSelectedDraftType(draft.draftType)}
                     >
                       <td className="px-4 py-2.5 font-medium text-zinc-950">

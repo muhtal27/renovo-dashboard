@@ -130,7 +130,7 @@ function WorkflowNav({
                   <div
                     className={cn(
                       'h-[2px] w-full',
-                      isComplete || isCurrent ? 'bg-sky-400' : 'bg-zinc-200'
+                      isComplete || isCurrent ? 'bg-sky-400' : 'bg-zinc-200/60'
                     )}
                   />
                 </div>
@@ -160,7 +160,7 @@ function WorkflowNav({
                             : 'border-sky-500 bg-sky-500 text-white'
                         : isActive
                           ? 'border-sky-300 bg-sky-50 text-sky-600'
-                          : 'border-zinc-200 bg-white text-zinc-400 group-hover:border-zinc-300 group-hover:text-zinc-500'
+                          : 'border-zinc-200/60 bg-white text-zinc-400 group-hover:border-zinc-300 group-hover:text-zinc-500'
                   )}
                 >
                   {isComplete ? (
@@ -201,7 +201,7 @@ function WorkflowNav({
                   <div
                     className={cn(
                       'h-[2px] w-full',
-                      isComplete ? 'bg-sky-400' : 'bg-zinc-200'
+                      isComplete ? 'bg-sky-400' : 'bg-zinc-200/60'
                     )}
                   />
                 </div>
@@ -360,9 +360,9 @@ export function CheckoutCaseWorkspace({
   }, [activeStep, handleStepClick])
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in-up">
       {/* Case header */}
-      <section className="border border-zinc-200/80 bg-white px-6 py-6 md:px-7">
+      <section className="border border-zinc-200/60 bg-white px-6 py-6 md:px-7">
         <div className="flex items-center justify-between gap-3">
           <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
             {`Case #${caseReference}`}
@@ -411,7 +411,7 @@ export function CheckoutCaseWorkspace({
         </div>
 
         {/* Workflow navigation — competitor-style step bar */}
-        <div className="mt-6 border-t border-zinc-100 pt-5">
+        <div className="mt-6 border-t border-zinc-100/80 pt-5">
           <WorkflowNav
             activeStep={activeStep}
             currentStatus={currentStatus}
@@ -425,7 +425,7 @@ export function CheckoutCaseWorkspace({
       <section
         aria-busy={isPending}
         className={cn(
-          'border border-zinc-200/80 bg-white px-6 py-6 md:px-7',
+          'border border-zinc-200/60 bg-white px-6 py-6 md:px-7',
           isPending ? 'opacity-80' : null
         )}
       >

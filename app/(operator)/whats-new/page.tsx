@@ -25,13 +25,13 @@ function ReleaseCard({ entry }: { entry: ChangelogEntry }) {
   return (
     <article
       id={`v${entry.version}`}
-      className="scroll-mt-24 border-b border-zinc-200 py-10 first:pt-0 last:border-0"
+      className="scroll-mt-24 border-b border-zinc-200/60 py-10 first:pt-0 last:border-0 animate-fade-in-up"
     >
       <div className="flex flex-wrap items-baseline gap-3">
         <h2 className="text-lg font-semibold tracking-tight text-zinc-950">
           {entry.title}
         </h2>
-        <span className="rounded-md bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-600">
+        <span className="rounded-full bg-zinc-100 ring-1 ring-zinc-200/50 px-2 py-0.5 text-xs font-medium text-zinc-600">
           v{entry.version}
         </span>
         <time
@@ -75,7 +75,7 @@ export default async function WhatsNewPage() {
   const changelog = await getChangelog()
 
   return (
-    <div className="mx-auto max-w-2xl">
+    <div className="mx-auto max-w-2xl animate-fade-in-up">
       <header className="mb-10">
         <Link
           href="/dashboard"

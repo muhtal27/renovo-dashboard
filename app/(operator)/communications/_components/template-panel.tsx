@@ -91,8 +91,8 @@ function TemplateForm({
   }
 
   return (
-    <div className="border border-zinc-200 bg-white">
-      <div className="flex items-center justify-between border-b border-zinc-200 px-5 py-3">
+    <div className="rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm backdrop-blur-sm">
+      <div className="flex items-center justify-between border-b border-zinc-200/60 px-5 py-3">
         <h3 className="text-sm font-semibold text-zinc-950">
           {template ? 'Edit Template' : 'New Template'}
         </h3>
@@ -116,7 +116,7 @@ function TemplateForm({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Deposit Deduction Notice"
-              className="mt-1 h-10 w-full border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-sky-400 focus:ring-1 focus:ring-sky-400/30"
+              className="mt-1 h-10 w-full rounded-lg border border-zinc-200/60 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-300 focus:ring-2 focus:ring-emerald-100"
             />
           </div>
           <div className="w-48">
@@ -126,7 +126,7 @@ function TemplateForm({
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value as TemplateCategory)}
-              className="mt-1 h-10 w-full border border-zinc-200 bg-white px-3 text-sm text-zinc-900 focus:border-sky-400 focus:ring-1 focus:ring-sky-400/30"
+              className="mt-1 h-10 w-full rounded-lg border border-zinc-200/60 bg-white px-3 text-sm text-zinc-900 focus:border-emerald-300 focus:ring-2 focus:ring-emerald-100"
             >
               {TEMPLATE_CATEGORIES.map((c) => (
                 <option key={c.value} value={c.value}>
@@ -146,7 +146,7 @@ function TemplateForm({
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
             placeholder="Optional email subject"
-            className="mt-1 h-10 w-full border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-sky-400 focus:ring-1 focus:ring-sky-400/30"
+            className="mt-1 h-10 w-full rounded-lg border border-zinc-200/60 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-300 focus:ring-2 focus:ring-emerald-100"
           />
         </div>
 
@@ -164,7 +164,7 @@ function TemplateForm({
             onChange={(e) => setBody(e.target.value)}
             placeholder="Dear {{tenant_name}},&#10;&#10;We are writing regarding your tenancy at {{property_address}}..."
             rows={10}
-            className="mt-1 w-full border border-zinc-200 bg-white px-3 py-2 font-mono text-sm leading-6 text-zinc-900 placeholder:text-zinc-400 focus:border-sky-400 focus:ring-1 focus:ring-sky-400/30"
+            className="mt-1 w-full rounded-lg border border-zinc-200/60 bg-white px-3 py-2 font-mono text-sm leading-6 text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-300 focus:ring-2 focus:ring-emerald-100"
           />
         </div>
 
@@ -180,7 +180,7 @@ function TemplateForm({
                 key={v.key}
                 type="button"
                 onClick={() => insertVariable(v.key)}
-                className="inline-flex h-7 items-center border border-zinc-200 bg-zinc-50 px-2.5 text-[11px] font-medium text-zinc-600 transition hover:border-sky-300 hover:bg-sky-50 hover:text-sky-700"
+                className="inline-flex h-7 items-center rounded-lg border border-zinc-200/60 bg-zinc-50 px-2.5 text-[11px] font-medium text-zinc-600 transition hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700"
               >
                 {v.label}
               </button>
@@ -188,11 +188,11 @@ function TemplateForm({
           </div>
         </div>
 
-        <div className="flex justify-end gap-2 border-t border-zinc-100 pt-4">
+        <div className="flex justify-end gap-2 border-t border-zinc-100/80 pt-4">
           <button
             type="button"
             onClick={onCancel}
-            className="inline-flex h-10 items-center gap-2 border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+            className="inline-flex h-10 items-center gap-2 rounded-lg border border-zinc-200/60 bg-white px-4 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
           >
             Cancel
           </button>
@@ -200,7 +200,7 @@ function TemplateForm({
             type="button"
             onClick={handleSave}
             disabled={saving || !name.trim() || !body.trim()}
-            className="inline-flex h-10 items-center gap-2 border border-zinc-900 bg-zinc-900 px-4 text-sm font-medium text-white hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex h-10 items-center gap-2 rounded-lg border border-zinc-900 bg-zinc-900 px-4 text-sm font-medium text-white hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Save className="h-3.5 w-3.5" />
             {saving ? 'Saving...' : template ? 'Update' : 'Create'}
@@ -239,7 +239,7 @@ function TemplateCard({
     template.category
 
   return (
-    <div className="border border-zinc-200 bg-white transition hover:border-zinc-300">
+    <div className="rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm backdrop-blur-sm transition hover:border-zinc-300">
       <div className="px-5 py-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
@@ -272,7 +272,7 @@ function TemplateCard({
         </p>
       </div>
 
-      <div className="flex border-t border-zinc-100 px-5 py-2.5">
+      <div className="flex border-t border-zinc-100/80 px-5 py-2.5">
         <button
           type="button"
           onClick={onEdit}
@@ -391,7 +391,7 @@ export function TemplatePanel() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="animate-fade-in-up space-y-4">
       {/* Toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-2">
@@ -399,10 +399,10 @@ export function TemplatePanel() {
             type="button"
             onClick={() => setFilterCategory('all')}
             className={cn(
-              'inline-flex h-8 items-center border px-3 text-xs font-medium transition',
+              'inline-flex h-8 items-center rounded-lg border px-3 text-xs font-medium transition',
               filterCategory === 'all'
-                ? 'border-zinc-900 bg-zinc-900 text-white'
-                : 'border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50'
+                ? 'border-emerald-600 bg-emerald-600 text-white'
+                : 'border-zinc-200/60 bg-white text-zinc-600 hover:bg-zinc-50'
             )}
           >
             All
@@ -413,10 +413,10 @@ export function TemplatePanel() {
               type="button"
               onClick={() => setFilterCategory(c.value)}
               className={cn(
-                'inline-flex h-8 items-center border px-3 text-xs font-medium transition',
+                'inline-flex h-8 items-center rounded-lg border px-3 text-xs font-medium transition',
                 filterCategory === c.value
-                  ? 'border-zinc-900 bg-zinc-900 text-white'
-                  : 'border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50'
+                  ? 'border-emerald-600 bg-emerald-600 text-white'
+                  : 'border-zinc-200/60 bg-white text-zinc-600 hover:bg-zinc-50'
               )}
             >
               {c.label}
@@ -427,7 +427,7 @@ export function TemplatePanel() {
         <button
           type="button"
           onClick={() => setCreating(true)}
-          className="inline-flex h-8 items-center gap-1.5 border border-zinc-900 bg-zinc-900 px-3 text-xs font-medium text-white hover:bg-zinc-800"
+          className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-zinc-900 bg-zinc-900 px-3 text-xs font-medium text-white hover:bg-zinc-800"
         >
           <Plus className="h-3 w-3" />
           New Template
@@ -440,7 +440,7 @@ export function TemplatePanel() {
           {Array.from({ length: 3 }).map((_, i) => (
             <div
               key={i}
-              className="animate-pulse border border-zinc-200 bg-white px-5 py-4"
+              className="skeleton-shimmer rounded-2xl border border-zinc-200/60 bg-white/80 px-5 py-4"
             >
               <div className="h-4 w-2/3 rounded bg-zinc-100" />
               <div className="mt-3 h-3 w-1/3 rounded bg-zinc-100" />
@@ -452,7 +452,7 @@ export function TemplatePanel() {
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="border border-zinc-200 bg-white">
+        <div className="rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm backdrop-blur-sm">
           <EmptyState
             title="No templates yet"
             body="Create reusable message templates for tenant notices, landlord updates, and more."

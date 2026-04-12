@@ -108,7 +108,7 @@ export function TenancyDetailClient({ tenancyId }: { tenancyId: string }) {
   ])
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in-up">
       {/* Back link + header */}
       <div>
         <Link
@@ -137,8 +137,8 @@ export function TenancyDetailClient({ tenancyId }: { tenancyId: string }) {
         {/* Main column */}
         <div className="space-y-6">
           {/* Tenant & landlord */}
-          <section className="rounded-lg border border-zinc-200 bg-white">
-            <div className="border-b border-zinc-200 px-5 py-3">
+          <section className="rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm backdrop-blur-sm">
+            <div className="border-b border-zinc-200/60 px-5 py-3">
               <h3 className="text-sm font-semibold text-zinc-950">Residents</h3>
             </div>
             <div className="px-5">
@@ -156,8 +156,8 @@ export function TenancyDetailClient({ tenancyId }: { tenancyId: string }) {
           </section>
 
           {/* Property */}
-          <section className="rounded-lg border border-zinc-200 bg-white">
-            <div className="border-b border-zinc-200 px-5 py-3">
+          <section className="rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm backdrop-blur-sm">
+            <div className="border-b border-zinc-200/60 px-5 py-3">
               <h3 className="text-sm font-semibold text-zinc-950">Property</h3>
             </div>
             <div className="px-5">
@@ -175,8 +175,8 @@ export function TenancyDetailClient({ tenancyId }: { tenancyId: string }) {
           </section>
 
           {/* Tenancy period */}
-          <section className="rounded-lg border border-zinc-200 bg-white">
-            <div className="border-b border-zinc-200 px-5 py-3">
+          <section className="rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm backdrop-blur-sm">
+            <div className="border-b border-zinc-200/60 px-5 py-3">
               <h3 className="text-sm font-semibold text-zinc-950">Tenancy period</h3>
             </div>
             <div className="px-5">
@@ -204,8 +204,8 @@ export function TenancyDetailClient({ tenancyId }: { tenancyId: string }) {
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Deposit */}
-          <section className="rounded-lg border border-zinc-200 bg-white">
-            <div className="border-b border-zinc-200 px-5 py-3">
+          <section className="rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm backdrop-blur-sm">
+            <div className="border-b border-zinc-200/60 px-5 py-3">
               <h3 className="text-sm font-semibold text-zinc-950">Deposit</h3>
             </div>
             <div className="px-5">
@@ -230,8 +230,8 @@ export function TenancyDetailClient({ tenancyId }: { tenancyId: string }) {
           </section>
 
           {/* Checkout / Case */}
-          <section className="rounded-lg border border-zinc-200 bg-white">
-            <div className="border-b border-zinc-200 px-5 py-3">
+          <section className="rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm backdrop-blur-sm">
+            <div className="border-b border-zinc-200/60 px-5 py-3">
               <h3 className="text-sm font-semibold text-zinc-950">Checkout</h3>
             </div>
             <div className="px-5 py-4">

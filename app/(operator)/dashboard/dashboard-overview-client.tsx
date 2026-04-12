@@ -7,7 +7,6 @@ import {
   ArrowRight,
   ArrowUpRight,
   Building2,
-  Calendar,
   ClipboardCheck,
   Clock,
   Eye,
@@ -15,14 +14,13 @@ import {
   PoundSterling,
   RefreshCcw,
   Scale,
-  TrendingUp,
   UserX,
   Zap,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useEotTenancies, useEotCases } from '@/lib/queries/eot-queries'
 import type { EotTenancyListItem, EotCaseListItem } from '@/lib/eot-types'
-import { KPIStatCard, SkeletonPanel } from '@/app/operator-ui'
+import { SkeletonPanel } from '@/app/operator-ui'
 import {
   formatCurrency,
   formatDate,
@@ -113,7 +111,7 @@ function GreetingHeader({
   onRefresh: () => void
 }) {
   return (
-    <div className="animate-fade-in-up relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 px-6 py-6 text-white shadow-lg md:px-8 md:py-8">
+    <div className="dark-header animate-fade-in-up relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 px-6 py-6 text-white shadow-lg md:px-8 md:py-8">
       <div className="absolute inset-0 dot-pattern opacity-30" />
       <div className="absolute -right-16 -top-16 h-56 w-56 rounded-full bg-emerald-500/10 blur-3xl" />
       <div className="absolute -bottom-12 -left-12 h-40 w-40 rounded-full bg-emerald-400/8 blur-2xl" />
@@ -203,48 +201,6 @@ function QuickStat({
           {value}
         </span>
         {suffix ? <span className="text-[10px] text-zinc-500">{suffix}</span> : null}
-      </div>
-    </div>
-  )
-}
-
-function StatCards({ stats }: { stats: DashboardStats }) {
-  return (
-    <div className="animate-fade-in-up grid grid-cols-2 gap-3 md:grid-cols-4" style={{ animationDelay: '80ms' }}>
-      <div className="stat-card-gradient rounded-2xl px-5 py-4">
-        <KPIStatCard
-          label="Total tenancies"
-          value={stats.totalTenancies}
-          icon={<Building2 className="h-4 w-4" />}
-          tone="default"
-        />
-      </div>
-      <div className="stat-card-gradient stat-card-emerald rounded-2xl px-5 py-4">
-        <KPIStatCard
-          label="Active tenancies"
-          value={stats.activeTenancies}
-          icon={<TrendingUp className="h-4 w-4" />}
-          tone="accent"
-        />
-      </div>
-      <div className={cn(
-        'stat-card-gradient rounded-2xl px-5 py-4',
-        stats.endingSoon > 0 && 'stat-card-amber',
-      )}>
-        <KPIStatCard
-          label="Ending within 30d"
-          value={stats.endingSoon}
-          icon={<Calendar className="h-4 w-4" />}
-          tone={stats.endingSoon > 0 ? 'warning' : 'default'}
-        />
-      </div>
-      <div className="stat-card-gradient rounded-2xl px-5 py-4">
-        <KPIStatCard
-          label="Deposit value"
-          value={formatCurrency(stats.totalDepositValue)}
-          icon={<PoundSterling className="h-4 w-4" />}
-          tone="default"
-        />
       </div>
     </div>
   )
@@ -623,12 +579,6 @@ export function DashboardOverviewClient({
     return (
       <div className="space-y-4">
         <SkeletonPanel className="h-[180px]" />
-        <div className="grid gap-3 md:grid-cols-4">
-          <SkeletonPanel className="h-24" />
-          <SkeletonPanel className="h-24" />
-          <SkeletonPanel className="h-24" />
-          <SkeletonPanel className="h-24" />
-        </div>
         <div className="grid gap-3 sm:grid-cols-3">
           <SkeletonPanel className="h-28" />
           <SkeletonPanel className="h-28" />
@@ -642,7 +592,6 @@ export function DashboardOverviewClient({
   return (
     <div className="space-y-5">
       <GreetingHeader stats={stats} refreshing={refreshing} onRefresh={handleRefresh} />
-      <StatCards stats={stats} />
       <CaseSummaryCards stats={stats} />
       <NeedsAttentionWidget cases={cases} />
       <EndingSoonTable tenancies={tenancies} />
