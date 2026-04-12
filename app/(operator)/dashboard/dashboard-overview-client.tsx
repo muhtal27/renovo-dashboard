@@ -325,31 +325,31 @@ function CommandHeader({
   onRefresh: () => void
 }) {
   return (
-    <div className="dark-header animate-fade-in-up relative overflow-hidden rounded-2xl border border-zinc-200/60 bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 px-6 py-6 text-white shadow-lg md:px-8 md:py-8">
-      <div className="absolute inset-0 dot-pattern opacity-30" />
-      <div className="absolute -right-16 -top-16 h-56 w-56 rounded-full bg-emerald-500/10 blur-3xl" />
-      <div className="absolute -bottom-12 -left-12 h-40 w-40 rounded-full bg-emerald-400/8 blur-2xl" />
+    <div className="dark-header animate-fade-in-up relative overflow-hidden rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-8 md:py-8">
+      <div className="absolute inset-0 opacity-0" />
+      <div className="absolute -right-16 -top-16 h-56 w-56 opacity-0" />
+      <div className="absolute -bottom-12 -left-12 h-40 w-40 opacity-0" />
 
       <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-white md:text-2xl">
+          <h1 className="text-xl font-bold tracking-tight text-zinc-900 md:text-2xl">
             {getGreeting()}
           </h1>
-          <p className="mt-1 text-sm text-zinc-400">
-            Your operations command centre &mdash; everything at a glance
+          <p className="mt-1 text-sm text-zinc-500">
+            Your portfolio overview for today
           </p>
         </div>
         <div className="flex items-center gap-2 self-start">
           <Link
             href="/tenancies"
-            className="inline-flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-sm font-medium text-emerald-400 backdrop-blur-sm transition hover:border-emerald-500/50 hover:bg-emerald-500/20"
+            className="inline-flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700 transition hover:bg-emerald-100"
           >
             <ClipboardCheck className="h-3.5 w-3.5" />
             Start Checkout
           </Link>
           <Link
             href="/reports"
-            className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-white/70 backdrop-blur-sm transition hover:border-white/20 hover:bg-white/10"
+            className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-50 hover:text-zinc-900"
           >
             <BarChart3 className="h-3.5 w-3.5" />
             Reports
@@ -393,9 +393,9 @@ function QuickStat({
   warning?: boolean
 }) {
   return (
-    <div className="rounded-xl border border-white/8 bg-white/5 px-3.5 py-3 backdrop-blur-sm">
+    <div className="rounded-lg border border-zinc-200 bg-zinc-50 px-3.5 py-3">
       <div className="flex items-center gap-1.5">
-        <span className={cn('text-zinc-500', accent && 'text-emerald-400', warning && 'text-amber-400')}>
+        <span className={cn('text-zinc-400', accent && 'text-emerald-600', warning && 'text-amber-600')}>
           {icon}
         </span>
         <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">{label}</span>
@@ -441,7 +441,7 @@ function CasePipeline({
 
   return (
     <div
-      className="animate-fade-in-up overflow-hidden rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm backdrop-blur-sm"
+      className="animate-fade-in-up overflow-hidden rounded-xl border border-zinc-200 bg-white"
       style={{ animationDelay: '80ms' }}
     >
       <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-3.5">
@@ -673,7 +673,7 @@ function ActionCenter({ items }: { items: ActionItem[] }) {
 
   return (
     <div
-      className="animate-fade-in-up overflow-hidden rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm backdrop-blur-sm"
+      className="animate-fade-in-up overflow-hidden rounded-xl border border-zinc-200 bg-white"
       style={{ animationDelay: '240ms' }}
     >
       <div className="border-b border-zinc-100 px-5 py-3.5">
@@ -818,7 +818,7 @@ function TenancyLifecycle({ tenancies }: { tenancies: EotTenancyListItem[] }) {
 
   return (
     <div
-      className="animate-fade-in-up overflow-hidden rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm backdrop-blur-sm"
+      className="animate-fade-in-up overflow-hidden rounded-xl border border-zinc-200 bg-white"
       style={{ animationDelay: '320ms' }}
     >
       <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-3.5">
@@ -950,7 +950,7 @@ function RecentCasesTable({
 
   return (
     <div
-      className="animate-fade-in-up overflow-hidden rounded-2xl border border-zinc-200/60 bg-white/80 shadow-sm backdrop-blur-sm"
+      className="animate-fade-in-up overflow-hidden rounded-xl border border-zinc-200 bg-white"
       style={{ animationDelay: '400ms' }}
     >
       <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-3.5">
