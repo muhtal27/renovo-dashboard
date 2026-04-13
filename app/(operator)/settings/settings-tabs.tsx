@@ -11,44 +11,44 @@ function AccountTab() {
   return (
     <div className="space-y-6">
       {/* Basic information */}
-      <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
-        <h3 className="text-[13px] font-semibold text-zinc-900">Basic information</h3>
+      <section className="rounded-[10px] border border-zinc-200 bg-white p-5">
+        <h3 className="text-sm font-semibold text-zinc-900">Basic information</h3>
         <p className="mt-1 text-[13px] text-zinc-500">
           Your personal details used across the workspace.
         </p>
 
         <div className="mt-5 max-w-md space-y-4">
           <div>
-            <label htmlFor="first-name" className="block text-[11px] font-medium text-zinc-500">
+            <label htmlFor="first-name" className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
               First name
             </label>
             <input
               id="first-name"
               type="text"
               placeholder="First name"
-              className="mt-1 h-[34px] w-full rounded-lg border border-zinc-200 bg-white px-3 text-[13px] text-zinc-700 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
+              className="mt-1 h-10 w-full rounded-[10px] border border-zinc-200 bg-white px-3 text-[13px] text-zinc-900 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
             />
           </div>
           <div>
-            <label htmlFor="last-name" className="block text-[11px] font-medium text-zinc-500">
+            <label htmlFor="last-name" className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
               Last name
             </label>
             <input
               id="last-name"
               type="text"
               placeholder="Last name"
-              className="mt-1 h-[34px] w-full rounded-lg border border-zinc-200 bg-white px-3 text-[13px] text-zinc-700 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
+              className="mt-1 h-10 w-full rounded-[10px] border border-zinc-200 bg-white px-3 text-[13px] text-zinc-900 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
             />
           </div>
           <div>
-            <label htmlFor="email" className="block text-[11px] font-medium text-zinc-500">
+            <label htmlFor="email" className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
               Email
             </label>
             <input
               id="email"
               type="email"
               placeholder="you@company.co.uk"
-              className="mt-1 h-[34px] w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-[13px] text-zinc-500 placeholder:text-zinc-400"
+              className="mt-1 h-10 w-full rounded-[10px] border border-zinc-200 bg-zinc-50 px-3 text-[13px] text-zinc-600 placeholder:text-zinc-400"
               disabled
             />
             <p className="mt-1 text-xs text-zinc-400">
@@ -56,7 +56,7 @@ function AccountTab() {
             </p>
           </div>
 
-          <div className="flex items-center justify-between rounded-lg border border-zinc-100/80 bg-zinc-50 px-4 py-3">
+          <div className="flex items-center justify-between rounded-[10px] border border-zinc-100/80 bg-zinc-50 px-4 py-3">
             <div>
               <p className="text-[13px] font-medium text-zinc-900">Receive email notifications</p>
               <p className="text-xs text-zinc-500">Get notified about case updates and team activity.</p>
@@ -73,7 +73,7 @@ function AccountTab() {
 
           <button
             type="button"
-            className="rounded-lg bg-emerald-600 px-4 py-2 text-[13px] font-medium text-white transition hover:bg-emerald-700"
+            className="rounded-[10px] bg-zinc-900 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-zinc-800"
           >
             Update profile
           </button>
@@ -81,50 +81,50 @@ function AccountTab() {
       </section>
 
       {/* Change password */}
-      <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
-        <h3 className="text-[13px] font-semibold text-zinc-900">Change password</h3>
+      <section className="rounded-[10px] border border-zinc-200 bg-white p-5">
+        <h3 className="text-sm font-semibold text-zinc-900">Change password</h3>
         <p className="mt-1 text-[13px] text-zinc-500">
           Update your workspace password. You'll need to confirm your current password first.
         </p>
 
         <div className="mt-5 max-w-md space-y-4">
           <div>
-            <label htmlFor="current-password" className="block text-[11px] font-medium text-zinc-500">
+            <label htmlFor="current-password" className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
               Current password
             </label>
             <input
               id="current-password"
               type="password"
               placeholder="Enter current password"
-              className="mt-1 h-[34px] w-full rounded-lg border border-zinc-200 bg-white px-3 text-[13px] text-zinc-700 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
+              className="mt-1 h-10 w-full rounded-[10px] border border-zinc-200 bg-white px-3 text-[13px] text-zinc-900 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
             />
           </div>
           <div>
-            <label htmlFor="new-password" className="block text-[11px] font-medium text-zinc-500">
+            <label htmlFor="new-password" className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
               New password
             </label>
             <input
               id="new-password"
               type="password"
               placeholder="Enter new password"
-              className="mt-1 h-[34px] w-full rounded-lg border border-zinc-200 bg-white px-3 text-[13px] text-zinc-700 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
+              className="mt-1 h-10 w-full rounded-[10px] border border-zinc-200 bg-white px-3 text-[13px] text-zinc-900 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
             />
           </div>
           <div>
-            <label htmlFor="confirm-password" className="block text-[11px] font-medium text-zinc-500">
+            <label htmlFor="confirm-password" className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
               Confirm new password
             </label>
             <input
               id="confirm-password"
               type="password"
               placeholder="Confirm new password"
-              className="mt-1 h-[34px] w-full rounded-lg border border-zinc-200 bg-white px-3 text-[13px] text-zinc-700 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
+              className="mt-1 h-10 w-full rounded-[10px] border border-zinc-200 bg-white px-3 text-[13px] text-zinc-900 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
             />
           </div>
 
           <button
             type="button"
-            className="rounded-lg bg-zinc-900 px-4 py-2 text-[13px] font-medium text-white transition hover:bg-zinc-800"
+            className="rounded-[10px] bg-zinc-900 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-zinc-800"
           >
             Update password
           </button>
@@ -132,20 +132,20 @@ function AccountTab() {
       </section>
 
       {/* Two-factor authentication */}
-      <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
+      <section className="rounded-[10px] border border-zinc-200 bg-white p-5">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h3 className="text-[13px] font-semibold text-zinc-900">Two-factor authentication</h3>
+            <h3 className="text-sm font-semibold text-zinc-900">Two-factor authentication</h3>
             <p className="mt-1 text-[13px] text-zinc-500">
               Add an extra layer of security to your account.
             </p>
           </div>
-          <span className="shrink-0 rounded-full bg-zinc-100 px-2.5 py-0.5 text-[11px] font-semibold text-zinc-600">
+          <span className="shrink-0 rounded-full border border-zinc-200 bg-zinc-100 px-2.5 py-0.5 text-[11px] font-semibold text-zinc-700">
             Not enabled
           </span>
         </div>
 
-        <div className="mt-5 rounded-lg border border-zinc-100/80 bg-zinc-50 px-4 py-3 text-[13px] text-zinc-500">
+        <div className="mt-5 rounded-[10px] border border-zinc-100/80 bg-zinc-50 px-4 py-3 text-[13px] text-zinc-500">
           Two-factor authentication is not yet configured for this account.
         </div>
       </section>
@@ -170,17 +170,17 @@ function TeamTab() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
+      <section className="rounded-[10px] border border-zinc-200 bg-white p-5">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h3 className="text-[13px] font-semibold text-zinc-900">Your team</h3>
+            <h3 className="text-sm font-semibold text-zinc-900">Your team</h3>
             <p className="mt-1 text-[13px] text-zinc-500">
               Manage workspace members, roles, and permissions.
             </p>
           </div>
           <button
             type="button"
-            className="rounded-lg bg-emerald-600 px-4 py-2 text-[13px] font-medium text-white transition hover:bg-emerald-700"
+            className="rounded-[10px] bg-zinc-900 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-zinc-800"
           >
             Invite user
           </button>
@@ -190,21 +190,21 @@ function TeamTab() {
           <input
             type="search"
             placeholder="Search for users"
-            className="h-[34px] w-[200px] rounded-lg border border-zinc-200 bg-white px-3 text-[13px] text-zinc-700 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
+            className="h-10 w-[200px] rounded-[10px] border border-zinc-200 bg-white px-3 text-[13px] text-zinc-900 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
           />
         </div>
 
-        <div className="mt-5 flex flex-wrap items-center gap-1.5">
+        <div className="mt-5 flex gap-0 overflow-x-auto border-b border-zinc-200">
           {TEAM_SUB_TABS.map((tab) => (
             <button
               key={tab}
               type="button"
               onClick={() => setActiveSubTab(tab)}
               className={cn(
-                'rounded-full px-3 py-1 text-xs font-medium transition',
+                'whitespace-nowrap px-[18px] py-2.5 text-[13px] font-medium transition border-b-2',
                 activeSubTab === tab
-                  ? 'bg-zinc-900 text-white'
-                  : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
+                  ? 'border-zinc-900 text-zinc-900'
+                  : 'border-transparent text-zinc-500 hover:text-zinc-900'
               )}
             >
               {tab}
@@ -232,7 +232,7 @@ function TeamTab() {
                     <td className="py-3 pr-4 text-zinc-600">{member.joined}</td>
                     <td className="py-3 pr-4 text-zinc-600">{member.role}</td>
                     <td className="py-3">
-                      <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700">
+                      <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700">
                         {member.status}
                       </span>
                     </td>
@@ -241,7 +241,7 @@ function TeamTab() {
               </tbody>
             </table>
           ) : (
-            <div className="rounded-lg border border-zinc-100/80 bg-zinc-50 px-4 py-6 text-center text-[13px] text-zinc-500">
+            <div className="rounded-[10px] border border-zinc-100/80 bg-zinc-50 px-4 py-6 text-center text-[13px] text-zinc-500">
               No {activeSubTab.toLowerCase()} to display.
             </div>
           )}
@@ -542,7 +542,7 @@ function UnmatchedEmailCard({
 
   if (resolved) {
     return (
-      <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3">
+      <div className="rounded-[10px] border border-emerald-200 bg-emerald-50 px-4 py-3">
         <p className="text-xs font-medium text-emerald-700">
           Resolved — email attached to tenancy.
         </p>
@@ -551,11 +551,11 @@ function UnmatchedEmailCard({
   }
 
   return (
-    <div className="rounded-lg border border-amber-200 bg-white px-4 py-4">
+    <div className="rounded-[10px] border border-amber-200 bg-white px-4 py-4">
       {/* Email details */}
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 space-y-1">
-          <p className="text-[13px] font-semibold text-zinc-900">
+          <p className="text-sm font-semibold text-zinc-900">
             {item.subject || '(no subject)'}
           </p>
           <p className="text-xs text-zinc-500">
@@ -575,7 +575,7 @@ function UnmatchedEmailCard({
 
       {/* Tenancy selector */}
       <div className="mt-4">
-        <label className="block text-[11px] font-medium text-zinc-500">
+        <label className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
           Assign to tenancy
         </label>
         <input
@@ -586,14 +586,14 @@ function UnmatchedEmailCard({
             setTenancySearch(e.target.value)
             setSelectedTenancy(null)
           }}
-          className="mt-1 h-[34px] w-full rounded-lg border border-zinc-200 bg-white px-3 text-[13px] text-zinc-700 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
+          className="mt-1 h-10 w-full rounded-[10px] border border-zinc-200 bg-white px-3 text-[13px] text-zinc-900 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
         />
 
         {/* Results */}
         {searchLoading ? (
           <p className="mt-2 text-xs text-zinc-400">Loading tenancies...</p>
         ) : filteredOptions.length > 0 && !selectedTenancy ? (
-          <div className="mt-1 max-h-40 overflow-y-auto rounded-lg border border-zinc-200 bg-white">
+          <div className="mt-1 max-h-40 overflow-y-auto rounded-[10px] border border-zinc-200 bg-white">
             {filteredOptions.slice(0, 8).map((option) => (
               <button
                 key={option.id}
@@ -634,7 +634,7 @@ function UnmatchedEmailCard({
           type="button"
           onClick={handleResolve}
           disabled={!selectedTenancy || resolving}
-          className="rounded-lg bg-emerald-600 px-4 py-2 text-xs font-medium text-white transition hover:bg-emerald-700 disabled:opacity-50"
+          className="rounded-[10px] bg-emerald-600 px-4 py-2 text-xs font-medium text-white transition hover:bg-emerald-700 disabled:opacity-50"
         >
           {resolving ? 'Attaching...' : 'Attach to tenancy'}
         </button>
@@ -750,10 +750,10 @@ function EmailIngestionTab() {
   return (
     <div className="space-y-6">
       {/* Config section */}
-      <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
+      <section className="rounded-[10px] border border-zinc-200 bg-white p-5">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h3 className="text-[13px] font-semibold text-zinc-900">Email Ingestion</h3>
+            <h3 className="text-sm font-semibold text-zinc-900">Email Ingestion</h3>
             <p className="mt-1 text-[13px] text-zinc-500">
               Receive inventory reports and documents via email. Inventory providers
               send reports to your dedicated address and they are automatically
@@ -763,7 +763,7 @@ function EmailIngestionTab() {
           {config ? (
             <span
               className={cn(
-                'shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold',
+                'shrink-0 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold',
                 config.is_active
                   ? 'bg-emerald-50 text-emerald-700'
                   : 'bg-zinc-100 text-zinc-600'
@@ -772,27 +772,27 @@ function EmailIngestionTab() {
               {config.is_active ? 'Active' : 'Inactive'}
             </span>
           ) : (
-            <span className="shrink-0 rounded-full bg-zinc-100 px-2.5 py-0.5 text-[11px] font-semibold text-zinc-600">
+            <span className="shrink-0 rounded-full border border-zinc-200 bg-zinc-100 px-2.5 py-0.5 text-[11px] font-semibold text-zinc-700">
               Not configured
             </span>
           )}
         </div>
 
         {error ? (
-          <div className="mt-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-2.5 text-[13px] text-rose-700">
+          <div className="mt-4 rounded-[10px] border border-rose-200 bg-rose-50 px-4 py-2.5 text-[13px] text-rose-700">
             {error}
           </div>
         ) : null}
 
         {success ? (
-          <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-[13px] text-emerald-700">
+          <div className="mt-4 rounded-[10px] border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-[13px] text-emerald-700">
             {success}
           </div>
         ) : null}
 
         <div className="mt-5 max-w-lg space-y-4">
           <div>
-            <label htmlFor="email-prefix" className="block text-[11px] font-medium text-zinc-500">
+            <label htmlFor="email-prefix" className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
               Email address prefix
             </label>
             <div className="mt-1 flex items-center gap-0">
@@ -802,9 +802,9 @@ function EmailIngestionTab() {
                 value={prefix}
                 onChange={(e) => setPrefix(e.target.value)}
                 placeholder="reports"
-                className="h-[34px] w-48 rounded-l-lg border border-r-0 border-zinc-200 bg-white px-3 text-[13px] text-zinc-700 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
+                className="h-10 w-48 rounded-l-[10px] border border-r-0 border-zinc-200 bg-white px-3 text-[13px] text-zinc-900 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
               />
-              <span className="flex h-[34px] items-center rounded-r-lg border border-zinc-200 bg-zinc-50 px-3 text-[13px] text-zinc-500">
+              <span className="flex h-10 items-center rounded-r-[10px] border border-zinc-200 bg-zinc-50 px-3 text-[13px] text-zinc-600">
                 @in.renovoai.co.uk
               </span>
             </div>
@@ -814,7 +814,7 @@ function EmailIngestionTab() {
           </div>
 
           <div>
-            <label htmlFor="allowed-domains" className="block text-[11px] font-medium text-zinc-500">
+            <label htmlFor="allowed-domains" className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
               Allowed sender domains (optional)
             </label>
             <input
@@ -823,14 +823,14 @@ function EmailIngestionTab() {
               value={domains}
               onChange={(e) => setDomains(e.target.value)}
               placeholder="helloreport.co.uk, nolettinggo.co.uk"
-              className="mt-1 h-[34px] w-full rounded-lg border border-zinc-200 bg-white px-3 text-[13px] text-zinc-700 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
+              className="mt-1 h-10 w-full rounded-[10px] border border-zinc-200 bg-white px-3 text-[13px] text-zinc-900 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
             />
             <p className="mt-1 text-xs text-zinc-400">
               Comma-separated. Leave empty to accept from any sender.
             </p>
           </div>
 
-          <div className="flex items-center justify-between rounded-lg border border-zinc-100/80 bg-zinc-50 px-4 py-3">
+          <div className="flex items-center justify-between rounded-[10px] border border-zinc-100/80 bg-zinc-50 px-4 py-3">
             <div>
               <p className="text-[13px] font-medium text-zinc-900">Enable email ingestion</p>
               <p className="text-xs text-zinc-500">
@@ -862,7 +862,7 @@ function EmailIngestionTab() {
             type="button"
             onClick={handleSave}
             disabled={saving || !prefix.trim()}
-            className="rounded-lg bg-emerald-600 px-4 py-2 text-[13px] font-medium text-white transition hover:bg-emerald-700 disabled:opacity-50"
+            className="rounded-[10px] bg-zinc-900 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-zinc-800 disabled:opacity-50"
           >
             {saving ? 'Saving...' : config ? 'Update configuration' : 'Enable email ingestion'}
           </button>
@@ -870,8 +870,8 @@ function EmailIngestionTab() {
       </section>
 
       {/* How it works */}
-      <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
-        <h3 className="text-[13px] font-semibold text-zinc-900">How it works</h3>
+      <section className="rounded-[10px] border border-zinc-200 bg-white p-5">
+        <h3 className="text-sm font-semibold text-zinc-900">How it works</h3>
         <div className="mt-4 space-y-3">
           {[
             {
@@ -918,8 +918,8 @@ function EmailIngestionTab() {
 
       {/* Recent activity */}
       {logs.length > 0 ? (
-        <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
-          <h3 className="text-[13px] font-semibold text-zinc-900">Recent activity</h3>
+        <section className="rounded-[10px] border border-zinc-200 bg-white p-5">
+          <h3 className="text-sm font-semibold text-zinc-900">Recent activity</h3>
           <div className="mt-4 overflow-x-auto">
             <table className="w-full text-[13px]">
               <thead>
@@ -946,7 +946,7 @@ function EmailIngestionTab() {
                     <td className="py-2.5 pr-4">
                       <span
                         className={cn(
-                          'rounded-full px-2.5 py-0.5 text-[11px] font-semibold',
+                          'rounded-full border px-2.5 py-0.5 text-[11px] font-semibold',
                           statusColors[log.status] ?? 'bg-zinc-100 text-zinc-500'
                         )}
                       >
@@ -968,7 +968,7 @@ function EmailIngestionTab() {
           </div>
         </section>
       ) : config ? (
-        <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
+        <section className="rounded-[10px] border border-zinc-200 bg-white p-5">
           <p className="text-center text-[13px] text-zinc-400">
             No emails received yet. Send a test email to{' '}
             <span className="font-medium text-zinc-600">
@@ -1149,10 +1149,10 @@ function StreetIntegrationPanel() {
   return (
     <div className="space-y-6">
       {/* Connection config */}
-      <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
+      <section className="rounded-[10px] border border-zinc-200 bg-white p-5">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h3 className="text-[13px] font-semibold text-zinc-900">
+            <h3 className="text-sm font-semibold text-zinc-900">
               Street.co.uk Connection
             </h3>
             <p className="mt-1 text-[13px] text-zinc-500">
@@ -1161,7 +1161,7 @@ function StreetIntegrationPanel() {
           </div>
           <span
             className={cn(
-              'shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold',
+              'shrink-0 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold',
               connected
                 ? 'bg-emerald-50 text-emerald-700'
                 : 'bg-zinc-100 text-zinc-600'
@@ -1172,20 +1172,20 @@ function StreetIntegrationPanel() {
         </div>
 
         {error ? (
-          <div className="mt-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-2.5 text-[13px] text-rose-700">
+          <div className="mt-4 rounded-[10px] border border-rose-200 bg-rose-50 px-4 py-2.5 text-[13px] text-rose-700">
             {error}
           </div>
         ) : null}
 
         {success ? (
-          <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-[13px] text-emerald-700">
+          <div className="mt-4 rounded-[10px] border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-[13px] text-emerald-700">
             {success}
           </div>
         ) : null}
 
         <div className="mt-5 max-w-md space-y-4">
           <div>
-            <label htmlFor="street-label" className="block text-[11px] font-medium text-zinc-500">
+            <label htmlFor="street-label" className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
               Label (optional)
             </label>
             <input
@@ -1194,12 +1194,12 @@ function StreetIntegrationPanel() {
               value={label}
               onChange={(e) => setLabel(e.target.value)}
               placeholder="e.g. Main office"
-              className="mt-1 h-[34px] w-full rounded-lg border border-zinc-200 bg-white px-3 text-[13px] text-zinc-700 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
+              className="mt-1 h-10 w-full rounded-[10px] border border-zinc-200 bg-white px-3 text-[13px] text-zinc-900 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
             />
           </div>
 
           <div>
-            <label htmlFor="street-api-token" className="block text-[11px] font-medium text-zinc-500">
+            <label htmlFor="street-api-token" className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
               API Token
             </label>
             <input
@@ -1208,7 +1208,7 @@ function StreetIntegrationPanel() {
               value={apiToken}
               onChange={(e) => setApiToken(e.target.value)}
               placeholder={connected ? '••••••••••••••••' : 'Paste your Street.co.uk API token'}
-              className="mt-1 h-[34px] w-full rounded-lg border border-zinc-200 bg-white px-3 text-[13px] text-zinc-700 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
+              className="mt-1 h-10 w-full rounded-[10px] border border-zinc-200 bg-white px-3 text-[13px] text-zinc-900 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
             />
             <p className="mt-1 text-xs text-zinc-400">
               Find this in Street &gt; Settings &gt; Account Administration &gt; Applications.
@@ -1221,7 +1221,7 @@ function StreetIntegrationPanel() {
                 type="button"
                 onClick={handleSave}
                 disabled={saving || !apiToken.trim()}
-                className="rounded-lg bg-emerald-600 px-4 py-2 text-[13px] font-medium text-white transition hover:bg-emerald-700 disabled:opacity-50"
+                className="rounded-[10px] bg-zinc-900 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-zinc-800 disabled:opacity-50"
               >
                 {saving ? 'Connecting...' : 'Connect'}
               </button>
@@ -1229,7 +1229,7 @@ function StreetIntegrationPanel() {
               <button
                 type="button"
                 onClick={handleDisconnect}
-                className="rounded-lg border border-rose-200 bg-white px-4 py-2 text-[13px] font-medium text-rose-600 transition hover:bg-rose-50"
+                className="rounded-[10px] border border-rose-200 bg-rose-50 px-4 py-2 text-[13px] font-semibold text-rose-700 transition hover:bg-rose-100"
               >
                 Disconnect
               </button>
@@ -1240,10 +1240,10 @@ function StreetIntegrationPanel() {
 
       {/* Sync controls */}
       {connected ? (
-        <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
+        <section className="rounded-[10px] border border-zinc-200 bg-white p-5">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <h3 className="text-[13px] font-semibold text-zinc-900">Data sync</h3>
+              <h3 className="text-sm font-semibold text-zinc-900">Data sync</h3>
               <p className="mt-1 text-[13px] text-zinc-500">
                 Pull properties and tenancies from Street.co.uk into Renovo.
               </p>
@@ -1264,7 +1264,7 @@ function StreetIntegrationPanel() {
               type="button"
               onClick={handleSync}
               disabled={syncing}
-              className="rounded-lg bg-zinc-900 px-4 py-2 text-[13px] font-medium text-white transition hover:bg-zinc-800 disabled:opacity-50"
+              className="rounded-[10px] bg-zinc-900 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-zinc-800 disabled:opacity-50"
             >
               {syncing ? 'Syncing...' : 'Sync now'}
             </button>
@@ -1293,7 +1293,7 @@ function StreetIntegrationPanel() {
                       <td className="py-2.5 pr-4">
                         <span
                           className={cn(
-                            'rounded-full px-2.5 py-0.5 text-[11px] font-semibold',
+                            'rounded-full border px-2.5 py-0.5 text-[11px] font-semibold',
                             log.status === 'completed'
                               ? 'bg-emerald-50 text-emerald-700'
                               : log.status === 'failed'
@@ -1506,10 +1506,10 @@ function ReapitIntegrationPanel() {
   return (
     <div className="space-y-6">
       {/* Connection config */}
-      <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
+      <section className="rounded-[10px] border border-zinc-200 bg-white p-5">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h3 className="text-[13px] font-semibold text-zinc-900">
+            <h3 className="text-sm font-semibold text-zinc-900">
               Reapit Foundations
             </h3>
             <p className="mt-1 text-[13px] text-zinc-500">
@@ -1518,7 +1518,7 @@ function ReapitIntegrationPanel() {
           </div>
           <span
             className={cn(
-              'shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold',
+              'shrink-0 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold',
               connected
                 ? status?.connection?.health_status === 'healthy'
                   ? 'bg-emerald-50 text-emerald-700'
@@ -1535,13 +1535,13 @@ function ReapitIntegrationPanel() {
         </div>
 
         {error ? (
-          <div className="mt-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-2.5 text-[13px] text-rose-700">
+          <div className="mt-4 rounded-[10px] border border-rose-200 bg-rose-50 px-4 py-2.5 text-[13px] text-rose-700">
             {error}
           </div>
         ) : null}
 
         {success ? (
-          <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-[13px] text-emerald-700">
+          <div className="mt-4 rounded-[10px] border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-[13px] text-emerald-700">
             {success}
           </div>
         ) : null}
@@ -1549,7 +1549,7 @@ function ReapitIntegrationPanel() {
         {testResult ? (
           <div
             className={cn(
-              'mt-4 rounded-lg border px-4 py-2.5 text-[13px]',
+              'mt-4 rounded-[10px] border px-4 py-2.5 text-[13px]',
               testResult.ok
                 ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
                 : 'border-rose-200 bg-rose-50 text-rose-700'
@@ -1562,7 +1562,7 @@ function ReapitIntegrationPanel() {
         {!connected ? (
           <div className="mt-5 max-w-md space-y-4">
             <div>
-              <label htmlFor="reapit-customer-id" className="block text-[11px] font-medium text-zinc-500">
+              <label htmlFor="reapit-customer-id" className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
                 Reapit Customer ID
               </label>
               <input
@@ -1571,7 +1571,7 @@ function ReapitIntegrationPanel() {
                 value={customerId}
                 onChange={(e) => setCustomerId(e.target.value)}
                 placeholder="e.g. SBOX (sandbox) or your live customer ID"
-                className="mt-1 h-[34px] w-full rounded-lg border border-zinc-200 bg-white px-3 text-[13px] text-zinc-700 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
+                className="mt-1 h-10 w-full rounded-[10px] border border-zinc-200 bg-white px-3 text-[13px] text-zinc-900 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
               />
               <p className="mt-1 text-xs text-zinc-400">
                 First install Renovo from the Reapit AppMarket. Your Customer ID is shown in the Reapit Developer Portal under Installations.
@@ -1582,7 +1582,7 @@ function ReapitIntegrationPanel() {
               type="button"
               onClick={handleConnect}
               disabled={saving || !customerId.trim()}
-              className="rounded-lg bg-emerald-600 px-4 py-2 text-[13px] font-medium text-white transition hover:bg-emerald-700 disabled:opacity-50"
+              className="rounded-[10px] bg-zinc-900 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-zinc-800 disabled:opacity-50"
             >
               {saving ? 'Connecting...' : 'Connect'}
             </button>
@@ -1593,14 +1593,14 @@ function ReapitIntegrationPanel() {
               type="button"
               onClick={handleTest}
               disabled={testing}
-              className="rounded-lg border border-zinc-200 bg-white px-4 py-2 text-[13px] font-medium text-zinc-600 transition hover:bg-zinc-50 disabled:opacity-50"
+              className="rounded-[10px] border border-zinc-200 bg-white px-4 py-2 text-[13px] font-semibold text-zinc-700 transition hover:bg-zinc-50 disabled:opacity-50"
             >
               {testing ? 'Testing...' : 'Test connection'}
             </button>
             <button
               type="button"
               onClick={handleDisconnect}
-              className="rounded-lg border border-rose-200 bg-white px-4 py-2 text-[13px] font-medium text-rose-600 transition hover:bg-rose-50"
+              className="rounded-[10px] border border-rose-200 bg-rose-50 px-4 py-2 text-[13px] font-semibold text-rose-700 transition hover:bg-rose-100"
             >
               Disconnect
             </button>
@@ -1610,10 +1610,10 @@ function ReapitIntegrationPanel() {
 
       {/* Sync controls */}
       {connected && status?.connection ? (
-        <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
+        <section className="rounded-[10px] border border-zinc-200 bg-white p-5">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <h3 className="text-[13px] font-semibold text-zinc-900">Data sync</h3>
+              <h3 className="text-sm font-semibold text-zinc-900">Data sync</h3>
               <p className="mt-1 text-[13px] text-zinc-500">
                 Pull properties and tenancies from Reapit into Renovo.
               </p>
@@ -1634,7 +1634,7 @@ function ReapitIntegrationPanel() {
               type="button"
               onClick={handleSync}
               disabled={syncing}
-              className="rounded-lg bg-zinc-900 px-4 py-2 text-[13px] font-medium text-white transition hover:bg-zinc-800 disabled:opacity-50"
+              className="rounded-[10px] bg-zinc-900 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-zinc-800 disabled:opacity-50"
             >
               {syncing ? 'Syncing...' : 'Sync now'}
             </button>
@@ -1663,7 +1663,7 @@ function ReapitIntegrationPanel() {
                       <td className="py-2.5 pr-4">
                         <span
                           className={cn(
-                            'rounded-full px-2.5 py-0.5 text-[11px] font-semibold',
+                            'rounded-full border px-2.5 py-0.5 text-[11px] font-semibold',
                             log.status === 'completed'
                               ? 'bg-emerald-50 text-emerald-700'
                               : log.status === 'failed'
@@ -1717,23 +1717,23 @@ function IntegrationsTab() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
-        <h3 className="text-[13px] font-semibold text-zinc-900">Integrations</h3>
+      <section className="rounded-[10px] border border-zinc-200 bg-white p-5">
+        <h3 className="text-sm font-semibold text-zinc-900">Integrations</h3>
         <p className="mt-1 text-[13px] text-zinc-500">
           Connect your property management tools and inventory software.
         </p>
 
-        <div className="mt-5 flex flex-wrap items-center gap-1.5">
+        <div className="mt-5 flex gap-0 overflow-x-auto border-b border-zinc-200">
           {INTEGRATION_LIST.map((integration) => (
             <button
               key={integration.name}
               type="button"
               onClick={() => setActiveIntegration(integration.name)}
               className={cn(
-                'rounded-full px-3 py-1 text-xs font-medium transition',
+                'shrink-0 whitespace-nowrap px-[18px] py-2.5 text-[13px] font-medium transition border-b-2',
                 activeIntegration === integration.name
-                  ? 'bg-zinc-900 text-white'
-                  : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
+                  ? 'border-zinc-900 text-zinc-900'
+                  : 'border-transparent text-zinc-500 hover:text-zinc-900'
               )}
             >
               {integration.name}
@@ -1747,10 +1747,10 @@ function IntegrationsTab() {
       ) : isReapit ? (
         <ReapitIntegrationPanel />
       ) : isDepositScheme ? (
-        <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
+        <section className="rounded-[10px] border border-zinc-200 bg-white p-5">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h3 className="text-[13px] font-semibold text-zinc-900">
+              <h3 className="text-sm font-semibold text-zinc-900">
                 {selected.name} Integration
               </h3>
               <p className="mt-1 text-[13px] text-zinc-500">{selected.description}</p>
@@ -1773,7 +1773,7 @@ function IntegrationsTab() {
             ))}
           </div>
 
-          <div className="mt-6 rounded-lg border border-amber-200 bg-amber-50/50 p-4">
+          <div className="mt-6 rounded-[10px] border border-amber-200 bg-amber-50/50 p-4">
             <p className="text-[13px] font-medium text-amber-800">API access pending</p>
             <p className="mt-1 text-[13px] text-amber-700">
               Direct integration with {selected.name} requires API access from the scheme provider.
@@ -1785,15 +1785,15 @@ function IntegrationsTab() {
       ) : (
         <>
           {/* Feature list for non-Street integrations */}
-          <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
+          <section className="rounded-[10px] border border-zinc-200 bg-white p-5">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h3 className="text-[13px] font-semibold text-zinc-900">
+                <h3 className="text-sm font-semibold text-zinc-900">
                   {selected.name} Integration
                 </h3>
                 <p className="mt-1 text-[13px] text-zinc-500">{selected.description}</p>
               </div>
-              <span className="shrink-0 rounded-full bg-zinc-100 px-2.5 py-0.5 text-[11px] font-semibold text-zinc-600">
+              <span className="shrink-0 rounded-full border border-zinc-200 bg-zinc-100 px-2.5 py-0.5 text-[11px] font-semibold text-zinc-700">
                 Not configured
               </span>
             </div>
@@ -1813,31 +1813,31 @@ function IntegrationsTab() {
 
             <div className="mt-6 max-w-md space-y-4">
               <div>
-                <label htmlFor="api-key" className="block text-[11px] font-medium text-zinc-500">
+                <label htmlFor="api-key" className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
                   API Key
                 </label>
                 <input
                   id="api-key"
                   type="text"
                   placeholder="Enter your API key"
-                  className="mt-1 h-[34px] w-full rounded-lg border border-zinc-200 bg-white px-3 text-[13px] text-zinc-700 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
+                  className="mt-1 h-10 w-full rounded-[10px] border border-zinc-200 bg-white px-3 text-[13px] text-zinc-900 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
                 />
               </div>
 
               <div>
-                <label htmlFor="integration-status" className="block text-[11px] font-medium text-zinc-500">
+                <label htmlFor="integration-status" className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
                   Integration status
                 </label>
                 <select
                   id="integration-status"
-                  className="mt-1 h-[34px] w-full rounded-lg border border-zinc-200 bg-white px-3 text-[13px] text-zinc-700 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
+                  className="mt-1 h-10 w-full rounded-[10px] border border-zinc-200 bg-white px-3 text-[13px] text-zinc-900 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
                 >
                   <option>Inactive</option>
                   <option>Active</option>
                 </select>
               </div>
 
-              <div className="flex items-center justify-between rounded-lg border border-zinc-100/80 bg-zinc-50 px-4 py-3">
+              <div className="flex items-center justify-between rounded-[10px] border border-zinc-100/80 bg-zinc-50 px-4 py-3">
                 <div>
                   <p className="text-[13px] font-medium text-zinc-900">Automatically sync properties overnight</p>
                   <p className="text-xs text-zinc-500">Keep property data in sync with your PMS.</p>
@@ -2164,17 +2164,17 @@ function AutomationTab() {
   return (
     <div className="space-y-6">
       {/* Sub-tabs */}
-      <div className="flex flex-wrap items-center gap-1.5">
+      <div className="flex gap-0 overflow-x-auto border-b border-zinc-200">
         {AUTOMATION_SUB_TABS.map((tab) => (
           <button
             key={tab}
             type="button"
             onClick={() => setSubTab(tab)}
             className={cn(
-              'rounded-full px-3 py-1 text-xs font-medium transition',
+              'whitespace-nowrap px-[18px] py-2.5 text-[13px] font-medium transition border-b-2',
               subTab === tab
-                ? 'bg-zinc-900 text-white'
-                : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
+                ? 'border-zinc-900 text-zinc-900'
+                : 'border-transparent text-zinc-500 hover:text-zinc-900'
             )}
           >
             {tab}
@@ -2184,12 +2184,12 @@ function AutomationTab() {
 
       {/* Alerts */}
       {error && (
-        <div className="rounded-lg rounded-lg border border-rose-200 bg-rose-50 px-4 py-2.5 text-[13px] text-rose-700">
+        <div className="rounded-[10px] border border-rose-200 bg-rose-50 px-4 py-2.5 text-[13px] text-rose-700">
           {error}
         </div>
       )}
       {success && (
-        <div className="rounded-lg rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-[13px] text-emerald-700">
+        <div className="rounded-[10px] border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-[13px] text-emerald-700">
           {success}
         </div>
       )}
@@ -2197,10 +2197,10 @@ function AutomationTab() {
       {subTab === 'Rules' && (
         <>
           {/* Rules list */}
-          <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
+          <section className="rounded-[10px] border border-zinc-200 bg-white p-5">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-[13px] font-semibold text-zinc-900">Automation Rules</h3>
+                <h3 className="text-sm font-semibold text-zinc-900">Automation Rules</h3>
                 <p className="mt-1 text-[13px] text-zinc-500">
                   Rules trigger actions automatically when events occur.
                 </p>
@@ -2211,14 +2211,14 @@ function AutomationTab() {
                   resetForm()
                   setShowCreateForm(true)
                 }}
-                className="rounded-lg bg-emerald-600 px-4 py-2 text-[13px] font-medium text-white transition hover:bg-emerald-700"
+                className="rounded-[10px] bg-zinc-900 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-zinc-800"
               >
                 Create rule
               </button>
             </div>
 
             {rules.length === 0 && !showCreateForm ? (
-              <div className="mt-6 rounded-lg border border-zinc-100/80 bg-zinc-50 px-4 py-8 text-center">
+              <div className="mt-6 rounded-[10px] border border-zinc-100/80 bg-zinc-50 px-4 py-8 text-center">
                 <p className="text-[13px] font-medium text-zinc-600">No automation rules yet</p>
                 <p className="mt-1 text-[13px] text-zinc-400">
                   Create a rule or activate a template below to get started.
@@ -2310,27 +2310,27 @@ function AutomationTab() {
 
           {/* Create/Edit form */}
           {showCreateForm && (
-            <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
-              <h3 className="text-[13px] font-semibold text-zinc-900">
+            <section className="rounded-[10px] border border-zinc-200 bg-white p-5">
+              <h3 className="text-sm font-semibold text-zinc-900">
                 {editingRuleId ? 'Edit Rule' : 'Create Rule'}
               </h3>
 
               <div className="mt-5 max-w-lg space-y-4">
                 {/* Name */}
                 <div>
-                  <label className="block text-[11px] font-medium text-zinc-500">Rule name</label>
+                  <label className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Rule name</label>
                   <input
                     type="text"
                     value={formName}
                     onChange={(e) => setFormName(e.target.value)}
                     placeholder="e.g., Auto-create case on checkout"
-                    className="mt-1 h-[34px] w-full rounded-lg border border-zinc-200 bg-white px-3 text-[13px] text-zinc-700 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
+                    className="mt-1 h-10 w-full rounded-[10px] border border-zinc-200 bg-white px-3 text-[13px] text-zinc-900 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
                   />
                 </div>
 
                 {/* Description */}
                 <div>
-                  <label className="block text-[11px] font-medium text-zinc-500">
+                  <label className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
                     Description (optional)
                   </label>
                   <input
@@ -2338,17 +2338,17 @@ function AutomationTab() {
                     value={formDescription}
                     onChange={(e) => setFormDescription(e.target.value)}
                     placeholder="What does this rule do?"
-                    className="mt-1 h-[34px] w-full rounded-lg border border-zinc-200 bg-white px-3 text-[13px] text-zinc-700 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
+                    className="mt-1 h-10 w-full rounded-[10px] border border-zinc-200 bg-white px-3 text-[13px] text-zinc-900 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
                   />
                 </div>
 
                 {/* Trigger */}
                 <div>
-                  <label className="block text-[11px] font-medium text-zinc-500">When this happens</label>
+                  <label className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">When this happens</label>
                   <select
                     value={formTrigger}
                     onChange={(e) => setFormTrigger(e.target.value)}
-                    className="mt-1 h-[34px] w-full rounded-lg border border-zinc-200 bg-white px-3 text-[13px] text-zinc-700 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
+                    className="mt-1 h-10 w-full rounded-[10px] border border-zinc-200 bg-white px-3 text-[13px] text-zinc-900 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
                   >
                     <option value="">Select trigger...</option>
                     {Object.entries(TRIGGER_LABELS).map(([value, label]) => (
@@ -2362,7 +2362,7 @@ function AutomationTab() {
                 {/* Conditions */}
                 <div>
                   <div className="flex items-center justify-between">
-                    <label className="block text-[11px] font-medium text-zinc-500">
+                    <label className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
                       Only if (conditions)
                     </label>
                     {formConditions.length < 3 && (
@@ -2385,7 +2385,7 @@ function AutomationTab() {
                       <select
                         value={cond.type}
                         onChange={(e) => updateCondition(idx, 'type', e.target.value)}
-                        className="h-[34px] flex-1 rounded-lg border border-zinc-200 bg-white px-2 text-[13px] text-zinc-700"
+                        className="h-10 flex-1 rounded-[10px] border border-zinc-200 bg-white px-2 text-[13px] text-zinc-700"
                       >
                         <option value="">Select condition...</option>
                         {Object.entries(CONDITION_LABELS).map(([value, label]) => (
@@ -2422,7 +2422,7 @@ function AutomationTab() {
                                 ? 'review'
                                 : 'value'
                           }
-                          className="h-[34px] w-28 rounded-lg border border-zinc-200 bg-white px-2 text-[13px] text-zinc-700"
+                          className="h-10 w-28 rounded-[10px] border border-zinc-200 bg-white px-2 text-[13px] text-zinc-700"
                         />
                       )}
                       <button
@@ -2438,14 +2438,14 @@ function AutomationTab() {
 
                 {/* Action */}
                 <div>
-                  <label className="block text-[11px] font-medium text-zinc-500">Then do this</label>
+                  <label className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Then do this</label>
                   <select
                     value={formAction}
                     onChange={(e) => {
                       setFormAction(e.target.value)
                       setFormActionParams({})
                     }}
-                    className="mt-1 h-[34px] w-full rounded-lg border border-zinc-200 bg-white px-3 text-[13px] text-zinc-700 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
+                    className="mt-1 h-10 w-full rounded-[10px] border border-zinc-200 bg-white px-3 text-[13px] text-zinc-900 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
                   >
                     <option value="">Select action...</option>
                     {Object.entries(ACTION_LABELS).map(([value, label]) => (
@@ -2459,13 +2459,13 @@ function AutomationTab() {
                 {/* Action params (dynamic based on action type) */}
                 {formAction === 'create_case' && (
                   <div>
-                    <label className="block text-[11px] font-medium text-zinc-500">Priority</label>
+                    <label className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Priority</label>
                     <select
                       value={formActionParams.priority || 'medium'}
                       onChange={(e) =>
                         setFormActionParams({ ...formActionParams, priority: e.target.value })
                       }
-                      className="mt-1 h-[34px] w-full rounded-lg border border-zinc-200 bg-white px-2 text-[13px]"
+                      className="mt-1 h-10 w-full rounded-[10px] border border-zinc-200 bg-white px-2 text-[13px]"
                     >
                       <option value="low">Low</option>
                       <option value="medium">Medium</option>
@@ -2476,13 +2476,13 @@ function AutomationTab() {
 
                 {formAction === 'change_case_status' && (
                   <div>
-                    <label className="block text-[11px] font-medium text-zinc-500">Target status</label>
+                    <label className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Target status</label>
                     <select
                       value={formActionParams.status || ''}
                       onChange={(e) =>
                         setFormActionParams({ ...formActionParams, status: e.target.value })
                       }
-                      className="mt-1 h-[34px] w-full rounded-lg border border-zinc-200 bg-white px-2 text-[13px]"
+                      className="mt-1 h-10 w-full rounded-[10px] border border-zinc-200 bg-white px-2 text-[13px]"
                     >
                       <option value="">Select status...</option>
                       <option value="draft">Draft</option>
@@ -2495,7 +2495,7 @@ function AutomationTab() {
 
                 {formAction === 'assign_case' && (
                   <div>
-                    <label className="block text-[11px] font-medium text-zinc-500">
+                    <label className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
                       Assignment method
                     </label>
                     <select
@@ -2503,7 +2503,7 @@ function AutomationTab() {
                       onChange={(e) =>
                         setFormActionParams({ ...formActionParams, user_id: e.target.value })
                       }
-                      className="mt-1 h-[34px] w-full rounded-lg border border-zinc-200 bg-white px-2 text-[13px]"
+                      className="mt-1 h-10 w-full rounded-[10px] border border-zinc-200 bg-white px-2 text-[13px]"
                     >
                       <option value="least_loaded">Least loaded operator</option>
                       <option value="round_robin">Round robin</option>
@@ -2513,13 +2513,13 @@ function AutomationTab() {
 
                 {formAction === 'send_notification' && (
                   <div>
-                    <label className="block text-[11px] font-medium text-zinc-500">Channel</label>
+                    <label className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Channel</label>
                     <select
                       value={formActionParams.channel || 'in_app'}
                       onChange={(e) =>
                         setFormActionParams({ ...formActionParams, channel: e.target.value })
                       }
-                      className="mt-1 h-[34px] w-full rounded-lg border border-zinc-200 bg-white px-2 text-[13px]"
+                      className="mt-1 h-10 w-full rounded-[10px] border border-zinc-200 bg-white px-2 text-[13px]"
                     >
                       <option value="in_app">In-app</option>
                       <option value="email">Email</option>
@@ -2529,7 +2529,7 @@ function AutomationTab() {
 
                 {formAction === 'log_timeline_event' && (
                   <div>
-                    <label className="block text-[11px] font-medium text-zinc-500">Description</label>
+                    <label className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Description</label>
                     <input
                       type="text"
                       value={formActionParams.description || ''}
@@ -2537,7 +2537,7 @@ function AutomationTab() {
                         setFormActionParams({ ...formActionParams, description: e.target.value })
                       }
                       placeholder="Action logged by automation"
-                      className="mt-1 h-[34px] w-full rounded-lg border border-zinc-200 bg-white px-2 text-[13px]"
+                      className="mt-1 h-10 w-full rounded-[10px] border border-zinc-200 bg-white px-2 text-[13px]"
                     />
                   </div>
                 )}
@@ -2548,14 +2548,14 @@ function AutomationTab() {
                     type="button"
                     onClick={handleSaveRule}
                     disabled={saving}
-                    className="rounded-lg bg-emerald-600 px-4 py-2 text-[13px] font-medium text-white transition hover:bg-emerald-700 disabled:opacity-50"
+                    className="rounded-[10px] bg-zinc-900 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-zinc-800 disabled:opacity-50"
                   >
                     {saving ? 'Saving...' : editingRuleId ? 'Update rule' : 'Create rule'}
                   </button>
                   <button
                     type="button"
                     onClick={resetForm}
-                    className="rounded-lg border border-zinc-200 px-5 py-2.5 text-[13px] font-medium text-zinc-600 transition hover:bg-zinc-50"
+                    className="rounded-[10px] border border-zinc-200 px-5 py-2.5 text-[13px] font-medium text-zinc-600 transition hover:bg-zinc-50"
                   >
                     Cancel
                   </button>
@@ -2566,8 +2566,8 @@ function AutomationTab() {
 
           {/* Templates */}
           {templates.length > 0 && (
-            <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
-              <h3 className="text-[13px] font-semibold text-zinc-900">Quick Start Templates</h3>
+            <section className="rounded-[10px] border border-zinc-200 bg-white p-5">
+              <h3 className="text-sm font-semibold text-zinc-900">Quick Start Templates</h3>
               <p className="mt-1 text-[13px] text-zinc-500">
                 Activate a template to create an inactive rule you can customise.
               </p>
@@ -2575,7 +2575,7 @@ function AutomationTab() {
                 {templates.map((tmpl) => (
                   <div
                     key={tmpl.id}
-                    className="rounded-lg border border-zinc-100/80 bg-zinc-50 px-4 py-3"
+                    className="rounded-[10px] border border-zinc-100/80 bg-zinc-50 px-4 py-3"
                   >
                     <p className="text-[13px] font-medium text-zinc-900">{tmpl.name}</p>
                     <p className="mt-0.5 text-xs text-zinc-500">{tmpl.description}</p>
@@ -2590,7 +2590,7 @@ function AutomationTab() {
                     <button
                       type="button"
                       onClick={() => handleActivateTemplate(tmpl.id)}
-                      className="mt-3 rounded-lg border border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-700 transition hover:bg-zinc-100"
+                      className="mt-3 rounded-[10px] border border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-700 transition hover:bg-zinc-100"
                     >
                       Activate template
                     </button>
@@ -2603,10 +2603,10 @@ function AutomationTab() {
       )}
 
       {subTab === 'Execution Log' && (
-        <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
+        <section className="rounded-[10px] border border-zinc-200 bg-white p-5">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-[13px] font-semibold text-zinc-900">Execution Log</h3>
+              <h3 className="text-sm font-semibold text-zinc-900">Execution Log</h3>
               <p className="mt-1 text-[13px] text-zinc-500">
                 Recent rule evaluations and their outcomes.
               </p>
@@ -2614,14 +2614,14 @@ function AutomationTab() {
             <button
               type="button"
               onClick={fetchLogs}
-              className="rounded-lg border border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-600 transition hover:bg-zinc-50"
+              className="rounded-[10px] border border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-600 transition hover:bg-zinc-50"
             >
               Refresh
             </button>
           </div>
 
           {logs.length === 0 ? (
-            <div className="mt-6 rounded-lg border border-zinc-100/80 bg-zinc-50 px-4 py-8 text-center">
+            <div className="mt-6 rounded-[10px] border border-zinc-100/80 bg-zinc-50 px-4 py-8 text-center">
               <p className="text-[13px] font-medium text-zinc-600">No executions yet</p>
               <p className="mt-1 text-[13px] text-zinc-400">
                 Logs will appear here when rules are triggered.
@@ -2752,7 +2752,7 @@ function SecretRevealBanner({
   }
 
   return (
-    <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-4">
+    <div className="rounded-[10px] border border-amber-300 bg-amber-50 px-4 py-4">
       <p className="text-[13px] font-semibold text-amber-800">{label}</p>
       <p className="mt-1 text-xs text-amber-700">
         This will not be shown again. Copy it now and store it securely.
@@ -3140,12 +3140,12 @@ function ApiPartnersTab() {
 
         {/* Alerts */}
         {error && (
-          <div className="rounded-lg rounded-lg border border-rose-200 bg-rose-50 px-4 py-2.5 text-[13px] text-rose-700">
+          <div className="rounded-[10px] border border-rose-200 bg-rose-50 px-4 py-2.5 text-[13px] text-rose-700">
             {error}
           </div>
         )}
         {success && (
-          <div className="rounded-lg rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-[13px] text-emerald-700">
+          <div className="rounded-[10px] border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-[13px] text-emerald-700">
             {success}
           </div>
         )}
@@ -3160,9 +3160,9 @@ function ApiPartnersTab() {
         )}
 
         {/* Application details */}
-        <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
+        <section className="rounded-[10px] border border-zinc-200 bg-white p-5">
           <div className="flex items-center justify-between">
-            <h3 className="text-[13px] font-semibold text-zinc-900">
+            <h3 className="text-sm font-semibold text-zinc-900">
               {editing ? 'Edit Application' : selectedApp.name}
             </h3>
             {!editing && (
@@ -3189,16 +3189,16 @@ function ApiPartnersTab() {
           {editing ? (
             <div className="mt-5 max-w-md space-y-4">
               <div>
-                <label className="block text-[11px] font-medium text-zinc-500">Name</label>
+                <label className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Name</label>
                 <input
                   type="text"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="mt-1 h-[34px] w-full rounded-lg border border-zinc-200 bg-white px-3 text-[13px] text-zinc-700 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
+                  className="mt-1 h-10 w-full rounded-[10px] border border-zinc-200 bg-white px-3 text-[13px] text-zinc-900 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-medium text-zinc-500">
+                <label className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
                   Rate limit (requests/min)
                 </label>
                 <input
@@ -3207,11 +3207,11 @@ function ApiPartnersTab() {
                   onChange={(e) => setEditRateLimit(parseInt(e.target.value, 10) || 300)}
                   min={1}
                   max={10000}
-                  className="mt-1 h-[34px] w-full rounded-lg border border-zinc-200 bg-white px-3 text-[13px] text-zinc-700 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
+                  className="mt-1 h-10 w-full rounded-[10px] border border-zinc-200 bg-white px-3 text-[13px] text-zinc-900 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-medium text-zinc-500">Scopes</label>
+                <label className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Scopes</label>
                 <div className="mt-2 space-y-2">
                   {ALL_SCOPES.map((scope) => (
                     <label key={scope} className="flex items-center gap-2 text-[13px] text-zinc-700">
@@ -3232,14 +3232,14 @@ function ApiPartnersTab() {
                   type="button"
                   onClick={handleUpdateApp}
                   disabled={saving || !editName.trim()}
-                  className="rounded-lg bg-emerald-600 px-4 py-2 text-[13px] font-medium text-white transition hover:bg-emerald-700 disabled:opacity-50"
+                  className="rounded-[10px] bg-zinc-900 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-zinc-800 disabled:opacity-50"
                 >
                   {saving ? 'Saving...' : 'Save'}
                 </button>
                 <button
                   type="button"
                   onClick={() => setEditing(false)}
-                  className="rounded-lg border border-zinc-200 bg-white px-4 py-2 text-[13px] font-medium text-zinc-600 transition hover:bg-zinc-50"
+                  className="rounded-[10px] border border-zinc-200 bg-white px-4 py-2 text-[13px] font-semibold text-zinc-700 transition hover:bg-zinc-50"
                 >
                   Cancel
                 </button>
@@ -3284,14 +3284,14 @@ function ApiPartnersTab() {
                 <button
                   type="button"
                   onClick={startEdit}
-                  className="rounded-lg bg-emerald-600 px-4 py-2 text-[13px] font-medium text-white transition hover:bg-emerald-700"
+                  className="rounded-[10px] bg-zinc-900 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-zinc-800"
                 >
                   Edit
                 </button>
                 <button
                   type="button"
                   onClick={handleRegenerateSecret}
-                  className="rounded-lg border border-rose-200 bg-white px-4 py-2 text-[13px] font-medium text-rose-600 transition hover:bg-rose-50"
+                  className="rounded-[10px] border border-rose-200 bg-rose-50 px-4 py-2 text-[13px] font-semibold text-rose-700 transition hover:bg-rose-100"
                 >
                   Regenerate Secret
                 </button>
@@ -3301,9 +3301,9 @@ function ApiPartnersTab() {
         </section>
 
         {/* API Keys section */}
-        <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
+        <section className="rounded-[10px] border border-zinc-200 bg-white p-5">
           <div className="flex items-center justify-between">
-            <h3 className="text-[13px] font-semibold text-zinc-900">API Keys</h3>
+            <h3 className="text-sm font-semibold text-zinc-900">API Keys</h3>
             {!showKeyForm && (
               <button
                 type="button"
@@ -3311,7 +3311,7 @@ function ApiPartnersTab() {
                   setShowKeyForm(true)
                   setKeyScopes([...selectedApp.scopes])
                 }}
-                className="rounded-lg bg-emerald-600 px-4 py-2 text-[13px] font-medium text-white transition hover:bg-emerald-700"
+                className="rounded-[10px] bg-zinc-900 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-zinc-800"
               >
                 Create Key
               </button>
@@ -3320,20 +3320,20 @@ function ApiPartnersTab() {
 
           {/* Key creation form */}
           {showKeyForm && (
-            <div className="mt-4 rounded-lg border border-zinc-100/80 bg-zinc-50/50 px-4 py-4">
+            <div className="mt-4 rounded-[10px] border border-zinc-100/80 bg-zinc-50/50 px-4 py-4">
               <div className="max-w-md space-y-3">
                 <div>
-                  <label className="block text-[11px] font-medium text-zinc-500">Key name</label>
+                  <label className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Key name</label>
                   <input
                     type="text"
                     value={keyName}
                     onChange={(e) => setKeyName(e.target.value)}
                     placeholder="e.g. Production key"
-                    className="mt-1 h-[34px] w-full rounded-lg border border-zinc-200 bg-white px-3 text-[13px] text-zinc-700 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
+                    className="mt-1 h-10 w-full rounded-[10px] border border-zinc-200 bg-white px-3 text-[13px] text-zinc-900 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-medium text-zinc-500">
+                  <label className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
                     Expires in (days, optional)
                   </label>
                   <input
@@ -3343,11 +3343,11 @@ function ApiPartnersTab() {
                     placeholder="Leave empty for no expiry"
                     min={1}
                     max={365}
-                    className="mt-1 h-[34px] w-full rounded-lg border border-zinc-200 bg-white px-3 text-[13px] text-zinc-700 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
+                    className="mt-1 h-10 w-full rounded-[10px] border border-zinc-200 bg-white px-3 text-[13px] text-zinc-900 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-medium text-zinc-500">Scopes</label>
+                  <label className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Scopes</label>
                   <div className="mt-2 space-y-2">
                     {selectedApp.scopes.map((scope) => (
                       <label
@@ -3370,14 +3370,14 @@ function ApiPartnersTab() {
                     type="button"
                     onClick={handleCreateKey}
                     disabled={saving || !keyName.trim()}
-                    className="rounded-lg bg-emerald-600 px-4 py-2 text-[13px] font-medium text-white transition hover:bg-emerald-700 disabled:opacity-50"
+                    className="rounded-[10px] bg-zinc-900 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-zinc-800 disabled:opacity-50"
                   >
                     {saving ? 'Creating...' : 'Create Key'}
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowKeyForm(false)}
-                    className="rounded-lg border border-zinc-200 bg-white px-4 py-2 text-[13px] font-medium text-zinc-600 transition hover:bg-zinc-50"
+                    className="rounded-[10px] border border-zinc-200 bg-white px-4 py-2 text-[13px] font-semibold text-zinc-700 transition hover:bg-zinc-50"
                   >
                     Cancel
                   </button>
@@ -3477,12 +3477,12 @@ function ApiPartnersTab() {
 
       {/* Alerts */}
       {error && (
-        <div className="rounded-lg rounded-lg border border-rose-200 bg-rose-50 px-4 py-2.5 text-[13px] text-rose-700">
+        <div className="rounded-[10px] border border-rose-200 bg-rose-50 px-4 py-2.5 text-[13px] text-rose-700">
           {error}
         </div>
       )}
       {success && (
-        <div className="rounded-lg rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-[13px] text-emerald-700">
+        <div className="rounded-[10px] border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-[13px] text-emerald-700">
           {success}
         </div>
       )}
@@ -3497,10 +3497,10 @@ function ApiPartnersTab() {
       )}
 
       {/* Applications section */}
-      <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
+      <section className="rounded-[10px] border border-zinc-200 bg-white p-5">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-[13px] font-semibold text-zinc-900">API Applications</h3>
+            <h3 className="text-sm font-semibold text-zinc-900">API Applications</h3>
             <p className="mt-1 text-[13px] text-zinc-500">
               Manage partner applications that access your data via the public API.
             </p>
@@ -3509,7 +3509,7 @@ function ApiPartnersTab() {
             <button
               type="button"
               onClick={() => setShowCreateForm(true)}
-              className="rounded-lg bg-emerald-600 px-4 py-2 text-[13px] font-medium text-white transition hover:bg-emerald-700"
+              className="rounded-[10px] bg-zinc-900 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-zinc-800"
             >
               Create Application
             </button>
@@ -3518,21 +3518,21 @@ function ApiPartnersTab() {
 
         {/* Create form */}
         {showCreateForm && (
-          <div className="mt-5 rounded-lg border border-zinc-100/80 bg-zinc-50/50 px-4 py-4">
+          <div className="mt-5 rounded-[10px] border border-zinc-100/80 bg-zinc-50/50 px-4 py-4">
             <h4 className="text-[13px] font-medium text-zinc-900">New Application</h4>
             <div className="mt-3 max-w-md space-y-3">
               <div>
-                <label className="block text-[11px] font-medium text-zinc-500">Name</label>
+                <label className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Name</label>
                 <input
                   type="text"
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
                   placeholder="e.g. NLG Integration"
-                  className="mt-1 h-[34px] w-full rounded-lg border border-zinc-200 bg-white px-3 text-[13px] text-zinc-700 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
+                  className="mt-1 h-10 w-full rounded-[10px] border border-zinc-200 bg-white px-3 text-[13px] text-zinc-900 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-medium text-zinc-500">Scopes</label>
+                <label className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Scopes</label>
                 <div className="mt-2 space-y-2">
                   {ALL_SCOPES.map((scope) => (
                     <label key={scope} className="flex items-center gap-2 text-[13px] text-zinc-700">
@@ -3571,7 +3571,7 @@ function ApiPartnersTab() {
                 </label>
               </div>
               <div>
-                <label className="block text-[11px] font-medium text-zinc-500">
+                <label className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
                   Rate limit (requests/min)
                 </label>
                 <input
@@ -3580,7 +3580,7 @@ function ApiPartnersTab() {
                   onChange={(e) => setFormRateLimit(parseInt(e.target.value, 10) || 300)}
                   min={1}
                   max={10000}
-                  className="mt-1 h-[34px] w-full rounded-lg border border-zinc-200 bg-white px-3 text-[13px] text-zinc-700 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
+                  className="mt-1 h-10 w-full rounded-[10px] border border-zinc-200 bg-white px-3 text-[13px] text-zinc-900 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
                 />
               </div>
               <div className="flex items-center gap-2 pt-1">
@@ -3588,14 +3588,14 @@ function ApiPartnersTab() {
                   type="button"
                   onClick={handleCreateApp}
                   disabled={saving || !formName.trim()}
-                  className="rounded-lg bg-emerald-600 px-4 py-2 text-[13px] font-medium text-white transition hover:bg-emerald-700 disabled:opacity-50"
+                  className="rounded-[10px] bg-zinc-900 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-zinc-800 disabled:opacity-50"
                 >
                   {saving ? 'Creating...' : 'Create'}
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowCreateForm(false)}
-                  className="rounded-lg border border-zinc-200 bg-white px-4 py-2 text-[13px] font-medium text-zinc-600 transition hover:bg-zinc-50"
+                  className="rounded-[10px] border border-zinc-200 bg-white px-4 py-2 text-[13px] font-semibold text-zinc-700 transition hover:bg-zinc-50"
                 >
                   Cancel
                 </button>
@@ -3684,24 +3684,24 @@ export function SettingsTabs() {
     <div className="space-y-5">
       {/* Header */}
       <div>
-        <h2 className="text-lg font-bold tracking-tight text-zinc-900">Settings</h2>
-        <p className="mt-0.5 text-[13px] text-zinc-500">
-          Manage your workspace, team, integrations, and automations.
+        <h2 className="text-xl font-semibold tracking-tight text-zinc-900">Settings</h2>
+        <p className="mt-1 text-[13px] text-zinc-500">
+          Configure your workspace
         </p>
       </div>
 
       {/* Main tabs */}
-      <div className="flex flex-wrap items-center gap-1.5">
+      <div className="flex gap-0 overflow-x-auto border-b border-zinc-200">
         {TABS.map((tab) => (
           <button
             key={tab}
             type="button"
             onClick={() => setActiveTab(tab)}
             className={cn(
-              'rounded-full px-3 py-1 text-xs font-medium transition',
+              'whitespace-nowrap px-[18px] py-2.5 text-[13px] font-medium transition border-b-2',
               activeTab === tab
-                ? 'bg-zinc-900 text-white'
-                : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
+                ? 'border-zinc-900 text-zinc-900'
+                : 'border-transparent text-zinc-500 hover:text-zinc-900'
             )}
           >
             {tab}
@@ -3710,7 +3710,7 @@ export function SettingsTabs() {
       </div>
 
       {/* Tab content */}
-      <div>
+      <div className="mt-4">
         {activeTab === 'Account' ? <AccountTab /> : null}
         {activeTab === 'Team' ? <TeamTab /> : null}
         {activeTab === 'Integrations' ? <IntegrationsTab /> : null}
