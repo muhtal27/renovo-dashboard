@@ -238,15 +238,18 @@ function SidebarContent({
           onClick={onNavigate}
           className="flex items-center gap-2.5"
         >
-          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-emerald-600 text-xs font-bold text-white">
-            R
-          </div>
-          {!isCollapsed ? (
+          {isCollapsed ? (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 36" fill="none" className="h-7 w-7 shrink-0">
+              <rect x="0" y="2" width="26" height="6.5" rx="3.25" fill="#d4d4d8" />
+              <rect x="3" y="13" width="26" height="6.5" rx="3.25" fill="#a1a1aa" />
+              <rect x="6" y="24" width="26" height="6.5" rx="3.25" fill="#0a0a0a" />
+            </svg>
+          ) : (
             <div>
-              <p className="text-sm font-semibold tracking-tight text-zinc-900">Renovo AI</p>
-              <p className="text-[11px] font-medium text-zinc-400">End of Tenancy</p>
+              <img src="/logo-new.svg" alt="Renovo AI" className="h-7" />
+              <p className="mt-0.5 text-[11px] font-medium text-zinc-400">End of Tenancy</p>
             </div>
-          ) : null}
+          )}
         </Link>
 
         {!mobile ? (

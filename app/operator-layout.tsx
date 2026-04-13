@@ -327,8 +327,8 @@ export function OperatorLayout({ children, operator, latestRelease }: OperatorLa
               </div>
             </div>
 
-            {/* Center: search (opens command palette) */}
-            <div className="hidden min-w-0 flex-1 justify-center xl:flex">
+            {/* Search (opens command palette) */}
+            <div className="hidden min-w-0 flex-1 xl:flex">
               <Suspense fallback={null}>
                 <OperatorSearchFormBridge
                   pathname={pathname}
