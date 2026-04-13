@@ -83,7 +83,14 @@ h1{font-size:24px} h2{font-size:20px} h3{font-size:16px} h4{font-size:14px}
    ═══════════════════════════════════════════════════════════════ */
 .sidebar-brand{padding:16px 16px 0;display:flex;align-items:center;justify-content:space-between}
 .sidebar-brand-link{display:flex;align-items:center;gap:10px}
-.brand-mark{width:28px;height:28px;border-radius:var(--radius-sm);background:var(--emerald-600);color:var(--white);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.brand-mark{flex-shrink:0;display:flex;align-items:center}
+.brand-mark svg{height:28px;width:auto}
+.sidebar.collapsed .brand-mark svg.logo-full{display:none}
+.sidebar.collapsed .brand-mark svg.logo-icon{display:block}
+.sidebar:not(.collapsed) .brand-mark svg.logo-icon{display:none}
+.sidebar:not(.collapsed) .brand-mark svg.logo-full{display:block}
+.sidebar-brand-link{flex-direction:column;align-items:flex-start;gap:2px}
+.sidebar.collapsed .sidebar-brand-link{align-items:center}
 .brand-text h3{font-size:14px;letter-spacing:-0.02em;line-height:1.2}
 .brand-text p{font-size:12px;color:var(--zinc-400);font-weight:500;margin-top:1px}
 .sidebar-collapse-btn{width:28px;height:28px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;color:var(--zinc-400);transition:all .15s}
@@ -807,8 +814,8 @@ function renderSidebar(mobile=false){
   return`
     <div class="sidebar-brand">
       <a onclick="navigate('dashboard')" class="sidebar-brand-link">
-        <div class="brand-mark">R</div>
-        <div class="brand-text"><h3>Renovo AI</h3><p>End of Tenancy</p></div>
+        <div class="brand-mark"><svg class="logo-full" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 40" fill="none"><rect x="0" y="4" width="26" height="6.5" rx="3.25" fill="#d4d4d8"/><rect x="3" y="15" width="26" height="6.5" rx="3.25" fill="#a1a1aa"/><rect x="6" y="26" width="26" height="6.5" rx="3.25" fill="#0a0a0a"/><text x="48" y="27" font-family="'DM Sans',sans-serif" font-size="22" font-weight="600" fill="#0a0a0a" letter-spacing="-0.5">Renovo</text><text x="134" y="27" font-family="'DM Sans',sans-serif" font-size="22" font-weight="300" fill="#a1a1aa" letter-spacing="-0.5">AI</text></svg><svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 36" fill="none"><rect x="0" y="2" width="26" height="6.5" rx="3.25" fill="#d4d4d8"/><rect x="3" y="13" width="26" height="6.5" rx="3.25" fill="#a1a1aa"/><rect x="6" y="24" width="26" height="6.5" rx="3.25" fill="#0a0a0a"/></svg></div>
+        <div class="brand-text"><p>End of Tenancy</p></div>
       </a>
       ${!mobile?`<button onclick="state.sidebarCollapsed=!state.sidebarCollapsed;localStorage.setItem('rv-sidebar',state.sidebarCollapsed?'1':'0');render()" class="sidebar-collapse-btn" title="Toggle sidebar">${luc(c?'chevron-right':'chevron-left',16)}</button>`:''}
     </div>
