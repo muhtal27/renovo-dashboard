@@ -360,7 +360,7 @@ const STATUS_ACTIVITY_ICON: Record<string, ActivityIconConfig> = {
 }
 
 function activityDescription(c: EotCaseListItem): string {
-  const ref = c.reference || buildAddress(c.property)
+  const ref = c.property.reference || buildAddress(c.property)
   switch (c.status) {
     case 'analysis': return `AI analysis completed for ${ref}`
     case 'disputed': return `New dispute opened on ${ref}`
