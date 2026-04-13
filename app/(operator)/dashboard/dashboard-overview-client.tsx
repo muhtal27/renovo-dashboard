@@ -427,13 +427,23 @@ function MonthlyThroughputCard({
   analytics?: { throughput: { week_start: string; created: number; resolved: number }[] } | null
 }) {
   const monthlyData = useMemo(() => {
-    if (!analytics?.throughput?.length) return []
+    if (!analytics?.throughput?.length) {
+      // Fallback placeholder data when no real analytics exist yet
+      const now = new Date()
+      return Array.from({ length: 6 }, (_, i) => {
+        const d = new Date(now.getFullYear(), now.getMonth() - 5 + i)
+        return {
+          label: d.toLocaleString('en-GB', { month: 'short' }),
+          created: [14, 11, 18, 22, 19, 16][i],
+          resolved: [12, 9, 15, 20, 17, 14][i],
+        }
+      })
+    }
 
     const grouped = new Map<string, { created: number; resolved: number }>()
     for (const week of analytics.throughput) {
       const d = new Date(week.week_start)
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-      const label = d.toLocaleString('en-GB', { month: 'short' })
       const existing = grouped.get(key)
       if (existing) {
         existing.created += week.created
