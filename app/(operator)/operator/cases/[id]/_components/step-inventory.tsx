@@ -1,6 +1,5 @@
 'use client'
 
-import { ArrowRight } from 'lucide-react'
 import { formatCurrency, formatDate, formatEnumLabel } from '@/app/eot/_components/eot-ui'
 import type { OperatorCheckoutWorkspaceData } from '@/lib/operator-checkout-workspace-types'
 
@@ -155,16 +154,6 @@ export function StepInventory({ data }: { data: OperatorCheckoutWorkspaceData })
         </dl>
       </div>
 
-      {/* Continue button */}
-      <div className="flex justify-end pt-2">
-        <button
-          type="button"
-          className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-700"
-        >
-          Continue to Checkout
-          <ArrowRight className="h-4 w-4" />
-        </button>
-      </div>
     </div>
   )
 }

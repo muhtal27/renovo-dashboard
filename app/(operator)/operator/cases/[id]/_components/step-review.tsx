@@ -87,11 +87,12 @@ const SORT_OPTIONS: { value: DefectSort; label: string }[] = [
 /*  Trade filter types                                                 */
 /* ------------------------------------------------------------------ */
 
-type TradeFilter = 'all' | 'cleaning' | 'maintenance'
+type TradeFilter = 'all' | 'cleaning' | 'damage' | 'maintenance'
 
 const TRADE_FILTER_OPTIONS: { value: TradeFilter; label: string }[] = [
   { value: 'all', label: 'All Trades' },
   { value: 'cleaning', label: 'Cleaning' },
+  { value: 'damage', label: 'Damage' },
   { value: 'maintenance', label: 'Maintenance' },
 ]
 
@@ -185,9 +186,9 @@ function DefectQueueCard({
         {edit.operatorLiability ? (
           <span className={cn(
             'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium',
-            edit.operatorLiability === 'tenant' ? 'bg-fuchsia-50 text-fuchsia-700' :
+            edit.operatorLiability === 'tenant' ? 'bg-rose-50 text-rose-700' :
             edit.operatorLiability === 'landlord' ? 'bg-sky-50 text-sky-700' :
-            'bg-orange-50 text-orange-700'
+            'bg-amber-50 text-amber-700'
           )}>
             {formatEnumLabel(edit.operatorLiability)}
           </span>
@@ -330,11 +331,11 @@ function DefectRow({
                 className={cn(
                   'text-sm font-medium',
                   edit.operatorLiability === 'tenant'
-                    ? 'text-fuchsia-700'
+                    ? 'text-rose-700'
                     : edit.operatorLiability === 'landlord'
                       ? 'text-sky-700'
                       : edit.operatorLiability === 'shared'
-                        ? 'text-orange-700'
+                        ? 'text-amber-700'
                         : 'text-zinc-400'
                 )}
               >
@@ -660,14 +661,14 @@ function DetailPanel({
                   type="button"
                   onClick={() => onChange(defect.id, { operatorLiability: opt.value })}
                   className={cn(
-                    'flex-1 px-3 py-2 text-xs font-medium transition-colors',
+                    'flex-1 px-3 py-2 text-xs font-semibold transition-colors',
                     idx > 0 && 'border-l border-zinc-200',
                     edit.operatorLiability === opt.value
                       ? opt.value === 'tenant'
-                        ? 'bg-fuchsia-600 text-white'
+                        ? 'bg-rose-50 text-rose-700 border-rose-200'
                         : opt.value === 'landlord'
-                          ? 'bg-sky-600 text-white'
-                          : 'bg-orange-600 text-white'
+                          ? 'bg-sky-50 text-sky-700 border-sky-200'
+                          : 'bg-amber-50 text-amber-700 border-amber-200'
                       : 'bg-white text-zinc-600 hover:bg-zinc-50'
                   )}
                 >
@@ -679,11 +680,11 @@ function DetailPanel({
             <p className={cn(
               'mt-2 text-sm font-medium',
               edit.operatorLiability === 'tenant'
-                ? 'text-fuchsia-700'
+                ? 'text-rose-700'
                 : edit.operatorLiability === 'landlord'
                   ? 'text-sky-700'
                   : edit.operatorLiability === 'shared'
-                    ? 'text-orange-700'
+                    ? 'text-amber-700'
                     : 'text-zinc-400'
             )}>
               {edit.operatorLiability ? formatEnumLabel(edit.operatorLiability) : 'Unassigned'}
@@ -1212,6 +1213,31 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
     handleEditChange(selectedDefectId, { excluded: true })
   }, [selectedDefectId, handleEditChange])
 
+  // Keyboard shortcuts: ↑↓ navigate, T/L/S assign liability
+  useEffect(() => {
+    if (!isReview) return
+    function handler(e: KeyboardEvent) {
+      const tag = (e.target as HTMLElement)?.tagName
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
+
+      if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+        e.preventDefault()
+        const idx = queueFiltered.findIndex((d) => d.id === selectedDefectId)
+        if (idx < 0) return
+        const next = e.key === 'ArrowDown' ? Math.min(idx + 1, queueFiltered.length - 1) : Math.max(idx - 1, 0)
+        if (next !== idx) setSelectedDefectId(queueFiltered[next].id)
+      }
+
+      if (!selectedDefectId) return
+      const key = e.key.toLowerCase()
+      if (key === 't') handleEditChange(selectedDefectId, { operatorLiability: 'tenant' })
+      else if (key === 'l') handleEditChange(selectedDefectId, { operatorLiability: 'landlord' })
+      else if (key === 's') handleEditChange(selectedDefectId, { operatorLiability: 'shared' })
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [isReview, queueFiltered, selectedDefectId, handleEditChange])
+
   // Total exposure (sum of all non-excluded costs)
   const totalExposure = useMemo(() => {
     let total = 0
@@ -1273,6 +1299,23 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
       {/* ---- Defect Review tab ---- */}
       {activeTab === 'defects' ? (
       <>
+      {/* ---- Accept All AI + keyboard hints ---- */}
+      {isReview && defects.length > 0 ? (
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={handleAcceptAiSuggestions}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 transition hover:bg-zinc-50"
+          >
+            <Check className="h-3.5 w-3.5" />
+            Accept All AI
+          </button>
+          <span className="text-[11px] text-zinc-400 bg-zinc-50 px-2.5 py-1 rounded-md">
+            Keys: ↑↓ navigate · T tenant · L landlord · S shared
+          </span>
+        </div>
+      ) : null}
+
       {/* ---- Stats row ---- */}
       {defects.length > 0 ? (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">

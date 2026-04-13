@@ -2,6 +2,7 @@
 
 import {
   ArrowLeft,
+  ArrowRight,
   Bot,
   Check,
   CheckCircle,
@@ -290,6 +291,64 @@ function WorkspaceSidebar({ data }: { data: OperatorCheckoutWorkspaceData }) {
 }
 
 /* ────────────────────────────────────────────────────────────── */
+/*  Step navigation buttons (Back / Continue)                     */
+/* ────────────────────────────────────────────────────────────── */
+
+const STEP_NAV: Record<WorkspaceStep, { prevStep: WorkspaceStep | null; nextStep: WorkspaceStep | null; nextLabel: string }> = {
+  inventory: { prevStep: null, nextStep: 'checkout', nextLabel: 'Continue to Checkout' },
+  checkout: { prevStep: 'inventory', nextStep: 'readings', nextLabel: 'Continue to Readings' },
+  readings: { prevStep: 'checkout', nextStep: 'analysis', nextLabel: 'Continue to Analysis' },
+  analysis: { prevStep: 'readings', nextStep: 'review', nextLabel: 'Start Review' },
+  review: { prevStep: 'analysis', nextStep: 'deductions', nextLabel: 'Continue to Deductions' },
+  deductions: { prevStep: 'review', nextStep: 'refund', nextLabel: 'Continue to Refund' },
+  refund: { prevStep: 'deductions', nextStep: null, nextLabel: '' },
+}
+
+function StepNavigation({
+  activeStep,
+  caseStatus,
+  onStepClick,
+}: {
+  activeStep: WorkspaceStep
+  caseStatus: string
+  onStepClick: (step: WorkspaceStep) => void
+}) {
+  const nav = STEP_NAV[activeStep]
+  if (!nav) return null
+
+  /* Analysis step: only show "Start Review" when analysis is complete */
+  const analysisComplete = activeStep === 'analysis' && ['review', 'draft_sent', 'ready_for_claim', 'submitted', 'resolved', 'disputed'].includes(caseStatus)
+  const showNext = activeStep === 'analysis' ? analysisComplete : nav.nextStep !== null
+  /* Refund step handles its own action buttons */
+  const isRefund = activeStep === 'refund'
+
+  return (
+    <div className={cn('flex pt-2', nav.prevStep ? 'justify-between' : 'justify-end')}>
+      {nav.prevStep ? (
+        <button
+          type="button"
+          onClick={() => onStepClick(nav.prevStep!)}
+          className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 shadow-sm transition hover:bg-zinc-50"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Back
+        </button>
+      ) : null}
+      {showNext && !isRefund && nav.nextStep ? (
+        <button
+          type="button"
+          onClick={() => onStepClick(nav.nextStep!)}
+          className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-700"
+        >
+          {nav.nextLabel}
+          <ArrowRight className="h-3.5 w-3.5" />
+        </button>
+      ) : null}
+    </div>
+  )
+}
+
+/* ────────────────────────────────────────────────────────────── */
 /*  Step → component mapping                                      */
 /* ────────────────────────────────────────────────────────────── */
 
@@ -455,12 +514,16 @@ export function CheckoutCaseWorkspace({
         </div>
       ) : isReviewStep ? (
         /* Review step — full-width, no sidebar */
-        <ActiveStepComponent data={data} />
+        <div className="space-y-4">
+          <ActiveStepComponent data={data} />
+          <StepNavigation activeStep={activeStep} caseStatus={currentStatus} onStepClick={handleStepClick} />
+        </div>
       ) : (
         /* All other steps — 2-column with sidebar */
         <div className="grid gap-4 xl:grid-cols-[1fr_320px]">
           <div className="space-y-4 min-w-0">
             <ActiveStepComponent data={data} />
+            <StepNavigation activeStep={activeStep} caseStatus={currentStatus} onStepClick={handleStepClick} />
           </div>
           <WorkspaceSidebar data={data} />
         </div>
