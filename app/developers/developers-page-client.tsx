@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { MarketingShell } from '@/app/components/MarketingShell'
 
@@ -8,14 +8,16 @@ import { MarketingShell } from '@/app/components/MarketingShell'
 /*  Data                                                               */
 /* ------------------------------------------------------------------ */
 
-const BASE_URL = 'https://backend.renovoai.co.uk/v1'
+const BASE_URL = 'https://api.renovoai.co.uk/v1'
+const SANDBOX_URL = 'https://api.sandbox.renovoai.co.uk/v1'
 
 type Endpoint = {
-  method: 'GET' | 'POST' | 'DELETE'
+  method: 'GET' | 'POST' | 'PATCH' | 'DELETE'
   path: string
   title: string
   description: string
   scope: string
+  statusCode?: number
   requestBody?: string
   responseBody: string
   notes?: string[]
@@ -42,6 +44,7 @@ const sections: Section[] = [
         description:
           'Exchange your client credentials for a JWT bearer token. Tokens expire after 1 hour by default.',
         scope: 'none',
+        statusCode: 200,
         requestBody: `// Content-Type: application/x-www-form-urlencoded
 
 grant_type=client_credentials
@@ -74,6 +77,7 @@ grant_type=client_credentials
         description:
           'Push a property inspection with rooms, photos, and documents. Supports idempotent retries via the Idempotency-Key header.',
         scope: 'inventory:write',
+        statusCode: 201,
         requestBody: `{
   "external_reference": "INV-2026-0042",
   "inspection_type": "checkout",
@@ -124,24 +128,62 @@ grant_type=client_credentials
         ],
       },
       {
+        method: 'GET',
+        path: '/inspections',
+        title: 'List inspections',
+        description:
+          'Retrieve a paginated list of inspections pushed by your application. Supports filtering by type and status.',
+        scope: 'inventory:read',
+        statusCode: 200,
+        responseBody: `{
+  "data": [
+    {
+      "id": "019622f1-a3b4-7c8d-9e0f-1a2b3c4d5e6f",
+      "external_reference": "INV-2026-0042",
+      "inspection_type": "checkout",
+      "status": "received",
+      "property_address": "14 Marchmont Crescent, Flat 3, EH9 1HQ",
+      "matched_tenancy_id": "018f...",
+      "inspected_at": "2026-04-10T14:30:00Z",
+      "created_at": "2026-04-10T14:31:02Z"
+    }
+  ],
+  "pagination": {
+    "has_more": true,
+    "next_cursor": "eyJjIjoiMjAyNi...",
+    "total_count": 23
+  }
+}`,
+        notes: [
+          'Query params: ?inspection_type=checkout&status=received&limit=20&cursor=...',
+          'Maximum limit is 100. Default is 20.',
+        ],
+      },
+      {
         method: 'POST',
         path: '/inspections/{inspection_id}/documents',
-        title: 'Add inspection document',
-        description: 'Attach an additional document to an existing inspection.',
+        title: 'Upload inspection document',
+        description:
+          'Attach an additional document to an existing inspection. Uses multipart/form-data for binary file upload.',
         scope: 'documents:write',
-        requestBody: `{
-  "name": "Schedule of Condition",
-  "document_type": "schedule_of_condition",
-  "url": "https://cdn.example.com/docs/soc-042.pdf",
-  "mime_type": "application/pdf"
-}`,
+        statusCode: 201,
+        requestBody: `// Content-Type: multipart/form-data
+
+file: <binary>
+name: "Schedule of Condition"
+document_type: "schedule_of_condition"`,
         responseBody: `{
   "id": "019622f2-...",
   "inspection_id": "019622f1-...",
   "name": "Schedule of Condition",
   "document_type": "schedule_of_condition",
+  "file_size_bytes": 2048576,
   "created_at": "2026-04-10T14:35:00Z"
 }`,
+        notes: [
+          'Maximum file size: 25 MB.',
+          'Accepted types: application/pdf, image/jpeg, image/png.',
+        ],
       },
     ],
   },
@@ -158,6 +200,7 @@ grant_type=client_credentials
         description:
           'Retrieve a paginated list of cases. Supports filtering by status and tenancy, with cursor-based pagination.',
         scope: 'cases:read',
+        statusCode: 200,
         responseBody: `{
   "data": [
     {
@@ -180,7 +223,7 @@ grant_type=client_credentials
   }
 }`,
         notes: [
-          'Query params: ?status=review&limit=20&cursor=...',
+          'Query params: ?status=review&tenancy_id=...&limit=20&cursor=...',
           'Maximum limit is 100. Default is 20.',
         ],
       },
@@ -191,6 +234,7 @@ grant_type=client_credentials
         description:
           'Retrieve full case detail including issues, documents, and a summary timeline.',
         scope: 'cases:read',
+        statusCode: 200,
         responseBody: `{
   "id": "018f...",
   "tenancy_id": "018e...",
@@ -236,6 +280,7 @@ grant_type=client_credentials
         title: 'Download document',
         description: 'Get a time-limited pre-signed URL to download a case document.',
         scope: 'documents:read',
+        statusCode: 200,
         responseBody: `{
   "download_url": "https://storage.supabase.co/...",
   "expires_in": 3600
@@ -256,6 +301,7 @@ grant_type=client_credentials
         description:
           'Subscribe to one or more event types. Each delivery includes an X-Renovo-Signature header for verification.',
         scope: 'webhooks:manage',
+        statusCode: 201,
         requestBody: `{
   "url": "https://your-app.com/webhooks/renovo",
   "events": [
@@ -283,17 +329,53 @@ grant_type=client_credentials
         method: 'GET',
         path: '/webhooks',
         title: 'List webhooks',
-        description: 'List all active webhook registrations for your application.',
+        description: 'List all webhook registrations for your application with cursor-based pagination.',
         scope: 'webhooks:manage',
-        responseBody: `[
-  {
-    "id": "019c...",
-    "url": "https://your-app.com/webhooks/renovo",
-    "events": ["case.created", "case.status_changed"],
-    "status": "active",
-    "created_at": "2026-04-11T10:00:00Z"
+        statusCode: 200,
+        responseBody: `{
+  "data": [
+    {
+      "id": "019c...",
+      "url": "https://your-app.com/webhooks/renovo",
+      "events": ["case.created", "case.status_changed"],
+      "status": "active",
+      "created_at": "2026-04-11T10:00:00Z"
+    }
+  ],
+  "pagination": {
+    "has_more": false,
+    "next_cursor": null,
+    "total_count": 1
   }
-]`,
+}`,
+      },
+      {
+        method: 'PATCH',
+        path: '/webhooks/{webhook_id}',
+        title: 'Update webhook',
+        description:
+          'Update a webhook\u2019s subscribed events or URL. Only include the fields you want to change.',
+        scope: 'webhooks:manage',
+        statusCode: 200,
+        requestBody: `{
+  "events": [
+    "case.created",
+    "case.status_changed",
+    "case.resolved"
+  ]
+}`,
+        responseBody: `{
+  "id": "019c...",
+  "url": "https://your-app.com/webhooks/renovo",
+  "events": ["case.created", "case.status_changed", "case.resolved"],
+  "status": "active",
+  "created_at": "2026-04-11T10:00:00Z",
+  "updated_at": "2026-04-12T08:30:00Z"
+}`,
+        notes: [
+          'Only url, events, and secret can be updated.',
+          'Omitted fields are left unchanged.',
+        ],
       },
       {
         method: 'DELETE',
@@ -301,6 +383,7 @@ grant_type=client_credentials
         title: 'Delete webhook',
         description: 'Remove a webhook registration. Returns 204 No Content on success.',
         scope: 'webhooks:manage',
+        statusCode: 204,
         responseBody: '// 204 No Content',
       },
     ],
@@ -320,18 +403,21 @@ const webhookEvents = [
 
 const scopes = [
   { scope: 'inventory:write', description: 'Create inspections and push inventory data.' },
-  { scope: 'documents:write', description: 'Add documents to inspections.' },
+  { scope: 'inventory:read', description: 'List and retrieve inspection records.' },
   { scope: 'cases:read', description: 'List and read case data.' },
+  { scope: 'cases:write', description: 'Update case data (specific integrations only).' },
+  { scope: 'documents:write', description: 'Upload documents to inspections.' },
   { scope: 'documents:read', description: 'Download case documents.' },
   { scope: 'webhooks:manage', description: 'Register and manage webhook endpoints.' },
 ]
 
 const errorCodes = [
+  { code: 'validation_error', status: 400, description: 'Request body or query params failed validation.' },
   { code: 'unauthorized', status: 401, description: 'Missing or invalid token.' },
   { code: 'forbidden', status: 403, description: 'Valid token but insufficient scopes.' },
   { code: 'not_found', status: 404, description: 'Resource not found.' },
-  { code: 'validation_error', status: 400, description: 'Request body failed validation.' },
-  { code: 'conflict', status: 409, description: 'Idempotency key reused or duplicate resource.' },
+  { code: 'conflict', status: 409, description: 'Idempotency key reused with different payload.' },
+  { code: 'unprocessable', status: 422, description: 'Valid syntax but violates a business rule.' },
   { code: 'rate_limited', status: 429, description: 'Rate limit exceeded. Check Retry-After header.' },
   { code: 'internal_error', status: 500, description: 'Server error. Contact support with the request_id.' },
 ]
@@ -344,6 +430,7 @@ function MethodBadge({ method }: { method: string }) {
   const colors: Record<string, string> = {
     GET: 'bg-blue-50 text-blue-700 border-blue-200',
     POST: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    PATCH: 'bg-amber-50 text-amber-700 border-amber-200',
     DELETE: 'bg-red-50 text-red-700 border-red-200',
   }
   return (
@@ -390,6 +477,11 @@ function EndpointCard({ endpoint }: { endpoint: Endpoint }) {
       <div className="flex flex-wrap items-center gap-2">
         <MethodBadge method={endpoint.method} />
         <code className="text-sm font-semibold text-zinc-950">{endpoint.path}</code>
+        {endpoint.statusCode && (
+          <span className="rounded-md bg-zinc-100 px-1.5 py-0.5 text-[11px] font-mono font-medium text-zinc-500">
+            {endpoint.statusCode}
+          </span>
+        )}
         {endpoint.scope !== 'none' && (
           <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[11px] font-medium text-zinc-500">
             {endpoint.scope}
@@ -423,11 +515,16 @@ function EndpointCard({ endpoint }: { endpoint: Endpoint }) {
 function SideNav({ activeSection }: { activeSection: string }) {
   const allSections = [
     { id: 'overview', title: 'Overview' },
+    { id: 'getting-started', title: 'Getting Started' },
     ...sections.map((s) => ({ id: s.id, title: s.title })),
     { id: 'events', title: 'Webhook Events' },
     { id: 'scopes', title: 'Scopes' },
     { id: 'errors', title: 'Error Handling' },
     { id: 'rate-limits', title: 'Rate Limits' },
+    { id: 'idempotency', title: 'Idempotency' },
+    { id: 'versioning', title: 'Versioning' },
+    { id: 'sandbox', title: 'Sandbox' },
+    { id: 'changelog', title: 'Changelog' },
   ]
 
   return (
@@ -460,6 +557,33 @@ function SideNav({ activeSection }: { activeSection: string }) {
 
 export function DevelopersPageClient() {
   const [activeSection, setActiveSection] = useState('overview')
+  useEffect(() => {
+    const sectionIds = [
+      'overview', 'getting-started',
+      ...sections.map((s) => s.id),
+      'events', 'scopes', 'errors', 'rate-limits',
+      'idempotency', 'versioning', 'sandbox', 'changelog',
+    ]
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id)
+            break
+          }
+        }
+      },
+      { rootMargin: '-80px 0px -60% 0px', threshold: 0 }
+    )
+
+    for (const id of sectionIds) {
+      const el = document.getElementById(id)
+      if (el) observer.observe(el)
+    }
+
+    return () => observer.disconnect()
+  }, [])
 
   return (
     <MarketingShell currentPath="/developers" navAriaLabel="Developer docs">
@@ -480,9 +604,15 @@ export function DevelopersPageClient() {
 
           <div className="mt-8 flex flex-wrap gap-3">
             <span className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm">
-              <span className="font-medium text-zinc-950">Base URL</span>
+              <span className="font-medium text-zinc-950">Production</span>
               <code className="rounded bg-zinc-200/60 px-2 py-0.5 text-xs text-zinc-700">
                 {BASE_URL}
+              </code>
+            </span>
+            <span className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm">
+              <span className="font-medium text-zinc-950">Sandbox</span>
+              <code className="rounded bg-zinc-200/60 px-2 py-0.5 text-xs text-zinc-700">
+                {SANDBOX_URL}
               </code>
             </span>
             <span className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm">
@@ -507,6 +637,52 @@ export function DevelopersPageClient() {
             </div>
           </div>
         </header>
+
+        {/* Getting started */}
+        <section id="getting-started" className="scroll-mt-24 mb-16">
+          <h2 className="text-xl font-bold tracking-tight text-zinc-950">Getting Started</h2>
+          <p className="mt-2 text-sm leading-relaxed text-zinc-500">
+            Follow these steps to start integrating with the Renovo API.
+          </p>
+          <ol className="mt-6 space-y-4">
+            {[
+              {
+                step: '1',
+                title: 'Register your application',
+                description:
+                  'Contact us or book a demo to get your application registered. We\u2019ll issue you a client_id and client_secret for production, and a sandbox API key for development.',
+              },
+              {
+                step: '2',
+                title: 'Authenticate in sandbox',
+                description:
+                  'Use your sandbox API key to make test requests against the sandbox environment. Sandbox tokens are prefixed renv1_test_sk_.',
+              },
+              {
+                step: '3',
+                title: 'Integrate your endpoints',
+                description:
+                  'Push inspections from your inventory platform, read case data, and register webhooks to receive real-time updates.',
+              },
+              {
+                step: '4',
+                title: 'Go live',
+                description:
+                  'When you\u2019re ready, switch to production credentials and the production base URL. Use OAuth 2.0 Client Credentials to obtain short-lived JWT tokens.',
+              },
+            ].map((item) => (
+              <li key={item.step} className="flex gap-4">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-sm font-semibold text-emerald-700">
+                  {item.step}
+                </span>
+                <div>
+                  <p className="text-sm font-semibold text-zinc-950">{item.title}</p>
+                  <p className="mt-0.5 text-sm text-zinc-500">{item.description}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
 
         {/* Layout: sidebar + content */}
         <div className="grid gap-12 lg:grid-cols-[200px_1fr]">
@@ -595,14 +771,56 @@ export function DevelopersPageClient() {
               </div>
 
               <div className="mt-6">
-                <h3 className="text-sm font-semibold text-zinc-950">Verifying signatures</h3>
-                <CodeBlock>{`import hmac, hashlib
+                <h3 className="text-sm font-semibold text-zinc-950">Example delivery payload</h3>
+                <p className="mt-2 text-sm leading-relaxed text-zinc-500">
+                  When an event fires, Renovo sends a POST request to your registered URL with this structure:
+                </p>
+                <div className="mt-3">
+                  <CodeBlock title="Webhook delivery body">{`{
+  "id": "del_a1b2c3d4",
+  "event": "case.status_changed",
+  "created_at": "2026-04-11T14:30:00Z",
+  "data": {
+    "case_id": "018f...",
+    "tenancy_id": "018e...",
+    "property_address": "14 Marchmont Crescent, Flat 3, EH9 1HQ",
+    "previous_status": "draft",
+    "new_status": "review",
+    "changed_at": "2026-04-11T14:30:00Z"
+  }
+}`}</CodeBlock>
+                </div>
+              </div>
 
-def verify(body: bytes, secret: str, signature: str) -> bool:
+              <div className="mt-6">
+                <h3 className="text-sm font-semibold text-zinc-950">Verifying signatures</h3>
+                <p className="mt-2 text-sm leading-relaxed text-zinc-500">
+                  The signature is computed over <code className="rounded bg-zinc-100 px-1 py-0.5 text-xs">{'{timestamp}.{raw_body}'}</code> using
+                  your webhook secret. Always verify signatures before processing deliveries.
+                </p>
+                <div className="mt-3 space-y-4">
+                  <CodeBlock title="Python">{`import hmac, hashlib
+
+def verify(body: bytes, secret: str, timestamp: str, signature: str) -> bool:
+    payload = f"{timestamp}.".encode() + body
     expected = "sha256=" + hmac.new(
-        secret.encode(), body, hashlib.sha256
+        secret.encode(), payload, hashlib.sha256
     ).hexdigest()
     return hmac.compare_digest(expected, signature)`}</CodeBlock>
+                  <CodeBlock title="Node.js">{`const crypto = require('crypto');
+
+function verify(body, secret, timestamp, signature) {
+  const payload = \`\${timestamp}.\${body}\`;
+  const expected = 'sha256=' + crypto
+    .createHmac('sha256', secret)
+    .update(payload)
+    .digest('hex');
+  return crypto.timingSafeEqual(
+    Buffer.from(expected),
+    Buffer.from(signature)
+  );
+}`}</CodeBlock>
+                </div>
               </div>
             </section>
 
@@ -692,10 +910,41 @@ def verify(body: bytes, secret: str, signature: str) -> bool:
             <section id="rate-limits" className="scroll-mt-24 mb-16">
               <h2 className="text-xl font-bold tracking-tight text-zinc-950">Rate Limits</h2>
               <p className="mt-2 text-sm leading-relaxed text-zinc-500">
-                The API enforces a sliding-window rate limit of 300 requests per hour
-                per application. Every response includes rate limit headers.
+                The API enforces a sliding-window rate limit per minute per application.
+                Limits vary by environment tier. Every response includes rate limit headers.
               </p>
+
               <div className="mt-6 overflow-x-auto rounded-lg border border-zinc-200">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-zinc-200 bg-zinc-50">
+                      <th className="px-4 py-3 text-left font-semibold text-zinc-950">Tier</th>
+                      <th className="px-4 py-3 text-left font-semibold text-zinc-950">Requests / minute</th>
+                      <th className="px-4 py-3 text-left font-semibold text-zinc-950">Burst</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-b border-zinc-100">
+                      <td className="px-4 py-3 text-zinc-600">Sandbox</td>
+                      <td className="px-4 py-3 font-mono text-zinc-600">60</td>
+                      <td className="px-4 py-3 font-mono text-zinc-600">10</td>
+                    </tr>
+                    <tr className="border-b border-zinc-100">
+                      <td className="px-4 py-3 text-zinc-600">Production</td>
+                      <td className="px-4 py-3 font-mono text-zinc-600">300</td>
+                      <td className="px-4 py-3 font-mono text-zinc-600">50</td>
+                    </tr>
+                    <tr className="last:border-0">
+                      <td className="px-4 py-3 text-zinc-600">Enterprise</td>
+                      <td className="px-4 py-3 font-mono text-zinc-600">1,000</td>
+                      <td className="px-4 py-3 font-mono text-zinc-600">100</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <h3 className="mt-6 text-sm font-semibold text-zinc-950">Response headers</h3>
+              <div className="mt-3 overflow-x-auto rounded-lg border border-zinc-200">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-zinc-200 bg-zinc-50">
@@ -714,7 +963,7 @@ def verify(body: bytes, secret: str, signature: str) -> bool:
                     </tr>
                     <tr className="border-b border-zinc-100">
                       <td className="px-4 py-3"><code className="rounded bg-zinc-100 px-1.5 py-0.5 text-xs text-zinc-700">X-RateLimit-Reset</code></td>
-                      <td className="px-4 py-3 text-zinc-600">Seconds until the window resets.</td>
+                      <td className="px-4 py-3 text-zinc-600">Unix timestamp when the window resets.</td>
                     </tr>
                     <tr className="last:border-0">
                       <td className="px-4 py-3"><code className="rounded bg-zinc-100 px-1.5 py-0.5 text-xs text-zinc-700">Retry-After</code></td>
@@ -722,6 +971,135 @@ def verify(body: bytes, secret: str, signature: str) -> bool:
                     </tr>
                   </tbody>
                 </table>
+              </div>
+            </section>
+
+            {/* Idempotency */}
+            <section id="idempotency" className="scroll-mt-24 mb-16">
+              <h2 className="text-xl font-bold tracking-tight text-zinc-950">Idempotency</h2>
+              <p className="mt-2 text-sm leading-relaxed text-zinc-500">
+                All POST, PUT, and PATCH endpoints accept an <code className="rounded bg-zinc-100 px-1 py-0.5 text-xs">Idempotency-Key</code> header
+                so you can safely retry requests on network failure without creating duplicate resources.
+              </p>
+              <div className="mt-4">
+                <CodeBlock title="Example header">{`POST /v1/inspections HTTP/1.1
+Authorization: Bearer renv1_live_...
+Idempotency-Key: your-unique-key-per-request
+Content-Type: application/json`}</CodeBlock>
+              </div>
+              <div className="mt-6 overflow-x-auto rounded-lg border border-zinc-200">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-zinc-200 bg-zinc-50">
+                      <th className="px-4 py-3 text-left font-semibold text-zinc-950">Scenario</th>
+                      <th className="px-4 py-3 text-left font-semibold text-zinc-950">Behaviour</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-b border-zinc-100">
+                      <td className="px-4 py-3 text-zinc-600">First request</td>
+                      <td className="px-4 py-3 text-zinc-600">Processed normally. Response cached for 24 hours.</td>
+                    </tr>
+                    <tr className="border-b border-zinc-100">
+                      <td className="px-4 py-3 text-zinc-600">Same key, same payload</td>
+                      <td className="px-4 py-3 text-zinc-600">Returns the cached response (not re-processed).</td>
+                    </tr>
+                    <tr className="border-b border-zinc-100">
+                      <td className="px-4 py-3 text-zinc-600">Same key, different payload</td>
+                      <td className="px-4 py-3 text-zinc-600">Returns <code className="rounded bg-zinc-100 px-1.5 py-0.5 text-xs text-zinc-700">409 Conflict</code>.</td>
+                    </tr>
+                    <tr className="last:border-0">
+                      <td className="px-4 py-3 text-zinc-600">No key provided</td>
+                      <td className="px-4 py-3 text-zinc-600">Processed without idempotency protection.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            {/* Versioning */}
+            <section id="versioning" className="scroll-mt-24 mb-16">
+              <h2 className="text-xl font-bold tracking-tight text-zinc-950">Versioning</h2>
+              <p className="mt-2 text-sm leading-relaxed text-zinc-500">
+                The API is versioned via URL path. The current version is <code className="rounded bg-zinc-100 px-1 py-0.5 text-xs">/v1/</code>.
+              </p>
+              <ul className="mt-4 space-y-2">
+                {[
+                  'Non-breaking additions (new fields, new optional parameters) do not require a version bump.',
+                  'Breaking changes (field removal, type changes, behaviour changes) will ship under a new version.',
+                  'Deprecated versions are supported for 12 months after the deprecation announcement.',
+                  'Deprecation notices are sent via email and the X-Renovo-Deprecated header.',
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-zinc-500">
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </section>
+
+            {/* Sandbox */}
+            <section id="sandbox" className="scroll-mt-24 mb-16">
+              <h2 className="text-xl font-bold tracking-tight text-zinc-950">Sandbox Environment</h2>
+              <p className="mt-2 text-sm leading-relaxed text-zinc-500">
+                Use the sandbox environment for development and testing. Sandbox data is
+                isolated from production and can be reset at any time.
+              </p>
+              <div className="mt-6 overflow-x-auto rounded-lg border border-zinc-200">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-zinc-200 bg-zinc-50">
+                      <th className="px-4 py-3 text-left font-semibold text-zinc-950">Environment</th>
+                      <th className="px-4 py-3 text-left font-semibold text-zinc-950">Base URL</th>
+                      <th className="px-4 py-3 text-left font-semibold text-zinc-950">Auth</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-b border-zinc-100">
+                      <td className="px-4 py-3 text-zinc-600">Production</td>
+                      <td className="px-4 py-3"><code className="rounded bg-zinc-100 px-1.5 py-0.5 text-xs text-zinc-700">{BASE_URL}</code></td>
+                      <td className="px-4 py-3 text-zinc-600">OAuth 2.0 (tokens prefixed <code className="rounded bg-zinc-100 px-1 py-0.5 text-xs text-zinc-700">renv1_live_</code>)</td>
+                    </tr>
+                    <tr className="last:border-0">
+                      <td className="px-4 py-3 text-zinc-600">Sandbox</td>
+                      <td className="px-4 py-3"><code className="rounded bg-zinc-100 px-1.5 py-0.5 text-xs text-zinc-700">{SANDBOX_URL}</code></td>
+                      <td className="px-4 py-3 text-zinc-600">API keys (prefixed <code className="rounded bg-zinc-100 px-1 py-0.5 text-xs text-zinc-700">renv1_test_sk_</code>)</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <ul className="mt-4 space-y-2">
+                {[
+                  'Sandbox API keys are long-lived and do not expire, but can be rotated from your dashboard.',
+                  'Sandbox rate limits are lower (60 requests/minute) to prevent accidental load.',
+                  'Webhook deliveries in sandbox are tagged with a test: true field.',
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-zinc-500">
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </section>
+
+            {/* Changelog */}
+            <section id="changelog" className="scroll-mt-24 mb-16">
+              <h2 className="text-xl font-bold tracking-tight text-zinc-950">Changelog</h2>
+              <p className="mt-2 text-sm leading-relaxed text-zinc-500">
+                We publish API changes and deprecation notices here. Subscribe to updates
+                via your application settings in the Renovo dashboard.
+              </p>
+              <div className="mt-6 space-y-4">
+                <div className="rounded-lg border border-zinc-200 p-4">
+                  <div className="flex items-center gap-2">
+                    <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-700">New</span>
+                    <span className="text-xs text-zinc-400">2026-04-13</span>
+                  </div>
+                  <p className="mt-2 text-sm font-medium text-zinc-950">API v1 public launch</p>
+                  <p className="mt-1 text-sm text-zinc-500">
+                    Initial release of the Renovo Public API with inspections, cases, documents, and webhooks.
+                  </p>
+                </div>
               </div>
             </section>
 
