@@ -11,7 +11,7 @@ function AccountTab() {
   return (
     <div className="space-y-6">
       {/* Basic information */}
-      <section className="border border-zinc-200 bg-white shadow-sm px-6 py-6 md:px-7">
+      <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
         <h3 className="text-sm font-semibold text-zinc-950">Basic information</h3>
         <p className="mt-1 text-sm text-zinc-500">
           Your personal details used across the workspace.
@@ -26,7 +26,7 @@ function AccountTab() {
               id="first-name"
               type="text"
               placeholder="First name"
-              className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300"
+              className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-200"
             />
           </div>
           <div>
@@ -37,7 +37,7 @@ function AccountTab() {
               id="last-name"
               type="text"
               placeholder="Last name"
-              className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300"
+              className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-200"
             />
           </div>
           <div>
@@ -81,7 +81,7 @@ function AccountTab() {
       </section>
 
       {/* Change password */}
-      <section className="border border-zinc-200 bg-white shadow-sm px-6 py-6 md:px-7">
+      <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
         <h3 className="text-sm font-semibold text-zinc-950">Change password</h3>
         <p className="mt-1 text-sm text-zinc-500">
           Update your workspace password. You'll need to confirm your current password first.
@@ -96,7 +96,7 @@ function AccountTab() {
               id="current-password"
               type="password"
               placeholder="Enter current password"
-              className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300"
+              className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-200"
             />
           </div>
           <div>
@@ -107,7 +107,7 @@ function AccountTab() {
               id="new-password"
               type="password"
               placeholder="Enter new password"
-              className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300"
+              className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-200"
             />
           </div>
           <div>
@@ -118,7 +118,7 @@ function AccountTab() {
               id="confirm-password"
               type="password"
               placeholder="Confirm new password"
-              className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300"
+              className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-200"
             />
           </div>
 
@@ -132,7 +132,7 @@ function AccountTab() {
       </section>
 
       {/* Two-factor authentication */}
-      <section className="border border-zinc-200 bg-white shadow-sm px-6 py-6 md:px-7">
+      <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h3 className="text-sm font-semibold text-zinc-950">Two-factor authentication</h3>
@@ -170,7 +170,7 @@ function TeamTab() {
 
   return (
     <div className="space-y-6">
-      <section className="border border-zinc-200 bg-white shadow-sm px-6 py-6 md:px-7">
+      <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h3 className="text-sm font-semibold text-zinc-950">Your team</h3>
@@ -190,7 +190,7 @@ function TeamTab() {
           <input
             type="search"
             placeholder="Search for users"
-            className="h-10 w-64 rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300"
+            className="h-10 w-64 rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-200"
           />
         </div>
 
@@ -586,7 +586,7 @@ function UnmatchedEmailCard({
             setTenancySearch(e.target.value)
             setSelectedTenancy(null)
           }}
-          className="mt-1 h-9 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300"
+          className="mt-1 h-9 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-200"
         />
 
         {/* Results */}
@@ -750,7 +750,7 @@ function EmailIngestionTab() {
   return (
     <div className="space-y-6">
       {/* Config section */}
-      <section className="border border-zinc-200 bg-white shadow-sm px-6 py-6 md:px-7">
+      <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h3 className="text-sm font-semibold text-zinc-950">Email Ingestion</h3>
@@ -802,7 +802,7 @@ function EmailIngestionTab() {
                 value={prefix}
                 onChange={(e) => setPrefix(e.target.value)}
                 placeholder="reports"
-                className="h-10 w-48 rounded-l-lg border border-r-0 border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300"
+                className="h-10 w-48 rounded-l-lg border border-r-0 border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-200"
               />
               <span className="flex h-10 items-center rounded-r-lg border border-zinc-200 bg-zinc-50 px-3 text-sm text-zinc-500">
                 @in.renovoai.co.uk
@@ -823,7 +823,7 @@ function EmailIngestionTab() {
               value={domains}
               onChange={(e) => setDomains(e.target.value)}
               placeholder="helloreport.co.uk, nolettinggo.co.uk"
-              className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300"
+              className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-200"
             />
             <p className="mt-1 text-xs text-zinc-400">
               Comma-separated. Leave empty to accept from any sender.
@@ -870,7 +870,7 @@ function EmailIngestionTab() {
       </section>
 
       {/* How it works */}
-      <section className="border border-zinc-200 bg-white shadow-sm px-6 py-6 md:px-7">
+      <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
         <h3 className="text-sm font-semibold text-zinc-950">How it works</h3>
         <div className="mt-4 space-y-3">
           {[
@@ -918,7 +918,7 @@ function EmailIngestionTab() {
 
       {/* Recent activity */}
       {logs.length > 0 ? (
-        <section className="border border-zinc-200 bg-white shadow-sm px-6 py-6 md:px-7">
+        <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
           <h3 className="text-sm font-semibold text-zinc-950">Recent activity</h3>
           <div className="mt-4 overflow-x-auto">
             <table className="w-full text-sm">
@@ -968,7 +968,7 @@ function EmailIngestionTab() {
           </div>
         </section>
       ) : config ? (
-        <section className="border border-zinc-200 bg-white shadow-sm px-6 py-6 md:px-7">
+        <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
           <p className="text-center text-sm text-zinc-400">
             No emails received yet. Send a test email to{' '}
             <span className="font-medium text-zinc-600">
@@ -1149,7 +1149,7 @@ function StreetIntegrationPanel() {
   return (
     <div className="space-y-6">
       {/* Connection config */}
-      <section className="border border-zinc-200 bg-white shadow-sm px-6 py-6 md:px-7">
+      <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h3 className="text-sm font-semibold text-zinc-950">
@@ -1194,7 +1194,7 @@ function StreetIntegrationPanel() {
               value={label}
               onChange={(e) => setLabel(e.target.value)}
               placeholder="e.g. Main office"
-              className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300"
+              className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-200"
             />
           </div>
 
@@ -1208,7 +1208,7 @@ function StreetIntegrationPanel() {
               value={apiToken}
               onChange={(e) => setApiToken(e.target.value)}
               placeholder={connected ? '••••••••••••••••' : 'Paste your Street.co.uk API token'}
-              className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300"
+              className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-200"
             />
             <p className="mt-1 text-xs text-zinc-400">
               Find this in Street &gt; Settings &gt; Account Administration &gt; Applications.
@@ -1240,7 +1240,7 @@ function StreetIntegrationPanel() {
 
       {/* Sync controls */}
       {connected ? (
-        <section className="border border-zinc-200 bg-white shadow-sm px-6 py-6 md:px-7">
+        <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <h3 className="text-sm font-semibold text-zinc-950">Data sync</h3>
@@ -1506,7 +1506,7 @@ function ReapitIntegrationPanel() {
   return (
     <div className="space-y-6">
       {/* Connection config */}
-      <section className="border border-zinc-200 bg-white shadow-sm px-6 py-6 md:px-7">
+      <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h3 className="text-sm font-semibold text-zinc-950">
@@ -1571,7 +1571,7 @@ function ReapitIntegrationPanel() {
                 value={customerId}
                 onChange={(e) => setCustomerId(e.target.value)}
                 placeholder="e.g. SBOX (sandbox) or your live customer ID"
-                className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300"
+                className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-200"
               />
               <p className="mt-1 text-xs text-zinc-400">
                 First install Renovo from the Reapit AppMarket. Your Customer ID is shown in the Reapit Developer Portal under Installations.
@@ -1610,7 +1610,7 @@ function ReapitIntegrationPanel() {
 
       {/* Sync controls */}
       {connected && status?.connection ? (
-        <section className="border border-zinc-200 bg-white shadow-sm px-6 py-6 md:px-7">
+        <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <h3 className="text-sm font-semibold text-zinc-950">Data sync</h3>
@@ -1717,7 +1717,7 @@ function IntegrationsTab() {
 
   return (
     <div className="space-y-6">
-      <section className="border border-zinc-200 bg-white shadow-sm px-6 py-6 md:px-7">
+      <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
         <h3 className="text-sm font-semibold text-zinc-950">Integrations</h3>
         <p className="mt-1 text-sm text-zinc-500">
           Connect your property management tools and inventory software.
@@ -1747,7 +1747,7 @@ function IntegrationsTab() {
       ) : isReapit ? (
         <ReapitIntegrationPanel />
       ) : isDepositScheme ? (
-        <section className="border border-zinc-200 bg-white shadow-sm px-6 py-6 md:px-7">
+        <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
           <div className="flex items-start justify-between gap-4">
             <div>
               <h3 className="text-sm font-semibold text-zinc-950">
@@ -1785,7 +1785,7 @@ function IntegrationsTab() {
       ) : (
         <>
           {/* Feature list for non-Street integrations */}
-          <section className="border border-zinc-200 bg-white shadow-sm px-6 py-6 md:px-7">
+          <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h3 className="text-sm font-semibold text-zinc-950">
@@ -1820,7 +1820,7 @@ function IntegrationsTab() {
                   id="api-key"
                   type="text"
                   placeholder="Enter your API key"
-                  className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300"
+                  className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-200"
                 />
               </div>
 
@@ -1830,7 +1830,7 @@ function IntegrationsTab() {
                 </label>
                 <select
                   id="integration-status"
-                  className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300"
+                  className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-200"
                 >
                   <option>Inactive</option>
                   <option>Active</option>
@@ -2197,7 +2197,7 @@ function AutomationTab() {
       {subTab === 'Rules' && (
         <>
           {/* Rules list */}
-          <section className="border border-zinc-200 bg-white shadow-sm px-6 py-6 md:px-7">
+          <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-sm font-semibold text-zinc-950">Automation Rules</h3>
@@ -2310,7 +2310,7 @@ function AutomationTab() {
 
           {/* Create/Edit form */}
           {showCreateForm && (
-            <section className="border border-zinc-200 bg-white shadow-sm px-6 py-6 md:px-7">
+            <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
               <h3 className="text-sm font-semibold text-zinc-950">
                 {editingRuleId ? 'Edit Rule' : 'Create Rule'}
               </h3>
@@ -2324,7 +2324,7 @@ function AutomationTab() {
                     value={formName}
                     onChange={(e) => setFormName(e.target.value)}
                     placeholder="e.g., Auto-create case on checkout"
-                    className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300"
+                    className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-200"
                   />
                 </div>
 
@@ -2338,7 +2338,7 @@ function AutomationTab() {
                     value={formDescription}
                     onChange={(e) => setFormDescription(e.target.value)}
                     placeholder="What does this rule do?"
-                    className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300"
+                    className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-200"
                   />
                 </div>
 
@@ -2348,7 +2348,7 @@ function AutomationTab() {
                   <select
                     value={formTrigger}
                     onChange={(e) => setFormTrigger(e.target.value)}
-                    className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300"
+                    className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-200"
                   >
                     <option value="">Select trigger...</option>
                     {Object.entries(TRIGGER_LABELS).map(([value, label]) => (
@@ -2445,7 +2445,7 @@ function AutomationTab() {
                       setFormAction(e.target.value)
                       setFormActionParams({})
                     }}
-                    className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300"
+                    className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-200"
                   >
                     <option value="">Select action...</option>
                     {Object.entries(ACTION_LABELS).map(([value, label]) => (
@@ -2566,7 +2566,7 @@ function AutomationTab() {
 
           {/* Templates */}
           {templates.length > 0 && (
-            <section className="border border-zinc-200 bg-white shadow-sm px-6 py-6 md:px-7">
+            <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
               <h3 className="text-sm font-semibold text-zinc-950">Quick Start Templates</h3>
               <p className="mt-1 text-sm text-zinc-500">
                 Activate a template to create an inactive rule you can customise.
@@ -2603,7 +2603,7 @@ function AutomationTab() {
       )}
 
       {subTab === 'Execution Log' && (
-        <section className="border border-zinc-200 bg-white shadow-sm px-6 py-6 md:px-7">
+        <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-sm font-semibold text-zinc-950">Execution Log</h3>
@@ -3160,7 +3160,7 @@ function ApiPartnersTab() {
         )}
 
         {/* Application details */}
-        <section className="border border-zinc-200 bg-white shadow-sm px-6 py-6 md:px-7">
+        <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold text-zinc-950">
               {editing ? 'Edit Application' : selectedApp.name}
@@ -3194,7 +3194,7 @@ function ApiPartnersTab() {
                   type="text"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300"
+                  className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-200"
                 />
               </div>
               <div>
@@ -3207,7 +3207,7 @@ function ApiPartnersTab() {
                   onChange={(e) => setEditRateLimit(parseInt(e.target.value, 10) || 300)}
                   min={1}
                   max={10000}
-                  className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300"
+                  className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-200"
                 />
               </div>
               <div>
@@ -3301,7 +3301,7 @@ function ApiPartnersTab() {
         </section>
 
         {/* API Keys section */}
-        <section className="border border-zinc-200 bg-white shadow-sm px-6 py-6 md:px-7">
+        <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold text-zinc-950">API Keys</h3>
             {!showKeyForm && (
@@ -3329,7 +3329,7 @@ function ApiPartnersTab() {
                     value={keyName}
                     onChange={(e) => setKeyName(e.target.value)}
                     placeholder="e.g. Production key"
-                    className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300"
+                    className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-200"
                   />
                 </div>
                 <div>
@@ -3343,7 +3343,7 @@ function ApiPartnersTab() {
                     placeholder="Leave empty for no expiry"
                     min={1}
                     max={365}
-                    className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300"
+                    className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-200"
                   />
                 </div>
                 <div>
@@ -3497,7 +3497,7 @@ function ApiPartnersTab() {
       )}
 
       {/* Applications section */}
-      <section className="border border-zinc-200 bg-white shadow-sm px-6 py-6 md:px-7">
+      <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-sm font-semibold text-zinc-950">API Applications</h3>
@@ -3528,7 +3528,7 @@ function ApiPartnersTab() {
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
                   placeholder="e.g. NLG Integration"
-                  className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300"
+                  className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-200"
                 />
               </div>
               <div>
@@ -3580,7 +3580,7 @@ function ApiPartnersTab() {
                   onChange={(e) => setFormRateLimit(parseInt(e.target.value, 10) || 300)}
                   min={1}
                   max={10000}
-                  className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-300"
+                  className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-200"
                 />
               </div>
               <div className="flex items-center gap-2 pt-1">

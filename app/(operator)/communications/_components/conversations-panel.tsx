@@ -161,7 +161,7 @@ function StatCard({
     : 'text-zinc-950'
 
   return (
-    <div className={cn('flex items-center gap-3 rounded-xl border border-zinc-200 bg-white px-4 py-3 shadow-sm', className)}>
+    <div className={cn('flex items-center gap-3 rounded-xl border border-zinc-200 bg-white px-4 py-3', className)}>
       <span className={iconColor}>{icon}</span>
       <div>
         <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">{label}</p>
@@ -986,7 +986,7 @@ export function ConversationsPanel() {
       {loading ? (
         <div className="grid gap-4 lg:grid-cols-5">
           <div className="lg:col-span-2">
-            <div className="space-y-0 rounded-xl border border-zinc-200 bg-white shadow-sm">
+            <div className="space-y-0 rounded-xl border border-zinc-200 bg-white">
               {Array.from({ length: 5 }).map((_, i) => (
                 <div key={i} className="skeleton-shimmer border-b border-zinc-100/80 px-4 py-4 last:border-b-0">
                   <div className="flex gap-2">

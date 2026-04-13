@@ -146,7 +146,7 @@ export function MembersPanel() {
         <button
           type="button"
           onClick={() => setShowInvite(true)}
-          className="inline-flex items-center gap-1.5 border border-zinc-900 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-zinc-800"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-900 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-zinc-800"
         >
           <UserPlus className="h-3.5 w-3.5" />
           Add member
@@ -154,20 +154,20 @@ export function MembersPanel() {
       </div>
 
       {error ? (
-        <p className="border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm text-rose-700">
+        <p className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm text-rose-700">
           {error}
         </p>
       ) : null}
 
       {success ? (
-        <p className="border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm text-emerald-700">
+        <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm text-emerald-700">
           {success}
         </p>
       ) : null}
 
       {/* Invite form */}
       {showInvite ? (
-        <section className="border border-zinc-200 bg-white shadow-sm px-5 py-5">
+        <section className="rounded-xl border border-zinc-200 bg-white px-5 py-5">
           <p className="text-sm font-semibold text-zinc-950">Add a new member</p>
           <p className="mt-1 text-sm text-zinc-500">
             Enter their email address. If they don&apos;t have an auth account yet, one will be
@@ -180,12 +180,12 @@ export function MembersPanel() {
               placeholder="name@company.com"
               value={inviteEmail}
               onChange={(e) => setInviteEmail(e.target.value)}
-              className="h-9 w-full border border-zinc-200 bg-zinc-50 px-3 text-sm text-zinc-900 outline-none focus:border-zinc-400 focus:bg-white"
+              className="h-9 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-sm text-zinc-900 outline-none focus:border-emerald-500 focus:bg-white"
             />
             <select
               value={inviteRole}
               onChange={(e) => setInviteRole(e.target.value)}
-              className="h-9 border border-zinc-200 bg-zinc-50 px-3 text-sm text-zinc-900 outline-none focus:border-zinc-400 focus:bg-white"
+              className="h-9 rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-sm text-zinc-900 outline-none focus:border-emerald-500 focus:bg-white"
             >
               {ROLE_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -197,7 +197,7 @@ export function MembersPanel() {
               <button
                 type="submit"
                 disabled={inviting}
-                className="inline-flex items-center gap-1.5 border border-zinc-900 bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-60"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-900 bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-60"
               >
                 <Plus className="h-3.5 w-3.5" />
                 {inviting ? 'Adding...' : 'Add'}
@@ -209,7 +209,7 @@ export function MembersPanel() {
                   setInviteEmail('')
                   setError(null)
                 }}
-                className="border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
+                className="rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
               >
                 Cancel
               </button>
@@ -219,7 +219,7 @@ export function MembersPanel() {
       ) : null}
 
       {/* Members table */}
-      <section className="border border-zinc-200 bg-white shadow-sm px-6 py-6 md:px-7">
+      <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
         <h3 className="text-sm font-semibold text-zinc-950">Workspace members</h3>
         <p className="mt-1 text-sm text-zinc-500">
           {members.length} member{members.length !== 1 ? 's' : ''} · {activeCount} active
@@ -237,14 +237,14 @@ export function MembersPanel() {
             <button
               type="button"
               onClick={() => setShowInvite(true)}
-              className="mt-3 inline-flex items-center gap-1.5 border border-zinc-900 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-zinc-800"
+              className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-zinc-900 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-zinc-800"
             >
               <UserPlus className="h-3.5 w-3.5" />
               Add member
             </button>
           </div>
         ) : (
-          <div className="mt-4 overflow-hidden border border-zinc-200">
+          <div className="mt-4 overflow-hidden rounded-xl border border-zinc-200">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-zinc-200 bg-zinc-50/60">
@@ -278,7 +278,7 @@ export function MembersPanel() {
                       <select
                         value={member.role}
                         onChange={(e) => handleRoleChange(member.membershipId, e.target.value)}
-                        className="border border-transparent bg-transparent px-1 py-0.5 text-sm text-zinc-600 outline-none transition hover:border-zinc-200 focus:border-zinc-400"
+                        className="border border-transparent bg-transparent px-1 py-0.5 text-sm text-zinc-600 outline-none transition hover:border-zinc-200 focus:border-emerald-500"
                       >
                         {ROLE_OPTIONS.map((opt) => (
                           <option key={opt.value} value={opt.value}>
@@ -342,7 +342,7 @@ export function MembersPanel() {
       </section>
 
       {/* Link to teams */}
-      <section className="border border-zinc-200 bg-white shadow-sm px-6 py-6 md:px-7">
+      <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-sm font-semibold text-zinc-950">Team groups</h3>
@@ -352,7 +352,7 @@ export function MembersPanel() {
           </div>
           <Link
             href="/teams/teams"
-            className="border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50"
+            className="rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50"
           >
             Manage teams
           </Link>

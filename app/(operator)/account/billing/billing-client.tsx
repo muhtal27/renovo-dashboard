@@ -80,7 +80,7 @@ export function BillingPageClient() {
     <div className="space-y-6 animate-fade-in-up">
 
       {/* ── Plan overview ── */}
-      <section className="border border-zinc-200 bg-white shadow-sm px-6 py-6 md:px-7">
+      <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h3 className="text-sm font-semibold text-zinc-950">Current plan</h3>
@@ -125,7 +125,7 @@ export function BillingPageClient() {
       </section>
 
       {/* ── Usage ── */}
-      <section className="border border-zinc-200 bg-white shadow-sm px-6 py-6 md:px-7">
+      <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h3 className="text-sm font-semibold text-zinc-950">Usage</h3>
@@ -180,7 +180,7 @@ export function BillingPageClient() {
       </section>
 
       {/* ── Manage blocks ── */}
-      <section className="border border-zinc-200 bg-white shadow-sm px-6 py-6 md:px-7">
+      <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h3 className="text-sm font-semibold text-zinc-950">Manage portfolio blocks</h3>
@@ -275,7 +275,7 @@ export function BillingPageClient() {
       </section>
 
       {/* ── Payment method ── */}
-      <section className="border border-zinc-200 bg-white shadow-sm px-6 py-6 md:px-7">
+      <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h3 className="text-sm font-semibold text-zinc-950">Payment method</h3>
@@ -317,7 +317,7 @@ export function BillingPageClient() {
       </section>
 
       {/* ── Billing history ── */}
-      <section className="border border-zinc-200 bg-white shadow-sm px-6 py-6 md:px-7">
+      <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h3 className="text-sm font-semibold text-zinc-950">Billing history</h3>

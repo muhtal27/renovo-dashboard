@@ -239,7 +239,7 @@ export function TeamDetailPanel({ teamId }: { teamId: string }) {
       {showAdd ? (
         <form
           onSubmit={handleAdd}
-          className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm"
+          className="rounded-xl border border-zinc-200 bg-white p-5"
         >
           <p className="text-sm font-semibold text-zinc-950">Add a workspace member to this team</p>
           <p className="mt-1 text-sm text-zinc-500">

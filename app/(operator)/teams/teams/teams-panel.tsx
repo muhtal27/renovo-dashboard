@@ -111,7 +111,7 @@ export function TeamsPanel() {
         <button
           type="button"
           onClick={() => setShowCreate(true)}
-          className="inline-flex items-center gap-1.5 border border-zinc-900 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-zinc-800"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-900 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-zinc-800"
         >
           <Plus className="h-3.5 w-3.5" />
           New team
@@ -119,20 +119,20 @@ export function TeamsPanel() {
       </div>
 
       {error ? (
-        <p className="border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm text-rose-700">
+        <p className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm text-rose-700">
           {error}
         </p>
       ) : null}
 
       {success ? (
-        <p className="border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm text-emerald-700">
+        <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm text-emerald-700">
           {success}
         </p>
       ) : null}
 
       {/* Create form */}
       {showCreate ? (
-        <section className="border border-zinc-200 bg-white shadow-sm px-5 py-5">
+        <section className="rounded-xl border border-zinc-200 bg-white px-5 py-5">
           <p className="text-sm font-semibold text-zinc-950">Create a new team</p>
           <p className="mt-1 text-sm text-zinc-500">
             Teams let you organise workspace members into groups — e.g. by property portfolio or
@@ -145,20 +145,20 @@ export function TeamsPanel() {
               placeholder="e.g. North London Team"
               value={teamName}
               onChange={(e) => setTeamName(e.target.value)}
-              className="h-9 w-full border border-zinc-200 bg-zinc-50 px-3 text-sm text-zinc-900 outline-none focus:border-zinc-400 focus:bg-white"
+              className="h-9 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-sm text-zinc-900 outline-none focus:border-emerald-500 focus:bg-white"
             />
             <input
               type="text"
               placeholder="Description (optional)"
               value={teamDescription}
               onChange={(e) => setTeamDescription(e.target.value)}
-              className="h-9 w-full border border-zinc-200 bg-zinc-50 px-3 text-sm text-zinc-900 outline-none focus:border-zinc-400 focus:bg-white"
+              className="h-9 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-sm text-zinc-900 outline-none focus:border-emerald-500 focus:bg-white"
             />
             <div className="flex gap-2">
               <button
                 type="submit"
                 disabled={creating}
-                className="inline-flex items-center gap-1.5 border border-zinc-900 bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-60"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-900 bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-60"
               >
                 <Plus className="h-3.5 w-3.5" />
                 {creating ? 'Creating...' : 'Create'}
@@ -171,7 +171,7 @@ export function TeamsPanel() {
                   setTeamDescription('')
                   setError(null)
                 }}
-                className="border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
+                className="rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
               >
                 Cancel
               </button>
@@ -181,7 +181,7 @@ export function TeamsPanel() {
       ) : null}
 
       {/* Teams list */}
-      <section className="border border-zinc-200 bg-white shadow-sm px-6 py-6 md:px-7">
+      <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
         <h3 className="text-sm font-semibold text-zinc-950">Team groups</h3>
         <p className="mt-1 text-sm text-zinc-500">
           {teams.length} team{teams.length !== 1 ? 's' : ''}
@@ -199,14 +199,14 @@ export function TeamsPanel() {
             <button
               type="button"
               onClick={() => setShowCreate(true)}
-              className="mt-3 inline-flex items-center gap-1.5 border border-zinc-900 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-zinc-800"
+              className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-zinc-900 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-zinc-800"
             >
               <Plus className="h-3.5 w-3.5" />
               New team
             </button>
           </div>
         ) : (
-          <div className="mt-4 overflow-hidden border border-zinc-200">
+          <div className="mt-4 overflow-hidden rounded-xl border border-zinc-200">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-zinc-200 bg-zinc-50/60">
@@ -242,7 +242,7 @@ export function TeamsPanel() {
                         </button>
                         <Link
                           href={`/teams/teams/${team.id}`}
-                          className="inline-flex items-center gap-1 border border-zinc-200 bg-white px-2.5 py-1 text-xs font-medium text-zinc-700 transition hover:border-zinc-300"
+                          className="inline-flex items-center gap-1 rounded-lg border border-zinc-200 bg-white px-2.5 py-1 text-xs font-medium text-zinc-700 transition hover:border-zinc-300"
                         >
                           Manage
                           <ChevronRight className="h-3 w-3" />

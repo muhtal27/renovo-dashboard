@@ -113,7 +113,7 @@ export function CaseAllocationPanel() {
 
   if (loadError) {
     return (
-      <div className="border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+      <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
         {loadError}
       </div>
     )
@@ -123,7 +123,7 @@ export function CaseAllocationPanel() {
     <div className="space-y-4 animate-fade-in-up">
       {/* Inline assign error */}
       {assignError ? (
-        <div className="flex items-center justify-between gap-3 border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm text-rose-700">
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm text-rose-700">
           <span>{assignError}</span>
           <button
             type="button"
@@ -136,7 +136,7 @@ export function CaseAllocationPanel() {
       ) : null}
 
       {/* Filter tabs */}
-      <div className="flex items-center gap-0">
+      <div className="flex items-center gap-1">
         {[
           { value: 'unallocated' as const, label: `Unallocated (${unallocatedCount})` },
           { value: 'allocated' as const, label: `Allocated (${allocatedCount})` },
@@ -146,10 +146,10 @@ export function CaseAllocationPanel() {
             key={tab.value}
             type="button"
             onClick={() => setFilter(tab.value)}
-            className={`px-3 py-1.5 text-xs font-medium transition ${
+            className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
               filter === tab.value
-                ? 'bg-emerald-600 text-white'
-                : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
+                ? 'bg-zinc-900 text-white'
+                : 'text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700'
             }`}
           >
             {tab.label}
@@ -167,7 +167,7 @@ export function CaseAllocationPanel() {
               : 'No cases found.'}
         </p>
       ) : (
-        <div className="overflow-hidden border border-zinc-200">
+        <div className="overflow-hidden rounded-xl border border-zinc-200">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-zinc-200 bg-zinc-50/60">
@@ -221,7 +221,7 @@ export function CaseAllocationPanel() {
                           const value = e.target.value || null
                           void handleAssign(caseItem.id, value)
                         }}
-                        className="h-7 w-full max-w-[200px] border border-zinc-200 bg-white px-2 text-xs text-zinc-700 disabled:opacity-50"
+                        className="h-7 w-full max-w-[200px] rounded-lg border border-zinc-200 bg-white px-2 text-xs text-zinc-700 disabled:opacity-50"
                       >
                         <option value="">Unassigned</option>
                         {members.map((m) => (
