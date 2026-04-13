@@ -208,7 +208,7 @@ function OperatorSearchForm({
           onChange={(event) => setSearchValue(event.target.value)}
           placeholder={searchPlaceholder}
           onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))}
-          className="h-9 w-full max-w-[420px] rounded-xl border border-zinc-200 bg-zinc-50 pl-9 pr-4 text-[13px] text-zinc-900 placeholder:text-zinc-400 transition focus:border-emerald-400 focus:bg-white focus:outline-none focus:ring-[3px] focus:ring-emerald-500/10"
+          className="h-9 w-full max-w-[420px] rounded-[14px] border border-zinc-200 bg-zinc-50 pl-9 pr-4 text-[13px] text-zinc-900 placeholder:text-zinc-400 transition focus:border-emerald-400 focus:bg-white focus:outline-none focus:ring-[3px] focus:ring-emerald-500/10"
           readOnly
         />
       </label>
@@ -362,6 +362,9 @@ export function OperatorLayout({ children, operator, latestRelease }: OperatorLa
                 <kbd className="rounded border border-zinc-200 bg-zinc-50 px-1.5 py-0.5 text-[11px] font-medium text-zinc-400">⌘K</kbd>
               </button>
 
+              {/* Notifications */}
+              <NotificationCenter />
+
               {/* AI Assistant */}
               <button
                 type="button"
@@ -371,9 +374,6 @@ export function OperatorLayout({ children, operator, latestRelease }: OperatorLa
               >
                 <Bot className="h-[18px] w-[18px]" />
               </button>
-
-              {/* Notifications */}
-              <NotificationCenter />
 
               {/* Profile */}
               <div className="relative ml-1" ref={profileMenuRef}>
