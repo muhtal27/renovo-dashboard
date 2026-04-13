@@ -1,440 +1,408 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
-import {
-  CreditCard,
-  Download,
-  ExternalLink,
-  Layers,
-  Minus,
-  Plus,
-  Receipt,
-  Shield,
-  TrendingUp,
-} from 'lucide-react'
-import { KPIStatCard, ProgressBar } from '@/app/operator-ui'
 import { cn } from '@/lib/ui'
 
-/* ── mock data (replace with real Stripe/API data) ── */
+// ---------------------------------------------------------------------------
+// Data
+// ---------------------------------------------------------------------------
 
-const BLOCK_PRICE = 179
-const TENANCIES_PER_BLOCK = 365
-
-const mockSubscription = {
-  plan: 'Portfolio 365',
-  status: 'active' as const,
-  blocks: 2,
-  billingCycle: 'Monthly',
-  currentPeriodEnd: '2026-05-09',
-  nextInvoiceAmount: 358,
-}
-
-const mockUsage = {
-  fullyManagedTenancies: 412,
-  letOnlyTenancies: 87,
-  totalTenancies: 499,
-  activeCases: 23,
-}
-
-const mockPaymentMethod = {
-  brand: 'Visa',
-  last4: '4242',
-  expMonth: 12,
-  expYear: 2027,
-}
-
-const mockInvoices = [
-  { id: 'inv_001', date: '2026-04-01', amount: 358, status: 'paid' as const, pdfUrl: '#' },
-  { id: 'inv_002', date: '2026-03-01', amount: 358, status: 'paid' as const, pdfUrl: '#' },
-  { id: 'inv_003', date: '2026-02-01', amount: 179, status: 'paid' as const, pdfUrl: '#' },
-  { id: 'inv_004', date: '2026-01-01', amount: 0, status: 'paid' as const, pdfUrl: '#' },
+const PLANS = [
+  {
+    id: 'starter',
+    name: 'Starter',
+    price: 49,
+    tenancies: 50,
+    features: ['Up to 50 tenancies', 'Basic reporting', 'Email support', '1 team member'],
+    current: false,
+  },
+  {
+    id: 'portfolio',
+    name: 'Portfolio 365',
+    price: 179,
+    tenancies: 365,
+    features: [
+      'Up to 365 tenancies',
+      'Advanced analytics',
+      'Priority support',
+      'Unlimited team members',
+      'AI analysis engine',
+      'API access',
+    ],
+    current: true,
+  },
+  {
+    id: 'enterprise',
+    name: 'Enterprise',
+    price: 349,
+    tenancies: 1000,
+    features: [
+      'Up to 1,000 tenancies',
+      'Custom reporting',
+      'Dedicated account manager',
+      'Unlimited everything',
+      'Custom integrations',
+      'SLA guarantee',
+      'SSO & audit logs',
+    ],
+    current: false,
+  },
 ]
 
-/* ── helpers ── */
+const INVOICES = [
+  { id: 'INV-2026-04', date: '1 Apr 2026', desc: 'Portfolio 365 — Monthly', amount: 179, status: 'Paid' },
+  { id: 'INV-2026-03', date: '1 Mar 2026', desc: 'Portfolio 365 — Monthly', amount: 179, status: 'Paid' },
+  { id: 'INV-2026-02', date: '1 Feb 2026', desc: 'Portfolio 365 — Monthly', amount: 179, status: 'Paid' },
+  { id: 'INV-2026-01', date: '1 Jan 2026', desc: 'Portfolio 365 — Monthly', amount: 149, status: 'Paid' },
+]
 
-function formatGBP(amount: number) {
-  return new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(amount)
-}
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  })
-}
-
-/* ── component ── */
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
 
 export function BillingPageClient() {
-  const [blocks, setBlocks] = useState(mockSubscription.blocks)
-  const [showConfirm, setShowConfirm] = useState(false)
-
-  const capacity = blocks * TENANCIES_PER_BLOCK
-  const usagePercent = capacity > 0 ? Math.round((mockUsage.fullyManagedTenancies / capacity) * 100) : 0
-  const monthlyCost = blocks * BLOCK_PRICE
-  const isOverCapacity = mockUsage.fullyManagedTenancies > capacity
+  const [editPayment, setEditPayment] = useState(false)
+  const usedTenancies = 12
+  const totalTenancies = 365
+  const usagePct = Math.round((usedTenancies / totalTenancies) * 100)
 
   return (
-    <div className="space-y-6 animate-fade-in-up">
+    <div className="space-y-6">
+      {/* Header */}
+      <div>
+        <h2 className="text-xl font-semibold tracking-tight text-zinc-900">Billing</h2>
+        <p className="mt-1 text-[13px] text-zinc-500">
+          Manage your subscription, usage, and payments
+        </p>
+      </div>
 
-      {/* ── Plan overview ── */}
-      <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
+      {/* Choose Your Plan */}
+      <div>
+        <h3 className="mb-4 text-base font-semibold text-zinc-900">Choose Your Plan</h3>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          {PLANS.map((plan) => (
+            <div
+              key={plan.id}
+              className={cn(
+                'rounded-[10px] border bg-white p-5',
+                plan.current
+                  ? 'border-emerald-400 shadow-[0_0_0_1px_rgb(52,211,153)]'
+                  : 'border-zinc-200'
+              )}
+            >
+              {plan.current ? (
+                <div className="mb-2 flex justify-end">
+                  <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700">
+                    Current Plan
+                  </span>
+                </div>
+              ) : (
+                <div className="h-[30px]" />
+              )}
+
+              <h3 className="text-base font-semibold text-zinc-900">{plan.name}</h3>
+
+              <div className="mt-2">
+                <span className="text-[32px] font-bold tracking-tight text-zinc-900">
+                  £{plan.price}
+                </span>
+                <span className="text-[13px] text-zinc-500">/month</span>
+              </div>
+
+              <p className="mt-1 text-[13px] text-zinc-500">
+                Up to {plan.tenancies.toLocaleString()} tenancies
+              </p>
+
+              <div className="mt-4 border-t border-zinc-100 pt-4">
+                <div className="space-y-3">
+                  {plan.features.map((feature) => (
+                    <div key={feature} className="flex items-center gap-2 text-[13px] text-zinc-700">
+                      <svg className="h-3.5 w-3.5 shrink-0 text-zinc-900" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M20 6L9 17l-5-5" />
+                      </svg>
+                      {feature}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {plan.current ? (
+                <button
+                  type="button"
+                  disabled
+                  className="mt-3 w-full rounded-[10px] border border-zinc-200 bg-white px-4 py-2 text-[13px] font-medium text-zinc-500 opacity-50"
+                >
+                  Current Plan
+                </button>
+              ) : plan.price > 179 ? (
+                <button
+                  type="button"
+                  className="mt-3 w-full rounded-[10px] bg-zinc-900 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-zinc-800"
+                >
+                  Contact Sales
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="mt-3 w-full rounded-[10px] border border-zinc-200 bg-white px-4 py-2 text-[13px] font-medium text-zinc-700 transition hover:bg-zinc-50"
+                >
+                  Downgrade
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Usage Breakdown */}
+      <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
         <div className="flex items-start justify-between gap-4">
-          <div>
-            <h3 className="text-sm font-semibold text-zinc-950">Current plan</h3>
-            <p className="mt-1 text-sm text-zinc-500">
-              Your active subscription and billing summary.
-            </p>
-          </div>
-          <span
-            className={cn(
-              'shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium',
-              mockSubscription.status === 'active'
-                ? 'bg-emerald-50 text-emerald-700'
-                : 'bg-zinc-100 text-zinc-500',
-            )}
+          <h3 className="text-base font-semibold text-zinc-900">Usage Breakdown</h3>
+          <button
+            type="button"
+            className="flex items-center gap-1.5 rounded-[10px] bg-emerald-500 px-3 py-1.5 text-[13px] font-medium text-white transition hover:bg-emerald-600"
           >
-            {mockSubscription.status === 'active' ? 'Active' : 'Inactive'}
-          </span>
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14M12 5v14" />
+            </svg>
+            Add Block (£30/mo)
+          </button>
         </div>
 
-        <dl className="mt-5 grid grid-cols-2 gap-x-12 gap-y-4 text-sm xl:grid-cols-4">
-          <div>
-            <dt className="text-xs text-zinc-500">Plan</dt>
-            <dd className="mt-0.5 font-medium text-zinc-950">{mockSubscription.plan}</dd>
+        <div className="mt-4">
+          <div className="mb-1.5 flex items-center justify-between">
+            <span className="text-[13px] font-medium text-zinc-900">
+              {usedTenancies} of {totalTenancies} tenancies used
+            </span>
+            <span className="text-[13px] font-semibold text-emerald-600">
+              {usagePct}%
+            </span>
           </div>
-          <div>
-            <dt className="text-xs text-zinc-500">Portfolio blocks</dt>
-            <dd className="mt-0.5 font-medium text-zinc-950">
-              {mockSubscription.blocks} {mockSubscription.blocks === 1 ? 'block' : 'blocks'}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-xs text-zinc-500">Billing cycle</dt>
-            <dd className="mt-0.5 font-medium text-zinc-950">{mockSubscription.billingCycle}</dd>
-          </div>
-          <div>
-            <dt className="text-xs text-zinc-500">Next invoice</dt>
-            <dd className="mt-0.5 font-medium text-zinc-950">
-              {formatGBP(mockSubscription.nextInvoiceAmount)} on {formatDate(mockSubscription.currentPeriodEnd)}
-            </dd>
-          </div>
-        </dl>
-      </section>
-
-      {/* ── Usage ── */}
-      <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h3 className="text-sm font-semibold text-zinc-950">Usage</h3>
-            <p className="mt-1 text-sm text-zinc-500">
-              Fully managed tenancies count toward your block allocation. Let-only tenancies are always free.
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-5 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-zinc-200 bg-zinc-200 md:grid-cols-4">
-          <div className="bg-white px-5 py-4">
-            <KPIStatCard label="Fully managed" value={mockUsage.fullyManagedTenancies} tone="default" />
-          </div>
-          <div className="bg-white px-5 py-4">
-            <KPIStatCard label="Let-only (free)" value={mockUsage.letOnlyTenancies} tone="accent" />
-          </div>
-          <div className="bg-white px-5 py-4">
-            <KPIStatCard label="Block capacity" value={capacity} tone="default" />
-          </div>
-          <div className="bg-white px-5 py-4">
-            <KPIStatCard
-              label="Utilisation"
-              value={`${usagePercent}%`}
-              tone={isOverCapacity ? 'danger' : usagePercent >= 80 ? 'warning' : 'default'}
+          <div className="h-[10px] overflow-hidden rounded-full bg-zinc-100">
+            <div
+              className="h-full rounded-full bg-emerald-500 transition-all duration-500"
+              style={{ width: `${usagePct}%` }}
             />
           </div>
         </div>
 
-        <div className="mt-5">
-          <ProgressBar
-            value={Math.min(usagePercent, 100)}
-            label={
-              <>
-                <span>
-                  {mockUsage.fullyManagedTenancies} of {capacity} fully managed tenancies used
-                </span>
-                <span className={cn(isOverCapacity ? 'font-medium text-rose-600' : '')}>
-                  {isOverCapacity
-                    ? `${mockUsage.fullyManagedTenancies - capacity} over capacity`
-                    : `${capacity - mockUsage.fullyManagedTenancies} remaining`}
-                </span>
-              </>
-            }
-          />
-        </div>
-
-        {isOverCapacity && (
-          <div className="mt-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-            You have exceeded your current block capacity. Add another block to avoid service interruptions.
-          </div>
-        )}
-      </section>
-
-      {/* ── Manage blocks ── */}
-      <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h3 className="text-sm font-semibold text-zinc-950">Manage portfolio blocks</h3>
-            <p className="mt-1 text-sm text-zinc-500">
-              Each block covers up to {TENANCIES_PER_BLOCK} fully managed tenancies at {formatGBP(BLOCK_PRICE)}/month + VAT.
-            </p>
-          </div>
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
-            <Layers className="h-4.5 w-4.5" />
-          </div>
-        </div>
-
-        <div className="mt-6 flex flex-col items-start gap-6 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-4">
-            <button
-              type="button"
-              onClick={() => setBlocks((b) => Math.max(1, b - 1))}
-              disabled={blocks <= 1}
-              className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 text-zinc-600 transition hover:border-zinc-300 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-40"
+        <div className="mt-4 grid grid-cols-3 gap-3">
+          {[
+            { label: 'Fully Managed', value: 7 },
+            { label: 'Let-Only', value: 4 },
+            { label: 'HMO', value: 1 },
+          ].map((stat) => (
+            <div
+              key={stat.label}
+              className="rounded-[6px] bg-zinc-50 px-3.5 py-3 text-center"
             >
-              <Minus className="h-4 w-4" />
-            </button>
-
-            <div className="text-center">
-              <p className="text-3xl font-bold tabular-nums text-zinc-950">{blocks}</p>
-              <p className="text-xs text-zinc-500">{blocks === 1 ? 'block' : 'blocks'}</p>
+              <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
+                {stat.label}
+              </div>
+              <div className="mt-1 text-xl font-bold tabular-nums text-zinc-900">
+                {stat.value}
+              </div>
             </div>
+          ))}
+        </div>
+      </div>
 
-            <button
-              type="button"
-              onClick={() => setBlocks((b) => Math.min(5, b + 1))}
-              disabled={blocks >= 5}
-              className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 text-zinc-600 transition hover:border-zinc-300 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              <Plus className="h-4 w-4" />
-            </button>
-          </div>
-
-          <div className="text-left sm:text-right">
-            <p className="text-sm text-zinc-500">Estimated monthly cost</p>
-            <p className="mt-0.5 text-2xl font-bold tabular-nums text-zinc-950">
-              {formatGBP(monthlyCost)}
-              <span className="text-sm font-normal text-zinc-500"> + VAT</span>
-            </p>
-            <p className="mt-0.5 text-xs text-zinc-400">
-              Up to {blocks * TENANCIES_PER_BLOCK} fully managed tenancies
-            </p>
-          </div>
+      {/* Payment Method */}
+      <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
+        <div className="flex items-start justify-between gap-4">
+          <h3 className="text-base font-semibold text-zinc-900">Payment Method</h3>
+          <button
+            type="button"
+            onClick={() => setEditPayment(!editPayment)}
+            className="flex items-center gap-1.5 rounded-[10px] border border-zinc-200 bg-white px-3 py-1.5 text-[13px] font-medium text-zinc-700 transition hover:bg-zinc-50"
+          >
+            {editPayment ? (
+              <>
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M18 6L6 18M6 6l12 12" />
+                </svg>
+                Cancel
+              </>
+            ) : (
+              <>
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m15 5 4 4" />
+                </svg>
+                Update
+              </>
+            )}
+          </button>
         </div>
 
-        {blocks !== mockSubscription.blocks && (
-          <div className="mt-6 flex flex-col gap-3 border-t border-zinc-100/80 pt-5 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-2 text-sm">
-              <TrendingUp className="h-4 w-4 text-emerald-600" />
-              <span className="text-zinc-600">
-                Changing from {mockSubscription.blocks} to {blocks} {blocks === 1 ? 'block' : 'blocks'}
-                {' — '}
-                <span className="font-medium text-zinc-950">
-                  {blocks > mockSubscription.blocks ? '+' : ''}
-                  {formatGBP((blocks - mockSubscription.blocks) * BLOCK_PRICE)}/mo
-                </span>
-              </span>
+        {editPayment ? (
+          <div className="mt-4 max-w-[420px] space-y-4">
+            <div>
+              <label className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
+                Card Number
+              </label>
+              <input
+                type="text"
+                placeholder="4242 4242 4242 4242"
+                className="mt-1 h-10 w-full rounded-[10px] border border-zinc-200 bg-white px-3 text-[13px] text-zinc-900 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
+              />
+            </div>
+            <div className="flex gap-3">
+              <div className="flex-1">
+                <label className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
+                  Expiry
+                </label>
+                <input
+                  type="text"
+                  placeholder="MM / YY"
+                  className="mt-1 h-10 w-full rounded-[10px] border border-zinc-200 bg-white px-3 text-[13px] text-zinc-900 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
+                />
+              </div>
+              <div className="flex-1">
+                <label className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
+                  CVC
+                </label>
+                <input
+                  type="text"
+                  placeholder="123"
+                  className="mt-1 h-10 w-full rounded-[10px] border border-zinc-200 bg-white px-3 text-[13px] text-zinc-900 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
+                Name on Card
+              </label>
+              <input
+                type="text"
+                placeholder="Jamie Mitchell"
+                className="mt-1 h-10 w-full rounded-[10px] border border-zinc-200 bg-white px-3 text-[13px] text-zinc-900 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
+              />
             </div>
             <div className="flex gap-2">
               <button
                 type="button"
-                onClick={() => setBlocks(mockSubscription.blocks)}
-                className="rounded-md border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-50"
+                className="rounded-[10px] bg-emerald-500 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-emerald-600"
               >
-                Cancel
+                Save Card
               </button>
               <button
                 type="button"
-                onClick={() => setShowConfirm(true)}
-                className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800"
+                onClick={() => setEditPayment(false)}
+                className="rounded-[10px] border border-zinc-200 bg-white px-4 py-2 text-[13px] font-medium text-zinc-700 transition hover:bg-zinc-50"
               >
-                Update subscription
+                Cancel
               </button>
             </div>
           </div>
-        )}
-
-        {blocks >= 5 && (
-          <p className="mt-4 text-sm text-zinc-500">
-            Need more than 5 blocks?{' '}
-            <Link href="/contact" className="font-medium text-emerald-600 hover:text-emerald-700">
-              Talk to sales
-            </Link>{' '}
-            for Enterprise pricing.
-          </p>
-        )}
-      </section>
-
-      {/* ── Payment method ── */}
-      <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h3 className="text-sm font-semibold text-zinc-950">Payment method</h3>
-            <p className="mt-1 text-sm text-zinc-500">
-              Manage the card or payment method on file.
-            </p>
+        ) : (
+          <div className="mt-3 flex items-center gap-3 rounded-[10px] bg-zinc-50 px-3.5 py-3">
+            <svg className="h-5 w-5 shrink-0 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <rect width="20" height="14" x="2" y="5" rx="2" />
+              <line x1="2" x2="22" y1="10" y2="10" />
+            </svg>
+            <div className="flex-1">
+              <div className="text-[13px] font-medium text-zinc-900">Visa ending in 4242</div>
+              <div className="text-[11px] text-zinc-500">Expires 12/2027</div>
+            </div>
+            <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700">
+              Default
+            </span>
           </div>
+        )}
+      </div>
+
+      {/* Billing Contact */}
+      <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
+        <h3 className="text-base font-semibold text-zinc-900">Billing Contact</h3>
+        <div className="mt-3 max-w-[420px]">
+          <label className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
+            Billing Email
+          </label>
+          <div className="mt-1 flex gap-2">
+            <input
+              type="email"
+              defaultValue="accounts@propertyfirst.co.uk"
+              className="h-10 flex-1 rounded-[10px] border border-zinc-200 bg-white px-3 text-[13px] text-zinc-900 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
+            />
+            <button
+              type="button"
+              className="rounded-[10px] border border-zinc-200 bg-white px-4 py-2 text-[13px] font-medium text-zinc-700 transition hover:bg-zinc-50"
+            >
+              Save
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Invoice History */}
+      <div className="overflow-hidden rounded-[10px] border border-zinc-200 bg-white">
+        <div className="flex items-start justify-between gap-4 px-5 py-4">
+          <h3 className="text-base font-semibold text-zinc-900">Invoice History</h3>
           <button
             type="button"
-            className="rounded-md border border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-600 transition hover:bg-zinc-50"
+            className="flex items-center gap-1.5 text-[13px] font-medium text-zinc-600 transition hover:text-zinc-900"
           >
-            Update
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 15V3m0 0L7 8m5-5 5 5M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            </svg>
+            Export All
           </button>
         </div>
 
-        {mockPaymentMethod ? (
-          <div className="mt-5 flex items-center gap-4 rounded-lg border border-zinc-100/80 bg-zinc-50/80 px-4 py-3.5">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white border border-zinc-200">
-              <CreditCard className="h-5 w-5 text-zinc-400" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-zinc-950">
-                {mockPaymentMethod.brand} ending in {mockPaymentMethod.last4}
-              </p>
-              <p className="text-xs text-zinc-500">
-                Expires {mockPaymentMethod.expMonth.toString().padStart(2, '0')}/{mockPaymentMethod.expYear}
-              </p>
-            </div>
-            <Shield className="h-4 w-4 text-emerald-500" />
-          </div>
-        ) : (
-          <div className="mt-5 rounded-lg border border-zinc-100/80 bg-zinc-50 px-4 py-3 text-sm text-zinc-500">
-            No payment method on file.{' '}
-            <Link href="/checkout" className="font-medium text-emerald-600 hover:text-emerald-700">
-              Add a payment method
-            </Link>
-          </div>
-        )}
-      </section>
-
-      {/* ── Billing history ── */}
-      <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h3 className="text-sm font-semibold text-zinc-950">Billing history</h3>
-            <p className="mt-1 text-sm text-zinc-500">
-              Past invoices and payment records.
-            </p>
-          </div>
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-zinc-100 text-zinc-500">
-            <Receipt className="h-4 w-4" />
-          </div>
-        </div>
-
-        {mockInvoices.length > 0 ? (
-          <div className="mt-5 overflow-hidden rounded-xl border border-zinc-100/80">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-zinc-100/80 bg-zinc-50/60">
-                  <th className="px-4 py-2.5 text-left text-xs font-medium text-zinc-500">Date</th>
-                  <th className="px-4 py-2.5 text-left text-xs font-medium text-zinc-500">Amount</th>
-                  <th className="px-4 py-2.5 text-left text-xs font-medium text-zinc-500">Status</th>
-                  <th className="px-4 py-2.5 text-right text-xs font-medium text-zinc-500">Invoice</th>
-                </tr>
-              </thead>
-              <tbody>
-                {mockInvoices.map((inv) => (
-                  <tr key={inv.id} className="border-b border-zinc-50 last:border-b-0 transition modern-table-row">
-                    <td className="px-4 py-3 font-medium text-zinc-950">{formatDate(inv.date)}</td>
-                    <td className="px-4 py-3 tabular-nums text-zinc-700">{formatGBP(inv.amount)}</td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={cn(
-                          'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium',
-                          inv.status === 'paid'
-                            ? 'bg-emerald-50 text-emerald-700'
-                            : inv.status === 'pending'
-                              ? 'bg-amber-50 text-amber-700'
-                              : 'bg-rose-50 text-rose-700',
-                        )}
-                      >
-                        {inv.status.charAt(0).toUpperCase() + inv.status.slice(1)}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <a
-                        href={inv.pdfUrl}
-                        className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 transition hover:text-emerald-700"
-                      >
-                        <Download className="h-3.5 w-3.5" />
-                        PDF
-                      </a>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <div className="mt-5 rounded-lg border border-zinc-100/80 bg-zinc-50 px-4 py-3 text-sm text-zinc-500">
-            No billing history yet.
-          </div>
-        )}
-      </section>
-
-      {/* ── Manage on Stripe ── */}
-      <div className="flex items-center justify-between rounded-lg border border-zinc-200 bg-zinc-50/80 px-6 py-4">
-        <p className="text-sm text-zinc-500">
-          Need to manage payment details, download receipts, or cancel your subscription?
-        </p>
-        <a
-          href="https://billing.stripe.com/p/login/test"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
-        >
-          Stripe portal
-          <ExternalLink className="h-3.5 w-3.5" />
-        </a>
+        <table className="w-full text-[13px]">
+          <thead>
+            <tr className="border-t border-b border-zinc-100 bg-zinc-50/60 text-left text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
+              <th className="px-5 py-2.5">Date</th>
+              <th className="px-5 py-2.5">Invoice</th>
+              <th className="px-5 py-2.5">Description</th>
+              <th className="px-5 py-2.5 text-right">Amount</th>
+              <th className="px-5 py-2.5">Status</th>
+              <th className="px-5 py-2.5" />
+            </tr>
+          </thead>
+          <tbody>
+            {INVOICES.map((inv) => (
+              <tr key={inv.id} className="border-b border-zinc-50 last:border-0">
+                <td className="px-5 py-3 text-zinc-700">{inv.date}</td>
+                <td className="px-5 py-3 font-medium text-zinc-900">{inv.id}</td>
+                <td className="px-5 py-3 text-zinc-600">{inv.desc}</td>
+                <td className="px-5 py-3 text-right font-semibold tabular-nums text-zinc-900">
+                  £{inv.amount}
+                </td>
+                <td className="px-5 py-3">
+                  <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700">
+                    {inv.status}
+                  </span>
+                </td>
+                <td className="px-5 py-3">
+                  <div className="flex justify-end gap-1">
+                    <button
+                      type="button"
+                      className="flex h-8 w-8 items-center justify-center rounded-[6px] text-zinc-400 transition hover:bg-zinc-50 hover:text-zinc-700"
+                      title="View details"
+                    >
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
+                        <circle cx="12" cy="12" r="3" />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      className="flex h-8 w-8 items-center justify-center rounded-[6px] text-zinc-400 transition hover:bg-zinc-50 hover:text-zinc-700"
+                      title="Download"
+                    >
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 15V3m0 12-5-5m5 5 5-5M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
-
-      {/* ── Confirmation modal ── */}
-      {showConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="mx-4 w-full max-w-md rounded-xl border border-zinc-200 bg-white p-6 shadow-xl ">
-            <h3 className="text-base font-semibold text-zinc-950">Confirm subscription change</h3>
-            <p className="mt-2 text-sm text-zinc-500">
-              You are changing from{' '}
-              <span className="font-medium text-zinc-950">{mockSubscription.blocks} {mockSubscription.blocks === 1 ? 'block' : 'blocks'}</span>
-              {' '}to{' '}
-              <span className="font-medium text-zinc-950">{blocks} {blocks === 1 ? 'block' : 'blocks'}</span>.
-              Your new monthly cost will be{' '}
-              <span className="font-medium text-zinc-950">{formatGBP(monthlyCost)} + VAT</span>.
-            </p>
-            <p className="mt-2 text-sm text-zinc-500">
-              Changes will be prorated and applied immediately.
-            </p>
-            <div className="mt-6 flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setShowConfirm(false)}
-                className="rounded-md border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-50"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  // TODO: call Stripe API to update subscription
-                  setShowConfirm(false)
-                }}
-                className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800"
-              >
-                Confirm change
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
