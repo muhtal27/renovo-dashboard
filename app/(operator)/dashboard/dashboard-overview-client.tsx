@@ -487,21 +487,29 @@ function MonthlyThroughputCard({
           <p className="text-sm text-zinc-400">No throughput data yet</p>
         </div>
       ) : (
-        <div className="mt-4 flex items-end gap-2 pt-2" style={{ height: 160 }}>
-          {monthlyData.map((m) => {
-            const total = m.created + m.resolved
-            const pct = Math.max((total / (maxVal * 2)) * 100, 6)
-            return (
-              <div key={m.label} className="relative flex flex-1 flex-col items-center">
-                <span className="mb-1 text-[11px] font-semibold text-zinc-700">{total}</span>
-                <div
-                  className="w-full rounded-t bg-emerald-500 transition-all"
-                  style={{ height: `${pct}%`, minWidth: 28, maxWidth: 48 }}
-                />
-                <span className="mt-2 text-[10px] font-medium text-zinc-400">{m.label}</span>
+        <div className="mt-4">
+          <div className="flex items-end gap-2" style={{ height: 140 }}>
+            {monthlyData.map((m) => {
+              const total = m.created + m.resolved
+              const barHeight = Math.max((total / (maxVal * 2)) * 120, 8)
+              return (
+                <div key={m.label} className="flex flex-1 flex-col items-center gap-1">
+                  <span className="text-[11px] font-semibold text-zinc-700">{total}</span>
+                  <div
+                    className="w-full max-w-[48px] rounded-t-[3px] bg-emerald-500"
+                    style={{ height: barHeight }}
+                  />
+                </div>
+              )
+            })}
+          </div>
+          <div className="mt-1 flex gap-2">
+            {monthlyData.map((m) => (
+              <div key={m.label} className="flex-1 text-center text-[10px] font-medium text-zinc-400">
+                {m.label}
               </div>
-            )
-          })}
+            ))}
+          </div>
         </div>
       )}
     </div>
