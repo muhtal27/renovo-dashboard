@@ -10,8 +10,8 @@ import {
   ChevronRight,
   ClipboardList,
   CreditCard,
-  Home,
   Landmark,
+  LayoutDashboard,
   MessageSquare,
   Settings,
   ShieldAlert,
@@ -40,7 +40,7 @@ type OperatorNavProps = {
 type NavItem = {
   label: string
   href: string
-  icon: typeof Home
+  icon: typeof LayoutDashboard
   isActive: (pathname: string) => boolean
   requiredPermission?: (typeof OPERATOR_PERMISSIONS)[keyof typeof OPERATOR_PERMISSIONS]
 }
@@ -55,7 +55,7 @@ const NAV_GROUPS: Array<{
       {
         label: 'Dashboard',
         href: '/dashboard',
-        icon: Home,
+        icon: LayoutDashboard,
         isActive: (pathname) => pathname === '/dashboard',
       },
       {
@@ -266,9 +266,14 @@ function SidebarContent({
       </div>
 
       {/* Nav groups */}
-      <div className={cn('mt-7 flex-1 space-y-6 overflow-y-auto pb-4', isCollapsed ? 'px-2' : 'px-2.5')}>
-        {visibleGroups.map((group) => (
+      <div className={cn('mt-7 flex-1 overflow-y-auto pb-4', isCollapsed ? 'px-2' : 'px-2.5')}>
+        {visibleGroups.map((group, groupIndex) => (
           <div key={group.label}>
+            {groupIndex > 0 ? (
+              <div className={cn('my-3', isCollapsed ? 'mx-1' : 'mx-2')}>
+                <div className="border-t border-zinc-100" />
+              </div>
+            ) : null}
             {!isCollapsed ? (
               <p className="px-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-600/70">
                 {group.label}

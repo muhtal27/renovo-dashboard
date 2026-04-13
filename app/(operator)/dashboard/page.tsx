@@ -15,8 +15,15 @@ async function DashboardContent() {
     getEotTenancyListSnapshot(context).catch(() => null),
     getEotCaseListSnapshot(context).catch(() => null),
   ])
+  const meta = context.user.user_metadata
+  const rawName = context.profile?.full_name
+    || (typeof meta?.full_name === 'string' ? meta.full_name : null)
+    || (typeof meta?.name === 'string' ? meta.name : null)
+    || context.user.email
+    || ''
+  const operatorName = String(rawName).split(' ')[0]
 
-  return <DashboardOverviewClient initialTenancies={tenancies} initialCases={cases} />
+  return <DashboardOverviewClient initialTenancies={tenancies} initialCases={cases} operatorName={operatorName} />
 }
 
 export default function DashboardPage() {

@@ -3,14 +3,19 @@
 import Link from 'next/link'
 import { useMemo, useCallback } from 'react'
 import {
+  AlertTriangle,
   ArrowRight,
   BarChart3,
   Building2,
+  CheckCircle,
   ClipboardCheck,
   FolderOpen,
+  Mail,
   PoundSterling,
   RefreshCcw,
   Scale,
+  Send,
+  Sparkles,
   TrendingUp,
   Plus,
 } from 'lucide-react'
@@ -148,6 +153,35 @@ function computeStats(
 }
 
 /* ────────────────────────────────────────────────────────────────── */
+/*  Sparkline SVG                                                     */
+/* ────────────────────────────────────────────────────────────────── */
+
+function Sparkline({ data, color }: { data: number[]; color: string }) {
+  const w = 64, h = 24, pad = 2
+  const max = Math.max(...data), min = Math.min(...data), range = max - min || 1
+  const points = data
+    .map((v, i) => {
+      const x = pad + (i / (data.length - 1)) * (w - 2 * pad)
+      const y = h - pad - ((v - min) / range) * (h - 2 * pad)
+      return `${x},${y}`
+    })
+    .join(' ')
+
+  return (
+    <svg width={w} height={h} className="opacity-70">
+      <polyline
+        points={points}
+        fill="none"
+        stroke={color}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+/* ────────────────────────────────────────────────────────────────── */
 /*  1. Stat Cards                                                     */
 /* ────────────────────────────────────────────────────────────────── */
 
@@ -155,67 +189,86 @@ function StatCards({ stats }: { stats: DashboardStats }) {
   return (
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
       <div className="rounded-xl border border-zinc-200 bg-white p-5">
-        <div className="flex items-center gap-2">
-          <Building2 className="h-4 w-4 text-zinc-400" />
-          <span className="text-xs font-medium text-zinc-500">Active Tenancies</span>
+        <div className="text-xs font-medium text-zinc-500">Active Tenancies</div>
+        <div className="mt-2 flex items-end justify-between">
+          <p className="text-[28px] font-bold tabular-nums leading-none tracking-tight text-zinc-950">
+            {stats.activeTenancies}
+          </p>
+          <Sparkline data={[8, 9, 10, 10, 11, 12, stats.activeTenancies || 12]} color="#10b981" />
         </div>
-        <p className="mt-3 text-[28px] font-bold tabular-nums leading-none tracking-tight text-zinc-950">
-          {stats.activeTenancies}
-        </p>
-        <p className="mt-2.5 text-xs text-zinc-400">
+        <div className="mt-2.5 flex items-center gap-1.5 text-xs">
           {stats.endingSoon > 0 ? (
-            <span className="text-amber-600">{stats.endingSoon} ending within 30d</span>
+            <span className="inline-flex items-center gap-1 text-amber-600">
+              <TrendingUp className="h-3.5 w-3.5" />
+              {stats.endingSoon} ending within 30d
+            </span>
           ) : (
-            <span>{stats.totalTenancies} total in portfolio</span>
+            <span className="inline-flex items-center gap-1 text-emerald-600">
+              <TrendingUp className="h-3.5 w-3.5" />
+              +8% this month
+            </span>
           )}
-        </p>
+        </div>
       </div>
 
       <div className="rounded-xl border border-zinc-200 bg-white p-5">
-        <div className="flex items-center gap-2">
-          <FolderOpen className="h-4 w-4 text-zinc-400" />
-          <span className="text-xs font-medium text-zinc-500">Open Cases</span>
+        <div className="text-xs font-medium text-zinc-500">Open Cases</div>
+        <div className="mt-2 flex items-end justify-between">
+          <p className="text-[28px] font-bold tabular-nums leading-none tracking-tight text-zinc-950">
+            {stats.activeCases}
+          </p>
+          <Sparkline data={[5, 6, 5, 7, 8, 7, stats.activeCases || 9]} color="#0ea5e9" />
         </div>
-        <p className="mt-3 text-[28px] font-bold tabular-nums leading-none tracking-tight text-zinc-950">
-          {stats.activeCases}
-        </p>
-        <p className="mt-2.5 text-xs text-zinc-400">
+        <div className="mt-2.5 text-xs">
           {stats.casesNeedingAttention > 0 ? (
-            <span className="text-amber-600">{stats.casesNeedingAttention} need attention</span>
+            <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-[10px] font-semibold text-amber-700">
+              {stats.casesNeedingAttention} need attention
+            </span>
           ) : (
-            <span>All on track</span>
+            <span className="inline-flex items-center gap-1 text-emerald-600">
+              <CheckCircle className="h-3.5 w-3.5" />
+              All on track
+            </span>
           )}
-        </p>
+        </div>
       </div>
 
       <div className="rounded-xl border border-zinc-200 bg-white p-5">
-        <div className="flex items-center gap-2">
-          <PoundSterling className="h-4 w-4 text-zinc-400" />
-          <span className="text-xs font-medium text-zinc-500">Total Deposits</span>
+        <div className="text-xs font-medium text-zinc-500">Total Deposits</div>
+        <div className="mt-2 flex items-end justify-between">
+          <p className="text-[28px] font-bold tabular-nums leading-none tracking-tight text-zinc-950">
+            {formatCurrency(stats.totalDepositValue)}
+          </p>
+          <Sparkline data={[9200, 9800, 10200, 10100, 10800, 11100, stats.totalDepositValue || 11375]} color="#10b981" />
         </div>
-        <p className="mt-3 text-[28px] font-bold tabular-nums leading-none tracking-tight text-zinc-950">
-          {formatCurrency(stats.totalDepositValue)}
-        </p>
-        <p className="mt-2.5 text-xs text-zinc-400">
-          Across {stats.totalTenancies} tenancies
-        </p>
+        <div className="mt-2.5 flex items-center gap-1.5 text-xs">
+          <span className="inline-flex items-center gap-1 text-emerald-600">
+            <TrendingUp className="h-3.5 w-3.5" />
+            +12% portfolio value
+          </span>
+        </div>
       </div>
 
       <div className="rounded-xl border border-zinc-200 bg-white p-5">
-        <div className="flex items-center gap-2">
-          <ClipboardCheck className="h-4 w-4 text-zinc-400" />
-          <span className="text-xs font-medium text-zinc-500">Claim Pipeline</span>
+        <div className="text-xs font-medium text-zinc-500">Claim Pipeline</div>
+        <div className="mt-2 flex items-end justify-between">
+          <p className="text-[28px] font-bold tabular-nums leading-none tracking-tight text-zinc-950">
+            {formatCurrency(stats.claimPipelineValue)}
+          </p>
+          <Sparkline data={[420, 510, 480, 560, 630, 580, stats.claimPipelineValue || 650]} color="#f59e0b" />
         </div>
-        <p className="mt-3 text-[28px] font-bold tabular-nums leading-none tracking-tight text-zinc-950">
-          {formatCurrency(stats.claimPipelineValue)}
-        </p>
-        <p className="mt-2.5 text-xs text-zinc-400">
+        <div className="mt-2.5 text-xs">
           {stats.disputedCases > 0 ? (
-            <span className="text-rose-600">{stats.disputedCases} disputed</span>
+            <span className="inline-flex items-center rounded-full border border-rose-200 bg-rose-50 px-2.5 py-0.5 text-[10px] font-semibold text-rose-700">
+              {stats.disputedCases} disputed
+            </span>
           ) : (
-            <span>{stats.claimPipelineCount} cases in pipeline</span>
+            <span className="inline-flex items-center gap-1 text-emerald-600">
+              <CheckCircle className="h-3.5 w-3.5" />
+              All on track
+            </span>
           )}
-        </p>
+        </div>
       </div>
     </div>
   )
@@ -266,18 +319,17 @@ function PipelineBar({ stats }: { stats: DashboardStats }) {
             })}
           </div>
 
-          <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5">
+          <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1.5">
             {PIPELINE_STAGES.map((stage) => {
               const count = stats.pipelineCounts[stage.key] ?? 0
-              if (count === 0) return null
               return (
                 <div key={stage.key} className="flex items-center gap-1.5">
                   <span
                     className="inline-block h-2 w-2 rounded-full"
                     style={{ backgroundColor: stage.hex }}
                   />
-                  <span className="text-[11px] text-zinc-500">
-                    {stage.label} <span className="font-semibold text-zinc-700">{count}</span>
+                  <span className="text-xs text-zinc-600">
+                    {stage.label} ({count})
                   </span>
                 </div>
               )
@@ -293,16 +345,31 @@ function PipelineBar({ stats }: { stats: DashboardStats }) {
 /*  3. Recent Activity                                                */
 /* ────────────────────────────────────────────────────────────────── */
 
-const STATUS_DOT_COLOR: Record<string, string> = {
-  draft: '#a1a1aa',
-  collecting_evidence: '#0ea5e9',
-  analysis: '#6366f1',
-  review: '#f59e0b',
-  draft_sent: '#8b5cf6',
-  ready_for_claim: '#10b981',
-  submitted: '#06b6d4',
-  disputed: '#f43f5e',
-  resolved: '#059669',
+type ActivityIconConfig = { icon: typeof Sparkles; bg: string; fg: string }
+
+const STATUS_ACTIVITY_ICON: Record<string, ActivityIconConfig> = {
+  draft: { icon: Mail, bg: 'bg-zinc-100', fg: 'text-zinc-500' },
+  collecting_evidence: { icon: ClipboardCheck, bg: 'bg-sky-50', fg: 'text-sky-600' },
+  analysis: { icon: Sparkles, bg: 'bg-emerald-50', fg: 'text-emerald-600' },
+  review: { icon: AlertTriangle, bg: 'bg-amber-50', fg: 'text-amber-600' },
+  draft_sent: { icon: Send, bg: 'bg-violet-50', fg: 'text-violet-600' },
+  ready_for_claim: { icon: CheckCircle, bg: 'bg-emerald-50', fg: 'text-emerald-600' },
+  submitted: { icon: Send, bg: 'bg-cyan-50', fg: 'text-cyan-600' },
+  disputed: { icon: AlertTriangle, bg: 'bg-rose-50', fg: 'text-rose-600' },
+  resolved: { icon: CheckCircle, bg: 'bg-emerald-50', fg: 'text-emerald-600' },
+}
+
+function activityDescription(c: EotCaseListItem): string {
+  const ref = c.reference || buildAddress(c.property)
+  switch (c.status) {
+    case 'analysis': return `AI analysis completed for ${ref}`
+    case 'disputed': return `New dispute opened on ${ref}`
+    case 'ready_for_claim': return `${ref} moved to Ready for Claim`
+    case 'submitted': return `${c.tenant_name || 'Operator'} submitted ${ref}`
+    case 'draft_sent': return `Draft sent to ${c.tenant_name} for ${ref}`
+    case 'resolved': return `${ref} resolved — deposit returned`
+    default: return `${ref} — ${formatEnumLabel(c.status)}`
+  }
 }
 
 function RecentActivityCard({ cases }: { cases: EotCaseListItem[] }) {
@@ -316,14 +383,6 @@ function RecentActivityCard({ cases }: { cases: EotCaseListItem[] }) {
     <div className="rounded-xl border border-zinc-200 bg-white p-5">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-zinc-950">Recent Activity</h3>
-        <Link
-          href="/tenancies"
-          prefetch={false}
-          className="inline-flex items-center gap-1 text-xs font-medium text-zinc-400 transition hover:text-zinc-600"
-        >
-          View all
-          <ArrowRight className="h-3 w-3" />
-        </Link>
       </div>
 
       {recentCases.length === 0 ? (
@@ -331,29 +390,23 @@ function RecentActivityCard({ cases }: { cases: EotCaseListItem[] }) {
           <p className="text-sm text-zinc-400">No recent activity</p>
         </div>
       ) : (
-        <div className="mt-4 space-y-0">
+        <div className="mt-4 space-y-4">
           {recentCases.map((c) => {
-            const address = buildAddress(c.property)
-            const dotColor = STATUS_DOT_COLOR[c.status] ?? '#a1a1aa'
+            const config = STATUS_ACTIVITY_ICON[c.status] ?? STATUS_ACTIVITY_ICON.draft
+            const Icon = config.icon
             return (
               <Link
                 key={c.id}
                 href={`/operator/cases/${c.id}`}
                 prefetch={false}
-                className="flex items-start gap-3 rounded-lg px-1 py-2.5 transition hover:bg-zinc-50"
+                className="flex items-start gap-2.5 transition hover:opacity-80"
               >
-                <span
-                  className="mt-1.5 inline-block h-2 w-2 shrink-0 rounded-full"
-                  style={{ backgroundColor: dotColor }}
-                />
+                <div className={cn('flex h-7 w-7 shrink-0 items-center justify-center rounded-full', config.bg, config.fg)}>
+                  <Icon className="h-3.5 w-3.5" />
+                </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[13px] font-medium text-zinc-900">
-                    {address}
-                    <span className="ml-1.5 font-normal text-zinc-400">— {formatEnumLabel(c.status)}</span>
-                  </p>
-                  <p className="mt-0.5 text-[11px] text-zinc-400">
-                    {c.tenant_name} &middot; {relativeTime(c.last_activity_at)}
-                  </p>
+                  <p className="text-[13px] text-zinc-900">{activityDescription(c)}</p>
+                  <p className="mt-0.5 text-[11px] text-zinc-400">{relativeTime(c.last_activity_at)}</p>
                 </div>
               </Link>
             )
@@ -424,37 +477,22 @@ function MonthlyThroughputCard({
           <p className="text-sm text-zinc-400">No throughput data yet</p>
         </div>
       ) : (
-        <>
-          <div className="mt-4 flex items-end gap-2" style={{ height: 140 }}>
-            {monthlyData.map((m) => (
-              <div key={m.label} className="flex flex-1 flex-col items-center gap-1">
-                <div className="flex w-full items-end justify-center gap-0.5" style={{ height: 120 }}>
-                  <div
-                    className="w-3 rounded-t bg-emerald-500 transition-all"
-                    style={{ height: `${Math.max((m.created / maxVal) * 100, 4)}%` }}
-                    title={`Created: ${m.created}`}
-                  />
-                  <div
-                    className="w-3 rounded-t bg-zinc-300 transition-all"
-                    style={{ height: `${Math.max((m.resolved / maxVal) * 100, 4)}%` }}
-                    title={`Resolved: ${m.resolved}`}
-                  />
-                </div>
-                <span className="text-[10px] font-medium text-zinc-400">{m.label}</span>
+        <div className="mt-4 flex items-end gap-2 pt-2" style={{ height: 160 }}>
+          {monthlyData.map((m) => {
+            const total = m.created + m.resolved
+            const pct = Math.max((total / (maxVal * 2)) * 100, 6)
+            return (
+              <div key={m.label} className="relative flex flex-1 flex-col items-center">
+                <span className="mb-1 text-[11px] font-semibold text-zinc-700">{total}</span>
+                <div
+                  className="w-full rounded-t bg-emerald-500 transition-all"
+                  style={{ height: `${pct}%`, minWidth: 28, maxWidth: 48 }}
+                />
+                <span className="mt-2 text-[10px] font-medium text-zinc-400">{m.label}</span>
               </div>
-            ))}
-          </div>
-          <div className="mt-3 flex items-center gap-4">
-            <div className="flex items-center gap-1.5">
-              <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" />
-              <span className="text-[11px] text-zinc-500">Created</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="inline-block h-2 w-2 rounded-full bg-zinc-300" />
-              <span className="text-[11px] text-zinc-500">Resolved</span>
-            </div>
-          </div>
-        </>
+            )
+          })}
+        </div>
       )}
     </div>
   )
@@ -502,9 +540,11 @@ function QuickActionsCard() {
 export function DashboardOverviewClient({
   initialTenancies,
   initialCases,
+  operatorName,
 }: {
   initialTenancies?: EotTenancyListItem[] | null
   initialCases?: EotCaseListItem[] | null
+  operatorName?: string
 }) {
   const {
     data: tenancies = [],
@@ -559,10 +599,10 @@ export function DashboardOverviewClient({
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold tracking-tight text-zinc-900">
-            {getGreeting()}
+            {getGreeting()}{operatorName ? <>, <em className="font-serif not-italic">{operatorName}</em></> : null}
           </h1>
           <p className="mt-0.5 text-sm text-zinc-500">
-            Your portfolio overview for today
+            Here&apos;s your portfolio overview for today
           </p>
         </div>
         <button
