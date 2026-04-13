@@ -2,71 +2,30 @@ import type { Metadata } from 'next'
 import { requireOperatorTenant } from '@/lib/operator-server'
 
 export const metadata: Metadata = {
-  title: 'Deposit Scheme | Renovo AI',
+  title: 'Deposit Schemes | Renovo AI',
 }
 
 const DEPOSIT_SCHEMES = [
   {
     region: 'Scotland',
     schemes: [
-      {
-        name: 'SafeDeposits Scotland',
-        url: 'https://www.safedepositsscotland.com',
-        description:
-          'The largest tenancy deposit scheme in Scotland, providing free dispute resolution for landlords and tenants.',
-      },
-      {
-        name: 'Letting Protection Service Scotland',
-        url: 'https://www.lettingprotectionscotland.com',
-        description:
-          'Government-approved scheme offering custodial deposit protection and independent adjudication.',
-      },
-      {
-        name: 'mydeposits Scotland',
-        url: 'https://www.mydeposits.co.uk/scotland',
-        description:
-          'Insurance-backed deposit protection with online management tools and alternative dispute resolution.',
-      },
+      { name: 'SafeDeposits Scotland', desc: 'The largest tenancy deposit scheme in Scotland.' },
+      { name: 'Letting Protection Service Scotland', desc: 'Government-approved scheme offering custodial deposit protection.' },
+      { name: 'mydeposits Scotland', desc: 'Insurance-backed deposit protection with online management tools.' },
     ],
   },
   {
     region: 'England & Wales',
     schemes: [
-      {
-        name: 'Deposit Protection Service (DPS)',
-        url: 'https://www.depositprotection.com',
-        description:
-          'Free custodial scheme backed by the government, holding deposits in a secure account for the duration of the tenancy.',
-      },
-      {
-        name: 'mydeposits',
-        url: 'https://www.mydeposits.co.uk',
-        description:
-          'Insurance-backed and custodial options with online deposit management and dispute resolution.',
-      },
-      {
-        name: 'Tenancy Deposit Scheme (TDS)',
-        url: 'https://www.tenancydepositscheme.com',
-        description:
-          'Offers both insured and custodial protection with a free independent dispute resolution service.',
-      },
+      { name: 'Deposit Protection Service (DPS)', desc: 'Free custodial scheme backed by the government.' },
+      { name: 'mydeposits', desc: 'Insurance-backed and custodial options with online deposit management.' },
+      { name: 'Tenancy Deposit Scheme (TDS)', desc: 'Offers both insured and custodial protection with free dispute resolution.' },
     ],
   },
   {
     region: 'Northern Ireland',
     schemes: [
-      {
-        name: 'Tenancy Deposit Scheme Northern Ireland (TDSNI)',
-        url: 'https://www.tdsni.co.uk',
-        description:
-          'The primary custodial deposit scheme for Northern Ireland, providing free protection and dispute resolution.',
-      },
-      {
-        name: 'Letting Protection Service Northern Ireland',
-        url: 'https://www.lettingprotectionni.com',
-        description:
-          'Government-approved scheme offering insurance-backed deposit protection for Northern Ireland tenancies.',
-      },
+      { name: 'TDSNI', desc: 'The primary custodial deposit scheme for Northern Ireland.' },
     ],
   },
 ]
@@ -75,44 +34,41 @@ export default async function DepositSchemePage() {
   await requireOperatorTenant('/deposit-scheme')
 
   return (
-    <div className="space-y-8 px-6 py-6 md:px-7 animate-fade-in-up">
-      <div className="max-w-3xl">
-        <h2 className="text-lg font-bold tracking-tight text-zinc-900">
-          Deposit Schemes
-        </h2>
-        <p className="mt-1 text-sm text-zinc-500">
-          Government-approved tenancy deposit protection schemes by region.
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-xl font-semibold tracking-tight text-zinc-900">Deposit Schemes</h2>
+        <p className="mt-1 text-[13px] text-zinc-500">
+          Approved UK deposit protection schemes by region
         </p>
       </div>
 
       {DEPOSIT_SCHEMES.map((group) => (
-        <section key={group.region}>
-          <div className="flex items-end gap-8 border-b border-zinc-200 pb-3">
-            <h2 className="text-sm font-semibold text-zinc-950">{group.region}</h2>
-            <span className="text-xs tabular-nums text-zinc-500">
-              {group.schemes.length} scheme{group.schemes.length !== 1 ? 's' : ''}
+        <div key={group.region}>
+          <h3 className="mb-3 text-base font-semibold text-zinc-900">
+            {group.region}{' '}
+            <span className="text-[13px] font-medium text-zinc-500">
+              ({group.schemes.length} schemes)
             </span>
-          </div>
+          </h3>
 
-          <div className="mt-4 space-y-3">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {group.schemes.map((scheme) => (
-              <div key={scheme.name} className="border-l-2 border-zinc-200 py-3 pl-5 animate-fade-in-up">
-                <div className="flex items-baseline gap-3">
-                  <h3 className="text-sm font-semibold text-zinc-950">{scheme.name}</h3>
-                  <a
-                    href={scheme.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs font-medium text-emerald-600 hover:text-emerald-700"
-                  >
-                    Visit site &rarr;
-                  </a>
-                </div>
-                <p className="mt-1 text-sm leading-6 text-zinc-600">{scheme.description}</p>
+              <div key={scheme.name} className="rounded-[10px] border border-zinc-200 bg-white p-5">
+                <h4 className="text-sm font-semibold text-zinc-900">{scheme.name}</h4>
+                <p className="mt-2 text-[13px] text-zinc-500">{scheme.desc}</p>
+                <button
+                  type="button"
+                  className="mt-3 flex items-center gap-1.5 rounded-[10px] border border-zinc-200 bg-white px-3 py-1.5 text-[13px] font-medium text-zinc-700 transition hover:bg-zinc-50"
+                >
+                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                  </svg>
+                  Visit Website
+                </button>
               </div>
             ))}
           </div>
-        </section>
+        </div>
       ))}
     </div>
   )
