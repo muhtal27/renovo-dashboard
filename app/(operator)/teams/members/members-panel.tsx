@@ -2,7 +2,9 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { Plus, UserPlus } from 'lucide-react'
+import { ChevronRight, Plus, Settings, UserPlus } from 'lucide-react'
+
+/* ─── Types ─── */
 
 type Member = {
   membershipId: string
@@ -14,14 +16,50 @@ type Member = {
   createdAt: string
 }
 
+type Team = {
+  id: string
+  name: string
+  description: string | null
+  memberCount: number
+  createdAt: string
+}
+
 const ROLE_OPTIONS = [
   { value: 'operator', label: 'Operator' },
   { value: 'manager', label: 'Manager' },
   { value: 'admin', label: 'Admin' },
 ] as const
 
+function roleBadgeClass(role: string) {
+  return role === 'admin'
+    ? 'border-violet-200 bg-violet-50 text-violet-700'
+    : 'border-zinc-200 bg-zinc-100 text-zinc-700'
+}
+
+function statusBadgeClass(status: string) {
+  return status === 'active'
+    ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+    : 'border-amber-200 bg-amber-50 text-amber-700'
+}
+
+function getInitials(name: string | null, email: string | null) {
+  if (name) {
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2)
+  }
+  return (email ?? '?')[0].toUpperCase()
+}
+
+/* ─── Component ─── */
+
 export function MembersPanel() {
+  const [tab, setTab] = useState<'members' | 'groups'>('members')
   const [members, setMembers] = useState<Member[]>([])
+  const [teams, setTeams] = useState<Team[]>([])
   const [loading, setLoading] = useState(true)
   const [showInvite, setShowInvite] = useState(false)
   const [inviteEmail, setInviteEmail] = useState('')
@@ -31,15 +69,28 @@ export function MembersPanel() {
   const [success, setSuccess] = useState<string | null>(null)
   const [refreshKey, setRefreshKey] = useState(0)
 
+  /* Team creation state */
+  const [showCreateTeam, setShowCreateTeam] = useState(false)
+  const [teamName, setTeamName] = useState('')
+  const [teamDescription, setTeamDescription] = useState('')
+  const [creatingTeam, setCreatingTeam] = useState(false)
+
   useEffect(() => {
     let cancelled = false
 
     async function load() {
-      const res = await fetch('/api/operator/members', { credentials: 'same-origin' })
+      const [membersRes, teamsRes] = await Promise.all([
+        fetch('/api/operator/members', { credentials: 'same-origin' }),
+        fetch('/api/operator/teams', { credentials: 'same-origin' }),
+      ])
       if (cancelled) return
-      if (res.ok) {
-        const data = await res.json()
+      if (membersRes.ok) {
+        const data = await membersRes.json()
         setMembers(data.members ?? [])
+      }
+      if (teamsRes.ok) {
+        const data = await teamsRes.json()
+        setTeams(data.teams ?? [])
       }
       setLoading(false)
     }
@@ -51,6 +102,8 @@ export function MembersPanel() {
   function triggerRefresh() {
     setRefreshKey((k) => k + 1)
   }
+
+  /* ─── Member actions ─── */
 
   async function handleInvite(e: React.FormEvent) {
     e.preventDefault()
@@ -112,7 +165,7 @@ export function MembersPanel() {
     }
   }
 
-  async function handleRemove(membershipId: string, email: string | null) {
+  async function handleRemoveMember(membershipId: string, email: string | null) {
     if (!confirm(`Remove ${email ?? 'this member'} from the workspace?`)) return
     setError(null)
     const res = await fetch(`/api/operator/members/${membershipId}`, {
@@ -127,47 +180,123 @@ export function MembersPanel() {
     }
   }
 
-  const activeCount = members.filter((m) => m.status === 'active').length
+  /* ─── Team actions ─── */
+
+  async function handleCreateTeam(e: React.FormEvent) {
+    e.preventDefault()
+    setCreatingTeam(true)
+    setError(null)
+    setSuccess(null)
+
+    const res = await fetch('/api/operator/teams', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({ name: teamName, description: teamDescription || undefined }),
+    })
+
+    const data = await res.json()
+
+    if (!res.ok) {
+      setError(data.error ?? 'Failed to create team.')
+    } else {
+      setSuccess(`Team "${data.team.name}" created.`)
+      setTeamName('')
+      setTeamDescription('')
+      setShowCreateTeam(false)
+      triggerRefresh()
+    }
+
+    setCreatingTeam(false)
+  }
+
+  async function handleDeleteTeam(teamId: string, name: string) {
+    if (!confirm(`Delete team "${name}"? All team memberships will be removed.`)) return
+    setError(null)
+    const res = await fetch(`/api/operator/teams/${teamId}`, {
+      method: 'DELETE',
+      credentials: 'same-origin',
+    })
+    if (!res.ok) {
+      const data = await res.json()
+      setError(data.error ?? 'Failed to delete team.')
+    } else {
+      triggerRefresh()
+    }
+  }
+
+  /* ─── Render ─── */
 
   return (
-    <div className="space-y-6 animate-fade-in-up">
-      {/* Header with actions */}
+    <div className="space-y-5 animate-fade-in-up">
+      {/* Page header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Link
-            href="/admin"
-            className="text-xs font-medium text-zinc-500 transition hover:text-zinc-700"
-          >
-            Admin
-          </Link>
-          <span className="text-xs text-zinc-300">/</span>
-          <span className="text-xs font-medium text-zinc-700">Members</span>
+        <div>
+          <h2 className="text-xl font-semibold tracking-tight text-zinc-900">Teams</h2>
+          <p className="mt-1 text-sm text-zinc-500">Manage members and team groups</p>
         </div>
+        {tab === 'members' ? (
+          <button
+            type="button"
+            onClick={() => setShowInvite(true)}
+            className="inline-flex items-center gap-1.5 rounded-[10px] border border-emerald-600 bg-emerald-600 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-emerald-700"
+          >
+            <UserPlus className="h-3.5 w-3.5" />
+            Invite Member
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setShowCreateTeam(true)}
+            className="inline-flex items-center gap-1.5 rounded-[10px] border border-emerald-600 bg-emerald-600 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-emerald-700"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            New Team
+          </button>
+        )}
+      </div>
+
+      {/* Tabs */}
+      <div className="flex gap-0 border-b border-zinc-200">
         <button
           type="button"
-          onClick={() => setShowInvite(true)}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-900 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-zinc-800"
+          onClick={() => setTab('members')}
+          className={`border-b-2 px-[18px] py-2.5 text-[13px] font-medium transition ${
+            tab === 'members'
+              ? 'border-zinc-900 text-zinc-900'
+              : 'border-transparent text-zinc-500 hover:text-zinc-900'
+          }`}
         >
-          <UserPlus className="h-3.5 w-3.5" />
-          Add member
+          Members
+        </button>
+        <button
+          type="button"
+          onClick={() => setTab('groups')}
+          className={`border-b-2 px-[18px] py-2.5 text-[13px] font-medium transition ${
+            tab === 'groups'
+              ? 'border-zinc-900 text-zinc-900'
+              : 'border-transparent text-zinc-500 hover:text-zinc-900'
+          }`}
+        >
+          Team Groups
         </button>
       </div>
 
+      {/* Messages */}
       {error ? (
-        <p className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm text-rose-700">
+        <p className="rounded-[10px] border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm text-rose-700">
           {error}
         </p>
       ) : null}
-
       {success ? (
-        <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm text-emerald-700">
+        <p className="rounded-[10px] border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm text-emerald-700">
           {success}
         </p>
       ) : null}
 
-      {/* Invite form */}
-      {showInvite ? (
-        <section className="rounded-xl border border-zinc-200 bg-white px-5 py-5">
+      {/* Invite member form */}
+      {showInvite && tab === 'members' ? (
+        <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
           <p className="text-sm font-semibold text-zinc-950">Add a new member</p>
           <p className="mt-1 text-sm text-zinc-500">
             Enter their email address. If they don&apos;t have an auth account yet, one will be
@@ -180,12 +309,12 @@ export function MembersPanel() {
               placeholder="name@company.com"
               value={inviteEmail}
               onChange={(e) => setInviteEmail(e.target.value)}
-              className="h-9 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-sm text-zinc-900 outline-none focus:border-emerald-500 focus:bg-white"
+              className="h-10 w-full rounded-[10px] border border-zinc-200 bg-white px-3 text-[13px] outline-none transition focus:border-emerald-400 focus:shadow-[0_0_0_3px_rgba(16,185,129,.1)]"
             />
             <select
               value={inviteRole}
               onChange={(e) => setInviteRole(e.target.value)}
-              className="h-9 rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-sm text-zinc-900 outline-none focus:border-emerald-500 focus:bg-white"
+              className="h-10 rounded-[10px] border border-zinc-200 bg-white px-3 text-[13px] outline-none transition focus:border-emerald-400 focus:shadow-[0_0_0_3px_rgba(16,185,129,.1)]"
             >
               {ROLE_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -197,88 +326,123 @@ export function MembersPanel() {
               <button
                 type="submit"
                 disabled={inviting}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-900 bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-60"
+                className="inline-flex items-center gap-1.5 rounded-[10px] border border-zinc-900 bg-zinc-900 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-zinc-800 disabled:opacity-60"
               >
                 <Plus className="h-3.5 w-3.5" />
                 {inviting ? 'Adding...' : 'Add'}
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  setShowInvite(false)
-                  setInviteEmail('')
-                  setError(null)
-                }}
-                className="rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
+                onClick={() => { setShowInvite(false); setInviteEmail(''); setError(null) }}
+                className="rounded-[10px] border border-zinc-200 bg-white px-4 py-2 text-[13px] font-semibold text-zinc-700 transition hover:bg-zinc-50"
               >
                 Cancel
               </button>
             </div>
           </form>
-        </section>
+        </div>
       ) : null}
 
-      {/* Members table */}
-      <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
-        <h3 className="text-sm font-semibold text-zinc-950">Workspace members</h3>
-        <p className="mt-1 text-sm text-zinc-500">
-          {members.length} member{members.length !== 1 ? 's' : ''} · {activeCount} active
-        </p>
+      {/* Create team form */}
+      {showCreateTeam && tab === 'groups' ? (
+        <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
+          <p className="text-sm font-semibold text-zinc-950">Create a new team</p>
+          <p className="mt-1 text-sm text-zinc-500">
+            Teams let you organise workspace members into groups — e.g. by property portfolio or region.
+          </p>
+          <form onSubmit={handleCreateTeam} className="mt-4 grid gap-3 md:grid-cols-[2fr_1fr_auto]">
+            <input
+              type="text"
+              required
+              placeholder="e.g. Edinburgh Portfolio"
+              value={teamName}
+              onChange={(e) => setTeamName(e.target.value)}
+              className="h-10 w-full rounded-[10px] border border-zinc-200 bg-white px-3 text-[13px] outline-none transition focus:border-emerald-400 focus:shadow-[0_0_0_3px_rgba(16,185,129,.1)]"
+            />
+            <input
+              type="text"
+              placeholder="Description (optional)"
+              value={teamDescription}
+              onChange={(e) => setTeamDescription(e.target.value)}
+              className="h-10 w-full rounded-[10px] border border-zinc-200 bg-white px-3 text-[13px] outline-none transition focus:border-emerald-400 focus:shadow-[0_0_0_3px_rgba(16,185,129,.1)]"
+            />
+            <div className="flex gap-2">
+              <button
+                type="submit"
+                disabled={creatingTeam}
+                className="inline-flex items-center gap-1.5 rounded-[10px] border border-zinc-900 bg-zinc-900 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-zinc-800 disabled:opacity-60"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                {creatingTeam ? 'Creating...' : 'Create'}
+              </button>
+              <button
+                type="button"
+                onClick={() => { setShowCreateTeam(false); setTeamName(''); setTeamDescription(''); setError(null) }}
+                className="rounded-[10px] border border-zinc-200 bg-white px-4 py-2 text-[13px] font-semibold text-zinc-700 transition hover:bg-zinc-50"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      ) : null}
 
-        {loading ? (
-          <div className="mt-4 space-y-3">
+      {/* ────── Members tab ────── */}
+      {tab === 'members' ? (
+        loading ? (
+          <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-12 skeleton-shimmer rounded-xl border border-zinc-100/80 bg-zinc-50" />
+              <div key={i} className="h-12 animate-pulse rounded-[10px] border border-zinc-100/80 bg-zinc-50" />
             ))}
           </div>
         ) : members.length === 0 ? (
-          <div className="mt-4 py-8 text-center">
+          <div className="rounded-[10px] border border-zinc-200 bg-white px-6 py-10 text-center">
             <p className="text-sm text-zinc-500">No team members yet.</p>
             <button
               type="button"
               onClick={() => setShowInvite(true)}
-              className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-zinc-900 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-zinc-800"
+              className="mt-3 inline-flex items-center gap-1.5 rounded-[10px] border border-emerald-600 bg-emerald-600 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-emerald-700"
             >
               <UserPlus className="h-3.5 w-3.5" />
-              Add member
+              Invite Member
             </button>
           </div>
         ) : (
-          <div className="mt-4 overflow-hidden rounded-xl border border-zinc-200">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-zinc-200 bg-zinc-50/60">
-                  <th className="px-4 py-2.5 text-left text-xs font-medium text-zinc-500">
-                    Member
-                  </th>
-                  <th className="px-4 py-2.5 text-left text-xs font-medium text-zinc-500">Role</th>
-                  <th className="px-4 py-2.5 text-left text-xs font-medium text-zinc-500">
-                    Status
-                  </th>
-                  <th className="px-4 py-2.5 text-right text-xs font-medium text-zinc-500">
-                    Actions
-                  </th>
+          <div className="mt-4 overflow-hidden rounded-[10px] border border-zinc-200 bg-white">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-zinc-50">
+                <tr>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Name</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Email</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Role</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Status</th>
+                  <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Cases</th>
                 </tr>
               </thead>
               <tbody>
                 {members.map((member) => (
                   <tr
                     key={member.membershipId}
-                    className="group border-b border-zinc-100/80 last:border-0 transition modern-table-row"
+                    className="group border-t border-zinc-100 transition hover:bg-zinc-50"
                   >
                     <td className="px-4 py-3">
-                      <p className="font-medium text-zinc-950">
-                        {member.fullName ?? member.email ?? 'Unknown'}
-                      </p>
-                      {member.fullName && member.email ? (
-                        <p className="mt-0.5 text-xs text-zinc-400">{member.email}</p>
-                      ) : null}
+                      <div className="flex items-center gap-2">
+                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-[10px] font-semibold text-emerald-700">
+                          {getInitials(member.fullName, member.email)}
+                        </div>
+                        <span className="text-[13px] font-medium text-zinc-900">
+                          {member.fullName ?? member.email ?? 'Unknown'}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-[13px] text-zinc-500">
+                      {member.email ?? '—'}
                     </td>
                     <td className="px-4 py-3">
                       <select
                         value={member.role}
                         onChange={(e) => handleRoleChange(member.membershipId, e.target.value)}
-                        className="border border-transparent bg-transparent px-1 py-0.5 text-sm text-zinc-600 outline-none transition hover:border-zinc-200 focus:border-emerald-500"
+                        className={`inline-flex cursor-pointer items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold leading-[1.6] outline-none transition hover:opacity-80 ${roleBadgeClass(member.role)}`}
                       >
                         {ROLE_OPTIONS.map((opt) => (
                           <option key={opt.value} value={opt.value}>
@@ -288,76 +452,85 @@ export function MembersPanel() {
                       </select>
                     </td>
                     <td className="px-4 py-3">
-                      <span className="inline-flex items-center gap-1.5 text-xs">
-                        <span
-                          role="status"
-                          aria-label={member.status}
-                          className={`h-1.5 w-1.5 rounded-full ${
-                            member.status === 'active'
-                              ? 'bg-emerald-500'
-                              : member.status === 'suspended'
-                                ? 'bg-amber-500'
-                                : 'bg-zinc-300'
-                          }`}
-                        />
-                        <span className="text-zinc-600">
-                          {member.status.charAt(0).toUpperCase() + member.status.slice(1)}
-                        </span>
+                      <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold leading-[1.6] ${statusBadgeClass(member.status)}`}>
+                        {member.status.charAt(0).toUpperCase() + member.status.slice(1)}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex items-center justify-end gap-2 opacity-0 transition group-hover:opacity-100 group-focus-within:opacity-100">
-                        {member.status === 'active' ? (
-                          <button
-                            type="button"
-                            onClick={() => handleStatusChange(member.membershipId, 'suspended')}
-                            className="px-2 py-1 text-xs font-medium text-amber-600 transition hover:bg-amber-50"
-                          >
-                            Suspend
-                          </button>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => handleStatusChange(member.membershipId, 'active')}
-                            className="px-2 py-1 text-xs font-medium text-emerald-600 transition hover:bg-emerald-50"
-                          >
-                            Activate
-                          </button>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => handleRemove(member.membershipId, member.email)}
-                          className="px-2 py-1 text-xs font-medium text-rose-600 transition hover:bg-rose-50"
-                        >
-                          Remove
-                        </button>
-                      </div>
+                    <td className="px-4 py-3 text-right text-[13px] font-semibold tabular-nums text-zinc-900">
+                      —
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-        )}
-      </section>
+        )
+      ) : null}
 
-      {/* Link to teams */}
-      <section className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-sm font-semibold text-zinc-950">Team groups</h3>
-            <p className="mt-1 text-sm text-zinc-500">
-              Organise members into teams by portfolio, region, or function.
-            </p>
+      {/* ────── Team Groups tab ────── */}
+      {tab === 'groups' ? (
+        loading ? (
+          <div className="grid gap-4 md:grid-cols-2">
+            {[1, 2].map((i) => (
+              <div key={i} className="h-[120px] animate-pulse rounded-[10px] border border-zinc-100/80 bg-zinc-50" />
+            ))}
           </div>
-          <Link
-            href="/teams/teams"
-            className="rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50"
-          >
-            Manage teams
-          </Link>
-        </div>
-      </section>
+        ) : teams.length === 0 ? (
+          <div className="rounded-[10px] border border-zinc-200 bg-white px-6 py-10 text-center">
+            <p className="text-sm text-zinc-500">No teams yet.</p>
+            <button
+              type="button"
+              onClick={() => setShowCreateTeam(true)}
+              className="mt-3 inline-flex items-center gap-1.5 rounded-[10px] border border-emerald-600 bg-emerald-600 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-emerald-700"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              New Team
+            </button>
+          </div>
+        ) : (
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            {teams.map((team) => (
+              <div key={team.id} className="rounded-[10px] border border-zinc-200 bg-white p-5">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-semibold text-zinc-900">{team.name}</h4>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteTeam(team.id, team.name)}
+                      className="rounded-[6px] px-2 py-1 text-xs font-medium text-rose-600 opacity-0 transition hover:bg-rose-50 group-hover:opacity-100"
+                    >
+                      Delete
+                    </button>
+                    <Link
+                      href={`/teams/teams/${team.id}`}
+                      className="inline-flex h-7 w-7 items-center justify-center rounded-[6px] text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-700"
+                    >
+                      <Settings className="h-3.5 w-3.5" />
+                    </Link>
+                  </div>
+                </div>
+
+                {/* Member avatars */}
+                <div className="mt-3 flex gap-2">
+                  {members.slice(0, team.memberCount || 3).map((m) => (
+                    <div
+                      key={m.membershipId}
+                      className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-100 text-[10px] font-semibold text-emerald-700"
+                      title={m.fullName ?? m.email ?? undefined}
+                    >
+                      {getInitials(m.fullName, m.email)}
+                    </div>
+                  ))}
+                </div>
+
+                <p className="mt-3 text-xs text-zinc-500">
+                  {team.memberCount} member{team.memberCount !== 1 ? 's' : ''}
+                </p>
+              </div>
+            ))}
+          </div>
+        )
+      ) : null}
     </div>
   )
 }

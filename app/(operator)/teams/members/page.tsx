@@ -4,7 +4,7 @@ import { requireOperatorPermission } from '@/lib/operator-server'
 import { MembersPanel } from './members-panel'
 
 export const metadata: Metadata = {
-  title: 'Team Members | Renovo AI',
+  title: 'Teams | Renovo AI',
 }
 
 export default async function MembersPage() {

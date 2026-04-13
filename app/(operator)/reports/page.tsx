@@ -40,8 +40,14 @@ export default function ReportsPage() {
   return (
     <Suspense
       fallback={
-        <div className="space-y-4">
-          <SkeletonPanel className="h-20" />
+        <div className="space-y-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="h-6 w-32 animate-pulse rounded bg-zinc-100" />
+              <div className="mt-2 h-4 w-56 animate-pulse rounded bg-zinc-50" />
+            </div>
+          </div>
+          <div className="h-10 animate-pulse rounded-[10px] bg-zinc-50" />
           <div className="grid gap-4 xl:grid-cols-2">
             <SkeletonPanel className="h-[200px]" />
             <SkeletonPanel className="h-[200px]" />

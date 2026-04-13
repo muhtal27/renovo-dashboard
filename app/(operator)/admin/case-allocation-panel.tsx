@@ -26,6 +26,30 @@ function assigneeLabel(assignee: Assignee) {
   return assignee.fullName || assignee.email || assignee.userId.slice(0, 8)
 }
 
+function statusBadgeClass(status: string) {
+  switch (status) {
+    case 'draft':
+      return 'border-zinc-200 bg-zinc-100 text-zinc-700'
+    case 'collecting_evidence':
+      return 'border-sky-200 bg-sky-50 text-sky-700'
+    case 'analysis':
+      return 'border-indigo-200 bg-indigo-50 text-indigo-700'
+    case 'review':
+    case 'draft_sent':
+      return 'border-amber-200 bg-amber-50 text-amber-700'
+    case 'ready_for_claim':
+      return 'border-emerald-200 bg-emerald-50 text-emerald-700'
+    case 'submitted':
+      return 'border-cyan-200 bg-cyan-50 text-cyan-700'
+    case 'disputed':
+      return 'border-rose-200 bg-rose-50 text-rose-700'
+    case 'resolved':
+      return 'border-emerald-200 bg-emerald-50 text-emerald-700'
+    default:
+      return 'border-zinc-200 bg-zinc-100 text-zinc-700'
+  }
+}
+
 export function CaseAllocationPanel() {
   const [cases, setCases] = useState<EotCaseListItem[]>([])
   const [members, setMembers] = useState<Assignee[]>([])
@@ -33,7 +57,6 @@ export function CaseAllocationPanel() {
   const [loadError, setLoadError] = useState<string | null>(null)
   const [assignError, setAssignError] = useState<string | null>(null)
   const [assigning, setAssigning] = useState<string | null>(null)
-  const [filter, setFilter] = useState<'unallocated' | 'allocated' | 'all'>('unallocated')
   const [confirmRemove, setConfirmRemove] = useState<{ caseId: string; address: string } | null>(null)
 
   useEffect(() => {
@@ -80,7 +103,7 @@ export function CaseAllocationPanel() {
       const memberName = userId ? memberMap.get(userId) : null
       toast.success(
         userId
-          ? `Case assigned to ${assigneeLabel(memberName!)}`
+          ? `Assigned to ${assigneeLabel(memberName!)}`
           : 'Assignment removed'
       )
     } catch (err) {
@@ -92,173 +115,139 @@ export function CaseAllocationPanel() {
     }
   }
 
-  const filteredCases = cases.filter((c) => {
-    if (filter === 'unallocated') return c.assigned_to === null
-    if (filter === 'allocated') return c.assigned_to !== null
-    return true
-  })
-
-  const unallocatedCount = cases.filter((c) => c.assigned_to === null).length
-  const allocatedCount = cases.filter((c) => c.assigned_to !== null).length
-
+  const unassignedCount = cases.filter((c) => c.assigned_to === null).length
+  const activeMembers = members.length
   const memberMap = new Map(members.map((m) => [m.userId, m]))
 
   if (loading) {
     return (
-      <div className="py-8 text-center text-sm text-zinc-400">
-        Loading cases and members...
+      <div className="space-y-5">
+        <div className="grid gap-4 md:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-[88px] animate-pulse rounded-[10px] border border-zinc-200 bg-white" />
+          ))}
+        </div>
+        <div className="h-[300px] animate-pulse rounded-[10px] border border-zinc-200 bg-white" />
       </div>
     )
   }
 
   if (loadError) {
     return (
-      <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+      <div className="rounded-[10px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
         {loadError}
       </div>
     )
   }
 
   return (
-    <div className="space-y-4 animate-fade-in-up">
-      {/* Inline assign error */}
-      {assignError ? (
-        <div className="flex items-center justify-between gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm text-rose-700">
-          <span>{assignError}</span>
-          <button
-            type="button"
-            onClick={() => setAssignError(null)}
-            className="text-xs font-medium text-rose-600 hover:text-rose-800"
-          >
-            Dismiss
-          </button>
+    <>
+      {/* Stat cards row */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <div className="relative overflow-hidden rounded-[10px] border border-zinc-200 bg-white p-5">
+          <div className="text-xs font-medium text-zinc-500">Unassigned Cases</div>
+          <div className="mt-2 text-[28px] font-bold leading-none tracking-tight tabular-nums text-amber-700">
+            {unassignedCount}
+          </div>
         </div>
-      ) : null}
-
-      {/* Filter tabs */}
-      <div className="flex items-center gap-1">
-        {[
-          { value: 'unallocated' as const, label: `Unallocated (${unallocatedCount})` },
-          { value: 'allocated' as const, label: `Allocated (${allocatedCount})` },
-          { value: 'all' as const, label: `All (${cases.length})` },
-        ].map((tab) => (
-          <button
-            key={tab.value}
-            type="button"
-            onClick={() => setFilter(tab.value)}
-            className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
-              filter === tab.value
-                ? 'bg-zinc-900 text-white'
-                : 'text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
+        <div className="relative overflow-hidden rounded-[10px] border border-zinc-200 bg-white p-5">
+          <div className="text-xs font-medium text-zinc-500">Team Members</div>
+          <div className="mt-2 text-[28px] font-bold leading-none tracking-tight tabular-nums text-zinc-900">
+            {members.length}
+          </div>
+        </div>
+        <div className="relative overflow-hidden rounded-[10px] border border-zinc-200 bg-white p-5">
+          <div className="text-xs font-medium text-zinc-500">Active Operators</div>
+          <div className="mt-2 text-[28px] font-bold leading-none tracking-tight tabular-nums text-zinc-900">
+            {activeMembers}
+          </div>
+        </div>
       </div>
 
-      {/* Case list */}
-      {filteredCases.length === 0 ? (
-        <p className="py-6 text-center text-sm text-zinc-400">
-          {filter === 'unallocated'
-            ? 'All cases have been allocated.'
-            : filter === 'allocated'
-              ? 'No cases have been allocated yet.'
-              : 'No cases found.'}
-        </p>
-      ) : (
-        <div className="overflow-hidden rounded-xl border border-zinc-200">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-zinc-200 bg-zinc-50/60">
-                <th className="px-4 py-2.5 text-left text-xs font-medium text-zinc-500">
-                  Property
-                </th>
-                <th className="px-4 py-2.5 text-left text-xs font-medium text-zinc-500">
-                  Tenant
-                </th>
-                <th className="px-4 py-2.5 text-left text-xs font-medium text-zinc-500">
-                  Status
-                </th>
-                <th className="px-4 py-2.5 text-left text-xs font-medium text-zinc-500">
-                  Assigned to
-                </th>
-                <th className="px-4 py-2.5 text-right text-xs font-medium text-zinc-500">
-                  Action
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredCases.map((caseItem) => {
-                const isAssigning = assigning === caseItem.id
+      {/* Case Allocation card */}
+      <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
+        <h3 className="mb-4 text-base font-semibold text-zinc-900">Case Allocation</h3>
 
-                return (
-                  <tr
-                    key={caseItem.id}
-                    className="border-b border-zinc-100/80 last:border-0 transition modern-table-row"
-                  >
-                    <td className="px-4 py-2.5">
-                      <Link
-                        href={`/operator/cases/${caseItem.id}`}
-                        className="font-medium text-zinc-950 hover:underline"
-                      >
-                        {buildAddress(caseItem.property)}
-                      </Link>
-                    </td>
-                    <td className="px-4 py-2.5 text-zinc-600">
-                      {caseItem.tenant_name}
-                    </td>
-                    <td className="px-4 py-2.5">
-                      <span className="text-xs font-medium text-zinc-600">
-                        {formatEnumLabel(caseItem.status)}
-                      </span>
-                    </td>
-                    <td className="px-4 py-2.5">
-                      <select
-                        value={caseItem.assigned_to ?? ''}
-                        disabled={isAssigning}
-                        onChange={(e) => {
-                          const value = e.target.value || null
-                          void handleAssign(caseItem.id, value)
-                        }}
-                        className="h-7 w-full max-w-[200px] rounded-lg border border-zinc-200 bg-white px-2 text-xs text-zinc-700 disabled:opacity-50"
-                      >
-                        <option value="">Unassigned</option>
-                        {members.map((m) => (
-                          <option key={m.userId} value={m.userId}>
-                            {assigneeLabel(m)}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-                    <td className="px-4 py-2.5 text-right">
-                      {caseItem.assigned_to ? (
-                        <button
-                          type="button"
-                          disabled={isAssigning}
-                          onClick={() =>
-                            setConfirmRemove({
-                              caseId: caseItem.id,
-                              address: buildAddress(caseItem.property),
-                            })
-                          }
-                          className="text-xs font-medium text-rose-600 transition hover:text-rose-700 disabled:opacity-50"
-                        >
-                          {isAssigning ? 'Removing...' : 'Remove'}
-                        </button>
-                      ) : (
-                        <span className="text-xs text-zinc-400">
-                          {isAssigning ? 'Assigning...' : 'Select member'}
+        {/* Inline assign error */}
+        {assignError ? (
+          <div className="mb-4 flex items-center justify-between gap-3 rounded-[10px] border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm text-rose-700">
+            <span>{assignError}</span>
+            <button
+              type="button"
+              onClick={() => setAssignError(null)}
+              className="text-xs font-medium text-rose-600 hover:text-rose-800"
+            >
+              Dismiss
+            </button>
+          </div>
+        ) : null}
+
+        {cases.length === 0 ? (
+          <p className="py-6 text-center text-sm text-zinc-400">No cases found.</p>
+        ) : (
+          <div className="overflow-hidden rounded-[10px] border border-zinc-200">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-zinc-50">
+                <tr>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Case</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Property</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Status</th>
+                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Assigned To</th>
+                  <th className="px-4 py-2.5"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {cases.map((caseItem) => {
+                  const isAssigning = assigning === caseItem.id
+                  return (
+                    <tr key={caseItem.id} className="border-t border-zinc-100 transition hover:bg-zinc-50">
+                      <td className="px-4 py-3 text-[13px] font-medium text-zinc-900">
+                        <Link href={`/operator/cases/${caseItem.id}`} className="hover:underline">
+                          {caseItem.id.slice(0, 12)}
+                        </Link>
+                      </td>
+                      <td className="px-4 py-3 text-[13px] text-zinc-700">
+                        {buildAddress(caseItem.property).split(',')[0]}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold leading-[1.6] ${statusBadgeClass(caseItem.status)}`}>
+                          {formatEnumLabel(caseItem.status)}
                         </span>
-                      )}
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <select
+                          value={caseItem.assigned_to ?? ''}
+                          disabled={isAssigning}
+                          onChange={(e) => {
+                            const value = e.target.value || null
+                            if (value === null && caseItem.assigned_to) {
+                              setConfirmRemove({
+                                caseId: caseItem.id,
+                                address: buildAddress(caseItem.property),
+                              })
+                            } else {
+                              void handleAssign(caseItem.id, value)
+                            }
+                          }}
+                          className="h-8 w-[180px] rounded-[10px] border border-zinc-200 bg-white px-3 text-[13px] text-zinc-700 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10 disabled:opacity-50"
+                        >
+                          <option value="">Unassigned</option>
+                          {members.map((m) => (
+                            <option key={m.userId} value={m.userId}>
+                              {assigneeLabel(m)}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
+                      <td className="px-4 py-3"></td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
 
       <ConfirmDialog
         open={confirmRemove !== null}
@@ -278,6 +267,6 @@ export function CaseAllocationPanel() {
         }}
         onCancel={() => setConfirmRemove(null)}
       />
-    </div>
+    </>
   )
 }
