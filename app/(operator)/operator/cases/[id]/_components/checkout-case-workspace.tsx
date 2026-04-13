@@ -1,7 +1,10 @@
 'use client'
 
 import {
+  ArrowLeft,
+  Bot,
   Check,
+  CheckCircle,
   ClipboardList,
   ClipboardCheck,
   Gauge,
@@ -9,15 +12,15 @@ import {
   Eye,
   Calculator,
   Banknote,
-  User,
-  Clock,
+  FileCheck,
   Keyboard,
-  Shield,
+  User,
 } from 'lucide-react'
 import dynamic from 'next/dynamic'
+import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useTransition, type ComponentType } from 'react'
-import { formatAddress, formatDate } from '@/app/eot/_components/eot-ui'
+import { formatAddress, formatCurrency, formatDate } from '@/app/eot/_components/eot-ui'
 import { WorkspaceBadge, WorkspaceSkeleton, WorkspaceSkeletonCard, WorkspaceSkeletonMetrics } from '@/app/(operator)/operator/cases/[id]/_components/checkout-workspace-ui'
 import { cn } from '@/lib/ui'
 import { relativeTime } from '@/lib/relative-time'
@@ -36,7 +39,6 @@ const WORKFLOW_STEPS: {
   step: WorkspaceStep
   label: string
   icon: typeof ClipboardList
-  /** The first status that maps to this step */
   statusStart: EotCaseStatus | null
 }[] = [
   { step: 'inventory', label: 'Inventory', icon: ClipboardList, statusStart: null },
@@ -48,7 +50,6 @@ const WORKFLOW_STEPS: {
   { step: 'refund', label: 'Refund', icon: Banknote, statusStart: 'submitted' },
 ]
 
-/** Ordered list of statuses for progress comparison */
 const STATUS_ORDER: EotCaseStatus[] = [
   'draft',
   'collecting_evidence',
@@ -59,11 +60,6 @@ const STATUS_ORDER: EotCaseStatus[] = [
   'submitted',
   'resolved',
 ]
-
-function getStatusIndex(status: EotCaseStatus): number {
-  const index = STATUS_ORDER.indexOf(status)
-  return index >= 0 ? index : 0
-}
 
 function statusToStep(status: EotCaseStatus): WorkspaceStep {
   if (status === 'disputed') return 'refund'
@@ -77,101 +73,6 @@ function statusToStep(status: EotCaseStatus): WorkspaceStep {
   if (status === 'draft') return 'checkout'
   return 'inventory'
 }
-
-/** Get the date to show under a step, if any */
-function getStepDate(step: WorkspaceStep, data: OperatorCheckoutWorkspaceData): string | null {
-  switch (step) {
-    case 'inventory':
-      return data.checkoutCase?.checkinDate ?? null
-    case 'checkout':
-      return data.checkoutCase?.checkoutDate ?? data.workspace.tenancy.end_date ?? null
-    default:
-      return null
-  }
-}
-
-/* ────────────────────────────────────────────────────────────── */
-/*  Visual workflow navigation (competitor-style step bar)        */
-/* ────────────────────────────────────────────────────────────── */
-
-function WorkflowNav({
-  activeStep,
-  currentStatus,
-  data,
-  onStepClick,
-}: {
-  activeStep: WorkspaceStep
-  currentStatus: EotCaseStatus
-  data: OperatorCheckoutWorkspaceData
-  onStepClick: (step: WorkspaceStep) => void
-}) {
-  const currentStepKey = statusToStep(currentStatus)
-  const currentStepIdx = WORKFLOW_STEPS.findIndex((s) => s.step === currentStepKey)
-  const isDisputed = currentStatus === 'disputed'
-  const isResolved = currentStatus === 'resolved'
-
-  return (
-    <nav className="w-full overflow-x-auto scrollbar-none" aria-label="Case workflow">
-      <div className="flex min-w-[480px]">
-        {WORKFLOW_STEPS.map((item, index) => {
-          const stepIdx = index
-          const isComplete = stepIdx < currentStepIdx || (isResolved && stepIdx <= currentStepIdx)
-          const isCurrent = stepIdx === currentStepIdx && !isResolved
-          const isActive = item.step === activeStep
-          const isProcessing = isCurrent && currentStatus === 'analysis'
-
-          const Icon = item.icon
-
-          return (
-            <button
-              key={item.step}
-              type="button"
-              onClick={() => onStepClick(item.step)}
-              className={cn(
-                'flex flex-1 items-center justify-center gap-1.5 border-b-2 px-2 py-3 text-xs font-medium transition-all',
-                isActive
-                  ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
-                  : isComplete
-                    ? 'border-emerald-300 text-emerald-600 hover:bg-zinc-50'
-                    : 'border-transparent text-zinc-500 hover:bg-zinc-50',
-              )}
-              style={{ whiteSpace: 'nowrap' }}
-            >
-              {isComplete ? (
-                <span className="text-emerald-500">
-                  <Check className="h-3.5 w-3.5" strokeWidth={2.5} />
-                </span>
-              ) : (
-                <span className={cn('opacity-60', isActive && 'opacity-100')}>
-                  <Icon className="h-3.5 w-3.5" strokeWidth={2} />
-                </span>
-              )}
-              <span className="hidden sm:inline">{item.label}</span>
-            </button>
-          )
-        })}
-      </div>
-    </nav>
-  )
-}
-
-/* ────────────────────────────────────────────────────────────── */
-/*  Step → component mapping                                      */
-/* ────────────────────────────────────────────────────────────── */
-
-const STEP_COMPONENTS: Record<WorkspaceStep, ComponentType<{ data: OperatorCheckoutWorkspaceData }>> = {
-  inventory: dynamic(() => import('./step-inventory').then((m) => m.StepInventory)),
-  checkout: dynamic(() => import('./step-checkout-report').then((m) => m.StepCheckoutReport)),
-  readings: dynamic(() => import('./step-readings').then((m) => m.StepReadings)),
-  analysis: dynamic(() => import('./step-analysis').then((m) => m.StepAnalysis)),
-  review: dynamic(() => import('./step-review').then((m) => m.StepReview)),
-  deductions: dynamic(() => import('./step-deductions').then((m) => m.StepDeductions)),
-  refund: dynamic(() => import('./step-refund').then((m) => m.StepRefund)),
-}
-
-/* ────────────────────────────────────────────────────────────── */
-/*  Status badge presentation                                     */
-/* ────────────────────────────────────────────────────────────── */
 
 function getStatusPresentation(status: EotCaseStatus) {
   switch (status) {
@@ -198,9 +99,16 @@ function getStatusPresentation(status: EotCaseStatus) {
   }
 }
 
-/* ────────────────────────────────────────────────────────────── */
-/*  Deposit scheme labels                                         */
-/* ────────────────────────────────────────────────────────────── */
+function priorityBadgeTone(priority: string | null | undefined) {
+  switch (priority) {
+    case 'high':
+      return 'disputed' as const
+    case 'medium':
+      return 'warning' as const
+    default:
+      return 'neutral' as const
+  }
+}
 
 function getDepositSchemeLabel(scheme: string | null | undefined): string | null {
   if (!scheme) return null
@@ -211,6 +119,188 @@ function getDepositSchemeLabel(scheme: string | null | undefined): string | null
     case 'safedeposits_scotland': return 'SafeDeposits Scotland'
     default: return scheme.toUpperCase()
   }
+}
+
+/* ────────────────────────────────────────────────────────────── */
+/*  Step navigation (HTML design: card with icon+label tabs)     */
+/* ────────────────────────────────────────────────────────────── */
+
+function WorkflowNav({
+  activeStep,
+  currentStatus,
+  onStepClick,
+}: {
+  activeStep: WorkspaceStep
+  currentStatus: EotCaseStatus
+  onStepClick: (step: WorkspaceStep) => void
+}) {
+  const currentStepKey = statusToStep(currentStatus)
+  const currentStepIdx = WORKFLOW_STEPS.findIndex((s) => s.step === currentStepKey)
+  const isResolved = currentStatus === 'resolved'
+
+  return (
+    <div className="overflow-hidden rounded-[10px] border border-zinc-200 bg-white">
+      <nav className="flex" aria-label="Case workflow">
+        {WORKFLOW_STEPS.map((item, index) => {
+          const isComplete = index < currentStepIdx || (isResolved && index <= currentStepIdx)
+          const isCurrent = index === currentStepIdx && !isResolved
+          const isActive = item.step === activeStep
+          const Icon = item.icon
+
+          return (
+            <button
+              key={item.step}
+              type="button"
+              onClick={() => onStepClick(item.step)}
+              className={cn(
+                'flex flex-1 items-center justify-center gap-1.5 border-b-2 px-2 py-3 text-xs font-medium whitespace-nowrap transition-all',
+                isActive
+                  ? 'border-emerald-500 bg-emerald-50 text-emerald-700 font-semibold'
+                  : isComplete
+                    ? 'border-emerald-300 text-emerald-600 hover:bg-zinc-50'
+                    : 'border-transparent text-zinc-500 hover:bg-zinc-50',
+              )}
+            >
+              {isComplete ? (
+                <span className="text-emerald-500">
+                  <CheckCircle className="h-3.5 w-3.5" strokeWidth={2} />
+                </span>
+              ) : (
+                <span className={cn('opacity-60', isActive && 'opacity-100')}>
+                  <Icon className="h-3.5 w-3.5" strokeWidth={2} />
+                </span>
+              )}
+              <span className="hidden sm:inline">{item.label}</span>
+            </button>
+          )
+        })}
+      </nav>
+    </div>
+  )
+}
+
+/* ────────────────────────────────────────────────────────────── */
+/*  Sidebar cards (Case Overview, Claim Summary, Documents)      */
+/* ────────────────────────────────────────────────────────────── */
+
+function WorkspaceSidebar({ data }: { data: OperatorCheckoutWorkspaceData }) {
+  const propertyAddress = formatAddress([
+    data.workspace.property.address_line_1,
+    data.workspace.property.address_line_2,
+    data.workspace.property.city,
+    data.workspace.property.postcode,
+  ])
+  const depositAmount = data.workspace.totals.depositAmount
+  const depositScheme = getDepositSchemeLabel(data.checkoutCase?.depositScheme)
+  const startDate = data.workspace.tenancy.start_date
+  const endDate = data.workspace.tenancy.end_date
+  const reference = data.checkoutCase?.caseReference ?? data.workspace.case.id.slice(0, 8).toUpperCase()
+
+  const totalClaim = data.workspace.totals.totalClaimed ?? 0
+  const defectCount = data.defects.length
+  const returnToTenant = data.workspace.totals.returnToTenant
+  const claimPct = depositAmount ? Math.round((totalClaim / depositAmount) * 100) : 0
+
+  const hasCheckinReport = data.documents.some((d) => d.documentType === 'checkin')
+  const hasCheckoutReport = data.documents.some((d) => d.documentType === 'checkout')
+  const hasAnalysis = data.workspace.case.status !== 'draft' && data.workspace.case.status !== 'collecting_evidence'
+
+  return (
+    <div className="space-y-4">
+      {/* Case Overview */}
+      <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
+        <h4 className="mb-3 text-sm font-semibold text-zinc-900">Case Overview</h4>
+        <div className="space-y-4">
+          <div>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Property</div>
+            <div className="mt-1 text-[13px] text-zinc-700">{propertyAddress}</div>
+          </div>
+          <div>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Deposit</div>
+            <div className="mt-1 text-[13px] font-semibold text-zinc-700">
+              {depositAmount ? formatCurrency(depositAmount) : '—'}
+              {depositScheme ? ` · ${depositScheme}` : ''}
+            </div>
+          </div>
+          <div>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Period</div>
+            <div className="mt-1 text-[13px] text-zinc-700">
+              {formatDate(startDate)} – {formatDate(endDate)}
+            </div>
+          </div>
+          <div>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Reference</div>
+            <div className="mt-1 text-[13px] text-zinc-700">{reference}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Claim Summary */}
+      <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
+        <h4 className="mb-3 text-sm font-semibold text-zinc-900">Claim Summary</h4>
+        <div className="text-2xl font-bold tabular-nums text-emerald-600">
+          {formatCurrency(totalClaim)}
+        </div>
+        <div className="mt-1 text-xs text-zinc-500">
+          {defectCount} item{defectCount !== 1 ? 's' : ''}
+          {returnToTenant != null ? ` · ${formatCurrency(returnToTenant)} return to tenant` : ''}
+        </div>
+        {depositAmount ? (
+          <>
+            <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-zinc-100">
+              <div
+                className="h-full rounded-full bg-emerald-500 transition-all"
+                style={{ width: `${Math.min(claimPct, 100)}%` }}
+              />
+            </div>
+            <div className="mt-1 text-[11px] text-zinc-500">{claimPct}% of deposit</div>
+          </>
+        ) : null}
+      </div>
+
+      {/* Documents */}
+      <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
+        <h4 className="mb-3 text-sm font-semibold text-zinc-900">Documents</h4>
+        <div className="space-y-3">
+          {hasCheckinReport ? (
+            <div className="flex items-center gap-2">
+              <FileCheck className="h-3.5 w-3.5 text-emerald-600" />
+              <span className="text-[13px] text-zinc-700">Check-in Report</span>
+            </div>
+          ) : null}
+          {hasCheckoutReport ? (
+            <div className="flex items-center gap-2">
+              <FileCheck className="h-3.5 w-3.5 text-emerald-600" />
+              <span className="text-[13px] text-zinc-700">Checkout Report</span>
+            </div>
+          ) : null}
+          {hasAnalysis ? (
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-3.5 w-3.5 text-emerald-600" />
+              <span className="text-[13px] text-zinc-700">AI Analysis Report</span>
+            </div>
+          ) : null}
+          {!hasCheckinReport && !hasCheckoutReport && !hasAnalysis ? (
+            <p className="text-xs text-zinc-400">No documents linked yet</p>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ────────────────────────────────────────────────────────────── */
+/*  Step → component mapping                                      */
+/* ────────────────────────────────────────────────────────────── */
+
+const STEP_COMPONENTS: Record<WorkspaceStep, ComponentType<{ data: OperatorCheckoutWorkspaceData }>> = {
+  inventory: dynamic(() => import('./step-inventory').then((m) => m.StepInventory)),
+  checkout: dynamic(() => import('./step-checkout-report').then((m) => m.StepCheckoutReport)),
+  readings: dynamic(() => import('./step-readings').then((m) => m.StepReadings)),
+  analysis: dynamic(() => import('./step-analysis').then((m) => m.StepAnalysis)),
+  review: dynamic(() => import('./step-review').then((m) => m.StepReview)),
+  deductions: dynamic(() => import('./step-deductions').then((m) => m.StepDeductions)),
+  refund: dynamic(() => import('./step-refund').then((m) => m.StepRefund)),
 }
 
 /* ────────────────────────────────────────────────────────────── */
@@ -236,25 +326,23 @@ export function CheckoutCaseWorkspace({
   const currentStatus = data.workspace.case.status
   const status = getStatusPresentation(currentStatus)
 
-  const propertyAddress = formatAddress([
+  const propertyName = data.workspace.property.address_line_1 || formatAddress([
     data.workspace.property.address_line_1,
-    data.workspace.property.address_line_2,
     data.workspace.property.city,
-    data.workspace.property.postcode,
-    data.workspace.property.country_code,
   ])
-  const caseReference =
-    data.checkoutCase?.caseReference ?? data.workspace.case.id.slice(0, 8).toUpperCase()
-
-  const depositSchemeLabel = getDepositSchemeLabel(data.checkoutCase?.depositScheme)
+  const caseReference = data.checkoutCase?.caseReference ?? data.workspace.case.id.slice(0, 8).toUpperCase()
+  const tenantName = data.workspace.tenant.name
+  const landlordName = data.workspace.overview.landlords[0]?.fullName
   const lastModified = data.checkoutCase?.updatedAt ?? data.workspace.case.updated_at
   const assignedTo = data.checkoutCase?.assignedTo
+  const priority = data.workspace.case.priority
+
+  const isReviewStep = activeStep === 'review'
 
   const handleStepClick = useCallback(
     (step: WorkspaceStep) => {
       if (!pathname) return
 
-      // Guard against navigating away with unsaved changes (#21)
       if (
         (window as unknown as Record<string, boolean>).__workspaceDirty &&
         !window.confirm('You have unsaved changes. Discard and switch steps?')
@@ -282,11 +370,9 @@ export function CheckoutCaseWorkspace({
   // Keyboard navigation: Ctrl+← / Ctrl+→ to move between steps
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
-      // Only trigger with Ctrl/Cmd modifier to avoid interfering with text editing
       if (!e.ctrlKey && !e.metaKey) return
       if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return
 
-      // Don't trigger when inside input/textarea/select
       const tag = (e.target as HTMLElement)?.tagName
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
 
@@ -309,92 +395,76 @@ export function CheckoutCaseWorkspace({
   }, [activeStep, handleStepClick])
 
   return (
-    <div className="space-y-6 animate-fade-in-up">
-      {/* Case header */}
-      <section className="overflow-hidden rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7">
-        <div className="flex items-center justify-between gap-3">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
-            {`Case #${caseReference}`}
-          </p>
-          {/* Meta badges */}
-          <div className="flex flex-wrap items-center gap-2">
-            {assignedTo ? (
-              <span className="inline-flex items-center gap-1 text-[11px] text-zinc-400">
-                <User className="h-3 w-3" />
-                {assignedTo}
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1 text-[11px] text-amber-500">
-                <User className="h-3 w-3" />
-                Unassigned
-              </span>
-            )}
-            {lastModified ? (
-              <span className="inline-flex items-center gap-1 text-[11px] text-zinc-400">
-                <Clock className="h-3 w-3" />
-                {relativeTime(lastModified)}
-              </span>
-            ) : null}
-          </div>
-        </div>
-        <div className="mt-3 flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
-          <div className="min-w-0">
-            <h2 className="text-[1.7rem] font-semibold tracking-[-0.04em] text-zinc-950 [overflow-wrap:anywhere]">
-              {propertyAddress}
-            </h2>
-            <div className="mt-2 flex flex-wrap items-center gap-2">
-              <WorkspaceBadge label={status.label} tone={status.tone} />
-              {depositSchemeLabel ? (
-                <WorkspaceBadge label={depositSchemeLabel} tone="info" />
-              ) : null}
-              <span className="text-xs text-zinc-400">
-                Checkout {formatDate(data.checkoutCase?.checkoutDate ?? data.workspace.tenancy.end_date)}
-              </span>
-              {data.defects.length > 0 ? (
-                <span className="text-xs text-zinc-400">
-                  · {data.defects.length} defects · {data.rooms.length} rooms
-                </span>
-              ) : null}
-            </div>
-          </div>
-        </div>
-
-        {/* Workflow navigation — tab-style step bar */}
-        <div className="mt-6 border-t border-zinc-100 pt-0">
-          <WorkflowNav
-            activeStep={activeStep}
-            currentStatus={currentStatus}
-            data={data}
-            onStepClick={handleStepClick}
-          />
-          <p className="mt-2 hidden items-center gap-1 text-[10px] text-zinc-400 sm:flex">
-            <Keyboard className="h-3 w-3" />
-            <kbd className="border border-zinc-200 bg-zinc-50 px-1 py-0.5 text-[9px] font-medium">Ctrl</kbd>
-            <span>+</span>
-            <kbd className="border border-zinc-200 bg-zinc-50 px-1 py-0.5 text-[9px] font-medium">&larr;</kbd>
-            <kbd className="border border-zinc-200 bg-zinc-50 px-1 py-0.5 text-[9px] font-medium">&rarr;</kbd>
-            <span>to navigate steps</span>
+    <div className="space-y-5 animate-fade-in-up">
+      {/* ── Case Header ── */}
+      <div className="flex flex-wrap items-center gap-3">
+        <Link
+          href="/tenancies"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-[10px] text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900"
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </Link>
+        <div className="min-w-[200px] flex-1">
+          <h2 className="text-lg font-semibold tracking-tight text-zinc-900">{propertyName}</h2>
+          <p className="text-[13px] text-zinc-500">
+            {caseReference}
+            {tenantName ? ` · ${tenantName}` : ''}
+            {landlordName ? ` · ${landlordName}` : ''}
           </p>
         </div>
-      </section>
+        <div className="flex flex-wrap items-center gap-1.5">
+          {lastModified ? (
+            <span className="text-xs text-zinc-400">{relativeTime(lastModified)}</span>
+          ) : null}
+          {priority ? (
+            <WorkspaceBadge
+              label={priority.charAt(0).toUpperCase() + priority.slice(1)}
+              tone={priorityBadgeTone(priority)}
+            />
+          ) : null}
+          {assignedTo ? (
+            <span className="text-xs font-medium text-zinc-700">{assignedTo}</span>
+          ) : (
+            <WorkspaceBadge label="Unassigned" tone="warning" />
+          )}
+          <button
+            type="button"
+            className="inline-flex items-center gap-1 rounded-[10px] px-2.5 py-1.5 text-xs font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900"
+          >
+            <Bot className="h-3.5 w-3.5" />
+            AI
+          </button>
+        </div>
+      </div>
 
-      {/* Step content */}
-      <section
-        aria-busy={isPending}
-        className="rounded-xl border border-zinc-200 bg-white px-6 py-6 md:px-7"
-      >
-        {isPending ? (
-          <div className="space-y-6 animate-fade-in-up">
-            <WorkspaceSkeletonMetrics count={4} />
-            <WorkspaceSkeleton width="w-1/3" height="h-4" />
-            <WorkspaceSkeleton width="w-full" height="h-3" />
-            <WorkspaceSkeleton width="w-2/3" height="h-3" />
-            <WorkspaceSkeletonCard />
+      {/* ── Step Navigation ── */}
+      <WorkflowNav
+        activeStep={activeStep}
+        currentStatus={currentStatus}
+        onStepClick={handleStepClick}
+      />
+
+      {/* ── Step Content (2-col with sidebar, or full-width for review) ── */}
+      {isPending ? (
+        <div className="space-y-6 animate-fade-in-up">
+          <WorkspaceSkeletonMetrics count={4} />
+          <WorkspaceSkeleton width="w-1/3" height="h-4" />
+          <WorkspaceSkeleton width="w-full" height="h-3" />
+          <WorkspaceSkeleton width="w-2/3" height="h-3" />
+          <WorkspaceSkeletonCard />
+        </div>
+      ) : isReviewStep ? (
+        /* Review step — full-width, no sidebar */
+        <ActiveStepComponent data={data} />
+      ) : (
+        /* All other steps — 2-column with sidebar */
+        <div className="grid gap-4 xl:grid-cols-[1fr_320px]">
+          <div className="space-y-4 min-w-0">
+            <ActiveStepComponent data={data} />
           </div>
-        ) : (
-          <ActiveStepComponent data={data} />
-        )}
-      </section>
+          <WorkspaceSidebar data={data} />
+        </div>
+      )}
     </div>
   )
 }

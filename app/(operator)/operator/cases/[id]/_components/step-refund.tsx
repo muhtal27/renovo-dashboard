@@ -1,6 +1,6 @@
 'use client'
 
-import { CheckCircle2, Loader2, RefreshCw, Upload } from 'lucide-react'
+import { CheckCircle2, Clock, Landmark, Loader2, RefreshCw, Upload } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useMemo, useState, useTransition } from 'react'
 import { toast } from 'sonner'
@@ -16,6 +16,8 @@ import { toTimestamp } from '@/lib/operator-checkout-workspace-helpers'
 import type { OperatorCheckoutWorkspaceData } from '@/lib/operator-checkout-workspace-types'
 import type { EotClaimStatusResult } from '@/lib/eot-types'
 
+type TimelineFilter = 'all' | 'key' | 'alerts' | 'activity'
+
 export function StepRefund({ data }: { data: OperatorCheckoutWorkspaceData }) {
   const router = useRouter()
   const [isTransitioning, setIsTransitioning] = useState(false)
@@ -26,6 +28,7 @@ export function StepRefund({ data }: { data: OperatorCheckoutWorkspaceData }) {
   const [isCheckingStatus, setIsCheckingStatus] = useState(false)
   const [isUploadingEvidence, setIsUploadingEvidence] = useState(false)
   const [schemeStatusData, setSchemeStatusData] = useState<EotClaimStatusResult | null>(null)
+  const [timelineFilter, setTimelineFilter] = useState<TimelineFilter>('all')
 
   const caseId = data.workspace.case.id
   const caseStatus = data.workspace.case.status
@@ -52,6 +55,19 @@ export function StepRefund({ data }: { data: OperatorCheckoutWorkspaceData }) {
       .slice(0, 10),
     [data.timeline]
   )
+
+  const filteredTimeline = useMemo(() => {
+    if (timelineFilter === 'all') return timelineItems
+    if (timelineFilter === 'key') return timelineItems.filter((item) => item.eventType.includes('submitted') || item.eventType.includes('resolved') || item.eventType.includes('disputed'))
+    if (timelineFilter === 'alerts') return timelineItems.filter((item) => item.eventType.includes('alert') || item.eventType.includes('warning') || item.eventType.includes('error'))
+    return timelineItems.filter((item) => item.eventType.includes('activity') || item.eventType.includes('update') || item.eventType.includes('note'))
+  }, [timelineItems, timelineFilter])
+
+  function getTimelineIconTone(eventType: string): string {
+    if (eventType.includes('resolved') || eventType.includes('submitted') || eventType.includes('approved')) return 'text-emerald-600'
+    if (eventType.includes('alert') || eventType.includes('warning') || eventType.includes('disputed')) return 'text-amber-600'
+    return 'text-zinc-500'
+  }
 
   async function handleTransition(targetStatus: string) {
     setIsTransitioning(true)
@@ -140,239 +156,385 @@ export function StepRefund({ data }: { data: OperatorCheckoutWorkspaceData }) {
     }
   }
 
-  return (
-    <div className="space-y-6">
-      <section>
-        <h3 className="text-sm font-semibold text-zinc-950">
-          {isDisputed ? 'Dispute in progress' : isResolved ? 'Case resolved' : isSubmitted ? 'Submitted' : 'Submit claim'}
-        </h3>
-        {isReadyForClaim ? (
-          <p className="mt-1 text-sm text-zinc-500">
-            The case is ready for submission. Submit to the connected deposit scheme or mark as submitted manually.
-          </p>
-        ) : isSubmitted ? (
-          <p className="mt-1 text-sm text-zinc-500">
-            {submittedAt
-              ? `Claim submitted on ${formatDateTime(submittedAt)}.`
-              : 'Claim has been submitted and is awaiting resolution.'}
-          </p>
-        ) : isDisputed ? (
-          <p className="mt-1 text-sm text-zinc-500">
-            This case is currently under dispute. Once the dispute has been settled, mark it as
-            resolved to close the case.
-          </p>
-        ) : isResolved ? (
-          <p className="mt-1 text-sm text-zinc-500">
+  /* ── Resolved state ────────────────────────────────────────── */
+  if (isResolved) {
+    return (
+      <div className="space-y-6">
+        <div className="rounded-[10px] border-2 border-emerald-200 bg-emerald-50 p-12 text-center">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
+            <CheckCircle2 className="h-7 w-7 text-emerald-600" />
+          </div>
+          <h3 className="mt-4 text-lg font-semibold text-emerald-700">Case Resolved</h3>
+          <p className="mt-2 text-sm text-emerald-600/80">
             This case has been resolved and closed.
+            {submittedAt ? ` Claim submitted on ${formatDateTime(submittedAt)}.` : ''}
           </p>
-        ) : (
-          <p className="mt-1 text-sm text-zinc-500">
-            The case has not yet reached the submission stage.
-          </p>
-        )}
-      </section>
 
-      {/* Final position */}
-      <section>
-        <h3 className="text-sm font-semibold text-zinc-950">Final position</h3>
-        <dl className="mt-3 grid grid-cols-2 gap-x-12 gap-y-4 text-sm xl:grid-cols-4">
-          <div>
-            <dt className="text-xs text-zinc-500">Claim total</dt>
-            <dd className="mt-0.5 font-medium text-zinc-950">
-              {claim ? formatCurrency(claim.total_amount) : formatCurrency(totals.totalClaimed)}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-xs text-zinc-500">Deposit held</dt>
-            <dd className="mt-0.5 font-medium text-zinc-950">
-              {totals.depositAmount != null ? formatCurrency(totals.depositAmount) : '\u2014'}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-xs text-zinc-500">Return to tenant</dt>
-            <dd className="mt-0.5 font-medium text-zinc-950">
-              {totals.returnToTenant != null ? formatCurrency(totals.returnToTenant) : '\u2014'}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-xs text-zinc-500">Status</dt>
-            <dd className="mt-0.5 font-medium">
-              {isDisputed ? (
-                <span className="text-rose-700">Disputed</span>
-              ) : isResolved ? (
-                <span className="text-emerald-700">Resolved</span>
-              ) : isSubmitted ? (
-                <span className="text-amber-700">Awaiting resolution</span>
-              ) : (
-                <span className="text-zinc-400">Ready for claim</span>
-              )}
-            </dd>
-          </div>
-        </dl>
-      </section>
-
-      {/* Deposit scheme tracking (visible when submitted or disputed) */}
-      {(isSubmitted || isDisputed) && schemeProvider ? (
-        <section>
-          <h3 className="text-sm font-semibold text-zinc-950">Deposit scheme tracking</h3>
-          <div className="mt-3 flex flex-wrap items-center gap-3 border border-zinc-200 bg-white px-4 py-3">
-            <span className={`h-2.5 w-2.5 ${isDisputed ? 'bg-rose-500' : 'bg-emerald-500'}`} />
-            <span className="text-sm font-semibold text-zinc-950">{formatEnumLabel(schemeProvider)}</span>
-            {schemeRef ? (
-              <span className="bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-600">
-                Ref: {schemeRef}
+          {/* Breakdown */}
+          <div className="mx-auto mt-8 max-w-md space-y-3">
+            <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center gap-2">
+                <span className="h-2.5 w-2.5 rounded-full bg-sky-500" />
+                <span className="text-zinc-600">To Landlord</span>
+              </div>
+              <span className="font-semibold text-zinc-900">
+                {outcome?.amount_to_landlord != null
+                  ? formatCurrency(String(outcome.amount_to_landlord))
+                  : totals.totalClaimed
+                    ? formatCurrency(totals.totalClaimed)
+                    : '\u2014'}
               </span>
-            ) : null}
-            <WorkspaceBadge
-              label={formatEnumLabel(schemeStatus ?? caseStatus)}
-              tone={isDisputed ? 'disputed' : 'submitted'}
-            />
-          </div>
-
-          <div className="mt-3 flex flex-wrap gap-3">
-            <WorkspaceActionButton
-              disabled={isUploadingEvidence}
-              tone="primary"
-              onClick={handleUploadEvidence}
-            >
-              {isUploadingEvidence ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-              Upload evidence to scheme
-            </WorkspaceActionButton>
-            <WorkspaceActionButton
-              disabled={isCheckingStatus}
-              tone="secondary"
-              onClick={handleCheckStatus}
-            >
-              {isCheckingStatus ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-              Check status
-            </WorkspaceActionButton>
-          </div>
-        </section>
-      ) : null}
-
-      {/* Outcome display */}
-      {outcome ? (
-        <section className="border border-emerald-200 bg-emerald-50 px-5 py-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-700">
-            Adjudication outcome
-          </p>
-          <dl className="mt-3 grid gap-3 sm:grid-cols-3">
-            {outcome.amount_awarded != null ? (
-              <div>
-                <dt className="text-xs text-emerald-600">Amount awarded</dt>
-                <dd className="mt-0.5 text-lg font-semibold text-emerald-900">
-                  {formatCurrency(String(outcome.amount_awarded))}
-                </dd>
-              </div>
-            ) : null}
-            {outcome.amount_to_landlord != null ? (
-              <div>
-                <dt className="text-xs text-emerald-600">To landlord</dt>
-                <dd className="mt-0.5 text-lg font-semibold text-emerald-900">
-                  {formatCurrency(String(outcome.amount_to_landlord))}
-                </dd>
-              </div>
-            ) : null}
-            {outcome.amount_to_tenant != null ? (
-              <div>
-                <dt className="text-xs text-zinc-500">To tenant</dt>
-                <dd className="mt-0.5 text-lg font-semibold text-zinc-700">
-                  {formatCurrency(String(outcome.amount_to_tenant))}
-                </dd>
-              </div>
-            ) : null}
-          </dl>
-          {adjudicatorNotes ? (
-            <div className="mt-4 border-t border-emerald-200 pt-3">
-              <p className="text-xs font-medium text-emerald-700">Adjudicator notes</p>
-              <p className="mt-1 text-sm leading-relaxed text-emerald-900">{adjudicatorNotes}</p>
             </div>
+            <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center gap-2">
+                <span className="h-2.5 w-2.5 rounded-full bg-fuchsia-500" />
+                <span className="text-zinc-600">To Tenant</span>
+              </div>
+              <span className="font-semibold text-zinc-900">
+                {outcome?.amount_to_tenant != null
+                  ? formatCurrency(String(outcome.amount_to_tenant))
+                  : totals.returnToTenant != null
+                    ? formatCurrency(totals.returnToTenant)
+                    : '\u2014'}
+              </span>
+            </div>
+            <div className="border-t border-emerald-200 pt-3">
+              <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center gap-2">
+                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                  <span className="font-medium text-zinc-700">Total Deposit</span>
+                </div>
+                <span className="font-semibold text-zinc-900">
+                  {totals.depositAmount != null ? formatCurrency(totals.depositAmount) : '\u2014'}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {summary ? (
+          <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
+            <h3 className="text-sm font-semibold text-zinc-950">Case Summary</h3>
+            <p className="mt-2 text-sm leading-6 text-zinc-600">{summary}</p>
+          </div>
+        ) : null}
+
+        {error ? <p className="text-sm text-rose-700">{error}</p> : null}
+
+        <ConfirmDialog
+          open={confirmAction === 'resolved'}
+          title="Mark this case as resolved?"
+          description="This will close the case permanently. This action cannot be undone."
+          confirmLabel="Resolve case"
+          cancelLabel="Cancel"
+          onConfirm={() => handleTransition('resolved')}
+          onCancel={() => setConfirmAction(null)}
+        />
+        <ConfirmDialog
+          open={confirmAction === 'disputed'}
+          title="Flag this case as disputed?"
+          description="This will move the case into dispute handling. You can resolve it later."
+          confirmLabel="Flag dispute"
+          cancelLabel="Cancel"
+          tone="danger"
+          onConfirm={() => handleTransition('disputed')}
+          onCancel={() => setConfirmAction(null)}
+        />
+      </div>
+    )
+  }
+
+  /* ── Processing state (not resolved) ───────────────────────── */
+  return (
+    <div className="space-y-4">
+      {/* Stats grid */}
+      <div className="grid grid-cols-4 gap-4">
+        <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
+          <p className="text-xs font-medium text-zinc-500">Total Claimed</p>
+          <p className="mt-2 text-xl font-bold tabular-nums text-emerald-600">
+            {claim ? formatCurrency(claim.total_amount) : formatCurrency(totals.totalClaimed)}
+          </p>
+        </div>
+        <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
+          <p className="text-xs font-medium text-zinc-500">Deposit Held</p>
+          <p className="mt-2 text-xl font-bold tabular-nums text-zinc-950">
+            {totals.depositAmount != null ? formatCurrency(totals.depositAmount) : '\u2014'}
+          </p>
+        </div>
+        <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
+          <p className="text-xs font-medium text-zinc-500">Return to Tenant</p>
+          <p className="mt-2 text-xl font-bold tabular-nums text-zinc-950">
+            {totals.returnToTenant != null ? formatCurrency(totals.returnToTenant) : '\u2014'}
+          </p>
+        </div>
+        <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
+          <p className="text-xs font-medium text-zinc-500">Return to Landlord</p>
+          <p className="mt-2 text-xl font-bold tabular-nums text-zinc-950">
+            {totals.totalClaimed ? formatCurrency(totals.totalClaimed) : '\u2014'}
+          </p>
+        </div>
+      </div>
+
+      {/* 2-column layout: Deposit Breakdown + Scheme Submission */}
+      <div className="grid grid-cols-2 gap-4">
+        {/* Left: Deposit Breakdown */}
+        <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
+          <h3 className="text-sm font-semibold text-zinc-950">Deposit Breakdown</h3>
+          <div className="mt-4 space-y-3">
+            <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center gap-2">
+                <span className="h-2.5 w-2.5 rounded-full bg-sky-500" />
+                <span className="text-zinc-600">To Landlord</span>
+              </div>
+              <span className="font-semibold text-zinc-900">
+                {claim ? formatCurrency(claim.total_amount) : formatCurrency(totals.totalClaimed)}
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center gap-2">
+                <span className="h-2.5 w-2.5 rounded-full bg-fuchsia-500" />
+                <span className="text-zinc-600">To Tenant</span>
+              </div>
+              <span className="font-semibold text-zinc-900">
+                {totals.returnToTenant != null ? formatCurrency(totals.returnToTenant) : '\u2014'}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Right: Scheme Submission */}
+        <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
+          <h3 className="text-sm font-semibold text-zinc-950">Scheme Submission</h3>
+
+          {/* Submission status box */}
+          <div className="mt-4 rounded-lg border border-zinc-100 bg-zinc-50 px-4 py-3">
+            <div className="flex items-center gap-3">
+              {schemeProvider || isSubmitted || isDisputed ? (
+                <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" />
+              ) : (
+                <Landmark className="h-5 w-5 shrink-0 text-zinc-400" />
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-zinc-900">
+                  {schemeProvider ? formatEnumLabel(schemeProvider) : 'Deposit Scheme'}
+                </p>
+                {schemeRef ? (
+                  <p className="text-xs text-zinc-500">Ref: {schemeRef}</p>
+                ) : null}
+              </div>
+              {isSubmitted || isDisputed ? (
+                <WorkspaceBadge
+                  label={formatEnumLabel(schemeStatus ?? caseStatus)}
+                  tone={isDisputed ? 'disputed' : 'submitted'}
+                />
+              ) : (
+                <WorkspaceBadge label="Pending" tone="pending" />
+              )}
+            </div>
+          </div>
+
+          {/* Scheme action buttons */}
+          <div className="mt-4 flex flex-wrap gap-2">
+            {isReadyForClaim ? (
+              <button
+                disabled={isSubmittingToScheme || isTransitioning}
+                onClick={() => setConfirmAction('submit_scheme')}
+                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isSubmittingToScheme ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                Submit to Scheme
+              </button>
+            ) : (isSubmitted || isDisputed) ? (
+              <>
+                <button
+                  disabled={isUploadingEvidence}
+                  onClick={handleUploadEvidence}
+                  className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isUploadingEvidence ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                  Evidence
+                </button>
+                <button
+                  disabled={isCheckingStatus}
+                  onClick={handleCheckStatus}
+                  className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isCheckingStatus ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+                  Check Status
+                </button>
+              </>
+            ) : null}
+          </div>
+        </div>
+      </div>
+
+      {/* Adjudication Outcome */}
+      <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-zinc-950">Adjudication Outcome</h3>
+          {!outcome ? (
+            <WorkspaceBadge label="Awaiting" tone="warning" />
           ) : null}
-        </section>
-      ) : null}
+        </div>
+
+        {outcome ? (
+          <div className="mt-4">
+            <div className="grid grid-cols-3 gap-4">
+              {outcome.amount_awarded != null ? (
+                <div className="rounded-lg border border-zinc-100 bg-zinc-50 px-4 py-3">
+                  <p className="text-xs font-medium text-zinc-500">Amount Claimed</p>
+                  <p className="mt-1 text-lg font-semibold tabular-nums text-zinc-900">
+                    {claim ? formatCurrency(claim.total_amount) : formatCurrency(totals.totalClaimed)}
+                  </p>
+                </div>
+              ) : null}
+              {outcome.amount_awarded != null ? (
+                <div className="rounded-lg border border-emerald-100 bg-emerald-50 px-4 py-3">
+                  <p className="text-xs font-medium text-emerald-600">Amount Awarded</p>
+                  <p className="mt-1 text-lg font-semibold tabular-nums text-emerald-700">
+                    {formatCurrency(String(outcome.amount_awarded))}
+                  </p>
+                </div>
+              ) : null}
+              {outcome.amount_awarded != null && totals.totalClaimed ? (
+                <div className="rounded-lg border border-zinc-100 bg-zinc-50 px-4 py-3">
+                  <p className="text-xs font-medium text-zinc-500">Success Rate</p>
+                  <p className="mt-1 text-lg font-semibold tabular-nums text-zinc-900">
+                    {Math.round(
+                      (Number(outcome.amount_awarded) /
+                        (claim ? Number(claim.total_amount) : Number(totals.totalClaimed))) *
+                        100
+                    )}%
+                  </p>
+                </div>
+              ) : null}
+            </div>
+            {adjudicatorNotes ? (
+              <div className="mt-4 rounded-lg border border-zinc-100 bg-zinc-50 px-4 py-3">
+                <p className="text-xs font-medium text-zinc-500">Adjudicator Notes</p>
+                <p className="mt-1 text-sm leading-relaxed text-zinc-700">{adjudicatorNotes}</p>
+              </div>
+            ) : null}
+          </div>
+        ) : (
+          <div className="mt-6 flex flex-col items-center py-8 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-50">
+              <Clock className="h-6 w-6 text-amber-500" />
+            </div>
+            <p className="mt-3 text-sm text-zinc-500">No adjudication outcome received yet</p>
+          </div>
+        )}
+      </div>
 
       {summary ? (
-        <section>
-          <h3 className="text-sm font-semibold text-zinc-950">Case summary</h3>
+        <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
+          <h3 className="text-sm font-semibold text-zinc-950">Case Summary</h3>
           <p className="mt-2 text-sm leading-6 text-zinc-600">{summary}</p>
-        </section>
+        </div>
       ) : null}
 
+      {/* Case Timeline */}
       {timelineItems.length > 0 ? (
-        <section>
-          <h3 className="text-sm font-semibold text-zinc-950">Case timeline</h3>
-          <div className="mt-3 space-y-1">
-            {timelineItems.map((item) => (
-              <div key={item.id} className="flex items-start justify-between border-b border-zinc-100 py-2.5 last:border-0">
-                <div>
-                  <p className="text-sm font-medium text-zinc-950">{formatEnumLabel(item.eventType)}</p>
+        <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-zinc-950">Case Timeline</h3>
+            <div className="flex gap-1">
+              {(['all', 'key', 'alerts', 'activity'] as TimelineFilter[]).map((filter) => (
+                <button
+                  key={filter}
+                  type="button"
+                  onClick={() => setTimelineFilter(filter)}
+                  className={`rounded-full px-3 py-1 text-xs font-medium transition ${
+                    timelineFilter === filter
+                      ? 'bg-zinc-900 text-white'
+                      : 'bg-zinc-100 text-zinc-500 hover:bg-zinc-200 hover:text-zinc-700'
+                  }`}
+                >
+                  {filter.charAt(0).toUpperCase() + filter.slice(1)}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="mt-4 space-y-0">
+            {filteredTimeline.map((item) => (
+              <div key={item.id} className="flex items-start gap-3 border-b border-zinc-100 py-3 last:border-0">
+                <div className={`mt-0.5 shrink-0 ${getTimelineIconTone(item.eventType)}`}>
+                  <CheckCircle2 className="h-4 w-4" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-zinc-900">{formatEnumLabel(item.eventType)}</p>
                   <p className="text-xs text-zinc-500">{item.eventDescription}</p>
                 </div>
                 <span className="shrink-0 text-xs text-zinc-400">{formatDateTime(item.eventDate)}</span>
               </div>
             ))}
+            {filteredTimeline.length === 0 ? (
+              <p className="py-4 text-center text-sm text-zinc-400">No timeline events match this filter</p>
+            ) : null}
           </div>
-        </section>
-      ) : null}
-
-      {error ? (
-        <p className="text-sm text-rose-700">{error}</p>
-      ) : null}
-
-      {/* Submit to scheme (ready_for_claim) */}
-      {isReadyForClaim ? (
-        <div className="border-t border-zinc-200 pt-6">
-          <WorkspaceActionButton
-            disabled={isSubmittingToScheme || isTransitioning}
-            tone="primary"
-            onClick={() => setConfirmAction('submit_scheme')}
-          >
-            {isSubmittingToScheme ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
-            Submit to deposit scheme
-          </WorkspaceActionButton>
-          <ConfirmDialog
-            open={confirmAction === 'submit_scheme'}
-            title="Submit claim to deposit scheme?"
-            description="This will submit the claim to the connected deposit scheme. Ensure all deductions and evidence are finalised before proceeding."
-            confirmLabel="Submit to scheme"
-            cancelLabel="Cancel"
-            onConfirm={() => {
-              setConfirmAction(null)
-              handleSubmitToScheme()
-            }}
-            onCancel={() => setConfirmAction(null)}
-          />
         </div>
       ) : null}
 
-      {/* Resolution actions (submitted) */}
+      {error ? <p className="text-sm text-rose-700">{error}</p> : null}
+
+      {/* Bottom action buttons */}
       {isSubmitted ? (
-        <div className="flex gap-3 border-t border-zinc-200 pt-6">
-          <WorkspaceActionButton
+        <div className="flex gap-3 pt-2">
+          <button
             disabled={isTransitioning}
-            tone="primary"
-            onClick={() => setConfirmAction('resolved')}
-          >
-            {isTransitioning ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-            Mark resolved
-          </WorkspaceActionButton>
-          <WorkspaceActionButton
-            disabled={isTransitioning}
-            tone="danger"
             onClick={() => setConfirmAction('disputed')}
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-rose-200 bg-white px-4 py-2 text-sm font-medium text-rose-700 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Flag dispute
-          </WorkspaceActionButton>
+            Mark Disputed
+          </button>
+          <button
+            disabled={isTransitioning}
+            onClick={() => setConfirmAction('resolved')}
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isTransitioning ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+            Mark Resolved
+          </button>
         </div>
       ) : isDisputed ? (
-        <div className="border-t border-zinc-200 pt-6">
-          <WorkspaceActionButton disabled={isTransitioning} tone="primary" onClick={() => setConfirmAction('resolved')}>
-            {isTransitioning ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-            Resolve dispute
-          </WorkspaceActionButton>
+        <div className="flex gap-3 pt-2">
+          <button
+            disabled={isTransitioning}
+            onClick={() => setConfirmAction('disputed')}
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-rose-200 bg-white px-4 py-2 text-sm font-medium text-rose-700 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            Mark Disputed
+          </button>
+          <button
+            disabled={isTransitioning}
+            onClick={() => setConfirmAction('resolved')}
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isTransitioning ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+            Mark Resolved
+          </button>
+        </div>
+      ) : isReadyForClaim ? (
+        <div className="flex gap-3 pt-2">
+          <p className="text-sm text-zinc-500">
+            The case is ready for submission. Submit to the connected deposit scheme or mark as submitted manually.
+          </p>
         </div>
       ) : null}
 
+      {/* Confirm dialogs */}
+      <ConfirmDialog
+        open={confirmAction === 'submit_scheme'}
+        title="Submit claim to deposit scheme?"
+        description="This will submit the claim to the connected deposit scheme. Ensure all deductions and evidence are finalised before proceeding."
+        confirmLabel="Submit to scheme"
+        cancelLabel="Cancel"
+        onConfirm={() => {
+          setConfirmAction(null)
+          handleSubmitToScheme()
+        }}
+        onCancel={() => setConfirmAction(null)}
+      />
       <ConfirmDialog
         open={confirmAction === 'resolved'}
         title="Mark this case as resolved?"

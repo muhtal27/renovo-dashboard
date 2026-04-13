@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertTriangle, Check, CheckCircle2, Loader2, XCircle } from 'lucide-react'
+import { AlertTriangle, Check, CheckCircle2, Loader2, Minus, RefreshCcw, Sparkles, TrendingDown, XCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState, useTransition } from 'react'
 import { toast } from 'sonner'
@@ -9,8 +9,6 @@ import {
   ConditionBadge,
   WorkspaceActionButton,
   WorkspaceBadge,
-  WorkspaceNotice,
-  WorkspaceProgressBar,
 } from '@/app/(operator)/operator/cases/[id]/_components/checkout-workspace-ui'
 import { formatCurrency } from '@/app/eot/_components/eot-ui'
 import type { OperatorCheckoutWorkspaceData } from '@/lib/operator-checkout-workspace-types'
@@ -26,7 +24,6 @@ export function StepAnalysis({ data }: { data: OperatorCheckoutWorkspaceData }) 
   const caseStatus = data.workspace.case.status
   const isAnalysing = caseStatus === 'analysis'
 
-  // Auto-refresh while analysis is in progress (#19)
   useEffect(() => {
     if (!isAnalysing) return
     const interval = setInterval(() => {
@@ -34,6 +31,7 @@ export function StepAnalysis({ data }: { data: OperatorCheckoutWorkspaceData }) 
     }, 8000)
     return () => clearInterval(interval)
   }, [isAnalysing, router, startTransition])
+
   const isPastAnalysis = ['review', 'draft_sent', 'ready_for_claim', 'submitted', 'resolved', 'disputed'].includes(caseStatus)
 
   const hasCheckIn = Boolean(data.workspace.reportDocuments.checkIn)
@@ -42,14 +40,17 @@ export function StepAnalysis({ data }: { data: OperatorCheckoutWorkspaceData }) 
   const canRun = hasCheckIn && hasCheckOut
 
   const defectCount = data.defects.length
-  const recommendationCount = data.workspace.recommendations.length
-  const issueCount = data.workspace.issues.length
   const roomCount = data.rooms.length
-
   const totalEstimatedCost = data.defects.reduce((sum, d) => sum + (d.costEstimate ?? 0), 0)
+  const roomsWithDefects = new Set(data.defects.map((d) => d.roomId)).size
+
   const tenantLiabilityCount = data.defects.filter((d) => d.aiSuggestedLiability === 'tenant').length
   const landlordLiabilityCount = data.defects.filter((d) => d.aiSuggestedLiability === 'landlord').length
   const sharedLiabilityCount = data.defects.filter((d) => d.aiSuggestedLiability === 'shared').length
+  const totalLiability = tenantLiabilityCount + landlordLiabilityCount + sharedLiabilityCount
+  const tenantPct = totalLiability ? Math.round((tenantLiabilityCount / totalLiability) * 100) : 0
+  const sharedPct = totalLiability ? Math.round((sharedLiabilityCount / totalLiability) * 100) : 0
+  const landlordPct = totalLiability ? 100 - tenantPct - sharedPct : 0
 
   async function handleRunAnalysis() {
     setIsRunning(true)
@@ -75,212 +76,233 @@ export function StepAnalysis({ data }: { data: OperatorCheckoutWorkspaceData }) 
     }
   }
 
-  const readinessItems = [
-    { label: 'Check-in report', ready: hasCheckIn, required: true },
-    { label: 'Checkout report', ready: hasCheckOut, required: true },
-    { label: 'Tenancy agreement', ready: hasTenancyAgreement, required: false },
-  ]
-  const readinessScore = readinessItems.filter((i) => i.ready).length
-  const requiredReady = readinessItems.filter((i) => i.required && i.ready).length
-  const requiredTotal = readinessItems.filter((i) => i.required).length
+  /* ── State: Analysis Complete ── */
+  if (isPastAnalysis) {
+    return (
+      <div className="space-y-4">
+        {/* Success banner */}
+        <div className="rounded-[10px] border border-zinc-200 bg-white p-5" style={{ borderLeftWidth: 3, borderLeftColor: '#10b981' }}>
+          <div className="flex items-center gap-2.5">
+            <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+            <div className="flex-1">
+              <div className="text-sm font-semibold text-emerald-700">AI Analysis Complete</div>
+              <div className="text-[13px] text-zinc-500">
+                {defectCount} defects identified across {roomsWithDefects} rooms
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowRerunConfirm(true)}
+              className="inline-flex items-center gap-1.5 rounded-[10px] border border-zinc-200 bg-white px-3 py-1.5 text-xs font-semibold text-zinc-700 transition hover:bg-zinc-50"
+            >
+              <RefreshCcw className="h-3.5 w-3.5" />
+              Re-run
+            </button>
+          </div>
+        </div>
 
+        {/* Stats grid */}
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
+            <div className="text-xs font-medium text-zinc-500">Defects Found</div>
+            <div className="mt-2 text-[28px] font-bold leading-none tabular-nums text-zinc-900">{defectCount}</div>
+          </div>
+          <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
+            <div className="text-xs font-medium text-zinc-500">Estimated Cost</div>
+            <div className="mt-2 text-[28px] font-bold leading-none tabular-nums text-emerald-600">{formatCurrency(totalEstimatedCost)}</div>
+          </div>
+          <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
+            <div className="text-xs font-medium text-zinc-500">Rooms Affected</div>
+            <div className="mt-2 text-[28px] font-bold leading-none tabular-nums text-zinc-900">
+              {roomsWithDefects}<span className="text-sm font-normal text-zinc-500">/{roomCount}</span>
+            </div>
+          </div>
+          <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
+            <div className="text-xs font-medium text-zinc-500">AI Confidence</div>
+            <div className="mt-2 text-[28px] font-bold leading-none tabular-nums text-zinc-900">—</div>
+          </div>
+        </div>
+
+        {/* Room Conditions */}
+        {data.rooms.length > 0 ? (
+          <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
+            <h4 className="mb-3 text-sm font-semibold text-zinc-900">Room Conditions</h4>
+            <div className="overflow-hidden rounded-[10px] border border-zinc-200">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-zinc-50">
+                  <tr>
+                    <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Room</th>
+                    <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Check-in</th>
+                    <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Checkout</th>
+                    <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Change</th>
+                    <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Defects</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.rooms.map((room) => {
+                    const hasDeclined = room.conditionCheckin && room.conditionCheckout && room.conditionCheckin !== room.conditionCheckout
+                    return (
+                      <tr key={room.id} className="border-t border-zinc-100 transition hover:bg-zinc-50">
+                        <td className="px-4 py-3 text-[13px] font-medium text-zinc-900">{room.roomName}</td>
+                        <td className="px-4 py-3"><ConditionBadge value={room.conditionCheckin} /></td>
+                        <td className="px-4 py-3"><ConditionBadge value={room.conditionCheckout} /></td>
+                        <td className="px-4 py-3">
+                          {hasDeclined ? (
+                            <span className="text-rose-600"><TrendingDown className="h-3.5 w-3.5" /></span>
+                          ) : (
+                            <span className="text-emerald-600"><Minus className="h-3.5 w-3.5" /></span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-right text-[13px] tabular-nums font-semibold">
+                          {room.defectCount > 0 ? room.defectCount : <span className="text-zinc-400">—</span>}
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ) : null}
+
+        {/* Liability Breakdown */}
+        {totalLiability > 0 ? (
+          <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
+            <h4 className="mb-3 text-sm font-semibold text-zinc-900">Liability Breakdown</h4>
+            <div className="flex gap-4">
+              {[
+                { label: 'Tenant', pct: tenantPct, color: 'bg-rose-500', textColor: 'text-rose-500' },
+                { label: 'Shared', pct: sharedPct, color: 'bg-amber-500', textColor: 'text-amber-500' },
+                { label: 'Landlord', pct: landlordPct, color: 'bg-sky-500', textColor: 'text-sky-500' },
+              ].map((item) => (
+                <div key={item.label} className="flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <div className={`h-2 w-2 rounded-full ${item.color}`} />
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">{item.label}</span>
+                  </div>
+                  <div className="mt-1 text-xl font-bold tabular-nums">{item.pct}%</div>
+                  <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-zinc-100">
+                    <div className={`h-full rounded-full ${item.color}`} style={{ width: `${item.pct}%` }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {error ? <p className="text-sm text-rose-700" role="alert">{error}</p> : null}
+
+        <ConfirmDialog
+          open={showRerunConfirm}
+          title="Re-run AI analysis?"
+          description={`This will replace all ${defectCount} existing defects and claims with a fresh analysis. Any manual overrides in the review step will be lost. This action cannot be undone.`}
+          confirmLabel="Re-run analysis"
+          cancelLabel="Cancel"
+          tone="danger"
+          onConfirm={handleRunAnalysis}
+          onCancel={() => setShowRerunConfirm(false)}
+        />
+      </div>
+    )
+  }
+
+  /* ── State: Analysing (running) ── */
+  if (isAnalysing) {
+    return (
+      <div className="space-y-4">
+        <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
+          <h3 className="mb-4 text-base font-semibold text-zinc-900">AI Analysis Engine</h3>
+          <div className="rounded-[10px] border border-emerald-200 p-5" style={{ background: 'linear-gradient(135deg, #ecfdf5, #f0f9ff)' }}>
+            <div className="mb-5 flex items-center gap-2.5">
+              <Loader2 className="h-5 w-5 animate-spin text-emerald-600" />
+              <div>
+                <div className="text-sm font-semibold text-emerald-700">Analysing documents...</div>
+                <div className="text-[13px] text-zinc-500">This usually takes 10–15 seconds</div>
+              </div>
+            </div>
+            <div className="mb-5 h-1 overflow-hidden rounded-full bg-emerald-100">
+              <div className="h-full w-1/2 animate-pulse rounded-full bg-emerald-500" />
+            </div>
+            <div className="space-y-4">
+              {[
+                { label: 'Scanning uploaded documents', desc: 'Reading check-in and checkout reports...' },
+                { label: 'Identifying defects and issues', desc: 'Comparing room conditions between reports...' },
+                { label: 'Assessing severity and liability', desc: 'Applying fair wear and tear guidelines...' },
+                { label: 'Generating recommendations', desc: 'Creating claim recommendations and cost estimates...' },
+              ].map((stage, i) => (
+                <div key={stage.label} className="flex items-start gap-2.5">
+                  <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${i === 0 ? 'bg-emerald-100 text-emerald-600' : 'bg-zinc-100 text-zinc-400'}`}>
+                    {i === 0 ? <Loader2 className="h-3 w-3 animate-spin" /> : <span className="h-2 w-2 rounded-full bg-current" />}
+                  </div>
+                  <div>
+                    <div className={`text-[13px] font-medium ${i === 0 ? 'text-emerald-700' : 'text-zinc-400'}`}>{stage.label}</div>
+                    <div className={`text-[11px] ${i === 0 ? 'text-emerald-600' : 'text-zinc-400'}`}>{stage.desc}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  /* ── State: Ready to Analyse ── */
   return (
-    <div className="space-y-6">
-      <section>
-        <h3 className="text-sm font-semibold text-zinc-950">AI analysis</h3>
-        {isAnalysing ? (
-          <WorkspaceNotice
-            tone="warning"
-            icon={
-              <div className="relative">
-                <div className="absolute inset-0 animate-ping rounded-full bg-amber-400 opacity-40" />
-                <Loader2 className="h-4 w-4 animate-spin text-amber-600" />
-              </div>
-            }
-            title="Analysis in progress"
-            body="The system is comparing check-in and checkout reports to identify defects, assign liability, and generate recommendations. This may take a few minutes."
-          />
-        ) : isPastAnalysis ? (
-          <WorkspaceNotice
-            tone="success"
-            icon={<CheckCircle2 className="h-4 w-4" />}
-            title="Analysis complete"
-            body={`${defectCount} defects identified, ${recommendationCount} recommendations generated, ${issueCount} issues raised across ${roomCount} rooms.`}
-          />
-        ) : (
-          <p className="mt-1 text-sm text-zinc-500">
-            Run AI analysis to compare check-in and checkout reports. The system will identify
-            defects, assign liability, and generate claim recommendations.
-          </p>
-        )}
-      </section>
+    <div className="space-y-4">
+      <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
+        <h3 className="mb-4 text-base font-semibold text-zinc-900">AI Analysis Engine</h3>
 
-      {/* Report readiness checklist */}
-      <section>
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-zinc-950">Report readiness</h3>
-          <span className="text-xs tabular-nums text-zinc-400">
-            {readinessScore}/{readinessItems.length} linked
-          </span>
-        </div>
-        <div className="mt-2">
-          <WorkspaceProgressBar
-            value={requiredReady}
-            max={requiredTotal}
-            tone={requiredReady === requiredTotal ? 'success' : 'warning'}
-            showPercentage={false}
-          />
-        </div>
-        <div className="mt-3 space-y-1">
-          {readinessItems.map((item) => (
-            <div key={item.label} className="flex items-center justify-between border-b border-zinc-50 py-2 last:border-0">
-              <div className="flex items-center gap-2">
-                {item.ready ? (
-                  <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                ) : (
-                  <XCircle className="h-4 w-4 text-zinc-300" />
-                )}
-                <span className="text-sm text-zinc-600">{item.label}</span>
-                {!item.required ? (
-                  <span className="text-[10px] text-zinc-400">(optional)</span>
-                ) : null}
-              </div>
-              <WorkspaceBadge
-                label={item.ready ? 'Linked' : 'Missing'}
-                tone={item.ready ? 'accepted' : item.required ? 'fail' : 'neutral'}
-                size="compact"
-              />
+        {/* Readiness Checklist */}
+        <div className="mb-4 rounded-[10px] border border-zinc-200 bg-zinc-50 p-4">
+          <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
+            Readiness Checklist
+          </div>
+          {[
+            { label: 'Check-in report linked', ready: hasCheckIn },
+            { label: 'Checkout report linked', ready: hasCheckOut },
+          ].map((item) => (
+            <div key={item.label} className="flex items-center gap-2 py-1">
+              <CheckCircle2 className={`h-4 w-4 ${item.ready ? 'text-emerald-600' : 'text-zinc-300'}`} />
+              <span className="text-[13px] text-zinc-700">{item.label}</span>
             </div>
           ))}
+          <div className="flex items-center gap-2 py-1">
+            <span className={`flex h-4 w-4 items-center justify-center rounded-full border ${hasTenancyAgreement ? 'border-emerald-400 text-emerald-600' : 'border-zinc-300 text-zinc-400'}`}>
+              {hasTenancyAgreement ? <Check className="h-2.5 w-2.5" /> : null}
+            </span>
+            <span className="text-[13px] text-zinc-500">Tenancy agreement (optional)</span>
+          </div>
         </div>
-      </section>
 
-      {isPastAnalysis ? (
-        <>
-          {/* Results metrics */}
-          <section>
-            <h3 className="text-sm font-semibold text-zinc-950">Results summary</h3>
-            <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-              <div className="border border-zinc-200 px-4 py-3">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Defects</p>
-                <p className="mt-1 text-xl font-semibold tabular-nums text-zinc-950">{defectCount}</p>
-                <p className="mt-1 text-[10px] text-zinc-500">
-                  {[
-                    tenantLiabilityCount > 0 ? `${tenantLiabilityCount} tenant` : null,
-                    landlordLiabilityCount > 0 ? `${landlordLiabilityCount} landlord` : null,
-                    sharedLiabilityCount > 0 ? `${sharedLiabilityCount} shared` : null,
-                  ].filter(Boolean).join(' · ')}
-                </p>
-              </div>
-              <div className="border border-zinc-200 px-4 py-3">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Estimated cost</p>
-                <p className="mt-1 text-xl font-semibold tabular-nums text-zinc-950">{formatCurrency(totalEstimatedCost)}</p>
-              </div>
-              <div className="border border-zinc-200 px-4 py-3">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Recommendations</p>
-                <p className="mt-1 text-xl font-semibold tabular-nums text-zinc-950">{recommendationCount}</p>
-                <p className="mt-1 text-[10px] text-zinc-400">{issueCount} issues raised</p>
-              </div>
-              <div className="border border-zinc-200 px-4 py-3">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Rooms</p>
-                <p className="mt-1 text-xl font-semibold tabular-nums text-zinc-950">{roomCount}</p>
-              </div>
-            </div>
-          </section>
+        {/* CTA */}
+        <div className="rounded-[10px] border border-emerald-200 p-6 text-center" style={{ background: 'linear-gradient(135deg, #ecfdf5, #f0f9ff)' }}>
+          <div className="mb-2 text-emerald-600">
+            <Sparkles className="mx-auto h-7 w-7" />
+          </div>
+          <h4 className="text-sm font-semibold text-zinc-900">Ready to Analyse</h4>
+          <p className="mx-auto mt-1 max-w-sm text-[13px] text-zinc-500">
+            Renovo AI will scan your documents, identify defects, assess severity, and recommend liability for each issue.
+          </p>
+          <button
+            type="button"
+            disabled={!canRun || isRunning}
+            onClick={handleRunAnalysis}
+            className="mt-4 inline-flex items-center gap-1.5 rounded-[10px] border border-emerald-600 bg-emerald-600 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-50"
+          >
+            {isRunning ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+            Run AI Analysis
+          </button>
+        </div>
 
-          {/* Room conditions table with ConditionBadge */}
-          {data.rooms.length > 0 ? (
-            <section>
-              <h3 className="text-sm font-semibold text-zinc-950">Room conditions</h3>
-              <div className="mt-3 overflow-x-auto border border-zinc-200">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-zinc-200 bg-zinc-50/80">
-                      <th className="px-4 py-2.5 text-left text-xs font-medium text-zinc-500">Room</th>
-                      <th className="px-4 py-2.5 text-left text-xs font-medium text-zinc-500">Check-in</th>
-                      <th className="px-4 py-2.5 text-left text-xs font-medium text-zinc-500">Checkout</th>
-                      <th className="px-4 py-2.5 text-center text-xs font-medium text-zinc-500">Change</th>
-                      <th className="px-4 py-2.5 text-right text-xs font-medium text-zinc-500">Defects</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.rooms.map((room) => {
-                      const hasDeclined =
-                        room.conditionCheckin && room.conditionCheckout &&
-                        room.conditionCheckin !== room.conditionCheckout
-                      return (
-                        <tr key={room.id} className="border-b border-zinc-100 last:border-0">
-                          <td className="px-4 py-2.5 font-medium text-zinc-950">{room.roomName}</td>
-                          <td className="px-4 py-2.5">
-                            <ConditionBadge value={room.conditionCheckin} />
-                          </td>
-                          <td className="px-4 py-2.5">
-                            <ConditionBadge value={room.conditionCheckout} />
-                          </td>
-                          <td className="px-4 py-2.5 text-center">
-                            {hasDeclined ? (
-                              <WorkspaceBadge label="Deteriorated" tone="warning" size="compact" />
-                            ) : room.conditionCheckin && room.conditionCheckout ? (
-                              <WorkspaceBadge label="No change" tone="accepted" size="compact" />
-                            ) : (
-                              <span className="text-xs text-zinc-400">—</span>
-                            )}
-                          </td>
-                          <td className="px-4 py-2.5 text-right">
-                            {room.defectCount > 0 ? (
-                              <span className="font-medium text-zinc-950">{room.defectCount}</span>
-                            ) : (
-                              <span className="text-zinc-400">0</span>
-                            )}
-                          </td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </section>
-          ) : null}
-        </>
-      ) : null}
+        {!canRun ? (
+          <p className="mt-3 text-xs text-zinc-500">
+            Both check-in and checkout reports must be linked before running analysis.
+          </p>
+        ) : null}
+      </div>
 
       {error ? <p className="text-sm text-rose-700" role="alert">{error}</p> : null}
-
-      {/* Action buttons */}
-      {(caseStatus === 'analysis' || caseStatus === 'collecting_evidence' || isPastAnalysis) ? (
-        <div className="border-t border-zinc-200 pt-6">
-          <WorkspaceActionButton
-            disabled={!canRun || isRunning}
-            tone={isPastAnalysis ? 'secondary' : 'primary'}
-            onClick={isPastAnalysis ? () => setShowRerunConfirm(true) : handleRunAnalysis}
-          >
-            {isRunning ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-            {isPastAnalysis ? 'Re-run analysis' : 'Run AI analysis'}
-          </WorkspaceActionButton>
-          {!canRun ? (
-            <p className="mt-2 text-xs text-zinc-500">
-              Both check-in and checkout reports must be linked before running analysis.
-            </p>
-          ) : isPastAnalysis ? (
-            <p className="mt-2 text-xs text-amber-600">
-              <AlertTriangle className="mr-1 inline-block h-3 w-3" />
-              Re-running will replace existing defects, recommendations, and claims with fresh analysis.
-            </p>
-          ) : null}
-        </div>
-      ) : null}
-
-      {/* Re-run confirmation dialog */}
-      <ConfirmDialog
-        open={showRerunConfirm}
-        title="Re-run AI analysis?"
-        description={`This will replace all ${defectCount} existing defects, ${recommendationCount} recommendations, and claims with a fresh analysis. Any manual overrides in the review step will be lost. This action cannot be undone.`}
-        confirmLabel="Re-run analysis"
-        cancelLabel="Cancel"
-        tone="danger"
-        onConfirm={handleRunAnalysis}
-        onCancel={() => setShowRerunConfirm(false)}
-      />
     </div>
   )
 }

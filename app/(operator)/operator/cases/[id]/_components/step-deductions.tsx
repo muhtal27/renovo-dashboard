@@ -18,12 +18,9 @@ import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { ConfirmDialog } from '@/app/components/ConfirmDialog'
 import {
-  WorkspaceActionButton,
   WorkspaceBadge,
-  WorkspaceMetricCard,
   WorkspaceNotice,
   WorkspaceOptionButton,
-  WorkspaceProgressBar,
 } from '@/app/(operator)/operator/cases/[id]/_components/checkout-workspace-ui'
 import { MessageThreadCard } from '@/app/(operator)/operator/cases/[id]/_components/message-thread-card'
 import { formatCurrency, formatDateTime, formatEnumLabel } from '@/app/eot/_components/eot-ui'
@@ -74,35 +71,47 @@ function NegotiationActions({
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      {currentStatus !== 'agreed' ? (
-        <WorkspaceActionButton
-          disabled={saving}
-          tone="success"
-          onClick={() => setConfirmAction('agreed')}
-        >
-          <Check className="h-3 w-3" />
-          Mark Agreed
-        </WorkspaceActionButton>
-      ) : null}
-      {currentStatus !== 'disputed' ? (
-        <WorkspaceActionButton
-          disabled={saving}
-          tone="danger"
-          onClick={() => setConfirmAction('disputed')}
-        >
-          <X className="h-3 w-3" />
-          Mark Disputed
-        </WorkspaceActionButton>
-      ) : null}
-      {currentStatus !== 'pending' && currentStatus ? (
-        <WorkspaceActionButton
-          disabled={saving}
-          tone="secondary"
-          onClick={() => handleStatusChange('pending')}
-        >
-          Reset to Pending
-        </WorkspaceActionButton>
-      ) : null}
+      <button
+        type="button"
+        disabled={saving}
+        onClick={() => currentStatus !== 'pending' ? handleStatusChange('pending') : undefined}
+        className={cn(
+          'inline-flex h-8 items-center gap-1.5 rounded-md border px-3 text-[13px] font-medium transition',
+          currentStatus === 'pending'
+            ? 'border-amber-300 bg-amber-50 text-amber-700'
+            : 'border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50'
+        )}
+      >
+        Pending
+      </button>
+      <button
+        type="button"
+        disabled={saving}
+        onClick={() => currentStatus !== 'agreed' ? setConfirmAction('agreed') : undefined}
+        className={cn(
+          'inline-flex h-8 items-center gap-1.5 rounded-md border px-3 text-[13px] font-medium transition',
+          currentStatus === 'agreed'
+            ? 'border-emerald-300 bg-emerald-50 text-emerald-700'
+            : 'border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50'
+        )}
+      >
+        <Check className="h-3.5 w-3.5" />
+        Agreed
+      </button>
+      <button
+        type="button"
+        disabled={saving}
+        onClick={() => currentStatus !== 'disputed' ? setConfirmAction('disputed') : undefined}
+        className={cn(
+          'inline-flex h-8 items-center gap-1.5 rounded-md border px-3 text-[13px] font-medium transition',
+          currentStatus === 'disputed'
+            ? 'border-rose-300 bg-rose-50 text-rose-700'
+            : 'border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50'
+        )}
+      >
+        <X className="h-3.5 w-3.5" />
+        Disputed
+      </button>
 
       <ConfirmDialog
         open={confirmAction === 'agreed'}
@@ -170,27 +179,29 @@ function NegotiationNotes({
           onChange={(e) => setNotes(e.target.value)}
           rows={4}
           disabled={saving}
-          className="w-full border border-zinc-200 bg-white px-3 py-2 text-sm leading-6 text-zinc-900 placeholder:text-zinc-400 focus:border-sky-400 focus:ring-1 focus:ring-sky-400/30 disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-500"
+          className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-[13px] leading-6 text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-400/30 disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-500"
           placeholder="Add negotiation notes, key points, agreements..."
         />
         <div className="mt-2 flex gap-2">
-          <WorkspaceActionButton
+          <button
+            type="button"
             onClick={handleSave}
             disabled={saving}
-            tone="primary"
+            className="inline-flex h-8 items-center gap-1.5 rounded-md bg-emerald-600 px-3 text-[13px] font-medium text-white transition hover:bg-emerald-700 disabled:opacity-50"
           >
             {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
             Save
-          </WorkspaceActionButton>
-          <WorkspaceActionButton
+          </button>
+          <button
+            type="button"
             onClick={() => {
               setEditing(false)
               setNotes(initialNotes ?? '')
             }}
-            tone="secondary"
+            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-3 text-[13px] font-medium text-zinc-600 transition hover:bg-zinc-50"
           >
             Cancel
-          </WorkspaceActionButton>
+          </button>
         </div>
       </div>
     )
@@ -198,7 +209,7 @@ function NegotiationNotes({
 
   return (
     <div className="group">
-      <p className="whitespace-pre-wrap text-sm leading-6 text-zinc-600 [overflow-wrap:anywhere]">
+      <p className="whitespace-pre-wrap text-[13px] leading-6 text-zinc-600 [overflow-wrap:anywhere]">
         {initialNotes?.trim() || 'No negotiation notes recorded yet.'}
       </p>
       <button
@@ -287,7 +298,7 @@ function EmailDraftCompose({
   }
 
   return (
-    <div className="border border-zinc-200 bg-white">
+    <div className="rounded-[10px] border border-zinc-200 bg-white">
       <div className="flex items-center justify-between border-b border-zinc-200 px-5 py-3">
         <div className="flex items-center gap-2">
           <Mail className="h-4 w-4 text-zinc-500" />
@@ -296,16 +307,16 @@ function EmailDraftCompose({
         <button
           type="button"
           onClick={onCancel}
-          className="flex h-7 w-7 items-center justify-center text-zinc-400 hover:text-zinc-600"
+          className="flex h-7 w-7 items-center justify-center rounded-md text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-600"
         >
           <X className="h-4 w-4" />
         </button>
       </div>
 
-      <div className="space-y-4 px-5 py-4">
+      <div className="space-y-4 p-5">
         {/* Recipients */}
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
             Send to
           </p>
           <div className="mt-2 flex gap-2">
@@ -326,15 +337,15 @@ function EmailDraftCompose({
         {/* Recipient details */}
         <div className="grid gap-3 sm:grid-cols-2">
           {sendTo !== 'tenant' ? (
-            <div className={cn('border px-4 py-3', landlordEmail ? 'border-zinc-200' : 'border-amber-200 bg-amber-50/50')}>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Landlord</p>
+            <div className={cn('rounded-lg border px-4 py-3', landlordEmail ? 'border-zinc-200' : 'border-amber-200 bg-amber-50/50')}>
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Landlord</p>
               <p className="mt-1 text-sm font-medium text-zinc-950">{landlordName}</p>
               <p className="mt-0.5 text-xs text-zinc-500">{landlordEmail || 'No email on file'}</p>
             </div>
           ) : null}
           {sendTo !== 'landlord' ? (
-            <div className={cn('border px-4 py-3', tenantEmail ? 'border-zinc-200' : 'border-amber-200 bg-amber-50/50')}>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Tenant</p>
+            <div className={cn('rounded-lg border px-4 py-3', tenantEmail ? 'border-zinc-200' : 'border-amber-200 bg-amber-50/50')}>
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Tenant</p>
               <p className="mt-1 text-sm font-medium text-zinc-950">{tenantName}</p>
               <p className="mt-0.5 text-xs text-zinc-500">{tenantEmail || 'No email on file'}</p>
             </div>
@@ -344,7 +355,7 @@ function EmailDraftCompose({
         {/* AI draft insertion */}
         {aiDrafts.length > 0 ? (
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
               Reference AI draft (optional)
             </p>
             <div className="mt-2 flex flex-wrap gap-1.5">
@@ -354,9 +365,9 @@ function EmailDraftCompose({
                   type="button"
                   onClick={() => setSelectedAiDraft(selectedAiDraft === draft.id ? null : draft.id)}
                   className={cn(
-                    'inline-flex h-7 items-center gap-1 border px-2.5 text-[11px] font-medium transition',
+                    'inline-flex h-7 items-center gap-1 rounded-md border px-2.5 text-[11px] font-medium transition',
                     selectedAiDraft === draft.id
-                      ? 'border-sky-300 bg-sky-50 text-sky-700'
+                      ? 'border-emerald-300 bg-emerald-50 text-emerald-700'
                       : 'border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50'
                   )}
                 >
@@ -366,7 +377,7 @@ function EmailDraftCompose({
               ))}
             </div>
             {selectedDraft ? (
-              <div className="mt-2 max-h-40 overflow-y-auto border border-zinc-100 bg-zinc-50/50 px-3 py-2">
+              <div className="mt-2 max-h-40 overflow-y-auto rounded-lg border border-emerald-200 bg-emerald-50/30 px-3 py-2">
                 <p className="line-clamp-6 whitespace-pre-wrap text-xs leading-5 text-zinc-600">
                   {selectedDraft.content}
                 </p>
@@ -386,10 +397,10 @@ function EmailDraftCompose({
         </button>
 
         {showPreview ? (
-          <div className="border border-zinc-200 bg-zinc-50/50 px-4 py-3">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Subject</p>
+          <div className="rounded-lg border border-zinc-200 bg-zinc-50/50 px-4 py-3">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">Subject</p>
             <p className="mt-1 text-sm text-zinc-900">Checkout Report — {propertyAddress}</p>
-            <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Body preview</p>
+            <p className="mt-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">Body preview</p>
             <div className="mt-1 text-sm leading-6 text-zinc-600">
               {sendTo === 'both' ? (
                 <>
@@ -429,17 +440,22 @@ function EmailDraftCompose({
         ) : null}
 
         <div className="flex justify-end gap-2 border-t border-zinc-100 pt-3">
-          <WorkspaceActionButton tone="secondary" onClick={onCancel}>
+          <button
+            type="button"
+            onClick={onCancel}
+            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-3 text-[13px] font-medium text-zinc-600 transition hover:bg-zinc-50"
+          >
             Cancel
-          </WorkspaceActionButton>
-          <WorkspaceActionButton
-            tone="primary"
+          </button>
+          <button
+            type="button"
             onClick={handleSend}
             disabled={sending || !canSend}
+            className="inline-flex h-8 items-center gap-1.5 rounded-md bg-emerald-600 px-3 text-[13px] font-medium text-white transition hover:bg-emerald-700 disabled:opacity-50"
           >
             {sending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
             {sending ? 'Sending...' : 'Send Email'}
-          </WorkspaceActionButton>
+          </button>
         </div>
       </div>
     </div>
@@ -526,73 +542,219 @@ export function StepDeductions({ data }: { data: OperatorCheckoutWorkspaceData }
 
   return (
     <div className="space-y-6">
-      {/* ── Negotiation status bar ── */}
-      <div className="grid grid-cols-2 gap-4 border-b border-zinc-200 pb-4 lg:grid-cols-4">
-        <WorkspaceMetricCard
-          label="Negotiation"
-          value={negotiationPresentation.label}
-          tone={
-            negotiationStatus === 'agreed' ? 'success'
-              : negotiationStatus === 'disputed' ? 'danger'
-                : 'warning'
-          }
-        />
-        <WorkspaceMetricCard
-          label="Total claimed"
-          value={formatCurrency(claimTotal)}
-          detail={depositCoverage != null ? `${depositCoverage}% of deposit` : undefined}
-          tone={numericClaimTotal > 0 ? 'warning' : 'default'}
-        />
-        <WorkspaceMetricCard
-          label="Messages"
-          value={data.workspace.messages.length}
-          detail={latestMessageTimestamp ? `Latest ${formatDateTime(latestMessageTimestamp)}` : 'None'}
-          tone={data.workspace.messages.length > 0 ? 'default' : 'warning'}
-        />
-        <WorkspaceMetricCard
-          label="Emails sent"
-          value={sentDrafts.length}
-          detail={sentDrafts.length > 0 ? 'Via Resend' : 'Not sent yet'}
-          tone={sentDrafts.length > 0 ? 'success' : 'warning'}
-        />
+      {/* ── Stats grid ── */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Total Claimed</p>
+          <p className="mt-1 text-[28px] font-bold tabular-nums text-emerald-600">
+            {formatCurrency(claimTotal)}
+          </p>
+          {depositCoverage != null ? (
+            <p className="mt-0.5 text-xs text-zinc-500">{depositCoverage}% of deposit</p>
+          ) : null}
+        </div>
+        <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Return to Tenant</p>
+          <p className="mt-1 text-[28px] font-bold tabular-nums text-zinc-900">
+            {totals.returnToTenant != null ? formatCurrency(totals.returnToTenant) : '—'}
+          </p>
+          {deposit != null ? (
+            <p className="mt-0.5 text-xs text-zinc-500">of {formatCurrency(deposit)} deposit</p>
+          ) : null}
+        </div>
       </div>
 
-      {/* ── Negotiation workflow actions ── */}
-      <section>
+      {/* ── Itemised Deductions card ── */}
+      {breakdown.length > 0 ? (
+        <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
+          <h3 className="mb-4 text-base font-semibold text-zinc-950">Itemised Deductions</h3>
+          <div className="overflow-hidden rounded-[10px] border border-zinc-200">
+            <table className="w-full text-[13px]">
+              <thead>
+                <tr className="bg-zinc-50">
+                  <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
+                    Item
+                  </th>
+                  <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
+                    Room
+                  </th>
+                  <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
+                    Liability
+                  </th>
+                  <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
+                    Amount
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {breakdown.map((item) => {
+                  const decision = item.decision?.toLowerCase() ?? ''
+                  const liabilityBadge = decision.includes('tenant')
+                    ? { label: 'Tenant', cls: 'bg-rose-50 text-rose-700' }
+                    : decision.includes('landlord')
+                      ? { label: 'Landlord', cls: 'bg-sky-50 text-sky-700' }
+                      : decision.includes('shared')
+                        ? { label: 'Shared', cls: 'bg-amber-50 text-amber-700' }
+                        : { label: item.decision ? formatEnumLabel(item.decision) : '—', cls: 'bg-zinc-100 text-zinc-600' }
+                  return (
+                    <tr key={item.id} className="border-t border-zinc-100">
+                      <td className="px-4 py-3 text-[13px] font-medium text-zinc-950">{item.title}</td>
+                      <td className="px-4 py-3 text-[13px]">
+                        {'room' in item && item.room ? (
+                          <span className="inline-flex items-center rounded-md bg-zinc-100 px-2 py-0.5 text-[11px] font-medium text-zinc-700">
+                            {String(item.room)}
+                          </span>
+                        ) : (
+                          <span className="text-zinc-400">—</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-[13px]">
+                        <span className={cn('inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium', liabilityBadge.cls)}>
+                          {liabilityBadge.label}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right text-[13px] text-zinc-600">
+                        {formatCurrency(item.estimatedCost)}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+              <tfoot>
+                <tr className="border-t-2 border-zinc-200">
+                  <td colSpan={3} className="px-4 py-3 text-[13px] font-bold text-zinc-950">Total</td>
+                  <td className="px-4 py-3 text-right text-[13px] font-bold text-emerald-600">
+                    {formatCurrency(totals.totalClaimed)}
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      ) : null}
+
+      {/* ── Negotiation card ── */}
+      <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
         <div className="flex items-center justify-between gap-3">
-          <h3 className="text-sm font-semibold text-zinc-950">Negotiation status</h3>
+          <h3 className="text-base font-semibold text-zinc-950">Negotiation</h3>
           <WorkspaceBadge label={negotiationPresentation.label} tone={negotiationPresentation.tone} />
         </div>
-        <p className="mt-1 text-sm text-zinc-500">
+        <p className="mt-1 text-[13px] text-zinc-500">
           {negotiationStatus === 'agreed'
             ? 'Both parties have reached agreement. Proceed to claim submission when ready.'
             : negotiationStatus === 'disputed'
               ? 'The case is flagged for dispute. Review the position and communication before proceeding.'
               : 'Review deductions with both parties and mark the negotiation outcome.'}
         </p>
-        <div className="mt-3">
+        <div className="mt-4">
           <NegotiationActions
             caseId={caseId}
             currentStatus={negotiationStatus}
             onUpdated={handleRefresh}
           />
         </div>
-      </section>
 
-      {/* ── Email sending ── */}
-      <section>
+        {/* Message thread */}
+        <div className="mt-6 rounded-[10px] border border-zinc-200 bg-zinc-50/30 p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <MessageSquare className="h-4 w-4 text-zinc-400" />
+              <h4 className="text-sm font-semibold text-zinc-950">Message Thread</h4>
+            </div>
+            <span className="inline-flex items-center rounded-full bg-zinc-100 px-2 py-0.5 text-[11px] font-medium text-zinc-600">
+              {data.workspace.messages.length}
+            </span>
+          </div>
+          <div className="mt-3">
+            <MessageThreadCard workspace={data.workspace} showCompose />
+          </div>
+        </div>
+
+        {/* Operator Notes */}
+        <div className="mt-6">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Operator Notes</p>
+          <div className="mt-2">
+            <NegotiationNotes
+              caseId={caseId}
+              initialNotes={negotiationNotes ?? null}
+              onUpdated={handleRefresh}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* ── AI Drafts card ── */}
+      {data.aiDrafts.length > 0 ? (
+        <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
+          <div className="flex items-center justify-between gap-3">
+            <h3 className="text-base font-semibold text-zinc-950">AI Drafts</h3>
+            <span className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-medium text-emerald-700">
+              Powered by Renovo AI
+            </span>
+          </div>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            {data.aiDrafts.map((draft) => (
+              <div key={draft.id} className="rounded-[10px] border border-zinc-200 p-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50">
+                    <FileText className="h-4 w-4 text-emerald-600" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-zinc-950">
+                      {draft.title || formatEnumLabel(draft.draftType)}
+                    </p>
+                    <p className="mt-0.5 text-xs text-zinc-500">
+                      {draft.content ? 'Draft ready to review' : 'Generate a draft for this item'}
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-3">
+                  {draft.content ? (
+                    <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2.5 py-1 text-[11px] font-medium text-emerald-700">
+                      <Check className="h-3 w-3" />
+                      Generated
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      className="inline-flex items-center gap-1 rounded-md border border-zinc-200 bg-white px-2.5 py-1 text-[11px] font-medium text-zinc-600 transition hover:bg-zinc-50"
+                    >
+                      Generate
+                    </button>
+                  )}
+                </div>
+                {draft.content ? (
+                  <div className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50/30 p-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Preview</p>
+                    <pre className="mt-1 whitespace-pre-wrap text-xs leading-5 text-zinc-600">
+                      {draft.content}
+                    </pre>
+                  </div>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {/* ── Send to Tenant card ── */}
+      <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
         <div className="flex items-center justify-between gap-3">
-          <h3 className="text-sm font-semibold text-zinc-950">Send checkout report</h3>
+          <h3 className="text-base font-semibold text-zinc-950">Send to Tenant</h3>
           {!showEmailCompose ? (
-            <WorkspaceActionButton tone="primary" onClick={() => setShowEmailCompose(true)}>
-              <Mail className="h-3 w-3" />
-              Compose email
-            </WorkspaceActionButton>
+            <button
+              type="button"
+              onClick={() => setShowEmailCompose(true)}
+              className="inline-flex h-8 items-center gap-1.5 rounded-md bg-emerald-600 px-3 text-[13px] font-medium text-white transition hover:bg-emerald-700"
+            >
+              <Mail className="h-3.5 w-3.5" />
+              Send Draft
+            </button>
           ) : null}
         </div>
 
         {showEmailCompose ? (
-          <div className="mt-3">
+          <div className="mt-4">
             <EmailDraftCompose
               caseId={caseId}
               landlordName={landlordName}
@@ -613,21 +775,21 @@ export function StepDeductions({ data }: { data: OperatorCheckoutWorkspaceData }
 
         {/* Delivery log */}
         {sentDrafts.length > 0 || (isDraftSent && !showEmailCompose) ? (
-          <div className="mt-3">
+          <div className="mt-4">
             {isDraftSent && sentDrafts.length === 0 ? (
               <div className="grid gap-3 sm:grid-cols-2">
-                <div className="border border-zinc-200 px-4 py-3">
+                <div className="rounded-lg border border-zinc-200 px-4 py-3">
                   <div className="flex items-center gap-2">
-                    <div className="flex h-5 w-5 items-center justify-center rounded bg-emerald-50">
+                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-50">
                       <Check className="h-3 w-3 text-emerald-600" />
                     </div>
                     <p className="text-sm font-medium text-zinc-950">Landlord — complete report</p>
                   </div>
                   <p className="mt-2 text-xs text-zinc-500">{landlordName} ({landlordEmail || 'no email'})</p>
                 </div>
-                <div className="border border-zinc-200 px-4 py-3">
+                <div className="rounded-lg border border-zinc-200 px-4 py-3">
                   <div className="flex items-center gap-2">
-                    <div className="flex h-5 w-5 items-center justify-center rounded bg-emerald-50">
+                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-50">
                       <Check className="h-3 w-3 text-emerald-600" />
                     </div>
                     <p className="text-sm font-medium text-zinc-950">Tenant — liabilities only</p>
@@ -638,13 +800,15 @@ export function StepDeductions({ data }: { data: OperatorCheckoutWorkspaceData }
             ) : sentDrafts.length > 0 ? (
               <div className="space-y-2">
                 {sentDrafts.map((draft) => (
-                  <div key={draft.id} className="flex items-center justify-between border border-zinc-100 px-4 py-2.5">
+                  <div key={draft.id} className="flex items-center justify-between rounded-lg border border-zinc-100 px-4 py-2.5">
                     <div>
                       <p className="text-sm font-medium text-zinc-950">{draft.subject || formatEnumLabel(draft.draftType)}</p>
                       <p className="text-xs text-zinc-500">{draft.sentTo || 'Recipient not recorded'}</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <WorkspaceBadge label="Sent" tone="sent" size="compact" />
+                      <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
+                        Sent
+                      </span>
                       {draft.sentAt ? (
                         <span className="text-[10px] text-zinc-400">{formatDateTime(draft.sentAt)}</span>
                       ) : null}
@@ -655,106 +819,7 @@ export function StepDeductions({ data }: { data: OperatorCheckoutWorkspaceData }
             ) : null}
           </div>
         ) : null}
-      </section>
-
-      {/* ── Financial position ── */}
-      <section>
-        <h3 className="text-sm font-semibold text-zinc-950">Financial position</h3>
-        <dl className="mt-3 grid grid-cols-2 gap-x-12 gap-y-4 text-sm xl:grid-cols-4">
-          <div>
-            <dt className="text-xs text-zinc-500">Deposit held</dt>
-            <dd className="mt-0.5 font-medium text-zinc-950">
-              {deposit != null ? formatCurrency(deposit) : '—'}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-xs text-zinc-500">Total claimed</dt>
-            <dd className="mt-0.5 font-medium text-zinc-950">{formatCurrency(totals.totalClaimed)}</dd>
-          </div>
-          <div>
-            <dt className="text-xs text-zinc-500">Return to tenant</dt>
-            <dd className="mt-0.5 font-medium text-zinc-950">
-              {totals.returnToTenant != null ? formatCurrency(totals.returnToTenant) : '—'}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-xs text-zinc-500">Disputed amount</dt>
-            <dd className="mt-0.5 font-medium text-zinc-950">
-              {totals.disputedAmount > 0 ? (
-                <span className="text-rose-700">{formatCurrency(totals.disputedAmount)}</span>
-              ) : (
-                formatCurrency(0)
-              )}
-            </dd>
-          </div>
-        </dl>
-
-        {depositCoverage != null ? (
-          <div className="mt-4">
-            <WorkspaceProgressBar
-              max={100}
-              tone={depositCoverage >= 100 ? 'danger' : depositCoverage >= 70 ? 'warning' : 'success'}
-              value={depositCoverage}
-              label={<span className="text-xs text-zinc-500">Claim vs deposit coverage</span>}
-              valueLabel={`${depositCoverage}%`}
-            />
-          </div>
-        ) : null}
-      </section>
-
-      {/* ── Claim breakdown ── */}
-      {breakdown.length > 0 ? (
-        <section>
-          <h3 className="text-sm font-semibold text-zinc-950">Claim breakdown</h3>
-          <div className="mt-3 overflow-hidden border border-zinc-200">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-zinc-200 bg-zinc-50/80">
-                  <th className="px-4 py-2.5 text-left text-xs font-medium text-zinc-500">Item</th>
-                  <th className="px-4 py-2.5 text-left text-xs font-medium text-zinc-500">Decision</th>
-                  <th className="px-4 py-2.5 text-right text-xs font-medium text-zinc-500">Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {breakdown.map((item) => (
-                  <tr key={item.id} className="border-b border-zinc-100 last:border-0">
-                    <td className="px-4 py-2.5 font-medium text-zinc-950">{item.title}</td>
-                    <td className="px-4 py-2.5 text-zinc-600">
-                      {item.decision ? formatEnumLabel(item.decision) : '—'}
-                    </td>
-                    <td className="px-4 py-2.5 text-right text-zinc-600">
-                      {formatCurrency(item.estimatedCost)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      ) : null}
-
-      {/* ── Negotiation notes (editable) ── */}
-      <section>
-        <h3 className="text-sm font-semibold text-zinc-950">Negotiation notes</h3>
-        <div className="mt-2">
-          <NegotiationNotes
-            caseId={caseId}
-            initialNotes={negotiationNotes ?? null}
-            onUpdated={handleRefresh}
-          />
-        </div>
-      </section>
-
-      {/* ── Communication thread ── */}
-      <section>
-        <div className="flex items-center gap-2">
-          <MessageSquare className="h-4 w-4 text-zinc-400" />
-          <h3 className="text-sm font-semibold text-zinc-950">Stakeholder communication</h3>
-        </div>
-        <div className="mt-3">
-          <MessageThreadCard workspace={data.workspace} showCompose />
-        </div>
-      </section>
+      </div>
 
       {error ? (
         <p className="text-sm text-rose-700">{error}</p>
@@ -763,40 +828,48 @@ export function StepDeductions({ data }: { data: OperatorCheckoutWorkspaceData }
       {/* ── Workflow actions ── */}
       {isDraftSent ? (
         <div className="flex gap-3 border-t border-zinc-200 pt-6">
-          <WorkspaceActionButton
+          <button
+            type="button"
             disabled={isTransitioning}
-            tone="primary"
             onClick={() => handleTransition('ready_for_claim')}
+            className="inline-flex h-9 items-center gap-2 rounded-md bg-emerald-600 px-4 text-[13px] font-medium text-white transition hover:bg-emerald-700 disabled:opacity-50"
           >
             {isTransitioning ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
             Proceed to claim
-          </WorkspaceActionButton>
-          <WorkspaceActionButton
+          </button>
+          <button
+            type="button"
             disabled={isTransitioning}
-            tone="secondary"
             onClick={() => handleTransition('review')}
+            className="inline-flex h-9 items-center gap-2 rounded-md border border-zinc-200 bg-white px-4 text-[13px] font-medium text-zinc-600 transition hover:bg-zinc-50 disabled:opacity-50"
           >
             Back to review
-          </WorkspaceActionButton>
+          </button>
         </div>
       ) : isReady ? (
         <div className="border-t border-zinc-200 pt-6">
-          <p className="mb-3 text-sm text-zinc-600">
+          <p className="mb-3 text-[13px] text-zinc-600">
             Once submitted, the case moves to the submitted state and cannot be edited without dispute
             resolution.
           </p>
           <div className="flex gap-3">
-            <WorkspaceActionButton disabled={isTransitioning} tone="primary" onClick={() => setConfirmAction('submitted')}>
+            <button
+              type="button"
+              disabled={isTransitioning}
+              onClick={() => setConfirmAction('submitted')}
+              className="inline-flex h-9 items-center gap-2 rounded-md bg-emerald-600 px-4 text-[13px] font-medium text-white transition hover:bg-emerald-700 disabled:opacity-50"
+            >
               {isTransitioning ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
               Submit claim
-            </WorkspaceActionButton>
-            <WorkspaceActionButton
+            </button>
+            <button
+              type="button"
               disabled={isTransitioning}
-              tone="secondary"
               onClick={() => handleTransition('draft_sent')}
+              className="inline-flex h-9 items-center gap-2 rounded-md border border-zinc-200 bg-white px-4 text-[13px] font-medium text-zinc-600 transition hover:bg-zinc-50 disabled:opacity-50"
             >
               Revert to draft sent
-            </WorkspaceActionButton>
+            </button>
           </div>
           <ConfirmDialog
             open={confirmAction === 'submitted'}

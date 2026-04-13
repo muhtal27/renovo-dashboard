@@ -84,7 +84,129 @@ const SORT_OPTIONS: { value: DefectSort; label: string }[] = [
 ]
 
 /* ------------------------------------------------------------------ */
-/*  Defect row                                                         */
+/*  Trade filter types                                                 */
+/* ------------------------------------------------------------------ */
+
+type TradeFilter = 'all' | 'cleaning' | 'maintenance'
+
+const TRADE_FILTER_OPTIONS: { value: TradeFilter; label: string }[] = [
+  { value: 'all', label: 'All Trades' },
+  { value: 'cleaning', label: 'Cleaning' },
+  { value: 'maintenance', label: 'Maintenance' },
+]
+
+/* ------------------------------------------------------------------ */
+/*  Liability filter types                                             */
+/* ------------------------------------------------------------------ */
+
+type LiabilityFilter = 'all' | 'tenant' | 'landlord' | 'shared'
+
+const LIABILITY_FILTER_OPTIONS: { value: LiabilityFilter; label: string }[] = [
+  { value: 'all', label: 'All' },
+  { value: 'tenant', label: 'Tenant' },
+  { value: 'landlord', label: 'Landlord' },
+  { value: 'shared', label: 'Shared' },
+]
+
+/* ------------------------------------------------------------------ */
+/*  Severity helpers                                                   */
+/* ------------------------------------------------------------------ */
+
+function getDefectSeverity(d: CheckoutWorkspaceDefectRecord): 'high' | 'medium' | 'low' {
+  const cost = d.costEstimate ?? 0
+  if (cost >= 200) return 'high'
+  if (cost >= 50) return 'medium'
+  return 'low'
+}
+
+function severityBorderColor(severity: 'high' | 'medium' | 'low') {
+  if (severity === 'high') return 'border-l-rose-500'
+  if (severity === 'medium') return 'border-l-amber-500'
+  return 'border-l-zinc-400'
+}
+
+function severityBadgeTone(severity: 'high' | 'medium' | 'low') {
+  if (severity === 'high') return 'bg-rose-50 text-rose-700'
+  if (severity === 'medium') return 'bg-amber-50 text-amber-700'
+  return 'bg-zinc-100 text-zinc-600'
+}
+
+/* ------------------------------------------------------------------ */
+/*  Defect queue card (left panel)                                     */
+/* ------------------------------------------------------------------ */
+
+function DefectQueueCard({
+  defect,
+  edit,
+  isSelected,
+  roomMap,
+  onClick,
+}: {
+  defect: CheckoutWorkspaceDefectRecord
+  edit: DefectEditState
+  isSelected: boolean
+  roomMap: Map<string, CheckoutWorkspaceRoomRecord>
+  onClick: () => void
+}) {
+  const severity = getDefectSeverity(defect)
+  const room = roomMap.get(defect.roomId)
+  const effectiveCost = edit.excluded ? 0 : (edit.costAdjusted ?? defect.costEstimate ?? 0)
+  const isReviewed = edit.operatorLiability !== null && !edit.excluded
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        'w-full rounded-[6px] border border-zinc-200 bg-white p-3 text-left cursor-pointer border-l-[3px] transition-all',
+        isSelected
+          ? 'border-l-emerald-500 bg-emerald-50 border-emerald-200'
+          : severityBorderColor(severity),
+        edit.excluded && 'opacity-50'
+      )}
+    >
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-[13px] font-semibold text-zinc-900 leading-tight">{defect.itemName}</p>
+        {isReviewed ? (
+          <span className="flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full bg-emerald-500">
+            <Check className="h-3 w-3 text-white" />
+          </span>
+        ) : null}
+      </div>
+      <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+        {room ? (
+          <span className="inline-flex items-center rounded-full bg-zinc-100 px-2 py-0.5 text-[10px] font-medium text-zinc-600">
+            {room.roomName}
+          </span>
+        ) : null}
+        <span className={cn('inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium', severityBadgeTone(severity))}>
+          {severity.charAt(0).toUpperCase() + severity.slice(1)}
+        </span>
+        {edit.operatorLiability ? (
+          <span className={cn(
+            'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium',
+            edit.operatorLiability === 'tenant' ? 'bg-fuchsia-50 text-fuchsia-700' :
+            edit.operatorLiability === 'landlord' ? 'bg-sky-50 text-sky-700' :
+            'bg-orange-50 text-orange-700'
+          )}>
+            {formatEnumLabel(edit.operatorLiability)}
+          </span>
+        ) : null}
+      </div>
+      <div className="mt-2 flex items-center justify-between">
+        <span className="text-[13px] font-semibold tabular-nums text-zinc-900">
+          {formatCurrency(effectiveCost)}
+        </span>
+        {edit.excluded ? (
+          <span className="text-[10px] font-medium text-zinc-400">Excluded</span>
+        ) : null}
+      </div>
+    </button>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/*  Defect row (used in grouped list / flat view as fallback)          */
 /* ------------------------------------------------------------------ */
 
 function DefectRow({
@@ -113,7 +235,10 @@ function DefectRow({
 
   return (
     <div
-      className={`border border-zinc-200 px-4 py-4 transition ${edit.excluded ? 'opacity-50' : ''}`}
+      className={cn(
+        'rounded-[10px] border border-zinc-200 bg-white px-4 py-4 transition',
+        edit.excluded && 'opacity-50'
+      )}
     >
       {/* Header row */}
       <div className="flex items-start justify-between gap-3">
@@ -151,7 +276,7 @@ function DefectRow({
             <button
               type="button"
               onClick={() => onOpenDetail(defect.id)}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-zinc-400 transition hover:bg-zinc-50 hover:text-zinc-600"
+              className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-zinc-400 transition hover:bg-zinc-50 hover:text-zinc-600"
               title="View details"
             >
               <Maximize2 className="h-3.5 w-3.5" />
@@ -163,11 +288,12 @@ function DefectRow({
             <button
               type="button"
               onClick={() => onChange(defect.id, { excluded: !edit.excluded })}
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium transition ${
+              className={cn(
+                'inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition',
                 edit.excluded
                   ? 'bg-zinc-100 text-zinc-500 hover:bg-zinc-200'
                   : 'bg-white text-zinc-500 hover:bg-zinc-50'
-              }`}
+              )}
               title={edit.excluded ? 'Include this defect' : 'Exclude this defect'}
             >
               {edit.excluded ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
@@ -182,7 +308,7 @@ function DefectRow({
         <div className="mt-4 flex flex-wrap items-end gap-4">
           {/* Liability toggle */}
           <div className="min-w-0">
-            <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
+            <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
               Liability
             </p>
             {isReview ? (
@@ -201,7 +327,8 @@ function DefectRow({
               </div>
             ) : (
               <span
-                className={`text-sm font-medium ${
+                className={cn(
+                  'text-sm font-medium',
                   edit.operatorLiability === 'tenant'
                     ? 'text-fuchsia-700'
                     : edit.operatorLiability === 'landlord'
@@ -209,7 +336,7 @@ function DefectRow({
                       : edit.operatorLiability === 'shared'
                         ? 'text-orange-700'
                         : 'text-zinc-400'
-                }`}
+                )}
               >
                 {edit.operatorLiability ? formatEnumLabel(edit.operatorLiability) : 'Unassigned'}
               </span>
@@ -223,7 +350,7 @@ function DefectRow({
 
           {/* Cost input */}
           <div className="min-w-0">
-            <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
+            <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
               Cost
             </p>
             {isReview ? (
@@ -242,7 +369,7 @@ function DefectRow({
                       costAdjusted: val === '' ? null : Math.max(0, parseFloat(val)),
                     })
                   }}
-                  className="h-9 w-28 border border-zinc-200 bg-white pl-7 pr-3 text-sm text-zinc-900 tabular-nums placeholder:text-zinc-400 focus:border-slate-400 focus:outline-none"
+                  className="h-9 w-28 rounded-lg border border-zinc-200 bg-white pl-7 pr-3 text-sm text-zinc-900 tabular-nums placeholder:text-zinc-400 focus:border-slate-400 focus:outline-none"
                   placeholder="0.00"
                 />
               </div>
@@ -260,7 +387,7 @@ function DefectRow({
 
           {/* AI confidence */}
           <div className="min-w-0">
-            <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
+            <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
               AI confidence
             </p>
             <span className="text-sm tabular-nums text-zinc-500">
@@ -296,7 +423,7 @@ function RoomGroupHeader({
     <button
       type="button"
       onClick={onToggle}
-      className="flex w-full items-center gap-3 border border-zinc-200 bg-zinc-50/80 px-4 py-3 text-left transition-colors hover:bg-zinc-100/80"
+      className="flex w-full items-center gap-3 rounded-[10px] border border-zinc-200 bg-zinc-50/80 px-4 py-3 text-left transition-colors hover:bg-zinc-100/80"
     >
       {isExpanded ? (
         <ChevronDown className="h-4 w-4 shrink-0 text-zinc-400" />
@@ -353,8 +480,8 @@ function BulkActionsBar({
   const aiSuggestedCount = defects.filter((d) => d.aiSuggestedLiability && !edits[d.id]?.excluded).length
 
   return (
-    <div className="flex flex-wrap items-center gap-2 border border-zinc-200 bg-zinc-50/60 px-4 py-3">
-      <span className="mr-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">Bulk:</span>
+    <div className="flex flex-wrap items-center gap-2 rounded-[10px] border border-zinc-200 bg-zinc-50/60 px-4 py-3">
+      <span className="mr-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Bulk:</span>
       <WorkspaceActionButton tone="secondary" onClick={onAcceptAiSuggestions}>
         <Sparkles className="h-3 w-3" />
         Accept AI ({aiSuggestedCount})
@@ -378,7 +505,7 @@ function BulkActionsBar({
             step="1"
             value={threshold}
             onChange={(e) => setThreshold(e.target.value)}
-            className="h-7 w-16 border border-zinc-200 bg-white px-2 text-xs tabular-nums focus:border-slate-400 focus:outline-none"
+            className="h-7 w-16 rounded-lg border border-zinc-200 bg-white px-2 text-xs tabular-nums focus:border-slate-400 focus:outline-none"
           />
           <WorkspaceActionButton tone="secondary" onClick={() => {
             onExcludeBelow(parseFloat(threshold) || 0)
@@ -392,6 +519,279 @@ function BulkActionsBar({
           Exclude under £…
         </WorkspaceActionButton>
       )}
+    </div>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/*  Detail panel (right side)                                          */
+/* ------------------------------------------------------------------ */
+
+function DetailPanel({
+  defect,
+  edit,
+  room,
+  evidence,
+  isReview,
+  onChange,
+  onOpenDetail,
+  onConfirmAndNext,
+  onExclude,
+}: {
+  defect: CheckoutWorkspaceDefectRecord
+  edit: DefectEditState
+  room: CheckoutWorkspaceRoomRecord | null
+  evidence: OperatorCheckoutWorkspaceData['workspace']['evidence']
+  isReview: boolean
+  onChange: (id: string, patch: Partial<DefectEditState>) => void
+  onOpenDetail: (id: string) => void
+  onConfirmAndNext: () => void
+  onExclude: () => void
+}) {
+  const severity = getDefectSeverity(defect)
+  const aiLiability = defect.aiSuggestedLiability
+  const hasOverride =
+    edit.operatorLiability !== null &&
+    aiLiability !== null &&
+    edit.operatorLiability !== aiLiability
+  const hasCostOverride =
+    defect.costEstimate !== null &&
+    edit.costAdjusted !== null &&
+    edit.costAdjusted !== defect.costEstimate
+  const isReviewed = edit.operatorLiability !== null && !edit.excluded
+
+  // Find evidence items related to this defect's room
+  const room_name = room?.roomName ?? null
+  const defectEvidence = evidence.filter((e) => room_name && e.area && e.area.toLowerCase() === room_name.toLowerCase()).slice(0, 4)
+
+  return (
+    <div className="rounded-[10px] border border-zinc-200 bg-white p-5 sticky top-0">
+      {/* Title + severity */}
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <h3 className="text-base font-semibold text-zinc-900">{defect.itemName}</h3>
+            <span className={cn('inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium', severityBadgeTone(severity))}>
+              {severity.charAt(0).toUpperCase() + severity.slice(1)}
+            </span>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => onOpenDetail(defect.id)}
+          className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-medium text-zinc-400 transition hover:bg-zinc-50 hover:text-zinc-600"
+          title="Full detail view"
+        >
+          <Maximize2 className="h-3.5 w-3.5" />
+        </button>
+      </div>
+
+      {/* Badges row */}
+      <div className="mt-2 flex flex-wrap items-center gap-1.5">
+        {room ? (
+          <span className="inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-0.5 text-[10px] font-medium text-zinc-600">
+            {room.roomName}
+          </span>
+        ) : null}
+        <span className="inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-0.5 text-[10px] font-medium text-zinc-600">
+          {formatEnumLabel(defect.defectType)}
+        </span>
+        {isReviewed ? (
+          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-medium text-emerald-700">
+            <Check className="h-2.5 w-2.5" />
+            Reviewed
+          </span>
+        ) : (
+          <span className="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-[10px] font-medium text-amber-700">
+            Pending
+          </span>
+        )}
+        {edit.excluded ? (
+          <span className="inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-0.5 text-[10px] font-medium text-zinc-500">
+            Excluded
+          </span>
+        ) : null}
+      </div>
+
+      {/* Description */}
+      {defect.description ? (
+        <p className="mt-3 text-[13px] leading-relaxed text-zinc-600">{defect.description}</p>
+      ) : null}
+
+      {/* Evidence boxes */}
+      {defectEvidence.length > 0 ? (
+        <div className="mt-4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Evidence</p>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            {defectEvidence.map((ev, idx) => (
+              <div key={ev.id ?? idx} className="flex h-24 items-center justify-center rounded-lg border border-zinc-200 bg-zinc-50 text-[11px] text-zinc-400">
+                {ev.file_url ? (
+                  <img src={ev.file_url} alt={ev.area ?? 'Evidence'} className="h-full w-full rounded-lg object-cover" />
+                ) : (
+                  <span>{ev.area ?? 'No image'}</span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="mt-4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Evidence</p>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            <div className="flex h-24 items-center justify-center rounded-lg border border-zinc-200 bg-zinc-50 text-[11px] text-zinc-400">
+              No image
+            </div>
+            <div className="flex h-24 items-center justify-center rounded-lg border border-zinc-200 bg-zinc-50 text-[11px] text-zinc-400">
+              No image
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Liability group buttons */}
+      {!edit.excluded ? (
+        <div className="mt-4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Liability</p>
+          {isReview ? (
+            <div className="mt-2 flex overflow-hidden rounded-lg border border-zinc-200">
+              {LIABILITY_OPTIONS.map((opt, idx) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => onChange(defect.id, { operatorLiability: opt.value })}
+                  className={cn(
+                    'flex-1 px-3 py-2 text-xs font-medium transition-colors',
+                    idx > 0 && 'border-l border-zinc-200',
+                    edit.operatorLiability === opt.value
+                      ? opt.value === 'tenant'
+                        ? 'bg-fuchsia-600 text-white'
+                        : opt.value === 'landlord'
+                          ? 'bg-sky-600 text-white'
+                          : 'bg-orange-600 text-white'
+                      : 'bg-white text-zinc-600 hover:bg-zinc-50'
+                  )}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <p className={cn(
+              'mt-2 text-sm font-medium',
+              edit.operatorLiability === 'tenant'
+                ? 'text-fuchsia-700'
+                : edit.operatorLiability === 'landlord'
+                  ? 'text-sky-700'
+                  : edit.operatorLiability === 'shared'
+                    ? 'text-orange-700'
+                    : 'text-zinc-400'
+            )}>
+              {edit.operatorLiability ? formatEnumLabel(edit.operatorLiability) : 'Unassigned'}
+            </p>
+          )}
+          {hasOverride ? (
+            <p className="mt-1 text-[10px] text-amber-600">AI suggested: {formatEnumLabel(aiLiability!)}</p>
+          ) : null}
+        </div>
+      ) : null}
+
+      {/* Cost adjustment */}
+      {!edit.excluded ? (
+        <div className="mt-4">
+          <div className="flex items-center gap-2">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Cost adjustment</p>
+            {defect.costEstimate != null ? (
+              <span className="text-[10px] text-zinc-400">AI estimate: {formatCurrency(defect.costEstimate)}</span>
+            ) : null}
+          </div>
+          {isReview ? (
+            <div className="relative mt-2">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-zinc-400">£</span>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={edit.costAdjusted ?? ''}
+                onChange={(e) => {
+                  const val = e.target.value
+                  onChange(defect.id, {
+                    costAdjusted: val === '' ? null : Math.max(0, parseFloat(val)),
+                  })
+                }}
+                className="h-9 w-full rounded-lg border border-zinc-200 bg-white pl-7 pr-3 text-sm text-zinc-900 tabular-nums placeholder:text-zinc-400 focus:border-slate-400 focus:outline-none"
+                placeholder="0.00"
+              />
+            </div>
+          ) : (
+            <p className="mt-2 text-sm font-medium tabular-nums text-zinc-950">
+              {edit.costAdjusted != null ? formatCurrency(edit.costAdjusted) : '—'}
+            </p>
+          )}
+          {hasCostOverride ? (
+            <p className="mt-1 text-[10px] text-amber-600">Modified from AI estimate</p>
+          ) : null}
+        </div>
+      ) : null}
+
+      {/* Include/Exclude toggle */}
+      {isReview ? (
+        <div className="mt-4 flex items-center justify-between">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Include in claim</p>
+          <button
+            type="button"
+            onClick={() => onChange(defect.id, { excluded: !edit.excluded })}
+            className={cn(
+              'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors',
+              edit.excluded ? 'bg-zinc-200' : 'bg-emerald-500'
+            )}
+          >
+            <span
+              className={cn(
+                'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition-transform',
+                edit.excluded ? 'translate-x-0' : 'translate-x-5'
+              )}
+            />
+          </button>
+        </div>
+      ) : null}
+
+      {/* AI Rationale */}
+      {defect.aiReasoning ? (
+        <div className="mt-4 rounded-lg bg-zinc-50 p-3">
+          <div className="flex items-center gap-1.5">
+            <Sparkles className="h-3 w-3 text-zinc-400" />
+            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">AI Rationale</p>
+          </div>
+          <p className="mt-1.5 text-[12px] leading-relaxed text-zinc-600">{defect.aiReasoning}</p>
+          {defect.aiConfidence != null ? (
+            <p className="mt-1 text-[10px] text-zinc-400">
+              Confidence: {defect.aiConfidence <= 1 ? Math.round(defect.aiConfidence * 100) : Math.round(defect.aiConfidence)}%
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+
+      {/* Action buttons */}
+      {isReview ? (
+        <div className="mt-5 flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onConfirmAndNext}
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-emerald-700"
+          >
+            <Check className="h-3.5 w-3.5" />
+            Confirm & Next
+          </button>
+          <button
+            type="button"
+            onClick={onExclude}
+            className="flex items-center justify-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-4 py-2.5 text-[13px] font-medium text-zinc-600 transition-colors hover:bg-zinc-50"
+          >
+            <EyeOff className="h-3.5 w-3.5" />
+            Exclude
+          </button>
+        </div>
+      ) : null}
     </div>
   )
 }
@@ -425,6 +825,9 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
   // Detail modal state
   const [detailDefectId, setDetailDefectId] = useState<string | null>(null)
 
+  // Selected defect in the split panel
+  const [selectedDefectId, setSelectedDefectId] = useState<string | null>(null)
+
   const [edits, setEdits] = useState<Record<string, DefectEditState>>(() =>
     buildInitialEdits(defects)
   )
@@ -434,6 +837,10 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
   const [activeFilter, setActiveFilter] = useState<DefectFilter>('all')
   const [activeSort, setActiveSort] = useState<DefectSort>('room')
   const [collapsedRooms, setCollapsedRooms] = useState<Set<string>>(new Set())
+
+  // New filters for split-panel
+  const [liabilityFilter, setLiabilityFilter] = useState<LiabilityFilter>('all')
+  const [tradeFilter, setTradeFilter] = useState<TradeFilter>('all')
 
   const handleEditChange = useCallback(
     (id: string, patch: Partial<DefectEditState>) => {
@@ -571,6 +978,23 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
 
     return sorted
   }, [defects, edits, activeFilter, activeSort, roomMap])
+
+  // Additional filtering for the split-panel queue
+  const queueFiltered = useMemo(() => {
+    let result = filteredAndSorted
+
+    // Liability filter
+    if (liabilityFilter !== 'all') {
+      result = result.filter((d) => edits[d.id]?.operatorLiability === liabilityFilter)
+    }
+
+    // Trade filter
+    if (tradeFilter !== 'all') {
+      result = result.filter((d) => d.defectType === tradeFilter)
+    }
+
+    return result
+  }, [filteredAndSorted, liabilityFilter, tradeFilter, edits])
 
   // Group by room when sorting by room
   const groupedByRoom = useMemo(() => {
@@ -762,8 +1186,45 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
     return counts
   }, [defects, edits])
 
+  // Auto-select first defect if none selected
+  useEffect(() => {
+    if (!selectedDefectId && queueFiltered.length > 0) {
+      setSelectedDefectId(queueFiltered[0].id)
+    }
+  }, [selectedDefectId, queueFiltered])
+
+  // Selected defect and room for detail panel
+  const selectedDefect = selectedDefectId ? defects.find((d) => d.id === selectedDefectId) ?? null : null
+  const selectedRoom = selectedDefect ? roomMap.get(selectedDefect.roomId) ?? null : null
+
+  // Confirm & Next handler for detail panel
+  const handleConfirmAndNext = useCallback(() => {
+    if (!selectedDefectId) return
+    const currentIdx = queueFiltered.findIndex((d) => d.id === selectedDefectId)
+    if (currentIdx >= 0 && currentIdx < queueFiltered.length - 1) {
+      setSelectedDefectId(queueFiltered[currentIdx + 1].id)
+    }
+  }, [selectedDefectId, queueFiltered])
+
+  // Exclude handler for detail panel
+  const handleDetailExclude = useCallback(() => {
+    if (!selectedDefectId) return
+    handleEditChange(selectedDefectId, { excluded: true })
+  }, [selectedDefectId, handleEditChange])
+
+  // Total exposure (sum of all non-excluded costs)
+  const totalExposure = useMemo(() => {
+    let total = 0
+    for (const d of defects) {
+      const edit = edits[d.id]
+      if (!edit || edit.excluded) continue
+      total += edit.costAdjusted ?? d.costEstimate ?? 0
+    }
+    return total
+  }, [defects, edits])
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* ---- Review sub-tabs ---- */}
       <div className="flex items-center gap-1 border-b border-zinc-200">
         <button
@@ -794,7 +1255,7 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
           <Sparkles className="h-3.5 w-3.5" />
           AI Documents
           {aiDraftCount > 0 ? (
-            <span className="ml-1 inline-flex h-4.5 min-w-[18px] items-center justify-center bg-sky-100 px-1.5 text-[10px] font-semibold text-sky-700">
+            <span className="ml-1 inline-flex h-4.5 min-w-[18px] items-center justify-center rounded-full bg-sky-100 px-1.5 text-[10px] font-semibold text-sky-700">
               {aiDraftCount}
             </span>
           ) : null}
@@ -812,30 +1273,34 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
       {/* ---- Defect Review tab ---- */}
       {activeTab === 'defects' ? (
       <>
-      {/* ---- Review progress bar ---- */}
+      {/* ---- Stats row ---- */}
       {defects.length > 0 ? (
-        <div className="flex items-center gap-4">
-          <div className="flex-1">
-            <div className="flex items-center justify-between mb-1.5">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-500">
-                Review progress
-              </p>
-              <span className="text-xs tabular-nums text-zinc-500">
-                {reviewedCount}/{includedCount} reviewed
-              </span>
-            </div>
-            <WorkspaceProgressBar
-              value={reviewProgress}
-              max={100}
-              tone={reviewProgress === 100 ? 'success' : reviewProgress >= 50 ? 'warning' : 'danger'}
-            />
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {/* Defects count */}
+          <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Defects</p>
+            <p className="mt-1 text-[28px] font-bold tabular-nums leading-tight text-zinc-900">{defects.length}</p>
           </div>
-          {reviewProgress === 100 && includedCount > 0 ? (
-            <div className="flex items-center gap-1 text-xs font-medium text-emerald-600">
-              <Check className="h-3.5 w-3.5" />
-              Complete
-            </div>
-          ) : null}
+          {/* Reviewed */}
+          <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Reviewed</p>
+            <p className={cn(
+              'mt-1 text-[28px] font-bold tabular-nums leading-tight',
+              reviewedCount === includedCount && includedCount > 0 ? 'text-emerald-600' : reviewedCount > 0 ? 'text-amber-600' : 'text-zinc-900'
+            )}>
+              {reviewedCount}/{includedCount}
+            </p>
+          </div>
+          {/* Total Exposure */}
+          <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Total Exposure</p>
+            <p className="mt-1 text-[28px] font-bold tabular-nums leading-tight text-zinc-900">{formatCurrency(totalExposure)}</p>
+          </div>
+          {/* Excluded */}
+          <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Excluded</p>
+            <p className="mt-1 text-[28px] font-bold tabular-nums leading-tight text-zinc-900">{excludedCount}</p>
+          </div>
         </div>
       ) : null}
 
@@ -856,53 +1321,6 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
         />
       ) : null}
 
-      {/* ---- Filter + Sort toolbar ---- */}
-      {defects.length > 0 ? (
-        <div className="flex flex-wrap items-center gap-3">
-          {/* Filters */}
-          <div className="flex items-center gap-1">
-            <Filter className="h-3.5 w-3.5 text-zinc-400" />
-            {FILTER_OPTIONS.map((opt) => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => setActiveFilter(opt.value)}
-                className={cn(
-                  'px-2.5 py-1 text-xs font-medium transition-colors',
-                  activeFilter === opt.value
-                    ? 'bg-zinc-900 text-white'
-                    : 'bg-zinc-100 text-zinc-500 hover:bg-zinc-200 hover:text-zinc-700'
-                )}
-              >
-                {opt.label}
-                {filterCounts[opt.value] > 0 ? (
-                  <span className={cn(
-                    'ml-1 tabular-nums',
-                    activeFilter === opt.value ? 'text-zinc-300' : 'text-zinc-400'
-                  )}>
-                    {filterCounts[opt.value]}
-                  </span>
-                ) : null}
-              </button>
-            ))}
-          </div>
-
-          {/* Sort */}
-          <div className="flex items-center gap-1">
-            <SortAsc className="h-3.5 w-3.5 text-zinc-400" />
-            <select
-              value={activeSort}
-              onChange={(e) => setActiveSort(e.target.value as DefectSort)}
-              className="h-7 border border-zinc-200 bg-white px-2 text-xs text-zinc-600 focus:border-slate-400 focus:outline-none"
-            >
-              {SORT_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-      ) : null}
-
       {/* ---- Bulk actions ---- */}
       {isReview && defects.length > 3 ? (
         <BulkActionsBar
@@ -914,128 +1332,144 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
         />
       ) : null}
 
-      {/* ---- Defects section ---- */}
-      <section>
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <h3 className="text-sm font-semibold text-zinc-950">Defects</h3>
-            <span className="text-xs text-zinc-400">
-              {includedCount} included{excludedCount > 0 ? ` · ${excludedCount} excluded` : ''}
-              {activeFilter !== 'all' ? ` · showing ${filteredAndSorted.length}` : ''}
-            </span>
-          </div>
-          {isReview && defects.length > 0 ? (
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={handleResetAll}
-                className="inline-flex items-center gap-1 text-xs text-zinc-400 hover:text-zinc-600"
-              >
-                <RotateCcw className="h-3 w-3" />
-                Reset
-              </button>
+      {/* ---- Split-panel layout ---- */}
+      {defects.length > 0 ? (
+        <div className="grid grid-cols-1 gap-4 min-h-[420px] lg:grid-cols-[340px_1fr]">
+          {/* Left panel - Defect queue */}
+          <div className="flex flex-col gap-3">
+            {/* Filter pills */}
+            <div className="space-y-2">
+              {/* Liability filter row */}
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400 mr-1">Liability:</span>
+                {LIABILITY_FILTER_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setLiabilityFilter(opt.value)}
+                    className={cn(
+                      'rounded-full border px-3.5 py-1 text-[11px] font-medium transition-colors',
+                      liabilityFilter === opt.value
+                        ? 'bg-zinc-900 text-white border-zinc-900'
+                        : 'bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-50'
+                    )}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+              {/* Trade filter row */}
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400 mr-1">Trade:</span>
+                {TRADE_FILTER_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setTradeFilter(opt.value)}
+                    className={cn(
+                      'rounded-full border px-3.5 py-1 text-[11px] font-medium transition-colors',
+                      tradeFilter === opt.value
+                        ? 'bg-zinc-900 text-white border-zinc-900'
+                        : 'bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-50'
+                    )}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
             </div>
-          ) : null}
-        </div>
 
-        {filteredAndSorted.length > 0 ? (
-          <div className="mt-3 space-y-2">
-            {groupedByRoom ? (
-              // Grouped by room
-              groupedByRoom.map((group) => {
-                const isCollapsed = collapsedRooms.has(group.roomId)
-                const roomCost = group.defects.reduce((sum, d) => {
-                  const edit = edits[d.id]
-                  if (!edit || edit.excluded) return sum
-                  return sum + (edit.costAdjusted ?? d.costEstimate ?? 0)
-                }, 0)
+            {/* Queue list */}
+            <div className="flex-1 space-y-2 overflow-y-auto max-h-[600px] pr-1">
+              {queueFiltered.length > 0 ? (
+                queueFiltered.map((d) => (
+                  <DefectQueueCard
+                    key={d.id}
+                    defect={d}
+                    edit={edits[d.id] ?? { operatorLiability: null, costAdjusted: null, excluded: false }}
+                    isSelected={selectedDefectId === d.id}
+                    roomMap={roomMap}
+                    onClick={() => setSelectedDefectId(d.id)}
+                  />
+                ))
+              ) : (
+                <div className="flex items-center justify-center rounded-[10px] border border-dashed border-zinc-200 py-10">
+                  <p className="text-sm text-zinc-400">No defects match filters</p>
+                </div>
+              )}
+            </div>
 
-                return (
-                  <div key={group.roomId}>
-                    <RoomGroupHeader
-                      room={group.room}
-                      defectCount={group.defects.length}
-                      roomCost={roomCost}
-                      isExpanded={!isCollapsed}
-                      onToggle={() => {
-                        setCollapsedRooms((prev) => {
-                          const next = new Set(prev)
-                          if (next.has(group.roomId)) next.delete(group.roomId)
-                          else next.add(group.roomId)
-                          return next
-                        })
-                      }}
-                    />
-                    {!isCollapsed ? (
-                      <div className="ml-4 mt-1 space-y-2 border-l-2 border-zinc-100 pl-4">
-                        {group.defects.map((d) => (
-                          <DefectRow
-                            key={d.id}
-                            defect={d}
-                            edit={edits[d.id] ?? { operatorLiability: null, costAdjusted: null, excluded: false }}
-                            isReview={isReview}
-                            onChange={handleEditChange}
-                            onOpenDetail={setDetailDefectId}
-                          />
-                        ))}
-                      </div>
-                    ) : null}
-                  </div>
-                )
-              })
+            {/* Queue summary */}
+            <div className="flex items-center justify-between rounded-[10px] border border-zinc-200 bg-zinc-50 px-3 py-2">
+              <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
+                Showing {queueFiltered.length} of {defects.length}
+              </span>
+              {isReview && defects.length > 0 ? (
+                <button
+                  type="button"
+                  onClick={handleResetAll}
+                  className="inline-flex items-center gap-1 text-[11px] font-medium text-zinc-400 hover:text-zinc-600"
+                >
+                  <RotateCcw className="h-3 w-3" />
+                  Reset
+                </button>
+              ) : null}
+            </div>
+          </div>
+
+          {/* Right panel - Detail view */}
+          <div>
+            {selectedDefect && edits[selectedDefect.id] ? (
+              <DetailPanel
+                defect={selectedDefect}
+                edit={edits[selectedDefect.id]}
+                room={selectedRoom}
+                evidence={evidence}
+                isReview={isReview}
+                onChange={handleEditChange}
+                onOpenDetail={setDetailDefectId}
+                onConfirmAndNext={handleConfirmAndNext}
+                onExclude={handleDetailExclude}
+              />
             ) : (
-              // Flat list (when not sorting by room)
-              filteredAndSorted.map((d) => (
-                <DefectRow
-                  key={d.id}
-                  defect={d}
-                  edit={edits[d.id] ?? { operatorLiability: null, costAdjusted: null, excluded: false }}
-                  isReview={isReview}
-                  onChange={handleEditChange}
-                  onOpenDetail={setDetailDefectId}
-                />
-              ))
+              <div className="flex h-full items-center justify-center rounded-[10px] border border-dashed border-zinc-200 bg-white p-10">
+                <div className="text-center">
+                  <p className="text-sm font-medium text-zinc-400">Select a defect</p>
+                  <p className="mt-1 text-xs text-zinc-300">Choose a defect from the queue to review its details</p>
+                </div>
+              </div>
             )}
           </div>
-        ) : defects.length > 0 ? (
-          <div className="mt-2 flex items-center gap-3">
-            <p className="text-sm text-zinc-500">No defects match the current filter.</p>
-            <button
-              type="button"
-              onClick={() => setActiveFilter('all')}
-              className="text-xs font-medium text-sky-600 hover:text-sky-700"
-            >
-              Clear filter
-            </button>
-          </div>
-        ) : (
-          <p className="mt-2 text-sm text-zinc-500">No defects identified.</p>
-        )}
+        </div>
+      ) : (
+        <div className="flex items-center justify-center rounded-[10px] border border-dashed border-zinc-200 bg-white py-16">
+          <p className="text-sm text-zinc-400">No defects identified.</p>
+        </div>
+      )}
 
-        {/* Save overrides — sticky bar when dirty */}
-        {isReview && defects.length > 0 ? (
-          <div className={cn(
-            'mt-4 flex items-center gap-3',
-            isDirty ? 'sticky bottom-0 z-10 -mx-6 border-t border-amber-200 bg-amber-50/95 px-6 py-3  md:-mx-7 md:px-7' : ''
-          )}>
-            <WorkspaceActionButton
-              tone={isDirty ? 'primary' : 'secondary'}
-              disabled={isSaving}
-              onClick={handleSaveOverrides}
-            >
-              {isSaving ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Save className="h-4 w-4" />
-              )}
-              Save review overrides
-            </WorkspaceActionButton>
-            {isDirty ? (
-              <span className="text-xs text-amber-600">Unsaved changes</span>
-            ) : null}
-          </div>
-        ) : null}
-      </section>
+      {/* Save overrides — sticky bar when dirty */}
+      {isReview && defects.length > 0 ? (
+        <div className={cn(
+          'flex items-center gap-3',
+          isDirty ? 'sticky bottom-0 z-10 -mx-6 rounded-[10px] border border-amber-200 bg-amber-50/95 px-6 py-3 md:-mx-7 md:px-7' : ''
+        )}>
+          <WorkspaceActionButton
+            tone={isDirty ? 'primary' : 'secondary'}
+            disabled={isSaving}
+            onClick={handleSaveOverrides}
+          >
+            {isSaving ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="h-4 w-4" />
+            )}
+            Save review overrides
+          </WorkspaceActionButton>
+          {isDirty ? (
+            <span className="text-xs text-amber-600">Unsaved changes</span>
+          ) : null}
+        </div>
+      ) : null}
 
       <div className="border-t border-zinc-100" />
 
@@ -1043,27 +1477,27 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
       <section>
         <h3 className="text-sm font-semibold text-zinc-950">Claim summary</h3>
         <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <div className="border border-zinc-200 px-4 py-3">
+          <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
             <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
               Tenant liability
             </p>
-            <p className="mt-1 text-lg font-semibold tabular-nums text-fuchsia-700">
+            <p className="mt-1 text-[28px] font-bold tabular-nums leading-tight text-fuchsia-700">
               {formatCurrency(tenantTotal)}
             </p>
           </div>
-          <div className="border border-zinc-200 px-4 py-3">
+          <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
             <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
               Landlord cost
             </p>
-            <p className="mt-1 text-lg font-semibold tabular-nums text-sky-700">
+            <p className="mt-1 text-[28px] font-bold tabular-nums leading-tight text-sky-700">
               {formatCurrency(landlordTotal)}
             </p>
           </div>
-          <div className="border border-zinc-200 px-4 py-3">
+          <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
             <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
               Shared
             </p>
-            <p className="mt-1 text-lg font-semibold tabular-nums text-orange-700">
+            <p className="mt-1 text-[28px] font-bold tabular-nums leading-tight text-orange-700">
               {formatCurrency(sharedTotal)}
             </p>
             {sharedTotal > 0 ? (
@@ -1072,11 +1506,11 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
               </p>
             ) : null}
           </div>
-          <div className="border border-zinc-200 px-4 py-3">
+          <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
             <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
               Deposit held
             </p>
-            <p className="mt-1 text-lg font-semibold tabular-nums text-zinc-950">
+            <p className="mt-1 text-[28px] font-bold tabular-nums leading-tight text-zinc-950">
               {depositHeld > 0 ? formatCurrency(depositHeld) : '—'}
             </p>
           </div>
@@ -1091,7 +1525,7 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
         {recommendations.length > 0 ? (
           <div className="mt-3 space-y-3">
             {recommendations.map((rec) => (
-              <div key={rec.id} className="border border-zinc-200 px-4 py-3">
+              <div key={rec.id} className="rounded-[10px] border border-zinc-200 bg-white p-5">
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-zinc-950">
@@ -1139,7 +1573,7 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
             <p className="mt-1 text-xs text-zinc-400">
               AI-generated breakdown — use the defect overrides above to adjust the final claim.
             </p>
-            <div className="mt-3 overflow-hidden border border-zinc-200">
+            <div className="mt-3 overflow-hidden rounded-[10px] border border-zinc-200">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-zinc-200 bg-zinc-50/80">
