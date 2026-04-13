@@ -465,6 +465,35 @@ a:focus-visible {
   animation: count-up 0.5s ease-out both;
 }
 
+/* Bar chart grow-in animation */
+@keyframes bar-grow {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+
+.animate-bar-grow {
+  animation: bar-grow 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Pipeline segment grow-in animation */
+@keyframes pipeline-grow {
+  from { transform: scaleX(0); opacity: 0; }
+  to { transform: scaleX(1); opacity: 1; }
+}
+
+.animate-pipeline-grow {
+  animation: pipeline-grow 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Sparkline draw animation */
+@keyframes sparkline-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+.animate-sparkline-draw {
+  animation: sparkline-draw 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+}
+
 .skeleton-shimmer {
   background: linear-gradient(90deg, #f4f4f5 25%, #e4e4e7 50%, #f4f4f5 75%);
   background-size: 200% 100%;

@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useMemo, useCallback } from 'react'
+import { useMemo, useCallback, useState, useEffect, useRef } from 'react'
 import {
   AlertTriangle,
   ArrowRight,
@@ -44,6 +44,48 @@ function getGreeting(): string {
   if (hour < 12) return 'Good morning'
   if (hour < 17) return 'Good afternoon'
   return 'Good evening'
+}
+
+/* ────────────────────────────────────────────────────────────────── */
+/*  Animated counter hook                                             */
+/* ────────────────────────────────────────────────────────────────── */
+
+function useCountUp(target: number, duration = 1200) {
+  const [value, setValue] = useState(0)
+  const prevTarget = useRef(target)
+
+  useEffect(() => {
+    prevTarget.current = target
+    const start = performance.now()
+    let raf: number
+
+    function tick(now: number) {
+      const elapsed = now - start
+      const progress = Math.min(elapsed / duration, 1)
+      const eased = 1 - Math.pow(1 - progress, 3) // cubic ease-out
+      setValue(Math.round(target * eased))
+      if (progress < 1) raf = requestAnimationFrame(tick)
+    }
+
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [target, duration])
+
+  return value
+}
+
+function AnimatedNumber({ value, prefix = '' }: { value: number; prefix?: string }) {
+  const animated = useCountUp(value)
+  return (
+    <>
+      {prefix}{prefix === '£' ? animated.toLocaleString('en-GB') : animated}
+    </>
+  )
+}
+
+function AnimatedCurrency({ value }: { value: number }) {
+  const animated = useCountUp(value)
+  return <>{formatCurrency(animated)}</>
 }
 
 /* ────────────────────────────────────────────────────────────────── */
@@ -159,13 +201,19 @@ function computeStats(
 function Sparkline({ data, color }: { data: number[]; color: string }) {
   const w = 64, h = 24, pad = 2
   const max = Math.max(...data), min = Math.min(...data), range = max - min || 1
-  const points = data
-    .map((v, i) => {
-      const x = pad + (i / (data.length - 1)) * (w - 2 * pad)
-      const y = h - pad - ((v - min) / range) * (h - 2 * pad)
-      return `${x},${y}`
-    })
-    .join(' ')
+  const coords = data.map((v, i) => ({
+    x: pad + (i / (data.length - 1)) * (w - 2 * pad),
+    y: h - pad - ((v - min) / range) * (h - 2 * pad),
+  }))
+  const points = coords.map((c) => `${c.x},${c.y}`).join(' ')
+
+  // Calculate path length for stroke-dash animation
+  let pathLength = 0
+  for (let i = 1; i < coords.length; i++) {
+    const dx = coords[i].x - coords[i - 1].x
+    const dy = coords[i].y - coords[i - 1].y
+    pathLength += Math.sqrt(dx * dx + dy * dy)
+  }
 
   return (
     <svg width={w} height={h} className="opacity-70">
@@ -176,6 +224,8 @@ function Sparkline({ data, color }: { data: number[]; color: string }) {
         strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
+        className="animate-sparkline-draw"
+        style={{ strokeDasharray: pathLength, strokeDashoffset: pathLength }}
       />
     </svg>
   )
@@ -192,7 +242,7 @@ function StatCards({ stats }: { stats: DashboardStats }) {
         <div className="text-xs font-medium text-zinc-500">Active Tenancies</div>
         <div className="mt-2 flex items-end justify-between">
           <p className="text-[28px] font-bold tabular-nums leading-none tracking-tight text-zinc-950">
-            {stats.activeTenancies}
+            <AnimatedNumber value={stats.activeTenancies} />
           </p>
           <Sparkline data={[8, 9, 10, 10, 11, 12, stats.activeTenancies || 12]} color="#10b981" />
         </div>
@@ -215,7 +265,7 @@ function StatCards({ stats }: { stats: DashboardStats }) {
         <div className="text-xs font-medium text-zinc-500">Open Cases</div>
         <div className="mt-2 flex items-end justify-between">
           <p className="text-[28px] font-bold tabular-nums leading-none tracking-tight text-zinc-950">
-            {stats.activeCases}
+            <AnimatedNumber value={stats.activeCases} />
           </p>
           <Sparkline data={[5, 6, 5, 7, 8, 7, stats.activeCases || 9]} color="#0ea5e9" />
         </div>
@@ -237,7 +287,7 @@ function StatCards({ stats }: { stats: DashboardStats }) {
         <div className="text-xs font-medium text-zinc-500">Total Deposits</div>
         <div className="mt-2 flex items-end justify-between">
           <p className="text-[28px] font-bold tabular-nums leading-none tracking-tight text-zinc-950">
-            {formatCurrency(stats.totalDepositValue)}
+            <AnimatedCurrency value={stats.totalDepositValue} />
           </p>
           <Sparkline data={[9200, 9800, 10200, 10100, 10800, 11100, stats.totalDepositValue || 11375]} color="#10b981" />
         </div>
@@ -253,7 +303,7 @@ function StatCards({ stats }: { stats: DashboardStats }) {
         <div className="text-xs font-medium text-zinc-500">Claim Pipeline</div>
         <div className="mt-2 flex items-end justify-between">
           <p className="text-[28px] font-bold tabular-nums leading-none tracking-tight text-zinc-950">
-            {formatCurrency(stats.claimPipelineValue)}
+            <AnimatedCurrency value={stats.claimPipelineValue} />
           </p>
           <Sparkline data={[420, 510, 480, 560, 630, 580, stats.claimPipelineValue || 650]} color="#f59e0b" />
         </div>
@@ -303,14 +353,14 @@ function PipelineBar({ stats }: { stats: DashboardStats }) {
       ) : (
         <>
           <div className="mt-4 flex h-8 overflow-hidden rounded-lg bg-zinc-100">
-            {stagesWithCases.map((stage) => {
+            {stagesWithCases.map((stage, i) => {
               const count = stats.pipelineCounts[stage.key] ?? 0
               const pct = Math.max((count / totalCases) * 100, 8)
               return (
                 <div
                   key={stage.key}
-                  className="flex items-center justify-center text-[11px] font-semibold text-white transition-all first:rounded-l-lg last:rounded-r-lg"
-                  style={{ width: `${pct}%`, backgroundColor: stage.hex }}
+                  className="flex origin-left animate-pipeline-grow items-center justify-center text-[11px] font-semibold text-white transition-all first:rounded-l-lg last:rounded-r-lg"
+                  style={{ width: `${pct}%`, backgroundColor: stage.hex, animationDelay: `${i * 80}ms` }}
                   title={`${stage.label}: ${count}`}
                 >
                   {count > 0 ? count : ''}
@@ -474,14 +524,16 @@ function MonthlyThroughputCard({
 
       <div className="mt-4">
         <div className="flex items-end gap-2" style={{ height: 140 }}>
-          {bars.map((b) => {
+          {bars.map((b, i) => {
             const barHeight = Math.max((b.total / maxVal) * 120, 8)
             return (
               <div key={b.label} className="flex flex-1 flex-col items-center gap-1">
-                <span className="text-[11px] font-semibold text-zinc-700">{b.total}</span>
+                <span className="animate-count-up text-[11px] font-semibold text-zinc-700" style={{ animationDelay: `${i * 100}ms` }}>
+                  <AnimatedNumber value={b.total} />
+                </span>
                 <div
-                  className="w-full max-w-[48px] rounded-t-[3px] bg-emerald-500"
-                  style={{ height: barHeight }}
+                  className="w-full max-w-[48px] origin-bottom animate-bar-grow rounded-t-[3px] bg-emerald-500"
+                  style={{ height: barHeight, animationDelay: `${i * 100}ms` }}
                 />
               </div>
             )
