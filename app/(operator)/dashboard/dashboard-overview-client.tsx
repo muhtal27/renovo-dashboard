@@ -421,52 +421,42 @@ function RecentActivityCard({ cases }: { cases: EotCaseListItem[] }) {
 /*  4. Monthly Throughput Chart                                       */
 /* ────────────────────────────────────────────────────────────────── */
 
+const FALLBACK_MONTHS = ['Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr']
+const FALLBACK_THROUGHPUT = [
+  { label: 'Nov', total: 14 },
+  { label: 'Dec', total: 11 },
+  { label: 'Jan', total: 18 },
+  { label: 'Feb', total: 22 },
+  { label: 'Mar', total: 19 },
+  { label: 'Apr', total: 16 },
+]
+
 function MonthlyThroughputCard({
   analytics,
 }: {
   analytics?: { throughput: { week_start: string; created: number; resolved: number }[] } | null
 }) {
-  const monthlyData = useMemo(() => {
-    if (!analytics?.throughput?.length) {
-      // Fallback placeholder data when no real analytics exist yet
-      const now = new Date()
-      return Array.from({ length: 6 }, (_, i) => {
-        const d = new Date(now.getFullYear(), now.getMonth() - 5 + i)
-        return {
-          label: d.toLocaleString('en-GB', { month: 'short' }),
-          created: [14, 11, 18, 22, 19, 16][i],
-          resolved: [12, 9, 15, 20, 17, 14][i],
-        }
-      })
-    }
+  const chartData = useMemo(() => {
+    if (!analytics?.throughput?.length) return null
 
-    const grouped = new Map<string, { created: number; resolved: number }>()
+    const grouped = new Map<string, number>()
     for (const week of analytics.throughput) {
       const d = new Date(week.week_start)
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-      const existing = grouped.get(key)
-      if (existing) {
-        existing.created += week.created
-        existing.resolved += week.resolved
-      } else {
-        grouped.set(key, { created: week.created, resolved: week.resolved })
-      }
+      grouped.set(key, (grouped.get(key) ?? 0) + week.created + week.resolved)
     }
 
     return Array.from(grouped.entries())
       .slice(-6)
-      .map(([key, vals]) => {
+      .map(([key, total]) => {
         const [, month] = key.split('-')
         const d = new Date(2024, Number(month) - 1)
-        return {
-          label: d.toLocaleString('en-GB', { month: 'short' }),
-          created: vals.created,
-          resolved: vals.resolved,
-        }
+        return { label: d.toLocaleString('en-GB', { month: 'short' }), total }
       })
   }, [analytics])
 
-  const maxVal = Math.max(1, ...monthlyData.map((m) => Math.max(m.created, m.resolved)))
+  const bars = chartData ?? FALLBACK_THROUGHPUT
+  const maxVal = Math.max(1, ...bars.map((b) => b.total))
 
   return (
     <div className="rounded-xl border border-zinc-200 bg-white p-5">
@@ -482,36 +472,29 @@ function MonthlyThroughputCard({
         </Link>
       </div>
 
-      {monthlyData.length === 0 ? (
-        <div className="mt-4 rounded-lg bg-zinc-50 px-4 py-8 text-center">
-          <p className="text-sm text-zinc-400">No throughput data yet</p>
-        </div>
-      ) : (
-        <div className="mt-4">
-          <div className="flex items-end gap-2" style={{ height: 140 }}>
-            {monthlyData.map((m) => {
-              const total = m.created + m.resolved
-              const barHeight = Math.max((total / (maxVal * 2)) * 120, 8)
-              return (
-                <div key={m.label} className="flex flex-1 flex-col items-center gap-1">
-                  <span className="text-[11px] font-semibold text-zinc-700">{total}</span>
-                  <div
-                    className="w-full max-w-[48px] rounded-t-[3px] bg-emerald-500"
-                    style={{ height: barHeight }}
-                  />
-                </div>
-              )
-            })}
-          </div>
-          <div className="mt-1 flex gap-2">
-            {monthlyData.map((m) => (
-              <div key={m.label} className="flex-1 text-center text-[10px] font-medium text-zinc-400">
-                {m.label}
+      <div className="mt-4">
+        <div className="flex items-end gap-2" style={{ height: 140 }}>
+          {bars.map((b) => {
+            const barHeight = Math.max((b.total / maxVal) * 120, 8)
+            return (
+              <div key={b.label} className="flex flex-1 flex-col items-center gap-1">
+                <span className="text-[11px] font-semibold text-zinc-700">{b.total}</span>
+                <div
+                  className="w-full max-w-[48px] rounded-t-[3px] bg-emerald-500"
+                  style={{ height: barHeight }}
+                />
               </div>
-            ))}
-          </div>
+            )
+          })}
         </div>
-      )}
+        <div className="mt-1 flex gap-2">
+          {bars.map((b) => (
+            <div key={b.label} className="flex-1 text-center text-[10px] font-medium text-zinc-400">
+              {b.label}
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   )
 }
