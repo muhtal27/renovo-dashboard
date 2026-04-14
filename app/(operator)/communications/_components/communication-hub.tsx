@@ -1,6 +1,6 @@
 'use client'
 
-import { FileText, Home, Inbox, MessageSquare, User } from 'lucide-react'
+import { FileText, Inbox, MessageSquare } from 'lucide-react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useTransition } from 'react'
 import dynamic from 'next/dynamic'
@@ -19,13 +19,6 @@ const ConversationsPanel = dynamic(() =>
 const TemplatePanel = dynamic(() =>
   import('./template-panel').then((m) => m.TemplatePanel)
 )
-const TenantPortalPanel = dynamic(() =>
-  import('./tenant-portal-panel').then((m) => m.TenantPortalPanel)
-)
-const LandlordPortalPanel = dynamic(() =>
-  import('./landlord-portal-panel').then((m) => m.LandlordPortalPanel)
-)
-
 const HUB_TABS: {
   id: CommunicationHubTab
   label: string
@@ -34,16 +27,12 @@ const HUB_TABS: {
   { id: 'inbox', label: 'Inbox', icon: Inbox },
   { id: 'conversations', label: 'Conversations', icon: MessageSquare },
   { id: 'templates', label: 'Templates', icon: FileText },
-  { id: 'tenant-portal', label: 'Tenant Portal', icon: User },
-  { id: 'landlord-portal', label: 'Landlord Portal', icon: Home },
 ]
 
 const TAB_COMPONENTS: Record<CommunicationHubTab, React.ComponentType> = {
   inbox: InboxPanel,
   conversations: ConversationsPanel,
   templates: TemplatePanel,
-  'tenant-portal': TenantPortalPanel,
-  'landlord-portal': LandlordPortalPanel,
 }
 
 export function CommunicationHub({

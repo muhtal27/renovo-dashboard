@@ -8,8 +8,6 @@ export const COMMUNICATION_HUB_TABS = [
   'inbox',
   'conversations',
   'templates',
-  'tenant-portal',
-  'landlord-portal',
 ] as const
 
 export type CommunicationHubTab = (typeof COMMUNICATION_HUB_TABS)[number]
