@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
+import posthog from 'posthog-js'
 import Link from 'next/link'
 
 export default function CheckoutCompletePage() {
@@ -11,6 +12,7 @@ export default function CheckoutCompletePage() {
   const [status, setStatus] = useState<string | null>(null)
   const [email, setEmail] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const capturedRef = useRef(false)
 
   useEffect(() => {
     if (!sessionId) return
@@ -20,6 +22,16 @@ export default function CheckoutCompletePage() {
       .then((data) => {
         setStatus(data.status)
         setEmail(data.customer_email)
+        if (!capturedRef.current) {
+          capturedRef.current = true
+          if (data.status === 'complete') {
+            posthog.capture('subscription_completed', {
+              plan: 'portfolio_365',
+              customer_email: data.customer_email,
+              stripe_session_id: sessionId,
+            })
+          }
+        }
       })
       .finally(() => setLoading(false))
   }, [sessionId])

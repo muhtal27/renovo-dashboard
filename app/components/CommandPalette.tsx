@@ -10,6 +10,7 @@ import {
   CreditCard,
   Home,
   LayoutDashboard,
+  MessageSquare,
   Search,
   Settings,
   Users,
@@ -44,6 +45,15 @@ const COMMANDS: CommandItem[] = [
     icon: Building2,
     section: 'Navigation',
     keywords: ['property', 'tenant', 'landlord', 'deposit'],
+  },
+  {
+    id: 'communications',
+    label: 'Communications',
+    description: 'Messages, conversations, and templates',
+    href: '/communications',
+    icon: MessageSquare,
+    section: 'Navigation',
+    keywords: ['messages', 'inbox', 'email', 'template', 'conversations'],
   },
   {
     id: 'disputes',

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Download } from 'lucide-react'
 import { toast } from 'sonner'
+import { cn } from '@/lib/ui'
 import { useEotAnalyticsDashboard } from '@/lib/queries/eot-queries'
 import { SkeletonPanel } from '@/app/operator-ui'
 import type { EotReportSummary, EotAnalyticsDashboard } from '@/lib/eot-types'
@@ -24,8 +25,11 @@ import {
 const TABS = [
   { id: 'throughput', label: 'Throughput' },
   { id: 'claims', label: 'Claim Recovery' },
+  { id: 'recovery-analytics', label: 'Recovery Analytics' },
+  { id: 'ai-accuracy', label: 'AI Accuracy' },
   { id: 'resolution', label: 'Resolution Time' },
   { id: 'workload', label: 'Team Workload' },
+  { id: 'sla', label: 'SLA Metrics' },
   { id: 'health', label: 'Integration Health' },
 ] as const
 
@@ -154,13 +158,13 @@ export function ReportsClient({
       {/* Page header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-semibold tracking-tight text-zinc-900">Reports</h2>
+          <h1 className="text-[24px] font-semibold tracking-tight text-zinc-900">Reports</h1>
           <p className="mt-1 text-sm text-zinc-500">Portfolio analytics and performance</p>
         </div>
         <button
           type="button"
           onClick={handleExportCSV}
-          className="inline-flex items-center gap-1.5 rounded-[10px] border border-zinc-200 bg-white px-4 py-2 text-[13px] font-semibold text-zinc-700 transition hover:bg-zinc-50 hover:border-zinc-300"
+          className="app-secondary-button gap-1.5 px-4 py-2 text-[13px]"
         >
           <Download className="h-3.5 w-3.5" />
           Export CSV
@@ -169,29 +173,33 @@ export function ReportsClient({
 
       {/* Tab bar */}
       <div className="flex gap-0 overflow-x-auto border-b border-zinc-200">
-        {TABS.map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            onClick={() => {
-              const params = new URLSearchParams(searchParams.toString())
-              if (tab.id === 'throughput') {
-                params.delete('tab')
-              } else {
-                params.set('tab', tab.id)
-              }
-              const qs = params.toString()
-              router.replace(`/reports${qs ? `?${qs}` : ''}`, { scroll: false })
-            }}
-            className={`whitespace-nowrap border-b-2 px-[18px] py-2.5 text-[13px] font-medium transition ${
-              activeTab === tab.id
-                ? 'border-zinc-900 text-zinc-900'
-                : 'border-transparent text-zinc-500 hover:text-zinc-900'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
+        {TABS.map((tab) => {
+          const isActive = activeTab === tab.id
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => {
+                const params = new URLSearchParams(searchParams.toString())
+                if (tab.id === 'throughput') {
+                  params.delete('tab')
+                } else {
+                  params.set('tab', tab.id)
+                }
+                const qs = params.toString()
+                router.replace(`/reports${qs ? `?${qs}` : ''}`, { scroll: false })
+              }}
+              className={cn(
+                'whitespace-nowrap border-b-2 px-[18px] py-2.5 text-[13px] font-medium transition',
+                isActive
+                  ? 'border-zinc-900 text-zinc-900'
+                  : 'border-transparent text-zinc-500 hover:text-zinc-900'
+              )}
+            >
+              {tab.label}
+            </button>
+          )
+        })}
       </div>
 
       {/* Loading state */}
@@ -214,11 +222,11 @@ export function ReportsClient({
           {/* ── Throughput tab ── */}
           {activeTab === 'throughput' && (
             <div className="grid gap-4 xl:grid-cols-2">
-              <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
+              <div className="stat-card">
                 <h4 className="mb-4 text-sm font-semibold text-zinc-900">Cases Processed</h4>
                 <AnalyticsThroughput data={analyticsData.throughput} />
               </div>
-              <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
+              <div className="stat-card">
                 <h4 className="mb-4 text-sm font-semibold text-zinc-900">Status Distribution</h4>
                 {initialSummary ? (
                   <StatusDistribution breakdown={initialSummary.status_breakdown} />
@@ -232,11 +240,11 @@ export function ReportsClient({
           {/* ── Claim Recovery tab ── */}
           {activeTab === 'claims' && (
             <div className="grid gap-4 xl:grid-cols-2">
-              <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
+              <div className="stat-card">
                 <h4 className="mb-4 text-sm font-semibold text-zinc-900">Recovery Summary</h4>
                 <AnalyticsClaimRecovery data={analyticsData.claim_recovery} />
               </div>
-              <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
+              <div className="stat-card">
                 <h4 className="mb-4 text-sm font-semibold text-zinc-900">Per-Case Recovery</h4>
                 {performanceRows.filter((r) => r.claim_total_amount && Number(r.claim_total_amount) > 0).length > 0 ? (
                   <div className="space-y-4">
@@ -265,7 +273,7 @@ export function ReportsClient({
 
           {/* ── Resolution Time tab ── */}
           {activeTab === 'resolution' && (
-            <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
+            <div className="stat-card">
               <h4 className="mb-4 text-sm font-semibold text-zinc-900">Average Days per Stage</h4>
               <AnalyticsResolutionTime data={analyticsData.resolution_time} />
             </div>
@@ -273,7 +281,7 @@ export function ReportsClient({
 
           {/* ── Team Workload tab ── */}
           {activeTab === 'workload' && (
-            <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
+            <div className="stat-card">
               <h4 className="mb-4 text-sm font-semibold text-zinc-900">Team Workload</h4>
               <AnalyticsTeamWorkload data={analyticsData.team_workload} />
             </div>
@@ -281,9 +289,107 @@ export function ReportsClient({
 
           {/* ── Integration Health tab ── */}
           {activeTab === 'health' && (
-            <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
+            <div className="stat-card">
               <h4 className="mb-4 text-sm font-semibold text-zinc-900">Integration Health</h4>
               <AnalyticsIntegrationHealth data={analyticsData.integration_health} />
+            </div>
+          )}
+
+          {/* ── Recovery Analytics tab ── */}
+          {activeTab === 'recovery-analytics' && (
+            <div className="grid gap-4 xl:grid-cols-2">
+              <div className="stat-card">
+                <h4 className="mb-4 text-sm font-semibold text-zinc-900">Claimed vs Awarded</h4>
+                <div className="space-y-3">
+                  {performanceRows.length > 0 ? performanceRows.slice(0, 10).map((row) => (
+                    <div key={row.case_id} className="flex items-center justify-between">
+                      <span className="text-[13px] text-zinc-700 truncate max-w-[200px]">{row.property_name || row.case_id.slice(0, 8)}</span>
+                      <div className="flex items-center gap-3">
+                        <span className="text-[11px] text-zinc-500">Claimed: {row.claim_total_amount ? formatCurrency(row.claim_total_amount) : '\u2014'}</span>
+                        <span className="text-[11px] font-medium text-emerald-600">{row.status === 'resolved' ? 'Resolved' : formatEnumLabel(row.status)}</span>
+                      </div>
+                    </div>
+                  )) : (
+                    <p className="py-6 text-center text-sm text-zinc-400">No recovery data available.</p>
+                  )}
+                </div>
+              </div>
+              <div className="stat-card">
+                <h4 className="mb-4 text-sm font-semibold text-zinc-900">By Scheme Breakdown</h4>
+                <p className="py-6 text-center text-sm text-zinc-400">Scheme-level recovery analytics will be available when more data is collected.</p>
+              </div>
+            </div>
+          )}
+
+          {/* ── AI Accuracy tab ── */}
+          {activeTab === 'ai-accuracy' && (
+            <div className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                <div className="stat-card">
+                  <span className="stat-label">Agreement Rate</span>
+                  <div className="stat-value text-emerald-600">&mdash;</div>
+                  <p className="mt-1 text-xs text-zinc-500">AI vs operator consensus</p>
+                </div>
+                <div className="stat-card">
+                  <span className="stat-label">Overrides</span>
+                  <div className="stat-value">&mdash;</div>
+                  <p className="mt-1 text-xs text-zinc-500">Operator-overridden AI decisions</p>
+                </div>
+                <div className="stat-card">
+                  <span className="stat-label">Avg Confidence</span>
+                  <div className="stat-value">&mdash;</div>
+                  <p className="mt-1 text-xs text-zinc-500">Mean AI confidence score</p>
+                </div>
+                <div className="stat-card">
+                  <span className="stat-label">Improvement Trend</span>
+                  <div className="stat-value">&mdash;</div>
+                  <p className="mt-1 text-xs text-zinc-500">30-day improvement</p>
+                </div>
+              </div>
+              <div className="stat-card">
+                <h4 className="mb-4 text-sm font-semibold text-zinc-900">AI Accuracy Insights</h4>
+                <div className="rounded-md border-l-[3px] border-l-sky-500 bg-sky-50 px-4 py-3">
+                  <p className="text-sm font-medium text-sky-900">AI accuracy tracking is building</p>
+                  <p className="mt-1 text-[13px] text-sky-700">
+                    As more cases are reviewed and operators make decisions, AI accuracy metrics will populate here.
+                    The system tracks agreement rates, override patterns, and confidence calibration.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── SLA Metrics tab ── */}
+          {activeTab === 'sla' && (
+            <div className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                <div className="stat-card">
+                  <span className="stat-label">SLA Met</span>
+                  <div className="stat-value text-emerald-600">&mdash;</div>
+                  <p className="mt-1 text-xs text-zinc-500">Within target time</p>
+                </div>
+                <div className="stat-card">
+                  <span className="stat-label">SLA Missed</span>
+                  <div className="stat-value text-rose-600">&mdash;</div>
+                  <p className="mt-1 text-xs text-zinc-500">Exceeded target time</p>
+                </div>
+                <div className="stat-card">
+                  <span className="stat-label">Pipeline Value</span>
+                  <div className="stat-value">&mdash;</div>
+                  <p className="mt-1 text-xs text-zinc-500">Total deposits in pipeline</p>
+                </div>
+                <div className="stat-card">
+                  <span className="stat-label">Projected Recovery</span>
+                  <div className="stat-value text-emerald-600">&mdash;</div>
+                  <p className="mt-1 text-xs text-zinc-500">Based on historical rate</p>
+                </div>
+              </div>
+              <div className="stat-card">
+                <h4 className="mb-4 text-sm font-semibold text-zinc-900">SLA Performance</h4>
+                <p className="py-6 text-center text-sm text-zinc-400">
+                  SLA performance tracking will be available when target times are configured in Settings.
+                </p>
+              </div>
             </div>
           )}
         </div>

@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import type { AuthSession } from '@supabase/supabase-js'
 import { useEffect, useRef, useState } from 'react'
+import posthog from 'posthog-js'
 import { getReturnToFromSearch } from '@/lib/return-to'
 import { supabase } from '@/lib/supabase'
 import {
@@ -70,6 +71,14 @@ export default function LoginPage() {
 
     handledSessionRef.current = sessionKey
     clearLegacySupabaseBrowserAuthArtifacts(process.env.NEXT_PUBLIC_SUPABASE_URL)
+
+    const userId = session?.user?.id
+    const userEmail = session?.user?.email
+    if (userId) {
+      posthog.identify(userId, userEmail ? { email: userEmail } : undefined)
+    }
+    posthog.capture('login_completed', { provider: 'microsoft' })
+
     return true
   }
 
@@ -123,6 +132,7 @@ export default function LoginPage() {
   async function handleSSO() {
     setLoadingSSO(true)
     setError(null)
+    posthog.capture('login_sso_initiated', { provider: 'microsoft' })
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'azure',

@@ -428,7 +428,7 @@ export function OperatorLayout({ children, operator, latestRelease }: OperatorLa
           </header>
 
           {/* Page content */}
-          <div className="mx-auto flex w-full max-w-[1320px] flex-1 flex-col px-5 py-7 md:px-8">
+          <div className="mx-auto flex w-full max-w-[1320px] flex-1 flex-col px-5 py-7 pb-16 md:px-8">
             {children}
           </div>
         </div>

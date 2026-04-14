@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { getPostHogClient } from '@/lib/posthog-server'
 import {
   clearInvalidTenantSelection,
   resolveActiveTenantMembership,
@@ -95,6 +96,15 @@ export async function POST(request: Request) {
     )
     setOperatorSessionCookie(response.cookies, result.session, secure)
     applyTenantSelectionCookies(response, secure, membershipResolution)
+
+    const posthog = getPostHogClient()
+    posthog.identify({ distinctId: result.user.id, properties: { email: result.user.email } })
+    posthog.capture({
+      distinctId: result.user.id,
+      event: 'operator_session_established',
+      properties: { provider: 'microsoft' },
+    })
+
     return response
   } catch {
     return NextResponse.json({ detail: 'Valid session data is required.' }, { status: 400 })

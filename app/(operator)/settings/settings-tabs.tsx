@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { cn } from '@/lib/ui'
 
-const TABS = ['Account', 'Team', 'Integrations', 'Email Ingestion', 'Automation', 'API Partners'] as const
+const TABS = ['Account', 'Team', 'Integrations', 'Email Ingestion', 'Automation', 'API Partners', 'Data & Privacy'] as const
 type Tab = (typeof TABS)[number]
 
 // ---------------------------------------------------------------------------
@@ -369,7 +369,7 @@ export function SettingsTabs() {
     <div className="space-y-5">
       {/* Header */}
       <div>
-        <h2 className="text-xl font-semibold tracking-tight text-zinc-900">Settings</h2>
+        <h2 className="text-[24px] font-semibold tracking-tight text-zinc-900">Settings</h2>
         <p className="mt-1 text-[13px] text-zinc-500">
           Configure your workspace
         </p>
@@ -402,6 +402,82 @@ export function SettingsTabs() {
         {activeTab === 'Email Ingestion' ? <EmailIngestionTab /> : null}
         {activeTab === 'Automation' ? <AutomationTab /> : null}
         {activeTab === 'API Partners' ? <ApiPartnersTab /> : null}
+        {activeTab === 'Data & Privacy' ? <DataPrivacyTab /> : null}
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Data & Privacy Tab
+// ---------------------------------------------------------------------------
+
+function DataPrivacyTab() {
+  return (
+    <div className="rounded-[10px] border border-zinc-200 bg-white p-5" style={{ maxWidth: 520 }}>
+      <h4 className="mb-4 text-sm font-semibold text-zinc-900">Data Retention</h4>
+
+      <div className="space-y-4">
+        <div>
+          <label className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
+            Case Data Retention
+          </label>
+          <select
+            defaultValue="24"
+            className="mt-1 h-10 w-full rounded-[10px] border border-zinc-200 bg-white px-3 text-[13px] text-zinc-900 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
+          >
+            <option value="12">12 months</option>
+            <option value="24">24 months</option>
+            <option value="36">36 months</option>
+            <option value="60">60 months</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
+            Document Retention
+          </label>
+          <select
+            defaultValue="36"
+            className="mt-1 h-10 w-full rounded-[10px] border border-zinc-200 bg-white px-3 text-[13px] text-zinc-900 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
+          >
+            <option value="12">12 months</option>
+            <option value="24">24 months</option>
+            <option value="36">36 months</option>
+            <option value="60">60 months</option>
+            <option value="84">7 years</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="mt-6 border-t border-zinc-100 pt-5">
+        <h4 className="mb-4 text-sm font-semibold text-zinc-900">Data Subject Requests</h4>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            className="app-secondary-button"
+          >
+            Export My Data
+          </button>
+          <button
+            type="button"
+            className="inline-flex items-center gap-1.5 rounded-[var(--radius-md)] border border-rose-200 bg-rose-50 px-4 py-2 text-[13px] font-semibold text-rose-700 transition hover:bg-rose-100"
+          >
+            Request Data Deletion
+          </button>
+        </div>
+        <p className="mt-3 text-xs text-zinc-500">
+          Data subject requests are processed within 30 days in accordance with UK GDPR requirements.
+        </p>
+      </div>
+
+      <div className="mt-5 flex justify-end">
+        <button
+          type="button"
+          className="app-primary-button"
+        >
+          Save
+        </button>
       </div>
     </div>
   )

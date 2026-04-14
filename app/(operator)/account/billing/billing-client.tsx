@@ -70,8 +70,8 @@ export function BillingPageClient() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-xl font-semibold tracking-tight text-zinc-900">Billing</h2>
-        <p className="mt-1 text-[13px] text-zinc-500">
+        <h1 className="text-[24px] font-semibold tracking-tight text-zinc-900">Billing</h1>
+        <p className="mt-1 text-sm text-zinc-500">
           Manage your subscription, usage, and payments
         </p>
       </div>
@@ -350,30 +350,28 @@ export function BillingPageClient() {
           </button>
         </div>
 
-        <table className="w-full text-[13px]">
+        <table className="data-table">
           <thead>
-            <tr className="border-t border-b border-zinc-100 bg-zinc-50/60 text-left text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
-              <th className="px-5 py-2.5">Date</th>
-              <th className="px-5 py-2.5">Invoice</th>
-              <th className="px-5 py-2.5">Description</th>
-              <th className="px-5 py-2.5 text-right">Amount</th>
-              <th className="px-5 py-2.5">Status</th>
-              <th className="px-5 py-2.5" />
+            <tr>
+              <th>Date</th>
+              <th>Invoice</th>
+              <th>Description</th>
+              <th className="text-right">Amount</th>
+              <th>Status</th>
+              <th />
             </tr>
           </thead>
           <tbody>
             {INVOICES.map((inv) => (
-              <tr key={inv.id} className="border-b border-zinc-50 last:border-0">
-                <td className="px-5 py-3 text-zinc-700">{inv.date}</td>
-                <td className="px-5 py-3 font-medium text-zinc-900">{inv.id}</td>
-                <td className="px-5 py-3 text-zinc-600">{inv.desc}</td>
-                <td className="px-5 py-3 text-right font-semibold tabular-nums text-zinc-900">
+              <tr key={inv.id}>
+                <td className="text-zinc-700">{inv.date}</td>
+                <td className="font-medium text-zinc-900">{inv.id}</td>
+                <td className="text-zinc-600">{inv.desc}</td>
+                <td className="text-right font-semibold tabular-nums text-zinc-900">
                   £{inv.amount}
                 </td>
-                <td className="px-5 py-3">
-                  <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700">
-                    {inv.status}
-                  </span>
+                <td>
+                  <span className="badge badge-emerald">{inv.status}</span>
                 </td>
                 <td className="px-5 py-3">
                   <div className="flex justify-end gap-1">

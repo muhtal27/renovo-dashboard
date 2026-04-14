@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
+import { getPostHogClient } from '@/lib/posthog-server'
 
 function getStripe() {
   return new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -20,6 +21,12 @@ export async function POST() {
       ],
       mode: 'subscription',
       return_url: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'}/checkout/complete?session_id={CHECKOUT_SESSION_ID}`,
+    })
+
+    getPostHogClient().capture({
+      distinctId: 'anonymous',
+      event: 'checkout_session_created',
+      properties: { plan: 'portfolio_365', stripe_session_id: session.id },
     })
 
     return NextResponse.json({ clientSecret: session.client_secret })

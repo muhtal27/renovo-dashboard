@@ -1,6 +1,7 @@
 'use client'
 
 import { FormEvent, useId, useState } from 'react'
+import posthog from 'posthog-js'
 
 type EnquiryType = 'Product enquiry' | 'Partnerships' | 'Investor enquiry' | 'General enquiry'
 type PortfolioSize =
@@ -131,6 +132,11 @@ export function PublicContactForm({
         return
       }
 
+      posthog.capture('contact_form_submitted', {
+        enquiry_type: payload.enquiryType,
+        portfolio_size: payload.portfolioSize,
+        source_page: sourcePage,
+      })
       setForm(INITIAL_FORM_STATE)
       setStatus('success')
     } catch {

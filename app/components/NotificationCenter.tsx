@@ -146,26 +146,24 @@ export function NotificationCenter() {
       <button
         type="button"
         onClick={() => { setOpen((prev) => !prev); setHasOpened(true) }}
-        className="relative flex h-8 w-8 items-center justify-center rounded-lg text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-700"
-        aria-label="Notifications"
+        className="relative flex h-9 w-9 items-center justify-center rounded-[10px] text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900"
+        aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
       >
-        <Bell className="h-4 w-4" strokeWidth={2} />
+        <Bell className="h-[18px] w-[18px]" strokeWidth={2} />
         {unreadCount > 0 ? (
-          <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white">
-            {unreadCount > 9 ? '9+' : unreadCount}
-          </span>
+          <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white" />
         ) : null}
       </button>
 
       {open ? (
-        <div className="absolute right-0 top-full z-50 mt-2 w-80 overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-lg">
-          <div className="flex items-center justify-between border-b border-zinc-100 px-4 py-3">
-            <h3 className="text-sm font-semibold text-zinc-950">Notifications</h3>
-            {unreadCount > 0 ? (
-              <span className="rounded-full bg-rose-50 px-2 py-0.5 text-xs font-medium text-rose-700">
-                {unreadCount} new
-              </span>
-            ) : null}
+        <div className="absolute right-0 top-[calc(100%+8px)] z-50 w-[360px] overflow-hidden rounded-[var(--radius-md)] border border-zinc-200 bg-white shadow-lg animate-fade-in-up">
+          <div className="flex items-center justify-between border-b border-zinc-100 px-4 py-3.5">
+            <h4 className="text-sm font-semibold text-zinc-900">
+              Notifications
+              {unreadCount > 0 ? (
+                <span className="badge badge-rose ml-2">{unreadCount}</span>
+              ) : null}
+            </h4>
           </div>
 
           <div className="max-h-[360px] overflow-y-auto">

@@ -20,6 +20,7 @@ export const WORKSPACE_STEPS = [
   'analysis',
   'review',
   'deductions',
+  'negotiation',
   'refund',
 ] as const
 
@@ -310,7 +311,8 @@ export function normalizeWorkspaceStep(value: string | null | undefined): Worksp
   if (v === 'utilities') return 'readings'
   if (v === 'process') return 'analysis'
   if (v === 'defects') return 'review'
-  if (v === 'draft-sent' || v === 'send-out' || v === 'sendout' || v === 'ready-for-claim' || v === 'negotiation') return 'deductions'
+  if (v === 'draft-sent' || v === 'send-out' || v === 'sendout') return 'deductions'
+  if (v === 'ready-for-claim') return 'negotiation'
   if (v === 'submitted' || v === 'resolved' || v === 'submission') return 'refund'
   return 'inventory'
 }

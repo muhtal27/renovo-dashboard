@@ -61,3 +61,4 @@ node_modules/
 playwright/.auth/
 playwright/.auth/*.json
 app/page.tsx.bak
+.env.local

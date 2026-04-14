@@ -12,6 +12,7 @@ import {
   Sparkles,
   Eye,
   Calculator,
+  MessageSquare,
   Banknote,
   FileCheck,
   Keyboard,
@@ -48,6 +49,7 @@ const WORKFLOW_STEPS: {
   { step: 'analysis', label: 'Analysis', icon: Sparkles, statusStart: 'analysis' },
   { step: 'review', label: 'Review', icon: Eye, statusStart: 'review' },
   { step: 'deductions', label: 'Deductions', icon: Calculator, statusStart: 'draft_sent' },
+  { step: 'negotiation', label: 'Negotiation', icon: MessageSquare, statusStart: 'ready_for_claim' },
   { step: 'refund', label: 'Refund', icon: Banknote, statusStart: 'submitted' },
 ]
 
@@ -66,7 +68,7 @@ function statusToStep(status: EotCaseStatus): WorkspaceStep {
   if (status === 'disputed') return 'refund'
   if (status === 'resolved') return 'refund'
   if (status === 'submitted') return 'refund'
-  if (status === 'ready_for_claim') return 'deductions'
+  if (status === 'ready_for_claim') return 'negotiation'
   if (status === 'draft_sent') return 'deductions'
   if (status === 'review') return 'review'
   if (status === 'analysis') return 'analysis'
@@ -300,8 +302,9 @@ const STEP_NAV: Record<WorkspaceStep, { prevStep: WorkspaceStep | null; nextStep
   readings: { prevStep: 'checkout', nextStep: 'analysis', nextLabel: 'Continue to Analysis' },
   analysis: { prevStep: 'readings', nextStep: 'review', nextLabel: 'Start Review' },
   review: { prevStep: 'analysis', nextStep: 'deductions', nextLabel: 'Continue to Deductions' },
-  deductions: { prevStep: 'review', nextStep: 'refund', nextLabel: 'Continue to Refund' },
-  refund: { prevStep: 'deductions', nextStep: null, nextLabel: '' },
+  deductions: { prevStep: 'review', nextStep: 'negotiation', nextLabel: 'Continue to Negotiation' },
+  negotiation: { prevStep: 'deductions', nextStep: 'refund', nextLabel: 'Continue to Refund' },
+  refund: { prevStep: 'negotiation', nextStep: null, nextLabel: '' },
 }
 
 function StepNavigation({
@@ -359,6 +362,7 @@ const STEP_COMPONENTS: Record<WorkspaceStep, ComponentType<{ data: OperatorCheck
   analysis: dynamic(() => import('./step-analysis').then((m) => m.StepAnalysis)),
   review: dynamic(() => import('./step-review').then((m) => m.StepReview)),
   deductions: dynamic(() => import('./step-deductions').then((m) => m.StepDeductions)),
+  negotiation: dynamic(() => import('./step-negotiation').then((m) => m.StepNegotiation)),
   refund: dynamic(() => import('./step-refund').then((m) => m.StepRefund)),
 }
 

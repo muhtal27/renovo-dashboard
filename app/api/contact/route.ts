@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { isReasonableText, isValidEmail, rateLimitRequest } from '@/lib/public-route-guard'
 import { getSupabaseServiceRoleClient } from '@/lib/supabase-admin'
+import { getPostHogClient } from '@/lib/posthog-server'
 
 const ENQUIRY_TYPES = new Set([
   'Product enquiry',
@@ -106,6 +107,16 @@ export async function POST(request: Request) {
     if (error) {
       return NextResponse.json({ error: 'Submission failed' }, { status: 500 })
     }
+
+    getPostHogClient().capture({
+      distinctId: workEmail,
+      event: 'contact_form_received',
+      properties: {
+        enquiry_type: enquiryType,
+        portfolio_size: portfolioSize,
+        source_page: sourcePage,
+      },
+    })
 
     return NextResponse.json({ success: true })
   } catch {

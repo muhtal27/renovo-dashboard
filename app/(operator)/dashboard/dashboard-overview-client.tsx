@@ -6,18 +6,16 @@ import {
   AlertTriangle,
   ArrowRight,
   BarChart3,
-  Building2,
   CheckCircle,
   ClipboardCheck,
-  FolderOpen,
   Mail,
-  PoundSterling,
+  Plus,
   RefreshCcw,
   Scale,
   Send,
+  ShieldAlert,
   Sparkles,
   TrendingUp,
-  Plus,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useEotTenancies, useEotCases, useEotAnalyticsDashboard } from '@/lib/queries/eot-queries'
@@ -123,6 +121,7 @@ type DashboardStats = {
   disputedValue: number
   pipelineCounts: Record<string, number>
   highPriorityCases: number
+  urgentDeadlineCases: number
 }
 
 function computeStats(
@@ -176,6 +175,14 @@ function computeStats(
     0,
   )
 
+  // Cases within 7 days of statutory deadline
+  const sevenDays = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+  const urgentDeadlineCases = tenancies.filter((t) => {
+    if (!t.end_date) return false
+    const endDate = new Date(t.end_date)
+    return endDate >= now && endDate <= sevenDays
+  }).length
+
   return {
     totalTenancies: tenancies.length,
     activeTenancies,
@@ -191,6 +198,7 @@ function computeStats(
     disputedValue,
     pipelineCounts,
     highPriorityCases,
+    urgentDeadlineCases,
   }
 }
 
@@ -238,15 +246,15 @@ function Sparkline({ data, color }: { data: number[]; color: string }) {
 function StatCards({ stats }: { stats: DashboardStats }) {
   return (
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-      <div className="rounded-xl border border-zinc-200 bg-white p-5">
-        <div className="text-xs font-medium text-zinc-500">Active Tenancies</div>
+      <div className="stat-card">
+        <div className="stat-label">Active Tenancies</div>
         <div className="mt-2 flex items-end justify-between">
-          <p className="text-[28px] font-bold tabular-nums leading-none tracking-tight text-zinc-950">
+          <div className="stat-value tabular-nums text-zinc-950">
             <AnimatedNumber value={stats.activeTenancies} />
-          </p>
+          </div>
           <Sparkline data={[8, 9, 10, 10, 11, 12, stats.activeTenancies || 12]} color="#10b981" />
         </div>
-        <div className="mt-2.5 flex items-center gap-1.5 text-xs">
+        <div className="stat-footer">
           {stats.endingSoon > 0 ? (
             <span className="inline-flex items-center gap-1 text-amber-600">
               <TrendingUp className="h-3.5 w-3.5" />
@@ -261,19 +269,17 @@ function StatCards({ stats }: { stats: DashboardStats }) {
         </div>
       </div>
 
-      <div className="rounded-xl border border-zinc-200 bg-white p-5">
-        <div className="text-xs font-medium text-zinc-500">Open Cases</div>
+      <div className="stat-card">
+        <div className="stat-label">Open Cases</div>
         <div className="mt-2 flex items-end justify-between">
-          <p className="text-[28px] font-bold tabular-nums leading-none tracking-tight text-zinc-950">
+          <div className="stat-value tabular-nums text-zinc-950">
             <AnimatedNumber value={stats.activeCases} />
-          </p>
+          </div>
           <Sparkline data={[5, 6, 5, 7, 8, 7, stats.activeCases || 9]} color="#0ea5e9" />
         </div>
-        <div className="mt-2.5 text-xs">
+        <div className="stat-footer">
           {stats.casesNeedingAttention > 0 ? (
-            <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-[10px] font-semibold text-amber-700">
-              {stats.casesNeedingAttention} need attention
-            </span>
+            <span className="badge badge-amber">{stats.casesNeedingAttention} need attention</span>
           ) : (
             <span className="inline-flex items-center gap-1 text-emerald-600">
               <CheckCircle className="h-3.5 w-3.5" />
@@ -283,15 +289,15 @@ function StatCards({ stats }: { stats: DashboardStats }) {
         </div>
       </div>
 
-      <div className="rounded-xl border border-zinc-200 bg-white p-5">
-        <div className="text-xs font-medium text-zinc-500">Total Deposits</div>
+      <div className="stat-card">
+        <div className="stat-label">Total Deposits</div>
         <div className="mt-2 flex items-end justify-between">
-          <p className="text-[28px] font-bold tabular-nums leading-none tracking-tight text-zinc-950">
+          <div className="stat-value tabular-nums text-zinc-950">
             <AnimatedCurrency value={stats.totalDepositValue} />
-          </p>
+          </div>
           <Sparkline data={[9200, 9800, 10200, 10100, 10800, 11100, stats.totalDepositValue || 11375]} color="#10b981" />
         </div>
-        <div className="mt-2.5 flex items-center gap-1.5 text-xs">
+        <div className="stat-footer">
           <span className="inline-flex items-center gap-1 text-emerald-600">
             <TrendingUp className="h-3.5 w-3.5" />
             +12% portfolio value
@@ -299,19 +305,17 @@ function StatCards({ stats }: { stats: DashboardStats }) {
         </div>
       </div>
 
-      <div className="rounded-xl border border-zinc-200 bg-white p-5">
-        <div className="text-xs font-medium text-zinc-500">Claim Pipeline</div>
+      <div className="stat-card">
+        <div className="stat-label">Claim Pipeline</div>
         <div className="mt-2 flex items-end justify-between">
-          <p className="text-[28px] font-bold tabular-nums leading-none tracking-tight text-zinc-950">
+          <div className="stat-value tabular-nums text-zinc-950">
             <AnimatedCurrency value={stats.claimPipelineValue} />
-          </p>
+          </div>
           <Sparkline data={[420, 510, 480, 560, 630, 580, stats.claimPipelineValue || 650]} color="#f59e0b" />
         </div>
-        <div className="mt-2.5 text-xs">
+        <div className="stat-footer">
           {stats.disputedCases > 0 ? (
-            <span className="inline-flex items-center rounded-full border border-rose-200 bg-rose-50 px-2.5 py-0.5 text-[10px] font-semibold text-rose-700">
-              {stats.disputedCases} disputed
-            </span>
+            <span className="badge badge-rose">{stats.disputedCases} disputed</span>
           ) : (
             <span className="inline-flex items-center gap-1 text-emerald-600">
               <CheckCircle className="h-3.5 w-3.5" />
@@ -333,16 +337,15 @@ function PipelineBar({ stats }: { stats: DashboardStats }) {
   const stagesWithCases = PIPELINE_STAGES.filter((s) => (stats.pipelineCounts[s.key] ?? 0) > 0)
 
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-5">
+    <div className="stat-card">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-zinc-950">Case Pipeline</h3>
+        <h3 className="text-[16px] font-semibold text-zinc-900">Case Pipeline</h3>
         <Link
           href="/tenancies"
           prefetch={false}
-          className="inline-flex items-center gap-1 text-xs font-medium text-zinc-400 transition hover:text-zinc-600"
+          className="app-secondary-button gap-1 px-3 py-1.5 text-[12px]"
         >
-          View all
-          <ArrowRight className="h-3 w-3" />
+          View all <ArrowRight className="h-3 w-3" />
         </Link>
       </div>
 
@@ -352,35 +355,31 @@ function PipelineBar({ stats }: { stats: DashboardStats }) {
         </div>
       ) : (
         <>
-          <div className="mt-4 flex h-8 overflow-hidden rounded-lg bg-zinc-100">
+          <div className="pipeline-bar mt-4">
             {stagesWithCases.map((stage, i) => {
               const count = stats.pipelineCounts[stage.key] ?? 0
               const pct = Math.max((count / totalCases) * 100, 8)
               return (
-                <div
+                <Link
                   key={stage.key}
-                  className="flex origin-left animate-pipeline-grow items-center justify-center text-[11px] font-semibold text-white transition-all first:rounded-l-lg last:rounded-r-lg"
+                  href={`/tenancies?status=${stage.key}`}
+                  className="pipeline-seg origin-left animate-pipeline-grow first:rounded-l-lg last:rounded-r-lg"
                   style={{ width: `${pct}%`, backgroundColor: stage.hex, animationDelay: `${i * 80}ms` }}
                   title={`${stage.label}: ${count}`}
                 >
                   {count > 0 ? count : ''}
-                </div>
+                </Link>
               )
             })}
           </div>
 
-          <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1.5">
+          <div className="pipeline-legend mt-3">
             {PIPELINE_STAGES.map((stage) => {
               const count = stats.pipelineCounts[stage.key] ?? 0
               return (
-                <div key={stage.key} className="flex items-center gap-1.5">
-                  <span
-                    className="inline-block h-2 w-2 rounded-full"
-                    style={{ backgroundColor: stage.hex }}
-                  />
-                  <span className="text-xs text-zinc-600">
-                    {stage.label} ({count})
-                  </span>
+                <div key={stage.key} className="pipeline-legend-item">
+                  <div className="pipeline-legend-dot" style={{ backgroundColor: stage.hex }} />
+                  {stage.label} ({count})
                 </div>
               )
             })}
@@ -430,10 +429,8 @@ function RecentActivityCard({ cases }: { cases: EotCaseListItem[] }) {
   }, [cases])
 
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-5">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-zinc-950">Recent Activity</h3>
-      </div>
+    <div className="stat-card">
+      <h3 className="text-[16px] font-semibold text-zinc-900">Recent Activity</h3>
 
       {recentCases.length === 0 ? (
         <div className="mt-4 rounded-lg bg-zinc-50 px-4 py-8 text-center">
@@ -509,16 +506,15 @@ function MonthlyThroughputCard({
   const maxVal = Math.max(1, ...bars.map((b) => b.total))
 
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-5">
+    <div className="stat-card">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-zinc-950">Monthly Throughput</h3>
+        <h3 className="text-[16px] font-semibold text-zinc-900">Monthly Throughput</h3>
         <Link
           href="/reports"
           prefetch={false}
-          className="inline-flex items-center gap-1 text-xs font-medium text-zinc-400 transition hover:text-zinc-600"
+          className="app-secondary-button gap-1 px-3 py-1.5 text-[12px]"
         >
-          Full report
-          <ArrowRight className="h-3 w-3" />
+          Full report <ArrowRight className="h-3 w-3" />
         </Link>
       </div>
 
@@ -552,33 +548,59 @@ function MonthlyThroughputCard({
 }
 
 /* ────────────────────────────────────────────────────────────────── */
-/*  5. Quick Actions                                                  */
+/*  5. Deadline Alert                                                 */
+/* ────────────────────────────────────────────────────────────────── */
+
+function DeadlineAlert({ count }: { count: number }) {
+  if (count === 0) return null
+
+  return (
+    <div className="alert-banner alert-banner-danger">
+      <AlertTriangle className="h-[18px] w-[18px] shrink-0" />
+      <div className="flex-1">
+        <span className="font-semibold">Deadline Alert</span>
+        <span className="ml-1 text-[12px] text-rose-600">
+          {count} case{count > 1 ? 's' : ''} within 7 days of statutory deadline
+        </span>
+      </div>
+      <Link
+        href="/tenancies"
+        className="inline-flex items-center gap-1 rounded-[var(--radius-sm)] bg-rose-500 px-3 py-1.5 text-[12px] font-semibold text-white transition hover:bg-rose-600"
+      >
+        View Cases
+      </Link>
+    </div>
+  )
+}
+
+/* ────────────────────────────────────────────────────────────────── */
+/*  6. Quick Actions                                                  */
 /* ────────────────────────────────────────────────────────────────── */
 
 function QuickActionsCard() {
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-5">
-      <h3 className="text-sm font-semibold text-zinc-950">Quick Actions</h3>
+    <div className="stat-card">
+      <h3 className="text-[16px] font-semibold text-zinc-900">Quick Actions</h3>
       <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
         <Link
           href="/tenancies"
-          className="flex flex-col items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-5 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50"
+          className="app-secondary-button flex-col gap-2 px-4 py-4 text-sm"
         >
-          <Plus className="h-5 w-5 text-emerald-500" />
+          <Plus className="h-[18px] w-[18px] text-emerald-500" />
           Start New Checkout
         </Link>
         <Link
           href="/disputes"
-          className="flex flex-col items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-5 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50"
+          className="app-secondary-button flex-col gap-2 px-4 py-4 text-sm"
         >
-          <Scale className="h-5 w-5 text-amber-500" />
+          <ShieldAlert className="h-[18px] w-[18px] text-amber-500" />
           View Disputes
         </Link>
         <Link
           href="/reports"
-          className="flex flex-col items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-5 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50"
+          className="app-secondary-button flex-col gap-2 px-4 py-4 text-sm"
         >
-          <BarChart3 className="h-5 w-5 text-indigo-500" />
+          <BarChart3 className="h-[18px] w-[18px] text-indigo-500" />
           Generate Report
         </Link>
       </div>
@@ -647,35 +669,43 @@ export function DashboardOverviewClient({
   }
 
   return (
-    <div className="space-y-5">
-      {/* Header */}
+    <div className="animate-fade-in-up space-y-6">
+      {/* Greeting */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-zinc-900">
+          <h1 className="text-[28px] font-bold leading-tight tracking-tight text-zinc-900">
             {getGreeting()}{operatorName ? <>, <em className="font-serif not-italic">{operatorName}</em></> : null}
           </h1>
-          <p className="mt-0.5 text-sm text-zinc-500">
+          <p className="mt-1 text-sm text-zinc-500">
             Here&apos;s your portfolio overview for today
           </p>
         </div>
         <button
           type="button"
           onClick={handleRefresh}
-          className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-50 hover:text-zinc-900"
+          className="app-secondary-button gap-2 px-3 py-2 text-sm"
           title="Refresh dashboard"
         >
           <RefreshCcw className={cn('h-3.5 w-3.5', refreshing && 'animate-spin')} />
         </button>
       </div>
 
+      {/* Deadline alert */}
+      <DeadlineAlert count={stats.urgentDeadlineCases} />
+
+      {/* KPI stat cards */}
       <StatCards stats={stats} />
+
+      {/* Pipeline */}
       <PipelineBar stats={stats} />
 
+      {/* Activity + Throughput */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <RecentActivityCard cases={cases} />
         <MonthlyThroughputCard analytics={analytics} />
       </div>
 
+      {/* Quick actions */}
       <QuickActionsCard />
     </div>
   )

@@ -1,6 +1,7 @@
 'use client'
 
-import { useCallback } from 'react'
+import { useCallback, useEffect } from 'react'
+import posthog from 'posthog-js'
 import { loadStripe } from '@stripe/stripe-js'
 import {
   EmbeddedCheckoutProvider,
@@ -13,6 +14,10 @@ const stripePromise = loadStripe(
 )
 
 export default function CheckoutPage() {
+  useEffect(() => {
+    posthog.capture('checkout_started', { plan: 'portfolio_365' })
+  }, [])
+
   const fetchClientSecret = useCallback(() => {
     return fetch('/api/stripe/create-checkout-session', { method: 'POST' })
       .then((res) => res.json())
