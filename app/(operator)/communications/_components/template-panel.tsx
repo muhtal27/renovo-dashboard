@@ -6,12 +6,12 @@ import {
   Pencil,
   Trash2,
   Copy,
+  Mail,
   X,
   Save,
   Variable,
 } from 'lucide-react'
 import { toast } from 'sonner'
-import { StatusBadge, formatDateTime } from '@/app/eot/_components/eot-ui'
 import { EmptyState } from '@/app/operator-ui'
 import { cn } from '@/lib/ui'
 import {
@@ -116,7 +116,7 @@ function TemplateForm({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Deposit Deduction Notice"
-              className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-300 focus:ring-2 focus:ring-emerald-100"
+              className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:ring-2 focus:ring-zinc-100"
             />
           </div>
           <div className="w-48">
@@ -126,7 +126,7 @@ function TemplateForm({
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value as TemplateCategory)}
-              className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 focus:border-emerald-300 focus:ring-2 focus:ring-emerald-100"
+              className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 focus:border-zinc-400 focus:ring-2 focus:ring-zinc-100"
             >
               {TEMPLATE_CATEGORIES.map((c) => (
                 <option key={c.value} value={c.value}>
@@ -146,7 +146,7 @@ function TemplateForm({
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
             placeholder="Optional email subject"
-            className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-300 focus:ring-2 focus:ring-emerald-100"
+            className="mt-1 h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:ring-2 focus:ring-zinc-100"
           />
         </div>
 
@@ -164,7 +164,7 @@ function TemplateForm({
             onChange={(e) => setBody(e.target.value)}
             placeholder="Dear {{tenant_name}},&#10;&#10;We are writing regarding your tenancy at {{property_address}}..."
             rows={10}
-            className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 font-mono text-sm leading-6 text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-300 focus:ring-2 focus:ring-emerald-100"
+            className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 font-mono text-sm leading-6 text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:ring-2 focus:ring-zinc-100"
           />
         </div>
 
@@ -180,7 +180,7 @@ function TemplateForm({
                 key={v.key}
                 type="button"
                 onClick={() => insertVariable(v.key)}
-                className="inline-flex h-7 items-center rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 text-[11px] font-medium text-zinc-600 transition hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700"
+                className="inline-flex h-7 items-center rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 text-[11px] font-medium text-zinc-600 transition hover:border-zinc-300 hover:bg-zinc-100 hover:text-zinc-900"
               >
                 {v.label}
               </button>
@@ -215,84 +215,71 @@ function TemplateForm({
 /*  Template card                                                  */
 /* ────────────────────────────────────────────────────────────── */
 
-const CATEGORY_TONES: Record<TemplateCategory, string> = {
-  general: 'draft',
-  tenant_notice: 'tenant',
-  landlord_update: 'landlord',
-  dispute: 'disputed_issue',
-  deposit: 'review',
-}
-
 function TemplateCard({
   template,
   onEdit,
   onDelete,
   onCopy,
+  onUse,
 }: {
   template: CommunicationTemplate
   onEdit: () => void
   onDelete: () => void
   onCopy: () => void
+  onUse: () => void
 }) {
   const categoryLabel =
     TEMPLATE_CATEGORIES.find((c) => c.value === template.category)?.label ??
     template.category
 
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white transition hover:border-zinc-300">
-      <div className="px-5 py-4">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            <h4 className="text-sm font-semibold text-zinc-950 [overflow-wrap:anywhere]">
-              {template.name}
-            </h4>
-            <div className="mt-2 flex flex-wrap items-center gap-2">
-              <StatusBadge
-                label={categoryLabel}
-                tone={CATEGORY_TONES[template.category] ?? 'draft'}
-              />
-              {!template.is_active ? (
-                <StatusBadge label="Inactive" tone="draft" />
-              ) : null}
-              <span className="text-[10px] text-zinc-400">
-                Updated {formatDateTime(template.updated_at)}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {template.subject ? (
-          <p className="mt-3 text-xs text-zinc-500">
-            Subject: {template.subject}
-          </p>
-        ) : null}
-
-        <p className="mt-2 line-clamp-3 text-sm leading-6 text-zinc-600 [overflow-wrap:anywhere]">
-          {template.body}
-        </p>
+    <div className="rounded-xl border border-zinc-200 bg-white px-5 py-4">
+      <div className="flex items-start justify-between gap-3">
+        <h4 className="text-sm font-semibold text-zinc-950 [overflow-wrap:anywhere]">
+          {template.name}
+        </h4>
+        <span className="inline-flex shrink-0 items-center rounded-md border border-zinc-200 bg-zinc-50 px-2 py-0.5 text-[10px] font-medium text-zinc-600">
+          {categoryLabel}
+        </span>
       </div>
 
-      <div className="flex border-t border-zinc-100/80 px-5 py-2.5">
+      <p className="mt-2 line-clamp-2 text-sm text-zinc-500 [overflow-wrap:anywhere]">
+        {template.subject || template.body}
+      </p>
+
+      <div className="mt-3 flex items-center gap-2">
+        <button
+          type="button"
+          onClick={onUse}
+          className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
+        >
+          <Mail className="h-3 w-3" />
+          Use Template
+        </button>
+        <div className="flex-1" />
         <button
           type="button"
           onClick={onEdit}
-          className="inline-flex items-center gap-1.5 px-2 py-1 text-xs font-medium text-zinc-500 hover:text-zinc-700"
+          className="inline-flex h-7 w-7 items-center justify-center rounded-md text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600"
+          title="Edit"
         >
-          <Pencil className="h-3 w-3" /> Edit
+          <Pencil className="h-3 w-3" />
         </button>
         <button
           type="button"
           onClick={onCopy}
-          className="inline-flex items-center gap-1.5 px-2 py-1 text-xs font-medium text-zinc-500 hover:text-zinc-700"
+          className="inline-flex h-7 w-7 items-center justify-center rounded-md text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600"
+          title="Duplicate"
         >
-          <Copy className="h-3 w-3" /> Duplicate
+          <Copy className="h-3 w-3" />
         </button>
         <button
           type="button"
           onClick={onDelete}
-          className="inline-flex items-center gap-1.5 px-2 py-1 text-xs font-medium text-zinc-500 hover:text-rose-600"
+          className="inline-flex h-7 w-7 items-center justify-center rounded-md text-zinc-400 hover:bg-zinc-100 hover:text-rose-600"
+          title="Delete"
         >
-          <Trash2 className="h-3 w-3" /> Delete
+          <Trash2 className="h-3 w-3" />
         </button>
       </div>
     </div>
@@ -401,7 +388,7 @@ export function TemplatePanel() {
             className={cn(
               'inline-flex h-8 items-center rounded-lg border px-3 text-xs font-medium transition',
               filterCategory === 'all'
-                ? 'border-emerald-600 bg-emerald-600 text-white'
+                ? 'border-zinc-900 bg-zinc-900 text-white'
                 : 'border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50'
             )}
           >
@@ -415,7 +402,7 @@ export function TemplatePanel() {
               className={cn(
                 'inline-flex h-8 items-center rounded-lg border px-3 text-xs font-medium transition',
                 filterCategory === c.value
-                  ? 'border-emerald-600 bg-emerald-600 text-white'
+                  ? 'border-zinc-900 bg-zinc-900 text-white'
                   : 'border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50'
               )}
             >
@@ -436,8 +423,8 @@ export function TemplatePanel() {
 
       {/* Template grid */}
       {loading ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 3 }).map((_, i) => (
+        <div className="grid gap-4 sm:grid-cols-2">
+          {Array.from({ length: 4 }).map((_, i) => (
             <div
               key={i}
               className="skeleton-shimmer rounded-xl border border-zinc-200 bg-white px-5 py-4"
@@ -460,7 +447,7 @@ export function TemplatePanel() {
               <button
                 type="button"
                 onClick={() => setCreating(true)}
-                className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-600 hover:text-emerald-700"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-zinc-600 hover:text-zinc-900"
               >
                 <Plus className="h-3.5 w-3.5" />
                 Create your first template
@@ -469,7 +456,7 @@ export function TemplatePanel() {
           />
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2">
           {filtered.map((template) => (
             <TemplateCard
               key={template.id}
@@ -477,6 +464,10 @@ export function TemplatePanel() {
               onEdit={() => setEditing(template)}
               onDelete={() => handleDelete(template.id)}
               onCopy={() => handleDuplicate(template)}
+              onUse={() => {
+                toast.success(`Template "${template.name}" copied to clipboard.`)
+                navigator.clipboard.writeText(template.body).catch(() => {})
+              }}
             />
           ))}
         </div>
