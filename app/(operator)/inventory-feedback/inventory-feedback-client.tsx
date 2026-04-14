@@ -28,15 +28,15 @@ const INVENTORY_RETURNS: InventoryReturn[] = [
 ]
 
 const STATUS_BADGE: Record<string, string> = {
-  signed: 'border-emerald-200 bg-emerald-50 text-emerald-700',
-  pending: 'border-amber-200 bg-amber-50 text-amber-700',
-  flagged: 'border-rose-200 bg-rose-50 text-rose-700',
+  signed: 'badge-emerald',
+  pending: 'badge-amber',
+  flagged: 'badge-rose',
 }
 
 const CONDITION_BADGE: Record<string, string> = {
-  Good: 'border-emerald-200 bg-emerald-50 text-emerald-700',
-  Fair: 'border-amber-200 bg-amber-50 text-amber-700',
-  Poor: 'border-rose-200 bg-rose-50 text-rose-700',
+  Good: 'badge-emerald',
+  Fair: 'badge-amber',
+  Poor: 'badge-rose',
 }
 
 export function InventoryFeedbackClient() {
@@ -61,7 +61,7 @@ export function InventoryFeedbackClient() {
     <div className="space-y-5">
       {/* Header */}
       <div>
-        <h2 className="text-xl font-semibold tracking-tight text-zinc-900">Inventory Feedback</h2>
+        <h2 className="text-[24px] font-semibold tracking-tight text-zinc-900">Inventory Feedback</h2>
         <p className="mt-1 text-[13px] text-zinc-500">Returned signed inventories and tenant remarks</p>
       </div>
 
@@ -97,12 +97,7 @@ export function InventoryFeedbackClient() {
               key={f.key}
               type="button"
               onClick={() => setStatusFilter(f.key)}
-              className={cn(
-                'rounded-full px-3.5 py-1.5 text-[13px] font-medium transition',
-                statusFilter === f.key
-                  ? 'bg-zinc-900 text-white'
-                  : 'bg-white text-zinc-600 border border-zinc-200 hover:bg-zinc-50'
-              )}
+              className={cn('pill', statusFilter === f.key && 'active')}
             >
               {f.label}
             </button>
@@ -140,12 +135,7 @@ export function InventoryFeedbackClient() {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium text-zinc-900">{shortProperty}</span>
-                    <span
-                      className={cn(
-                        'rounded-full border px-2.5 py-0.5 text-[11px] font-semibold',
-                        STATUS_BADGE[inv.status]
-                      )}
-                    >
+                    <span className={cn('badge', STATUS_BADGE[inv.status])}>
                       {inv.status.charAt(0).toUpperCase() + inv.status.slice(1)}
                     </span>
                   </div>
@@ -161,12 +151,7 @@ export function InventoryFeedbackClient() {
                     </div>
                     <div className="mt-1">
                       {inv.conditionScore ? (
-                        <span
-                          className={cn(
-                            'rounded-full border px-2.5 py-0.5 text-[11px] font-semibold',
-                            CONDITION_BADGE[inv.conditionScore] ?? 'bg-zinc-100 text-zinc-600'
-                          )}
-                        >
+                        <span className={cn('badge', CONDITION_BADGE[inv.conditionScore] ?? 'badge-zinc')}>
                           {inv.conditionScore}
                         </span>
                       ) : (

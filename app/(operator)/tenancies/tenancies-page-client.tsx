@@ -39,21 +39,21 @@ function buildCaseAddress(property: EotCaseListItem['property']): string {
 type ViewMode = 'table' | 'kanban'
 
 const STATUS_META: Record<string, { label: string; badge: string }> = {
-  draft: { label: 'Draft', badge: 'bg-zinc-100 text-zinc-600' },
-  collecting_evidence: { label: 'Collecting', badge: 'bg-sky-50 text-sky-700' },
-  analysis: { label: 'Analysis', badge: 'bg-indigo-50 text-indigo-700' },
-  review: { label: 'Review', badge: 'bg-amber-50 text-amber-700' },
-  draft_sent: { label: 'Draft Sent', badge: 'bg-violet-50 text-violet-700' },
-  ready_for_claim: { label: 'Ready', badge: 'bg-emerald-50 text-emerald-700' },
-  submitted: { label: 'Submitted', badge: 'bg-cyan-50 text-cyan-700' },
-  disputed: { label: 'Disputed', badge: 'bg-rose-50 text-rose-700' },
-  resolved: { label: 'Resolved', badge: 'bg-emerald-50 text-emerald-700' },
+  draft: { label: 'Draft', badge: 'badge-zinc' },
+  collecting_evidence: { label: 'Collecting', badge: 'badge-sky' },
+  analysis: { label: 'Analysis', badge: 'badge-indigo' },
+  review: { label: 'Review', badge: 'badge-amber' },
+  draft_sent: { label: 'Draft Sent', badge: 'badge-violet' },
+  ready_for_claim: { label: 'Ready', badge: 'badge-emerald' },
+  submitted: { label: 'Submitted', badge: 'badge-cyan' },
+  disputed: { label: 'Disputed', badge: 'badge-rose' },
+  resolved: { label: 'Resolved', badge: 'badge-emerald' },
 }
 
 const PRIORITY_BADGE: Record<string, string> = {
-  high: 'bg-rose-50 text-rose-700',
-  medium: 'bg-amber-50 text-amber-700',
-  low: 'bg-zinc-100 text-zinc-600',
+  high: 'badge-rose',
+  medium: 'badge-amber',
+  low: 'badge-zinc',
 }
 
 const WORKFLOW_STEPS: EotCaseStatus[] = [
@@ -148,12 +148,12 @@ function CaseTable({ cases }: { cases: EotCaseListItem[] }) {
                   </td>
                   <td className="text-zinc-700">{c.tenant_name}</td>
                   <td>
-                    <span className={cn('inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold', meta.badge)}>
+                    <span className={cn('badge', meta.badge)}>
                       {meta.label}
                     </span>
                   </td>
                   <td className="hidden md:table-cell">
-                    <span className={cn('inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold', priBadge)}>
+                    <span className={cn('badge', priBadge)}>
                       {c.priority.charAt(0).toUpperCase() + c.priority.slice(1)}
                     </span>
                   </td>
@@ -217,7 +217,7 @@ function KanbanBoard({ cases }: { cases: EotCaseListItem[] }) {
                       <span className="kanban-card-amount">
                         {c.deposit_amount ? formatCurrency(Number(c.deposit_amount)) : '\u2014'}
                       </span>
-                      <span className={cn('inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold', PRIORITY_BADGE[c.priority] ?? PRIORITY_BADGE.low)}>
+                      <span className={cn('badge', PRIORITY_BADGE[c.priority] ?? PRIORITY_BADGE.low)}>
                         {c.priority.charAt(0).toUpperCase() + c.priority.slice(1)}
                       </span>
                     </div>

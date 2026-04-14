@@ -36,7 +36,7 @@ export default async function DepositSchemePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold tracking-tight text-zinc-900">Deposit Schemes</h2>
+        <h2 className="text-[24px] font-semibold tracking-tight text-zinc-900">Deposit Schemes</h2>
         <p className="mt-1 text-[13px] text-zinc-500">
           Approved UK deposit protection schemes by region
         </p>
@@ -56,10 +56,7 @@ export default async function DepositSchemePage() {
               <div key={scheme.name} className="rounded-[10px] border border-zinc-200 bg-white p-5">
                 <h4 className="text-sm font-semibold text-zinc-900">{scheme.name}</h4>
                 <p className="mt-2 text-[13px] text-zinc-500">{scheme.desc}</p>
-                <button
-                  type="button"
-                  className="mt-3 flex items-center gap-1.5 rounded-[10px] border border-zinc-200 bg-white px-3 py-1.5 text-[13px] font-medium text-zinc-700 transition hover:bg-zinc-50"
-                >
+                <button type="button" className="app-secondary-button mt-3">
                   <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
                   </svg>

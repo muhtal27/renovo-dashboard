@@ -163,14 +163,7 @@ function IntegrationsTab() {
               <h4 className="text-sm font-semibold text-zinc-900">{ig.name}</h4>
               <p className="mt-1 text-[13px] text-zinc-500">{ig.desc}</p>
             </div>
-            <span
-              className={cn(
-                'shrink-0 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold',
-                ig.connected
-                  ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-                  : 'border-zinc-200 bg-zinc-100 text-zinc-600'
-              )}
-            >
+            <span className={cn('badge', ig.connected ? 'badge-emerald' : 'badge-zinc')}>
               {ig.status}
             </span>
           </div>

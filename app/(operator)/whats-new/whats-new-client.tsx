@@ -6,10 +6,10 @@ import { cn } from '@/lib/ui'
 type ChangeType = 'added' | 'improved' | 'fixed' | 'removed'
 
 const TYPE_BADGE: Record<ChangeType, string> = {
-  added: 'border-emerald-200 bg-emerald-50 text-emerald-700',
-  improved: 'border-sky-200 bg-sky-50 text-sky-700',
-  fixed: 'border-amber-200 bg-amber-50 text-amber-700',
-  removed: 'border-rose-200 bg-rose-50 text-rose-700',
+  added: 'badge-emerald',
+  improved: 'badge-sky',
+  fixed: 'badge-amber',
+  removed: 'badge-rose',
 }
 
 const TYPE_LABEL: Record<ChangeType, string> = {
@@ -66,7 +66,7 @@ export function WhatsNewClient() {
     <div className="space-y-5">
       {/* Header */}
       <div>
-        <h2 className="text-xl font-semibold tracking-tight text-zinc-900">What&apos;s New</h2>
+        <h2 className="text-[24px] font-semibold tracking-tight text-zinc-900">What&apos;s New</h2>
         <p className="mt-1 text-[13px] text-zinc-500">Release notes and changelog</p>
       </div>
 
@@ -77,12 +77,7 @@ export function WhatsNewClient() {
             key={f}
             type="button"
             onClick={() => setFilter(f)}
-            className={cn(
-              'rounded-full px-3.5 py-1.5 text-[13px] font-medium transition',
-              filter === f
-                ? 'bg-zinc-900 text-white'
-                : 'bg-white text-zinc-600 border border-zinc-200 hover:bg-zinc-50'
-            )}
+            className={cn('pill', filter === f && 'active')}
           >
             {f === 'all' ? 'All' : TYPE_LABEL[f as ChangeType]}
           </button>
@@ -102,9 +97,7 @@ export function WhatsNewClient() {
             <div key={release.version} className="rounded-[10px] border border-zinc-200 bg-white p-5">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <span className="inline-block rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700">
-                    v{release.version}
-                  </span>
+                  <span className="badge badge-emerald font-bold">v{release.version}</span>
                   <h3 className="mt-2 text-base font-semibold text-zinc-900">{release.title}</h3>
                 </div>
                 <span className="shrink-0 text-[13px] text-zinc-500">{release.date}</span>
@@ -113,12 +106,7 @@ export function WhatsNewClient() {
               <div className="mt-4 space-y-3">
                 {changes.map((change, i) => (
                   <div key={i} className="flex items-start gap-2">
-                    <span
-                      className={cn(
-                        'mt-0.5 shrink-0 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold',
-                        TYPE_BADGE[change.type]
-                      )}
-                    >
+                    <span className={cn('badge mt-0.5 shrink-0', TYPE_BADGE[change.type])}>
                       {TYPE_LABEL[change.type]}
                     </span>
                     <span className="text-[13px] text-zinc-700">{change.text}</span>

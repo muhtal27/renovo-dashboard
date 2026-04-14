@@ -92,9 +92,7 @@ export function BillingPageClient() {
             >
               {plan.current ? (
                 <div className="mb-2 flex justify-end">
-                  <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700">
-                    Current Plan
-                  </span>
+                  <span className="badge badge-emerald">Current Plan</span>
                 </div>
               ) : (
                 <div className="h-[30px]" />
@@ -305,9 +303,7 @@ export function BillingPageClient() {
               <div className="text-[13px] font-medium text-zinc-900">Visa ending in 4242</div>
               <div className="text-[11px] text-zinc-500">Expires 12/2027</div>
             </div>
-            <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700">
-              Default
-            </span>
+            <span className="badge badge-emerald">Default</span>
           </div>
         )}
       </div>

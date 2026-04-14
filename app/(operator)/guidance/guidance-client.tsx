@@ -136,15 +136,11 @@ export function GuidanceClient() {
             >
               <div className="flex items-start justify-between gap-3">
                 <h4 className="text-sm font-semibold text-zinc-900">{article.title}</h4>
-                <span className="shrink-0 rounded-full border border-zinc-200 bg-zinc-100 px-2.5 py-0.5 text-[11px] font-medium text-zinc-600">
-                  {article.region}
-                </span>
+                <span className="badge badge-zinc shrink-0">{article.region}</span>
               </div>
               <p className="mt-2 text-[13px] text-zinc-500">{article.summary}</p>
               <div className="mt-3 flex items-center justify-between">
-                <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700">
-                  {article.category}
-                </span>
+                <span className="badge badge-emerald">{article.category}</span>
                 <span className="flex items-center gap-1 text-[11px] font-medium text-zinc-400 group-hover:text-emerald-600">
                   Read more <ArrowRight className="h-3 w-3" />
                 </span>

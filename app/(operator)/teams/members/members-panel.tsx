@@ -31,15 +31,11 @@ const ROLE_OPTIONS = [
 ] as const
 
 function roleBadgeClass(role: string) {
-  return role === 'admin'
-    ? 'border-violet-200 bg-violet-50 text-violet-700'
-    : 'border-zinc-200 bg-zinc-100 text-zinc-700'
+  return role === 'admin' ? 'badge-violet' : 'badge-zinc'
 }
 
 function statusBadgeClass(status: string) {
-  return status === 'active'
-    ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-    : 'border-amber-200 bg-amber-50 text-amber-700'
+  return status === 'active' ? 'badge-emerald' : 'badge-amber'
 }
 
 function getInitials(name: string | null, email: string | null) {
@@ -232,7 +228,7 @@ export function MembersPanel() {
       {/* Page header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-semibold tracking-tight text-zinc-900">Teams</h2>
+          <h2 className="text-[24px] font-semibold tracking-tight text-zinc-900">Teams</h2>
           <p className="mt-1 text-sm text-zinc-500">Manage members and team groups</p>
         </div>
         {tab === 'members' ? (
@@ -409,40 +405,40 @@ export function MembersPanel() {
           </div>
         ) : (
           <div className="mt-4 overflow-hidden rounded-[10px] border border-zinc-200 bg-white">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-zinc-50">
+            <table className="data-table">
+              <thead>
                 <tr>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Name</th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Email</th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Role</th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Status</th>
-                  <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Cases</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Status</th>
+                  <th className="text-right">Cases</th>
                 </tr>
               </thead>
               <tbody>
                 {members.map((member) => (
                   <tr
                     key={member.membershipId}
-                    className="group border-t border-zinc-100 transition hover:bg-zinc-50"
+                    className="group transition hover:bg-zinc-50"
                   >
-                    <td className="px-4 py-3">
+                    <td>
                       <div className="flex items-center gap-2">
                         <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-[10px] font-semibold text-emerald-700">
                           {getInitials(member.fullName, member.email)}
                         </div>
-                        <span className="text-[13px] font-medium text-zinc-900">
+                        <span className="font-medium text-zinc-900">
                           {member.fullName ?? member.email ?? 'Unknown'}
                         </span>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-[13px] text-zinc-500">
+                    <td className="text-zinc-500">
                       {member.email ?? '—'}
                     </td>
-                    <td className="px-4 py-3">
+                    <td>
                       <select
                         value={member.role}
                         onChange={(e) => handleRoleChange(member.membershipId, e.target.value)}
-                        className={`inline-flex cursor-pointer items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold leading-[1.6] outline-none transition hover:opacity-80 ${roleBadgeClass(member.role)}`}
+                        className={`badge cursor-pointer outline-none transition hover:opacity-80 ${roleBadgeClass(member.role)}`}
                       >
                         {ROLE_OPTIONS.map((opt) => (
                           <option key={opt.value} value={opt.value}>
@@ -451,12 +447,12 @@ export function MembersPanel() {
                         ))}
                       </select>
                     </td>
-                    <td className="px-4 py-3">
-                      <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold leading-[1.6] ${statusBadgeClass(member.status)}`}>
+                    <td>
+                      <span className={`badge ${statusBadgeClass(member.status)}`}>
                         {member.status.charAt(0).toUpperCase() + member.status.slice(1)}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-right text-[13px] font-semibold tabular-nums text-zinc-900">
+                    <td className="text-right font-semibold tabular-nums text-zinc-900">
                       —
                     </td>
                   </tr>

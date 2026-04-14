@@ -13,7 +13,7 @@ export default async function AdminPage() {
     <div className="space-y-5 animate-fade-in-up">
       {/* Page heading */}
       <div>
-        <h2 className="text-xl font-semibold tracking-tight text-zinc-900">Admin</h2>
+        <h2 className="text-[24px] font-semibold tracking-tight text-zinc-900">Admin</h2>
         <p className="mt-1 text-sm text-zinc-500">Case allocation and workspace management</p>
       </div>
 

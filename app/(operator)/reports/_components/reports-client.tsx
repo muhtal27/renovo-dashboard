@@ -161,14 +161,26 @@ export function ReportsClient({
           <h1 className="text-[24px] font-semibold tracking-tight text-zinc-900">Reports</h1>
           <p className="mt-1 text-sm text-zinc-500">Portfolio analytics and performance</p>
         </div>
-        <button
-          type="button"
-          onClick={handleExportCSV}
-          className="app-secondary-button gap-1.5 px-4 py-2 text-[13px]"
-        >
-          <Download className="h-3.5 w-3.5" />
-          Export CSV
-        </button>
+        <div className="flex items-center gap-2">
+          <select
+            value={days}
+            onChange={(e) => setDays(Number(e.target.value))}
+            className="h-[34px] rounded-[10px] border border-zinc-200 bg-white px-3 text-[13px] text-zinc-700 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
+          >
+            <option value={30}>Last 30 days</option>
+            <option value={90}>Last quarter</option>
+            <option value={180}>Last 6 months</option>
+            <option value={365}>Year to date</option>
+          </select>
+          <button
+            type="button"
+            onClick={handleExportCSV}
+            className="app-secondary-button gap-1.5 px-4 py-2 text-[13px]"
+          >
+            <Download className="h-3.5 w-3.5" />
+            Export CSV
+          </button>
+        </div>
       </div>
 
       {/* Tab bar */}

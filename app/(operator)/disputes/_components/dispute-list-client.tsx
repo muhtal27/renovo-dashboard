@@ -35,9 +35,9 @@ const PRIORITY_BORDER: Record<string, string> = {
 }
 
 const PRIORITY_BADGE: Record<string, string> = {
-  high: 'bg-rose-50 text-rose-700',
-  medium: 'bg-amber-50 text-amber-700',
-  low: 'bg-zinc-100 text-zinc-600',
+  high: 'badge-rose',
+  medium: 'badge-amber',
+  low: 'badge-zinc',
 }
 
 type PriorityView = 'all' | 'high' | 'medium' | 'low'
@@ -269,7 +269,7 @@ export function DisputeListClient({
                         ) : null}
                       </div>
                       <div className="flex shrink-0 items-center gap-2">
-                        <span className={cn('badge', priBadge.includes('rose') ? 'badge-rose' : priBadge.includes('amber') ? 'badge-amber' : 'badge-zinc')}>
+                        <span className={cn('badge', priBadge)}>
                           {formatEnumLabel(c.priority)}
                         </span>
                         <span className="badge badge-rose">Disputed</span>

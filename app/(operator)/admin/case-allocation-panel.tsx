@@ -28,25 +28,16 @@ function assigneeLabel(assignee: Assignee) {
 
 function statusBadgeClass(status: string) {
   switch (status) {
-    case 'draft':
-      return 'border-zinc-200 bg-zinc-100 text-zinc-700'
-    case 'collecting_evidence':
-      return 'border-sky-200 bg-sky-50 text-sky-700'
-    case 'analysis':
-      return 'border-indigo-200 bg-indigo-50 text-indigo-700'
+    case 'draft': return 'badge-zinc'
+    case 'collecting_evidence': return 'badge-sky'
+    case 'analysis': return 'badge-indigo'
     case 'review':
-    case 'draft_sent':
-      return 'border-amber-200 bg-amber-50 text-amber-700'
-    case 'ready_for_claim':
-      return 'border-emerald-200 bg-emerald-50 text-emerald-700'
-    case 'submitted':
-      return 'border-cyan-200 bg-cyan-50 text-cyan-700'
-    case 'disputed':
-      return 'border-rose-200 bg-rose-50 text-rose-700'
-    case 'resolved':
-      return 'border-emerald-200 bg-emerald-50 text-emerald-700'
-    default:
-      return 'border-zinc-200 bg-zinc-100 text-zinc-700'
+    case 'draft_sent': return 'badge-amber'
+    case 'ready_for_claim': return 'badge-emerald'
+    case 'submitted': return 'badge-cyan'
+    case 'disputed': return 'badge-rose'
+    case 'resolved': return 'badge-emerald'
+    default: return 'badge-zinc'
   }
 }
 
@@ -186,35 +177,35 @@ export function CaseAllocationPanel() {
           <p className="py-6 text-center text-sm text-zinc-400">No cases found.</p>
         ) : (
           <div className="overflow-hidden rounded-[10px] border border-zinc-200">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-zinc-50">
+            <table className="data-table">
+              <thead>
                 <tr>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Case</th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Property</th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Status</th>
-                  <th className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">Assigned To</th>
-                  <th className="px-4 py-2.5"></th>
+                  <th>Case</th>
+                  <th>Property</th>
+                  <th>Status</th>
+                  <th>Assigned To</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
                 {cases.map((caseItem) => {
                   const isAssigning = assigning === caseItem.id
                   return (
-                    <tr key={caseItem.id} className="border-t border-zinc-100 transition hover:bg-zinc-50">
-                      <td className="px-4 py-3 text-[13px] font-medium text-zinc-900">
+                    <tr key={caseItem.id} className="transition hover:bg-zinc-50">
+                      <td className="font-medium text-zinc-900">
                         <Link href={`/operator/cases/${caseItem.id}`} className="hover:underline">
                           {caseItem.id.slice(0, 12)}
                         </Link>
                       </td>
-                      <td className="px-4 py-3 text-[13px] text-zinc-700">
+                      <td className="text-zinc-700">
                         {buildAddress(caseItem.property).split(',')[0]}
                       </td>
-                      <td className="px-4 py-3">
-                        <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold leading-[1.6] ${statusBadgeClass(caseItem.status)}`}>
+                      <td>
+                        <span className={`badge ${statusBadgeClass(caseItem.status)}`}>
                           {formatEnumLabel(caseItem.status)}
                         </span>
                       </td>
-                      <td className="px-4 py-3">
+                      <td>
                         <select
                           value={caseItem.assigned_to ?? ''}
                           disabled={isAssigning}
@@ -239,7 +230,7 @@ export function CaseAllocationPanel() {
                           ))}
                         </select>
                       </td>
-                      <td className="px-4 py-3"></td>
+                      <td></td>
                     </tr>
                   )
                 })}
