@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { FormEvent, useEffect, useMemo, useRef, useState } from 'react'
+import { FormEvent, lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import {
   ArrowLeft,
   ChevronDown,
@@ -65,6 +65,31 @@ import {
   getCaseProgress,
 } from '@/app/eot/_components/eot-ui'
 import { getEotUiErrorMessage } from '@/lib/eot-errors'
+import { WorkspaceStepProgress } from './workspace-step-progress'
+import type { WorkspaceStep } from '@/lib/mock/report-fixtures'
+
+// Lazy-loaded step panels (non-critical for initial paint)
+const WorkspaceInventoryPanel = lazy(() =>
+  import('./workspace-inventory-panel').then((m) => ({ default: m.WorkspaceInventoryPanel }))
+)
+const WorkspaceReadingsPanel = lazy(() =>
+  import('./workspace-readings-panel').then((m) => ({ default: m.WorkspaceReadingsPanel }))
+)
+const WorkspaceAnalysisPanel = lazy(() =>
+  import('./workspace-analysis-panel').then((m) => ({ default: m.WorkspaceAnalysisPanel }))
+)
+const DefectReviewPanel = lazy(() =>
+  import('./workspace-defect-review-panel').then((m) => ({ default: m.DefectReviewPanel }))
+)
+const WorkspaceDeductionsPanel = lazy(() =>
+  import('./workspace-deductions-panel').then((m) => ({ default: m.WorkspaceDeductionsPanel }))
+)
+const WorkspaceNegotiationPanel = lazy(() =>
+  import('./workspace-negotiation-panel').then((m) => ({ default: m.WorkspaceNegotiationPanel }))
+)
+const WorkspaceRefundPanel = lazy(() =>
+  import('./workspace-refund-panel').then((m) => ({ default: m.WorkspaceRefundPanel }))
+)
 
 type WorkspaceClientProps = {
   caseId: string
@@ -542,6 +567,10 @@ export function EotWorkspaceClient({
     createInitialSectionStates(caseId)
   )
   const sectionStateRef = useRef(sections)
+
+  // 7-step workflow state
+  const [activeStep, setActiveStep] = useState<WorkspaceStep>('inventory')
+  const [completedSteps, setCompletedSteps] = useState<Set<WorkspaceStep>>(new Set())
 
   const [selectedEvidenceId, setSelectedEvidenceId] = useState<string | null>(null)
   const [evidenceForm, setEvidenceForm] = useState<EvidenceFormState>(
@@ -1163,6 +1192,52 @@ export function EotWorkspaceClient({
           <ProgressBar value={progress} className="w-[140px]" />
         </div>
       </div>
+
+      {/* ── 7-step workflow progress ── */}
+      <div className="overflow-x-auto border-b border-zinc-200 py-3">
+        <WorkspaceStepProgress
+          currentStep={activeStep}
+          completedSteps={completedSteps}
+          onStepClick={(step) => setActiveStep(step)}
+        />
+      </div>
+
+      {/* ── Lazy-loaded step panels ── */}
+      {activeStep === 'inventory' && (
+        <Suspense fallback={<SkeletonPanel className="h-48" />}>
+          <WorkspaceInventoryPanel />
+        </Suspense>
+      )}
+      {activeStep === 'readings' && (
+        <Suspense fallback={<SkeletonPanel className="h-48" />}>
+          <WorkspaceReadingsPanel />
+        </Suspense>
+      )}
+      {activeStep === 'analysis' && (
+        <Suspense fallback={<SkeletonPanel className="h-48" />}>
+          <WorkspaceAnalysisPanel onComplete={() => setCompletedSteps((prev) => new Set([...prev, 'analysis']))} />
+        </Suspense>
+      )}
+      {activeStep === 'review' && (
+        <Suspense fallback={<SkeletonPanel className="h-48" />}>
+          <DefectReviewPanel />
+        </Suspense>
+      )}
+      {activeStep === 'deductions' && (
+        <Suspense fallback={<SkeletonPanel className="h-48" />}>
+          <WorkspaceDeductionsPanel />
+        </Suspense>
+      )}
+      {activeStep === 'negotiation' && (
+        <Suspense fallback={<SkeletonPanel className="h-48" />}>
+          <WorkspaceNegotiationPanel />
+        </Suspense>
+      )}
+      {activeStep === 'refund' && (
+        <Suspense fallback={<SkeletonPanel className="h-48" />}>
+          <WorkspaceRefundPanel />
+        </Suspense>
+      )}
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.55fr)_280px]">
         <div className="space-y-4">

@@ -13,6 +13,14 @@ import { AnalyticsResolutionTime } from './analytics-resolution-time'
 import { AnalyticsClaimRecovery } from './analytics-claim-recovery'
 import { AnalyticsTeamWorkload } from './analytics-team-workload'
 import { AnalyticsIntegrationHealth } from './analytics-integration-health'
+import { AnalyticsAiAccuracy } from './analytics-ai-accuracy'
+import { AnalyticsSlaMetrics } from './analytics-sla-metrics'
+import { AnalyticsRecoveryDetail } from './analytics-recovery-detail'
+import {
+  MOCK_AI_ACCURACY,
+  MOCK_SLA,
+  MOCK_RECOVERY_BY_SCHEME,
+} from '@/lib/mock/report-fixtures'
 import {
   formatCurrency,
   formatEnumLabel,
@@ -94,6 +102,11 @@ function StatusDistribution({
     </div>
   )
 }
+
+/* ── Pre-computed recovery totals (static mock data) ─────────── */
+
+const RECOVERY_TOTAL_CLAIMED = MOCK_RECOVERY_BY_SCHEME.reduce((s, r) => s + r.claimed, 0)
+const RECOVERY_TOTAL_AWARDED = MOCK_RECOVERY_BY_SCHEME.reduce((s, r) => s + r.awarded, 0)
 
 /* ────────────────────────────────────────────────────────────── */
 /*  Main component                                                */
@@ -309,100 +322,21 @@ export function ReportsClient({
 
           {/* ── Recovery Analytics tab ── */}
           {activeTab === 'recovery-analytics' && (
-            <div className="grid gap-4 xl:grid-cols-2">
-              <div className="stat-card">
-                <h4 className="mb-4 text-sm font-semibold text-zinc-900">Claimed vs Awarded</h4>
-                <div className="space-y-3">
-                  {performanceRows.length > 0 ? performanceRows.slice(0, 10).map((row) => (
-                    <div key={row.case_id} className="flex items-center justify-between">
-                      <span className="text-[13px] text-zinc-700 truncate max-w-[200px]">{row.property_name || row.case_id.slice(0, 8)}</span>
-                      <div className="flex items-center gap-3">
-                        <span className="text-[11px] text-zinc-500">Claimed: {row.claim_total_amount ? formatCurrency(row.claim_total_amount) : '\u2014'}</span>
-                        <span className="text-[11px] font-medium text-emerald-600">{row.status === 'resolved' ? 'Resolved' : formatEnumLabel(row.status)}</span>
-                      </div>
-                    </div>
-                  )) : (
-                    <p className="py-6 text-center text-sm text-zinc-400">No recovery data available.</p>
-                  )}
-                </div>
-              </div>
-              <div className="stat-card">
-                <h4 className="mb-4 text-sm font-semibold text-zinc-900">By Scheme Breakdown</h4>
-                <p className="py-6 text-center text-sm text-zinc-400">Scheme-level recovery analytics will be available when more data is collected.</p>
-              </div>
-            </div>
+            <AnalyticsRecoveryDetail
+              schemes={MOCK_RECOVERY_BY_SCHEME}
+              totalClaimed={RECOVERY_TOTAL_CLAIMED}
+              totalAwarded={RECOVERY_TOTAL_AWARDED}
+            />
           )}
 
           {/* ── AI Accuracy tab ── */}
           {activeTab === 'ai-accuracy' && (
-            <div className="space-y-4">
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                <div className="stat-card">
-                  <span className="stat-label">Agreement Rate</span>
-                  <div className="stat-value text-emerald-600">&mdash;</div>
-                  <p className="mt-1 text-xs text-zinc-500">AI vs operator consensus</p>
-                </div>
-                <div className="stat-card">
-                  <span className="stat-label">Overrides</span>
-                  <div className="stat-value">&mdash;</div>
-                  <p className="mt-1 text-xs text-zinc-500">Operator-overridden AI decisions</p>
-                </div>
-                <div className="stat-card">
-                  <span className="stat-label">Avg Confidence</span>
-                  <div className="stat-value">&mdash;</div>
-                  <p className="mt-1 text-xs text-zinc-500">Mean AI confidence score</p>
-                </div>
-                <div className="stat-card">
-                  <span className="stat-label">Improvement Trend</span>
-                  <div className="stat-value">&mdash;</div>
-                  <p className="mt-1 text-xs text-zinc-500">30-day improvement</p>
-                </div>
-              </div>
-              <div className="stat-card">
-                <h4 className="mb-4 text-sm font-semibold text-zinc-900">AI Accuracy Insights</h4>
-                <div className="rounded-md border-l-[3px] border-l-sky-500 bg-sky-50 px-4 py-3">
-                  <p className="text-sm font-medium text-sky-900">AI accuracy tracking is building</p>
-                  <p className="mt-1 text-[13px] text-sky-700">
-                    As more cases are reviewed and operators make decisions, AI accuracy metrics will populate here.
-                    The system tracks agreement rates, override patterns, and confidence calibration.
-                  </p>
-                </div>
-              </div>
-            </div>
+            <AnalyticsAiAccuracy data={MOCK_AI_ACCURACY} />
           )}
 
           {/* ── SLA Metrics tab ── */}
           {activeTab === 'sla' && (
-            <div className="space-y-4">
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                <div className="stat-card">
-                  <span className="stat-label">SLA Met</span>
-                  <div className="stat-value text-emerald-600">&mdash;</div>
-                  <p className="mt-1 text-xs text-zinc-500">Within target time</p>
-                </div>
-                <div className="stat-card">
-                  <span className="stat-label">SLA Missed</span>
-                  <div className="stat-value text-rose-600">&mdash;</div>
-                  <p className="mt-1 text-xs text-zinc-500">Exceeded target time</p>
-                </div>
-                <div className="stat-card">
-                  <span className="stat-label">Pipeline Value</span>
-                  <div className="stat-value">&mdash;</div>
-                  <p className="mt-1 text-xs text-zinc-500">Total deposits in pipeline</p>
-                </div>
-                <div className="stat-card">
-                  <span className="stat-label">Projected Recovery</span>
-                  <div className="stat-value text-emerald-600">&mdash;</div>
-                  <p className="mt-1 text-xs text-zinc-500">Based on historical rate</p>
-                </div>
-              </div>
-              <div className="stat-card">
-                <h4 className="mb-4 text-sm font-semibold text-zinc-900">SLA Performance</h4>
-                <p className="py-6 text-center text-sm text-zinc-400">
-                  SLA performance tracking will be available when target times are configured in Settings.
-                </p>
-              </div>
-            </div>
+            <AnalyticsSlaMetrics data={MOCK_SLA} />
           )}
         </div>
       )}
