@@ -16,6 +16,229 @@ export type EotIssueStatus = 'open' | 'resolved' | 'disputed'
 export type EotRecommendationDecision = 'charge' | 'no_charge' | 'partial'
 export type EotMessageSenderType = 'manager' | 'landlord' | 'tenant'
 
+// ── Workspace step / workflow types ─────────────────────────────
+
+export type WorkspaceStep =
+  | 'inventory'
+  | 'readings'
+  | 'analysis'
+  | 'review'
+  | 'deductions'
+  | 'negotiation'
+  | 'refund'
+
+export type WorkspaceStepDef = {
+  key: WorkspaceStep
+  label: string
+  shortLabel: string
+}
+
+export const WORKSPACE_STEPS: WorkspaceStepDef[] = [
+  { key: 'inventory', label: 'Inventory', shortLabel: 'Inv' },
+  { key: 'readings', label: 'Readings', shortLabel: 'Read' },
+  { key: 'analysis', label: 'Analysis', shortLabel: 'AI' },
+  { key: 'review', label: 'Review', shortLabel: 'Rev' },
+  { key: 'deductions', label: 'Deductions', shortLabel: 'Ded' },
+  { key: 'negotiation', label: 'Negotiation', shortLabel: 'Neg' },
+  { key: 'refund', label: 'Refund', shortLabel: 'Ref' },
+]
+
+export type EotWorkflowStatus = {
+  id: string
+  case_id: string
+  active_step: WorkspaceStep
+  completed_steps: WorkspaceStep[]
+  updated_by: string | null
+  updated_at: string
+}
+
+// ── Liability ───────────────────────────────────────────────────
+
+export type EotLiability = 'tenant' | 'shared' | 'landlord'
+
+// ── Defect (checkout_defects mapped to frontend) ────────────────
+
+export type EotDefect = {
+  id: string
+  case_id: string
+  room_id: string
+  room_name: string
+  title: string
+  description: string
+  defect_type: 'damage' | 'cleaning' | 'maintenance'
+  severity: EotIssueSeverity
+  checkin_condition: string | null
+  checkout_condition: string | null
+  ai_liability: EotLiability | null
+  operator_liability: EotLiability | null
+  estimated_cost: number | null
+  adjusted_cost: number | null
+  excluded: boolean
+  reviewed: boolean
+  reviewed_at: string | null
+  reviewed_by: string | null
+  ai_confidence: number | null
+  ai_reasoning: string | null
+  expected_lifespan: number | null
+  age_at_checkout: number | null
+  evidence_quality: 'good' | 'fair' | 'poor' | null
+  created_at: string
+  updated_at: string
+}
+
+// ── AI recommendation (first-class stored record) ───────────────
+
+export type EotAIRecommendation = {
+  id: string
+  case_id: string
+  defect_id: string | null
+  issue_id: string | null
+  recommendation_type: 'liability' | 'charge' | 'no_charge' | 'partial'
+  confidence: number
+  reasoning: string
+  model_id: string
+  model_version: string
+  generated_at: string
+  operator_override: EotLiability | null
+  operator_override_reason: string | null
+  operator_override_at: string | null
+  operator_override_by: string | null
+  final_outcome: EotLiability | null
+  final_outcome_at: string | null
+  metadata: Record<string, unknown> | null
+  created_at: string
+  updated_at: string
+}
+
+// ── Negotiation ─────────────────────────────────────────────────
+
+export type EotNegotiationStatus = 'pending' | 'disputed' | 'agreed'
+
+export type EotNegotiationItem = {
+  id: string
+  case_id: string
+  description: string
+  proposed_amount: number
+  responded_amount: number | null
+  status: EotNegotiationStatus
+  tenant_comment: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type EotNegotiationMessage = {
+  id: string
+  case_id: string
+  sender_role: 'operator' | 'tenant' | 'landlord'
+  sender_name: string
+  content: string
+  sent_at: string
+}
+
+// ── Draft (editable letter sections) ────────────────────────────
+
+export type EotDraftSection = {
+  id: string
+  case_id: string
+  section_key: string
+  title: string
+  content: string
+  sort_order: number
+  updated_at: string
+}
+
+// ── Utility readings / keys ─────────────────────────────────────
+
+export type EotUtilityReading = {
+  id: string
+  case_id: string
+  utility_type: string
+  reading_checkin: string | null
+  reading_checkout: string | null
+  usage: string | null
+  unit: string
+  meter_location: string | null
+}
+
+export type EotKeySet = {
+  id: string
+  case_id: string
+  set_name: string
+  key_count: number
+  status: 'returned' | 'outstanding'
+  notes: string | null
+}
+
+// ── Inventory documents ─────────────────────────────────────────
+
+export type EotInventoryDocumentStatus = 'uploaded' | 'pending' | 'missing'
+export type EotInventoryDocumentType = 'checkin' | 'checkout' | 'schedule' | 'supporting'
+
+export type EotInventoryDocument = {
+  id: string
+  case_id: string
+  name: string
+  document_type: EotInventoryDocumentType
+  status: EotInventoryDocumentStatus
+  file_url: string | null
+  uploaded_at: string | null
+  page_count: number | null
+}
+
+// ── Evidence photos (persisted to Supabase Storage) ─────────────
+
+export type EotEvidencePhoto = {
+  id: string
+  case_id: string
+  name: string
+  room: string | null
+  file_url: string
+  thumbnail_url: string | null
+  type: EotEvidenceType
+  uploaded_by: string | null
+  created_at: string
+}
+
+// ── Audit event logging ─────────────────────────────────────────
+
+export type EotAuditEventType =
+  | 'evidence_uploaded'
+  | 'evidence_deleted'
+  | 'defect_liability_changed'
+  | 'defect_cost_adjusted'
+  | 'defect_excluded'
+  | 'defect_reviewed'
+  | 'workflow_step_changed'
+  | 'draft_section_saved'
+  | 'negotiation_message_sent'
+  | 'refund_submitted'
+  | 'document_uploaded'
+  | 'document_deleted'
+  | 'ai_recommendation_generated'
+  | 'ai_recommendation_overridden'
+
+export type EotAuditEvent = {
+  case_id: string
+  event_type: EotAuditEventType
+  description: string
+  performed_by: string | null
+  metadata?: Record<string, unknown>
+}
+
+// ── Refund calculation ──────────────────────────────────────────
+
+export type EotRefundSummary = {
+  deposit_held: number
+  agreed_deductions: number
+  disputed_deductions: number
+  refund_to_tenant: number
+  line_items: Array<{
+    description: string
+    amount: number
+    status: EotNegotiationStatus
+  }>
+}
+
 export type EotTenancyListItem = {
   id: string
   property: {
@@ -398,4 +621,51 @@ export type EotAnalyticsDashboard = {
   claim_recovery: EotClaimRecoveryMetrics
   team_workload: EotTeamMemberWorkload[]
   integration_health: EotIntegrationHealthSummary
+}
+
+// ── Workspace mutation inputs ───────────────────────────────────
+
+export type UpdateDefectInput = {
+  defect_id: string
+  operator_liability?: EotLiability | null
+  adjusted_cost?: number | null
+  excluded?: boolean
+  reviewed?: boolean
+}
+
+export type UpdateWorkflowInput = {
+  case_id: string
+  active_step: WorkspaceStep
+  completed_steps: WorkspaceStep[]
+}
+
+export type SaveNegotiationMessageInput = {
+  case_id: string
+  sender_role: 'operator' | 'tenant' | 'landlord'
+  sender_name: string
+  content: string
+}
+
+export type SaveDraftSectionInput = {
+  case_id: string
+  section_key: string
+  title: string
+  content: string
+  sort_order: number
+}
+
+// ── Composite workspace data for step panels ────────────────────
+
+export type EotWorkspaceStepData = {
+  defects: EotDefect[]
+  workflow: EotWorkflowStatus | null
+  utilities: EotUtilityReading[]
+  keys: EotKeySet[]
+  negotiation_items: EotNegotiationItem[]
+  negotiation_messages: EotNegotiationMessage[]
+  draft_sections: EotDraftSection[]
+  refund: EotRefundSummary | null
+  ai_recommendations: EotAIRecommendation[]
+  inventory_documents: EotInventoryDocument[]
+  evidence_photos: EotEvidencePhoto[]
 }

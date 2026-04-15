@@ -13,7 +13,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/ui'
 import { StatusBadge, formatCurrency } from '@/app/eot/_components/eot-ui'
-import type { WorkspaceDefect } from '@/lib/mock/report-fixtures'
+import type { EotDefect, EotLiability } from '@/lib/eot-types'
 
 /* ── Confidence indicator ─────────────────────────────────────── */
 
@@ -40,7 +40,7 @@ function ConfidenceBadge({ confidence }: { confidence: number }) {
 
 /* ── Liability selector ───────────────────────────────────────── */
 
-const LIABILITY_OPTIONS: Array<{ value: WorkspaceDefect['aiLiability']; label: string }> = [
+const LIABILITY_OPTIONS: Array<{ value: EotLiability; label: string }> = [
   { value: 'tenant', label: 'Tenant' },
   { value: 'shared', label: 'Shared' },
   { value: 'landlord', label: 'Landlord' },
@@ -51,9 +51,9 @@ function LiabilitySelector({
   operatorLiability,
   onSelect,
 }: {
-  aiLiability: WorkspaceDefect['aiLiability']
-  operatorLiability: WorkspaceDefect['operatorLiability']
-  onSelect: (value: WorkspaceDefect['aiLiability']) => void
+  aiLiability: EotLiability | null
+  operatorLiability: EotLiability | null
+  onSelect: (value: EotLiability) => void
 }) {
 
   const effective = operatorLiability ?? aiLiability
@@ -176,8 +176,8 @@ function CostDisplay({
 /* ── Defect review card (memoized) ───────────────────────────── */
 
 type DefectCardProps = {
-  defect: WorkspaceDefect
-  onLiabilityChange: (id: string, liability: WorkspaceDefect['aiLiability']) => void
+  defect: EotDefect
+  onLiabilityChange: (id: string, liability: EotLiability) => void
   onCostAdjust: (id: string, cost: number | null) => void
   onToggleExclude: (id: string) => void
   onMarkReviewed: (id: string) => void
@@ -207,12 +207,12 @@ export const DefectReviewCard = memo(function DefectReviewCard({
             <h4 className="text-[13px] font-semibold text-zinc-900">
               {defect.title}
             </h4>
-            <StatusBadge label={defect.type} tone={defect.type === 'damage' ? 'high' : defect.type === 'cleaning' ? 'medium' : 'low'} />
+            <StatusBadge label={defect.defect_type} tone={defect.defect_type === 'damage' ? 'high' : defect.defect_type === 'cleaning' ? 'medium' : 'low'} />
             <StatusBadge label={defect.severity} tone={defect.severity} />
-            <ConfidenceBadge confidence={defect.aiConfidence} />
+            {defect.ai_confidence != null && <ConfidenceBadge confidence={defect.ai_confidence} />}
           </div>
           <p className="mt-1 text-xs text-zinc-500">
-            {defect.room} &bull; Evidence: {defect.evidenceQuality}
+            {defect.room_name} &bull; Evidence: {defect.evidence_quality ?? 'N/A'}
           </p>
         </div>
 
@@ -263,7 +263,7 @@ export const DefectReviewCard = memo(function DefectReviewCard({
                 Check-in
               </p>
               <p className="mt-0.5 text-sm font-medium text-zinc-900">
-                {defect.checkinCondition}
+                {defect.checkin_condition ?? 'N/A'}
               </p>
             </div>
             <div className="rounded-lg bg-zinc-50 px-3 py-2">
@@ -271,7 +271,7 @@ export const DefectReviewCard = memo(function DefectReviewCard({
                 Check-out
               </p>
               <p className="mt-0.5 text-sm font-medium text-zinc-900">
-                {defect.checkoutCondition}
+                {defect.checkout_condition ?? 'N/A'}
               </p>
             </div>
           </div>
@@ -283,11 +283,11 @@ export const DefectReviewCard = memo(function DefectReviewCard({
               AI Rationale
             </div>
             <p className="mt-1 text-[13px] leading-relaxed text-emerald-900/80">
-              {defect.rationale}
+              {defect.ai_reasoning || 'No AI rationale available.'}
             </p>
-            {defect.expectedLifespan && defect.ageAtCheckout !== null && (
+            {defect.expected_lifespan && defect.age_at_checkout !== null && (
               <p className="mt-2 text-[11px] text-emerald-700">
-                Expected lifespan: {defect.expectedLifespan}yr &bull; Age at checkout: {defect.ageAtCheckout}yr
+                Expected lifespan: {defect.expected_lifespan}yr &bull; Age at checkout: {defect.age_at_checkout}yr
               </p>
             )}
           </div>
@@ -295,13 +295,13 @@ export const DefectReviewCard = memo(function DefectReviewCard({
           {/* Controls */}
           <div className="grid gap-4 sm:grid-cols-3">
             <LiabilitySelector
-              aiLiability={defect.aiLiability}
-              operatorLiability={defect.operatorLiability}
+              aiLiability={defect.ai_liability}
+              operatorLiability={defect.operator_liability}
               onSelect={(v) => onLiabilityChange(defect.id, v)}
             />
             <CostDisplay
-              estimated={defect.estimatedCost}
-              adjusted={defect.adjustedCost}
+              estimated={defect.estimated_cost ?? 0}
+              adjusted={defect.adjusted_cost}
               onAdjust={(v) => onCostAdjust(defect.id, v)}
             />
             <div>
@@ -345,14 +345,14 @@ export const DefectReviewCard = memo(function DefectReviewCard({
 export function DefectSummaryBar({
   defects,
 }: {
-  defects: WorkspaceDefect[]
+  defects: EotDefect[]
 }) {
   const active = defects.filter((d) => !d.excluded)
   const reviewed = active.filter((d) => d.reviewed).length
-  const totalCost = active.reduce((s, d) => s + (d.adjustedCost ?? d.estimatedCost), 0)
-  const tenantLiable = active.filter((d) => (d.operatorLiability ?? d.aiLiability) === 'tenant').length
-  const sharedLiable = active.filter((d) => (d.operatorLiability ?? d.aiLiability) === 'shared').length
-  const landlordLiable = active.filter((d) => (d.operatorLiability ?? d.aiLiability) === 'landlord').length
+  const totalCost = active.reduce((s, d) => s + (d.adjusted_cost ?? d.estimated_cost ?? 0), 0)
+  const tenantLiable = active.filter((d) => (d.operator_liability ?? d.ai_liability) === 'tenant').length
+  const sharedLiable = active.filter((d) => (d.operator_liability ?? d.ai_liability) === 'shared').length
+  const landlordLiable = active.filter((d) => (d.operator_liability ?? d.ai_liability) === 'landlord').length
 
   return (
     <div className="flex flex-wrap items-center gap-4 rounded-lg border border-zinc-200 bg-white px-4 py-3">

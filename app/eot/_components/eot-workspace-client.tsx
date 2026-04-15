@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { FormEvent, lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
+import { FormEvent, lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   ArrowLeft,
   ChevronDown,
@@ -66,7 +66,12 @@ import {
 } from '@/app/eot/_components/eot-ui'
 import { getEotUiErrorMessage } from '@/lib/eot-errors'
 import { WorkspaceStepProgress } from './workspace-step-progress'
-import type { WorkspaceStep } from '@/lib/mock/report-fixtures'
+import type { WorkspaceStep, EotWorkspaceStepData, EotEvidencePhoto } from '@/lib/eot-types'
+import {
+  getWorkspaceStepData,
+  updateWorkflowStatus,
+} from '@/lib/eot-api'
+import { EvidenceLightbox, type LightboxItem } from './evidence-lightbox'
 
 // Lazy-loaded step panels (non-critical for initial paint)
 const WorkspaceInventoryPanel = lazy(() =>
@@ -568,9 +573,13 @@ export function EotWorkspaceClient({
   )
   const sectionStateRef = useRef(sections)
 
-  // 7-step workflow state
+  // 7-step workflow state — loaded from Supabase
   const [activeStep, setActiveStep] = useState<WorkspaceStep>('inventory')
   const [completedSteps, setCompletedSteps] = useState<Set<WorkspaceStep>>(new Set())
+  const [stepData, setStepData] = useState<EotWorkspaceStepData | null>(null)
+  const [stepDataLoading, setStepDataLoading] = useState(false)
+  const [evidencePhotos, setEvidencePhotos] = useState<EotEvidencePhoto[]>([])
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
 
   const [selectedEvidenceId, setSelectedEvidenceId] = useState<string | null>(null)
   const [evidenceForm, setEvidenceForm] = useState<EvidenceFormState>(
@@ -664,6 +673,47 @@ export function EotWorkspaceClient({
       cancelled = true
     }
   }, [caseId, initialWorkspace])
+
+  // Load workspace step data (defects, workflow, utilities, etc.) from Supabase
+  useEffect(() => {
+    let cancelled = false
+    setStepDataLoading(true)
+
+    getWorkspaceStepData(caseId)
+      .then((data) => {
+        if (cancelled) return
+        setStepData(data)
+        setEvidencePhotos(data.evidence_photos)
+        if (data.workflow) {
+          setActiveStep(data.workflow.active_step)
+          setCompletedSteps(new Set(data.workflow.completed_steps))
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          console.error('Failed to load workspace step data', err)
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setStepDataLoading(false)
+      })
+
+    return () => { cancelled = true }
+  }, [caseId])
+
+  // Persist workflow step changes to Supabase
+  const persistWorkflowStep = useCallback(
+    (step: WorkspaceStep, completed: Set<WorkspaceStep>) => {
+      updateWorkflowStatus(caseId, {
+        case_id: caseId,
+        active_step: step,
+        completed_steps: [...completed],
+      }).catch((err) => {
+        console.error('Failed to persist workflow step', err)
+      })
+    },
+    [caseId],
+  )
 
   function mergeSectionState<K extends SectionKey>(
     section: K,
@@ -1198,45 +1248,91 @@ export function EotWorkspaceClient({
         <WorkspaceStepProgress
           currentStep={activeStep}
           completedSteps={completedSteps}
-          onStepClick={(step) => setActiveStep(step)}
+          onStepClick={(step) => {
+            setActiveStep(step)
+            persistWorkflowStep(step, completedSteps)
+          }}
         />
       </div>
 
       {/* ── Lazy-loaded step panels ── */}
       {activeStep === 'inventory' && (
         <Suspense fallback={<SkeletonPanel className="h-48" />}>
-          <WorkspaceInventoryPanel />
+          <WorkspaceInventoryPanel
+            caseId={caseId}
+            documents={stepData?.inventory_documents ?? []}
+            photos={evidencePhotos}
+            onPhotoClick={(index) => setLightboxIndex(index)}
+            onPhotoAdded={(photo) => setEvidencePhotos((prev) => [...prev, photo])}
+          />
         </Suspense>
       )}
       {activeStep === 'readings' && (
         <Suspense fallback={<SkeletonPanel className="h-48" />}>
-          <WorkspaceReadingsPanel />
+          <WorkspaceReadingsPanel
+            utilities={stepData?.utilities ?? []}
+            keys={stepData?.keys ?? []}
+          />
         </Suspense>
       )}
       {activeStep === 'analysis' && (
         <Suspense fallback={<SkeletonPanel className="h-48" />}>
-          <WorkspaceAnalysisPanel onComplete={() => setCompletedSteps((prev) => new Set([...prev, 'analysis']))} />
+          <WorkspaceAnalysisPanel onComplete={() => {
+            const next = new Set([...completedSteps, 'analysis' as WorkspaceStep])
+            setCompletedSteps(next)
+            persistWorkflowStep(activeStep, next)
+          }} />
         </Suspense>
       )}
       {activeStep === 'review' && (
         <Suspense fallback={<SkeletonPanel className="h-48" />}>
-          <DefectReviewPanel />
+          <DefectReviewPanel
+            caseId={caseId}
+            initialDefects={stepData?.defects ?? []}
+          />
         </Suspense>
       )}
       {activeStep === 'deductions' && (
         <Suspense fallback={<SkeletonPanel className="h-48" />}>
-          <WorkspaceDeductionsPanel />
+          <WorkspaceDeductionsPanel
+            caseId={caseId}
+            initialSections={stepData?.draft_sections ?? []}
+            defects={stepData?.defects ?? []}
+          />
         </Suspense>
       )}
       {activeStep === 'negotiation' && (
         <Suspense fallback={<SkeletonPanel className="h-48" />}>
-          <WorkspaceNegotiationPanel />
+          <WorkspaceNegotiationPanel
+            caseId={caseId}
+            items={stepData?.negotiation_items ?? []}
+            messages={stepData?.negotiation_messages ?? []}
+          />
         </Suspense>
       )}
       {activeStep === 'refund' && (
         <Suspense fallback={<SkeletonPanel className="h-48" />}>
-          <WorkspaceRefundPanel />
+          <WorkspaceRefundPanel
+            refund={stepData?.refund ?? null}
+          />
         </Suspense>
+      )}
+
+      {/* Evidence lightbox */}
+      {lightboxIndex !== null && evidencePhotos.length > 0 && (
+        <EvidenceLightbox
+          items={evidencePhotos.map((p): LightboxItem => ({
+            id: p.id,
+            name: p.name,
+            type: p.type,
+            url: p.file_url,
+            area: p.room,
+            uploadedAt: p.created_at,
+          }))}
+          activeIndex={lightboxIndex}
+          onClose={() => setLightboxIndex(null)}
+          onNavigate={setLightboxIndex}
+        />
       )}
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.55fr)_280px]">

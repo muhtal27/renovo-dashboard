@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import {
   Check,
   Copy,
@@ -10,41 +10,8 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/ui'
 import { formatCurrency } from '@/app/eot/_components/eot-ui'
-
-/* ── Mock deduction letter ────────────────────────────────────── */
-
-const MOCK_LETTER_SECTIONS = [
-  {
-    id: 'opening',
-    title: 'Opening',
-    content:
-      'Dear Ms Campbell,\n\nFurther to the end of your tenancy at 17 Bruntsfield Place, Edinburgh EH10 4HN, we have now completed our review of the check-out inspection report and supporting evidence.',
-  },
-  {
-    id: 'deductions',
-    title: 'Proposed Deductions',
-    content:
-      'Following a comparison of the check-in and check-out inventory reports, we have identified the following items where the condition at check-out falls below the standard recorded at the start of the tenancy:\n\n1. Carpet staining in living room — £320\n2. Kitchen deep clean required — £180\n3. Bedroom wall marks and scuffs (shared liability) — £60\n4. Missing window blind — £45\n5. Garden maintenance — £150\n\nTotal proposed deductions: £755',
-  },
-  {
-    id: 'rationale',
-    title: 'Rationale',
-    content:
-      'Each deduction has been assessed against the tenancy agreement terms, fair wear and tear guidelines, and the age/condition of the item at the start of the tenancy. Items where the condition change is consistent with normal use have been excluded.',
-  },
-  {
-    id: 'response',
-    title: 'Your Right to Respond',
-    content:
-      'You have 14 days from receipt of this letter to respond with any comments or additional evidence. If we do not receive a response within this period, we will proceed with the proposed deductions from your deposit.',
-  },
-  {
-    id: 'closing',
-    title: 'Closing',
-    content:
-      'If you have any questions, please contact us at your earliest convenience.\n\nYours sincerely,\nRenovo AI — Property Management',
-  },
-]
+import type { EotDraftSection, EotDefect } from '@/lib/eot-types'
+import { saveDraftSection } from '@/lib/eot-api'
 
 /* ── Letter section editor ────────────────────────────────────── */
 
@@ -52,14 +19,14 @@ function LetterSection({
   section,
   onEdit,
 }: {
-  section: (typeof MOCK_LETTER_SECTIONS)[number]
-  onEdit: (id: string, content: string) => void
+  section: EotDraftSection
+  onEdit: (sectionKey: string, content: string) => void
 }) {
   const [editing, setEditing] = useState(false)
   const [editContent, setEditContent] = useState(section.content)
 
   function handleSave() {
-    onEdit(section.id, editContent)
+    onEdit(section.section_key, editContent)
     setEditing(false)
   }
 
@@ -118,15 +85,42 @@ function LetterSection({
 
 /* ── Main export ──────────────────────────────────────────────── */
 
-export function WorkspaceDeductionsPanel() {
-  const [sections, setSections] = useState(MOCK_LETTER_SECTIONS)
+type WorkspaceDeductionsPanelProps = {
+  caseId: string
+  initialSections: EotDraftSection[]
+  defects: EotDefect[]
+}
+
+export function WorkspaceDeductionsPanel({
+  caseId,
+  initialSections,
+  defects,
+}: WorkspaceDeductionsPanelProps) {
+  const [sections, setSections] = useState<EotDraftSection[]>(initialSections)
   const [sent, setSent] = useState(false)
 
-  function handleEdit(id: string, content: string) {
-    setSections((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, content } : s)),
-    )
-  }
+  const totalDeductions = defects
+    .filter((d) => !d.excluded)
+    .reduce((sum, d) => sum + (d.adjusted_cost ?? d.estimated_cost ?? 0), 0)
+
+  const handleEdit = useCallback(
+    (sectionKey: string, content: string) => {
+      setSections((prev) =>
+        prev.map((s) => (s.section_key === sectionKey ? { ...s, content } : s)),
+      )
+      // Persist to Supabase
+      const section = sections.find((s) => s.section_key === sectionKey)
+      saveDraftSection(caseId, {
+        section_key: sectionKey,
+        title: section?.title ?? sectionKey,
+        content,
+        sort_order: section?.sort_order ?? 0,
+      }).catch((err) => {
+        console.error('Failed to persist draft section', err)
+      })
+    },
+    [caseId, sections],
+  )
 
   function handleCopyAll() {
     const fullText = sections.map((s) => s.content).join('\n\n')
@@ -145,7 +139,7 @@ export function WorkspaceDeductionsPanel() {
         </div>
         <div className="h-6 w-px bg-zinc-200" />
         <span className="text-xs text-zinc-500">
-          Total deductions: <strong className="font-semibold text-zinc-900">{formatCurrency(755)}</strong>
+          Total deductions: <strong className="font-semibold text-zinc-900">{formatCurrency(totalDeductions)}</strong>
         </span>
         <div className="ml-auto flex items-center gap-2">
           <button
@@ -184,13 +178,19 @@ export function WorkspaceDeductionsPanel() {
 
       {/* Letter content */}
       <div className="stat-card">
-        {sections.map((section) => (
-          <LetterSection
-            key={section.id}
-            section={section}
-            onEdit={handleEdit}
-          />
-        ))}
+        {sections.length > 0 ? (
+          sections.map((section) => (
+            <LetterSection
+              key={section.id}
+              section={section}
+              onEdit={handleEdit}
+            />
+          ))
+        ) : (
+          <p className="py-6 text-center text-sm text-zinc-500">
+            No draft sections yet. Generate an AI draft from the Analysis step to populate this section.
+          </p>
+        )}
       </div>
     </div>
   )

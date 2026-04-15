@@ -10,13 +10,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/ui'
 import { formatCurrency } from '@/app/eot/_components/eot-ui'
-
-/* ── Mock refund calculation ──────────────────────────────────── */
-
-const MOCK_DEPOSIT = 1250
-const MOCK_AGREED_DEDUCTIONS = 405 // kitchen + blind + partial garden
-const MOCK_DISPUTED_DEDUCTIONS = 380 // carpet + wall marks + rest of garden
-const MOCK_REFUND = MOCK_DEPOSIT - MOCK_AGREED_DEDUCTIONS
+import type { EotRefundSummary } from '@/lib/eot-types'
 
 /* ── Donut chart ──────────────────────────────────────────────── */
 
@@ -29,11 +23,13 @@ function RefundDonut({
   deductions: number
   refund: number
 }) {
+  if (deposit <= 0) return null
+
   const size = 160
   const strokeWidth = 20
   const radius = (size - strokeWidth) / 2
   const circumference = 2 * Math.PI * radius
-  const deductionPct = (deductions / deposit) * 100
+  const deductionPct = Math.min((deductions / deposit) * 100, 100)
   const refundPct = 100 - deductionPct
   const deductionDash = (deductionPct / 100) * circumference
   const refundDash = (refundPct / 100) * circumference
@@ -113,8 +109,21 @@ function BreakdownRow({
 
 /* ── Main export ──────────────────────────────────────────────── */
 
-export function WorkspaceRefundPanel() {
+type WorkspaceRefundPanelProps = {
+  refund: EotRefundSummary | null
+}
+
+export function WorkspaceRefundPanel({ refund }: WorkspaceRefundPanelProps) {
   const [submitted, setSubmitted] = useState(false)
+
+  const depositHeld = refund?.deposit_held ?? 0
+  const agreedDeductions = refund?.agreed_deductions ?? 0
+  const disputedDeductions = refund?.disputed_deductions ?? 0
+  const refundToTenant = refund?.refund_to_tenant ?? depositHeld
+  const lineItems = refund?.line_items ?? []
+
+  const agreedItems = lineItems.filter((li) => li.status === 'agreed')
+  const disputedItems = lineItems.filter((li) => li.status !== 'agreed')
 
   return (
     <div className="space-y-5">
@@ -122,11 +131,15 @@ export function WorkspaceRefundPanel() {
         {/* Refund visualization */}
         <div className="stat-card flex flex-col items-center justify-center py-8">
           <h4 className="mb-4 text-sm font-semibold text-zinc-900">Deposit Breakdown</h4>
-          <RefundDonut
-            deposit={MOCK_DEPOSIT}
-            deductions={MOCK_AGREED_DEDUCTIONS}
-            refund={MOCK_REFUND}
-          />
+          {depositHeld > 0 ? (
+            <RefundDonut
+              deposit={depositHeld}
+              deductions={agreedDeductions}
+              refund={refundToTenant}
+            />
+          ) : (
+            <p className="text-sm text-zinc-500">No deposit information available.</p>
+          )}
         </div>
 
         {/* Line items */}
@@ -134,23 +147,23 @@ export function WorkspaceRefundPanel() {
           <h4 className="mb-2 text-sm font-semibold text-zinc-900">
             Refund Calculation
           </h4>
-          <BreakdownRow label="Original Deposit" amount={MOCK_DEPOSIT} tone="default" />
-          <BreakdownRow label="Kitchen deep clean" amount={180} tone="danger" />
-          <BreakdownRow label="Missing window blind" amount={45} tone="danger" />
-          <BreakdownRow label="Garden maintenance (agreed)" amount={100} tone="danger" />
-          <BreakdownRow label="Bedroom wall marks (shared)" amount={80} tone="danger" />
+          <BreakdownRow label="Original Deposit" amount={depositHeld} tone="default" />
+          {agreedItems.map((li) => (
+            <BreakdownRow key={li.description} label={li.description} amount={li.amount} tone="danger" />
+          ))}
           <div className="mt-2 flex items-center justify-between border-t-2 border-zinc-900 pt-3">
             <span className="text-[14px] font-bold text-zinc-900">Refund to Tenant</span>
             <span className="text-[18px] font-bold tabular-nums text-emerald-600">
-              {formatCurrency(MOCK_REFUND)}
+              {formatCurrency(refundToTenant)}
             </span>
           </div>
 
           {/* Disputed note */}
-          {MOCK_DISPUTED_DEDUCTIONS > 0 && (
+          {disputedDeductions > 0 && (
             <div className="mt-4 rounded-lg border border-amber-100 bg-amber-50/50 px-4 py-3">
               <p className="text-[12px] text-amber-800">
-                <strong>Note:</strong> {formatCurrency(MOCK_DISPUTED_DEDUCTIONS)} in disputed deductions
+                <strong>Note:</strong> {formatCurrency(disputedDeductions)} in disputed deductions
+                ({disputedItems.length} item{disputedItems.length !== 1 ? 's' : ''})
                 are pending resolution and excluded from this calculation.
               </p>
             </div>
@@ -165,21 +178,20 @@ export function WorkspaceRefundPanel() {
             <Landmark className="h-4 w-4 text-zinc-400" />
             <h4 className="text-sm font-semibold text-zinc-900">Scheme Submission</h4>
           </div>
-          <span className="text-xs text-zinc-500">SafeDeposits Scotland</span>
         </div>
 
         <div className="mt-4 grid gap-4 sm:grid-cols-3">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-zinc-400">
-              Scheme Reference
+              Deposit Held
             </p>
-            <p className="mt-0.5 text-sm font-medium text-zinc-900">SDS-2026-04281</p>
+            <p className="mt-0.5 text-sm font-medium text-zinc-900">{formatCurrency(depositHeld)}</p>
           </div>
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-zinc-400">
-              Deposit Type
+              Agreed Deductions
             </p>
-            <p className="mt-0.5 text-sm font-medium text-zinc-900">Custodial</p>
+            <p className="mt-0.5 text-sm font-medium text-zinc-900">{formatCurrency(agreedDeductions)}</p>
           </div>
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-zinc-400">

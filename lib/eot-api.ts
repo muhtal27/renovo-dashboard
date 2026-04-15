@@ -20,7 +20,7 @@ import type {
 } from '@/lib/eot-types'
 
 type RequestOptions = {
-  method?: 'GET' | 'POST' | 'PATCH'
+  method?: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE'
   body?: unknown
   searchParams?: Record<string, string | number | null | undefined>
 }
@@ -195,5 +195,98 @@ export function getEotAnalyticsDashboard(days: number = 30) {
   return requestJson<import('@/lib/eot-types').EotAnalyticsDashboard>(
     '/api/eot/reports/analytics',
     { searchParams: { days } },
+  )
+}
+
+// ── Workspace step data (Supabase-backed) ───────────────────────
+
+export function getWorkspaceStepData(caseId: string) {
+  return requestJson<import('@/lib/eot-types').EotWorkspaceStepData>(
+    `/api/operator/cases/${caseId}/workspace-steps`,
+  )
+}
+
+export function getWorkflowStatus(caseId: string) {
+  return requestJson<{ workflow: import('@/lib/eot-types').EotWorkflowStatus | null }>(
+    `/api/operator/cases/${caseId}/workflow`,
+  )
+}
+
+export function updateWorkflowStatus(
+  caseId: string,
+  input: import('@/lib/eot-types').UpdateWorkflowInput,
+) {
+  return requestJson<{ workflow: import('@/lib/eot-types').EotWorkflowStatus }>(
+    `/api/operator/cases/${caseId}/workflow`,
+    { method: 'PATCH', body: input },
+  )
+}
+
+export function updateDefects(
+  caseId: string,
+  updates: import('@/lib/eot-types').UpdateDefectInput[],
+) {
+  return requestJson<{ ok: boolean; updated: number }>(
+    `/api/operator/cases/${caseId}/defects`,
+    {
+      method: 'PATCH',
+      body: {
+        updates: updates.map((u) => ({
+          defectId: u.defect_id,
+          operatorLiability: u.operator_liability ?? null,
+          costAdjusted: u.adjusted_cost ?? null,
+          excluded: u.excluded ?? false,
+        })),
+      },
+    },
+  )
+}
+
+export function saveDraftSection(
+  caseId: string,
+  input: Pick<import('@/lib/eot-types').SaveDraftSectionInput, 'section_key' | 'title' | 'content' | 'sort_order'>,
+) {
+  return requestJson<{ ok: boolean }>(
+    `/api/operator/cases/${caseId}/draft-sections`,
+    { method: 'PATCH', body: input },
+  )
+}
+
+export function saveNegotiationMessage(
+  caseId: string,
+  input: { content: string; sender_role?: string; sender_name?: string },
+) {
+  return requestJson<{ ok: boolean }>(
+    `/api/operator/cases/${caseId}/negotiation-messages`,
+    { method: 'POST', body: input },
+  )
+}
+
+// ── Evidence upload ─────────────────────────────────────────────
+
+export function initEvidenceUpload(
+  caseId: string,
+  input: { fileName: string; contentType: string; fileSize: number },
+) {
+  return requestJson<{ success: boolean; bucketName: string; storagePath: string; token: string }>(
+    `/api/operator/cases/${caseId}/evidence-upload`,
+    { method: 'POST', body: input },
+  )
+}
+
+export function finalizeEvidenceUpload(
+  caseId: string,
+  input: { storagePath: string; fileName: string; contentType: string; area?: string },
+) {
+  return requestJson<{ success: boolean; evidence: import('@/lib/eot-types').EotEvidencePhoto }>(
+    `/api/operator/cases/${caseId}/evidence-upload`,
+    { method: 'PUT', body: input },
+  )
+}
+
+export function deleteEvidenceFile(caseId: string, evidenceId: string) {
+  return requestJson<{ success: boolean }>(
+    `/api/operator/cases/${caseId}/evidence-upload`,
+    { method: 'DELETE', body: { evidenceId } },
   )
 }

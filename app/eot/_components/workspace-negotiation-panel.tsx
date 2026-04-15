@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import {
   AlertTriangle,
   Check,
@@ -10,74 +10,12 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/ui'
 import { formatCurrency } from '@/app/eot/_components/eot-ui'
-
-/* ── Types ────────────────────────────────────────────────────── */
-
-type NegotiationStatus = 'pending' | 'disputed' | 'agreed'
-
-type NegotiationItem = {
-  id: string
-  description: string
-  proposedAmount: number
-  respondedAmount: number | null
-  status: NegotiationStatus
-  tenantComment: string | null
-}
-
-/* ── Mock data ────────────────────────────────────────────────── */
-
-const MOCK_NEGOTIATION_ITEMS: NegotiationItem[] = [
-  {
-    id: 'n1',
-    description: 'Carpet staining in living room',
-    proposedAmount: 320,
-    respondedAmount: 200,
-    status: 'disputed',
-    tenantComment: 'The stain was already present when I moved in. I have photos from the first week.',
-  },
-  {
-    id: 'n2',
-    description: 'Kitchen deep clean',
-    proposedAmount: 180,
-    respondedAmount: 180,
-    status: 'agreed',
-    tenantComment: null,
-  },
-  {
-    id: 'n3',
-    description: 'Bedroom wall marks (shared)',
-    proposedAmount: 60,
-    respondedAmount: null,
-    status: 'pending',
-    tenantComment: null,
-  },
-  {
-    id: 'n4',
-    description: 'Missing window blind',
-    proposedAmount: 45,
-    respondedAmount: 45,
-    status: 'agreed',
-    tenantComment: null,
-  },
-  {
-    id: 'n5',
-    description: 'Garden maintenance',
-    proposedAmount: 150,
-    respondedAmount: 100,
-    status: 'disputed',
-    tenantComment: 'I maintained the garden regularly. The overgrowth is from after I left.',
-  },
-]
-
-const MOCK_MESSAGES = [
-  { id: 'm1', from: 'Operator', role: 'operator' as const, time: '10 Apr 2026', text: 'Dear Ms Campbell, please find the proposed deductions attached. You have 14 days to respond.' },
-  { id: 'm2', from: 'Claire Campbell', role: 'tenant' as const, time: '12 Apr 2026', text: 'I have reviewed the deductions. I agree with the kitchen clean and blind replacement but I dispute the carpet staining and garden charges.' },
-  { id: 'm3', from: 'Operator', role: 'operator' as const, time: '13 Apr 2026', text: 'Thank you for your response. We will review your comments and the additional evidence you have provided.' },
-]
+import type { EotNegotiationItem, EotNegotiationMessage } from '@/lib/eot-types'
+import { saveNegotiationMessage } from '@/lib/eot-api'
 
 /* ── Negotiation item row ─────────────────────────────────────── */
 
-function NegotiationRow({ item }: { item: NegotiationItem }) {
+function NegotiationRow({ item }: { item: EotNegotiationItem }) {
   const statusConfig = {
     pending: { label: 'Pending', bg: 'bg-zinc-100 text-zinc-600 border-zinc-200' },
     disputed: { label: 'Disputed', bg: 'bg-rose-50 text-rose-700 border-rose-200' },
@@ -96,17 +34,17 @@ function NegotiationRow({ item }: { item: NegotiationItem }) {
           <div className="text-right">
             <p className="text-[11px] text-zinc-500">Proposed</p>
             <p className="text-[13px] font-semibold tabular-nums text-zinc-900">
-              {formatCurrency(item.proposedAmount)}
+              {formatCurrency(item.proposed_amount)}
             </p>
           </div>
-          {item.respondedAmount !== null && (
+          {item.responded_amount !== null && (
             <div className="text-right">
               <p className="text-[11px] text-zinc-500">Response</p>
               <p className={cn(
                 'text-[13px] font-semibold tabular-nums',
-                item.respondedAmount === item.proposedAmount ? 'text-emerald-600' : 'text-amber-600',
+                item.responded_amount === item.proposed_amount ? 'text-emerald-600' : 'text-amber-600',
               )}>
-                {formatCurrency(item.respondedAmount)}
+                {formatCurrency(item.responded_amount)}
               </p>
             </div>
           )}
@@ -118,10 +56,10 @@ function NegotiationRow({ item }: { item: NegotiationItem }) {
           </span>
         </div>
       </div>
-      {item.tenantComment && (
+      {item.tenant_comment && (
         <div className="mt-2 rounded-lg border border-amber-100 bg-amber-50/50 px-3 py-2">
           <p className="text-[11px] font-semibold text-amber-700">Tenant response:</p>
-          <p className="mt-0.5 text-[12px] text-amber-800">{item.tenantComment}</p>
+          <p className="mt-0.5 text-[12px] text-amber-800">{item.tenant_comment}</p>
         </div>
       )}
     </div>
@@ -130,8 +68,43 @@ function NegotiationRow({ item }: { item: NegotiationItem }) {
 
 /* ── Message thread ───────────────────────────────────────────── */
 
-function MessageThread() {
+function MessageThread({
+  messages: initialMessages,
+  caseId,
+}: {
+  messages: EotNegotiationMessage[]
+  caseId: string
+}) {
+  const [messages, setMessages] = useState(initialMessages)
   const [reply, setReply] = useState('')
+  const [sending, setSending] = useState(false)
+
+  const handleSend = useCallback(async () => {
+    const text = reply.trim()
+    if (!text || sending) return
+
+    setSending(true)
+    try {
+      await saveNegotiationMessage(caseId, { content: text })
+      // Optimistic append
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `temp-${Date.now()}`,
+          case_id: caseId,
+          sender_role: 'operator' as const,
+          sender_name: 'Operator',
+          content: text,
+          sent_at: new Date().toISOString(),
+        },
+      ])
+      setReply('')
+    } catch (err) {
+      console.error('Failed to send negotiation message', err)
+    } finally {
+      setSending(false)
+    }
+  }, [caseId, reply, sending])
 
   return (
     <div className="stat-card">
@@ -140,8 +113,24 @@ function MessageThread() {
         <h4 className="text-sm font-semibold text-zinc-900">Correspondence</h4>
       </div>
       <div className="mt-4 space-y-3">
-        {MOCK_MESSAGES.map((msg) => {
-          const isOp = msg.role === 'operator'
+        {messages.length === 0 && (
+          <p className="py-4 text-center text-sm text-zinc-500">
+            No correspondence yet.
+          </p>
+        )}
+        {messages.map((msg) => {
+          const isOp = msg.sender_role === 'operator'
+          const dateStr = (() => {
+            try {
+              return new Date(msg.sent_at).toLocaleDateString('en-GB', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+              })
+            } catch {
+              return msg.sent_at
+            }
+          })()
           return (
             <div key={msg.id} className={cn('flex flex-col', isOp ? 'items-end' : 'items-start')}>
               <div className="flex items-center gap-1.5">
@@ -149,9 +138,9 @@ function MessageThread() {
                   'text-[11px] font-semibold',
                   isOp ? 'text-emerald-700' : 'text-fuchsia-600',
                 )}>
-                  {msg.from}
+                  {msg.sender_name}
                 </span>
-                <span className="text-[10px] text-zinc-400">{msg.time}</span>
+                <span className="text-[10px] text-zinc-400">{dateStr}</span>
               </div>
               <div className={cn(
                 'mt-1 max-w-[85%] rounded-xl px-3 py-2 text-[12px] leading-relaxed',
@@ -159,7 +148,7 @@ function MessageThread() {
                   ? 'rounded-br-sm bg-emerald-600 text-white'
                   : 'rounded-bl-sm border border-zinc-200 bg-zinc-50 text-zinc-900',
               )}>
-                {msg.text}
+                {msg.content}
               </div>
             </div>
           )
@@ -170,13 +159,15 @@ function MessageThread() {
           type="text"
           value={reply}
           onChange={(e) => setReply(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); void handleSend() } }}
           placeholder="Type a response..."
           aria-label="Reply message"
           className="h-9 flex-1 rounded-lg border border-zinc-200 bg-white px-3 text-xs text-zinc-900 placeholder:text-zinc-400 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/10"
         />
         <button
           type="button"
-          disabled={!reply.trim()}
+          onClick={() => void handleSend()}
+          disabled={!reply.trim() || sending}
           className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-zinc-900 text-white hover:bg-zinc-800 disabled:opacity-40"
           aria-label="Send reply"
         >
@@ -189,11 +180,21 @@ function MessageThread() {
 
 /* ── Main export ──────────────────────────────────────────────── */
 
-export function WorkspaceNegotiationPanel() {
-  const totalProposed = MOCK_NEGOTIATION_ITEMS.reduce((s, i) => s + i.proposedAmount, 0)
-  const agreed = MOCK_NEGOTIATION_ITEMS.filter((i) => i.status === 'agreed')
-  const disputed = MOCK_NEGOTIATION_ITEMS.filter((i) => i.status === 'disputed')
-  const pending = MOCK_NEGOTIATION_ITEMS.filter((i) => i.status === 'pending')
+type WorkspaceNegotiationPanelProps = {
+  caseId: string
+  items: EotNegotiationItem[]
+  messages: EotNegotiationMessage[]
+}
+
+export function WorkspaceNegotiationPanel({
+  caseId,
+  items,
+  messages,
+}: WorkspaceNegotiationPanelProps) {
+  const totalProposed = items.reduce((s, i) => s + i.proposed_amount, 0)
+  const agreed = items.filter((i) => i.status === 'agreed')
+  const disputed = items.filter((i) => i.status === 'disputed')
+  const pending = items.filter((i) => i.status === 'pending')
 
   return (
     <div className="space-y-5">
@@ -225,14 +226,20 @@ export function WorkspaceNegotiationPanel() {
             <h4 className="text-sm font-semibold text-zinc-900">Deduction Items</h4>
           </div>
           <div className="mt-3">
-            {MOCK_NEGOTIATION_ITEMS.map((item) => (
-              <NegotiationRow key={item.id} item={item} />
-            ))}
+            {items.length === 0 ? (
+              <p className="py-4 text-center text-sm text-zinc-500">
+                No negotiation items yet.
+              </p>
+            ) : (
+              items.map((item) => (
+                <NegotiationRow key={item.id} item={item} />
+              ))
+            )}
           </div>
         </div>
 
         {/* Correspondence */}
-        <MessageThread />
+        <MessageThread messages={messages} caseId={caseId} />
       </div>
     </div>
   )

@@ -3,7 +3,7 @@
 import { useCallback } from 'react'
 import { Check } from 'lucide-react'
 import { cn } from '@/lib/ui'
-import { WORKSPACE_STEPS, type WorkspaceStep } from '@/lib/mock/report-fixtures'
+import { WORKSPACE_STEPS, type WorkspaceStep } from '@/lib/eot-types'
 
 type StepProgressProps = {
   currentStep: WorkspaceStep
