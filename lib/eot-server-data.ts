@@ -15,6 +15,16 @@ export type EotPortfolioSnapshot = {
   workspaces: EotCaseWorkspace[]
 }
 
+export class EotServerDataError extends Error {
+  status: number
+
+  constructor(message: string, status: number) {
+    super(message)
+    this.name = 'EotServerDataError'
+    this.status = status
+  }
+}
+
 function buildBackendUrl(pathname: string) {
   return new URL(pathname, getEotApiBaseUrl())
 }
@@ -55,7 +65,7 @@ async function fetchEotJson<T>(
         ? payload.detail
         : `Request failed with status ${response.status}.`
 
-    throw new Error(detail)
+    throw new EotServerDataError(detail, response.status)
   }
 
   return payload as T

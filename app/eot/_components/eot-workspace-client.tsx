@@ -100,6 +100,7 @@ type WorkspaceClientProps = {
   caseId: string
   defaultActor: string
   initialWorkspace?: EotCaseWorkspaceSummary | null
+  initialStep?: WorkspaceStep
 }
 
 type EvidenceFormState = {
@@ -543,6 +544,7 @@ export function EotWorkspaceClient({
   caseId,
   defaultActor,
   initialWorkspace,
+  initialStep,
 }: WorkspaceClientProps) {
   primeWorkspaceSummaryCache(caseId, initialWorkspace)
 
@@ -574,7 +576,7 @@ export function EotWorkspaceClient({
   const sectionStateRef = useRef(sections)
 
   // 7-step workflow state — loaded from Supabase
-  const [activeStep, setActiveStep] = useState<WorkspaceStep>('inventory')
+  const [activeStep, setActiveStep] = useState<WorkspaceStep>(initialStep ?? 'inventory')
   const [completedSteps, setCompletedSteps] = useState<Set<WorkspaceStep>>(new Set())
   const [stepData, setStepData] = useState<EotWorkspaceStepData | null>(null)
   const [stepDataLoading, setStepDataLoading] = useState(false)
