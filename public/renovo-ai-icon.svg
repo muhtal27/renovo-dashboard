@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <!-- Renovo AI – 3-bar icon mark on dark background -->
+  <rect width="128" height="128" rx="28" fill="#0a0a0a"/>
+  <rect x="18" y="28" width="68" height="16" rx="8" fill="#d4d4d8"/>
+  <rect x="28" y="56" width="68" height="16" rx="8" fill="#a1a1aa"/>
+  <rect x="38" y="84" width="68" height="16" rx="8" fill="#ffffff"/>
+</svg>

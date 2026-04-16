@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 40" fill="none">
+  <!-- Workflow layers mark -->
+  <rect x="0" y="4" width="26" height="6.5" rx="3.25" fill="#d4d4d8"/>
+  <rect x="3" y="15" width="26" height="6.5" rx="3.25" fill="#a1a1aa"/>
+  <rect x="6" y="26" width="26" height="6.5" rx="3.25" fill="#0a0a0a"/>
+  <!-- Wordmark -->
+  <text x="48" y="27" font-family="'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif" font-size="22" font-weight="600" fill="#0a0a0a" letter-spacing="-0.5">Renovo</text>
+  <text x="134" y="27" font-family="'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif" font-size="22" font-weight="300" fill="#a1a1aa" letter-spacing="-0.5">AI</text>
+</svg>
