@@ -30,6 +30,7 @@
     "pull:env:vercel": "bash scripts/pull-vercel-env.sh"
   },
   "dependencies": {
+    "@reapit/elements": "^4.3.4",
     "@stripe/react-stripe-js": "^6.1.0",
     "@stripe/stripe-js": "^9.1.0",
     "@supabase/supabase-js": "^2.101.1",
