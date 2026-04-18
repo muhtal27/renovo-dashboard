@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import * as Sentry from '@sentry/nextjs'
 import type { AuthSession } from '@supabase/supabase-js'
 import { useEffect, useRef, useState } from 'react'
 import posthog from 'posthog-js'
@@ -11,6 +12,7 @@ import {
   readLegacyBrowserSupabaseSession,
   toMinimalSupabaseSession,
 } from '@/lib/supabase-session'
+import type { CurrentOperator } from '@/lib/operator-types'
 
 const workflowStages = [
   {
@@ -72,10 +74,26 @@ export default function LoginPage() {
     handledSessionRef.current = sessionKey
     clearLegacySupabaseBrowserAuthArtifacts(process.env.NEXT_PUBLIC_SUPABASE_URL)
 
+    const operator = (await response.json().catch(() => null)) as CurrentOperator | null
     const userId = session?.user?.id
     const userEmail = session?.user?.email
+    const tenantId = operator?.membership?.tenant_id ?? null
+    const role = operator?.membership?.role ?? null
+
     if (userId) {
-      posthog.identify(userId, userEmail ? { email: userEmail } : undefined)
+      posthog.identify(userId, {
+        ...(userEmail ? { email: userEmail } : {}),
+        ...(tenantId ? { tenant_id: tenantId } : {}),
+        ...(role ? { role } : {}),
+      })
+      Sentry.setUser({ id: userId, ...(userEmail ? { email: userEmail } : {}) })
+    }
+    if (tenantId) {
+      posthog.group('tenant', tenantId)
+      Sentry.setTag('tenant_id', tenantId)
+    }
+    if (role) {
+      Sentry.setTag('role', role)
     }
     posthog.capture('login_completed', { provider: 'microsoft' })
 

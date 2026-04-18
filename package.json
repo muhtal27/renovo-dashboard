@@ -31,6 +31,8 @@
   },
   "dependencies": {
     "@reapit/elements": "^4.3.4",
+    "@sentry/nextjs": "^10.49.0",
+    "@sentry/profiling-node": "^10.49.0",
     "@stripe/react-stripe-js": "^6.1.0",
     "@stripe/stripe-js": "^9.1.0",
     "@supabase/supabase-js": "^2.101.1",

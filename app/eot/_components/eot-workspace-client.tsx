@@ -72,6 +72,7 @@ import {
   updateWorkflowStatus,
 } from '@/lib/eot-api'
 import { EvidenceLightbox, type LightboxItem } from './evidence-lightbox'
+import { EVENTS, track } from '@/lib/analytics'
 
 // Lazy-loaded step panels (non-critical for initial paint)
 const WorkspaceInventoryPanel = lazy(() =>
@@ -600,6 +601,10 @@ export function EotWorkspaceClient({
   useEffect(() => {
     sectionStateRef.current = sections
   }, [sections])
+
+  useEffect(() => {
+    track(EVENTS.CASE_OPENED, { case_id: caseId })
+  }, [caseId])
 
   useEffect(() => {
     setEvidenceForm(DEFAULT_EVIDENCE_FORM(defaultActor))

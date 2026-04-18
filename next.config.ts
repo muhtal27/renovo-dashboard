@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const securityHeaders = [
   {
@@ -9,7 +10,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob:",
       "font-src 'self' https://fonts.gstatic.com",
-      "connect-src 'self' https://*.supabase.co https://api.renovoai.co.uk",
+      "connect-src 'self' https://*.supabase.co https://api.renovoai.co.uk https://*.ingest.de.sentry.io https://*.ingest.sentry.io",
       "base-uri 'self'",
       "form-action 'self' https://*.supabase.co https://api.renovoai.co.uk https://login.microsoftonline.com",
       "frame-ancestors 'none'",
@@ -74,7 +75,10 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/:path*',
-        headers: securityHeaders,
+        headers: [
+          ...securityHeaders,
+          { key: 'Document-Policy', value: 'js-profiling' },
+        ],
       },
       {
         source: '/sw.js',
@@ -93,4 +97,20 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+const release = process.env.SENTRY_RELEASE ?? process.env.VERCEL_GIT_COMMIT_SHA
+
+export default withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  silent: !process.env.CI,
+  widenClientFileUpload: true,
+  sourcemaps: {
+    disable: !process.env.SENTRY_AUTH_TOKEN,
+    deleteSourcemapsAfterUpload: true,
+  },
+  webpack: {
+    automaticVercelMonitors: false,
+    treeshake: { removeDebugLogging: true },
+  },
+  ...(release ? { release: { name: release } } : {}),
+});

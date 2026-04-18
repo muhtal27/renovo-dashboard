@@ -3,6 +3,7 @@ import { Resend } from 'resend'
 import { getOperatorTenantContextForApi } from '@/lib/operator-server'
 import { OPERATOR_PERMISSIONS } from '@/lib/operator-rbac'
 import { getOperatorProfileForUserId } from '@/lib/operator-session-server'
+import { captureServerEvent, EVENTS } from '@/lib/analytics-server'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -147,9 +148,22 @@ export async function POST(request: Request, context: RouteContext) {
       console.warn('send-draft partial failure', { caseId, errors })
     }
 
+    const sent = recipients.filter((_, i) => !results[i].error)
+    await captureServerEvent({
+      event: EVENTS.SUBMISSION_SENT,
+      userId: authResult.context.user.id,
+      tenantId: authResult.context.tenantId,
+      properties: {
+        case_id: caseId,
+        case_ref: caseRef,
+        recipients: sent.join(','),
+        partial_failure: errors.length > 0,
+      },
+    })
+
     return NextResponse.json({
       ok: true,
-      sent: recipients.filter((_, i) => !results[i].error),
+      sent,
       errors: errors.length > 0 ? errors : undefined,
     })
   } catch (error) {

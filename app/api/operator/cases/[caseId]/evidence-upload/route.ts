@@ -6,6 +6,7 @@ import {
   finalizeEvidenceUpload,
   deleteEvidence,
 } from '@/lib/eot-workspace-service'
+import { captureServerEvent, EVENTS } from '@/lib/analytics-server'
 
 const MAX_EVIDENCE_SIZE_BYTES = 25 * 1024 * 1024
 const ALLOWED_TYPES = new Set([
@@ -117,6 +118,16 @@ export async function PUT(request: Request, context: RouteContext) {
         area: body.area ?? null,
       },
     )
+    await captureServerEvent({
+      event: EVENTS.EVIDENCE_UPLOADED,
+      userId: authResult.context.user.id,
+      tenantId: authResult.context.tenantId,
+      properties: {
+        case_id: caseId,
+        content_type: body.contentType,
+        area: body.area ?? null,
+      },
+    })
     return NextResponse.json({ success: true, evidence })
   } catch (error) {
     console.error('Evidence finalize failed', {
@@ -155,6 +166,12 @@ export async function DELETE(request: Request, context: RouteContext) {
 
   try {
     await deleteEvidence(caseId, authResult.context.tenantId, authResult.context.user.id, body.evidenceId)
+    await captureServerEvent({
+      event: EVENTS.EVIDENCE_DELETED,
+      userId: authResult.context.user.id,
+      tenantId: authResult.context.tenantId,
+      properties: { case_id: caseId, evidence_id: body.evidenceId },
+    })
     return NextResponse.json({ success: true })
   } catch (error) {
     return NextResponse.json(

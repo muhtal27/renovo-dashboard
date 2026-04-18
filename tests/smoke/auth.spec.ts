@@ -6,8 +6,7 @@ test.describe('auth smoke', () => {
 
     await expect(page).toHaveURL(/\/login(?:\?|$)/)
     await expect(page.getByRole('heading', { name: 'Workspace sign-in' })).toBeVisible()
-    await expect(page.getByLabel('Email address')).toBeVisible()
-    await expect(page.getByLabel('Password')).toBeVisible()
+    await expect(page.getByRole('button', { name: /Sign in with Microsoft/i })).toBeVisible()
   })
 
   test.describe('signed out', () => {

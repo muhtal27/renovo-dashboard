@@ -4,6 +4,7 @@ import { OPERATOR_PERMISSIONS } from '@/lib/operator-rbac'
 import { upsertWorkflowStatus, loadWorkflowStatus } from '@/lib/eot-workspace-service'
 import type { WorkspaceStep } from '@/lib/eot-types'
 import { WORKSPACE_STEPS } from '@/lib/eot-types'
+import { captureServerEvent, EVENTS } from '@/lib/analytics-server'
 
 type RouteContext = {
   params: Promise<{ caseId: string }>
@@ -57,6 +58,10 @@ export async function PATCH(request: Request, context: RouteContext) {
   ) as WorkspaceStep[]
 
   try {
+    const prior = await loadWorkflowStatus(caseId, authResult.context.tenantId).catch(() => null)
+    const priorCompleted = new Set(prior?.completed_steps ?? [])
+    const newlyCompleted = completedSteps.filter((step) => !priorCompleted.has(step))
+
     const workflow = await upsertWorkflowStatus(
       authResult.context.tenantId,
       authResult.context.user.id,
@@ -66,6 +71,24 @@ export async function PATCH(request: Request, context: RouteContext) {
         completed_steps: completedSteps,
       },
     )
+
+    await Promise.all([
+      captureServerEvent({
+        event: EVENTS.WORKSPACE_STEP_CHANGED,
+        userId: authResult.context.user.id,
+        tenantId: authResult.context.tenantId,
+        properties: { case_id: caseId, step: body.active_step },
+      }),
+      ...newlyCompleted.map((step) =>
+        captureServerEvent({
+          event: EVENTS.WORKSPACE_STEP_COMPLETED,
+          userId: authResult.context.user.id,
+          tenantId: authResult.context.tenantId,
+          properties: { case_id: caseId, step },
+        }),
+      ),
+    ])
+
     return NextResponse.json({ workflow })
   } catch (error) {
     console.error('workflow PATCH failed', {

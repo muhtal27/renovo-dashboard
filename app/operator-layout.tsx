@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 import type { ReactNode } from 'react'
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import * as Sentry from '@sentry/nextjs'
+import posthog from 'posthog-js'
 import { Bot, ChevronDown, LogOut, Menu, Search, Settings, CreditCard } from 'lucide-react'
 import { OperatorNav } from '@/app/operator-nav'
 import { getOperatorLabel, type CurrentOperator } from '@/lib/operator-types'
@@ -11,6 +13,7 @@ import { clearLegacySupabaseBrowserAuthArtifacts } from '@/lib/supabase-session'
 import { CommandPalette } from '@/app/components/CommandPalette'
 import { NotificationCenter } from '@/app/components/NotificationCenter'
 import { AiPanel } from '@/app/components/AiPanel'
+import { TelemetryIdentify } from '@/app/components/TelemetryIdentify'
 
 type Breadcrumb = {
   label: string
@@ -269,6 +272,9 @@ export function OperatorLayout({ children, operator, latestRelease }: OperatorLa
       credentials: 'same-origin',
     })
     clearLegacySupabaseBrowserAuthArtifacts(process.env.NEXT_PUBLIC_SUPABASE_URL)
+    posthog.capture('logout')
+    posthog.reset()
+    Sentry.setUser(null)
     window.location.href = '/login'
   }, [])
 
@@ -435,6 +441,7 @@ export function OperatorLayout({ children, operator, latestRelease }: OperatorLa
       </div>
       <CommandPalette />
       <AiPanel open={aiPanelOpen} onClose={() => setAiPanelOpen(false)} />
+      <TelemetryIdentify operator={operator} />
     </main>
   )
 }
