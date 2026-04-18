@@ -10,6 +10,7 @@ import {
   ChevronRight,
   ClipboardList,
   CreditCard,
+  Gauge,
   Landmark,
   LayoutDashboard,
   MessageSquare,
@@ -79,6 +80,12 @@ const NAV_GROUPS: Array<{
         icon: ShieldAlert,
         isActive: (pathname) => pathname.startsWith('/disputes') || pathname.startsWith('/issues'),
       },
+      {
+        label: 'Inventory Feedback',
+        href: '/inventory-feedback',
+        icon: ClipboardList,
+        isActive: (pathname) => pathname.startsWith('/inventory-feedback'),
+      },
     ],
   },
   {
@@ -105,6 +112,13 @@ const NAV_GROUPS: Array<{
         isActive: (pathname) => pathname.startsWith('/reports'),
         requiredPermission: OPERATOR_PERMISSIONS.VIEW_REPORTING,
       },
+      {
+        label: 'Intelligence',
+        href: '/intelligence',
+        icon: Gauge,
+        isActive: (pathname) => pathname.startsWith('/intelligence'),
+        requiredPermission: OPERATOR_PERMISSIONS.VIEW_REPORTING,
+      },
     ],
   },
   {
@@ -121,12 +135,6 @@ const NAV_GROUPS: Array<{
         href: '/deposit-scheme',
         icon: Landmark,
         isActive: (pathname) => pathname.startsWith('/deposit-scheme'),
-      },
-      {
-        label: 'Inventory Feedback',
-        href: '/inventory-feedback',
-        icon: ClipboardList,
-        isActive: (pathname) => pathname.startsWith('/inventory-feedback'),
       },
       {
         label: "What's New",
