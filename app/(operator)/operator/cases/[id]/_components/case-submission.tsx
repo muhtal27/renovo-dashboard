@@ -32,6 +32,7 @@ import {
 import { toTimestamp } from '@/lib/operator-checkout-workspace-helpers'
 import type { OperatorCheckoutWorkspaceData } from '@/lib/operator-checkout-workspace-types'
 import type { EotCaseSubmission, EotIssue } from '@/lib/eot-types'
+import { EVENTS, track } from '@/lib/analytics'
 
 type SubmissionTimelineTone = 'accent' | 'danger' | 'default' | 'warning'
 
@@ -227,6 +228,7 @@ export function CaseSubmission({ data }: { data: OperatorCheckoutWorkspaceData }
   async function handleTransition(targetStatus: string) {
     setIsTransitioning(true)
     setTransitionError(null)
+    const fromStatus = caseStatus
     try {
       const response = await fetch(`/api/eot/cases/${caseId}/transition`, {
         method: 'PATCH',
@@ -237,6 +239,11 @@ export function CaseSubmission({ data }: { data: OperatorCheckoutWorkspaceData }
         const err = await response.json().catch(() => null)
         throw new Error(err?.detail || 'Failed to update case status.')
       }
+      track(EVENTS.CASE_STATUS_TRANSITIONED, {
+        case_id: caseId,
+        from_status: fromStatus,
+        to_status: targetStatus,
+      })
       startTransition(() => { router.refresh() })
     } catch (error) {
       setTransitionError(error instanceof Error ? error.message : 'Failed to update case status.')
@@ -250,6 +257,11 @@ export function CaseSubmission({ data }: { data: OperatorCheckoutWorkspaceData }
     setTransitionError(null)
     try {
       const result = await submitClaimToScheme(caseId)
+      track(EVENTS.CLAIM_SUBMITTED_TO_SCHEME, {
+        case_id: caseId,
+        scheme_provider: result.scheme_provider ?? null,
+        scheme_reference: result.scheme_reference ?? null,
+      })
       toast.success(
         result.scheme_reference
           ? `Claim submitted to ${formatEnumLabel(result.scheme_provider ?? 'scheme')}: ${result.scheme_reference}`
@@ -301,6 +313,10 @@ export function CaseSubmission({ data }: { data: OperatorCheckoutWorkspaceData }
         mime_type: null,
       }))
       await uploadEvidenceToScheme(caseId, files)
+      track(EVENTS.CLAIM_EVIDENCE_UPLOADED_TO_SCHEME, {
+        case_id: caseId,
+        file_count: files.length,
+      })
       toast.success(`${files.length} document${files.length !== 1 ? 's' : ''} uploaded to scheme`)
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to upload evidence.')

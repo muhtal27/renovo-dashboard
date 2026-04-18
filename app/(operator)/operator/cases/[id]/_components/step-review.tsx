@@ -23,6 +23,7 @@ import type {
   CheckoutWorkspaceRoomRecord,
   OperatorCheckoutWorkspaceData,
 } from '@/lib/operator-checkout-workspace-types'
+import { EVENTS, track } from '@/lib/analytics'
 
 /* ------------------------------------------------------------------ */
 /*  Local state per defect                                             */
@@ -850,8 +851,27 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
         [id]: { ...prev[id], ...patch },
       }))
       setIsDirty(true)
+
+      // Track accept/override of AI liability suggestions (only when operator
+      // actively chose a liability and the defect had an AI suggestion).
+      if (patch.operatorLiability !== undefined && patch.operatorLiability !== null) {
+        const defect = defects.find((d) => d.id === id)
+        const aiSuggestion = defect?.aiSuggestedLiability ?? null
+        if (aiSuggestion) {
+          const matched = patch.operatorLiability === aiSuggestion
+          track(
+            matched ? EVENTS.AI_RECOMMENDATION_ACCEPTED : EVENTS.AI_RECOMMENDATION_OVERRIDDEN,
+            {
+              case_id: caseId,
+              defect_id: id,
+              ai_suggestion: aiSuggestion,
+              operator_decision: patch.operatorLiability,
+            },
+          )
+        }
+      }
     },
-    []
+    [caseId, defects],
   )
 
   const handleResetAll = useCallback(() => {
@@ -892,6 +912,7 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
   )
 
   const handleAcceptAiSuggestions = useCallback(() => {
+    let accepted = 0
     setEdits((prev) => {
       const next = { ...prev }
       for (const d of defects) {
@@ -901,13 +922,15 @@ export function StepReview({ data }: { data: OperatorCheckoutWorkspaceData }) {
             operatorLiability: d.aiSuggestedLiability,
             costAdjusted: next[d.id].costAdjusted ?? d.costEstimate,
           }
+          accepted++
         }
       }
       return next
     })
     setIsDirty(true)
+    track(EVENTS.AI_RECOMMENDATIONS_BULK_ACCEPTED, { case_id: caseId, count: accepted })
     toast.success('AI suggestions accepted for all defects')
-  }, [defects])
+  }, [caseId, defects])
 
   const handleExcludeBelow = useCallback(
     (threshold: number) => {
