@@ -1,7 +1,33 @@
-import Image from 'next/image'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { DASHBOARD_SIGN_IN_EXTERNAL, DASHBOARD_SIGN_IN_URL } from '@/lib/marketing-links'
+
+function BrandMark({ withText = true, size = 28 }: { withText?: boolean; size?: number }) {
+  return (
+    <span className="inline-flex items-center gap-2.5">
+      <span
+        className="relative inline-flex items-center justify-center"
+        style={{ width: size, height: size }}
+        aria-hidden="true"
+      >
+        <span
+          className="absolute rounded-[10px]"
+          style={{
+            inset: -4,
+            background: 'radial-gradient(circle, rgba(16,185,129,0.25), transparent 70%)',
+            zIndex: -1,
+          }}
+        />
+        <svg viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg" className="block h-full w-full">
+          <rect x="14" y="24" width="80" height="18" rx="9" fill="#ffffff" opacity="0.55" />
+          <rect x="24" y="55" width="80" height="18" rx="9" fill="#ffffff" opacity="0.8" />
+          <rect x="34" y="86" width="80" height="18" rx="9" fill="#10b981" />
+        </svg>
+      </span>
+      {withText && <span className="font-semibold tracking-[-0.01em] text-white">Renovo AI</span>}
+    </span>
+  )
+}
 
 type MarketingShellProps = {
   children: ReactNode
@@ -127,15 +153,7 @@ export function MarketingShell({
             aria-label="Renovo AI home"
             className="inline-flex shrink-0 items-center"
           >
-            <Image
-              src="/logo-new.svg"
-              alt="Renovo AI"
-              width={112}
-              height={22}
-              priority
-              sizes="(max-width: 1023px) 108px, 112px"
-              className="h-auto w-[108px] brightness-0 invert lg:w-[112px]"
-            />
+            <BrandMark />
           </Link>
 
           <nav
@@ -208,7 +226,9 @@ export function MarketingShell({
         <div className="marketing-frame">
           <div className="grid gap-10 border-b border-white/[0.04] pb-10 md:grid-cols-2 xl:grid-cols-[2fr_1fr_1fr_1fr]">
             <div>
-              <Link href="/" className="text-lg font-bold tracking-tight text-white">Renovo AI</Link>
+              <Link href="/" className="inline-flex items-center gap-2.5" aria-label="Renovo AI home">
+                <BrandMark size={26} />
+              </Link>
               <p className="mt-3 max-w-[280px] text-[13px] leading-[1.7] text-white/55">
                 Enterprise software for end of tenancy. Built for UK letting agencies. AI assists, humans decide.
               </p>

@@ -2,8 +2,36 @@
 
 import { useEffect, useMemo, useRef, useState } from "react"
 import Link from "next/link"
-import Image from "next/image"
 import { DASHBOARD_SIGN_IN_EXTERNAL, DASHBOARD_SIGN_IN_URL } from "@/lib/marketing-links"
+
+function BrandMark({ withText = true, size = 28 }: { withText?: boolean; size?: number }) {
+  return (
+    <span className="inline-flex items-center gap-2.5">
+      <span
+        className="relative inline-flex items-center justify-center"
+        style={{ width: size, height: size }}
+        aria-hidden="true"
+      >
+        <span
+          className="absolute rounded-[10px]"
+          style={{
+            inset: -4,
+            background: "radial-gradient(circle, rgba(16,185,129,0.25), transparent 70%)",
+            zIndex: -1,
+          }}
+        />
+        <svg viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg" className="block h-full w-full">
+          <rect x="14" y="24" width="80" height="18" rx="9" fill="#ffffff" opacity="0.55" />
+          <rect x="24" y="55" width="80" height="18" rx="9" fill="#ffffff" opacity="0.8" />
+          <rect x="34" y="86" width="80" height="18" rx="9" fill="#10b981" />
+        </svg>
+      </span>
+      {withText && (
+        <span className="font-semibold tracking-[-0.01em] text-white">Renovo AI</span>
+      )}
+    </span>
+  )
+}
 
 /* ═══════════════════════════════════════════════════════════════════════════
    DATA — ported from public/website-v2.html
@@ -407,7 +435,7 @@ export default function HomePageClient() {
       >
         <div className="mx-auto flex h-16 max-w-[1280px] items-center justify-between px-6 lg:px-10">
           <Link href="/" aria-label="Renovo AI home" className="inline-flex shrink-0 items-center">
-            <Image src="/logo-new.svg" alt="Renovo AI" width={112} height={22} priority className="h-auto w-[108px] brightness-0 invert lg:w-[112px]" />
+            <BrandMark />
           </Link>
           <div className="hidden items-center gap-8 lg:flex">
             {navLinks.map((l) => (
@@ -467,6 +495,7 @@ export default function HomePageClient() {
               <p className="mt-6 max-w-lg text-[15px] leading-relaxed text-white/60">
                 Renovo pulls checkout evidence straight from your inventory app, drafts a defensible deposit decision with reasoning, and routes it to your property manager to sign off. Eight days from checkout to released deposit. 91% scheme award rate.
               </p>
+              <HeroTypewriter prompts={variant.prompts} reducedMotion={reducedMotion} />
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link href="/book-demo" className="group inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-emerald-400 hover:shadow-[0_0_40px_rgba(16,185,129,0.35)]">
                   Book a demo
@@ -476,19 +505,24 @@ export default function HomePageClient() {
                   See how it works
                 </Link>
               </div>
-              <div className="mt-10 grid grid-cols-1 gap-4 border-t border-white/[0.06] pt-8 sm:grid-cols-3">
+              <div className="mt-10 grid max-w-[520px] grid-cols-1 gap-2.5 sm:grid-cols-3">
                 {[
                   { v: "8.4", unit: "d", label: "Avg resolution", detail: "vs 25.6 days industry" },
                   { v: "<2", unit: "m", label: "Deduction letter", detail: "down from 45 min" },
                   { v: "91", unit: "%", label: "Scheme award rate", detail: "rolling 30 days" },
                 ].map((s) => (
-                  <div key={s.label}>
-                    <div className="font-mono text-[clamp(28px,3.2vw,38px)] font-semibold tracking-[-0.03em] tabular-nums text-white">
+                  <div
+                    key={s.label}
+                    className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3.5 transition-colors hover:border-emerald-500/20 hover:bg-emerald-500/[0.03]"
+                  >
+                    <div className="font-mono text-[26px] font-semibold leading-none tracking-[-0.02em] tabular-nums text-emerald-300">
                       {s.v}
-                      <span className="ml-0.5 text-[0.55em] font-medium text-white/50">{s.unit}</span>
+                      <span className="ml-0.5 text-[16px] font-medium text-white/50">{s.unit}</span>
                     </div>
-                    <div className="mt-1 text-[11px] font-medium uppercase tracking-[0.1em] text-white/55">{s.label}</div>
-                    <div className="text-[11px] text-white/35">{s.detail}</div>
+                    <div className="mt-2.5 text-[11px] font-medium leading-snug text-white/60">
+                      {s.label}
+                      <em className="not-italic mt-0.5 block text-[10px] font-normal text-white/30">{s.detail}</em>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -882,6 +916,14 @@ export default function HomePageClient() {
             </div>
             <div className="relative overflow-hidden">
               <div
+                className="pointer-events-none absolute inset-y-0 left-0 z-[2] w-[140px]"
+                style={{ background: "linear-gradient(90deg, #05070e, transparent)" }}
+              />
+              <div
+                className="pointer-events-none absolute inset-y-0 right-0 z-[2] w-[140px]"
+                style={{ background: "linear-gradient(270deg, #05070e, transparent)" }}
+              />
+              <div
                 className="flex gap-3 whitespace-nowrap"
                 style={{ animation: reducedMotion ? undefined : "feedSlide 70s linear infinite", width: reducedMotion ? undefined : "max-content" }}
               >
@@ -923,7 +965,9 @@ export default function HomePageClient() {
         <div className="mx-auto max-w-[1280px]">
           <div className="grid gap-10 border-b border-white/[0.04] pb-10 md:grid-cols-2 xl:grid-cols-[2fr_1fr_1fr_1fr]">
             <div>
-              <Link href="/" className="text-lg font-bold tracking-tight text-white">Renovo AI</Link>
+              <Link href="/" className="inline-flex items-center gap-2.5" aria-label="Renovo AI home">
+                <BrandMark size={26} />
+              </Link>
               <p className="mt-3 max-w-[280px] text-[13px] leading-[1.7] text-white/55">
                 Enterprise software for end of tenancy. Built for UK letting agencies. AI assists, humans decide.
               </p>
@@ -953,6 +997,14 @@ export default function HomePageClient() {
           from { transform: translateX(0); }
           to { transform: translateX(-33.333%); }
         }
+        @keyframes ukPing {
+          0% { transform: translate(-50%, -50%) scale(1); opacity: 0.55; }
+          100% { transform: translate(-50%, -50%) scale(7); opacity: 0; }
+        }
+        @keyframes heroCursor {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.25; }
+        }
       `}</style>
     </div>
   )
@@ -961,6 +1013,59 @@ export default function HomePageClient() {
 /* ═══════════════════════════════════════════════════════════════════════════
    SUB-COMPONENTS
    ═══════════════════════════════════════════════════════════════════════════ */
+
+function HeroTypewriter({ prompts, reducedMotion }: { prompts: string[]; reducedMotion: boolean }) {
+  const [text, setText] = useState(prompts[0] ?? "")
+  const promptIdx = useRef(0)
+  const typedLen = useRef(0)
+  const typing = useRef(true)
+
+  useEffect(() => {
+    promptIdx.current = 0
+    typedLen.current = 0
+    typing.current = true
+    if (reducedMotion) {
+      setText(prompts[0] ?? "")
+      return
+    }
+    let cancelled = false
+    let timer: ReturnType<typeof setTimeout> | null = null
+    const tick = () => {
+      if (cancelled) return
+      const current = prompts[promptIdx.current] ?? ""
+      if (typing.current && typedLen.current < current.length) {
+        typedLen.current += 1
+        setText(current.slice(0, typedLen.current))
+        timer = setTimeout(tick, 40)
+      } else if (typing.current) {
+        timer = setTimeout(() => { typing.current = false; tick() }, 1800)
+      } else if (typedLen.current > 0) {
+        typedLen.current -= 1
+        setText(current.slice(0, typedLen.current))
+        timer = setTimeout(tick, 18)
+      } else {
+        promptIdx.current = (promptIdx.current + 1) % prompts.length
+        typing.current = true
+        tick()
+      }
+    }
+    tick()
+    return () => { cancelled = true; if (timer) clearTimeout(timer) }
+  }, [prompts, reducedMotion])
+
+  return (
+    <div className="mt-6 min-h-[22px] font-mono text-[13px] text-white/55">
+      <span className="text-emerald-400">→ </span>
+      {text}
+      {!reducedMotion && (
+        <span
+          className="ml-0.5 inline-block h-[14px] w-[2px] translate-y-[3px] bg-emerald-400"
+          style={{ animation: "heroCursor 1.2s ease-in-out infinite" }}
+        />
+      )}
+    </div>
+  )
+}
 
 function LiabilityPill({ liability }: { liability: Liability }) {
   const cls =
@@ -992,79 +1097,88 @@ function LiveCounter({ k, v, d, suffix }: { k: string; v: string; d: string; suf
 function schemeColor(scheme: UkScheme) {
   switch (scheme) {
     case "sds":
-      return "border border-emerald-500/40 bg-emerald-500/10 text-emerald-300"
-    case "mdp":
-      return "border border-violet-500/40 bg-violet-500/10 text-violet-300"
-    case "dps":
       return "border border-sky-500/40 bg-sky-500/10 text-sky-300"
-    case "tds":
+    case "mdp":
+      return "border border-emerald-500/40 bg-emerald-500/10 text-emerald-300"
+    case "dps":
       return "border border-amber-500/40 bg-amber-500/10 text-amber-300"
+    case "tds":
+      return "border border-violet-500/40 bg-violet-500/10 text-violet-300"
   }
 }
 
 function schemeDotColor(scheme: UkScheme) {
   switch (scheme) {
-    case "sds": return "#10b981"
-    case "mdp": return "#8b5cf6"
-    case "dps": return "#0ea5e9"
-    case "tds": return "#f59e0b"
+    case "sds": return "#7dd3fc"
+    case "mdp": return "#6ee7b7"
+    case "dps": return "#fcd34d"
+    case "tds": return "#c4b5fd"
   }
 }
 
 function UKMap({ pulseIdx, reducedMotion }: { pulseIdx: number | null; reducedMotion: boolean }) {
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-white/[0.05] bg-gradient-to-b from-white/[0.03] to-transparent p-4">
-      <div className="relative aspect-[4/5] w-full">
-        <div
-          className="absolute inset-0 opacity-[0.04]"
-          style={{ backgroundImage: "radial-gradient(circle at 1px 1px, white 1px, transparent 0)", backgroundSize: "24px 24px" }}
-        />
-        <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-          {UK_CONNECTIONS.map(([a, b], i) => (
-            <line
-              key={i}
-              x1={UK_CITIES[a].x}
-              y1={UK_CITIES[a].y}
-              x2={UK_CITIES[b].x}
-              y2={UK_CITIES[b].y}
-              stroke="rgba(16,185,129,0.18)"
-              strokeWidth="0.18"
-              strokeDasharray="0.8 0.8"
-            />
-          ))}
-        </svg>
-        {UK_CITIES.map((c, i) => {
-          const isPulse = pulseIdx === i
-          return (
+    <div
+      className="relative overflow-hidden rounded-[20px] border border-white/[0.05] aspect-[4/5] lg:aspect-auto lg:min-h-[560px]"
+      style={{
+        backgroundImage:
+          "radial-gradient(ellipse at 45% 55%, rgba(16,185,129,0.06), transparent 60%), linear-gradient(to bottom, rgba(255,255,255,0.02), rgba(255,255,255,0.005))",
+      }}
+    >
+      <div
+        className="pointer-events-none absolute inset-0 opacity-60"
+        style={{
+          backgroundImage: "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.05) 1px, transparent 0)",
+          backgroundSize: "28px 28px",
+        }}
+      />
+      <svg className="pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+        {UK_CONNECTIONS.map(([a, b], i) => (
+          <line
+            key={i}
+            x1={UK_CITIES[a].x}
+            y1={UK_CITIES[a].y}
+            x2={UK_CITIES[b].x}
+            y2={UK_CITIES[b].y}
+            stroke="rgba(16,185,129,0.08)"
+            strokeWidth="0.15"
+            strokeDasharray="0.8 0.8"
+          />
+        ))}
+      </svg>
+      {UK_CITIES.map((c, i) => {
+        const isPulse = pulseIdx === i && !reducedMotion
+        const color = schemeDotColor(c.scheme)
+        return (
+          <div
+            key={c.name}
+            className="group absolute z-[2]"
+            style={{ left: `${c.x}%`, top: `${c.y}%`, transform: "translate(-50%, -50%)" }}
+          >
             <div
-              key={c.name}
-              className="group absolute"
-              style={{ left: `${c.x}%`, top: `${c.y}%`, transform: "translate(-50%, -50%)" }}
-            >
+              className="relative h-2 w-2 rounded-full"
+              style={{ backgroundColor: color, boxShadow: `0 0 10px ${color}` }}
+            />
+            {isPulse && (
               <div
-                className="relative h-2 w-2 rounded-full"
-                style={{ backgroundColor: schemeDotColor(c.scheme), boxShadow: `0 0 8px ${schemeDotColor(c.scheme)}` }}
+                className="pointer-events-none absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full"
+                style={{
+                  backgroundColor: color,
+                  animation: "ukPing 2.4s ease-out",
+                }}
               />
-              {isPulse && !reducedMotion && (
-                <>
-                  <div
-                    className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 animate-ping rounded-full"
-                    style={{ backgroundColor: schemeDotColor(c.scheme), opacity: 0.6 }}
-                  />
-                  <div
-                    className="absolute left-1/2 top-1/2 h-8 w-8 -translate-x-1/2 -translate-y-1/2 animate-ping rounded-full opacity-30"
-                    style={{ backgroundColor: schemeDotColor(c.scheme) }}
-                  />
-                </>
-              )}
-              <span className="pointer-events-none absolute left-1/2 top-full mt-1.5 -translate-x-1/2 whitespace-nowrap rounded border border-white/10 bg-black/80 px-1.5 py-0.5 font-mono text-[9px] text-white/70 opacity-0 transition-opacity group-hover:opacity-100">
-                {c.name} · {c.pc} · {c.scheme.toUpperCase()}
-              </span>
-            </div>
-          )
-        })}
-      </div>
-      <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-[10px] text-white/55">
+            )}
+            <span
+              className={`pointer-events-none absolute left-1/2 top-3 -translate-x-1/2 whitespace-nowrap rounded border border-white/[0.05] bg-[rgba(5,7,14,0.75)] px-1.5 py-0.5 font-mono text-[9px] text-white/60 backdrop-blur-sm transition-opacity ${
+                isPulse ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+              }`}
+            >
+              {c.name} · {c.pc} · {c.scheme.toUpperCase()}
+            </span>
+          </div>
+        )
+      })}
+      <div className="absolute inset-x-4 bottom-4 z-[3] flex flex-wrap gap-x-4 gap-y-2 rounded-[10px] border border-white/[0.05] bg-[rgba(5,7,14,0.5)] px-3.5 py-2.5 text-[10px] backdrop-blur">
         {([
           { k: "sds", l: "SafeDeposits Scotland" },
           { k: "mdp", l: "mydeposits" },
@@ -1072,8 +1186,11 @@ function UKMap({ pulseIdx, reducedMotion }: { pulseIdx: number | null; reducedMo
           { k: "tds", l: "TDS" },
         ] as const).map((s) => (
           <span key={s.k} className="inline-flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: schemeDotColor(s.k) }} />
-            {s.l}
+            <span
+              className="h-[7px] w-[7px] rounded-full"
+              style={{ backgroundColor: schemeDotColor(s.k), boxShadow: `0 0 6px ${schemeDotColor(s.k)}` }}
+            />
+            <span className="font-mono text-[10px] text-white/70">{s.l}</span>
           </span>
         ))}
       </div>
