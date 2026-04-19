@@ -2,24 +2,49 @@ import Link from 'next/link'
 import { MarketingShell } from '@/app/components/MarketingShell'
 import { createMarketingMetadata } from '@/lib/marketing-metadata'
 
-const securityPrinciples = [
+type Badge = { ic: string; t: string; d: string }
+
+const BADGES: Badge[] = [
+  { ic: 'GDPR', t: 'UK GDPR and DPA 2018', d: 'Full data subject rights. Access, erasure, and portability handled inside the statutory time limits.' },
+  { ic: 'ICO', t: 'ICO registered', d: "Information Commissioner's Office registration ZC112030. Renewed every year." },
+  { ic: 'UK', t: 'Data in London', d: 'Supabase on AWS eu-west-2. Vercel frontend routed through London edge. Automated daily backups.' },
+  { ic: 'AES', t: 'Encrypted everywhere', d: 'TLS in transit, AES-256 at rest. Tokens, session credentials, and API keys use least privilege.' },
+]
+
+type Pillar = { title: string; intro: string; bullets: string[] }
+
+const PILLARS: Pillar[] = [
   {
-    title: 'Data isolation',
-    body: 'Every workspace is fully isolated at the database level. Tenant data, evidence, and case records are scoped and access-controlled throughout the stack.',
+    title: 'Your data is yours.',
+    intro:
+      'You stay the data controller. We act as your processor. Tenancy data processed by AI is never used to train models and never shared outside Renovo.',
+    bullets: [
+      'Per workspace database isolation',
+      'Three year default retention, custom on Enterprise',
+      'Deletion inside 90 days of contract end',
+    ],
   },
   {
-    title: 'Encryption',
-    body: 'All data is encrypted in transit via TLS and at rest using AES-256. Authentication tokens, session credentials, and API keys follow least-privilege principles.',
+    title: 'Every decision is logged.',
+    intro:
+      'Every AI draft, every manager edit, every liability reassignment is logged with actor, timestamp, and reason. Records cannot be edited or deleted inside the workspace.',
+    bullets: [
+      'Tamper evident case history',
+      'Replayable to any point in time',
+      'Exportable as a signed PDF for adjudication',
+    ],
   },
   {
-    title: 'Access control',
-    body: 'Role-based permissions govern every operator action. Manager sign-off, audit trails, and scoped API access are built into the workflow — not bolted on.',
+    title: 'Access is controlled.',
+    intro:
+      'Role-based permissions with manager sign-off. Property managers see their assigned cases. Branch managers see the whole portfolio. Sessions time out automatically. Enterprise customers use single sign-on.',
+    bullets: [
+      'Single sign-on via Microsoft Entra ID (Enterprise)',
+      'Least privilege API tokens',
+      'Responsible disclosure to security@renovoai.co.uk',
+    ],
   },
-  {
-    title: 'Infrastructure',
-    body: 'Renovo AI runs on hardened cloud infrastructure with automated patching, monitoring, and incident response. We do not self-host customer data on shared hardware.',
-  },
-] as const
+]
 
 const reportItems = [
   'A clear summary of the issue and the affected area',
@@ -53,7 +78,7 @@ const disclosureGuidelines = [
 export const metadata = createMarketingMetadata({
   title: 'Security | Renovo AI',
   description:
-    'How Renovo AI protects customer data, infrastructure security practices, and responsible disclosure policy.',
+    'UK hosted, audit first, humans decide. How Renovo AI protects customer data, compliance posture, and responsible disclosure policy.',
   path: '/security',
 })
 
@@ -61,55 +86,81 @@ export default function SecurityPage() {
   return (
     <MarketingShell currentPath="/security">
       <div className="page-shell page-stack">
+        {/* HERO */}
         <section className="page-hero">
-          <p className="app-kicker">Security</p>
+          <p className="app-kicker">Security and compliance</p>
           <h1 className="page-title max-w-[820px]">
-            Built for trust from <em className="text-slate-400">day one</em>
+            UK hosted. Audit first. <em className="text-slate-400">Humans decide.</em>
           </h1>
-          <p className="page-copy max-w-[640px]">
-            Renovo AI handles sensitive property, tenancy, and financial data on behalf of
-            letting agencies and property managers. Security is a core requirement of the
-            platform — not an afterthought.
+          <p className="page-copy max-w-[720px]">
+            Every workspace is isolated at database level. Every action is timestamped and attributed. Tenancy data processed by AI is never used for model training and never shared outside Renovo.
           </p>
         </section>
 
-        {/* Security principles */}
-        <section className="section-tinted">
-          <div className="mx-auto max-w-[1080px] px-6 py-24">
-            <p className="app-kicker">How we protect your data</p>
-            <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
-              Security <em className="text-slate-400">principles</em>
-            </h2>
-            <div className="mt-14 grid gap-10 md:grid-cols-2">
-              {securityPrinciples.map((item) => (
-                <div key={item.title}>
-                  <h3 className="text-[15px] font-semibold text-zinc-950">{item.title}</h3>
-                  <p className="mt-2 text-sm leading-7 text-slate-500">{item.body}</p>
+        {/* COMPLIANCE BADGES */}
+        <section className="mx-auto w-full max-w-[1200px] px-6 pt-8">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {BADGES.map((b) => (
+              <div key={b.ic} className="rounded-xl border border-slate-200 bg-white p-5">
+                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg border border-emerald-500/25 bg-emerald-50 font-mono text-[11px] font-semibold tracking-tight text-emerald-700">
+                  {b.ic}
                 </div>
-              ))}
-            </div>
+                <div className="text-[14px] font-semibold text-zinc-950">{b.t}</div>
+                <p className="mt-1.5 text-[13px] leading-relaxed text-slate-500">{b.d}</p>
+              </div>
+            ))}
           </div>
         </section>
 
-        {/* Responsible disclosure */}
-        <div className="mx-auto w-full max-w-[780px]">
-          <section className="page-section">
-            <h2 className="text-[clamp(1.5rem,3vw,2rem)] leading-[1.12] text-zinc-950">
-              Responsible disclosure
-            </h2>
-            <div className="mt-5 space-y-4 text-base leading-8 text-zinc-600">
-              <p>
-                We welcome responsible disclosure and good-faith security research. If you
-                identify a vulnerability in systems we control, we want to hear about it quickly
-                and clearly so we can investigate and respond appropriately.
+        {/* THREE PILLARS */}
+        <section className="mx-auto w-full max-w-[1200px] px-6 pt-16">
+          <div className="grid gap-6 lg:grid-cols-3">
+            {PILLARS.map((p) => (
+              <div key={p.title} className="rounded-2xl border border-slate-200 bg-white p-7">
+                <h3 className="text-[17px] font-semibold leading-tight text-zinc-950">{p.title}</h3>
+                <p className="mt-3 text-sm leading-relaxed text-slate-600">{p.intro}</p>
+                <ul className="mt-5 space-y-2 border-t border-slate-100 pt-5">
+                  {p.bullets.map((b) => (
+                    <li key={b} className="flex items-start gap-2.5 text-[13px] leading-relaxed text-slate-600">
+                      <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-emerald-500" />
+                      <span>{b}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* DISCLOSURE HEADER CARD */}
+        <section className="mx-auto w-full max-w-[1200px] px-6 pt-16">
+          <div className="grid gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-7 md:grid-cols-[1fr_auto] md:items-center">
+            <div>
+              <p className="app-kicker">Responsible disclosure</p>
+              <div className="mt-2 text-[17px] font-semibold text-zinc-950">
+                Found a vulnerability? Tell us directly.
+              </div>
+              <p className="mt-2 text-sm leading-relaxed text-slate-600">
+                Email{' '}
+                <a className="font-medium text-emerald-700 underline decoration-emerald-200 underline-offset-2 hover:decoration-emerald-500" href="mailto:security@renovoai.co.uk">
+                  security@renovoai.co.uk
+                </a>{' '}
+                with the steps to reproduce, the affected endpoints, and the security impact. We triage inside four working hours and fix critical issues quickly.
               </p>
             </div>
-          </section>
+            <a
+              href="mailto:security@renovoai.co.uk"
+              className="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:border-slate-400 hover:bg-slate-50"
+            >
+              Email security team &rarr;
+            </a>
+          </div>
+        </section>
 
+        {/* DISCLOSURE POLICY DETAIL */}
+        <div className="mx-auto w-full max-w-[780px]">
           <section className="page-section">
-            <h2 className="text-[clamp(1.5rem,3vw,2rem)] leading-[1.12] text-zinc-950">
-              How to report
-            </h2>
+            <h2 className="text-[clamp(1.5rem,3vw,2rem)] leading-[1.12] text-zinc-950">How to report</h2>
             <div className="mt-6 rounded-xl border border-zinc-200 bg-zinc-50 p-6">
               <p className="text-sm font-semibold text-zinc-950">Email</p>
               <a
@@ -145,9 +196,7 @@ export default function SecurityPage() {
           </section>
 
           <section className="page-section">
-            <h2 className="text-[clamp(1.5rem,3vw,2rem)] leading-[1.12] text-zinc-950">
-              Out of scope
-            </h2>
+            <h2 className="text-[clamp(1.5rem,3vw,2rem)] leading-[1.12] text-zinc-950">Out of scope</h2>
             <ul className="mt-6 space-y-4">
               {outOfScopeItems.map((item) => (
                 <li key={item} className="flex items-start gap-3 text-sm leading-7 text-zinc-600">
@@ -159,9 +208,7 @@ export default function SecurityPage() {
           </section>
 
           <section className="page-section">
-            <h2 className="text-[clamp(1.5rem,3vw,2rem)] leading-[1.12] text-zinc-950">
-              Compensation
-            </h2>
+            <h2 className="text-[clamp(1.5rem,3vw,2rem)] leading-[1.12] text-zinc-950">Compensation</h2>
             <div className="mt-5 space-y-4 text-base leading-8 text-zinc-600">
               <p>
                 Renovo may offer compensation for qualifying reports where the finding is original,
@@ -176,9 +223,7 @@ export default function SecurityPage() {
           </section>
 
           <section className="page-section">
-            <h2 className="text-[clamp(1.5rem,3vw,2rem)] leading-[1.12] text-zinc-950">
-              Disclosure guidelines
-            </h2>
+            <h2 className="text-[clamp(1.5rem,3vw,2rem)] leading-[1.12] text-zinc-950">Disclosure guidelines</h2>
             <ul className="mt-6 space-y-4">
               {disclosureGuidelines.map((item) => (
                 <li key={item} className="flex items-start gap-3 text-sm leading-7 text-zinc-600">
@@ -189,24 +234,31 @@ export default function SecurityPage() {
             </ul>
           </section>
 
+          {/* PROCUREMENT CTA */}
           <section className="page-section-compact pb-0">
-            <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-6">
-              <p className="app-kicker">Report a security issue</p>
-              <h2 className="mt-4 text-[clamp(1.5rem,3vw,2rem)] leading-[1.12] text-zinc-950">
-                Send responsible disclosure reports to <em>security@renovoai.co.uk</em>
-              </h2>
-              <p className="mt-4 max-w-[640px] text-sm leading-7 text-zinc-600">
-                Please include reproduction steps, affected endpoints or routes, and the security
-                impact. Compensation, where offered, is discretionary and based on severity,
-                impact, and report quality.
-              </p>
-              <div className="mt-6">
+            <div className="grid gap-4 rounded-xl border border-zinc-200 bg-zinc-50 p-6 md:grid-cols-[1fr_auto] md:items-center">
+              <div>
+                <p className="app-kicker">Procurement review?</p>
+                <h2 className="mt-3 text-[clamp(1.25rem,2.5vw,1.5rem)] leading-tight text-zinc-950">
+                  Send your security team our way.
+                </h2>
+                <p className="mt-3 text-sm leading-7 text-zinc-600">
+                  We return DPA, pre-filled questionnaire, and compliance details same business day for Portfolio 365+ customers.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
                 <a
                   href="mailto:security@renovoai.co.uk"
-                  className="app-primary-button rounded-md px-6 py-3 text-sm font-medium"
+                  className="app-primary-button rounded-md px-5 py-2.5 text-sm font-medium"
                 >
-                  Email security@renovoai.co.uk
+                  Email security team
                 </a>
+                <Link
+                  href="/book-demo"
+                  className="inline-flex items-center rounded-md border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:border-slate-400 hover:bg-slate-50"
+                >
+                  Book a technical demo
+                </Link>
               </div>
             </div>
           </section>

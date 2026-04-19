@@ -68,9 +68,9 @@ export default function ComplianceClient() {
         <section className="page-hero">
           <p className="app-kicker">Compliance</p>
           <h1 className="page-title max-w-[820px]">
-            Security, privacy, and <em className="text-slate-400">data handling</em>
+            UK registered. <em className="text-slate-400">UK hosted. UK audited.</em>
           </h1>
-          <p className="page-copy max-w-[640px]">
+          <p className="page-copy max-w-[720px]">
             Renovo AI processes tenancy evidence, liability assessments, and
             deposit decisions. This page outlines how that data is hosted,
             accessed, retained, and protected.

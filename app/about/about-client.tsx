@@ -9,11 +9,10 @@ export default function AboutClient() {
         <section className="page-hero">
           <p className="app-kicker">About</p>
           <h1 className="page-title max-w-[820px]">
-            Enterprise software for <em className="text-slate-400">end of tenancy operations</em>
+            Built by a team that runs <em className="text-slate-400">end of tenancy operations.</em>
           </h1>
-          <p className="page-copy max-w-[640px]">
-            Renovo AI automates the operational layer between checkout evidence
-            and documented deposit decisions for UK letting agencies.
+          <p className="page-copy max-w-[720px]">
+            Renovo is the operating layer between checkout evidence and defensible deposit decisions. We chose a narrow scope on purpose. We solve one workflow, thoroughly, rather than building a broad property platform.
           </p>
         </section>
 
@@ -99,12 +98,25 @@ export default function AboutClient() {
 
           <div className="mt-14 grid gap-10 md:grid-cols-3">
             {[
-              { h: "AI assists, humans decide", p: "Renovo drafts. Property managers approve, amend, or reject." },
-              { h: "Built for operational use", p: "Shaped around live portfolio pressure, not theoretical workflows." },
-              { h: "Defensible output matters", p: "Evidence, proportionality, and a reviewable trail at every step." },
+              {
+                n: "01",
+                h: "AI assists, humans decide.",
+                p: "The system drafts. Every liability assessment, every deduction, every letter needs a named manager to approve it. Nothing sends itself. No silent state changes. No AI signing off on anything that ends up in front of a tenant.",
+              },
+              {
+                n: "02",
+                h: "Built for operational use.",
+                p: "Developed around real portfolio pressures. Volume, timing, staff turnover. Not theoretical scenarios. The founding team manages end of tenancy for live residential lettings portfolios.",
+              },
+              {
+                n: "03",
+                h: "Defensible output matters.",
+                p: "Every decision has to survive the scheme. Evidence, proportionality, audit trails, and scheme-ready language are not optional extras. They are the product.",
+              },
             ].map((c) => (
-              <div key={c.h}>
-                <h3 className="text-[15px] font-semibold text-zinc-950">{c.h}</h3>
+              <div key={c.n}>
+                <p className="font-mono text-xs font-semibold tracking-wide text-emerald-600">{c.n}</p>
+                <h3 className="mt-2 text-[15px] font-semibold text-zinc-950">{c.h}</h3>
                 <p className="mt-2 text-sm leading-7 text-slate-500">{c.p}</p>
               </div>
             ))}

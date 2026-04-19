@@ -28,11 +28,10 @@ export default function InvestorsPage() {
         <section className="page-hero">
           <p className="app-kicker">Investors</p>
           <h1 className="page-title max-w-[860px]">
-            The operating layer between checkout evidence and <em className="text-slate-400">defensible deduction decisions</em>
+            Pre-seed. <em className="text-slate-400">Disciplined scope.</em>
           </h1>
-          <p className="page-copy max-w-[640px]">
-            Renovo AI gives letting agencies a structured route from checkout report to
-            liability assessment, deduction letter, landlord review, and dispute pack preparation.
+          <p className="page-copy max-w-[720px]">
+            UK letting agencies handle roughly four million tenancies a year through fragmented checkout admin. Outcomes depend heavily on the completeness of the evidence pack when a dispute reaches the scheme. Renovo solves that narrow, defensible workflow. Not the whole property stack.
           </p>
         </section>
 

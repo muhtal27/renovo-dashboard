@@ -81,11 +81,10 @@ export default async function ChangelogPage() {
             Changelog
           </p>
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-zinc-950 md:text-4xl">
-            What&apos;s new in Renovo AI
+            What shipped, and when.
           </h1>
-          <p className="mt-3 text-base text-zinc-500">
-            All the latest features, improvements, and fixes shipped to the
-            platform. Subscribe to stay in the loop.
+          <p className="mt-3 text-base leading-7 text-zinc-500">
+            Every material product change, tagged with a version and a date. Breaking changes and API additions are called out so integration partners have time to plan.
           </p>
         </header>
 

@@ -1,13 +1,36 @@
-import { redirect } from 'next/navigation'
-import { createMarketingMetadata } from '@/lib/marketing-metadata'
+import IntegrationsClient from '@/app/integrations/integrations-client'
+import {
+  createMarketingMetadata,
+  createWebPageJsonLd,
+  serializeJsonLd,
+} from '@/lib/marketing-metadata'
+
+const title = 'Integrations | Renovo AI'
+const description =
+  'Every UK deposit scheme and the CRM, inventory, accounting, and signature tools UK letting agencies already run. Connectors, webhooks, and a public REST API.'
 
 export const metadata = createMarketingMetadata({
-  title: 'Integrations | Renovo AI',
-  description: 'Renovo AI integrations for end of tenancy workflows.',
+  title,
+  description,
   path: '/integrations',
-  noIndex: true,
 })
 
 export default function IntegrationsPage() {
-  redirect('/contact')
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: serializeJsonLd([
+            createWebPageJsonLd({
+              path: '/integrations',
+              title,
+              description,
+            }),
+          ]),
+        }}
+      />
+      <IntegrationsClient />
+    </>
+  )
 }

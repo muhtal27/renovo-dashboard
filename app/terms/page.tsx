@@ -24,8 +24,10 @@ export default function TermsPage() {
 
         <section className="page-hero">
           <p className="app-kicker">Terms</p>
-          <h1 className="page-title max-w-[820px]">Website terms</h1>
-          <p className="page-copy max-w-[640px]">
+          <h1 className="page-title max-w-[820px]">
+            Plain terms. <em className="text-slate-400">Rolling monthly.</em>
+          </h1>
+          <p className="page-copy max-w-[720px]">
             These terms apply to your use of the Renovo AI marketing site, live demo,
             and contact routes. They do not replace any separate customer agreement for
             live product use.

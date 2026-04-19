@@ -103,12 +103,14 @@ export default function PricingPageClient() {
               </p>
 
               <div className="mt-6 border-t border-zinc-200 pt-6">
+                <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">Always included</p>
                 <ul className="space-y-3">
                   {[
-                    'Let-only tenancies only',
-                    'Unlimited users',
-                    'Full Renovo AI workflow included',
-                    'No credit card required',
+                    'Full case workspace and evidence management',
+                    'AI drafted liability assessments',
+                    'Approval workflows and audit trail',
+                    'Dispute pack generation (PDF)',
+                    'Custom templates, unlimited seats',
                   ].map((f) => (
                     <li key={f} className="flex items-start gap-3 text-sm leading-7 text-slate-600">
                       <span className="mt-1.5 text-sm font-semibold text-emerald-500">✓</span>
@@ -143,12 +145,14 @@ export default function PricingPageClient() {
               </p>
 
               <div className="mt-6 border-t border-zinc-200 pt-6">
+                <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">Everything in Free, plus</p>
                 <ul className="space-y-3">
                   {[
-                    'Let-only tenancies included at no extra cost',
-                    'Stack blocks as your portfolio grows',
-                    'Unlimited users',
-                    'Full platform access. No contract',
+                    'Fully managed tenancy workflow',
+                    'Scheme submission (TDS, DPS, mydeposits, SDS)',
+                    'Unlimited users, no contract',
+                    'First month free',
+                    'Priority email support',
                   ].map((f) => (
                     <li key={f} className="flex items-start gap-3 text-sm leading-7 text-slate-600">
                       <span className="mt-1.5 text-sm font-semibold text-emerald-500">✓</span>
@@ -182,12 +186,14 @@ export default function PricingPageClient() {
               </p>
 
               <div className="mt-6 border-t border-zinc-300 pt-6">
+                <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">Everything in Portfolio 365, plus</p>
                 <ul className="space-y-3">
                   {[
-                    '1,825+ fully managed tenancies',
-                    'Multi-branch groups',
-                    'Custom rollout and integrations',
-                    'Tailored commercial terms',
+                    'Single sign-on via Microsoft Entra ID',
+                    'Custom data retention',
+                    'Custom integrations and API access',
+                    'Named account manager and SLA',
+                    'Security review pack on request',
                   ].map((f) => (
                     <li key={f} className="flex items-start gap-3 text-sm leading-7 text-slate-700">
                       <span className="mt-1.5 text-sm font-semibold text-emerald-500">✓</span>

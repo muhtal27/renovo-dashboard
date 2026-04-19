@@ -54,11 +54,10 @@ export default function CareersPage() {
         <section className="page-hero">
           <p className="app-kicker">Careers</p>
           <h1 className="page-title max-w-[820px]">
-            Join Renovo AI
+            No open roles right now. <em className="text-slate-400">Get in touch anyway.</em>
           </h1>
-          <p className="page-copy max-w-[640px]">
-            We are building the operating system for end of tenancy in the UK.
-            Small team. Real product. Real customers. A lot left to build.
+          <p className="page-copy max-w-[720px]">
+            We do not run on a hiring schedule. If you have built something relevant, shipped features, solved operational problems, or worked inside a regulated workflow, we want to hear from you.
           </p>
         </section>
 

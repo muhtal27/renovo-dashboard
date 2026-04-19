@@ -11,11 +11,10 @@ export default function InsightsClient() {
         <section className="page-hero">
           <p className="app-kicker">Insights</p>
           <h1 className="page-title max-w-[820px]">
-            Research, updates, and <em className="text-slate-400">industry analysis</em>
+            Coming soon. <em className="text-slate-400">The UK end of tenancy landscape.</em>
           </h1>
-          <p className="page-copy max-w-[640px]">
-            Market research, product developments, and thinking on end of tenancy
-            operations for UK property managers.
+          <p className="page-copy max-w-[720px]">
+            We are preparing our first set of insights. Market research, product updates, and practical analysis for operations teams. Check back shortly, or join the short list to hear when the first piece goes out.
           </p>
         </section>
 

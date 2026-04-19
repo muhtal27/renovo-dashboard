@@ -34,11 +34,12 @@ export default function ComplaintsPage() {
       <div className="page-shell page-stack">
 
         <section className="page-hero">
-          <p className="app-kicker">Complaints</p>
-          <h1 className="page-title max-w-[820px]">Complaints procedure</h1>
-          <p className="page-copy max-w-[640px]">
-            We take all complaints seriously. If something has gone wrong, we want
-            to know about it so we can put it right and improve our service.
+          <p className="app-kicker">Complaints procedure</p>
+          <h1 className="page-title max-w-[820px]">
+            Something gone wrong? <em className="text-slate-400">Tell us directly.</em>
+          </h1>
+          <p className="page-copy max-w-[720px]">
+            We take every complaint seriously, whether it is about the platform, a billing issue, a support experience, or a data handling concern. This page sets out how to raise one, what we will do, and how long it will take.
           </p>
         </section>
 

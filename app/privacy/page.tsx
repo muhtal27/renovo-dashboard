@@ -39,11 +39,11 @@ export default function PrivacyPage() {
 
         <section className="page-hero">
           <p className="app-kicker">Privacy</p>
-          <h1 className="page-title max-w-[820px]">Privacy notice</h1>
-          <p className="page-copy max-w-[640px]">
-            Renovo AI is committed to handling personal and operational information
-            responsibly. We aim to use data carefully, securely, and only where it
-            supports the delivery and improvement of the service.
+          <h1 className="page-title max-w-[820px]">
+            How we look after <em className="text-slate-400">your tenancy data.</em>
+          </h1>
+          <p className="page-copy max-w-[720px]">
+            Renovo AI Ltd is registered with the ICO (ZC112030). We act as your data processor under the UK GDPR and the Data Protection Act 2018. You stay the data controller for all tenancy, landlord, and tenant information in your workspace.
           </p>
           <p className="mt-4 text-sm text-slate-500">
             Renovo AI Ltd is registered with the Information Commissioner&apos;s Office (ICO). Registration reference: ZC112030.
