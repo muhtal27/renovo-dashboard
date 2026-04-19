@@ -591,15 +591,21 @@ export function DevelopersPageClient() {
         {/* Hero */}
         <header className="mb-16" id="overview">
           <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-400">
-            Developer Documentation
+            Developers
           </p>
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-white md:text-4xl">
-            Renovo Public API
+            A clean REST API. <em className="font-bold not-italic text-white/45">A sandbox for every build.</em>
           </h1>
           <p className="mt-3 max-w-2xl text-base leading-relaxed text-white/55">
-            Integrate your property management or inventory platform with Renovo.
-            Push inspections, read cases, download documents, and receive real-time
-            webhooks &mdash; all through a single REST API.
+            Production on{' '}
+            <code className="rounded bg-white/[0.05] px-1.5 py-0.5 font-mono text-[13px] text-emerald-300">
+              api.renovoai.co.uk/v1
+            </code>
+            . Sandbox on{' '}
+            <code className="rounded bg-white/[0.05] px-1.5 py-0.5 font-mono text-[13px] text-emerald-300">
+              api.sandbox.renovoai.co.uk/v1
+            </code>
+            . OAuth&nbsp;2.0 Client Credentials in production using short-lived JWTs. Long-lived keys in sandbox.
           </p>
 
           <div className="mt-8 flex flex-wrap gap-3">

@@ -57,31 +57,14 @@ export default function PricingPageClient() {
       <div className="page-shell page-stack">
 
         {/* ── HERO ── */}
-        <section className="page-hero text-center">
+        <section className="page-hero">
           <p className="app-kicker">Pricing</p>
-          <h1 className="page-title mx-auto max-w-[820px]">
-            Pricing for <em className="text-white/45">managed portfolios</em>
+          <h1 className="page-title max-w-[860px]">
+            Transparent. Stackable. <em className="text-white/45">No setup fees, no contracts.</em>
           </h1>
-          <p className="page-copy mx-auto max-w-[760px]">
-            Free for let-only portfolios. Simple block pricing for fully managed
-            tenancies. No setup fees. No contract.
+          <p className="page-copy max-w-[760px]">
+            Let-only tenancies are always free. Fully managed tenancies scale in blocks. Add more as your portfolio grows. Prices exclude VAT. Monthly rolling, cancel whenever you like.
           </p>
-        </section>
-
-        {/* ── TRUST STRIP ── */}
-        <section className="mx-auto flex max-w-[820px] flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm font-medium text-white/55">
-          <span className="flex items-center gap-2">
-            <span className="text-emerald-500">✓</span> No setup fees
-          </span>
-          <span className="flex items-center gap-2">
-            <span className="text-emerald-500">✓</span> No contract
-          </span>
-          <span className="flex items-center gap-2">
-            <span className="text-emerald-500">✓</span> Free for let-only
-          </span>
-          <span className="flex items-center gap-2">
-            <span className="text-emerald-500">✓</span> Unlimited users
-          </span>
         </section>
 
         {/* ── PLAN CARDS ── */}

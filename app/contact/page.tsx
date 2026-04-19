@@ -41,12 +41,10 @@ export default function ContactPage() {
             <section className="page-hero">
               <p className="app-kicker">Contact</p>
               <h1 className="page-title max-w-[720px]">
-                Talk to Renovo AI about your <em className="text-white/45">checkout workflow</em>
+                Get in touch. <em className="text-white/45">We reply directly.</em>
               </h1>
-              <p className="page-copy max-w-[640px]">
-                Use the form for product enquiries, partnerships, investor conversations,
-                or general questions. Include context about how your team handles deduction
-                letters, liability assessments, or dispute packs and we will reply directly.
+              <p className="page-copy max-w-[720px]">
+                No ticket systems, no round robin. Messages go straight to the relevant team member and we reply inside one working day.
               </p>
 
               <div className="mt-8 grid gap-3 text-sm leading-7 text-white/55">

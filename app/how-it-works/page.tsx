@@ -43,31 +43,31 @@ const workflowSteps = [
 
 const controls = [
   {
-    title: 'Human approval at every stage',
-    body: 'Renovo drafts the liability assessment and deduction position. Your team decides what is sent, changed, or rejected. The AI never acts without sign-off.',
+    title: 'No automated deposit decisions.',
+    body: 'Renovo drafts the liability assessment and the deduction position. Your team decides what is sent, changed, or rejected. The AI never acts without a named manager sign-off.',
   },
   {
-    title: 'Case-level audit trail',
-    body: 'Notes, edits, evidence references, approvals, and rejections stay attached to the case file. The trail is immutable and supports scheme level scrutiny.',
+    title: 'Every edit captured. Nothing overwritten.',
+    body: 'Notes, edits, evidence references, approvals, and rejections stay attached to the case file. The trail is immutable inside the workspace and supports scheme-level scrutiny.',
   },
   {
-    title: 'Operational consistency',
-    body: 'Fair wear and tear guidance, betterment calculations, evidence referencing, and scheme ready wording handled through one structured process across all managers.',
+    title: 'The same logic, across every case.',
+    body: 'Fair wear and tear guidance, betterment calculations, evidence referencing, and scheme-ready wording run through one structured process across every property manager and branch.',
   },
 ] as const
 
 const integrationAreas = [
   {
-    title: 'Inventory and inspection systems',
-    body: 'Bring check-in inventories and checkout reports, photographs, and supporting evidence into one review workflow.',
+    title: 'Reports come in pre-structured.',
+    body: 'Check-in and checkout reports arrive from InventoryBase, Inventory Hive, and No Letting Go in a format Renovo already understands. No copy, paste, or reformatting.',
   },
   {
-    title: 'Property management software',
-    body: 'Keep tenancy operations, checkout scheduling, and case preparation connected to the CRM record.',
+    title: 'Tenancy data stays in your CRM.',
+    body: 'Reapit, Jupix, Alto, and MRI Qube remain the source of truth for tenancies, landlords, and properties. Renovo writes outcomes back instead of pulling them away.',
   },
   {
-    title: 'Claim and dispute preparation',
-    body: 'Move from liability assessment to adjudication ready evidence pack without rebuilding the file for the deposit scheme.',
+    title: 'Scheme portals, one workflow.',
+    body: 'Adjudication bundles push directly into TDS, DPS, mydeposits, and SafeDeposits Scotland. No copying case records into four different portals.',
   },
 ] as const
 
@@ -87,12 +87,10 @@ export default function HowItWorksPage() {
         <section className="page-hero">
           <p className="app-kicker">How it works</p>
           <h1 className="page-title max-w-[860px]">
-            From checkout report to <em className="text-white/45">deposit decision</em>
+            From checkout report <em className="text-white/45">to deposit decision.</em>
           </h1>
-          <p className="page-copy max-w-[640px]">
-            Renovo fits around the way letting agencies already manage end of tenancy.
-            Reports, deduction letters, landlord recommendations, evidence packs, and
-            scheme escalation stay connected to the same case.
+          <p className="page-copy max-w-[720px]">
+            Renovo fits around the way UK letting agencies already manage end of tenancy. AI drafts the repeatable bits. Property managers approve where judgement matters. Scheme ready at every step.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link href="/book-demo" className="app-primary-button rounded-md px-6 py-3 text-sm font-medium">
@@ -109,11 +107,10 @@ export default function HowItWorksPage() {
           <div className="mx-auto max-w-[1080px] px-6 py-24">
             <p className="app-kicker">Product flow</p>
             <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-white">
-              Six steps from checkout to <em className="text-white/45">deposit release</em>
+              Checkout to deposit release, <em className="text-white/45">in one system.</em>
             </h2>
-            <p className="mt-3.5 max-w-[560px] text-base leading-8 text-white/55">
-              Start with the case file, move through evidence review and liability
-              assessment, then close through agreement or scheme escalation.
+            <p className="mt-3.5 max-w-[640px] text-base leading-8 text-white/55">
+              Start with the case file, move through evidence review and liability assessment, then close through agreement or scheme escalation. Six steps, one audit trail.
             </p>
 
             <div className="mt-14 divide-y divide-white/10">
