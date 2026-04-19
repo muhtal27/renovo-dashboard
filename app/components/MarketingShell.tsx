@@ -222,28 +222,28 @@ export function MarketingShell({
         {children}
       </main>
 
-      <footer className="relative z-10 border-t border-white/[0.04] bg-[#05070e] py-14">
+      <footer className="relative z-10 border-t border-white/[0.04] pb-10 pt-12">
         <div className="marketing-frame">
-          <div className="grid gap-10 border-b border-white/[0.04] pb-10 md:grid-cols-2 xl:grid-cols-[2fr_1fr_1fr_1fr]">
+          <div className="grid gap-10 md:grid-cols-2 xl:grid-cols-[1.5fr_1fr_1fr_1fr]">
             <div>
               <Link href="/" className="inline-flex items-center gap-2.5" aria-label="Renovo AI home">
                 <BrandMark size={26} />
               </Link>
-              <p className="mt-3 max-w-[280px] text-[13px] leading-[1.7] text-white/55">
+              <p className="mt-3 max-w-[280px] text-[13px] leading-[1.7] text-white/45">
                 Enterprise software for end of tenancy. Built for UK letting agencies. AI assists, humans decide.
               </p>
             </div>
 
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-400">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">
                 Product
               </p>
-              <nav className="mt-4 grid gap-0.5" aria-label="Footer product links">
+              <nav className="mt-4 grid gap-2.5" aria-label="Footer product links">
                 {footerProductLinks.map((item) => (
                   <Link
                     key={item.label}
                     href={item.href}
-                    className="text-[13px] leading-[2.3] text-white/50 transition-colors hover:text-white"
+                    className="text-[13px] text-white/65 transition-colors hover:text-white"
                   >
                     {item.label}
                   </Link>
@@ -252,15 +252,15 @@ export function MarketingShell({
             </div>
 
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-400">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">
                 Company
               </p>
-              <nav className="mt-4 grid gap-0.5" aria-label="Footer company links">
+              <nav className="mt-4 grid gap-2.5" aria-label="Footer company links">
                 {footerCompanyLinks.map((item) => (
                   <Link
                     key={item.label}
                     href={item.href}
-                    className="text-[13px] leading-[2.3] text-white/50 transition-colors hover:text-white"
+                    className="text-[13px] text-white/65 transition-colors hover:text-white"
                   >
                     {item.label}
                   </Link>
@@ -269,15 +269,15 @@ export function MarketingShell({
             </div>
 
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-400">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">
                 Legal
               </p>
-              <nav className="mt-4 grid gap-0.5" aria-label="Footer legal links">
+              <nav className="mt-4 grid gap-2.5" aria-label="Footer legal links">
                 {footerLegalLinks.map((item) => (
                   <Link
                     key={item.label}
                     href={item.href}
-                    className="text-[13px] leading-[2.3] text-white/50 transition-colors hover:text-white"
+                    className="text-[13px] text-white/65 transition-colors hover:text-white"
                   >
                     {item.label}
                   </Link>
@@ -286,7 +286,7 @@ export function MarketingShell({
             </div>
           </div>
 
-          <div className="mt-10 flex flex-col gap-2 text-xs text-white/40 md:flex-row md:items-center md:justify-between">
+          <div className="mt-12 flex flex-col items-center gap-3 border-t border-white/[0.04] pt-6 text-xs text-white/40 md:flex-row md:items-center md:justify-between">
             <span>Renovo AI Ltd · SC833544 · VAT GB483379648 · ICO ZC112030</span>
             <span>© 2026 Renovo AI Ltd</span>
           </div>

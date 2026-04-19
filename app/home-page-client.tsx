@@ -909,12 +909,18 @@ export default function HomePageClient() {
         <section className="border-y border-white/[0.04] bg-white/[0.008]">
           <div className="mx-auto max-w-[1280px] px-6 py-8 lg:px-10">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-2 text-[11px]">
-              <span className="font-semibold uppercase tracking-[0.18em] text-white/45">Live decision feed · UK schemes</span>
-              <span className="text-white/45">
-                <b className="font-mono font-semibold tabular-nums text-white">{feedCount.toLocaleString("en-GB")}</b> resolved · last 7 days
+              <span className="inline-flex items-center gap-2.5 font-semibold uppercase tracking-[0.18em] text-white/50">
+                <span
+                  className={`h-1.5 w-1.5 rounded-full bg-emerald-400 ${reducedMotion ? "" : "animate-pulse"}`}
+                  style={{ boxShadow: "0 0 8px #34d399" }}
+                />
+                Live decision feed · UK schemes
+              </span>
+              <span className="font-mono text-[10px] text-white/35">
+                <b className="font-medium text-emerald-300">{feedCount.toLocaleString("en-GB")}</b> resolved · last 7 days
               </span>
             </div>
-            <div className="relative overflow-hidden">
+            <div className="feed-track-wrap relative overflow-hidden">
               <div
                 className="pointer-events-none absolute inset-y-0 left-0 z-[2] w-[140px]"
                 style={{ background: "linear-gradient(90deg, #05070e, transparent)" }}
@@ -924,8 +930,8 @@ export default function HomePageClient() {
                 style={{ background: "linear-gradient(270deg, #05070e, transparent)" }}
               />
               <div
-                className="flex gap-3 whitespace-nowrap"
-                style={{ animation: reducedMotion ? undefined : "feedSlide 70s linear infinite", width: reducedMotion ? undefined : "max-content" }}
+                className="feed-track flex gap-3 whitespace-nowrap will-change-transform"
+                style={{ animation: reducedMotion ? undefined : "feedSlide 95s linear infinite", width: reducedMotion ? undefined : "max-content" }}
               >
                 {feedItems.map((d, i) => (
                   <FeedCard key={`${d.cite}-${i}`} d={d} />
@@ -961,23 +967,23 @@ export default function HomePageClient() {
       </main>
 
       {/* ═══ DARK FOOTER ═══ (dual_footer: keep parallel with MarketingShell) */}
-      <footer className="relative z-10 border-t border-white/[0.04] bg-[#05070e] px-6 py-14 lg:px-10">
+      <footer className="relative z-10 border-t border-white/[0.04] px-6 pb-10 pt-12 lg:px-10">
         <div className="mx-auto max-w-[1280px]">
-          <div className="grid gap-10 border-b border-white/[0.04] pb-10 md:grid-cols-2 xl:grid-cols-[2fr_1fr_1fr_1fr]">
+          <div className="grid gap-10 md:grid-cols-2 xl:grid-cols-[1.5fr_1fr_1fr_1fr]">
             <div>
               <Link href="/" className="inline-flex items-center gap-2.5" aria-label="Renovo AI home">
                 <BrandMark size={26} />
               </Link>
-              <p className="mt-3 max-w-[280px] text-[13px] leading-[1.7] text-white/55">
+              <p className="mt-3 max-w-[280px] text-[13px] leading-[1.7] text-white/45">
                 Enterprise software for end of tenancy. Built for UK letting agencies. AI assists, humans decide.
               </p>
             </div>
             {Object.entries(footerCols).map(([title, links]) => (
               <div key={title}>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-emerald-400">{title}</p>
-                <nav className="mt-4 grid gap-0.5">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">{title}</p>
+                <nav className="mt-4 grid gap-2.5">
                   {links.map((l) => (
-                    <Link key={l.href} href={l.href} className="text-[13px] leading-[2.3] text-white/50 transition-colors hover:text-white">
+                    <Link key={l.href} href={l.href} className="text-[13px] text-white/65 transition-colors hover:text-white">
                       {l.label}
                     </Link>
                   ))}
@@ -985,7 +991,7 @@ export default function HomePageClient() {
               </div>
             ))}
           </div>
-          <div className="mt-10 flex flex-col gap-2 pt-6 text-xs text-white/40 md:flex-row md:justify-between">
+          <div className="mt-12 flex flex-col items-center gap-3 border-t border-white/[0.04] pt-6 text-xs text-white/40 md:flex-row md:justify-between">
             <span>Renovo AI Ltd · SC833544 · VAT GB483379648 · ICO ZC112030</span>
             <span>© 2026 Renovo AI Ltd</span>
           </div>
@@ -995,7 +1001,7 @@ export default function HomePageClient() {
       <style jsx global>{`
         @keyframes feedSlide {
           from { transform: translateX(0); }
-          to { transform: translateX(-33.333%); }
+          to { transform: translateX(calc(-100% / 3)); }
         }
         @keyframes ukPing {
           0% { transform: translate(-50%, -50%) scale(1); opacity: 0.55; }
@@ -1005,6 +1011,7 @@ export default function HomePageClient() {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.25; }
         }
+        .feed-track-wrap:hover .feed-track { animation-play-state: paused; }
       `}</style>
     </div>
   )
@@ -1084,12 +1091,12 @@ function LiabilityPill({ liability }: { liability: Liability }) {
 function LiveCounter({ k, v, d, suffix }: { k: string; v: string; d: string; suffix?: string }) {
   return (
     <div className="rounded-2xl border border-white/[0.05] bg-gradient-to-b from-white/[0.03] to-transparent p-5">
-      <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/45">{k}</div>
-      <div className="mt-2 font-mono text-[36px] font-semibold tracking-[-0.03em] tabular-nums text-white">
+      <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/40">{k}</div>
+      <div className="mt-1.5 font-mono text-[30px] font-semibold leading-none tracking-[-0.02em] tabular-nums text-emerald-300">
         {v}
-        {suffix && <span className="text-[0.55em] font-medium text-white/55">{suffix}</span>}
+        {suffix && <span className="text-[0.6em] font-medium opacity-60">{suffix}</span>}
       </div>
-      <div className="mt-1 text-[11px] text-white/40">{d}</div>
+      <div className="mt-1.5 font-mono text-[10px] text-white/40">{d}</div>
     </div>
   )
 }
