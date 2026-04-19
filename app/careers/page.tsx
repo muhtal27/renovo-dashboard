@@ -54,7 +54,7 @@ export default function CareersPage() {
         <section className="page-hero">
           <p className="app-kicker">Careers</p>
           <h1 className="page-title max-w-[820px]">
-            No open roles right now. <em className="text-slate-400">Get in touch anyway.</em>
+            No open roles right now. <em className="text-white/45">Get in touch anyway.</em>
           </h1>
           <p className="page-copy max-w-[720px]">
             We do not run on a hiring schedule. If you have built something relevant, shipped features, solved operational problems, or worked inside a regulated workflow, we want to hear from you.
@@ -64,12 +64,12 @@ export default function CareersPage() {
         {/* Why now */}
         <section className="mx-auto max-w-[780px] px-6 py-24">
           <p className="app-kicker">Why now</p>
-          <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
-            Timing <em className="text-slate-400">matters</em>
+          <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-white">
+            Timing <em className="text-white/45">matters</em>
           </h2>
           <div className="mt-10 space-y-4">
             {whyNow.map((item) => (
-              <div key={item} className="flex items-start gap-3 text-base leading-8 text-slate-500">
+              <div key={item} className="flex items-start gap-3 text-base leading-8 text-white/55">
                 <span className="mt-[13px] h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
                 <span>{item}</span>
               </div>
@@ -81,18 +81,18 @@ export default function CareersPage() {
         <section className="section-tinted">
           <div className="mx-auto max-w-[1080px] px-6 py-24">
             <p className="app-kicker">What we want to know</p>
-            <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
-              Tell us about <em className="text-slate-400">you</em>
+            <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-white">
+              Tell us about <em className="text-white/45">you</em>
             </h2>
-            <p className="mt-3.5 max-w-[560px] text-base leading-8 text-slate-500">
+            <p className="mt-3.5 max-w-[560px] text-base leading-8 text-white/55">
               We don&apos;t hire from CVs. We hire from conversations.
               These are the things we actually want to know.
             </p>
             <div className="mt-14 grid gap-10 md:grid-cols-2">
               {whatWeLookFor.map((item) => (
                 <div key={item.title}>
-                  <h3 className="text-[15px] font-semibold text-zinc-950">{item.title}</h3>
-                  <p className="mt-2 text-sm leading-7 text-slate-500">{item.body}</p>
+                  <h3 className="text-[15px] font-semibold text-white">{item.title}</h3>
+                  <p className="mt-2 text-sm leading-7 text-white/55">{item.body}</p>
                 </div>
               ))}
             </div>
@@ -102,14 +102,14 @@ export default function CareersPage() {
         {/* Stack */}
         <section className="mx-auto max-w-[780px] px-6 py-24">
           <p className="app-kicker">What we use</p>
-          <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
+          <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-white">
             Stack
           </h2>
           <div className="mt-8 flex flex-wrap gap-2.5">
             {stack.map((name) => (
               <span
                 key={name}
-                className="rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700"
+                className="rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-sm font-medium text-white/80"
               >
                 {name}
               </span>
@@ -121,21 +121,21 @@ export default function CareersPage() {
         <section className="section-tinted">
           <div className="mx-auto max-w-[780px] px-6 py-24">
             <p className="app-kicker">Open roles</p>
-            <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
-              Current <em className="text-slate-400">openings</em>
+            <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-white">
+              Current <em className="text-white/45">openings</em>
             </h2>
-            <div className="mt-10 rounded-xl border border-zinc-200 bg-white px-6 py-8 text-center">
-              <p className="text-sm font-medium text-zinc-950">No open roles right now</p>
-              <p className="mx-auto mt-2 max-w-[420px] text-sm leading-7 text-slate-500">
+            <div className="mt-10 rounded-xl border border-white/10 bg-white/[0.03] px-6 py-8 text-center">
+              <p className="text-sm font-medium text-white">No open roles right now</p>
+              <p className="mx-auto mt-2 max-w-[420px] text-sm leading-7 text-white/55">
                 We don&apos;t hire on a schedule. When we need someone, we move
                 fast. If you think you should be here, reach out anyway.
               </p>
             </div>
 
             {/* CTA */}
-            <div className="mt-12 rounded-xl border border-zinc-200 bg-white p-8">
-              <h3 className="text-lg font-semibold text-zinc-950">Interested?</h3>
-              <p className="mt-2 max-w-[480px] text-sm leading-7 text-slate-500">
+            <div className="mt-12 rounded-xl border border-white/10 bg-white/[0.03] p-8">
+              <h3 className="text-lg font-semibold text-white">Interested?</h3>
+              <p className="mt-2 max-w-[480px] text-sm leading-7 text-white/55">
                 Send an email with a short note on what you would bring and
                 a link to something you have built. No cover letters. No CVs
                 unless you want to include one.

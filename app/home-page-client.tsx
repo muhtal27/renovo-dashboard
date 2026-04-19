@@ -337,7 +337,11 @@ export default function HomePageClient() {
   const railIdRef = useRef(0)
   useEffect(() => {
     if (reducedMotion) return
-    let timer: ReturnType<typeof setTimeout>
+    const timers = new Set<ReturnType<typeof setTimeout>>()
+    const schedule = (fn: () => void, ms: number) => {
+      const t = setTimeout(() => { timers.delete(t); fn() }, ms)
+      timers.add(t)
+    }
     const pulse = () => {
       const idx = Math.floor(Math.random() * UK_CITIES.length)
       setPulseIdx(idx)
@@ -346,11 +350,11 @@ export default function HomePageClient() {
       const amt = 25 + Math.floor(Math.random() * 270)
       const id = ++railIdRef.current
       setRail((r) => [{ city, defect, amt, id }, ...r].slice(0, 8))
-      timer = setTimeout(() => setPulseIdx(null), 2400)
-      timer = setTimeout(pulse, 900 + Math.random() * 1400)
+      schedule(() => setPulseIdx(null), 2400)
+      schedule(pulse, 900 + Math.random() * 1400)
     }
-    const start = setTimeout(pulse, 600)
-    return () => { clearTimeout(start); clearTimeout(timer) }
+    schedule(pulse, 600)
+    return () => { timers.forEach(clearTimeout); timers.clear() }
   }, [reducedMotion])
 
   // Live active-cases counter
@@ -1015,7 +1019,7 @@ function UKMap({ pulseIdx, reducedMotion }: { pulseIdx: number | null; reducedMo
           className="absolute inset-0 opacity-[0.04]"
           style={{ backgroundImage: "radial-gradient(circle at 1px 1px, white 1px, transparent 0)", backgroundSize: "24px 24px" }}
         />
-        <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 125" preserveAspectRatio="none" aria-hidden="true">
+        <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
           {UK_CONNECTIONS.map(([a, b], i) => (
             <line
               key={i}
@@ -1023,8 +1027,9 @@ function UKMap({ pulseIdx, reducedMotion }: { pulseIdx: number | null; reducedMo
               y1={UK_CITIES[a].y}
               x2={UK_CITIES[b].x}
               y2={UK_CITIES[b].y}
-              stroke="rgba(255,255,255,0.08)"
-              strokeWidth="0.15"
+              stroke="rgba(16,185,129,0.18)"
+              strokeWidth="0.18"
+              strokeDasharray="0.8 0.8"
             />
           ))}
         </svg>

@@ -60,7 +60,7 @@ export default function PricingPageClient() {
         <section className="page-hero text-center">
           <p className="app-kicker">Pricing</p>
           <h1 className="page-title mx-auto max-w-[820px]">
-            Pricing for <em className="text-slate-400">managed portfolios</em>
+            Pricing for <em className="text-white/45">managed portfolios</em>
           </h1>
           <p className="page-copy mx-auto max-w-[760px]">
             Free for let-only portfolios. Simple block pricing for fully managed
@@ -69,7 +69,7 @@ export default function PricingPageClient() {
         </section>
 
         {/* ── TRUST STRIP ── */}
-        <section className="mx-auto flex max-w-[820px] flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm font-medium text-slate-500">
+        <section className="mx-auto flex max-w-[820px] flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm font-medium text-white/55">
           <span className="flex items-center gap-2">
             <span className="text-emerald-500">✓</span> No setup fees
           </span>
@@ -89,21 +89,21 @@ export default function PricingPageClient() {
           <div className="grid gap-6 lg:grid-cols-3">
 
             {/* FREE */}
-            <article className="border border-zinc-200 bg-white p-7 text-zinc-950">
-              <p className="inline-block bg-emerald-500/[0.08] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-600">
+            <article className="border border-white/10 bg-white/[0.03] p-7 text-white">
+              <p className="inline-block bg-emerald-500/[0.08] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-400">
                 Get started
               </p>
               <h2 className="mt-4 text-3xl font-semibold tracking-[-0.03em]">Free</h2>
               <div className="mt-3">
-                <span className="text-4xl font-bold tracking-tight text-zinc-950">£0</span>
-                <span className="text-base text-slate-500">/month</span>
+                <span className="text-4xl font-bold tracking-tight text-white">£0</span>
+                <span className="text-base text-white/55">/month</span>
               </div>
-              <p className="mt-2 text-sm leading-7 text-slate-500">
+              <p className="mt-2 text-sm leading-7 text-white/55">
                 For let-only portfolios
               </p>
 
-              <div className="mt-6 border-t border-zinc-200 pt-6">
-                <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">Always included</p>
+              <div className="mt-6 border-t border-white/10 pt-6">
+                <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-white/55">Always included</p>
                 <ul className="space-y-3">
                   {[
                     'Full case workspace and evidence management',
@@ -112,7 +112,7 @@ export default function PricingPageClient() {
                     'Dispute pack generation (PDF)',
                     'Custom templates, unlimited seats',
                   ].map((f) => (
-                    <li key={f} className="flex items-start gap-3 text-sm leading-7 text-slate-600">
+                    <li key={f} className="flex items-start gap-3 text-sm leading-7 text-white/65">
                       <span className="mt-1.5 text-sm font-semibold text-emerald-500">✓</span>
                       <span>{f}</span>
                     </li>
@@ -124,28 +124,28 @@ export default function PricingPageClient() {
                 <Link href="/book-demo" className="app-primary-button w-full rounded-md px-4 py-3 text-sm font-medium">
                   Get started free →
                 </Link>
-                <p className="mt-3 text-center text-xs text-slate-500">
+                <p className="mt-3 text-center text-xs text-white/55">
                   No commitment. No credit card.
                 </p>
               </div>
             </article>
 
             {/* PORTFOLIO */}
-            <article className="relative border-2 border-emerald-500 bg-white p-7 text-zinc-950">
-              <p className="inline-block bg-emerald-500/[0.08] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-600">
+            <article className="relative border-2 border-emerald-500 bg-white/[0.03] p-7 text-white">
+              <p className="inline-block bg-emerald-500/[0.08] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-400">
                 Most popular
               </p>
               <h2 className="mt-4 text-3xl font-semibold tracking-[-0.03em]">Portfolio 365</h2>
               <div className="mt-3">
-                <span className="text-4xl font-bold tracking-tight text-zinc-950">£179</span>
-                <span className="text-base text-slate-500">/block/month + VAT</span>
+                <span className="text-4xl font-bold tracking-tight text-white">£179</span>
+                <span className="text-base text-white/55">/block/month + VAT</span>
               </div>
-              <p className="mt-2 text-sm leading-7 text-slate-500">
+              <p className="mt-2 text-sm leading-7 text-white/55">
                 Up to 365 fully managed tenancies per block
               </p>
 
-              <div className="mt-6 border-t border-zinc-200 pt-6">
-                <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">Everything in Free, plus</p>
+              <div className="mt-6 border-t border-white/10 pt-6">
+                <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-white/55">Everything in Free, plus</p>
                 <ul className="space-y-3">
                   {[
                     'Fully managed tenancy workflow',
@@ -154,7 +154,7 @@ export default function PricingPageClient() {
                     'First month free',
                     'Priority email support',
                   ].map((f) => (
-                    <li key={f} className="flex items-start gap-3 text-sm leading-7 text-slate-600">
+                    <li key={f} className="flex items-start gap-3 text-sm leading-7 text-white/65">
                       <span className="mt-1.5 text-sm font-semibold text-emerald-500">✓</span>
                       <span>{f}</span>
                     </li>
@@ -166,27 +166,27 @@ export default function PricingPageClient() {
                 <Link href="/checkout" className="app-primary-button w-full rounded-md px-4 py-3 text-sm font-medium">
                   Get started →
                 </Link>
-                <p className="mt-3 text-center text-xs text-slate-500">
+                <p className="mt-3 text-center text-xs text-white/55">
                   First month on us.
                 </p>
               </div>
             </article>
 
             {/* ENTERPRISE */}
-            <article className="border border-zinc-300 bg-slate-50 p-7 text-zinc-950">
-              <p className="inline-block bg-emerald-500/[0.08] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-600">
+            <article className="border border-white/15 bg-white/[0.03] p-7 text-white">
+              <p className="inline-block bg-emerald-500/[0.08] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-400">
                 Tailored
               </p>
               <h2 className="mt-4 text-3xl font-semibold tracking-[-0.03em]">Enterprise</h2>
               <div className="mt-3">
-                <span className="text-4xl font-bold tracking-tight text-zinc-950">Custom</span>
+                <span className="text-4xl font-bold tracking-tight text-white">Custom</span>
               </div>
-              <p className="mt-2 text-sm leading-7 text-slate-500">
+              <p className="mt-2 text-sm leading-7 text-white/55">
                 For portfolios above 5 blocks
               </p>
 
-              <div className="mt-6 border-t border-zinc-300 pt-6">
-                <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">Everything in Portfolio 365, plus</p>
+              <div className="mt-6 border-t border-white/15 pt-6">
+                <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-white/55">Everything in Portfolio 365, plus</p>
                 <ul className="space-y-3">
                   {[
                     'Single sign-on via Microsoft Entra ID',
@@ -195,7 +195,7 @@ export default function PricingPageClient() {
                     'Named account manager and SLA',
                     'Security review pack on request',
                   ].map((f) => (
-                    <li key={f} className="flex items-start gap-3 text-sm leading-7 text-slate-700">
+                    <li key={f} className="flex items-start gap-3 text-sm leading-7 text-white/75">
                       <span className="mt-1.5 text-sm font-semibold text-emerald-500">✓</span>
                       <span>{f}</span>
                     </li>
@@ -207,7 +207,7 @@ export default function PricingPageClient() {
                 <Link href="/contact" className="app-primary-button w-full rounded-md px-4 py-3 text-sm font-medium">
                   Talk to sales →
                 </Link>
-                <p className="mt-3 text-center text-xs text-slate-500">
+                <p className="mt-3 text-center text-xs text-white/55">
                   Enterprise pricing starts above 5 portfolio blocks.
                 </p>
               </div>
@@ -220,18 +220,18 @@ export default function PricingPageClient() {
         <section className="section-tinted">
           <div className="mx-auto max-w-[1080px] px-6 py-24">
             <p className="app-kicker">Included</p>
-            <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
-              Every plan includes the <em className="text-slate-400">full platform</em>
+            <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-white">
+              Every plan includes the <em className="text-white/45">full platform</em>
             </h2>
-            <p className="mt-3 text-base leading-8 text-slate-500">
+            <p className="mt-3 text-base leading-8 text-white/55">
               No feature gates. Every plan — including Free — includes the complete Renovo AI workflow.
             </p>
 
             <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {platformFeatures.map((f) => (
-                <div key={f} className="flex items-start gap-3 rounded-lg border border-zinc-200 bg-white px-4 py-4">
+                <div key={f} className="flex items-start gap-3 rounded-lg border border-white/10 bg-white/[0.03] px-4 py-4">
                   <span className="mt-0.5 text-sm font-semibold text-emerald-500">✓</span>
-                  <span className="text-sm font-medium text-zinc-700">{f}</span>
+                  <span className="text-sm font-medium text-white/80">{f}</span>
                 </div>
               ))}
             </div>
@@ -241,44 +241,44 @@ export default function PricingPageClient() {
         {/* ── HOW IT SCALES ── */}
         <section className="mx-auto max-w-[1080px] px-6 py-24">
           <p className="app-kicker">How it scales</p>
-          <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
-            Add blocks as <em className="text-slate-400">you grow</em>
+          <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-white">
+            Add blocks as <em className="text-white/45">you grow</em>
           </h2>
-          <p className="mt-3 max-w-[640px] text-base leading-8 text-slate-500">
+          <p className="mt-3 max-w-[640px] text-base leading-8 text-white/55">
             Start free with let-only tenancies, then add blocks at £179/month each for up to
             365 fully managed tenancies per block. Let-only tenancies are always free.
           </p>
 
-          <div className="mt-10 overflow-x-auto border border-zinc-200">
+          <div className="mt-10 overflow-x-auto border border-white/10">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b-2 border-zinc-200 bg-zinc-50">
-                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-[0.06em] text-slate-500">
+                <tr className="border-b-2 border-white/10 bg-white/[0.03]">
+                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-[0.06em] text-white/55">
                     Blocks
                   </th>
-                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-[0.06em] text-slate-500">
+                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-[0.06em] text-white/55">
                     Fully managed tenancies
                   </th>
-                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-[0.06em] text-slate-500">
+                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-[0.06em] text-white/55">
                     Monthly price
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {scaleExamples.map((row) => (
-                  <tr key={row.blocks} className="border-t border-zinc-100 bg-white">
-                    <td className="px-5 py-3 font-medium text-zinc-950">
+                  <tr key={row.blocks} className="border-t border-white/[0.06] bg-white/[0.03]">
+                    <td className="px-5 py-3 font-medium text-white">
                       {row.blocks} {row.blocks === 1 ? 'block' : 'blocks'}
                     </td>
-                    <td className="px-5 py-3 text-slate-600">Up to {row.tenancies}</td>
-                    <td className="px-5 py-3 font-medium text-zinc-950">{row.price}/mo + VAT</td>
+                    <td className="px-5 py-3 text-white/65">Up to {row.tenancies}</td>
+                    <td className="px-5 py-3 font-medium text-white">{row.price}/mo + VAT</td>
                   </tr>
                 ))}
-                <tr className="border-t border-zinc-200 bg-zinc-50">
-                  <td className="px-5 py-3 font-medium text-zinc-950">6+ blocks</td>
-                  <td className="px-5 py-3 text-slate-600">1,825+</td>
+                <tr className="border-t border-white/10 bg-white/[0.03]">
+                  <td className="px-5 py-3 font-medium text-white">6+ blocks</td>
+                  <td className="px-5 py-3 text-white/65">1,825+</td>
                   <td className="px-5 py-3">
-                    <Link href="/contact" className="text-sm font-medium text-emerald-600 hover:text-emerald-700">
+                    <Link href="/contact" className="text-sm font-medium text-emerald-400 hover:text-emerald-300">
                       Talk to sales →
                     </Link>
                   </td>
@@ -292,17 +292,17 @@ export default function PricingPageClient() {
         <section className="section-tinted">
           <div className="mx-auto max-w-[680px] px-6 py-24">
             <p className="app-kicker">FAQ</p>
-            <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
-              Common <em className="text-slate-400">questions</em>
+            <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-white">
+              Common <em className="text-white/45">questions</em>
             </h2>
 
-            <div className="mt-10 divide-y divide-slate-200">
+            <div className="mt-10 divide-y divide-white/10">
               {pricingFaqs.map((item) => (
                 <details key={item.q} className="group py-5">
-                  <summary className="cursor-pointer list-none text-sm font-medium text-zinc-950">
+                  <summary className="cursor-pointer list-none text-sm font-medium text-white">
                     {item.q}
                   </summary>
-                  <p className="mt-3 text-sm leading-7 text-slate-500">{item.a}</p>
+                  <p className="mt-3 text-sm leading-7 text-white/55">{item.a}</p>
                 </details>
               ))}
             </div>

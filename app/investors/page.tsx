@@ -28,7 +28,7 @@ export default function InvestorsPage() {
         <section className="page-hero">
           <p className="app-kicker">Investors</p>
           <h1 className="page-title max-w-[860px]">
-            Pre-seed. <em className="text-slate-400">Disciplined scope.</em>
+            Pre-seed. <em className="text-white/45">Disciplined scope.</em>
           </h1>
           <p className="page-copy max-w-[720px]">
             UK letting agencies handle roughly four million tenancies a year through fragmented checkout admin. Outcomes depend heavily on the completeness of the evidence pack when a dispute reaches the scheme. Renovo solves that narrow, defensible workflow. Not the whole property stack.
@@ -39,14 +39,14 @@ export default function InvestorsPage() {
         <section className="section-tinted">
           <div className="mx-auto max-w-[1080px] px-6 py-24">
             <p className="app-kicker">Why this matters</p>
-            <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
-              A workflow category with <em className="text-slate-400">high operational drag</em>
+            <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-white">
+              A workflow category with <em className="text-white/45">high operational drag</em>
             </h2>
-            <div className="mt-14 divide-y divide-slate-200">
+            <div className="mt-14 divide-y divide-white/10">
               {whyItMatters.map((item) => (
                 <div key={item.l} className="grid gap-2 py-5 md:grid-cols-[180px_1fr]">
-                  <p className="text-sm font-semibold text-zinc-950">{item.l}</p>
-                  <p className="text-sm leading-7 text-slate-500">{item.d}</p>
+                  <p className="text-sm font-semibold text-white">{item.l}</p>
+                  <p className="text-sm leading-7 text-white/55">{item.d}</p>
                 </div>
               ))}
             </div>
@@ -56,14 +56,14 @@ export default function InvestorsPage() {
         {/* COMPANY */}
         <section className="mx-auto max-w-[1080px] px-6 py-24">
           <p className="app-kicker">Company</p>
-          <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
-            Built from direct <em className="text-slate-400">operational exposure</em>
+          <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-white">
+            Built from direct <em className="text-white/45">operational exposure</em>
           </h2>
-          <div className="mt-14 divide-y divide-slate-200">
+          <div className="mt-14 divide-y divide-white/10">
             {companyPoints.map((item) => (
               <div key={item.l} className="grid gap-2 py-5 md:grid-cols-[180px_1fr]">
-                <p className="text-sm font-semibold text-zinc-950">{item.l}</p>
-                <p className="text-sm leading-7 text-slate-500">{item.d}</p>
+                <p className="text-sm font-semibold text-white">{item.l}</p>
+                <p className="text-sm leading-7 text-white/55">{item.d}</p>
               </div>
             ))}
           </div>
@@ -75,8 +75,8 @@ export default function InvestorsPage() {
 
             ].map((d) => (
               <div key={d.l}>
-                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-slate-400">{d.l}</p>
-                <p className="mt-2 text-sm text-slate-700">{d.v}</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-white/45">{d.l}</p>
+                <p className="mt-2 text-sm text-white/75">{d.v}</p>
               </div>
             ))}
           </div>
@@ -86,10 +86,10 @@ export default function InvestorsPage() {
         <section className="section-tinted">
           <div className="mx-auto max-w-[1080px] px-6 py-24 text-center">
             <p className="app-kicker">Get in touch</p>
-            <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
-              Interested in <em className="text-slate-400">Renovo AI</em>?
+            <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-white">
+              Interested in <em className="text-white/45">Renovo AI</em>?
             </h2>
-            <p className="mx-auto mt-4 max-w-[500px] text-base leading-8 text-slate-500">
+            <p className="mx-auto mt-4 max-w-[500px] text-base leading-8 text-white/55">
               For investor enquiries, introductions, or to request our deck,
               reach out directly.
             </p>

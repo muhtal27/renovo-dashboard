@@ -68,7 +68,7 @@ export default function ComplianceClient() {
         <section className="page-hero">
           <p className="app-kicker">Compliance</p>
           <h1 className="page-title max-w-[820px]">
-            UK registered. <em className="text-slate-400">UK hosted. UK audited.</em>
+            UK registered. <em className="text-white/45">UK hosted. UK audited.</em>
           </h1>
           <p className="page-copy max-w-[720px]">
             Renovo AI processes tenancy evidence, liability assessments, and
@@ -82,14 +82,14 @@ export default function ComplianceClient() {
           <section key={s.kicker} className={idx % 2 === 0 ? "section-tinted" : ""}>
             <div className="mx-auto max-w-[1080px] px-6 py-24">
               <p className="app-kicker">{s.kicker}</p>
-              <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
-                {s.title} <em className="text-slate-400">{s.em}</em>
+              <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-white">
+                {s.title} <em className="text-white/45">{s.em}</em>
               </h2>
-              <div className="mt-14 divide-y divide-slate-200">
+              <div className="mt-14 divide-y divide-white/10">
                 {s.rows.map((r) => (
                   <div key={r.l} className="grid gap-2 py-5 md:grid-cols-[180px_1fr]">
-                    <p className="text-sm font-semibold text-zinc-950">{r.l}</p>
-                    <p className="text-sm leading-7 text-slate-500">{r.d}</p>
+                    <p className="text-sm font-semibold text-white">{r.l}</p>
+                    <p className="text-sm leading-7 text-white/55">{r.d}</p>
                   </div>
                 ))}
               </div>
@@ -109,12 +109,12 @@ export default function ComplianceClient() {
               { l: "ICO registration", v: "ZC112030" },
             ].map((d) => (
               <div key={d.l}>
-                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-slate-400">{d.l}</p>
-                <p className="mt-2 text-sm text-slate-700">{d.v}</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-white/45">{d.l}</p>
+                <p className="mt-2 text-sm text-white/75">{d.v}</p>
               </div>
             ))}
           </div>
-          <p className="mt-8 text-sm text-slate-500">
+          <p className="mt-8 text-sm text-white/55">
             For procurement, onboarding, or compliance enquiries contact{" "}
             <a href="mailto:compliance@renovoai.co.uk" className="text-emerald-500 hover:underline">compliance@renovoai.co.uk</a>
           </p>

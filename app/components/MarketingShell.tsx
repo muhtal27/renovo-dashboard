@@ -48,6 +48,7 @@ const footerCompanyLinks = [
   { label: 'Contact', href: '/contact' },
   { label: 'Investors', href: '/investors' },
   { label: 'Careers', href: '/careers' },
+  { label: 'Insights', href: '/insights' },
 ] as const
 
 const footerLegalLinks = [
@@ -82,8 +83,8 @@ function SignInLink({
 
 function navLinkClass(active: boolean) {
   return active
-    ? 'inline-flex items-center whitespace-nowrap text-sm font-medium text-zinc-950'
-    : 'inline-flex items-center whitespace-nowrap text-sm font-medium text-zinc-500 hover:text-zinc-950'
+    ? 'inline-flex items-center whitespace-nowrap text-sm font-medium text-white'
+    : 'inline-flex items-center whitespace-nowrap text-sm font-medium text-white/60 transition-colors hover:text-white'
 }
 
 const mobileNavLinks = [
@@ -100,16 +101,31 @@ export function MarketingShell({
   navAriaLabel = 'Marketing',
 }: MarketingShellProps) {
   return (
-    <div className="marketing-page min-h-screen bg-white text-zinc-900">
+    <div className="marketing-page marketing-dark dark-header relative min-h-screen overflow-x-clip bg-[#05070e] text-white">
       <a href="#main-content" className="skip-link">
         Skip to content
       </a>
-      <header className="sticky top-0 z-30 border-b border-zinc-200 bg-white/95 backdrop-blur">
+
+      {/* Ambient background */}
+      <div className="pointer-events-none fixed inset-0 z-0">
+        <div className="absolute left-[12%] top-[-10%] h-[720px] w-[720px] rounded-full bg-emerald-500/[0.08] blur-[160px]" />
+        <div className="absolute right-[-5%] top-[30%] h-[560px] w-[560px] rounded-full bg-cyan-500/[0.04] blur-[160px]" />
+        <div
+          className="absolute inset-0 opacity-[0.02]"
+          style={{
+            backgroundImage:
+              'radial-gradient(circle at 1px 1px, white 1px, transparent 0)',
+            backgroundSize: '40px 40px',
+          }}
+        />
+      </div>
+
+      <header className="sticky top-0 z-40 border-b border-white/[0.04] bg-[#05070e]/80 backdrop-blur-xl">
         <div className="marketing-frame flex min-h-[60px] items-center justify-between gap-3 py-2.5 lg:min-h-[64px] lg:gap-6">
           <Link
             href="/"
             aria-label="Renovo AI home"
-            className="inline-flex shrink-0 items-center text-base font-semibold tracking-[-0.02em] text-zinc-950"
+            className="inline-flex shrink-0 items-center"
           >
             <Image
               src="/logo-new.svg"
@@ -118,7 +134,7 @@ export function MarketingShell({
               height={22}
               priority
               sizes="(max-width: 1023px) 108px, 112px"
-              className="h-auto w-[108px] lg:w-[112px]"
+              className="h-auto w-[108px] brightness-0 invert lg:w-[112px]"
             />
           </Link>
 
@@ -138,43 +154,43 @@ export function MarketingShell({
             ))}
           </nav>
 
-          <div className="hidden shrink-0 items-center gap-2.5 lg:flex">
-            <SignInLink className="inline-flex items-center rounded-md px-3 py-2 text-sm font-medium text-zinc-500 hover:text-zinc-950">
+          <div className="hidden shrink-0 items-center gap-3 lg:flex">
+            <SignInLink className="inline-flex items-center rounded-md px-3 py-2 text-sm font-medium text-white/60 transition-colors hover:text-white">
               Sign in
             </SignInLink>
             <Link
               href="/book-demo"
-              className="app-primary-button rounded-md px-4 py-2 text-sm font-medium whitespace-nowrap"
+              className="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-emerald-400 hover:shadow-[0_0_30px_rgba(16,185,129,0.3)]"
             >
               Book a demo
             </Link>
           </div>
 
           <details className="group relative lg:hidden">
-            <summary className="inline-flex min-h-10 list-none items-center rounded-md border border-zinc-200 px-3.5 py-2 text-sm font-medium text-zinc-950 [&::-webkit-details-marker]:hidden">
+            <summary className="inline-flex min-h-10 list-none items-center rounded-md border border-white/20 px-3.5 py-2 text-sm font-medium text-white [&::-webkit-details-marker]:hidden">
               Menu
             </summary>
-            <div className="absolute right-0 mt-2 w-[min(86vw,22rem)] rounded-xl border border-zinc-200 bg-white p-4 shadow-[0_12px_30px_rgba(0,0,0,0.08)]">
+            <div className="absolute right-0 mt-2 w-[min(86vw,22rem)] rounded-xl border border-white/10 bg-[#0a0e1a] p-4 shadow-[0_12px_30px_rgba(0,0,0,0.6)]">
               <nav className="grid gap-1" aria-label="Mobile marketing navigation">
                 {mobileNavLinks.map((item) => (
                   <Link
                     key={item.label}
                     href={item.href}
                     aria-current={currentPath === item.href ? 'page' : undefined}
-                    className="rounded-md px-3 py-2 text-sm font-medium text-zinc-500 hover:bg-zinc-50 hover:text-zinc-950"
+                    className="rounded-md px-3 py-2 text-sm font-medium text-white/70 hover:bg-white/[0.04] hover:text-white"
                   >
                     {item.label}
                   </Link>
                 ))}
               </nav>
 
-              <div className="mt-3 grid gap-2 border-t border-zinc-200 pt-3">
-                <SignInLink className="rounded-md px-3 py-2 text-sm font-medium text-zinc-500 hover:bg-zinc-50 hover:text-zinc-950">
+              <div className="mt-3 grid gap-2 border-t border-white/10 pt-3">
+                <SignInLink className="rounded-md px-3 py-2 text-sm font-medium text-white/70 hover:bg-white/[0.04] hover:text-white">
                   Sign in
                 </SignInLink>
                 <Link
                   href="/book-demo"
-                  className="app-primary-button rounded-md px-4 py-2 text-center text-sm font-medium"
+                  className="rounded-md bg-emerald-500 px-4 py-2 text-center text-sm font-semibold text-white hover:bg-emerald-400"
                 >
                   Book a demo
                 </Link>
@@ -184,22 +200,22 @@ export function MarketingShell({
         </div>
       </header>
 
-      <main id="main-content" tabIndex={-1}>
+      <main id="main-content" tabIndex={-1} className="relative z-10">
         {children}
       </main>
 
-      <footer className="border-t border-[#1e293b] bg-[#0a0e1a] py-14">
+      <footer className="relative z-10 border-t border-white/[0.04] bg-[#05070e] py-14">
         <div className="marketing-frame">
-          <div className="grid gap-10 border-b border-[#1e293b] pb-10 md:grid-cols-2 xl:grid-cols-[2fr_1fr_1fr_1fr]">
+          <div className="grid gap-10 border-b border-white/[0.04] pb-10 md:grid-cols-2 xl:grid-cols-[2fr_1fr_1fr_1fr]">
             <div>
               <Link href="/" className="text-lg font-bold tracking-tight text-white">Renovo AI</Link>
-              <p className="mt-3 max-w-[260px] text-[13px] leading-[1.7] text-slate-400">
-                End of tenancy software for letting agencies.
+              <p className="mt-3 max-w-[280px] text-[13px] leading-[1.7] text-white/55">
+                Enterprise software for end of tenancy. Built for UK letting agencies. AI assists, humans decide.
               </p>
             </div>
 
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-500">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-400">
                 Product
               </p>
               <nav className="mt-4 grid gap-0.5" aria-label="Footer product links">
@@ -216,7 +232,7 @@ export function MarketingShell({
             </div>
 
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-500">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-400">
                 Company
               </p>
               <nav className="mt-4 grid gap-0.5" aria-label="Footer company links">
@@ -229,14 +245,11 @@ export function MarketingShell({
                     {item.label}
                   </Link>
                 ))}
-                <Link href="/insights" className="text-[13px] leading-[2.3] text-white/50 transition-colors hover:text-white">
-                  Insights
-                </Link>
               </nav>
             </div>
 
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-500">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-400">
                 Legal
               </p>
               <nav className="mt-4 grid gap-0.5" aria-label="Footer legal links">

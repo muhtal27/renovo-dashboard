@@ -429,13 +429,13 @@ const errorCodes = [
 function MethodBadge({ method }: { method: string }) {
   const colors: Record<string, string> = {
     GET: 'bg-blue-50 text-blue-700 border-blue-200',
-    POST: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-    PATCH: 'bg-amber-50 text-amber-700 border-amber-200',
+    POST: 'bg-emerald-500/15 text-emerald-300 border-emerald-200',
+    PATCH: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
     DELETE: 'bg-red-50 text-red-700 border-red-200',
   }
   return (
     <span
-      className={`inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-bold tracking-wide ${colors[method] ?? 'bg-zinc-50 text-zinc-700 border-zinc-200'}`}
+      className={`inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-bold tracking-wide ${colors[method] ?? 'bg-white/[0.03] text-white/80 border-white/10'}`}
     >
       {method}
     </span>
@@ -452,15 +452,15 @@ function CodeBlock({ children, title }: { children: string; title?: string }) {
   }
 
   return (
-    <div className="group relative rounded-lg border border-zinc-200 bg-zinc-950 text-sm">
+    <div className="group relative rounded-lg border border-white/10 bg-[#0a0e1a] text-sm">
       {title && (
-        <div className="border-b border-zinc-800 px-4 py-2 text-xs font-medium text-zinc-400">
+        <div className="border-b border-white/10 px-4 py-2 text-xs font-medium text-white/40">
           {title}
         </div>
       )}
       <button
         onClick={handleCopy}
-        className="absolute right-2 top-2 rounded-md border border-zinc-700 bg-zinc-800 px-2 py-1 text-[10px] font-medium text-zinc-400 opacity-0 transition-opacity hover:text-white group-hover:opacity-100"
+        className="absolute right-2 top-2 rounded-md border border-zinc-700 bg-white/[0.04] px-2 py-1 text-[10px] font-medium text-white/40 opacity-0 transition-opacity hover:text-white group-hover:opacity-100"
       >
         {copied ? 'Copied' : 'Copy'}
       </button>
@@ -473,28 +473,28 @@ function CodeBlock({ children, title }: { children: string; title?: string }) {
 
 function EndpointCard({ endpoint }: { endpoint: Endpoint }) {
   return (
-    <div className="scroll-mt-24 border-b border-zinc-200 py-8 last:border-0" id={endpoint.path.replace(/[{}\/]/g, '-')}>
+    <div className="scroll-mt-24 border-b border-white/10 py-8 last:border-0" id={endpoint.path.replace(/[{}\/]/g, '-')}>
       <div className="flex flex-wrap items-center gap-2">
         <MethodBadge method={endpoint.method} />
-        <code className="text-sm font-semibold text-zinc-950">{endpoint.path}</code>
+        <code className="text-sm font-semibold text-white">{endpoint.path}</code>
         {endpoint.statusCode && (
-          <span className="rounded-md bg-zinc-100 px-1.5 py-0.5 text-[11px] font-mono font-medium text-zinc-500">
+          <span className="rounded-md bg-white/[0.05] px-1.5 py-0.5 text-[11px] font-mono font-medium text-white/55">
             {endpoint.statusCode}
           </span>
         )}
         {endpoint.scope !== 'none' && (
-          <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[11px] font-medium text-zinc-500">
+          <span className="rounded-full bg-white/[0.05] px-2 py-0.5 text-[11px] font-medium text-white/55">
             {endpoint.scope}
           </span>
         )}
       </div>
-      <h3 className="mt-2 text-base font-semibold text-zinc-950">{endpoint.title}</h3>
-      <p className="mt-1 text-sm leading-relaxed text-zinc-600">{endpoint.description}</p>
+      <h3 className="mt-2 text-base font-semibold text-white">{endpoint.title}</h3>
+      <p className="mt-1 text-sm leading-relaxed text-white/65">{endpoint.description}</p>
 
       {endpoint.notes && (
         <ul className="mt-3 space-y-1">
           {endpoint.notes.map((note, i) => (
-            <li key={i} className="flex items-start gap-2 text-sm text-zinc-500">
+            <li key={i} className="flex items-start gap-2 text-sm text-white/55">
               <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
               {note}
             </li>
@@ -530,7 +530,7 @@ function SideNav({ activeSection }: { activeSection: string }) {
   return (
     <nav className="hidden lg:block" aria-label="API documentation sections">
       <div className="sticky top-24 space-y-0.5">
-        <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-600">
+        <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-400">
           On this page
         </p>
         {allSections.map((s) => (
@@ -539,8 +539,8 @@ function SideNav({ activeSection }: { activeSection: string }) {
             href={`#${s.id}`}
             className={`block rounded-md px-3 py-1.5 text-sm transition-colors ${
               activeSection === s.id
-                ? 'bg-emerald-50 font-medium text-emerald-700'
-                : 'text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900'
+                ? 'bg-emerald-500/15 font-medium text-emerald-300'
+                : 'text-white/55 hover:bg-white/[0.03] hover:text-white'
             }`}
           >
             {s.title}
@@ -590,44 +590,44 @@ export function DevelopersPageClient() {
       <div className="marketing-frame py-16 md:py-24">
         {/* Hero */}
         <header className="mb-16" id="overview">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-600">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-400">
             Developer Documentation
           </p>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight text-zinc-950 md:text-4xl">
+          <h1 className="mt-2 text-3xl font-bold tracking-tight text-white md:text-4xl">
             Renovo Public API
           </h1>
-          <p className="mt-3 max-w-2xl text-base leading-relaxed text-zinc-500">
+          <p className="mt-3 max-w-2xl text-base leading-relaxed text-white/55">
             Integrate your property management or inventory platform with Renovo.
             Push inspections, read cases, download documents, and receive real-time
             webhooks &mdash; all through a single REST API.
           </p>
 
           <div className="mt-8 flex flex-wrap gap-3">
-            <span className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm">
-              <span className="font-medium text-zinc-950">Production</span>
-              <code className="rounded bg-zinc-200/60 px-2 py-0.5 text-xs text-zinc-700">
+            <span className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm">
+              <span className="font-medium text-white">Production</span>
+              <code className="rounded bg-zinc-200/60 px-2 py-0.5 text-xs text-white/80">
                 {BASE_URL}
               </code>
             </span>
-            <span className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm">
-              <span className="font-medium text-zinc-950">Sandbox</span>
-              <code className="rounded bg-zinc-200/60 px-2 py-0.5 text-xs text-zinc-700">
+            <span className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm">
+              <span className="font-medium text-white">Sandbox</span>
+              <code className="rounded bg-zinc-200/60 px-2 py-0.5 text-xs text-white/80">
                 {SANDBOX_URL}
               </code>
             </span>
-            <span className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm">
-              <span className="font-medium text-zinc-950">Auth</span>
-              <span className="text-zinc-500">OAuth 2.0 / API Keys</span>
+            <span className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm">
+              <span className="font-medium text-white">Auth</span>
+              <span className="text-white/55">OAuth 2.0 / API Keys</span>
             </span>
-            <span className="inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm">
-              <span className="font-medium text-zinc-950">Format</span>
-              <span className="text-zinc-500">JSON</span>
+            <span className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm">
+              <span className="font-medium text-white">Format</span>
+              <span className="text-white/55">JSON</span>
             </span>
           </div>
 
           {/* Quick start */}
-          <div className="mt-10 rounded-xl border border-zinc-200 bg-zinc-50 p-6">
-            <h2 className="text-sm font-semibold text-zinc-950">Quick start</h2>
+          <div className="mt-10 rounded-xl border border-white/10 bg-white/[0.03] p-6">
+            <h2 className="text-sm font-semibold text-white">Quick start</h2>
             <div className="mt-3 space-y-4">
               <CodeBlock title="1. Get an access token">{`curl -X POST ${BASE_URL}/oauth/token \\
   -H "Content-Type: application/x-www-form-urlencoded" \\
@@ -640,8 +640,8 @@ export function DevelopersPageClient() {
 
         {/* Getting started */}
         <section id="getting-started" className="scroll-mt-24 mb-16">
-          <h2 className="text-xl font-bold tracking-tight text-zinc-950">Getting Started</h2>
-          <p className="mt-2 text-sm leading-relaxed text-zinc-500">
+          <h2 className="text-xl font-bold tracking-tight text-white">Getting Started</h2>
+          <p className="mt-2 text-sm leading-relaxed text-white/55">
             Follow these steps to start integrating with the Renovo API.
           </p>
           <ol className="mt-6 space-y-4">
@@ -672,12 +672,12 @@ export function DevelopersPageClient() {
               },
             ].map((item) => (
               <li key={item.step} className="flex gap-4">
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-sm font-semibold text-emerald-700">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-sm font-semibold text-emerald-300">
                   {item.step}
                 </span>
                 <div>
-                  <p className="text-sm font-semibold text-zinc-950">{item.title}</p>
-                  <p className="mt-0.5 text-sm text-zinc-500">{item.description}</p>
+                  <p className="text-sm font-semibold text-white">{item.title}</p>
+                  <p className="mt-0.5 text-sm text-white/55">{item.description}</p>
                 </div>
               </li>
             ))}
@@ -692,10 +692,10 @@ export function DevelopersPageClient() {
             {/* Endpoint sections */}
             {sections.map((section) => (
               <section key={section.id} id={section.id} className="scroll-mt-24 mb-16">
-                <h2 className="text-xl font-bold tracking-tight text-zinc-950">
+                <h2 className="text-xl font-bold tracking-tight text-white">
                   {section.title}
                 </h2>
-                <p className="mt-2 text-sm leading-relaxed text-zinc-500">
+                <p className="mt-2 text-sm leading-relaxed text-white/55">
                   {section.description}
                 </p>
                 <div className="mt-6">
@@ -708,30 +708,30 @@ export function DevelopersPageClient() {
 
             {/* Webhook events */}
             <section id="events" className="scroll-mt-24 mb-16">
-              <h2 className="text-xl font-bold tracking-tight text-zinc-950">
+              <h2 className="text-xl font-bold tracking-tight text-white">
                 Webhook Events
               </h2>
-              <p className="mt-2 text-sm leading-relaxed text-zinc-500">
+              <p className="mt-2 text-sm leading-relaxed text-white/55">
                 Subscribe to any combination of these events when registering a webhook.
                 Each delivery is signed with HMAC-SHA256 using your webhook secret.
               </p>
-              <div className="mt-6 overflow-x-auto rounded-lg border border-zinc-200">
+              <div className="mt-6 overflow-x-auto rounded-lg border border-white/10">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-zinc-200 bg-zinc-50">
-                      <th className="px-4 py-3 text-left font-semibold text-zinc-950">Event</th>
-                      <th className="px-4 py-3 text-left font-semibold text-zinc-950">Description</th>
+                    <tr className="border-b border-white/10 bg-white/[0.03]">
+                      <th className="px-4 py-3 text-left font-semibold text-white">Event</th>
+                      <th className="px-4 py-3 text-left font-semibold text-white">Description</th>
                     </tr>
                   </thead>
                   <tbody>
                     {webhookEvents.map((e) => (
-                      <tr key={e.event} className="border-b border-zinc-100 last:border-0">
+                      <tr key={e.event} className="border-b border-white/[0.06] last:border-0">
                         <td className="px-4 py-3">
-                          <code className="rounded bg-zinc-100 px-1.5 py-0.5 text-xs font-medium text-zinc-700">
+                          <code className="rounded bg-white/[0.05] px-1.5 py-0.5 text-xs font-medium text-white/80">
                             {e.event}
                           </code>
                         </td>
-                        <td className="px-4 py-3 text-zinc-600">{e.description}</td>
+                        <td className="px-4 py-3 text-white/65">{e.description}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -739,31 +739,31 @@ export function DevelopersPageClient() {
               </div>
 
               <div className="mt-6">
-                <h3 className="text-sm font-semibold text-zinc-950">Delivery headers</h3>
-                <div className="mt-3 overflow-x-auto rounded-lg border border-zinc-200">
+                <h3 className="text-sm font-semibold text-white">Delivery headers</h3>
+                <div className="mt-3 overflow-x-auto rounded-lg border border-white/10">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-zinc-200 bg-zinc-50">
-                        <th className="px-4 py-3 text-left font-semibold text-zinc-950">Header</th>
-                        <th className="px-4 py-3 text-left font-semibold text-zinc-950">Description</th>
+                      <tr className="border-b border-white/10 bg-white/[0.03]">
+                        <th className="px-4 py-3 text-left font-semibold text-white">Header</th>
+                        <th className="px-4 py-3 text-left font-semibold text-white">Description</th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr className="border-b border-zinc-100">
-                        <td className="px-4 py-3"><code className="rounded bg-zinc-100 px-1.5 py-0.5 text-xs text-zinc-700">X-Renovo-Event</code></td>
-                        <td className="px-4 py-3 text-zinc-600">The event type (e.g. case.created).</td>
+                      <tr className="border-b border-white/[0.06]">
+                        <td className="px-4 py-3"><code className="rounded bg-white/[0.05] px-1.5 py-0.5 text-xs text-white/80">X-Renovo-Event</code></td>
+                        <td className="px-4 py-3 text-white/65">The event type (e.g. case.created).</td>
                       </tr>
-                      <tr className="border-b border-zinc-100">
-                        <td className="px-4 py-3"><code className="rounded bg-zinc-100 px-1.5 py-0.5 text-xs text-zinc-700">X-Renovo-Delivery-Id</code></td>
-                        <td className="px-4 py-3 text-zinc-600">Unique ID for this delivery (for deduplication).</td>
+                      <tr className="border-b border-white/[0.06]">
+                        <td className="px-4 py-3"><code className="rounded bg-white/[0.05] px-1.5 py-0.5 text-xs text-white/80">X-Renovo-Delivery-Id</code></td>
+                        <td className="px-4 py-3 text-white/65">Unique ID for this delivery (for deduplication).</td>
                       </tr>
-                      <tr className="border-b border-zinc-100">
-                        <td className="px-4 py-3"><code className="rounded bg-zinc-100 px-1.5 py-0.5 text-xs text-zinc-700">X-Renovo-Timestamp</code></td>
-                        <td className="px-4 py-3 text-zinc-600">Unix timestamp of when the event was sent.</td>
+                      <tr className="border-b border-white/[0.06]">
+                        <td className="px-4 py-3"><code className="rounded bg-white/[0.05] px-1.5 py-0.5 text-xs text-white/80">X-Renovo-Timestamp</code></td>
+                        <td className="px-4 py-3 text-white/65">Unix timestamp of when the event was sent.</td>
                       </tr>
                       <tr className="last:border-0">
-                        <td className="px-4 py-3"><code className="rounded bg-zinc-100 px-1.5 py-0.5 text-xs text-zinc-700">X-Renovo-Signature</code></td>
-                        <td className="px-4 py-3 text-zinc-600">HMAC-SHA256 signature: sha256=&lt;hex&gt;.</td>
+                        <td className="px-4 py-3"><code className="rounded bg-white/[0.05] px-1.5 py-0.5 text-xs text-white/80">X-Renovo-Signature</code></td>
+                        <td className="px-4 py-3 text-white/65">HMAC-SHA256 signature: sha256=&lt;hex&gt;.</td>
                       </tr>
                     </tbody>
                   </table>
@@ -771,8 +771,8 @@ export function DevelopersPageClient() {
               </div>
 
               <div className="mt-6">
-                <h3 className="text-sm font-semibold text-zinc-950">Example delivery payload</h3>
-                <p className="mt-2 text-sm leading-relaxed text-zinc-500">
+                <h3 className="text-sm font-semibold text-white">Example delivery payload</h3>
+                <p className="mt-2 text-sm leading-relaxed text-white/55">
                   When an event fires, Renovo sends a POST request to your registered URL with this structure:
                 </p>
                 <div className="mt-3">
@@ -793,9 +793,9 @@ export function DevelopersPageClient() {
               </div>
 
               <div className="mt-6">
-                <h3 className="text-sm font-semibold text-zinc-950">Verifying signatures</h3>
-                <p className="mt-2 text-sm leading-relaxed text-zinc-500">
-                  The signature is computed over <code className="rounded bg-zinc-100 px-1 py-0.5 text-xs">{'{timestamp}.{raw_body}'}</code> using
+                <h3 className="text-sm font-semibold text-white">Verifying signatures</h3>
+                <p className="mt-2 text-sm leading-relaxed text-white/55">
+                  The signature is computed over <code className="rounded bg-white/[0.05] px-1 py-0.5 text-xs">{'{timestamp}.{raw_body}'}</code> using
                   your webhook secret. Always verify signatures before processing deliveries.
                 </p>
                 <div className="mt-3 space-y-4">
@@ -826,28 +826,28 @@ function verify(body, secret, timestamp, signature) {
 
             {/* Scopes */}
             <section id="scopes" className="scroll-mt-24 mb-16">
-              <h2 className="text-xl font-bold tracking-tight text-zinc-950">Scopes</h2>
-              <p className="mt-2 text-sm leading-relaxed text-zinc-500">
+              <h2 className="text-xl font-bold tracking-tight text-white">Scopes</h2>
+              <p className="mt-2 text-sm leading-relaxed text-white/55">
                 Each endpoint requires a specific scope. Request only the scopes you need
                 when exchanging credentials for a token.
               </p>
-              <div className="mt-6 overflow-x-auto rounded-lg border border-zinc-200">
+              <div className="mt-6 overflow-x-auto rounded-lg border border-white/10">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-zinc-200 bg-zinc-50">
-                      <th className="px-4 py-3 text-left font-semibold text-zinc-950">Scope</th>
-                      <th className="px-4 py-3 text-left font-semibold text-zinc-950">Permission</th>
+                    <tr className="border-b border-white/10 bg-white/[0.03]">
+                      <th className="px-4 py-3 text-left font-semibold text-white">Scope</th>
+                      <th className="px-4 py-3 text-left font-semibold text-white">Permission</th>
                     </tr>
                   </thead>
                   <tbody>
                     {scopes.map((s) => (
-                      <tr key={s.scope} className="border-b border-zinc-100 last:border-0">
+                      <tr key={s.scope} className="border-b border-white/[0.06] last:border-0">
                         <td className="px-4 py-3">
-                          <code className="rounded bg-zinc-100 px-1.5 py-0.5 text-xs font-medium text-zinc-700">
+                          <code className="rounded bg-white/[0.05] px-1.5 py-0.5 text-xs font-medium text-white/80">
                             {s.scope}
                           </code>
                         </td>
-                        <td className="px-4 py-3 text-zinc-600">{s.description}</td>
+                        <td className="px-4 py-3 text-white/65">{s.description}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -857,10 +857,10 @@ function verify(body, secret, timestamp, signature) {
 
             {/* Errors */}
             <section id="errors" className="scroll-mt-24 mb-16">
-              <h2 className="text-xl font-bold tracking-tight text-zinc-950">
+              <h2 className="text-xl font-bold tracking-tight text-white">
                 Error Handling
               </h2>
-              <p className="mt-2 text-sm leading-relaxed text-zinc-500">
+              <p className="mt-2 text-sm leading-relaxed text-white/55">
                 All errors return a consistent JSON structure with a machine-readable code,
                 a human-readable message, and the request ID for debugging.
               </p>
@@ -880,25 +880,25 @@ function verify(body, secret, timestamp, signature) {
   }
 }`}</CodeBlock>
               </div>
-              <div className="mt-6 overflow-x-auto rounded-lg border border-zinc-200">
+              <div className="mt-6 overflow-x-auto rounded-lg border border-white/10">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-zinc-200 bg-zinc-50">
-                      <th className="px-4 py-3 text-left font-semibold text-zinc-950">Code</th>
-                      <th className="px-4 py-3 text-left font-semibold text-zinc-950">HTTP</th>
-                      <th className="px-4 py-3 text-left font-semibold text-zinc-950">Description</th>
+                    <tr className="border-b border-white/10 bg-white/[0.03]">
+                      <th className="px-4 py-3 text-left font-semibold text-white">Code</th>
+                      <th className="px-4 py-3 text-left font-semibold text-white">HTTP</th>
+                      <th className="px-4 py-3 text-left font-semibold text-white">Description</th>
                     </tr>
                   </thead>
                   <tbody>
                     {errorCodes.map((e) => (
-                      <tr key={e.code} className="border-b border-zinc-100 last:border-0">
+                      <tr key={e.code} className="border-b border-white/[0.06] last:border-0">
                         <td className="px-4 py-3">
-                          <code className="rounded bg-zinc-100 px-1.5 py-0.5 text-xs font-medium text-zinc-700">
+                          <code className="rounded bg-white/[0.05] px-1.5 py-0.5 text-xs font-medium text-white/80">
                             {e.code}
                           </code>
                         </td>
-                        <td className="px-4 py-3 font-mono text-zinc-600">{e.status}</td>
-                        <td className="px-4 py-3 text-zinc-600">{e.description}</td>
+                        <td className="px-4 py-3 font-mono text-white/65">{e.status}</td>
+                        <td className="px-4 py-3 text-white/65">{e.description}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -908,66 +908,66 @@ function verify(body, secret, timestamp, signature) {
 
             {/* Rate limits */}
             <section id="rate-limits" className="scroll-mt-24 mb-16">
-              <h2 className="text-xl font-bold tracking-tight text-zinc-950">Rate Limits</h2>
-              <p className="mt-2 text-sm leading-relaxed text-zinc-500">
+              <h2 className="text-xl font-bold tracking-tight text-white">Rate Limits</h2>
+              <p className="mt-2 text-sm leading-relaxed text-white/55">
                 The API enforces a sliding-window rate limit per minute per application.
                 Limits vary by environment tier. Every response includes rate limit headers.
               </p>
 
-              <div className="mt-6 overflow-x-auto rounded-lg border border-zinc-200">
+              <div className="mt-6 overflow-x-auto rounded-lg border border-white/10">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-zinc-200 bg-zinc-50">
-                      <th className="px-4 py-3 text-left font-semibold text-zinc-950">Tier</th>
-                      <th className="px-4 py-3 text-left font-semibold text-zinc-950">Requests / minute</th>
-                      <th className="px-4 py-3 text-left font-semibold text-zinc-950">Burst</th>
+                    <tr className="border-b border-white/10 bg-white/[0.03]">
+                      <th className="px-4 py-3 text-left font-semibold text-white">Tier</th>
+                      <th className="px-4 py-3 text-left font-semibold text-white">Requests / minute</th>
+                      <th className="px-4 py-3 text-left font-semibold text-white">Burst</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr className="border-b border-zinc-100">
-                      <td className="px-4 py-3 text-zinc-600">Sandbox</td>
-                      <td className="px-4 py-3 font-mono text-zinc-600">60</td>
-                      <td className="px-4 py-3 font-mono text-zinc-600">10</td>
+                    <tr className="border-b border-white/[0.06]">
+                      <td className="px-4 py-3 text-white/65">Sandbox</td>
+                      <td className="px-4 py-3 font-mono text-white/65">60</td>
+                      <td className="px-4 py-3 font-mono text-white/65">10</td>
                     </tr>
-                    <tr className="border-b border-zinc-100">
-                      <td className="px-4 py-3 text-zinc-600">Production</td>
-                      <td className="px-4 py-3 font-mono text-zinc-600">300</td>
-                      <td className="px-4 py-3 font-mono text-zinc-600">50</td>
+                    <tr className="border-b border-white/[0.06]">
+                      <td className="px-4 py-3 text-white/65">Production</td>
+                      <td className="px-4 py-3 font-mono text-white/65">300</td>
+                      <td className="px-4 py-3 font-mono text-white/65">50</td>
                     </tr>
                     <tr className="last:border-0">
-                      <td className="px-4 py-3 text-zinc-600">Enterprise</td>
-                      <td className="px-4 py-3 font-mono text-zinc-600">1,000</td>
-                      <td className="px-4 py-3 font-mono text-zinc-600">100</td>
+                      <td className="px-4 py-3 text-white/65">Enterprise</td>
+                      <td className="px-4 py-3 font-mono text-white/65">1,000</td>
+                      <td className="px-4 py-3 font-mono text-white/65">100</td>
                     </tr>
                   </tbody>
                 </table>
               </div>
 
-              <h3 className="mt-6 text-sm font-semibold text-zinc-950">Response headers</h3>
-              <div className="mt-3 overflow-x-auto rounded-lg border border-zinc-200">
+              <h3 className="mt-6 text-sm font-semibold text-white">Response headers</h3>
+              <div className="mt-3 overflow-x-auto rounded-lg border border-white/10">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-zinc-200 bg-zinc-50">
-                      <th className="px-4 py-3 text-left font-semibold text-zinc-950">Header</th>
-                      <th className="px-4 py-3 text-left font-semibold text-zinc-950">Description</th>
+                    <tr className="border-b border-white/10 bg-white/[0.03]">
+                      <th className="px-4 py-3 text-left font-semibold text-white">Header</th>
+                      <th className="px-4 py-3 text-left font-semibold text-white">Description</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr className="border-b border-zinc-100">
-                      <td className="px-4 py-3"><code className="rounded bg-zinc-100 px-1.5 py-0.5 text-xs text-zinc-700">X-RateLimit-Limit</code></td>
-                      <td className="px-4 py-3 text-zinc-600">Maximum requests allowed per window.</td>
+                    <tr className="border-b border-white/[0.06]">
+                      <td className="px-4 py-3"><code className="rounded bg-white/[0.05] px-1.5 py-0.5 text-xs text-white/80">X-RateLimit-Limit</code></td>
+                      <td className="px-4 py-3 text-white/65">Maximum requests allowed per window.</td>
                     </tr>
-                    <tr className="border-b border-zinc-100">
-                      <td className="px-4 py-3"><code className="rounded bg-zinc-100 px-1.5 py-0.5 text-xs text-zinc-700">X-RateLimit-Remaining</code></td>
-                      <td className="px-4 py-3 text-zinc-600">Requests remaining in current window.</td>
+                    <tr className="border-b border-white/[0.06]">
+                      <td className="px-4 py-3"><code className="rounded bg-white/[0.05] px-1.5 py-0.5 text-xs text-white/80">X-RateLimit-Remaining</code></td>
+                      <td className="px-4 py-3 text-white/65">Requests remaining in current window.</td>
                     </tr>
-                    <tr className="border-b border-zinc-100">
-                      <td className="px-4 py-3"><code className="rounded bg-zinc-100 px-1.5 py-0.5 text-xs text-zinc-700">X-RateLimit-Reset</code></td>
-                      <td className="px-4 py-3 text-zinc-600">Unix timestamp when the window resets.</td>
+                    <tr className="border-b border-white/[0.06]">
+                      <td className="px-4 py-3"><code className="rounded bg-white/[0.05] px-1.5 py-0.5 text-xs text-white/80">X-RateLimit-Reset</code></td>
+                      <td className="px-4 py-3 text-white/65">Unix timestamp when the window resets.</td>
                     </tr>
                     <tr className="last:border-0">
-                      <td className="px-4 py-3"><code className="rounded bg-zinc-100 px-1.5 py-0.5 text-xs text-zinc-700">Retry-After</code></td>
-                      <td className="px-4 py-3 text-zinc-600">Included in 429 responses. Seconds to wait before retrying.</td>
+                      <td className="px-4 py-3"><code className="rounded bg-white/[0.05] px-1.5 py-0.5 text-xs text-white/80">Retry-After</code></td>
+                      <td className="px-4 py-3 text-white/65">Included in 429 responses. Seconds to wait before retrying.</td>
                     </tr>
                   </tbody>
                 </table>
@@ -976,9 +976,9 @@ function verify(body, secret, timestamp, signature) {
 
             {/* Idempotency */}
             <section id="idempotency" className="scroll-mt-24 mb-16">
-              <h2 className="text-xl font-bold tracking-tight text-zinc-950">Idempotency</h2>
-              <p className="mt-2 text-sm leading-relaxed text-zinc-500">
-                All POST, PUT, and PATCH endpoints accept an <code className="rounded bg-zinc-100 px-1 py-0.5 text-xs">Idempotency-Key</code> header
+              <h2 className="text-xl font-bold tracking-tight text-white">Idempotency</h2>
+              <p className="mt-2 text-sm leading-relaxed text-white/55">
+                All POST, PUT, and PATCH endpoints accept an <code className="rounded bg-white/[0.05] px-1 py-0.5 text-xs">Idempotency-Key</code> header
                 so you can safely retry requests on network failure without creating duplicate resources.
               </p>
               <div className="mt-4">
@@ -987,30 +987,30 @@ Authorization: Bearer renv1_live_...
 Idempotency-Key: your-unique-key-per-request
 Content-Type: application/json`}</CodeBlock>
               </div>
-              <div className="mt-6 overflow-x-auto rounded-lg border border-zinc-200">
+              <div className="mt-6 overflow-x-auto rounded-lg border border-white/10">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-zinc-200 bg-zinc-50">
-                      <th className="px-4 py-3 text-left font-semibold text-zinc-950">Scenario</th>
-                      <th className="px-4 py-3 text-left font-semibold text-zinc-950">Behaviour</th>
+                    <tr className="border-b border-white/10 bg-white/[0.03]">
+                      <th className="px-4 py-3 text-left font-semibold text-white">Scenario</th>
+                      <th className="px-4 py-3 text-left font-semibold text-white">Behaviour</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr className="border-b border-zinc-100">
-                      <td className="px-4 py-3 text-zinc-600">First request</td>
-                      <td className="px-4 py-3 text-zinc-600">Processed normally. Response cached for 24 hours.</td>
+                    <tr className="border-b border-white/[0.06]">
+                      <td className="px-4 py-3 text-white/65">First request</td>
+                      <td className="px-4 py-3 text-white/65">Processed normally. Response cached for 24 hours.</td>
                     </tr>
-                    <tr className="border-b border-zinc-100">
-                      <td className="px-4 py-3 text-zinc-600">Same key, same payload</td>
-                      <td className="px-4 py-3 text-zinc-600">Returns the cached response (not re-processed).</td>
+                    <tr className="border-b border-white/[0.06]">
+                      <td className="px-4 py-3 text-white/65">Same key, same payload</td>
+                      <td className="px-4 py-3 text-white/65">Returns the cached response (not re-processed).</td>
                     </tr>
-                    <tr className="border-b border-zinc-100">
-                      <td className="px-4 py-3 text-zinc-600">Same key, different payload</td>
-                      <td className="px-4 py-3 text-zinc-600">Returns <code className="rounded bg-zinc-100 px-1.5 py-0.5 text-xs text-zinc-700">409 Conflict</code>.</td>
+                    <tr className="border-b border-white/[0.06]">
+                      <td className="px-4 py-3 text-white/65">Same key, different payload</td>
+                      <td className="px-4 py-3 text-white/65">Returns <code className="rounded bg-white/[0.05] px-1.5 py-0.5 text-xs text-white/80">409 Conflict</code>.</td>
                     </tr>
                     <tr className="last:border-0">
-                      <td className="px-4 py-3 text-zinc-600">No key provided</td>
-                      <td className="px-4 py-3 text-zinc-600">Processed without idempotency protection.</td>
+                      <td className="px-4 py-3 text-white/65">No key provided</td>
+                      <td className="px-4 py-3 text-white/65">Processed without idempotency protection.</td>
                     </tr>
                   </tbody>
                 </table>
@@ -1019,9 +1019,9 @@ Content-Type: application/json`}</CodeBlock>
 
             {/* Versioning */}
             <section id="versioning" className="scroll-mt-24 mb-16">
-              <h2 className="text-xl font-bold tracking-tight text-zinc-950">Versioning</h2>
-              <p className="mt-2 text-sm leading-relaxed text-zinc-500">
-                The API is versioned via URL path. The current version is <code className="rounded bg-zinc-100 px-1 py-0.5 text-xs">/v1/</code>.
+              <h2 className="text-xl font-bold tracking-tight text-white">Versioning</h2>
+              <p className="mt-2 text-sm leading-relaxed text-white/55">
+                The API is versioned via URL path. The current version is <code className="rounded bg-white/[0.05] px-1 py-0.5 text-xs">/v1/</code>.
               </p>
               <ul className="mt-4 space-y-2">
                 {[
@@ -1030,7 +1030,7 @@ Content-Type: application/json`}</CodeBlock>
                   'Deprecated versions are supported for 12 months after the deprecation announcement.',
                   'Deprecation notices are sent via email and the X-Renovo-Deprecated header.',
                 ].map((item, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-zinc-500">
+                  <li key={i} className="flex items-start gap-2 text-sm text-white/55">
                     <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
                     {item}
                   </li>
@@ -1040,30 +1040,30 @@ Content-Type: application/json`}</CodeBlock>
 
             {/* Sandbox */}
             <section id="sandbox" className="scroll-mt-24 mb-16">
-              <h2 className="text-xl font-bold tracking-tight text-zinc-950">Sandbox Environment</h2>
-              <p className="mt-2 text-sm leading-relaxed text-zinc-500">
+              <h2 className="text-xl font-bold tracking-tight text-white">Sandbox Environment</h2>
+              <p className="mt-2 text-sm leading-relaxed text-white/55">
                 Use the sandbox environment for development and testing. Sandbox data is
                 isolated from production and can be reset at any time.
               </p>
-              <div className="mt-6 overflow-x-auto rounded-lg border border-zinc-200">
+              <div className="mt-6 overflow-x-auto rounded-lg border border-white/10">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-zinc-200 bg-zinc-50">
-                      <th className="px-4 py-3 text-left font-semibold text-zinc-950">Environment</th>
-                      <th className="px-4 py-3 text-left font-semibold text-zinc-950">Base URL</th>
-                      <th className="px-4 py-3 text-left font-semibold text-zinc-950">Auth</th>
+                    <tr className="border-b border-white/10 bg-white/[0.03]">
+                      <th className="px-4 py-3 text-left font-semibold text-white">Environment</th>
+                      <th className="px-4 py-3 text-left font-semibold text-white">Base URL</th>
+                      <th className="px-4 py-3 text-left font-semibold text-white">Auth</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr className="border-b border-zinc-100">
-                      <td className="px-4 py-3 text-zinc-600">Production</td>
-                      <td className="px-4 py-3"><code className="rounded bg-zinc-100 px-1.5 py-0.5 text-xs text-zinc-700">{BASE_URL}</code></td>
-                      <td className="px-4 py-3 text-zinc-600">OAuth 2.0 (tokens prefixed <code className="rounded bg-zinc-100 px-1 py-0.5 text-xs text-zinc-700">renv1_live_</code>)</td>
+                    <tr className="border-b border-white/[0.06]">
+                      <td className="px-4 py-3 text-white/65">Production</td>
+                      <td className="px-4 py-3"><code className="rounded bg-white/[0.05] px-1.5 py-0.5 text-xs text-white/80">{BASE_URL}</code></td>
+                      <td className="px-4 py-3 text-white/65">OAuth 2.0 (tokens prefixed <code className="rounded bg-white/[0.05] px-1 py-0.5 text-xs text-white/80">renv1_live_</code>)</td>
                     </tr>
                     <tr className="last:border-0">
-                      <td className="px-4 py-3 text-zinc-600">Sandbox</td>
-                      <td className="px-4 py-3"><code className="rounded bg-zinc-100 px-1.5 py-0.5 text-xs text-zinc-700">{SANDBOX_URL}</code></td>
-                      <td className="px-4 py-3 text-zinc-600">API keys (prefixed <code className="rounded bg-zinc-100 px-1 py-0.5 text-xs text-zinc-700">renv1_test_sk_</code>)</td>
+                      <td className="px-4 py-3 text-white/65">Sandbox</td>
+                      <td className="px-4 py-3"><code className="rounded bg-white/[0.05] px-1.5 py-0.5 text-xs text-white/80">{SANDBOX_URL}</code></td>
+                      <td className="px-4 py-3 text-white/65">API keys (prefixed <code className="rounded bg-white/[0.05] px-1 py-0.5 text-xs text-white/80">renv1_test_sk_</code>)</td>
                     </tr>
                   </tbody>
                 </table>
@@ -1074,7 +1074,7 @@ Content-Type: application/json`}</CodeBlock>
                   'Sandbox rate limits are lower (60 requests/minute) to prevent accidental load.',
                   'Webhook deliveries in sandbox are tagged with a test: true field.',
                 ].map((item, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-zinc-500">
+                  <li key={i} className="flex items-start gap-2 text-sm text-white/55">
                     <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
                     {item}
                   </li>
@@ -1084,19 +1084,19 @@ Content-Type: application/json`}</CodeBlock>
 
             {/* Changelog */}
             <section id="changelog" className="scroll-mt-24 mb-16">
-              <h2 className="text-xl font-bold tracking-tight text-zinc-950">Changelog</h2>
-              <p className="mt-2 text-sm leading-relaxed text-zinc-500">
+              <h2 className="text-xl font-bold tracking-tight text-white">Changelog</h2>
+              <p className="mt-2 text-sm leading-relaxed text-white/55">
                 We publish API changes and deprecation notices here. Subscribe to updates
                 via your application settings in the Renovo dashboard.
               </p>
               <div className="mt-6 space-y-4">
-                <div className="rounded-lg border border-zinc-200 p-4">
+                <div className="rounded-lg border border-white/10 p-4">
                   <div className="flex items-center gap-2">
-                    <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-700">New</span>
-                    <span className="text-xs text-zinc-400">2026-04-13</span>
+                    <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-300">New</span>
+                    <span className="text-xs text-white/40">2026-04-13</span>
                   </div>
-                  <p className="mt-2 text-sm font-medium text-zinc-950">API v1 public launch</p>
-                  <p className="mt-1 text-sm text-zinc-500">
+                  <p className="mt-2 text-sm font-medium text-white">API v1 public launch</p>
+                  <p className="mt-1 text-sm text-white/55">
                     Initial release of the Renovo Public API with inspections, cases, documents, and webhooks.
                   </p>
                 </div>
@@ -1104,9 +1104,9 @@ Content-Type: application/json`}</CodeBlock>
             </section>
 
             {/* CTA */}
-            <section className="rounded-xl border border-zinc-200 bg-zinc-50 p-8 text-center">
-              <h2 className="text-lg font-bold text-zinc-950">Ready to integrate?</h2>
-              <p className="mt-2 text-sm text-zinc-500">
+            <section className="rounded-xl border border-white/10 bg-white/[0.03] p-8 text-center">
+              <h2 className="text-lg font-bold text-white">Ready to integrate?</h2>
+              <p className="mt-2 text-sm text-white/55">
                 Get your API credentials and start building your integration today.
               </p>
               <div className="mt-5 flex flex-wrap justify-center gap-3">
@@ -1118,7 +1118,7 @@ Content-Type: application/json`}</CodeBlock>
                 </Link>
                 <Link
                   href="/contact"
-                  className="rounded-md border border-zinc-300 bg-white px-5 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+                  className="rounded-md border border-white/15 bg-white/[0.03] px-5 py-2.5 text-sm font-medium text-white/80 hover:bg-white/[0.03]"
                 >
                   Contact us
                 </Link>

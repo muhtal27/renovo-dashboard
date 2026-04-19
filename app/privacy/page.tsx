@@ -40,12 +40,12 @@ export default function PrivacyPage() {
         <section className="page-hero">
           <p className="app-kicker">Privacy</p>
           <h1 className="page-title max-w-[820px]">
-            How we look after <em className="text-slate-400">your tenancy data.</em>
+            How we look after <em className="text-white/45">your tenancy data.</em>
           </h1>
           <p className="page-copy max-w-[720px]">
             Renovo AI Ltd is registered with the ICO (ZC112030). We act as your data processor under the UK GDPR and the Data Protection Act 2018. You stay the data controller for all tenancy, landlord, and tenant information in your workspace.
           </p>
-          <p className="mt-4 text-sm text-slate-500">
+          <p className="mt-4 text-sm text-white/55">
             Renovo AI Ltd is registered with the Information Commissioner&apos;s Office (ICO). Registration reference: ZC112030.
           </p>
         </section>
@@ -54,14 +54,14 @@ export default function PrivacyPage() {
         <section className="section-tinted">
           <div className="mx-auto max-w-[1080px] px-6 py-24">
             <p className="app-kicker">Information we handle</p>
-            <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
-              Categories of information used to <em className="text-slate-400">operate the service</em>
+            <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-white">
+              Categories of information used to <em className="text-white/45">operate the service</em>
             </h2>
-            <div className="mt-14 divide-y divide-slate-200">
+            <div className="mt-14 divide-y divide-white/10">
               {informationCategories.map((item) => (
                 <div key={item.l} className="grid gap-2 py-5 md:grid-cols-[240px_1fr]">
-                  <p className="text-sm font-semibold text-zinc-950">{item.l}</p>
-                  <p className="text-sm leading-7 text-slate-500">{item.d}</p>
+                  <p className="text-sm font-semibold text-white">{item.l}</p>
+                  <p className="text-sm leading-7 text-white/55">{item.d}</p>
                 </div>
               ))}
             </div>
@@ -71,14 +71,14 @@ export default function PrivacyPage() {
         {/* HOW INFORMATION IS USED */}
         <section className="mx-auto max-w-[1080px] px-6 py-24">
           <p className="app-kicker">How information is used</p>
-          <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
-            Information use is tied to <em className="text-slate-400">service delivery and support</em>
+          <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-white">
+            Information use is tied to <em className="text-white/45">service delivery and support</em>
           </h2>
-          <div className="mt-14 divide-y divide-slate-200">
+          <div className="mt-14 divide-y divide-white/10">
             {usageCategories.map((item) => (
               <div key={item.l} className="grid gap-2 py-5 md:grid-cols-[280px_1fr]">
-                <p className="text-sm font-semibold text-zinc-950">{item.l}</p>
-                <p className="text-sm leading-7 text-slate-500">{item.d}</p>
+                <p className="text-sm font-semibold text-white">{item.l}</p>
+                <p className="text-sm leading-7 text-white/55">{item.d}</p>
               </div>
             ))}
           </div>
@@ -88,14 +88,14 @@ export default function PrivacyPage() {
         <section className="section-tinted">
           <div className="mx-auto max-w-[1080px] px-6 py-24">
             <p className="app-kicker">Data handling principles</p>
-            <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
-              Designed to stay <em className="text-slate-400">practical and reviewable</em>
+            <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-white">
+              Designed to stay <em className="text-white/45">practical and reviewable</em>
             </h2>
-            <div className="mt-14 divide-y divide-slate-200">
+            <div className="mt-14 divide-y divide-white/10">
               {handlingPrinciples.map((item) => (
                 <div key={item.l} className="grid gap-2 py-5 md:grid-cols-[240px_1fr]">
-                  <p className="text-sm font-semibold text-zinc-950">{item.l}</p>
-                  <p className="text-sm leading-7 text-slate-500">{item.d}</p>
+                  <p className="text-sm font-semibold text-white">{item.l}</p>
+                  <p className="text-sm leading-7 text-white/55">{item.d}</p>
                 </div>
               ))}
             </div>
@@ -104,10 +104,10 @@ export default function PrivacyPage() {
 
         {/* CTA */}
         <section className="page-hero text-center">
-          <h2 className="text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
-            Need more detail on <em className="text-slate-400">privacy or compliance</em>?
+          <h2 className="text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-white">
+            Need more detail on <em className="text-white/45">privacy or compliance</em>?
           </h2>
-          <p className="mx-auto mt-4 max-w-[500px] text-base leading-8 text-slate-500">
+          <p className="mx-auto mt-4 max-w-[500px] text-base leading-8 text-white/55">
             Contact us directly or review the compliance overview for hosting, access
             control, audit trail, and retention detail.
           </p>

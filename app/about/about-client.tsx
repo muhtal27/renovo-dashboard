@@ -9,7 +9,7 @@ export default function AboutClient() {
         <section className="page-hero">
           <p className="app-kicker">About</p>
           <h1 className="page-title max-w-[820px]">
-            Built by a team that runs <em className="text-slate-400">end of tenancy operations.</em>
+            Built by a team that runs <em className="text-white/45">end of tenancy operations.</em>
           </h1>
           <p className="page-copy max-w-[720px]">
             Renovo is the operating layer between checkout evidence and defensible deposit decisions. We chose a narrow scope on purpose. We solve one workflow, thoroughly, rather than building a broad property platform.
@@ -19,10 +19,10 @@ export default function AboutClient() {
         {/* WHO'S BEHIND IT */}
         <section className="mx-auto max-w-[1080px] px-6 py-24">
           <p className="app-kicker">Behind the product</p>
-          <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
-            Built from <em className="text-slate-400">real operations</em>
+          <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-white">
+            Built from <em className="text-white/45">real operations</em>
           </h2>
-          <p className="mt-5 max-w-[640px] text-base leading-8 text-slate-500">
+          <p className="mt-5 max-w-[640px] text-base leading-8 text-white/55">
             Renovo AI was built by a team that manages end of tenancy operations
             for residential lettings portfolios. The product exists to bring
             structure to a process that is often fragmented — turning checkout
@@ -34,15 +34,15 @@ export default function AboutClient() {
         {/* THE COMPANY */}
         <section className="mx-auto max-w-[1080px] px-6 py-24">
           <p className="app-kicker">The company</p>
-          <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
-            One workflow. <em className="text-slate-400">Done properly.</em>
+          <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-white">
+            One workflow. <em className="text-white/45">Done properly.</em>
           </h2>
-          <p className="mt-4 max-w-[640px] text-base leading-8 text-slate-500">
+          <p className="mt-4 max-w-[640px] text-base leading-8 text-white/55">
             Renovo AI is focused on one workflow category — turning checkout
             evidence into reviewable, defensible deposit decisions — with human
             approval at every stage.
           </p>
-          <p className="mt-4 max-w-[640px] text-base leading-8 text-slate-500">
+          <p className="mt-4 max-w-[640px] text-base leading-8 text-white/55">
             The platform handles liability comparison, deduction drafting,
             evidence management, and dispute preparation. It is not a broad
             property platform. It is purpose-built for end of tenancy operations.
@@ -57,8 +57,8 @@ export default function AboutClient() {
               { l: "ICO registration", v: "ZC112030" },
             ].map((d) => (
               <div key={d.l}>
-                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-slate-400">{d.l}</p>
-                <p className="mt-2 text-sm text-slate-700">{d.v}</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-white/45">{d.l}</p>
+                <p className="mt-2 text-sm text-white/75">{d.v}</p>
               </div>
             ))}
           </div>
@@ -68,11 +68,11 @@ export default function AboutClient() {
         <section className="section-tinted">
           <div className="mx-auto max-w-[1080px] px-6 py-24">
             <p className="app-kicker">Product focus</p>
-            <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
-              One workflow. <em className="text-slate-400">Done properly.</em>
+            <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-white">
+              One workflow. <em className="text-white/45">Done properly.</em>
             </h2>
 
-            <div className="mt-14 divide-y divide-slate-200">
+            <div className="mt-14 divide-y divide-white/10">
               {[
                 { label: "Liability comparison", desc: "AI compares check-in and checkout evidence room by room, flags discrepancies, and prepares a structured assessment against the schedule of condition." },
                 { label: "Deduction drafting", desc: "Fair wear and tear reasoning, betterment context, evidence references, and recommended deduction positions drafted automatically for manager review." },
@@ -81,8 +81,8 @@ export default function AboutClient() {
                 { label: "Human approval", desc: "Every recommendation requires manager sign-off. Nothing is sent without explicit approval from a named property manager." },
               ].map((item) => (
                 <div key={item.label} className="grid gap-2 py-5 md:grid-cols-[180px_1fr]">
-                  <p className="text-sm font-semibold text-zinc-950">{item.label}</p>
-                  <p className="text-sm leading-7 text-slate-500">{item.desc}</p>
+                  <p className="text-sm font-semibold text-white">{item.label}</p>
+                  <p className="text-sm leading-7 text-white/55">{item.desc}</p>
                 </div>
               ))}
             </div>
@@ -92,8 +92,8 @@ export default function AboutClient() {
         {/* PRINCIPLES */}
         <section className="mx-auto max-w-[1080px] px-6 py-24">
           <p className="app-kicker">Principles</p>
-          <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
-            How we <em className="text-slate-400">operate</em>
+          <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-white">
+            How we <em className="text-white/45">operate</em>
           </h2>
 
           <div className="mt-14 grid gap-10 md:grid-cols-3">
@@ -115,9 +115,9 @@ export default function AboutClient() {
               },
             ].map((c) => (
               <div key={c.n}>
-                <p className="font-mono text-xs font-semibold tracking-wide text-emerald-600">{c.n}</p>
-                <h3 className="mt-2 text-[15px] font-semibold text-zinc-950">{c.h}</h3>
-                <p className="mt-2 text-sm leading-7 text-slate-500">{c.p}</p>
+                <p className="font-mono text-xs font-semibold tracking-wide text-emerald-400">{c.n}</p>
+                <h3 className="mt-2 text-[15px] font-semibold text-white">{c.h}</h3>
+                <p className="mt-2 text-sm leading-7 text-white/55">{c.p}</p>
               </div>
             ))}
           </div>

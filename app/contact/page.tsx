@@ -41,7 +41,7 @@ export default function ContactPage() {
             <section className="page-hero">
               <p className="app-kicker">Contact</p>
               <h1 className="page-title max-w-[720px]">
-                Talk to Renovo AI about your <em className="text-slate-400">checkout workflow</em>
+                Talk to Renovo AI about your <em className="text-white/45">checkout workflow</em>
               </h1>
               <p className="page-copy max-w-[640px]">
                 Use the form for product enquiries, partnerships, investor conversations,
@@ -49,7 +49,7 @@ export default function ContactPage() {
                 letters, liability assessments, or dispute packs and we will reply directly.
               </p>
 
-              <div className="mt-8 grid gap-3 text-sm leading-7 text-slate-500">
+              <div className="mt-8 grid gap-3 text-sm leading-7 text-white/55">
                 {[
                   'Product enquiries for UK property managers and letting agencies',
                   'Partnership conversations across inventory, CRM, and workflow tooling',
@@ -64,7 +64,7 @@ export default function ContactPage() {
 
               <div className="mt-10">
                 <p className="app-kicker">Email</p>
-                <p className="mt-3 max-w-[560px] text-sm leading-7 text-slate-500">
+                <p className="mt-3 max-w-[560px] text-sm leading-7 text-white/55">
                   Prefer email? Contact{' '}
                   <a
                     href="mailto:hello@renovoai.co.uk"
@@ -83,7 +83,7 @@ export default function ContactPage() {
                 </div>
               </div>
 
-              <div className="mt-10 text-sm text-slate-400">
+              <div className="mt-10 text-sm text-white/45">
                 <p>Renovo AI Ltd &middot; SC833544 &middot; VAT GB483379648 &middot; ICO ZC112030</p>
 
                 <div className="mt-4 flex flex-wrap gap-4">

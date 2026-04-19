@@ -90,7 +90,7 @@ export default function SecurityPage() {
         <section className="page-hero">
           <p className="app-kicker">Security and compliance</p>
           <h1 className="page-title max-w-[820px]">
-            UK hosted. Audit first. <em className="text-slate-400">Humans decide.</em>
+            UK hosted. Audit first. <em className="text-white/45">Humans decide.</em>
           </h1>
           <p className="page-copy max-w-[720px]">
             Every workspace is isolated at database level. Every action is timestamped and attributed. Tenancy data processed by AI is never used for model training and never shared outside Renovo.
@@ -101,12 +101,12 @@ export default function SecurityPage() {
         <section className="mx-auto w-full max-w-[1200px] px-6 pt-8">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {BADGES.map((b) => (
-              <div key={b.ic} className="rounded-xl border border-slate-200 bg-white p-5">
-                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg border border-emerald-500/25 bg-emerald-50 font-mono text-[11px] font-semibold tracking-tight text-emerald-700">
+              <div key={b.ic} className="rounded-xl border border-white/10 bg-white/[0.03] p-5">
+                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg border border-emerald-500/25 bg-emerald-500/15 font-mono text-[11px] font-semibold tracking-tight text-emerald-300">
                   {b.ic}
                 </div>
-                <div className="text-[14px] font-semibold text-zinc-950">{b.t}</div>
-                <p className="mt-1.5 text-[13px] leading-relaxed text-slate-500">{b.d}</p>
+                <div className="text-[14px] font-semibold text-white">{b.t}</div>
+                <p className="mt-1.5 text-[13px] leading-relaxed text-white/55">{b.d}</p>
               </div>
             ))}
           </div>
@@ -116,12 +116,12 @@ export default function SecurityPage() {
         <section className="mx-auto w-full max-w-[1200px] px-6 pt-16">
           <div className="grid gap-6 lg:grid-cols-3">
             {PILLARS.map((p) => (
-              <div key={p.title} className="rounded-2xl border border-slate-200 bg-white p-7">
-                <h3 className="text-[17px] font-semibold leading-tight text-zinc-950">{p.title}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-slate-600">{p.intro}</p>
-                <ul className="mt-5 space-y-2 border-t border-slate-100 pt-5">
+              <div key={p.title} className="rounded-2xl border border-white/10 bg-white/[0.03] p-7">
+                <h3 className="text-[17px] font-semibold leading-tight text-white">{p.title}</h3>
+                <p className="mt-3 text-sm leading-relaxed text-white/65">{p.intro}</p>
+                <ul className="mt-5 space-y-2 border-t border-white/[0.06] pt-5">
                   {p.bullets.map((b) => (
-                    <li key={b} className="flex items-start gap-2.5 text-[13px] leading-relaxed text-slate-600">
+                    <li key={b} className="flex items-start gap-2.5 text-[13px] leading-relaxed text-white/65">
                       <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-emerald-500" />
                       <span>{b}</span>
                     </li>
@@ -134,15 +134,15 @@ export default function SecurityPage() {
 
         {/* DISCLOSURE HEADER CARD */}
         <section className="mx-auto w-full max-w-[1200px] px-6 pt-16">
-          <div className="grid gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-7 md:grid-cols-[1fr_auto] md:items-center">
+          <div className="grid gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-7 md:grid-cols-[1fr_auto] md:items-center">
             <div>
               <p className="app-kicker">Responsible disclosure</p>
-              <div className="mt-2 text-[17px] font-semibold text-zinc-950">
+              <div className="mt-2 text-[17px] font-semibold text-white">
                 Found a vulnerability? Tell us directly.
               </div>
-              <p className="mt-2 text-sm leading-relaxed text-slate-600">
+              <p className="mt-2 text-sm leading-relaxed text-white/65">
                 Email{' '}
-                <a className="font-medium text-emerald-700 underline decoration-emerald-200 underline-offset-2 hover:decoration-emerald-500" href="mailto:security@renovoai.co.uk">
+                <a className="font-medium text-emerald-300 underline decoration-emerald-200 underline-offset-2 hover:decoration-emerald-500" href="mailto:security@renovoai.co.uk">
                   security@renovoai.co.uk
                 </a>{' '}
                 with the steps to reproduce, the affected endpoints, and the security impact. We triage inside four working hours and fix critical issues quickly.
@@ -150,7 +150,7 @@ export default function SecurityPage() {
             </div>
             <a
               href="mailto:security@renovoai.co.uk"
-              className="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:border-slate-400 hover:bg-slate-50"
+              className="inline-flex items-center justify-center rounded-lg border border-white/15 bg-white/[0.03] px-5 py-2.5 text-sm font-medium text-white/75 transition-colors hover:border-white/30 hover:bg-white/[0.03]"
             >
               Email security team &rarr;
             </a>
@@ -160,22 +160,22 @@ export default function SecurityPage() {
         {/* DISCLOSURE POLICY DETAIL */}
         <div className="mx-auto w-full max-w-[780px]">
           <section className="page-section">
-            <h2 className="text-[clamp(1.5rem,3vw,2rem)] leading-[1.12] text-zinc-950">How to report</h2>
-            <div className="mt-6 rounded-xl border border-zinc-200 bg-zinc-50 p-6">
-              <p className="text-sm font-semibold text-zinc-950">Email</p>
+            <h2 className="text-[clamp(1.5rem,3vw,2rem)] leading-[1.12] text-white">How to report</h2>
+            <div className="mt-6 rounded-xl border border-white/10 bg-white/[0.03] p-6">
+              <p className="text-sm font-semibold text-white">Email</p>
               <a
                 href="mailto:security@renovoai.co.uk"
-                className="mt-2 inline-block text-base font-medium text-zinc-950 underline decoration-zinc-300 underline-offset-4"
+                className="mt-2 inline-block text-base font-medium text-white underline decoration-zinc-300 underline-offset-4"
               >
                 security@renovoai.co.uk
               </a>
-              <p className="mt-4 text-sm leading-7 text-zinc-600">
+              <p className="mt-4 text-sm leading-7 text-white/65">
                 Please include enough detail for the report to be triaged without follow-up guesswork.
               </p>
               <ul className="mt-4 space-y-3">
                 {reportItems.map((item) => (
-                  <li key={item} className="flex items-start gap-3 text-sm leading-7 text-zinc-600">
-                    <span className="mt-[11px] h-1.5 w-1.5 shrink-0 rounded-full bg-zinc-950" />
+                  <li key={item} className="flex items-start gap-3 text-sm leading-7 text-white/65">
+                    <span className="mt-[11px] h-1.5 w-1.5 shrink-0 rounded-full bg-[#0a0e1a]" />
                     <span>{item}</span>
                   </li>
                 ))}
@@ -184,11 +184,11 @@ export default function SecurityPage() {
           </section>
 
           <section className="page-section">
-            <h2 className="text-[clamp(1.5rem,3vw,2rem)] leading-[1.12] text-zinc-950">Scope</h2>
+            <h2 className="text-[clamp(1.5rem,3vw,2rem)] leading-[1.12] text-white">Scope</h2>
             <ul className="mt-6 space-y-4">
               {scopeItems.map((item) => (
-                <li key={item} className="flex items-start gap-3 text-sm leading-7 text-zinc-600">
-                  <span className="mt-[11px] h-1.5 w-1.5 shrink-0 rounded-full bg-zinc-950" />
+                <li key={item} className="flex items-start gap-3 text-sm leading-7 text-white/65">
+                  <span className="mt-[11px] h-1.5 w-1.5 shrink-0 rounded-full bg-[#0a0e1a]" />
                   <span>{item}</span>
                 </li>
               ))}
@@ -196,11 +196,11 @@ export default function SecurityPage() {
           </section>
 
           <section className="page-section">
-            <h2 className="text-[clamp(1.5rem,3vw,2rem)] leading-[1.12] text-zinc-950">Out of scope</h2>
+            <h2 className="text-[clamp(1.5rem,3vw,2rem)] leading-[1.12] text-white">Out of scope</h2>
             <ul className="mt-6 space-y-4">
               {outOfScopeItems.map((item) => (
-                <li key={item} className="flex items-start gap-3 text-sm leading-7 text-zinc-600">
-                  <span className="mt-[11px] h-1.5 w-1.5 shrink-0 rounded-full bg-zinc-300" />
+                <li key={item} className="flex items-start gap-3 text-sm leading-7 text-white/65">
+                  <span className="mt-[11px] h-1.5 w-1.5 shrink-0 rounded-full bg-white/20" />
                   <span>{item}</span>
                 </li>
               ))}
@@ -208,8 +208,8 @@ export default function SecurityPage() {
           </section>
 
           <section className="page-section">
-            <h2 className="text-[clamp(1.5rem,3vw,2rem)] leading-[1.12] text-zinc-950">Compensation</h2>
-            <div className="mt-5 space-y-4 text-base leading-8 text-zinc-600">
+            <h2 className="text-[clamp(1.5rem,3vw,2rem)] leading-[1.12] text-white">Compensation</h2>
+            <div className="mt-5 space-y-4 text-base leading-8 text-white/65">
               <p>
                 Renovo may offer compensation for qualifying reports where the finding is original,
                 actionable, and materially improves the security of the platform.
@@ -223,11 +223,11 @@ export default function SecurityPage() {
           </section>
 
           <section className="page-section">
-            <h2 className="text-[clamp(1.5rem,3vw,2rem)] leading-[1.12] text-zinc-950">Disclosure guidelines</h2>
+            <h2 className="text-[clamp(1.5rem,3vw,2rem)] leading-[1.12] text-white">Disclosure guidelines</h2>
             <ul className="mt-6 space-y-4">
               {disclosureGuidelines.map((item) => (
-                <li key={item} className="flex items-start gap-3 text-sm leading-7 text-zinc-600">
-                  <span className="mt-[11px] h-1.5 w-1.5 shrink-0 rounded-full bg-zinc-950" />
+                <li key={item} className="flex items-start gap-3 text-sm leading-7 text-white/65">
+                  <span className="mt-[11px] h-1.5 w-1.5 shrink-0 rounded-full bg-[#0a0e1a]" />
                   <span>{item}</span>
                 </li>
               ))}
@@ -236,13 +236,13 @@ export default function SecurityPage() {
 
           {/* PROCUREMENT CTA */}
           <section className="page-section-compact pb-0">
-            <div className="grid gap-4 rounded-xl border border-zinc-200 bg-zinc-50 p-6 md:grid-cols-[1fr_auto] md:items-center">
+            <div className="grid gap-4 rounded-xl border border-white/10 bg-white/[0.03] p-6 md:grid-cols-[1fr_auto] md:items-center">
               <div>
                 <p className="app-kicker">Procurement review?</p>
-                <h2 className="mt-3 text-[clamp(1.25rem,2.5vw,1.5rem)] leading-tight text-zinc-950">
+                <h2 className="mt-3 text-[clamp(1.25rem,2.5vw,1.5rem)] leading-tight text-white">
                   Send your security team our way.
                 </h2>
-                <p className="mt-3 text-sm leading-7 text-zinc-600">
+                <p className="mt-3 text-sm leading-7 text-white/65">
                   We return DPA, pre-filled questionnaire, and compliance details same business day for Portfolio 365+ customers.
                 </p>
               </div>
@@ -255,7 +255,7 @@ export default function SecurityPage() {
                 </a>
                 <Link
                   href="/book-demo"
-                  className="inline-flex items-center rounded-md border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:border-slate-400 hover:bg-slate-50"
+                  className="inline-flex items-center rounded-md border border-white/15 bg-white/[0.03] px-5 py-2.5 text-sm font-medium text-white/75 hover:border-white/30 hover:bg-white/[0.03]"
                 >
                   Book a technical demo
                 </Link>

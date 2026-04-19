@@ -87,7 +87,7 @@ export default function HowItWorksPage() {
         <section className="page-hero">
           <p className="app-kicker">How it works</p>
           <h1 className="page-title max-w-[860px]">
-            From checkout report to <em className="text-slate-400">deposit decision</em>
+            From checkout report to <em className="text-white/45">deposit decision</em>
           </h1>
           <p className="page-copy max-w-[640px]">
             Renovo fits around the way letting agencies already manage end of tenancy.
@@ -108,15 +108,15 @@ export default function HowItWorksPage() {
         <section className="section-tinted">
           <div className="mx-auto max-w-[1080px] px-6 py-24">
             <p className="app-kicker">Product flow</p>
-            <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
-              Six steps from checkout to <em className="text-slate-400">deposit release</em>
+            <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-white">
+              Six steps from checkout to <em className="text-white/45">deposit release</em>
             </h2>
-            <p className="mt-3.5 max-w-[560px] text-base leading-8 text-slate-500">
+            <p className="mt-3.5 max-w-[560px] text-base leading-8 text-white/55">
               Start with the case file, move through evidence review and liability
               assessment, then close through agreement or scheme escalation.
             </p>
 
-            <div className="mt-14 divide-y divide-slate-200">
+            <div className="mt-14 divide-y divide-white/10">
               {workflowSteps.map((s) => (
                 <div key={s.n} className="grid grid-cols-[52px_1fr] gap-5 py-6 md:grid-cols-[52px_120px_1fr]">
                   <div className="flex h-10 w-10 items-center justify-center rounded-[10px] border border-emerald-500/[0.18] bg-emerald-500/[0.08] text-sm font-bold text-emerald-500">
@@ -126,8 +126,8 @@ export default function HowItWorksPage() {
                     {s.tag}
                   </p>
                   <div>
-                    <h3 className="text-[15px] font-semibold text-zinc-950">{s.title}</h3>
-                    <p className="mt-1 text-sm leading-7 text-slate-500">{s.body}</p>
+                    <h3 className="text-[15px] font-semibold text-white">{s.title}</h3>
+                    <p className="mt-1 text-sm leading-7 text-white/55">{s.body}</p>
                   </div>
                 </div>
               ))}
@@ -138,10 +138,10 @@ export default function HowItWorksPage() {
         {/* CONTROL */}
         <section className="mx-auto max-w-[1080px] px-6 py-24">
           <p className="app-kicker">Decision control</p>
-          <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
-            Renovo drafts. <em className="text-slate-400">Your team decides.</em>
+          <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-white">
+            Renovo drafts. <em className="text-white/45">Your team decides.</em>
           </h2>
-          <p className="mt-3.5 max-w-[560px] text-base leading-8 text-slate-500">
+          <p className="mt-3.5 max-w-[560px] text-base leading-8 text-white/55">
             Renovo does not remove manager judgement. It structures the evidence,
             drafts the assessment, and keeps the audit trail readable.
           </p>
@@ -149,8 +149,8 @@ export default function HowItWorksPage() {
           <div className="mt-14 grid gap-10 md:grid-cols-3">
             {controls.map((c) => (
               <div key={c.title}>
-                <h3 className="text-[15px] font-semibold text-zinc-950">{c.title}</h3>
-                <p className="mt-2 text-sm leading-7 text-slate-500">{c.body}</p>
+                <h3 className="text-[15px] font-semibold text-white">{c.title}</h3>
+                <p className="mt-2 text-sm leading-7 text-white/55">{c.body}</p>
               </div>
             ))}
           </div>
@@ -160,10 +160,10 @@ export default function HowItWorksPage() {
         <section className="section-tinted">
           <div className="mx-auto max-w-[1080px] px-6 py-24">
             <p className="app-kicker">System handoff</p>
-            <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-zinc-950">
-              Built around <em className="text-slate-400">existing workflows</em>
+            <h2 className="mt-3.5 text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.1] tracking-tight text-white">
+              Built around <em className="text-white/45">existing workflows</em>
             </h2>
-            <p className="mt-3.5 max-w-[560px] text-base leading-8 text-slate-500">
+            <p className="mt-3.5 max-w-[560px] text-base leading-8 text-white/55">
               Integration work is focused on the handoff points that matter in
               end of tenancy operations, not on adding another disconnected admin tool.
             </p>
@@ -171,8 +171,8 @@ export default function HowItWorksPage() {
             <div className="mt-14 grid gap-10 md:grid-cols-3">
               {integrationAreas.map((i) => (
                 <div key={i.title}>
-                  <h3 className="text-[15px] font-semibold text-zinc-950">{i.title}</h3>
-                  <p className="mt-2 text-sm leading-7 text-slate-500">{i.body}</p>
+                  <h3 className="text-[15px] font-semibold text-white">{i.title}</h3>
+                  <p className="mt-2 text-sm leading-7 text-white/55">{i.body}</p>
                 </div>
               ))}
             </div>

@@ -37,27 +37,27 @@ export default function CalculatorClient() {
   const pct = ((tenancies - 50) / (2000 - 50)) * 100;
 
   return (
-    <main className="min-h-screen bg-white px-4 py-16 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-white/[0.03] px-4 py-16 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-5xl">
         <div className="text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-zinc-950 sm:text-4xl">
+          <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
             Savings Calculator
           </h1>
-          <p className="mt-3 text-lg text-zinc-500">
+          <p className="mt-3 text-lg text-white/55">
             See how much your agency could save with Renovo&nbsp;AI.
           </p>
         </div>
 
         <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-3">
           {/* Left — Slider */}
-          <div className="rounded-xl border border-zinc-200 bg-white p-6">
+          <div className="rounded-xl border border-white/10 bg-white/[0.03] p-6">
             <label
               htmlFor="tenancies"
-              className="block text-sm font-medium text-zinc-500"
+              className="block text-sm font-medium text-white/55"
             >
               Fully managed tenancies
             </label>
-            <p className="mt-1 text-4xl font-bold text-zinc-950">
+            <p className="mt-1 text-4xl font-bold text-white">
               {tenancies.toLocaleString("en-GB")}
             </p>
 
@@ -78,15 +78,15 @@ export default function CalculatorClient() {
               }}
             />
 
-            <div className="mt-2 flex justify-between text-xs text-zinc-400">
+            <div className="mt-2 flex justify-between text-xs text-white/40">
               <span>50</span>
               <span>2,000</span>
             </div>
           </div>
 
           {/* Centre — Annual saving */}
-          <div className="flex flex-col items-center justify-center rounded-xl border border-zinc-200 bg-white p-6 text-center">
-            <p className="text-sm font-medium text-zinc-500">
+          <div className="flex flex-col items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] p-6 text-center">
+            <p className="text-sm font-medium text-white/55">
               Estimated annual saving
             </p>
             <p className="mt-2 text-5xl font-bold text-emerald-500">
@@ -100,38 +100,38 @@ export default function CalculatorClient() {
           </div>
 
           {/* Right — Breakdown */}
-          <div className="rounded-xl border border-zinc-200 bg-white p-6">
-            <h2 className="text-sm font-medium text-zinc-500">Breakdown</h2>
+          <div className="rounded-xl border border-white/10 bg-white/[0.03] p-6">
+            <h2 className="text-sm font-medium text-white/55">Breakdown</h2>
 
             <div className="mt-4 space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-zinc-600">Manual cost (est.)</span>
-                <span className="text-sm font-semibold text-zinc-950">
+                <span className="text-sm text-white/65">Manual cost (est.)</span>
+                <span className="text-sm font-semibold text-white">
                   {fmt.format(manualAnnualCost)}/yr
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-zinc-600">Renovo AI cost</span>
-                <span className="text-sm font-semibold text-zinc-950">
+                <span className="text-sm text-white/65">Renovo AI cost</span>
+                <span className="text-sm font-semibold text-white">
                   {isEnterprise ? "Custom" : `${fmt.format(annualCost)}/yr`}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-zinc-600">Portfolio blocks</span>
-                <span className="text-sm font-semibold text-zinc-950">
+                <span className="text-sm text-white/65">Portfolio blocks</span>
+                <span className="text-sm font-semibold text-white">
                   {isEnterprise ? "6+" : blocks}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-zinc-600">FTE freed</span>
-                <span className="text-sm font-semibold text-zinc-950">
+                <span className="text-sm text-white/65">FTE freed</span>
+                <span className="text-sm font-semibold text-white">
                   {fteFreed.toFixed(1)}
                 </span>
               </div>
               {!isEnterprise && (
-                <div className="border-t border-zinc-100 pt-4">
+                <div className="border-t border-white/[0.06] pt-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-zinc-950">
+                    <span className="text-sm font-medium text-white">
                       3-year saving
                     </span>
                     <span className="text-lg font-bold text-emerald-500">
@@ -140,7 +140,7 @@ export default function CalculatorClient() {
                   </div>
                 </div>
               )}
-              <div className="text-xs text-zinc-400">
+              <div className="text-xs text-white/40">
                 Let-only tenancies included at no extra cost.
               </div>
             </div>
@@ -158,7 +158,7 @@ export default function CalculatorClient() {
         </div>
 
         {/* Footnote */}
-        <p className="mt-8 text-center text-xs text-zinc-400">
+        <p className="mt-8 text-center text-xs text-white/40">
           Estimates based on industry benchmarks. Actual savings depend on your
           staffing model and case mix. First month on us for new customers.
         </p>

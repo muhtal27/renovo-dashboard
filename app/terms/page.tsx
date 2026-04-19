@@ -25,7 +25,7 @@ export default function TermsPage() {
         <section className="page-hero">
           <p className="app-kicker">Terms</p>
           <h1 className="page-title max-w-[820px]">
-            Plain terms. <em className="text-slate-400">Rolling monthly.</em>
+            Plain terms. <em className="text-white/45">Rolling monthly.</em>
           </h1>
           <p className="page-copy max-w-[720px]">
             These terms apply to your use of the Renovo AI marketing site, live demo,
@@ -35,16 +35,16 @@ export default function TermsPage() {
         </section>
 
         <section className="mx-auto max-w-[1080px] px-6 py-24">
-          <div className="divide-y divide-slate-200">
+          <div className="divide-y divide-white/10">
             {termsSections.map((section, index) => (
               <div key={section.title} className="grid gap-2 py-5 md:grid-cols-[220px_1fr]">
                 <div className="flex items-start gap-3">
                   <span className="text-sm font-semibold text-emerald-500">
                     {String(index + 1).padStart(2, '0')}
                   </span>
-                  <p className="text-sm font-semibold text-zinc-950">{section.title}</p>
+                  <p className="text-sm font-semibold text-white">{section.title}</p>
                 </div>
-                <p className="text-sm leading-7 text-slate-500">
+                <p className="text-sm leading-7 text-white/55">
                   {section.title === 'Contact' ? (
                     <>
                       If you have questions about these terms, contact{' '}

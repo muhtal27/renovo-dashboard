@@ -37,7 +37,7 @@ export default function DemoPage() {
             <p className="app-kicker">Interactive demo</p>
             <h1 className="page-title max-w-[820px]">
               Explore the full operator dashboard with{' '}
-              <em className="text-slate-400">live mock data</em>
+              <em className="text-white/45">live mock data</em>
             </h1>
             <p className="page-copy max-w-[640px]">
               Click through the end-of-tenancy workflow from checkout intake to AI
@@ -52,45 +52,45 @@ export default function DemoPage() {
                 Launch interactive demo &rarr;
               </a>
             </div>
-            <p className="mt-5 text-sm leading-7 text-slate-400">
+            <p className="mt-5 text-sm leading-7 text-white/45">
               This demo uses mock Edinburgh properties and tenants. No real
               customer data is shown.
             </p>
           </section>
 
           <section className="mx-auto grid max-w-4xl gap-6 md:grid-cols-3">
-            <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-600">
+            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-6 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-400">
                 Full workflow
               </p>
-              <h3 className="mt-3 text-base font-semibold text-zinc-950">
+              <h3 className="mt-3 text-base font-semibold text-white">
                 Draft to resolved
               </h3>
-              <p className="mt-2 text-sm leading-6 text-zinc-600">
+              <p className="mt-2 text-sm leading-6 text-white/65">
                 Walk through every step of the checkout process including document
                 upload, AI analysis, review, draft delivery, and claim submission.
               </p>
             </div>
-            <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-600">
+            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-6 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-400">
                 Every page
               </p>
-              <h3 className="mt-3 text-base font-semibold text-zinc-950">
+              <h3 className="mt-3 text-base font-semibold text-white">
                 Sidebar navigation
               </h3>
-              <p className="mt-2 text-sm leading-6 text-zinc-600">
+              <p className="mt-2 text-sm leading-6 text-white/65">
                 Explore Checkouts, Disputes, Guidance, Reports, Admin, Teams, and
                 Settings pages exactly as operators see them.
               </p>
             </div>
-            <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-600">
+            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-6 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-400">
                 Mock data
               </p>
-              <h3 className="mt-3 text-base font-semibold text-zinc-950">
+              <h3 className="mt-3 text-base font-semibold text-white">
                 Realistic scenarios
               </h3>
-              <p className="mt-2 text-sm leading-6 text-zinc-600">
+              <p className="mt-2 text-sm leading-6 text-white/65">
                 Nine Edinburgh properties with tenants, landlords, deposits, and
                 AI-generated liability assessments across every workflow state.
               </p>
@@ -100,7 +100,7 @@ export default function DemoPage() {
           <section className="mx-auto mt-10 max-w-4xl text-center">
             <Link
               href="/demo/calculator"
-              className="text-sm font-medium text-emerald-600 transition-colors hover:text-emerald-700"
+              className="text-sm font-medium text-emerald-400 transition-colors hover:text-emerald-300"
             >
               Estimate your savings with our calculator →
             </Link>
