@@ -52,7 +52,7 @@ export default function ComplaintsPage() {
             {complaintSteps.map((step, index) => (
               <div key={step.title} className="grid gap-2 py-5 md:grid-cols-[220px_1fr]">
                 <div className="flex items-start gap-3">
-                  <span className="text-sm font-semibold text-emerald-500">
+                  <span className="text-sm font-semibold text-emerald-400">
                     {String(index + 1).padStart(2, '0')}
                   </span>
                   <p className="text-sm font-semibold text-white">{step.title}</p>
@@ -63,7 +63,7 @@ export default function ComplaintsPage() {
                       If you are unhappy with any aspect of our service, please contact us first at{' '}
                       <a
                         href="mailto:complaints@renovoai.co.uk"
-                        className="text-emerald-500 hover:underline"
+                        className="text-emerald-300 hover:underline"
                       >
                         complaints@renovoai.co.uk
                       </a>

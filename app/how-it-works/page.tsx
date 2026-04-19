@@ -116,10 +116,10 @@ export default function HowItWorksPage() {
             <div className="mt-14 divide-y divide-white/10">
               {workflowSteps.map((s) => (
                 <div key={s.n} className="grid grid-cols-[52px_1fr] gap-5 py-6 md:grid-cols-[52px_120px_1fr]">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-[10px] border border-emerald-500/[0.18] bg-emerald-500/[0.08] text-sm font-bold text-emerald-500">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-[10px] border border-emerald-500/[0.18] bg-emerald-500/[0.08] text-sm font-bold text-emerald-400">
                     {s.n}
                   </div>
-                  <p className="hidden pt-2.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-emerald-500 md:block">
+                  <p className="hidden pt-2.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-400 md:block">
                     {s.tag}
                   </p>
                   <div>

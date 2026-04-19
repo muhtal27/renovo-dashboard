@@ -66,7 +66,7 @@ export default function ContactPage() {
                   Prefer email? Contact{' '}
                   <a
                     href="mailto:hello@renovoai.co.uk"
-                    className="text-emerald-500 hover:underline"
+                    className="text-emerald-300 hover:underline"
                   >
                     hello@renovoai.co.uk
                   </a>
@@ -85,9 +85,9 @@ export default function ContactPage() {
                 <p>Renovo AI Ltd &middot; SC833544 &middot; VAT GB483379648 &middot; ICO ZC112030</p>
 
                 <div className="mt-4 flex flex-wrap gap-4">
-                  <Link href="/compliance" className="text-emerald-500 hover:underline">Compliance</Link>
-                  <Link href="/privacy" className="text-emerald-500 hover:underline">Privacy</Link>
-                  <Link href="/security" className="text-emerald-500 hover:underline">Security</Link>
+                  <Link href="/compliance" className="text-emerald-300 hover:underline">Compliance</Link>
+                  <Link href="/privacy" className="text-emerald-300 hover:underline">Privacy</Link>
+                  <Link href="/security" className="text-emerald-300 hover:underline">Security</Link>
                 </div>
               </div>
             </section>

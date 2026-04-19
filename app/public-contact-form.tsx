@@ -147,20 +147,20 @@ export function PublicContactForm({
   }
 
   return (
-    <section className="rounded-xl border border-zinc-200 bg-white p-6 shadow-[0_8px_24px_rgba(0,0,0,0.04)]">
-      <p className="app-kicker">Contact form</p>
-      <h2 className="mt-3 text-2xl tracking-tight text-zinc-950">Send us a message</h2>
+    <section className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-7 shadow-[0_20px_80px_rgba(0,0,0,0.4)] backdrop-blur">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-400">Contact form</p>
+      <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">Send us a message</h2>
 
       {status === 'success' ? (
         <div
           id={formStatusId}
           role="status"
           aria-live="polite"
-          className="mt-5 rounded-lg border border-zinc-200 bg-zinc-50 px-5 py-6 text-center text-zinc-900"
+          className="mt-5 rounded-lg border border-emerald-500/20 bg-emerald-500/[0.06] px-5 py-6 text-center text-white/80"
         >
-          <p className="text-2xl">✓</p>
+          <p className="text-2xl text-emerald-300">✓</p>
           <p className="mt-3 text-lg">Message received</p>
-          <p className="mt-2 text-sm leading-6 text-zinc-600">
+          <p className="mt-2 text-sm leading-6 text-white/55">
             Thanks for getting in touch. We&apos;ll reply as soon as we can.
           </p>
         </div>
@@ -185,7 +185,7 @@ export function PublicContactForm({
                 id={formErrorId}
                 role="alert"
                 aria-live="assertive"
-                className="border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"
+                className="rounded-lg border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-200"
               >
                 Check the highlighted fields and try again.
               </div>
@@ -193,8 +193,8 @@ export function PublicContactForm({
 
             <div className="grid gap-4 md:grid-cols-2">
               <label className="block">
-                <span className="mb-2 block text-sm font-medium text-zinc-700">
-                  Full name <span className="text-zinc-500">(required)</span>
+                <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.14em] text-white/55">
+                  Full name <span className="text-rose-400">(required)</span>
                 </span>
                 <input
                   id={`${baseId}-full-name`}
@@ -212,15 +212,15 @@ export function PublicContactForm({
                   className="app-field text-sm outline-none"
                 />
                 {fieldErrors.fullName ? (
-                  <p id={fullNameErrorId} className="mt-2 text-sm text-rose-700">
+                  <p id={fullNameErrorId} className="mt-2 text-sm text-rose-300">
                     {fieldErrors.fullName}
                   </p>
                 ) : null}
               </label>
 
               <label className="block">
-                <span className="mb-2 block text-sm font-medium text-zinc-700">
-                  Work email <span className="text-zinc-500">(required)</span>
+                <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.14em] text-white/55">
+                  Work email <span className="text-rose-400">(required)</span>
                 </span>
                 <input
                   id={`${baseId}-work-email`}
@@ -238,7 +238,7 @@ export function PublicContactForm({
                   className="app-field text-sm outline-none"
                 />
                 {fieldErrors.workEmail ? (
-                  <p id={workEmailErrorId} className="mt-2 text-sm text-rose-700">
+                  <p id={workEmailErrorId} className="mt-2 text-sm text-rose-300">
                     {fieldErrors.workEmail}
                   </p>
                 ) : null}
@@ -247,8 +247,8 @@ export function PublicContactForm({
 
             <div className="grid gap-4 md:grid-cols-2">
               <label className="block">
-                <span className="mb-2 block text-sm font-medium text-zinc-700">
-                  Company / agency name <span className="text-zinc-500">(optional)</span>
+                <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.14em] text-white/55">
+                  Company / agency name <span className="text-white/35">(optional)</span>
                 </span>
                 <input
                   id={`${baseId}-company-name`}
@@ -265,8 +265,8 @@ export function PublicContactForm({
               </label>
 
               <label className="block">
-                <span className="mb-2 block text-sm font-medium text-zinc-700">
-                  Enquiry type <span className="text-zinc-500">(required)</span>
+                <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.14em] text-white/55">
+                  Enquiry type <span className="text-rose-400">(required)</span>
                 </span>
                 <select
                   id={`${baseId}-enquiry-type`}
@@ -291,7 +291,7 @@ export function PublicContactForm({
                   ))}
                 </select>
                 {fieldErrors.enquiryType ? (
-                  <p id={enquiryTypeErrorId} className="mt-2 text-sm text-rose-700">
+                  <p id={enquiryTypeErrorId} className="mt-2 text-sm text-rose-300">
                     {fieldErrors.enquiryType}
                   </p>
                 ) : null}
@@ -299,8 +299,8 @@ export function PublicContactForm({
             </div>
 
             <label className="block">
-              <span className="mb-2 block text-sm font-medium text-zinc-700">
-                Portfolio size <span className="text-zinc-500">(optional)</span>
+              <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.14em] text-white/55">
+                Portfolio size <span className="text-white/35">(optional)</span>
               </span>
               <select
                 id={`${baseId}-portfolio-size`}
@@ -324,8 +324,8 @@ export function PublicContactForm({
             </label>
 
             <label className="block">
-              <span className="mb-2 block text-sm font-medium text-zinc-700">
-                Message <span className="text-zinc-500">(required)</span>
+              <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.14em] text-white/55">
+                Message <span className="text-rose-400">(required)</span>
               </span>
               <textarea
                 id={`${baseId}-message`}
@@ -347,7 +347,7 @@ export function PublicContactForm({
                 className="app-field app-textarea min-h-[180px] text-sm outline-none"
               />
               {fieldErrors.message ? (
-                <p id={messageErrorId} className="mt-2 text-sm text-rose-700">
+                <p id={messageErrorId} className="mt-2 text-sm text-rose-300">
                   {fieldErrors.message}
                 </p>
               ) : null}
@@ -358,7 +358,7 @@ export function PublicContactForm({
                 id={formStatusId}
                 role="alert"
                 aria-live="assertive"
-                className="border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900"
+                className="rounded-lg border border-rose-500/25 bg-rose-500/10 px-4 py-3 text-sm text-rose-200"
               >
                 Something went wrong. Please try again or email hello@renovoai.co.uk.
               </div>
@@ -375,10 +375,10 @@ export function PublicContactForm({
 
           <p
             id={privacyHintId}
-            className="mt-4 border-t border-zinc-200 pt-4 text-xs leading-6 text-zinc-500"
+            className="mt-4 border-t border-white/[0.06] pt-4 text-xs leading-6 text-white/45"
           >
             We only use these details to respond to your enquiry. See our{' '}
-            <a href="/privacy" className="underline decoration-zinc-300 underline-offset-4">
+            <a href="/privacy" className="text-emerald-300 underline decoration-emerald-500/30 underline-offset-4 hover:decoration-emerald-400">
               privacy notice
             </a>
             .

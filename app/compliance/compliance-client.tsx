@@ -116,7 +116,7 @@ export default function ComplianceClient() {
           </div>
           <p className="mt-8 text-sm text-white/55">
             For procurement, onboarding, or compliance enquiries contact{" "}
-            <a href="mailto:compliance@renovoai.co.uk" className="text-emerald-500 hover:underline">compliance@renovoai.co.uk</a>
+            <a href="mailto:compliance@renovoai.co.uk" className="text-emerald-300 hover:underline">compliance@renovoai.co.uk</a>
           </p>
         </section>
 

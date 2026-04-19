@@ -39,7 +39,7 @@ export default function TermsPage() {
             {termsSections.map((section, index) => (
               <div key={section.title} className="grid gap-2 py-5 md:grid-cols-[220px_1fr]">
                 <div className="flex items-start gap-3">
-                  <span className="text-sm font-semibold text-emerald-500">
+                  <span className="text-sm font-semibold text-emerald-400">
                     {String(index + 1).padStart(2, '0')}
                   </span>
                   <p className="text-sm font-semibold text-white">{section.title}</p>
@@ -50,7 +50,7 @@ export default function TermsPage() {
                       If you have questions about these terms, contact{' '}
                       <a
                         href="mailto:hello@renovoai.co.uk"
-                        className="text-emerald-500 hover:underline"
+                        className="text-emerald-300 hover:underline"
                       >
                         hello@renovoai.co.uk
                       </a>

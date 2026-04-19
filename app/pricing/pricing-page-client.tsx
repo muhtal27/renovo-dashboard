@@ -96,7 +96,7 @@ export default function PricingPageClient() {
                     'Custom templates, unlimited seats',
                   ].map((f) => (
                     <li key={f} className="flex items-start gap-3 text-sm leading-7 text-white/65">
-                      <span className="mt-1.5 text-sm font-semibold text-emerald-500">✓</span>
+                      <span className="mt-1.5 text-sm font-semibold text-emerald-400">✓</span>
                       <span>{f}</span>
                     </li>
                   ))}
@@ -138,7 +138,7 @@ export default function PricingPageClient() {
                     'Priority email support',
                   ].map((f) => (
                     <li key={f} className="flex items-start gap-3 text-sm leading-7 text-white/65">
-                      <span className="mt-1.5 text-sm font-semibold text-emerald-500">✓</span>
+                      <span className="mt-1.5 text-sm font-semibold text-emerald-400">✓</span>
                       <span>{f}</span>
                     </li>
                   ))}
@@ -179,7 +179,7 @@ export default function PricingPageClient() {
                     'Security review pack on request',
                   ].map((f) => (
                     <li key={f} className="flex items-start gap-3 text-sm leading-7 text-white/75">
-                      <span className="mt-1.5 text-sm font-semibold text-emerald-500">✓</span>
+                      <span className="mt-1.5 text-sm font-semibold text-emerald-400">✓</span>
                       <span>{f}</span>
                     </li>
                   ))}
@@ -213,7 +213,7 @@ export default function PricingPageClient() {
             <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {platformFeatures.map((f) => (
                 <div key={f} className="flex items-start gap-3 rounded-lg border border-white/10 bg-white/[0.03] px-4 py-4">
-                  <span className="mt-0.5 text-sm font-semibold text-emerald-500">✓</span>
+                  <span className="mt-0.5 text-sm font-semibold text-emerald-400">✓</span>
                   <span className="text-sm font-medium text-white/80">{f}</span>
                 </div>
               ))}

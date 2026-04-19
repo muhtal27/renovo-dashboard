@@ -134,10 +134,11 @@ export function MarketingShell({
 
       {/* Ambient background */}
       <div className="pointer-events-none fixed inset-0 z-0">
-        <div className="absolute left-[12%] top-[-10%] h-[720px] w-[720px] rounded-full bg-emerald-500/[0.08] blur-[160px]" />
-        <div className="absolute right-[-5%] top-[30%] h-[560px] w-[560px] rounded-full bg-cyan-500/[0.04] blur-[160px]" />
+        <div className="absolute left-[15%] top-[-15%] h-[900px] w-[900px] rounded-full bg-emerald-500/[0.12] blur-[160px]" />
+        <div className="absolute right-[-5%] top-[25%] h-[700px] w-[700px] rounded-full bg-cyan-500/[0.06] blur-[160px]" />
+        <div className="absolute left-[5%] bottom-[-15%] h-[800px] w-[800px] rounded-full bg-violet-500/[0.05] blur-[160px]" />
         <div
-          className="absolute inset-0 opacity-[0.02]"
+          className="absolute inset-0 opacity-[0.025]"
           style={{
             backgroundImage:
               'radial-gradient(circle at 1px 1px, white 1px, transparent 0)',
