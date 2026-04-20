@@ -14,28 +14,17 @@ import {
 } from '@/lib/supabase-session'
 import type { CurrentOperator } from '@/lib/operator-types'
 
-const workflowStages = [
-  {
-    step: '01',
-    title: 'Evidence',
-    body: 'Documents, extracted facts, and tenancy context stay together.',
-  },
-  {
-    step: '02',
-    title: 'Issues',
-    body: 'Responsibility, severity, and amount pressure stay reviewable.',
-  },
-  {
-    step: '03',
-    title: 'Decision',
-    body: 'Recommendations and rationale stay visible before approval.',
-  },
-  {
-    step: '04',
-    title: 'Submission',
-    body: 'Approved decisions turn into submission-ready line items.',
-  },
-]
+function BrandMark() {
+  return (
+    <span className="nav-logo" aria-hidden="true">
+      <svg viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="14" y="24" width="80" height="18" rx="9" fill="#ffffff" opacity="0.55" />
+        <rect x="24" y="55" width="80" height="18" rx="9" fill="#ffffff" opacity="0.8" />
+        <rect x="34" y="86" width="80" height="18" rx="9" fill="#10b981" />
+      </svg>
+    </span>
+  )
+}
 
 export default function LoginPage() {
   const handledSessionRef = useRef<string | null>(null)
@@ -170,86 +159,71 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="marketing-page min-h-screen bg-white py-8 text-zinc-950 md:py-10">
-      <div className="marketing-frame grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_460px]">
-        <section className="rounded-xl border border-zinc-200 bg-white p-8 shadow-[0_8px_24px_rgba(0,0,0,0.04)] md:p-10">
-          <p className="app-kicker">Renovo AI</p>
-          <h1 className="mt-4 text-[clamp(2rem,4vw,2.9rem)] leading-[1.08]">
-            Workspace sign-in
-          </h1>
-          <p className="mt-5 max-w-3xl text-base leading-8 text-slate-600 md:text-lg">
-            The end of tenancy decision engine for letting agencies.
-          </p>
+    <div className="marketing-page login-page">
+      <div className="ambient">
+        <div className="glow glow-1" />
+        <div className="glow glow-2" />
+        <div className="glow glow-3" />
+        <div className="grid-dots" />
+      </div>
 
-          <div className="mt-8 rounded-lg border border-zinc-200 bg-slate-50 p-5">
-            <p className="app-kicker">Inside the workspace</p>
-            <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {workflowStages.map((item) => (
-              <div key={item.step} className="border-l border-zinc-200 pl-4 first:border-l-0 first:pl-0">
-                <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-slate-400">
-                  Step {item.step}
-                </p>
-                <h2 className="mt-2 text-base">{item.title}</h2>
-                <p className="mt-2 text-sm leading-6 text-slate-600">{item.body}</p>
-              </div>
-            ))}
-          </div>
-          </div>
-        </section>
-
-        <section className="rounded-xl border border-zinc-200 bg-white p-8 shadow-[0_8px_24px_rgba(0,0,0,0.04)]">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="app-kicker">Sign In</p>
-              <h2 className="mt-2 text-3xl tracking-tight md:text-[2.6rem]">
-                Enter the workspace
-              </h2>
-            </div>
-            <Link
-              href="/"
-              className="app-secondary-button rounded px-4 py-2 text-sm font-medium"
-            >
-              Back to Renovo AI
+      <nav className="nav" aria-label="Sign in">
+        <div className="nav-inner">
+          <Link href="/" className="nav-brand">
+            <BrandMark />
+            <span className="brand-name">Renovo AI</span>
+          </Link>
+          <div className="nav-right">
+            <Link href="/" className="sign-in">
+              ← Back to site
             </Link>
           </div>
+        </div>
+      </nav>
 
-          <p className="mt-4 text-sm leading-6 text-slate-600">
-            Use your organisation&apos;s Microsoft account to sign in securely.
+      <main className="login-main">
+        <section className="login-card form-card">
+          <div className="login-kicker hero-kicker">
+            <span className="hero-pulse" aria-hidden="true" />
+            Workspace sign-in
+          </div>
+          <h1 className="login-title">Enter the workspace</h1>
+          <p className="login-sub">
+            Use your organisation&apos;s Microsoft account to sign in. You&apos;ll be routed to the right workspace automatically.
           </p>
 
-          <div className="mt-6 rounded-lg border border-zinc-200 bg-slate-50 p-4">
-            <p className="text-sm font-medium text-zinc-950">For approved property managers</p>
-            <p className="mt-2 text-sm leading-6 text-slate-600">
-              If your email is linked correctly, Renovo AI will send you straight to the right workspace after sign-in.
-            </p>
-          </div>
-
           {error ? (
-            <div
-              aria-live="polite"
-              className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-            >
+            <div className="login-error" aria-live="polite">
               {error}
             </div>
           ) : null}
 
-          <div className="mt-6">
-            <button
-              onClick={handleSSO}
-              disabled={loadingSSO}
-              className="app-primary-button flex w-full items-center justify-center gap-2.5 rounded px-4 py-3.5 text-sm font-medium disabled:opacity-60"
-            >
-              <svg width="18" height="18" viewBox="0 0 21 21" fill="none" aria-hidden="true">
-                <rect x="1" y="1" width="9" height="9" fill="#f25022" />
-                <rect x="11" y="1" width="9" height="9" fill="#7fba00" />
-                <rect x="1" y="11" width="9" height="9" fill="#00a4ef" />
-                <rect x="11" y="11" width="9" height="9" fill="#ffb900" />
-              </svg>
-              {loadingSSO ? 'Redirecting...' : 'Sign in with Microsoft'}
-            </button>
+          <button
+            onClick={handleSSO}
+            disabled={loadingSSO}
+            className="login-sso submit-btn"
+          >
+            <svg width="18" height="18" viewBox="0 0 21 21" fill="none" aria-hidden="true">
+              <rect x="1" y="1" width="9" height="9" fill="#f25022" />
+              <rect x="11" y="1" width="9" height="9" fill="#7fba00" />
+              <rect x="1" y="11" width="9" height="9" fill="#00a4ef" />
+              <rect x="11" y="11" width="9" height="9" fill="#ffb900" />
+            </svg>
+            {loadingSSO ? 'Redirecting…' : 'Sign in with Microsoft'}
+          </button>
+
+          <p className="login-fine form-fine">
+            Approved property managers only. Access is SSO-gated via your company directory.
+          </p>
+
+          <div className="login-help">
+            <span>Need access?</span>
+            <Link href="/book-demo">Book a demo</Link>
+            <span aria-hidden="true">·</span>
+            <Link href="/contact">Contact us</Link>
           </div>
         </section>
-      </div>
-    </main>
+      </main>
+    </div>
   )
 }
