@@ -2,7 +2,7 @@
 // Strategies: precache shell, network-first HTML, stale-while-revalidate assets
 // Cache is versioned per deploy — old caches are deleted on activate.
 
-const CACHE_VERSION = 'mnyeqc7n'
+const CACHE_VERSION = '__BUILD_TS__'
 const CACHE_NAME = `renovo-v4-${CACHE_VERSION}`
 const OFFLINE_URL = '/offline'
 
