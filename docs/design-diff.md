@@ -69,8 +69,8 @@ Item IDs are stable: **do not renumber**. Mark done by changing `[ ]` → `[x]` 
 - [x] **W11** Inventory step: **Compliance Pack card** with Tenancy agreement / Deposit cert / PI / Gas Safety / EICR / EPC / Legionella / Alarms rows (Scottish landlord reg appears only when `country_code` resolves to Scotland). Closed in Phase 3a-3.
 - [x] **W12** Inventory step: **readiness footer** — "N of M complete · ready to proceed" with an inline Continue to Checkout button (default StepNavigation hidden for this step to avoid duplicating the CTA). Closed in Phase 3a-3.
 - [x] **W13** Inventory step Setup card: Property / Tenancy / People / Financial sections matching prototype, with deposit type (Custodial / Insurance-backed) row and a Scottish landlord-reg placeholder when region resolves to Scotland. HMO indicator is data-gated. Closed in Phase 3a-3.
-- [ ] **W14** Response modal wired up on Negotiation step (P1). Prototype ref: [demo.html:1578](../public/demo.html#L1578).
-- [ ] **W15** Final Claim Statement overlay on resolution (P2). Prototype ref: [demo.html:1610](../public/demo.html#L1610).
+- [ ] **W14** Response modal wiring — **moved to portal scope**: the prototype invokes `openResponseModal()` only from the tenant portal (dispute / counter) and the landlord portal (query / reject), not the operator Negotiation step. Tracked under **TP3** and **LP5** instead.
+- [x] **W15** Final Claim Statement overlay on resolution — wired into the Refund step's Resolved block via a "View Final Claim Statement" button. Agreed / disputed / countered stats fall back to totals until per-item response tracking is wired in. Closed in Phase 3a-4.
 
 ### Disputes
 

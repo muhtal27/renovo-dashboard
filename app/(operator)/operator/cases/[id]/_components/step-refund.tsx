@@ -1,12 +1,13 @@
 'use client'
 
-import { CheckCircle2, Clock, Landmark, Loader2, RefreshCw, Upload } from 'lucide-react'
+import { CheckCircle2, Clock, FileText, Landmark, Loader2, RefreshCw, Upload } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useMemo, useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { ConfirmDialog } from '@/app/components/ConfirmDialog'
+import { FinalClaimStatement, type FinalClaimDeduction } from '@/app/components/FinalClaimStatement'
 import { WorkspaceActionButton, WorkspaceBadge } from '@/app/(operator)/operator/cases/[id]/_components/checkout-workspace-ui'
-import { formatCurrency, formatDateTime, formatEnumLabel } from '@/app/eot/_components/eot-ui'
+import { formatAddress, formatCurrency, formatDate, formatDateTime, formatEnumLabel } from '@/app/eot/_components/eot-ui'
 import {
   checkClaimStatus,
   submitClaimToScheme,
@@ -15,6 +16,13 @@ import {
 import { toTimestamp } from '@/lib/operator-checkout-workspace-helpers'
 import type { OperatorCheckoutWorkspaceData } from '@/lib/operator-checkout-workspace-types'
 import type { EotClaimStatusResult } from '@/lib/eot-types'
+
+const DEPOSIT_SCHEME_LABELS: Record<string, string> = {
+  tds: 'TDS',
+  dps: 'DPS',
+  mydeposits: 'mydeposits',
+  safedeposits_scotland: 'SafeDeposits Scotland',
+}
 
 type TimelineFilter = 'all' | 'key' | 'alerts' | 'activity'
 
@@ -29,6 +37,7 @@ export function StepRefund({ data }: { data: OperatorCheckoutWorkspaceData }) {
   const [isUploadingEvidence, setIsUploadingEvidence] = useState(false)
   const [schemeStatusData, setSchemeStatusData] = useState<EotClaimStatusResult | null>(null)
   const [timelineFilter, setTimelineFilter] = useState<TimelineFilter>('all')
+  const [showFinalStatement, setShowFinalStatement] = useState(false)
 
   const caseId = data.workspace.case.id
   const caseStatus = data.workspace.case.status
@@ -156,6 +165,52 @@ export function StepRefund({ data }: { data: OperatorCheckoutWorkspaceData }) {
     }
   }
 
+  /* ── Final Claim Statement props (only used while resolved) ── */
+  const leadTenantName = data.workspace.tenant.name
+  const leadLandlord = data.workspace.overview.landlords[0]
+  const caseReference = data.checkoutCase?.caseReference ?? caseId.slice(0, 8).toUpperCase()
+  const property = data.workspace.property
+  const propertyLine = formatAddress([
+    property.address_line_1,
+    property.address_line_2,
+    property.city,
+    property.postcode,
+  ])
+  const tenancyPeriodLabel =
+    data.workspace.tenancy.start_date && data.workspace.tenancy.end_date
+      ? `${formatDate(data.workspace.tenancy.start_date)} – ${formatDate(data.workspace.tenancy.end_date)}`
+      : '—'
+  const depositSchemeKey = data.checkoutCase?.depositScheme ?? ''
+  const depositSchemeLabel = DEPOSIT_SCHEME_LABELS[depositSchemeKey] ?? '—'
+  const depositAmount = totals.depositAmount ?? 0
+  const totalClaim = totals.totalClaimed ?? 0
+
+  // Phase 3a-4: response-tracking is not yet persisted per-item, so we fold
+  // everything into "agreed" for the Negotiation Summary. When tenant /
+  // landlord response tracking lands, populate the disputed / countered
+  // buckets from the corresponding records.
+  const agreedAmount = outcome?.amount_to_landlord != null
+    ? Number(outcome.amount_to_landlord)
+    : totalClaim
+  const disputedAmount = 0
+  const counteredAmount = 0
+
+  const finalDeductions: FinalClaimDeduction[] = (data.workspace.claimBreakdown ?? []).map((item) => ({
+    id: item.id,
+    title: item.title,
+    room: '',
+    amount: Number(item.estimatedCost ?? 0),
+    tenantStatus: null,
+    tenantCounterAmount: null,
+    landlordStatus: null,
+  }))
+
+  const generatedAtLabel = new Date().toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
+
   /* ── Resolved state ────────────────────────────────────────── */
   if (isResolved) {
     return (
@@ -169,6 +224,17 @@ export function StepRefund({ data }: { data: OperatorCheckoutWorkspaceData }) {
             This case has been resolved and closed.
             {submittedAt ? ` Claim submitted on ${formatDateTime(submittedAt)}.` : ''}
           </p>
+
+          <div className="mt-5 flex justify-center">
+            <button
+              type="button"
+              onClick={() => setShowFinalStatement(true)}
+              className="btn btn-accent btn-sm"
+            >
+              <FileText className="h-3.5 w-3.5" />
+              <span>View Final Claim Statement</span>
+            </button>
+          </div>
 
           {/* Breakdown */}
           <div className="mx-auto mt-8 max-w-md space-y-3">
@@ -239,6 +305,27 @@ export function StepRefund({ data }: { data: OperatorCheckoutWorkspaceData }) {
           tone="danger"
           onConfirm={() => handleTransition('disputed')}
           onCancel={() => setConfirmAction(null)}
+        />
+
+        {/* Final Claim Statement overlay — prototype: demo.html:1610-1682 */}
+        <FinalClaimStatement
+          open={showFinalStatement}
+          caseRef={caseReference}
+          generatedAtLabel={generatedAtLabel}
+          property={propertyLine}
+          depositScheme={depositSchemeLabel}
+          tenancyPeriodLabel={tenancyPeriodLabel}
+          depositType={data.checkoutCase?.depositType ?? 'custodial'}
+          tenant={leadTenantName}
+          landlord={leadLandlord?.fullName || 'Landlord'}
+          managingAgent={data.checkoutCase?.agencyName ?? 'Managing Agent'}
+          depositAmount={depositAmount}
+          totalClaim={totalClaim}
+          agreedAmount={agreedAmount}
+          disputedAmount={disputedAmount}
+          counteredAmount={counteredAmount}
+          deductions={finalDeductions}
+          onClose={() => setShowFinalStatement(false)}
         />
       </div>
     )
