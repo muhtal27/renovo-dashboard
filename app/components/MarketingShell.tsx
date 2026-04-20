@@ -103,6 +103,9 @@ export function MarketingShell({
             ))}
           </div>
           <div className="nav-right">
+            <Link href="/login" className="sign-in">
+              Sign in
+            </Link>
             <Link href="/book-demo" className="btn-primary">
               Book a demo
             </Link>
