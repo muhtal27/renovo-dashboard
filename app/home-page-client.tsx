@@ -293,26 +293,24 @@ export default function HomePageClient() {
   }, [])
   const variant = CASE_VARIANTS[variantIdx]
 
-  // Hero defect stream
+  // Hero defect stream — builds up once, then stays. No auto-reset (caused a full flicker).
   const [visible, setVisible] = useState<number[]>([])
   useEffect(() => {
     if (reducedMotion) {
       setVisible(variant.defects.map((d) => d.id))
       return
     }
-    if (visible.length >= variant.defects.length) {
-      const t = setTimeout(() => setVisible([]), 3500)
-      return () => clearTimeout(t)
-    }
+    if (visible.length >= variant.defects.length) return
     const t = setTimeout(() => setVisible((p) => [...p, variant.defects[p.length].id]), 850)
     return () => clearTimeout(t)
   }, [visible, variant, reducedMotion])
   useEffect(() => { setVisible([]) }, [variantIdx])
 
   const heroClaim = variant.defects.filter((d) => visible.includes(d.id)).reduce((s, d) => s + d.cost, 0)
-  const latestId = visible[visible.length - 1]
   const [hoveredDefect, setHoveredDefect] = useState<number | null>(null)
-  const chainedId = hoveredDefect ?? latestId
+  // Reasons chain only on hover — showing it on the "latest" defect caused the panel to
+  // jump vertically every 850ms as rows grew/shrunk while the stream filled in.
+  const chainedId = hoveredDefect
 
   // Interactive defect reassign
   const [assign, setAssign] = useState<Record<number, Liability>>({})
