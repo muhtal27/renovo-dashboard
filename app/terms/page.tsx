@@ -2,81 +2,106 @@ import Link from 'next/link'
 import { MarketingShell } from '@/app/components/MarketingShell'
 import { createMarketingMetadata } from '@/lib/marketing-metadata'
 
-const termsSections = [
-  { title: 'Use of the website', body: 'The Renovo AI website is provided for general information about the product, the live demo, and product enquiries. You may browse and use the site for lawful business purposes only.' },
-  { title: 'Product availability', body: 'Access to the live product is managed through onboarding. Nothing on this website guarantees access, availability, or a particular product feature unless agreed separately in writing.' },
-  { title: 'Intellectual property', body: 'Unless stated otherwise, the content, branding, interface, and materials on this website belong to Renovo AI or its licensors. You may not copy, republish, or reuse them beyond normal business evaluation without permission.' },
-  { title: 'Accuracy and changes', body: 'We aim to keep the website accurate and up to date, but product details may change as Renovo AI develops. We may update or remove content, routes, or features at any time.' },
-  { title: 'Liability', body: 'The website is provided on an as-is basis for general information. To the extent permitted by law, Renovo AI is not liable for loss arising from reliance on website content alone. Any live customer use of the product is governed by separate commercial terms.' },
-  { title: 'Contact', body: 'If you have questions about these terms, contact hello@renovoai.co.uk.' },
-] as const
-
 export const metadata = createMarketingMetadata({
-  title: 'Terms | Renovo AI',
-  description: 'Website terms for the Renovo AI marketing site, demo, and product enquiry routes.',
+  title: 'Terms of service. Renovo AI',
+  description:
+    'Plain terms. Rolling monthly. These terms apply whenever you use Renovo, paid or free. Written to be read, not skimmed.',
   path: '/terms',
 })
 
 export default function TermsPage() {
   return (
     <MarketingShell currentPath="/terms">
-      <div className="page-shell page-stack">
+      <section className="page-hero">
+        <p className="kicker">Terms of service</p>
+        <h1>
+          Plain terms.
+          <br />
+          <span className="accent">Rolling monthly.</span>
+        </h1>
+        <p className="page-hero-sub">
+          These terms apply whenever you use Renovo, paid or free. They are written to be read, not skimmed. If anything is unclear, email hello@renovoai.co.uk before you sign up.
+        </p>
+      </section>
 
-        <section className="page-hero">
-          <p className="app-kicker">Terms</p>
-          <h1 className="page-title max-w-[820px]">
-            Plain terms. <em className="text-white/45">Rolling monthly.</em>
-          </h1>
-          <p className="page-copy max-w-[720px]">
-            These terms apply to your use of the Renovo AI marketing site, live demo,
-            and contact routes. They do not replace any separate customer agreement for
-            live product use.
+      <section className="section first">
+        <div className="content-grid">
+          <div className="content-card">
+            <div className="content-k">Who we are</div>
+            <h3>Renovo AI Ltd, a Scottish company.</h3>
+            <p>
+              Registered as Renovo AI Ltd (SC833544) with VAT number GB483379648 and ICO registration ZC112030. Registered office in Edinburgh.
+            </p>
+          </div>
+          <div className="content-card">
+            <div className="content-k">What you get</div>
+            <h3>Access to the Renovo workspace.</h3>
+            <p>
+              An operator workspace that ingests checkout evidence, drafts liability assessments, supports manager review, and produces scheme-ready deposit decisions. Subject to fair use and the plan you are on.
+            </p>
+          </div>
+        </div>
+
+        <div className="content-grid" style={{ marginTop: 16 }}>
+          <div className="content-card">
+            <div className="content-k">Billing</div>
+            <h3>Monthly, in advance, plus VAT.</h3>
+            <p>
+              Free plan is free. Portfolio 365 is £179 per block per calendar month plus VAT. Enterprise is on a signed order form. First month on Portfolio 365 is complimentary for new customers. Billing runs on Stripe UK.
+            </p>
+          </div>
+          <div className="content-card">
+            <div className="content-k">Cancellation</div>
+            <h3>Any time, no notice period.</h3>
+            <p>
+              Cancel from inside the workspace at any point. We stop billing from the next cycle. Your data stays accessible for export up to ninety days. No refunds on the current paid month.
+            </p>
+          </div>
+        </div>
+
+        <div className="content-grid" style={{ marginTop: 16 }}>
+          <div className="content-card">
+            <div className="content-k">Acceptable use</div>
+            <h3>Use Renovo to run end of tenancy operations.</h3>
+            <p>
+              Do not use the service to break UK law, harass tenants, or generate misleading adjudication bundles. Do not attempt to reverse engineer the AI models or scrape other customers&apos; data. Breach of this clause can lead to immediate termination.
+            </p>
+          </div>
+          <div className="content-card">
+            <div className="content-k">Liability</div>
+            <h3>Capped at fees paid in the last twelve months.</h3>
+            <p>
+              Renovo is a tool. Every deduction decision is signed off by a human manager at your agency. You remain responsible for the accuracy of tenancy data, for the decisions you take on the basis of it, and for adjudication outcomes. Our total liability is limited to the fees you paid us in the twelve months before a claim.
+            </p>
+          </div>
+        </div>
+
+        <div className="content-card" style={{ marginTop: 16 }}>
+          <div className="content-k">Governing law</div>
+          <h3>Scotland, UK.</h3>
+          <p>
+            These terms are governed by the laws of Scotland. Disputes are resolved in the Scottish courts. Nothing in these terms affects your statutory rights as a UK consumer, if that applies to you.
           </p>
-        </section>
+          <div className="content-contact">Last updated 18 April 2026. Previous versions on request.</div>
+        </div>
+      </section>
 
-        <section className="mx-auto max-w-[1080px] px-6 py-24">
-          <div className="divide-y divide-white/10">
-            {termsSections.map((section, index) => (
-              <div key={section.title} className="grid gap-2 py-5 md:grid-cols-[220px_1fr]">
-                <div className="flex items-start gap-3">
-                  <span className="text-sm font-semibold text-emerald-400">
-                    {String(index + 1).padStart(2, '0')}
-                  </span>
-                  <p className="text-sm font-semibold text-white">{section.title}</p>
-                </div>
-                <p className="text-sm leading-7 text-white/55">
-                  {section.title === 'Contact' ? (
-                    <>
-                      If you have questions about these terms, contact{' '}
-                      <a
-                        href="mailto:hello@renovoai.co.uk"
-                        className="text-emerald-300 hover:underline"
-                      >
-                        hello@renovoai.co.uk
-                      </a>
-                      .
-                    </>
-                  ) : (
-                    section.body
-                  )}
-                </p>
-              </div>
-            ))}
+      <section className="cta-lite">
+        <div className="cta-lite-inner">
+          <div>
+            <h3>Need a signed order form or master agreement?</h3>
+            <p className="cta-lite-sub">Enterprise customers sign a standard MSA and DPA. Email the team below.</p>
           </div>
-        </section>
-
-        <section className="page-hero text-center">
-          <div className="flex flex-wrap justify-center gap-3">
-            <Link href="/" className="app-secondary-button rounded-md px-5 py-3 text-sm font-medium">
-              Back to homepage
-            </Link>
-            <Link href="/privacy" className="app-primary-button rounded-md px-5 py-3 text-sm font-medium">
-              View privacy notice
+          <div className="cta-lite-btns">
+            <a href="mailto:hello@renovoai.co.uk" className="btn-primary">
+              Email us
+            </a>
+            <Link href="/pricing" className="btn-outline">
+              See pricing
             </Link>
           </div>
-        </section>
-
-      </div>
+        </div>
+      </section>
     </MarketingShell>
   )
 }

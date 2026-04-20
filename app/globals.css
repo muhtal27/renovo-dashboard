@@ -906,130 +906,15 @@ a:focus-visible {
   padding-right: 24px;
 }
 
-.marketing-page .page-shell {
-  width: min(100%, 1180px);
-  margin: 0 auto;
-  padding: 40px 20px 52px;
-}
-
-.marketing-page .page-stack {
-  display: grid;
-  gap: 32px;
-}
-
-.marketing-page .page-hero {
-  padding: 0;
-}
-
-.marketing-page .page-card {
-  border: 1px solid var(--line);
-  border-radius: 0.75rem;
-  background: rgba(255, 255, 255, 0.98);
-  padding: 24px;
-}
-
-.marketing-page .page-section {
-  border-top: 1px solid var(--line);
-  padding-top: 32px;
-  padding-bottom: 32px;
-}
-
-.marketing-page .page-section-compact {
-  border-top: 1px solid var(--line);
-  padding-top: 24px;
-  padding-bottom: 24px;
-}
-
-.marketing-page .page-sidebar-card {
-  border: 1px solid var(--line);
-  border-radius: 0.75rem;
-  background: #fafafa;
-  padding: 20px;
-}
-
-.marketing-page .page-rule-list {
-  margin-top: 20px;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-}
-
-.marketing-page .page-rule-list > * + * {
-  border-top: 1px solid var(--line);
-}
-
-.marketing-page .page-title {
-  margin-top: 16px;
-  font-size: clamp(2.25rem, 4.8vw, 3.75rem);
-  line-height: 1.08;
-}
-
-.marketing-page .page-copy {
-  margin-top: 16px;
-  max-width: 760px;
-  font-size: 1rem;
-  font-weight: 400;
-  line-height: 1.75;
-  color: #52525b;
-}
-
-.marketing-page .page-grid-2 {
-  display: grid;
-  gap: 24px;
-}
-
-.marketing-page .page-grid-3 {
-  display: grid;
-  gap: 24px;
-}
-
 @media (min-width: 768px) {
   .marketing-frame {
     padding-left: 24px;
     padding-right: 24px;
   }
-
-  .marketing-page .page-shell {
-    padding: 52px 24px 60px;
-  }
-
-  .marketing-page .page-stack {
-    gap: 40px;
-  }
-
-  .marketing-page .page-card {
-    padding: 28px;
-  }
-
-  .marketing-page .page-section {
-    padding-top: 36px;
-    padding-bottom: 36px;
-  }
-
-  .marketing-page .page-section-compact {
-    padding-top: 28px;
-    padding-bottom: 28px;
-  }
-
-  .marketing-page .page-sidebar-card {
-    padding: 22px;
-  }
-
-  .marketing-page .page-grid-2 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .marketing-page .page-grid-3 {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
 }
 
 @media (min-width: 1024px) {
   .marketing-frame {
-    padding-left: 28px;
-    padding-right: 28px;
-  }
-
-  .marketing-page .page-shell {
     padding-left: 28px;
     padding-right: 28px;
   }
@@ -1133,146 +1018,12 @@ a:focus-visible {
   border: 1px solid rgba(16, 185, 129, 0.18);
 }
 
-.marketing-page .app-kicker {
-  color: #10b981;
-}
-
-/* Override global heading colour inside dark backgrounds.
-   The unlayered h1-h4 { color: #18181b } in this file beats Tailwind's
-   @layer utilities (text-white etc). Neither inherit nor unset work because
-   color is inherited and unset resolves to CanvasText. Only !important or
-   a higher-specificity rule can fix this. */
+/* Override global heading colour inside dark backgrounds on legacy
+   sign-in surfaces. The unlayered h1-h4 { color: #18181b } in this file
+   beats Tailwind's @layer utilities (text-white etc). */
 .bg-\[\#0a0e1a\] h1,
 .bg-\[\#0a0e1a\] h2,
 .bg-\[\#0a0e1a\] h3,
-.bg-\[\#0a0e1a\] h4,
-.dark-header h1,
-.dark-header h2,
-.dark-header h3,
-.dark-header h4,
-.marketing-dark h1,
-.marketing-dark h2,
-.marketing-dark h3,
-.marketing-dark h4 {
+.bg-\[\#0a0e1a\] h4 {
   color: #fff;
-}
-
-/* ─── MARKETING DARK THEME OVERRIDES ───────────────────────
-   Applied when MarketingShell wraps its children with
-   `.marketing-dark`. Inverts the light helper palette
-   (page-copy, section-tinted, page-card, etc.) and the input
-   surfaces so existing pages render correctly on the dark shell.
-   ─────────────────────────────────────────────────────────── */
-.marketing-dark .app-kicker {
-  color: #34d399;
-}
-
-.marketing-dark .page-copy {
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.marketing-dark .section-tinted {
-  background: rgba(255, 255, 255, 0.015);
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.marketing-dark .page-card {
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
-}
-
-.marketing-dark .page-section {
-  border-top-color: rgba(255, 255, 255, 0.06);
-}
-
-.marketing-dark .page-section-compact {
-  border-top-color: rgba(255, 255, 255, 0.06);
-}
-
-.marketing-dark .page-sidebar-card {
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  background: rgba(255, 255, 255, 0.03);
-}
-
-.marketing-dark .page-rule-list {
-  border-top-color: rgba(255, 255, 255, 0.06);
-  border-bottom-color: rgba(255, 255, 255, 0.06);
-}
-
-.marketing-dark .page-rule-list > * + * {
-  border-top-color: rgba(255, 255, 255, 0.06);
-}
-
-.marketing-dark .app-field,
-.marketing-dark .app-select,
-.marketing-dark .app-textarea {
-  background: rgba(255, 255, 255, 0.03);
-  border-color: rgba(255, 255, 255, 0.1);
-  color: #fff;
-}
-
-.marketing-dark .app-field::placeholder,
-.marketing-dark .app-textarea::placeholder {
-  color: rgba(255, 255, 255, 0.3);
-}
-
-.marketing-dark .app-field:hover,
-.marketing-dark .app-select:hover,
-.marketing-dark .app-textarea:hover {
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-.marketing-dark .app-field:focus,
-.marketing-dark .app-select:focus,
-.marketing-dark .app-textarea:focus {
-  border-color: #34d399;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
-}
-
-.marketing-dark .app-field:disabled,
-.marketing-dark .app-select:disabled,
-.marketing-dark .app-textarea:disabled {
-  background: rgba(255, 255, 255, 0.02);
-  color: rgba(255, 255, 255, 0.4);
-}
-
-/* Option text in dark select needs a dark surface — browsers
-   otherwise paint selector dropdown with light bg + dark text
-   which looks fine, but options inherit the select color which
-   is white on white. Force option colors. */
-.marketing-dark select option {
-  background: #0a0e1a;
-  color: #fff;
-}
-
-/* Button overrides on dark pages.
-   .app-primary-button is near-black on light — swap to emerald on dark.
-   .app-secondary-button is white with dark text — swap to outlined white/5. */
-.marketing-dark .app-primary-button {
-  background: #10b981;
-  border-color: #10b981;
-  color: #ffffff;
-}
-
-.marketing-dark .app-primary-button:hover {
-  background: #34d399;
-  border-color: #34d399;
-  box-shadow: 0 0 30px rgba(16, 185, 129, 0.3);
-}
-
-.marketing-dark .app-primary-button:disabled {
-  background: rgba(16, 185, 129, 0.5);
-  border-color: rgba(16, 185, 129, 0.5);
-}
-
-.marketing-dark .app-secondary-button {
-  background: rgba(255, 255, 255, 0.02);
-  border-color: rgba(255, 255, 255, 0.15);
-  color: #ffffff;
-}
-
-.marketing-dark .app-secondary-button:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.3);
 }

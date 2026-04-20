@@ -1,6 +1,7 @@
 import './globals.css'
+import './marketing.css'
 import type { Metadata, Viewport } from 'next'
-import { DM_Sans, Instrument_Serif } from 'next/font/google'
+import { DM_Sans, Instrument_Serif, JetBrains_Mono } from 'next/font/google'
 import { Toaster } from 'sonner'
 import {
   defaultDescription,
@@ -20,6 +21,12 @@ const instrumentSerif = Instrument_Serif({
   subsets: ['latin'],
   variable: '--font-instrument-serif',
   weight: ['400'],
+})
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-jetbrains-mono',
+  weight: ['400', '500', '600', '700'],
 })
 
 export const metadata: Metadata = {
@@ -72,7 +79,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${dmSans.variable} ${instrumentSerif.variable}`}>
+      <body className={`${dmSans.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable}`}>
         <ClientShell />
         <Toaster
           position="bottom-right"

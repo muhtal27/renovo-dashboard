@@ -1,4 +1,5 @@
 import HomePageClient from "@/app/home-page-client"
+import { MarketingShell } from "@/app/components/MarketingShell"
 import {
   createMarketingMetadata,
   createOrganizationJsonLd,
@@ -7,9 +8,9 @@ import {
   serializeJsonLd,
 } from "@/lib/marketing-metadata"
 
-const title = "Renovo AI | End of Tenancy Automation"
+const title = "Renovo AI. End of tenancy, resolved."
 const description =
-  "Renovo AI automates end of tenancy work for UK property managers and letting agencies, from evidence review and issue assessment to claim ready output."
+  "Enterprise software for end of tenancy operations. AI drafts, managers decide, every decision is audit ready for UK scheme adjudication."
 
 export const metadata = createMarketingMetadata({
   title,
@@ -19,7 +20,7 @@ export const metadata = createMarketingMetadata({
 
 export default function HomePage() {
   return (
-    <>
+    <MarketingShell currentPath="/">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -35,6 +36,6 @@ export default function HomePage() {
         }}
       />
       <HomePageClient />
-    </>
+    </MarketingShell>
   )
 }
