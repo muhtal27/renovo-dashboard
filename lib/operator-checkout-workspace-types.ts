@@ -44,6 +44,11 @@ export type CheckoutWorkspaceDepositScheme =
   | 'mydeposits'
   | 'safedeposits_scotland'
 
+// Prototype ref: public/demo.html:2320 — header meta distinguishes
+// Custodial vs Insurance-backed deposits. Nullable until the backend
+// populates the column; UI omits the pill when missing.
+export type CheckoutWorkspaceDepositType = 'custodial' | 'insurance'
+
 export type CheckoutWorkspaceCondition =
   | 'excellent'
   | 'good'
@@ -113,6 +118,7 @@ export type CheckoutWorkspaceCaseRecord = {
   status: CheckoutWorkspaceCaseStatus
   depositHeld: number | null
   depositScheme: CheckoutWorkspaceDepositScheme | null
+  depositType: CheckoutWorkspaceDepositType | null
   landlordEmail: string | null
   tenantEmail: string | null
   negotiationStatus: CheckoutWorkspaceNegotiationStatus

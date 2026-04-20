@@ -147,6 +147,60 @@ function getDepositSchemeLabel(scheme: string | null | undefined): string | null
   }
 }
 
+// Prototype ref: public/demo.html:2320 — header meta shows human-friendly
+// region name derived from the UK country code.
+function getRegionLabel(countryCode: string | null | undefined): string | null {
+  if (!countryCode) return null
+  const code = countryCode.toUpperCase().replace(/^GB[-_]?/, '')
+  switch (code) {
+    case 'ENG':
+    case 'GB-ENG':
+      return 'England'
+    case 'SCT':
+    case 'GB-SCT':
+      return 'Scotland'
+    case 'WLS':
+    case 'GB-WLS':
+      return 'Wales'
+    case 'NIR':
+    case 'GB-NIR':
+      return 'Northern Ireland'
+    case 'GB':
+    case '':
+      return 'United Kingdom'
+    default:
+      return null
+  }
+}
+
+function getDepositTypeLabel(depositType: string | null | undefined): string | null {
+  if (depositType === 'custodial') return 'Custodial'
+  if (depositType === 'insurance') return 'Insurance-backed'
+  return null
+}
+
+// Prototype ref: public/demo.html:1402 — days-until badge for deposit deadline.
+function WorkspaceDeadlineBadge({ endDate }: { endDate: string | null | undefined }) {
+  if (!endDate) return <WorkspaceBadge label="—" tone="neutral" />
+  const target = new Date(endDate)
+  if (Number.isNaN(target.getTime())) {
+    return <WorkspaceBadge label="—" tone="neutral" />
+  }
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const days = Math.ceil((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+  if (days < 0) {
+    return <WorkspaceBadge label={`${Math.abs(days)}d overdue`} tone="disputed" />
+  }
+  if (days <= 7) {
+    return <WorkspaceBadge label={`${days}d left`} tone="disputed" />
+  }
+  if (days <= 14) {
+    return <WorkspaceBadge label={`${days}d left`} tone="warning" />
+  }
+  return <WorkspaceBadge label={`${days}d`} tone="neutral" />
+}
+
 /* ────────────────────────────────────────────────────────────── */
 /*  Step navigation (HTML design: card with icon+label tabs)     */
 /* ────────────────────────────────────────────────────────────── */
@@ -236,15 +290,18 @@ function WorkspaceSidebar({ data }: { data: OperatorCheckoutWorkspaceData }) {
   const startDate = data.workspace.tenancy.start_date
   const endDate = data.workspace.tenancy.end_date
   const reference = data.checkoutCase?.caseReference ?? data.workspace.case.id.slice(0, 8).toUpperCase()
+  const caseStatus = data.workspace.case.status
+  const showDeadline = caseStatus !== 'resolved'
 
   const totalClaim = data.workspace.totals.totalClaimed ?? 0
   const defectCount = data.defects.length
   const returnToTenant = data.workspace.totals.returnToTenant
   const claimPct = depositAmount ? Math.round((totalClaim / depositAmount) * 100) : 0
 
-  const hasCheckinReport = data.documents.some((d) => d.documentType === 'checkin')
-  const hasCheckoutReport = data.documents.some((d) => d.documentType === 'checkout')
-  const hasAnalysis = data.workspace.case.status !== 'draft' && data.workspace.case.status !== 'collecting_evidence'
+  // Prototype ref: public/demo.html:2352-2354 — documents list is data-driven,
+  // not hardcoded to check-in/checkout/analysis labels.
+  const documents = buildWorkspaceDocumentEntries(data)
+  const timeline = data.timeline ?? []
 
   return (
     <div className="space-y-4">
@@ -267,6 +324,16 @@ function WorkspaceSidebar({ data }: { data: OperatorCheckoutWorkspaceData }) {
             <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Period</div>
             <div className="mt-1 text-[13px] text-zinc-700">
               {formatDate(startDate)} – {formatDate(endDate)}
+            </div>
+          </div>
+          <div>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">Deadline</div>
+            <div className="mt-1">
+              {showDeadline ? (
+                <WorkspaceDeadlineBadge endDate={endDate} />
+              ) : (
+                <WorkspaceBadge label="Closed" tone="neutral" />
+              )}
             </div>
           </div>
           <div>
@@ -299,35 +366,86 @@ function WorkspaceSidebar({ data }: { data: OperatorCheckoutWorkspaceData }) {
         ) : null}
       </div>
 
-      {/* Documents */}
+      {/* Documents — prototype ref: public/demo.html:2352-2354 */}
       <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
         <h4 className="mb-3 text-sm font-semibold text-zinc-900">Documents</h4>
         <div className="space-y-3">
-          {hasCheckinReport ? (
-            <div className="flex items-center gap-2">
-              <FileCheck className="h-3.5 w-3.5 text-emerald-600" />
-              <span className="text-[13px] text-zinc-700">Check-in Report</span>
-            </div>
-          ) : null}
-          {hasCheckoutReport ? (
-            <div className="flex items-center gap-2">
-              <FileCheck className="h-3.5 w-3.5 text-emerald-600" />
-              <span className="text-[13px] text-zinc-700">Checkout Report</span>
-            </div>
-          ) : null}
-          {hasAnalysis ? (
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-3.5 w-3.5 text-emerald-600" />
-              <span className="text-[13px] text-zinc-700">AI Analysis Report</span>
-            </div>
-          ) : null}
-          {!hasCheckinReport && !hasCheckoutReport && !hasAnalysis ? (
+          {documents.length > 0 ? (
+            documents.map((doc) => {
+              const Icon = doc.icon
+              return (
+                <div key={doc.id} className="flex items-center gap-2">
+                  <Icon className="h-3.5 w-3.5 text-emerald-600" />
+                  <span className="truncate text-[13px] text-zinc-700">{doc.label}</span>
+                </div>
+              )
+            })
+          ) : (
             <p className="text-xs text-zinc-400">No documents linked yet</p>
-          ) : null}
+          )}
         </div>
       </div>
+
+      {/* Activity Log — prototype ref: public/demo.html:1400 wsAuditLog */}
+      {timeline.length > 0 ? (
+        <div className="rounded-[10px] border border-zinc-200 bg-white p-5">
+          <h4 className="mb-3 text-sm font-semibold text-zinc-900">Activity Log</h4>
+          <ol className="space-y-3">
+            {timeline.slice(0, 8).map((entry) => (
+              <li key={entry.id} className="flex gap-2.5">
+                <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-[13px] text-zinc-700">{entry.eventDescription}</p>
+                  <p className="mt-0.5 text-[11px] text-zinc-400">
+                    {entry.performedBy ? `${entry.performedBy} · ` : ''}
+                    {relativeTime(entry.eventDate)}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+      ) : null}
     </div>
   )
+}
+
+// Prototype ref: public/demo.html:2352-2354 — the sidebar Documents list
+// is driven by the actual uploaded documents plus a synthetic "AI Analysis
+// Report" entry once analysis has completed.
+function buildWorkspaceDocumentEntries(
+  data: OperatorCheckoutWorkspaceData
+): Array<{ id: string; label: string; icon: typeof FileCheck }> {
+  const entries: Array<{ id: string; label: string; icon: typeof FileCheck }> = []
+  const seen = new Set<string>()
+
+  for (const doc of data.documents) {
+    const label = docLabel(doc)
+    if (seen.has(label)) continue
+    seen.add(label)
+    entries.push({ id: doc.id, label, icon: FileCheck })
+  }
+
+  const status = data.workspace.case.status
+  const analysisDone = status !== 'draft' && status !== 'collecting_evidence'
+  if (analysisDone) {
+    entries.push({ id: 'ai-analysis', label: 'AI Analysis Report', icon: Sparkles })
+  }
+
+  return entries
+}
+
+function docLabel(doc: { documentType: string; documentName: string | null }): string {
+  switch (doc.documentType) {
+    case 'checkin': return 'Check-in Report'
+    case 'checkout': return 'Checkout Report'
+    case 'tenancy': return 'Tenancy Agreement'
+    case 'schedule_of_condition': return 'Schedule of Condition'
+    case 'previous_inspection': return 'Previous Inspection'
+    case 'contractor_quote': return 'Contractor Quote'
+    case 'correspondence': return 'Correspondence'
+    default: return doc.documentName || 'Document'
+  }
 }
 
 /* ────────────────────────────────────────────────────────────── */
@@ -437,6 +555,18 @@ export function CheckoutCaseWorkspace({
   const lastModified = data.checkoutCase?.updatedAt ?? data.workspace.case.updated_at
   const assignedTo = data.checkoutCase?.assignedTo
   const priority = data.workspace.case.priority
+  // Prototype ref: public/demo.html:2320 — header meta includes region
+  // and deposit type so the operator can see jurisdiction + custodial/insured
+  // at a glance.
+  const regionLabel = getRegionLabel(data.workspace.property.country_code)
+  const depositTypeLabel = getDepositTypeLabel(data.checkoutCase?.depositType)
+  const headerMetaParts = [
+    caseReference,
+    tenantName,
+    landlordName,
+    regionLabel,
+    depositTypeLabel,
+  ].filter((part): part is string => Boolean(part))
 
   // Analysis step goes full-width once analysis is complete, matching the
   // prototype's `state.wsStep==='analysis' && state.wsAnalysisDone` layout.
@@ -514,11 +644,7 @@ export function CheckoutCaseWorkspace({
         </Link>
         <div className="min-w-[200px] flex-1">
           <h2 className="text-lg font-semibold tracking-tight text-zinc-900">{propertyName}</h2>
-          <p className="text-[13px] text-zinc-500">
-            {caseReference}
-            {tenantName ? ` · ${tenantName}` : ''}
-            {landlordName ? ` · ${landlordName}` : ''}
-          </p>
+          <p className="text-[13px] text-zinc-500">{headerMetaParts.join(' · ')}</p>
         </div>
         <div className="flex flex-wrap items-center gap-1.5">
           {lastModified ? (

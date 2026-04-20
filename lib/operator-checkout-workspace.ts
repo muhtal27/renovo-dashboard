@@ -79,6 +79,7 @@ function normalizeCheckoutCase(row: RowRecord): CheckoutWorkspaceCaseRecord {
     status: toRequiredString(row.status, 'in_review') as CheckoutWorkspaceCaseRecord['status'],
     depositHeld: toNullableNumber(row.deposit_held),
     depositScheme: toStringValue(row.deposit_scheme) as CheckoutWorkspaceCaseRecord['depositScheme'],
+    depositType: toStringValue(row.deposit_type) as CheckoutWorkspaceCaseRecord['depositType'],
     landlordEmail: getOptionalString(row, 'landlord_email'),
     tenantEmail: getOptionalString(row, 'tenant_email'),
     negotiationStatus: toRequiredString(row.negotiation_status, 'pending') as CheckoutWorkspaceCaseRecord['negotiationStatus'],

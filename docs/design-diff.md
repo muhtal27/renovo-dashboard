@@ -59,10 +59,10 @@ Item IDs are stable: **do not renumber**. Mark done by changing `[ ]` → `[x]` 
 - [x] **W1** Collapse steps 4+5 back to single merged **"Analysis & Review"**. Closed in Phase 3a-1 — review content renders inline beneath analysis summary via dynamic import of `StepReview`.
 - [x] **W2** Rename step 3 **"Readings"** → **"Handover"** (step key stays `readings` for URL backwards-compat). Closed in Phase 3a-1.
 - [x] **W3** Step-locking: future steps show a lock icon, `disabled` + `aria-disabled`, and tooltip "Complete previous steps first". Keyboard nav (Ctrl+←/→) honours the same lock. Closed in Phase 3a-1.
-- [ ] **W4** Header meta line: add **region** and Custodial/Insurance-backed pill. Prototype ref: [demo.html:2320](../public/demo.html#L2320).
-- [ ] **W5** Sidebar Case Overview: restore **Deadline** row with badge. Prototype ref: [demo.html:2342](../public/demo.html#L2342).
-- [ ] **W6** Documents list driven by `wsDocuments` array. Prototype ref: [demo.html:2353-2354](../public/demo.html#L2353).
-- [ ] **W7** Audit log panel (`wsAuditLog`) exposed in workspace. Prototype ref: [demo.html:2349](../public/demo.html#L2349).
+- [x] **W4** Header meta line: now shows region (derived from `property.country_code`) and Custodial / Insurance-backed pill (reads `checkoutCase.depositType`, optional until the backend populates). Closed in Phase 3a-2.
+- [x] **W5** Sidebar Case Overview: restored **Deadline** row with `WorkspaceDeadlineBadge` (rose ≤7d / amber ≤14d / neutral otherwise). Closed in Phase 3a-2.
+- [x] **W6** Documents list now driven by the full `data.documents` array (with a synthetic "AI Analysis Report" entry once analysis has completed). Closed in Phase 3a-2.
+- [x] **W7** Activity Log card in the sidebar reads from `data.timeline` (backend-persisted audit events). Closed in Phase 3a-2.
 - [ ] **W8** Inventory step: **PI compliance banner** (emerald / amber / rose + "Resolve now"). Prototype ref: [demo.html:2391](../public/demo.html#L2391).
 - [ ] **W9** Inventory step: **prior-dispute risk banner** with Risk Heatmap link. Prototype ref: [demo.html:2392](../public/demo.html#L2392).
 - [ ] **W10** Inventory step: **Inventory & Evidence card** (clerk avatar, quality/win-rate badges, signed check-in/out rows, item count). Prototype ref: [demo.html:2436-2456](../public/demo.html#L2436).
