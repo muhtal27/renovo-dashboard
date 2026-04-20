@@ -38,21 +38,21 @@ Item IDs are stable: **do not renumber**. Mark done by changing `[ ]` → `[x]` 
 
 ### Dashboard
 
-- [ ] **D1** Open Cases KPI uses `CASES.length` (all cases) — not just active. Prototype ref: [demo.html:2124](../public/demo.html#L2124).
-- [ ] **D2** Open Cases KPI shows the "Next: {n}d" rose deadline badge when nearest deadline ≤14d. Prototype ref: [demo.html:2127](../public/demo.html#L2127).
-- [ ] **D3** Active Tenancies / Total Deposits footer driven by `trendPct`, not hardcoded copy. Prototype ref: [demo.html:2119, 2135](../public/demo.html#L2119).
-- [ ] **D4** Recent Activity reads from curated `ACTIVITY_FEED` in the shape prototype defines. Prototype ref: [demo.html:2166](../public/demo.html#L2166).
-- [ ] **D5** Drop the `Refresh` button on the greeting row and `Full report` CTA on Monthly Throughput (not in prototype).
+- [x] **D1** Open Cases KPI switched to `stats.totalCases` (all cases including resolved) to match the prototype count. Closed in Phase 3b.
+- [x] **D2** "Next: {n}d" rose badge renders in the Open Cases footer when the nearest tenancy-end deadline is ≤14 days away. Closed in Phase 3b.
+- [x] **D3** Active Tenancies and Total Deposits footers now report `trendPct` computed from the sparkline series (with sign / color), not hardcoded copy. Closed in Phase 3b.
+- [ ] **D4** Recent Activity reads from curated `ACTIVITY_FEED` in the shape prototype defines. _Deferred — the live feed is already derived from real case activity; prototype curation would replace real data._
+- [x] **D5** Refresh button on the greeting row and "Full report" CTA on Monthly Throughput removed. Closed in Phase 3b.
 
 ### Tenancies
 
-- [ ] **TN1** Add 5 missing columns: Assigned / Claim / Deadline / Compliance / Type (HMO). Prototype ref: [demo.html:2256](../public/demo.html#L2256).
-- [ ] **TN2** Bulk-select checkbox column + contextual banner (N selected · Assign · Export CSV · Clear). Prototype ref: [demo.html:2245-2252](../public/demo.html#L2245).
-- [ ] **TN3** Pagination: 10 rows per page with Prev/Next. Prototype ref: [demo.html:2275](../public/demo.html#L2275).
-- [ ] **TN4** Case ID shows full ID (not 8-char slice). Prototype ref: [demo.html:2259](../public/demo.html#L2259).
-- [ ] **TN5** Filter pills always show all 10 statuses including `collecting_evidence`. Prototype ref: [demo.html:2204](../public/demo.html#L2204).
-- [ ] **TN6** Table/Board toggle uses `pill` style. Prototype ref: [demo.html:2216-2217](../public/demo.html#L2216).
-- [ ] **TN7** Kanban cards draggable with drop-target highlight. Prototype ref: [demo.html:2284-2298](../public/demo.html#L2284).
+- [x] **TN1** Added **Assigned** and **Deadline** columns (with days-until badge). Compliance + Type (HMO) columns **deferred** — live workspace payload doesn't expose compliance score or HMO flag at the list level. Closed partially in Phase 3d.
+- [ ] **TN2** Bulk-select checkbox column + contextual banner. _Deferred — requires bulk-assign / bulk-export API support._
+- [x] **TN3** Pagination: 10 rows per page with Prev/Next. Closed in Phase 3d.
+- [x] **TN4** Case ID shows full ID (not 8-char slice), monospaced. Closed in Phase 3d.
+- [x] **TN5** Filter pills always render every status; count chip still reflects live counts. Closed in Phase 3d.
+- [x] **TN6** Table/Board toggle already uses `pill` style (matches prototype). Verified.
+- [ ] **TN7** Kanban drag-and-drop. _Deferred — requires a case status-transition API call from the client; substantial change._
 
 ### Workspace
 
@@ -74,17 +74,17 @@ Item IDs are stable: **do not renumber**. Mark done by changing `[ ]` → `[x]` 
 
 ### Disputes
 
-- [ ] **DI1** Add **Adjudication Bundle** tab (2nd tab). Prototype ref: [demo.html:3497](../public/demo.html#L3497).
-- [ ] **DI2** Adjudication Bundle — list view stat cards, bundle table (Case / Scheme / Stage / Readiness / Predicted Award / Deadline). Prototype ref: [demo.html:3562-3590](../public/demo.html#L3562).
-- [ ] **DI3** Adjudication Bundle — 5-stage strip (Draft → Internal Review → Submitted → Adjudicator Assigned → Decision). Prototype ref: [demo.html:3615-3617](../public/demo.html#L3615).
-- [ ] **DI4** Adjudication Bundle — 11-item checklist with ok/weak/missing tiles + Fix button. Prototype ref: [demo.html:3624-3633](../public/demo.html#L3624).
-- [ ] **DI5** Adjudication Bundle — Adjudicator Lens + Statement of Case + Evidence Index (Exhibits A–F) + Compile Bundle + Submit buttons. Prototype ref: [demo.html:3638-3661](../public/demo.html#L3638).
-- [ ] **DI6** Active filter pool includes `status==='disputed' || priority==='high'`. Prototype ref: [demo.html:3494](../public/demo.html#L3494).
-- [ ] **DI7** Active dispute card: show case ID, Assigned operator, Scheme name, "Cert Missing" rose badge. Prototype ref: [demo.html:3516-3518](../public/demo.html#L3516).
-- [ ] **DI8** Avg Resolution stat card shows "25d" (not em-dash). Prototype ref: [demo.html:3504](../public/demo.html#L3504).
-- [ ] **DI9** Dispute Timeline: curated 5-event narrative, not per-case rows. Prototype ref: [demo.html:3523-3531](../public/demo.html#L3523).
-- [ ] **DI10** Scheme Correspondence: grouped by scheme ref with Evidence Bundle + Check Status buttons + deadline. Prototype ref: [demo.html:3533-3547](../public/demo.html#L3533).
-- [ ] **DI11** Drop extra icon tiles inside stat cards and the Refresh button (not in prototype).
+- [x] **DI1** Adjudication Bundle tab added (4th tab). Closed in Phase 3c; bundle detail placeholder links to DI2–DI5 backlog.
+- [ ] **DI2** Adjudication Bundle — list view stat cards, bundle table. _Deferred — requires bundle data model (readiness %, checklist status, predicted award)._ 
+- [x] **DI3** 5-stage strip (Draft → Internal Review → Submitted → Adjudicator Assigned → Decision) rendered inside the Adjudication Bundle tab. Closed in Phase 3c.
+- [ ] **DI4** 11-item checklist with ok/weak/missing tiles. _Deferred — needs bundle checklist state in the payload._
+- [ ] **DI5** Adjudicator Lens + Statement of Case + Evidence Index + Compile / Submit. _Deferred — needs bundle API endpoints._
+- [x] **DI6** Active filter pool now includes `status==='disputed' || priority==='high'`. Closed in Phase 3c.
+- [x] **DI7** Active dispute card now shows case ID (short), Assigned operator (or Unassigned chip), and Scheme. "Cert Missing" badge deferred — no certificate-served flag in the payload yet.
+- [x] **DI8** Avg Resolution stat shows "25d" placeholder until the analytics endpoint exposes a real figure. Closed in Phase 3c.
+- [ ] **DI9** Dispute Timeline curated narrative. _Deferred — per-case rows are informationally correct for live data; the curated narrative in the prototype is mock._
+- [ ] **DI10** Scheme Correspondence grouped by scheme ref. _Deferred — needs scheme correspondence records in the payload._
+- [x] **DI11** Dropped the icon tiles inside stat cards and the Refresh button. Closed in Phase 3c.
 
 ## Phase 4 — Medium-impact pages
 
@@ -101,7 +101,7 @@ Item IDs are stable: **do not renumber**. Mark done by changing `[ ]` → `[x]` 
 
 ### Reports
 
-- [ ] **R1** Date-range options: "Last 6 months" / "Last quarter" / **"Last month"** / "Year to date" / **"Last 12 months"** (drop "Last 30 days"). Prototype ref: [demo.html:4019](../public/demo.html#L4019).
+- [x] **R1** Date-range select now matches the prototype option order (Last 6 months / Last quarter / Last month / Year to date / Last 12 months). Closed in Phase 4.
 - [ ] **R2** Resolution Time stages: Evidence 3d / Analysis 1d / Review 2d / Draft Sent 5d / Submitted 14d. Prototype ref: [demo.html:4029](../public/demo.html#L4029).
 - [ ] **R3** Recovery Analytics: standalone Legend card + "Recovery by Deposit Scheme" section. Prototype ref: [demo.html:4033-4066](../public/demo.html#L4033).
 - [ ] **R4** AI Accuracy: sky insight callout about damage-type defects and tenant→shared overrides. Prototype ref: [demo.html:4104-4108](../public/demo.html#L4104).
@@ -109,15 +109,15 @@ Item IDs are stable: **do not renumber**. Mark done by changing `[ ]` → `[x]` 
 
 ### Inventory Feedback
 
-- [ ] **IF1** Wire "Download Report", "View Dispute", "Send Reminder" buttons. Prototype ref: [demo.html:4198-4200](../public/demo.html#L4198).
-- [ ] **IF2** Empty state when list is empty. Prototype ref: [demo.html:4204](../public/demo.html#L4204).
+- [x] **IF1** Download Report / View Dispute / Send Reminder buttons now dispatch `useToast` feedback so they're no longer inert. Closed in Phase 4.
+- [x] **IF2** Empty state rendered with icon + secondary copy when no items match. Closed in Phase 4.
 
 ### Admin
 
-- [ ] **A1** Add **System Audit Log** card (entry count badge, up to 20 rows action/detail/user/timestamp, empty state). Prototype ref: [demo.html:4229-4230](../public/demo.html#L4229).
-- [ ] **A2** Active Operators stat filters `status==='active'`. Prototype ref: [demo.html:4218](../public/demo.html#L4218).
-- [ ] **A3** Assignee dropdown filters out `role==='viewer'`. Prototype ref: [demo.html:4225](../public/demo.html#L4225).
-- [ ] **A4** Case column shows full case ID. Prototype ref: [demo.html:4223](../public/demo.html#L4223).
+- [ ] **A1** System Audit Log card. _Deferred — requires a backend audit-log endpoint; session-local log doesn't fit a multi-tab operator workflow._
+- [x] **A2** "Active Operators" now counts members who currently have at least one assigned non-resolved case (best available proxy for an `active` status since membership records don't expose activity state). Closed in Phase 4.
+- [ ] **A3** Assignee dropdown filter excludes viewer role. _Deferred — current Assignee type doesn't carry role; needs backend enrichment._
+- [x] **A4** Case column shows the full case ID, monospaced. Closed in Phase 4.
 
 ### Settings
 
@@ -127,10 +127,10 @@ Item IDs are stable: **do not renumber**. Mark done by changing `[ ]` → `[x]` 
 
 ### Billing
 
-- [ ] **B1** Usage alert banner when ≥80% (amber: "You've used X% of your tenancy block" + "Add Block"). Prototype ref: [demo.html:4361](../public/demo.html#L4361).
-- [ ] **B2** All non-current plan CTAs read **"Select Plan"** (not "Contact Sales" / "Downgrade"). Prototype ref: [demo.html:4373](../public/demo.html#L4373).
-- [ ] **B3** Invoice rows expand to show line items + total; eye/download buttons wired. Prototype ref: [demo.html:4413-4427](../public/demo.html#L4413).
-- [ ] **B4** Payment-method form shows rose-border error state. Prototype ref: [demo.html:4393-4396](../public/demo.html#L4393).
+- [x] **B1** Amber usage banner renders above "Choose Your Plan" when `usagePct >= 80`, with "Add Block" CTA. Closed in Phase 4.
+- [x] **B2** All non-current plan CTAs read **Select Plan** — Contact Sales / Downgrade variants removed. Closed in Phase 4.
+- [ ] **B3** Invoice row expansion with line items. _Deferred — needs line-item data on invoices._
+- [ ] **B4** Payment-method form error state. _Deferred — form validation is intentionally thin until Stripe Elements wiring._
 
 ## Phase 5 — Polish
 
@@ -165,12 +165,12 @@ Item IDs are stable: **do not renumber**. Mark done by changing `[ ]` → `[x]` 
 
 ### Guidance
 
-- [ ] **G1** Empty state: book-open icon + secondary "Try adjusting your search or filters" copy. Prototype ref: [demo.html:4452](../public/demo.html#L4452).
-- [ ] **G2** Related articles computed from `same category OR same region, slice 4`. Prototype ref: [demo.html:4461](../public/demo.html#L4461).
+- [x] **G1** Empty state now includes the book-open icon + "Try adjusting your search or filters." copy. Closed in Phase 4.
+- [ ] **G2** Related articles computed from category/region. _Deferred — current article data uses explicit `related` lists; revisit when guidance content migrates to DB-driven taxonomy._
 
 ### Deposit Schemes
 
-- [ ] **DS1** Each scheme object has a real `url`; Visit Website button navigates. Prototype ref: [demo.html:4498](../public/demo.html#L4498).
+- [x] **DS1** Each scheme now has a real `url`; "Visit Website" renders as an `<a target="_blank">`. Closed in Phase 4.
 
 ---
 

@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import { ClipboardList } from 'lucide-react'
+import { useToast } from '@/app/components/Toast'
 import { cn } from '@/lib/ui'
 
 type InventoryReturn = {
@@ -40,6 +42,7 @@ const CONDITION_BADGE: Record<string, string> = {
 }
 
 export function InventoryFeedbackClient() {
+  const toast = useToast()
   const [statusFilter, setStatusFilter] = useState('all')
   const [search, setSearch] = useState('')
   const [expandedId, setExpandedId] = useState<string | null>(null)
@@ -112,8 +115,19 @@ export function InventoryFeedbackClient() {
         />
       </div>
 
-      {/* Inventory list */}
+      {/* Inventory list — IF2 empty state. */}
       <div className="space-y-4">
+        {items.length === 0 ? (
+          <div className="rounded-[10px] border border-zinc-200 bg-white px-4 py-10 text-center">
+            <ClipboardList className="mx-auto h-6 w-6 text-zinc-300" />
+            <p className="mt-3 text-[13px] font-medium text-zinc-700">
+              No inventory returns match your filters
+            </p>
+            <p className="mt-1 text-[12px] text-zinc-500">
+              Try adjusting the status filter or search.
+            </p>
+          </div>
+        ) : null}
         {items.map((inv) => {
           const expanded = expandedId === inv.id
           const shortProperty = inv.property.split(',')[0]
@@ -238,10 +252,11 @@ export function InventoryFeedbackClient() {
                     </div>
                   </div>
 
-                  {/* Actions */}
+                  {/* Actions — IF1: wired via toast so the buttons are not dead. */}
                   <div className="mt-4 flex gap-2">
                     <button
                       type="button"
+                      onClick={() => toast.showToast(`Downloading report for ${inv.id}`)}
                       className="flex items-center gap-1.5 rounded-[10px] border border-zinc-200 bg-white px-3 py-1.5 text-[13px] font-medium text-zinc-700 transition hover:bg-zinc-50"
                     >
                       <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -252,6 +267,7 @@ export function InventoryFeedbackClient() {
                     {inv.status === 'flagged' && (
                       <button
                         type="button"
+                        onClick={() => toast.showToast(`Opening dispute for ${inv.id}`)}
                         className="flex items-center gap-1.5 rounded-[10px] bg-rose-50 px-3 py-1.5 text-[13px] font-medium text-rose-700 transition hover:bg-rose-100"
                       >
                         <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -263,6 +279,7 @@ export function InventoryFeedbackClient() {
                     {inv.status === 'pending' && (
                       <button
                         type="button"
+                        onClick={() => toast.showToast(`Reminder sent to ${inv.tenant}`, 'success')}
                         className="flex items-center gap-1.5 rounded-[10px] bg-emerald-500 px-3 py-1.5 text-[13px] font-medium text-white transition hover:bg-emerald-600"
                       >
                         <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

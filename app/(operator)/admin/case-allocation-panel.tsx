@@ -107,7 +107,14 @@ export function CaseAllocationPanel() {
   }
 
   const unassignedCount = cases.filter((c) => c.assigned_to === null).length
-  const activeMembers = members.length
+  // A2 — prototype ref: demo.html:4218 — "Active Operators" counts operators
+  // who currently have at least one assigned non-resolved case.
+  const activeAssignedUserIds = new Set(
+    cases
+      .filter((c) => c.assigned_to && c.status !== 'resolved')
+      .map((c) => c.assigned_to as string)
+  )
+  const activeMembers = members.filter((m) => activeAssignedUserIds.has(m.userId)).length
   const memberMap = new Map(members.map((m) => [m.userId, m]))
 
   if (loading) {
@@ -192,9 +199,10 @@ export function CaseAllocationPanel() {
                   const isAssigning = assigning === caseItem.id
                   return (
                     <tr key={caseItem.id} className="transition hover:bg-zinc-50">
-                      <td className="font-medium text-zinc-900">
+                      <td className="font-mono text-[12px] font-medium text-zinc-900">
+                        {/* A4 — prototype uses full case ID. */}
                         <Link href={`/operator/cases/${caseItem.id}`} className="hover:underline">
-                          {caseItem.id.slice(0, 12)}
+                          {caseItem.id}
                         </Link>
                       </td>
                       <td className="text-zinc-700">

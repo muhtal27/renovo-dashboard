@@ -180,10 +180,12 @@ export function ReportsClient({
             onChange={(e) => setDays(Number(e.target.value))}
             className="h-[34px] rounded-[10px] border border-zinc-200 bg-white px-3 text-[13px] text-zinc-700 outline-none transition focus:border-emerald-400 focus:ring-[3px] focus:ring-emerald-500/10"
           >
-            <option value={30}>Last 30 days</option>
-            <option value={90}>Last quarter</option>
+            {/* R1 — prototype option set. Prototype ref: demo.html:4019. */}
             <option value={180}>Last 6 months</option>
+            <option value={90}>Last quarter</option>
+            <option value={30}>Last month</option>
             <option value={365}>Year to date</option>
+            <option value={365}>Last 12 months</option>
           </select>
           <button
             type="button"

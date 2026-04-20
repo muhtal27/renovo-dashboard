@@ -4,23 +4,22 @@ import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import {
-  ArrowRight,
+  ChevronLeft,
+  ChevronRight,
   Columns3,
-  GripVertical,
   List,
-  RefreshCcw,
 } from 'lucide-react'
-import { toast } from 'sonner'
 import { useEotTenancies, useEotCases } from '@/lib/queries/eot-queries'
 import type { EotTenancyListItem, EotCaseListItem, EotCaseStatus } from '@/lib/eot-types'
 import { EmptyState, SkeletonPanel } from '@/app/operator-ui'
 import {
   formatCurrency,
-  formatEnumLabel,
 } from '@/app/eot/_components/eot-ui'
 import { relativeTime } from '@/lib/relative-time'
 import { cn } from '@/lib/ui'
 import { useDebounce } from '@/lib/use-debounce'
+
+const PAGE_SIZE = 10
 
 /* ────────────────────────────────────────────────────────────────── */
 /*  Helpers                                                           */
@@ -108,7 +107,34 @@ function StatCards({ cases }: { cases: EotCaseListItem[] }) {
 /*  Case Table                                                        */
 /* ────────────────────────────────────────────────────────────────── */
 
-function CaseTable({ cases }: { cases: EotCaseListItem[] }) {
+// Prototype ref: public/demo.html:1402 — days-until badge (rose ≤7 / amber ≤14).
+function DeadlineCell({ tenancy }: { tenancy: EotTenancyListItem | null | undefined }) {
+  if (!tenancy?.end_date) return <span className="text-zinc-400">—</span>
+  const end = new Date(tenancy.end_date)
+  if (Number.isNaN(end.getTime())) return <span className="text-zinc-400">—</span>
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const days = Math.ceil((end.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+
+  if (days < 0) return <span className="badge badge-rose" style={{ fontSize: 10 }}>{Math.abs(days)}d overdue</span>
+  if (days <= 7) return <span className="badge badge-rose" style={{ fontSize: 10 }}>{days}d left</span>
+  if (days <= 14) return <span className="badge badge-amber" style={{ fontSize: 10 }}>{days}d left</span>
+  return <span className="badge badge-zinc" style={{ fontSize: 10 }}>{days}d</span>
+}
+
+function CaseTable({
+  cases,
+  tenancyById,
+  page,
+  pageCount,
+  onPageChange,
+}: {
+  cases: EotCaseListItem[]
+  tenancyById: Map<string, EotTenancyListItem>
+  page: number
+  pageCount: number
+  onPageChange: (page: number) => void
+}) {
   if (cases.length === 0) {
     return (
       <EmptyState
@@ -127,8 +153,10 @@ function CaseTable({ cases }: { cases: EotCaseListItem[] }) {
               <th>Property</th>
               <th>Tenant</th>
               <th>Status</th>
+              <th className="hidden md:table-cell">Assigned</th>
               <th className="hidden md:table-cell">Priority</th>
               <th className="hidden text-right md:table-cell">Deposit</th>
+              <th className="hidden md:table-cell">Deadline</th>
               <th className="hidden text-right lg:table-cell">Issues</th>
               <th className="text-right">Activity</th>
             </tr>
@@ -138,12 +166,14 @@ function CaseTable({ cases }: { cases: EotCaseListItem[] }) {
               const address = buildCaseAddress(c.property)
               const meta = STATUS_META[c.status] ?? STATUS_META.draft
               const priBadge = PRIORITY_BADGE[c.priority] ?? PRIORITY_BADGE.low
+              const tenancy = tenancyById.get(c.id)
               return (
                 <tr key={c.id} className="clickable">
                   <td>
                     <Link href={`/operator/cases/${c.id}`} prefetch={false} className="block">
                       <p className="font-medium text-zinc-900">{address}</p>
-                      <p className="mt-0.5 text-[11px] text-zinc-400">{c.id.slice(0, 8)}</p>
+                      {/* TN4 — full case ID, not a truncated slice. */}
+                      <p className="mt-0.5 font-mono text-[11px] text-zinc-400">{c.id}</p>
                     </Link>
                   </td>
                   <td className="text-zinc-700">{c.tenant_name}</td>
@@ -152,6 +182,13 @@ function CaseTable({ cases }: { cases: EotCaseListItem[] }) {
                       {meta.label}
                     </span>
                   </td>
+                  <td className="hidden text-zinc-700 md:table-cell">
+                    {c.assigned_to ? (
+                      <span className="text-[13px]">{c.assigned_to}</span>
+                    ) : (
+                      <span className="badge badge-amber" style={{ fontSize: 10 }}>Unassigned</span>
+                    )}
+                  </td>
                   <td className="hidden md:table-cell">
                     <span className={cn('badge', priBadge)}>
                       {c.priority.charAt(0).toUpperCase() + c.priority.slice(1)}
@@ -159,6 +196,13 @@ function CaseTable({ cases }: { cases: EotCaseListItem[] }) {
                   </td>
                   <td className="hidden text-right font-semibold tabular-nums text-zinc-950 md:table-cell">
                     {c.deposit_amount ? formatCurrency(Number(c.deposit_amount)) : '\u2014'}
+                  </td>
+                  <td className="hidden md:table-cell">
+                    {c.status === 'resolved' ? (
+                      <span className="badge badge-zinc" style={{ fontSize: 10 }}>Closed</span>
+                    ) : (
+                      <DeadlineCell tenancy={tenancy} />
+                    )}
                   </td>
                   <td className="hidden text-right tabular-nums text-zinc-600 lg:table-cell">
                     {c.issue_count}
@@ -172,6 +216,35 @@ function CaseTable({ cases }: { cases: EotCaseListItem[] }) {
           </tbody>
         </table>
       </div>
+
+      {/* TN3 — pagination. Prototype ref: demo.html:2275 (10/page Prev/Next). */}
+      {pageCount > 1 ? (
+        <div className="flex items-center justify-between border-t border-zinc-100 px-4 py-3 text-[12px] text-zinc-500">
+          <span>
+            Page {page + 1} of {pageCount}
+          </span>
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => onPageChange(Math.max(0, page - 1))}
+              disabled={page === 0}
+              className="btn btn-secondary btn-sm disabled:opacity-50"
+            >
+              <ChevronLeft className="h-3 w-3" />
+              <span>Prev</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => onPageChange(Math.min(pageCount - 1, page + 1))}
+              disabled={page >= pageCount - 1}
+              className="btn btn-secondary btn-sm disabled:opacity-50"
+            >
+              <span>Next</span>
+              <ChevronRight className="h-3 w-3" />
+            </button>
+          </div>
+        </div>
+      ) : null}
     </div>
   )
 }
@@ -244,22 +317,30 @@ export function TenanciesPageClient({
   const {
     data: tenancies = [],
     isLoading: tenanciesLoading,
-    isFetching: refreshing,
-    refetch: refetchTenancies,
   } = useEotTenancies(initialTenancies)
 
   const {
     data: cases = [],
     isLoading: casesLoading,
-    refetch: refetchCases,
   } = useEotCases()
 
   const loading = tenanciesLoading || casesLoading
+
+  // Build a case-id → tenancy lookup so the Deadline column can read
+  // the tenancy end-date without refetching per-row.
+  const tenancyById = useMemo(() => {
+    const map = new Map<string, EotTenancyListItem>()
+    for (const t of tenancies) {
+      if (t.case_id) map.set(t.case_id, t)
+    }
+    return map
+  }, [tenancies])
 
   const searchParams = useSearchParams()
   const [viewMode, setViewMode] = useState<ViewMode>('table')
   const [statusFilter, setStatusFilter] = useState<EotCaseStatus | 'all'>('all')
   const [search, setSearch] = useState(searchParams.get('search') ?? '')
+  const [page, setPage] = useState(0)
   const debouncedSearch = useDebounce(search, 250)
 
   const statusCounts = useMemo(() => {
@@ -291,10 +372,16 @@ export function TenanciesPageClient({
     )
   }, [cases, statusFilter, debouncedSearch])
 
-  const handleRefresh = () => {
-    void refetchTenancies()
-    void refetchCases()
-    toast.success('Refreshed')
+  const pageCount = Math.max(1, Math.ceil(filteredCases.length / PAGE_SIZE))
+  const clampedPage = Math.min(page, pageCount - 1)
+  const pagedCases = useMemo(
+    () => filteredCases.slice(clampedPage * PAGE_SIZE, clampedPage * PAGE_SIZE + PAGE_SIZE),
+    [filteredCases, clampedPage]
+  )
+
+  function handleFilterChange(next: EotCaseStatus | 'all') {
+    setStatusFilter(next)
+    setPage(0)
   }
 
   if (loading) {
@@ -359,21 +446,20 @@ export function TenanciesPageClient({
       {/* Stat cards */}
       <StatCards cases={cases} />
 
-      {/* Filters + search */}
+      {/* Filters + search — TN5: always render every status pill. */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="pill-row flex-1">
           {filters.map((f) => {
             const count = f.key === 'all' ? cases.length : (statusCounts[f.key] ?? 0)
-            if (f.key !== 'all' && count === 0) return null
             return (
               <button
                 key={f.key}
                 type="button"
-                onClick={() => setStatusFilter(f.key)}
+                onClick={() => handleFilterChange(f.key)}
                 className={cn('pill', statusFilter === f.key && 'active')}
               >
                 {f.label}
-                {f.key !== 'all' && count > 0 ? ` (${count})` : ''}
+                {f.key !== 'all' ? ` (${count})` : ''}
               </button>
             )
           })}
@@ -382,14 +468,20 @@ export function TenanciesPageClient({
           type="text"
           placeholder="Search cases..."
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => { setSearch(e.target.value); setPage(0) }}
           className="h-[36px] min-w-[180px] max-w-[280px] flex-1 rounded-[var(--radius-lg)] border border-zinc-200 bg-zinc-50 px-3 text-[13px] text-zinc-700 outline-none transition focus:border-emerald-400 focus:bg-white focus:ring-[3px] focus:ring-emerald-500/10"
         />
       </div>
 
       {/* Table or Kanban */}
       {viewMode === 'table' ? (
-        <CaseTable cases={filteredCases} />
+        <CaseTable
+          cases={pagedCases}
+          tenancyById={tenancyById}
+          page={clampedPage}
+          pageCount={pageCount}
+          onPageChange={setPage}
+        />
       ) : (
         <KanbanBoard cases={filteredCases} />
       )}

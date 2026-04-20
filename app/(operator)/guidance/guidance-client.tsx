@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowRight, ChevronRight, Copy, FileText, X } from 'lucide-react'
+import { ArrowRight, BookOpen, ChevronRight, Copy, FileText, X } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/ui'
@@ -149,8 +149,11 @@ export function GuidanceClient() {
           ))}
         </div>
       ) : (
-        <div className="rounded-[var(--radius-md)] border border-zinc-200 bg-white px-4 py-10 text-center text-[13px] text-zinc-500">
-          No articles match your filters
+        // G1 — prototype empty state includes icon + secondary copy.
+        <div className="rounded-[var(--radius-md)] border border-zinc-200 bg-white px-4 py-10 text-center">
+          <BookOpen className="mx-auto h-6 w-6 text-zinc-300" />
+          <p className="mt-3 text-[13px] font-medium text-zinc-700">No articles match your filters</p>
+          <p className="mt-1 text-[12px] text-zinc-500">Try adjusting your search or filters.</p>
         </div>
       )}
 

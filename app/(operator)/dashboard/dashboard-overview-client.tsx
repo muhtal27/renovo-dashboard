@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useMemo, useCallback, useState, useEffect, useRef } from 'react'
+import { useMemo, useState, useEffect, useRef } from 'react'
 import {
   AlertTriangle,
   ArrowRight,
@@ -10,14 +10,12 @@ import {
   ClipboardCheck,
   Mail,
   Plus,
-  RefreshCcw,
   Scale,
   Send,
   ShieldAlert,
   Sparkles,
   TrendingUp,
 } from 'lucide-react'
-import { toast } from 'sonner'
 import { useEotTenancies, useEotCases, useEotAnalyticsDashboard } from '@/lib/queries/eot-queries'
 import type { EotTenancyListItem, EotCaseListItem, EotCaseStatus } from '@/lib/eot-types'
 import { SkeletonPanel } from '@/app/operator-ui'
@@ -122,6 +120,9 @@ type DashboardStats = {
   pipelineCounts: Record<string, number>
   highPriorityCases: number
   urgentDeadlineCases: number
+  // Prototype ref: public/demo.html:2127 — "Next: {n}d" rose chip on the
+  // Open Cases card when the nearest non-resolved tenancy deadline is ≤14d.
+  nearestDeadlineDays: number | null
 }
 
 function computeStats(
@@ -183,6 +184,21 @@ function computeStats(
     return endDate >= now && endDate <= sevenDays
   }).length
 
+  // Nearest upcoming deadline in days across all tenancies — drives the
+  // "Next: {n}d" rose chip on the Open Cases card (prototype demo.html:2127).
+  let nearestDeadlineDays: number | null = null
+  const MS_PER_DAY = 1000 * 60 * 60 * 24
+  for (const t of tenancies) {
+    if (!t.end_date) continue
+    const endDate = new Date(t.end_date)
+    if (Number.isNaN(endDate.getTime())) continue
+    const days = Math.ceil((endDate.getTime() - now.getTime()) / MS_PER_DAY)
+    if (days < 0) continue
+    if (nearestDeadlineDays === null || days < nearestDeadlineDays) {
+      nearestDeadlineDays = days
+    }
+  }
+
   return {
     totalTenancies: tenancies.length,
     activeTenancies,
@@ -199,7 +215,18 @@ function computeStats(
     pipelineCounts,
     highPriorityCases,
     urgentDeadlineCases,
+    nearestDeadlineDays,
   }
+}
+
+// Prototype ref: public/demo.html:2119, 2135 — footer percentages are
+// derived from the sparkline data, not hardcoded strings.
+function computeTrendPct(series: number[]): number | null {
+  if (series.length < 2) return null
+  const first = series[0]
+  const last = series[series.length - 1]
+  if (!first || first === 0) return null
+  return Math.round(((last - first) / first) * 100)
 }
 
 /* ────────────────────────────────────────────────────────────────── */
@@ -244,6 +271,14 @@ function Sparkline({ data, color }: { data: number[]; color: string }) {
 /* ────────────────────────────────────────────────────────────────── */
 
 function StatCards({ stats }: { stats: DashboardStats }) {
+  // Prototype ref: public/demo.html:2119 — footer trend is derived from the
+  // sparkline series, not a hardcoded "+8% this month".
+  const tenanciesSeries = [8, 9, 10, 10, 11, 12, stats.activeTenancies || 12]
+  const depositsSeries = [9200, 9800, 10200, 10100, 10800, 11100, stats.totalDepositValue || 11375]
+  const tenanciesTrendPct = computeTrendPct(tenanciesSeries)
+  const depositsTrendPct = computeTrendPct(depositsSeries)
+  const fmtPct = (n: number | null) => (n == null ? '—' : `${n >= 0 ? '+' : ''}${n}%`)
+
   return (
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
       <div className="stat-card">
@@ -252,7 +287,7 @@ function StatCards({ stats }: { stats: DashboardStats }) {
           <div className="stat-value tabular-nums text-zinc-950">
             <AnimatedNumber value={stats.activeTenancies} />
           </div>
-          <Sparkline data={[8, 9, 10, 10, 11, 12, stats.activeTenancies || 12]} color="#10b981" />
+          <Sparkline data={tenanciesSeries} color="#10b981" />
         </div>
         <div className="stat-footer">
           {stats.endingSoon > 0 ? (
@@ -261,9 +296,14 @@ function StatCards({ stats }: { stats: DashboardStats }) {
               {stats.endingSoon} ending within 30d
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1 text-emerald-600">
+            <span
+              className={cn(
+                'inline-flex items-center gap-1',
+                (tenanciesTrendPct ?? 0) >= 0 ? 'text-emerald-600' : 'text-rose-600'
+              )}
+            >
               <TrendingUp className="h-3.5 w-3.5" />
-              +8% this month
+              {fmtPct(tenanciesTrendPct)} this month
             </span>
           )}
         </div>
@@ -273,11 +313,12 @@ function StatCards({ stats }: { stats: DashboardStats }) {
         <div className="stat-label">Open Cases</div>
         <div className="mt-2 flex items-end justify-between">
           <div className="stat-value tabular-nums text-zinc-950">
-            <AnimatedNumber value={stats.activeCases} />
+            {/* D1 — prototype uses total case count, not just non-resolved. */}
+            <AnimatedNumber value={stats.totalCases} />
           </div>
-          <Sparkline data={[5, 6, 5, 7, 8, 7, stats.activeCases || 9]} color="#0ea5e9" />
+          <Sparkline data={[5, 6, 5, 7, 8, 7, stats.totalCases || 9]} color="#0ea5e9" />
         </div>
-        <div className="stat-footer">
+        <div className="stat-footer flex-wrap gap-1.5">
           {stats.casesNeedingAttention > 0 ? (
             <span className="badge badge-amber">{stats.casesNeedingAttention} need attention</span>
           ) : (
@@ -286,6 +327,10 @@ function StatCards({ stats }: { stats: DashboardStats }) {
               All on track
             </span>
           )}
+          {/* D2 — "Next: {n}d" chip when nearest deadline is within 14 days. */}
+          {stats.nearestDeadlineDays != null && stats.nearestDeadlineDays <= 14 ? (
+            <span className="badge badge-rose">Next: {stats.nearestDeadlineDays}d</span>
+          ) : null}
         </div>
       </div>
 
@@ -295,12 +340,17 @@ function StatCards({ stats }: { stats: DashboardStats }) {
           <div className="stat-value tabular-nums text-zinc-950">
             <AnimatedCurrency value={stats.totalDepositValue} />
           </div>
-          <Sparkline data={[9200, 9800, 10200, 10100, 10800, 11100, stats.totalDepositValue || 11375]} color="#10b981" />
+          <Sparkline data={depositsSeries} color="#10b981" />
         </div>
         <div className="stat-footer">
-          <span className="inline-flex items-center gap-1 text-emerald-600">
+          <span
+            className={cn(
+              'inline-flex items-center gap-1',
+              (depositsTrendPct ?? 0) >= 0 ? 'text-emerald-600' : 'text-rose-600'
+            )}
+          >
             <TrendingUp className="h-3.5 w-3.5" />
-            +12% portfolio value
+            {fmtPct(depositsTrendPct)} portfolio value
           </span>
         </div>
       </div>
@@ -507,16 +557,9 @@ function MonthlyThroughputCard({
 
   return (
     <div className="stat-card">
-      <div className="flex items-center justify-between">
-        <h3 className="text-[16px] font-semibold text-zinc-900">Monthly Throughput</h3>
-        <Link
-          href="/reports"
-          prefetch={false}
-          className="app-secondary-button gap-1 px-3 py-1.5 text-[12px]"
-        >
-          Full report <ArrowRight className="h-3 w-3" />
-        </Link>
-      </div>
+      {/* D5 — prototype ref: demo.html:2175-2177 has only the title, no "Full
+          report" CTA on this card. */}
+      <h3 className="text-[16px] font-semibold text-zinc-900">Monthly Throughput</h3>
 
       <div className="mt-4">
         <div className="flex items-end gap-2" style={{ height: 140 }}>
@@ -624,29 +667,18 @@ export function DashboardOverviewClient({
   const {
     data: tenancies = [],
     isLoading: tenanciesLoading,
-    isFetching: tenanciesRefreshing,
-    refetch: refetchTenancies,
   } = useEotTenancies(initialTenancies)
 
   const {
     data: cases = [],
     isLoading: casesLoading,
-    isFetching: casesRefreshing,
-    refetch: refetchCases,
   } = useEotCases(initialCases)
 
   const { data: analytics } = useEotAnalyticsDashboard(30)
 
   const loading = tenanciesLoading || casesLoading
-  const refreshing = tenanciesRefreshing || casesRefreshing
 
   const stats = useMemo(() => computeStats(tenancies, cases), [tenancies, cases])
-
-  const handleRefresh = useCallback(() => {
-    void refetchTenancies()
-    void refetchCases()
-    toast.success('Dashboard refreshed')
-  }, [refetchTenancies, refetchCases])
 
   if (loading) {
     return (
@@ -670,24 +702,14 @@ export function DashboardOverviewClient({
 
   return (
     <div className="animate-fade-in-up space-y-6">
-      {/* Greeting */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-[28px] font-bold leading-tight tracking-tight text-zinc-900">
-            {getGreeting()}{operatorName ? <>, <em className="font-serif not-italic">{operatorName}</em></> : null}
-          </h1>
-          <p className="mt-1 text-sm text-zinc-500">
-            Here&apos;s your portfolio overview for today
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={handleRefresh}
-          className="app-secondary-button gap-2 px-3 py-2 text-sm"
-          title="Refresh dashboard"
-        >
-          <RefreshCcw className={cn('h-3.5 w-3.5', refreshing && 'animate-spin')} />
-        </button>
+      {/* Greeting — prototype ref: demo.html:2097-2100 (no Refresh button). */}
+      <div>
+        <h1 className="text-[28px] font-bold leading-tight tracking-tight text-zinc-900">
+          {getGreeting()}{operatorName ? <>, <em className="font-serif not-italic">{operatorName}</em></> : null}
+        </h1>
+        <p className="mt-1 text-sm text-zinc-500">
+          Here&apos;s your portfolio overview for today
+        </p>
       </div>
 
       {/* Deadline alert */}

@@ -76,6 +76,31 @@ export function BillingPageClient() {
         </p>
       </div>
 
+      {/* B1 — Usage alert banner. Prototype ref: demo.html:4361. */}
+      {usagePct >= 80 ? (
+        <div className="rounded-[10px] border border-amber-200 bg-amber-50 p-4">
+          <div className="flex flex-wrap items-center gap-3">
+            <svg className="h-[18px] w-[18px] shrink-0 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3M12 9v4M12 17h.01" />
+            </svg>
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-amber-800">
+                You&apos;ve used {usagePct}% of your tenancy block
+              </p>
+              <p className="mt-0.5 text-xs text-amber-700">
+                {usedTenancies} of {totalTenancies} tenancies — add a block to avoid overage fees.
+              </p>
+            </div>
+            <button
+              type="button"
+              className="rounded-[10px] bg-amber-500 px-3 py-1.5 text-[13px] font-semibold text-white transition hover:bg-amber-600"
+            >
+              Add Block
+            </button>
+          </div>
+        </div>
+      ) : null}
+
       {/* Choose Your Plan */}
       <div>
         <h3 className="mb-4 text-base font-semibold text-zinc-900">Choose Your Plan</h3>
@@ -124,6 +149,8 @@ export function BillingPageClient() {
                 </div>
               </div>
 
+              {/* B2 — prototype ref: demo.html:4373 uses a single
+                  "Select Plan" label for every non-current card. */}
               {plan.current ? (
                 <button
                   type="button"
@@ -132,19 +159,12 @@ export function BillingPageClient() {
                 >
                   Current Plan
                 </button>
-              ) : plan.price > 179 ? (
-                <button
-                  type="button"
-                  className="mt-3 w-full rounded-[10px] bg-zinc-900 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-zinc-800"
-                >
-                  Contact Sales
-                </button>
               ) : (
                 <button
                   type="button"
                   className="mt-3 w-full rounded-[10px] border border-zinc-200 bg-white px-4 py-2 text-[13px] font-medium text-zinc-700 transition hover:bg-zinc-50"
                 >
-                  Downgrade
+                  Select Plan
                 </button>
               )}
             </div>
