@@ -888,6 +888,24 @@ a:focus-visible {
   padding-right: 20px;
 }
 
+/* Homepage section gutters — matches website-v2.html (.hero, .section-wide, .live-band).
+   All homepage top-level wrappers should use one of these two classes to stay aligned. */
+.home-frame-wide {
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+.home-frame-narrow {
+  max-width: 1080px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
 .marketing-page .page-shell {
   width: min(100%, 1180px);
   margin: 0 auto;

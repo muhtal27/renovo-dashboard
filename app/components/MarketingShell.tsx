@@ -65,6 +65,7 @@ const footerProductLinks = [
   { label: 'How it works', href: '/how-it-works' },
   { label: 'Pricing', href: '/pricing' },
   { label: 'Demo', href: '/demo' },
+  { label: 'Integrations', href: '/integrations' },
   { label: 'API Docs', href: '/developers' },
   { label: 'Changelog', href: '/changelog' },
 ] as const
@@ -115,6 +116,7 @@ function navLinkClass(active: boolean) {
 
 const mobileNavLinks = [
   ...headerNavItems,
+  { label: 'Integrations', href: '/integrations' as const },
   { label: 'Contact', href: '/contact' as const },
   { label: 'Investors', href: '/investors' as const },
   { label: 'Privacy', href: '/privacy' as const },

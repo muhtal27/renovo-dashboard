@@ -214,6 +214,7 @@ const navLinks = [
 
 const mobileNavLinks = [
   ...navLinks,
+  { href: "/integrations", label: "Integrations" },
   { href: "/contact", label: "Contact" },
   { href: "/investors", label: "Investors" },
   { href: "/privacy", label: "Privacy" },
@@ -225,6 +226,7 @@ const footerCols = {
     { href: "/how-it-works", label: "How it works" },
     { href: "/pricing", label: "Pricing" },
     { href: "/demo", label: "Demo" },
+    { href: "/integrations", label: "Integrations" },
     { href: "/developers", label: "API Docs" },
     { href: "/changelog", label: "Changelog" },
   ],
@@ -433,7 +435,7 @@ export default function HomePageClient() {
         id="rn-nav"
         className="fixed inset-x-0 top-0 z-50 border-b border-white/[0.04] bg-[#05070e]/70 backdrop-blur-xl transition-colors duration-300 [&.scrolled]:bg-[#05070e]/90"
       >
-        <div className="mx-auto flex h-16 max-w-[1280px] items-center justify-between px-6 lg:px-10">
+        <div className="home-frame-wide flex h-16 items-center justify-between">
           <Link href="/" aria-label="Renovo AI home" className="inline-flex shrink-0 items-center">
             <BrandMark />
           </Link>
@@ -476,7 +478,7 @@ export default function HomePageClient() {
 
       <main id="main-content" tabIndex={-1} className="relative z-10">
         {/* ═══ HERO ═══ */}
-        <section className="mx-auto max-w-[1280px] px-6 pb-24 pt-40 lg:px-10">
+        <section className="home-frame-wide pb-24 pt-40">
           <div className="grid items-center gap-12 lg:grid-cols-[1fr_1.1fr]">
             <div>
               <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/[0.04] px-4 py-1.5 text-[12px] font-medium text-emerald-400 backdrop-blur-sm">
@@ -639,7 +641,7 @@ export default function HomePageClient() {
 
         {/* ═══ TRUST STRIP ═══ */}
         <section className="border-y border-white/[0.04] bg-white/[0.008]">
-          <div className="mx-auto flex max-w-[1280px] flex-wrap items-center gap-x-8 gap-y-3 px-6 py-5 lg:px-10">
+          <div className="home-frame-wide flex flex-wrap items-center gap-x-8 gap-y-3 py-5">
             <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/40">Connects to</span>
             <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[13px] font-medium text-white/55">
               {["Reapit", "Jupix", "Alto", "MRI Qube", "InventoryBase", "Inventory Hive"].map((l) => (
@@ -654,7 +656,7 @@ export default function HomePageClient() {
         </section>
 
         {/* ═══ WHY AGENCIES SWITCH ═══ */}
-        <section className="mx-auto max-w-[1280px] px-6 py-24 lg:px-10">
+        <section className="home-frame-wide py-24">
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-400">Why agencies switch</p>
           <h2 className="mt-4 max-w-3xl text-[clamp(28px,4vw,48px)] font-semibold leading-[1.05] tracking-[-0.035em]">
             Checkout becomes a defensible decision, not a weekend of admin.
@@ -699,8 +701,8 @@ export default function HomePageClient() {
         </section>
 
         {/* ═══ WORKFLOW (scroll-synced) ═══ */}
-        <section className="relative px-6 py-24 lg:px-10">
-          <div className="mx-auto grid max-w-[1280px] gap-14 lg:grid-cols-[1fr_1fr]">
+        <section className="home-frame-wide relative py-24">
+          <div className="grid gap-14 lg:grid-cols-[1fr_1fr]">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-400">How it works</p>
               <h2 className="mt-4 text-[clamp(28px,4vw,48px)] font-semibold leading-[1.05] tracking-[-0.035em]">
@@ -753,7 +755,7 @@ export default function HomePageClient() {
         </section>
 
         {/* ═══ SOCIAL PROOF ═══ */}
-        <section className="mx-auto max-w-[1280px] px-6 py-24 lg:px-10">
+        <section className="home-frame-wide py-24">
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-400">What operators tell us</p>
           <h2 className="mt-4 max-w-3xl text-[clamp(28px,4vw,48px)] font-semibold leading-[1.05] tracking-[-0.035em]">
             Feedback from property managers, not sales teams.
@@ -784,7 +786,7 @@ export default function HomePageClient() {
         </section>
 
         {/* ═══ INTERACTIVE DEMO ═══ */}
-        <section className="mx-auto max-w-[1080px] px-6 py-24 lg:px-10">
+        <section className="home-frame-narrow py-24">
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-400">Try it yourself</p>
           <h2 className="mt-4 text-[clamp(28px,4vw,48px)] font-semibold leading-[1.05] tracking-[-0.035em]">
             Reassign a defect.
@@ -859,7 +861,7 @@ export default function HomePageClient() {
         </section>
 
         {/* ═══ LIVE BAND — UK map ═══ */}
-        <section className="mx-auto max-w-[1280px] px-6 py-24 lg:px-10">
+        <section className="home-frame-wide py-24">
           <div className="grid gap-6 md:grid-cols-[1fr_1fr] md:items-end">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-400">Live across the UK</p>
@@ -906,44 +908,42 @@ export default function HomePageClient() {
         </section>
 
         {/* ═══ LIVE DECISION FEED (marquee) ═══ */}
-        <section className="border-y border-white/[0.04] bg-white/[0.008]">
-          <div className="mx-auto max-w-[1280px] px-6 py-8 lg:px-10">
-            <div className="mb-4 flex flex-wrap items-center justify-between gap-2 text-[11px]">
-              <span className="inline-flex items-center gap-2.5 font-semibold uppercase tracking-[0.18em] text-white/50">
-                <span
-                  className={`h-1.5 w-1.5 rounded-full bg-emerald-400 ${reducedMotion ? "" : "animate-pulse"}`}
-                  style={{ boxShadow: "0 0 8px #34d399" }}
-                />
-                Live decision feed · UK schemes
-              </span>
-              <span className="font-mono text-[10px] text-white/35">
-                <b className="font-medium text-emerald-300">{feedCount.toLocaleString("en-GB")}</b> resolved · last 7 days
-              </span>
-            </div>
-            <div className="feed-track-wrap relative overflow-hidden">
-              <div
-                className="pointer-events-none absolute inset-y-0 left-0 z-[2] w-[140px]"
-                style={{ background: "linear-gradient(90deg, #05070e, transparent)" }}
+        <section className="relative overflow-hidden border-y border-white/[0.04] bg-white/[0.008] py-8">
+          <div className="home-frame-wide mb-4 flex flex-wrap items-center justify-between gap-2 text-[11px]">
+            <span className="inline-flex items-center gap-2.5 font-semibold uppercase tracking-[0.18em] text-white/50">
+              <span
+                className={`h-1.5 w-1.5 rounded-full bg-emerald-400 ${reducedMotion ? "" : "animate-pulse"}`}
+                style={{ boxShadow: "0 0 8px #34d399" }}
               />
-              <div
-                className="pointer-events-none absolute inset-y-0 right-0 z-[2] w-[140px]"
-                style={{ background: "linear-gradient(270deg, #05070e, transparent)" }}
-              />
-              <div
-                className="feed-track flex gap-3 whitespace-nowrap will-change-transform"
-                style={{ animation: reducedMotion ? undefined : "feedSlide 95s linear infinite", width: reducedMotion ? undefined : "max-content" }}
-              >
-                {feedItems.map((d, i) => (
-                  <FeedCard key={`${d.cite}-${i}`} d={d} />
-                ))}
-              </div>
+              Live decision feed · UK schemes
+            </span>
+            <span className="font-mono text-[10px] text-white/35">
+              <b className="font-medium text-emerald-300">{feedCount.toLocaleString("en-GB")}</b> resolved · last 7 days
+            </span>
+          </div>
+          <div className="feed-track-wrap relative overflow-hidden">
+            <div
+              className="pointer-events-none absolute inset-y-0 left-0 z-[2] w-[140px]"
+              style={{ background: "linear-gradient(90deg, #05070e, transparent)" }}
+            />
+            <div
+              className="pointer-events-none absolute inset-y-0 right-0 z-[2] w-[140px]"
+              style={{ background: "linear-gradient(270deg, #05070e, transparent)" }}
+            />
+            <div
+              className="feed-track flex gap-3 whitespace-nowrap will-change-transform"
+              style={{ animation: reducedMotion ? undefined : "feedSlide 95s linear infinite", width: reducedMotion ? undefined : "max-content" }}
+            >
+              {feedItems.map((d, i) => (
+                <FeedCard key={`${d.cite}-${i}`} d={d} />
+              ))}
             </div>
           </div>
         </section>
 
         {/* ═══ CTA ═══ */}
-        <section className="px-6 py-24 lg:px-10">
-          <div className="mx-auto max-w-[1080px] overflow-hidden rounded-3xl border border-emerald-500/15 bg-gradient-to-br from-emerald-500/[0.08] via-transparent to-transparent p-14 text-center backdrop-blur-xl">
+        <section className="home-frame-narrow py-24">
+          <div className="overflow-hidden rounded-3xl border border-emerald-500/15 bg-gradient-to-br from-emerald-500/[0.08] via-transparent to-transparent p-14 text-center backdrop-blur-xl">
             <h2 className="text-[clamp(30px,4.5vw,52px)] font-semibold leading-[1.08] tracking-[-0.035em]">
               Every deposit decision,
               <br />
@@ -967,8 +967,8 @@ export default function HomePageClient() {
       </main>
 
       {/* ═══ DARK FOOTER ═══ (dual_footer: keep parallel with MarketingShell) */}
-      <footer className="relative z-10 border-t border-white/[0.04] px-6 pb-10 pt-12 lg:px-10">
-        <div className="mx-auto max-w-[1280px]">
+      <footer className="relative z-10 border-t border-white/[0.04] pb-10 pt-12">
+        <div className="home-frame-wide">
           <div className="grid gap-10 md:grid-cols-2 xl:grid-cols-[1.5fr_1fr_1fr_1fr]">
             <div>
               <Link href="/" className="inline-flex items-center gap-2.5" aria-label="Renovo AI home">
