@@ -15,6 +15,7 @@ import { NotificationCenter } from '@/app/components/NotificationCenter'
 import { AiPanel } from '@/app/components/AiPanel'
 import { TelemetryIdentify } from '@/app/components/TelemetryIdentify'
 import { OperatorHeaderSearch } from '@/app/components/OperatorHeaderSearch'
+import { ToastProvider } from '@/app/components/Toast'
 
 type Breadcrumb = {
   label: string
@@ -228,6 +229,7 @@ export function OperatorLayout({ children, operator, latestRelease }: OperatorLa
   const handleOpenMobile = useCallback(() => setMobileNavOpen(true), [])
 
   return (
+    <ToastProvider>
     <main className="operator-app min-h-screen bg-zinc-50 text-zinc-900">
       <div className="flex min-h-screen">
         <OperatorNav
@@ -368,5 +370,6 @@ export function OperatorLayout({ children, operator, latestRelease }: OperatorLa
       <AiPanel open={aiPanelOpen} onClose={() => setAiPanelOpen(false)} />
       <TelemetryIdentify operator={operator} />
     </main>
+    </ToastProvider>
   )
 }

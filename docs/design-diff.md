@@ -9,30 +9,30 @@ Item IDs are stable: **do not renumber**. Mark done by changing `[ ]` → `[x]` 
 
 ## Phase 0 — Tokens
 
-- [ ] **T1** Port layout tokens `--sidebar-w: 260px`, `--sidebar-cw: 72px`, `--header-h: 56px` into [globals.css](../app/globals.css) under `:root`. Prototype ref: [demo.html:42](../public/demo.html#L42).
-- [ ] **T2** Port full color ramps (zinc 50–950, emerald 50–700, sky/indigo/amber/orange/rose/violet/cyan 50/500/700) as CSS custom properties. Prototype ref: [demo.html:20-35](../public/demo.html#L20).
-- [ ] **T3** 5px zinc-300 webkit scrollbars scoped to `.operator-app`. Prototype ref: [demo.html:51-53](../public/demo.html#L51).
-- [ ] **T4** `body` scroll model: operator shell scrolls inside `.page-scroll`, not the body. Prototype ref: [demo.html:50, 78](../public/demo.html#L50).
+- [x] **T1** Port layout tokens `--sidebar-w: 260px`, `--sidebar-cw: 72px`, `--header-h: 56px` into [globals.css](../app/globals.css) under `:root`. Closed by [bf23ef2](https://github.com/muhtal27/renovo-dashboard/commit/bf23ef2).
+- [x] **T2** Port full color ramps (zinc 50–950, emerald 50–700, sky/indigo/amber/orange/rose/violet/cyan 50/500/700) as CSS custom properties. Closed by [bf23ef2](https://github.com/muhtal27/renovo-dashboard/commit/bf23ef2).
+- [x] **T3** 5px zinc-300 webkit scrollbars scoped to `.operator-app`. Closed by [bf23ef2](https://github.com/muhtal27/renovo-dashboard/commit/bf23ef2).
+- [ ] **T4** `body` scroll model: operator shell scrolls inside `.page-scroll`, not the body. Prototype ref: [demo.html:50, 78](../public/demo.html#L50). _Deferred — structural; revisit once Phase 3 workspace work lands._
 
 ## Phase 1 — Shell
 
-- [ ] **S1** Sidebar footer shows operator's **organisation name**, not "Property Manager". Prototype ref: [demo.html:1951](../public/demo.html#L1951); live: [operator-nav.tsx:319](../app/operator-nav.tsx#L319).
-- [ ] **S2** Header search: replace read-only button with inline type-ahead dropdown grouped by section (Navigation / Management / Resources / Account). Prototype ref: [demo.html:2015-2030](../public/demo.html#L2015).
-- [ ] **S3** Header: drop duplicate mobile-only search icon; single `⌘K` hint serves all viewports. Prototype ref: [demo.html:1972](../public/demo.html#L1972).
-- [ ] **S4** Notifications dropdown: add **"Mark all read"** action in header. Prototype ref: [demo.html:1996](../public/demo.html#L1996).
-- [ ] **S5** Notifications: unread rows tinted `sky-50`; unread vs read visually distinct. Prototype ref: [demo.html:1998](../public/demo.html#L1998).
-- [ ] **S6** Notifications: show **icon glyph** per tone (alert-triangle / shield-alert / check-circle / info), not a plain colored dot. Prototype ref: [demo.html:1999](../public/demo.html#L1999).
-- [ ] **S7** Notifications: `info` tone uses sky, not neutral zinc. Prototype ref: [demo.html:273](../public/demo.html#L273).
-- [ ] **S8** Command palette: add **Intelligence**, **Deposit Schemes**, **What's New** entries. Prototype ref: [demo.html:1102-1106](../public/demo.html#L1102).
-- [ ] **S9** Command palette: rename "Guidance Library" → "Guidance". Prototype ref: [demo.html:1101](../public/demo.html#L1101).
-- [ ] **S10** Command palette: highlighted row uses `zinc-50` background (neutral), not emerald. Prototype ref: [demo.html:260](../public/demo.html#L260).
-- [ ] **S11** Command palette: drop footer hint row (`↑↓ navigate | ↵ open | ⌘K toggle`). Prototype has no footer. Prototype ref: [demo.html:2040-2055](../public/demo.html#L2040).
+- [x] **S1** Sidebar footer shows operator's **organisation name**, not "Property Manager". Closed by [bf23ef2](https://github.com/muhtal27/renovo-dashboard/commit/bf23ef2).
+- [x] **S2** Header search: replace read-only button with inline type-ahead dropdown grouped by section. Closed by [bf23ef2](https://github.com/muhtal27/renovo-dashboard/commit/bf23ef2).
+- [x] **S3** Header: drop duplicate mobile-only search icon; single `⌘K` hint serves all viewports. Closed by [bf23ef2](https://github.com/muhtal27/renovo-dashboard/commit/bf23ef2).
+- [x] **S4** Notifications dropdown: add **"Mark all read"** action in header. Closed by [bf23ef2](https://github.com/muhtal27/renovo-dashboard/commit/bf23ef2).
+- [x] **S5** Notifications: unread rows tinted `sky-50`; unread vs read visually distinct. Closed by [bf23ef2](https://github.com/muhtal27/renovo-dashboard/commit/bf23ef2).
+- [x] **S6** Notifications: show **icon glyph** per tone (alert-triangle / shield-alert / check-circle / info), not a plain colored dot. Closed by [bf23ef2](https://github.com/muhtal27/renovo-dashboard/commit/bf23ef2).
+- [x] **S7** Notifications: `info` tone uses sky, not neutral zinc. Closed by [bf23ef2](https://github.com/muhtal27/renovo-dashboard/commit/bf23ef2).
+- [x] **S8** Command palette: add **Intelligence**, **Deposit Schemes**, **What's New** entries. Closed by [bf23ef2](https://github.com/muhtal27/renovo-dashboard/commit/bf23ef2).
+- [x] **S9** Command palette: rename "Guidance Library" → "Guidance". Closed by [bf23ef2](https://github.com/muhtal27/renovo-dashboard/commit/bf23ef2).
+- [x] **S10** Command palette: highlighted row uses `zinc-50` background (neutral), not emerald. Closed by [bf23ef2](https://github.com/muhtal27/renovo-dashboard/commit/bf23ef2).
+- [x] **S11** Command palette: drop footer hint row. Closed by [bf23ef2](https://github.com/muhtal27/renovo-dashboard/commit/bf23ef2).
 
 ## Phase 2 — Shared primitives
 
-- [ ] **P1** Response modal (`dispute` / `counter` / `query` / `reject`) as a shared component. Prototype ref: [demo.html:1578-1607](../public/demo.html#L1578).
-- [ ] **P2** Final Claim Statement overlay (5 sections + Print / Done footer). Prototype ref: [demo.html:1610-1682](../public/demo.html#L1610).
-- [ ] **P3** Toast container + success / error / default variants. Prototype ref: [demo.html:286-289](../public/demo.html#L286).
+- [x] **P1** Response modal (`dispute` / `counter` / `query` / `reject`) as a shared component. See [app/components/ResponseModal.tsx](../app/components/ResponseModal.tsx).
+- [x] **P2** Final Claim Statement overlay (5 sections + Print / Done footer). See [app/components/FinalClaimStatement.tsx](../app/components/FinalClaimStatement.tsx).
+- [x] **P3** Toast container + success / error / default variants (+ `useToast()` hook, wired to `ToastProvider` in the operator shell). See [app/components/Toast.tsx](../app/components/Toast.tsx).
 
 ## Phase 3 — High-impact pages
 

@@ -948,6 +948,317 @@ a:focus-visible {
   animation: shimmer 1.8s ease-in-out infinite;
 }
 
+/* ─── PROTOTYPE BUTTON + FORM PRIMITIVES ────────────── */
+/* prototype: public/demo.html:163-174 */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: var(--zinc-900);
+  color: #ffffff;
+  border-color: var(--zinc-900);
+}
+.btn-primary:hover {
+  background: var(--zinc-800);
+}
+
+.btn-secondary {
+  background: #ffffff;
+  color: var(--zinc-700);
+  border-color: var(--zinc-200);
+}
+.btn-secondary:hover {
+  background: var(--zinc-50);
+  border-color: var(--zinc-300);
+}
+
+.btn-accent {
+  background: var(--emerald-600);
+  color: #ffffff;
+  border-color: var(--emerald-600);
+}
+.btn-accent:hover {
+  background: var(--emerald-700);
+}
+
+.btn-ghost {
+  color: var(--zinc-600);
+  padding: 6px 10px;
+}
+.btn-ghost:hover {
+  background: var(--zinc-100);
+  color: var(--zinc-900);
+}
+
+.btn-sm {
+  padding: 5px 12px;
+  font-size: 12px;
+}
+
+.btn-danger {
+  background: var(--rose-50);
+  color: var(--rose-700);
+  border-color: var(--rose-200);
+}
+.btn-danger:hover {
+  background: #ffe4e6;
+}
+
+/* prototype: public/demo.html:198-199 */
+.form-input {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--zinc-200);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  background: #ffffff;
+  outline: none;
+  transition: all 0.15s ease;
+}
+.form-input:focus {
+  border-color: var(--emerald-400);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+/* prototype: public/demo.html:67-68 */
+.text-muted { color: var(--zinc-500); }
+.tabnum { font-variant-numeric: tabular-nums; }
+
+/* ─── PROTOTYPE KEYFRAMES (camelCase names used by modal/toast) ─── */
+/* prototype: public/demo.html:344-346 */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── TOAST — prototype: public/demo.html:286-289 ────── */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.toast {
+  padding: 12px 18px;
+  background: var(--zinc-900);
+  color: #ffffff;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 500;
+  animation: slideUp 0.25s ease;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.toast.success { background: var(--emerald-600); }
+.toast.error   { background: #e11d48; }
+
+/* ─── CONFIG MODAL (response modal, integration config)
+   — prototype: public/demo.html:537-541 ──────────────── */
+.config-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 55;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.15s ease;
+}
+
+.config-modal {
+  width: 480px;
+  max-width: 90vw;
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  animation: scaleIn 0.15s ease;
+}
+
+.config-modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--zinc-100);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.config-modal-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.config-modal-body {
+  padding: 20px;
+}
+
+.config-modal-footer {
+  padding: 12px 20px;
+  border-top: 1px solid var(--zinc-100);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* ─── FINAL CLAIM STATEMENT (print-friendly overlay)
+   — prototype: public/demo.html:505-520 ──────────────── */
+.final-stmt-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 60;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow-y: auto;
+  padding: 32px 16px;
+  animation: fadeIn 0.15s ease;
+}
+
+.final-stmt {
+  width: 800px;
+  max-width: 100%;
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  animation: scaleIn 0.2s ease;
+}
+
+.final-stmt-header {
+  padding: 24px 32px;
+  border-bottom: 2px solid var(--zinc-900);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.final-stmt-body {
+  padding: 28px 32px;
+}
+
+.final-stmt-section {
+  margin-bottom: 24px;
+}
+
+.final-stmt-section h4 {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--zinc-500);
+  margin-bottom: 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--zinc-100);
+}
+
+.final-stmt-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.final-stmt-table th {
+  text-align: left;
+  padding: 8px 10px;
+  background: var(--zinc-50);
+  border: 1px solid var(--zinc-200);
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--zinc-600);
+}
+
+.final-stmt-table td {
+  padding: 8px 10px;
+  border: 1px solid var(--zinc-200);
+  vertical-align: top;
+}
+
+.final-stmt-table tr:nth-child(even) td {
+  background: var(--zinc-50);
+}
+
+.final-stmt-total {
+  font-weight: 700;
+  background: var(--zinc-900) !important;
+  color: #ffffff;
+}
+
+.final-stmt-total td {
+  border-color: var(--zinc-900) !important;
+}
+
+.final-stmt-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.final-stmt-split-box {
+  padding: 16px;
+  border-radius: var(--radius-sm);
+  text-align: center;
+}
+
+.final-stmt-footer {
+  padding: 16px 32px;
+  border-top: 1px solid var(--zinc-200);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--zinc-50);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+
+@media print {
+  .final-stmt-backdrop {
+    position: static;
+    background: none;
+    padding: 0;
+  }
+  .final-stmt {
+    box-shadow: none;
+    border-radius: 0;
+  }
+  .final-stmt-footer button {
+    display: none;
+  }
+}
+
 .modern-table-row {
   transition: all 0.15s ease;
 }
