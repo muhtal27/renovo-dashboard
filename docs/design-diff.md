@@ -63,12 +63,12 @@ Item IDs are stable: **do not renumber**. Mark done by changing `[ ]` → `[x]` 
 - [x] **W5** Sidebar Case Overview: restored **Deadline** row with `WorkspaceDeadlineBadge` (rose ≤7d / amber ≤14d / neutral otherwise). Closed in Phase 3a-2.
 - [x] **W6** Documents list now driven by the full `data.documents` array (with a synthetic "AI Analysis Report" entry once analysis has completed). Closed in Phase 3a-2.
 - [x] **W7** Activity Log card in the sidebar reads from `data.timeline` (backend-persisted audit events). Closed in Phase 3a-2.
-- [ ] **W8** Inventory step: **PI compliance banner** (emerald / amber / rose + "Resolve now"). Prototype ref: [demo.html:2391](../public/demo.html#L2391).
-- [ ] **W9** Inventory step: **prior-dispute risk banner** with Risk Heatmap link. Prototype ref: [demo.html:2392](../public/demo.html#L2392).
-- [ ] **W10** Inventory step: **Inventory & Evidence card** (clerk avatar, quality/win-rate badges, signed check-in/out rows, item count). Prototype ref: [demo.html:2436-2456](../public/demo.html#L2436).
-- [ ] **W11** Inventory step: **Compliance Pack card** (Tenancy agreement / Deposit cert / PI / Gas Safety / EICR / EPC / Legionella / Alarms / Scottish reg / HMO). Prototype ref: [demo.html:2457-2465](../public/demo.html#L2457).
-- [ ] **W12** Inventory step: **readiness footer** ("N of M complete" + Continue). Prototype ref: [demo.html:2466-2477](../public/demo.html#L2466).
-- [ ] **W13** Inventory step Setup card: restore **Financial** block + HMO indicator + Scottish landlord-reg field. Prototype ref: [demo.html:2393-2435](../public/demo.html#L2393).
+- [x] **W8** Inventory step: **PI compliance banner** renders (emerald / amber / rose) based on the compliance record flagged `prescribed_information`; the rose variant includes a "Resolve now" button. Closed in Phase 3a-3.
+- [ ] **W9** Inventory step: **prior-dispute risk banner** with Risk Heatmap link. Data not yet in the workspace payload (property-level risk score). _Deferred — revisit with Phase 3 Disputes work._
+- [x] **W10** Inventory step: **Inventory & Evidence card** (signed check-in/out rows with Upload / View actions, items + photos count). Closed in Phase 3a-3. Clerk avatar + quality / win-rate chips are data-gated — show when backend exposes the clerk record.
+- [x] **W11** Inventory step: **Compliance Pack card** with Tenancy agreement / Deposit cert / PI / Gas Safety / EICR / EPC / Legionella / Alarms rows (Scottish landlord reg appears only when `country_code` resolves to Scotland). Closed in Phase 3a-3.
+- [x] **W12** Inventory step: **readiness footer** — "N of M complete · ready to proceed" with an inline Continue to Checkout button (default StepNavigation hidden for this step to avoid duplicating the CTA). Closed in Phase 3a-3.
+- [x] **W13** Inventory step Setup card: Property / Tenancy / People / Financial sections matching prototype, with deposit type (Custodial / Insurance-backed) row and a Scottish landlord-reg placeholder when region resolves to Scotland. HMO indicator is data-gated. Closed in Phase 3a-3.
 - [ ] **W14** Response modal wired up on Negotiation step (P1). Prototype ref: [demo.html:1578](../public/demo.html#L1578).
 - [ ] **W15** Final Claim Statement overlay on resolution (P2). Prototype ref: [demo.html:1610](../public/demo.html#L1610).
 

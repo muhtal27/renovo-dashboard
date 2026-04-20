@@ -698,7 +698,12 @@ export function CheckoutCaseWorkspace({
         <div className="grid gap-4 xl:grid-cols-[1fr_320px]">
           <div className="space-y-4 min-w-0">
             <ActiveStepComponent data={data} />
-            <StepNavigation activeStep={activeStep} caseStatus={currentStatus} onStepClick={handleStepClick} />
+            {/* Inventory step renders its own Continue button in the readiness
+                footer (prototype demo.html:2466-2477), so skip the default
+                step-navigation bar to avoid duplicating the CTA. */}
+            {activeStep === 'inventory' ? null : (
+              <StepNavigation activeStep={activeStep} caseStatus={currentStatus} onStepClick={handleStepClick} />
+            )}
           </div>
           <WorkspaceSidebar data={data} />
         </div>
