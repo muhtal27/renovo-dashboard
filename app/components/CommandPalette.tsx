@@ -2,123 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import {
-  BarChart3,
-  BookOpenText,
-  Building2,
-  ClipboardCheck,
-  CreditCard,
-  Home,
-  LayoutDashboard,
-  MessageSquare,
-  Search,
-  Settings,
-  Users,
-} from 'lucide-react'
+import { Search } from 'lucide-react'
 import { cn } from '@/lib/ui'
-
-type CommandItem = {
-  id: string
-  label: string
-  description?: string
-  href: string
-  icon: typeof Home
-  section: string
-  keywords: string[]
-}
-
-const COMMANDS: CommandItem[] = [
-  {
-    id: 'dashboard',
-    label: 'Dashboard',
-    description: 'Portfolio overview',
-    href: '/dashboard',
-    icon: Home,
-    section: 'Navigation',
-    keywords: ['home', 'overview', 'portfolio', 'stats'],
-  },
-  {
-    id: 'tenancies',
-    label: 'Tenancies',
-    description: 'View all tenancy records',
-    href: '/tenancies',
-    icon: Building2,
-    section: 'Navigation',
-    keywords: ['property', 'tenant', 'landlord', 'deposit'],
-  },
-  {
-    id: 'communications',
-    label: 'Communications',
-    description: 'Messages, conversations, and templates',
-    href: '/communications',
-    icon: MessageSquare,
-    section: 'Navigation',
-    keywords: ['messages', 'inbox', 'email', 'template', 'conversations'],
-  },
-  {
-    id: 'disputes',
-    label: 'Disputes',
-    description: 'Disputed cases and contested issues',
-    href: '/disputes',
-    icon: ClipboardCheck,
-    section: 'Navigation',
-    keywords: ['dispute', 'contested', 'claim', 'resolution'],
-  },
-  {
-    id: 'reports',
-    label: 'Reports',
-    description: 'Portfolio analytics and performance',
-    href: '/reports',
-    icon: BarChart3,
-    section: 'Navigation',
-    keywords: ['analytics', 'performance', 'metrics', 'stats'],
-  },
-  {
-    id: 'admin',
-    label: 'Admin',
-    description: 'Case allocation and integrations',
-    href: '/admin',
-    icon: LayoutDashboard,
-    section: 'Management',
-    keywords: ['allocation', 'assign', 'intake'],
-  },
-  {
-    id: 'teams',
-    label: 'Teams',
-    description: 'Manage members and roles',
-    href: '/teams/members',
-    icon: Users,
-    section: 'Management',
-    keywords: ['members', 'roles', 'team', 'invite'],
-  },
-  {
-    id: 'guidance',
-    label: 'Guidance Library',
-    description: 'EOT scheme and evidence guidance',
-    href: '/guidance',
-    icon: BookOpenText,
-    section: 'Resources',
-    keywords: ['help', 'knowledge', 'scheme', 'evidence', 'tds', 'dps'],
-  },
-  {
-    id: 'settings',
-    label: 'Settings',
-    description: 'Account and workspace settings',
-    href: '/settings',
-    icon: Settings,
-    section: 'Account',
-    keywords: ['profile', 'account', 'preferences', 'password'],
-  },
-  {
-    id: 'billing',
-    label: 'Billing',
-    description: 'Subscription and invoices',
-    href: '/account/billing',
-    icon: CreditCard,
-    section: 'Account',
-    keywords: ['subscription', 'invoice', 'payment', 'plan'],
-  },
-]
+import { filterCommandItems, groupCommandItems, type CommandItem } from '@/app/components/command-items'
 
 export function CommandPalette() {
   const [open, setOpen] = useState(false)
@@ -128,17 +14,7 @@ export function CommandPalette() {
   const listRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
 
-  const filtered = useMemo(() => {
-    if (!query.trim()) return COMMANDS
-
-    const q = query.toLowerCase()
-    return COMMANDS.filter(
-      (cmd) =>
-        cmd.label.toLowerCase().includes(q) ||
-        cmd.description?.toLowerCase().includes(q) ||
-        cmd.keywords.some((kw) => kw.includes(q))
-    )
-  }, [query])
+  const filtered = useMemo(() => filterCommandItems(query), [query])
 
   const handleClose = useCallback(() => {
     setOpen(false)
@@ -203,15 +79,7 @@ export function CommandPalette() {
 
   if (!open) return null
 
-  const grouped = new Map<string, CommandItem[]>()
-  for (const item of filtered) {
-    const existing = grouped.get(item.section)
-    if (existing) {
-      existing.push(item)
-    } else {
-      grouped.set(item.section, [item])
-    }
-  }
+  const grouped = groupCommandItems(filtered)
 
   let flatIndex = 0
 
@@ -232,7 +100,7 @@ export function CommandPalette() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeydown}
-            placeholder="Search pages, actions, guidance..."
+            placeholder="Search pages, actions..."
             className="flex-1 bg-transparent text-sm text-zinc-900 outline-none placeholder:text-zinc-400"
           />
           <kbd className="hidden rounded border border-zinc-200 bg-zinc-50 px-1.5 py-0.5 text-[10px] font-medium text-zinc-400 sm:inline">
@@ -240,7 +108,7 @@ export function CommandPalette() {
           </kbd>
         </div>
 
-        <div ref={listRef} className="max-h-[320px] overflow-y-auto py-2">
+        <div ref={listRef} className="max-h-[320px] overflow-y-auto p-2">
           {filtered.length === 0 ? (
             <p className="px-4 py-8 text-center text-sm text-zinc-400">
               No results for &ldquo;{query}&rdquo;
@@ -261,10 +129,10 @@ export function CommandPalette() {
                       data-index={idx}
                       onClick={() => handleSelect(item)}
                       className={cn(
-                        'flex w-full items-center gap-3 px-4 py-2.5 text-left transition',
+                        'flex w-full items-center gap-3 px-4 py-2.5 text-left text-zinc-700 transition',
                         idx === selectedIndex
-                          ? 'bg-emerald-50 text-emerald-700'
-                          : 'text-zinc-700 hover:bg-zinc-50'
+                          ? 'bg-zinc-50'
+                          : 'hover:bg-zinc-50'
                       )}
                     >
                       <Icon className="h-4 w-4 shrink-0 opacity-60" />
@@ -280,22 +148,6 @@ export function CommandPalette() {
               </div>
             ))
           )}
-        </div>
-
-        <div className="border-t border-zinc-100 px-4 py-2">
-          <div className="flex items-center justify-between text-[11px] text-zinc-400">
-            <span>
-              <kbd className="rounded border border-zinc-200 bg-zinc-50 px-1 py-0.5 font-mono">↑↓</kbd>
-              {' '}navigate
-              <span className="mx-2">|</span>
-              <kbd className="rounded border border-zinc-200 bg-zinc-50 px-1 py-0.5 font-mono">↵</kbd>
-              {' '}open
-            </span>
-            <span>
-              <kbd className="rounded border border-zinc-200 bg-zinc-50 px-1 py-0.5 font-mono">⌘K</kbd>
-              {' '}to toggle
-            </span>
-          </div>
         </div>
       </div>
     </div>

@@ -267,12 +267,35 @@ export async function getOperatorMembershipContextForApi(requiredPermission?: Op
   return result
 }
 
+async function resolveTenantName(tenantId: string): Promise<string | null> {
+  try {
+    const { getSupabaseServiceRoleClient } = await import('@/lib/supabase-admin')
+    const client = getSupabaseServiceRoleClient()
+    const { data, error } = await client
+      .from('tenants')
+      .select('name')
+      .eq('id', tenantId)
+      .maybeSingle()
+
+    if (error || !data) {
+      return null
+    }
+
+    const name = (data as { name?: string | null }).name
+    return typeof name === 'string' && name.trim().length > 0 ? name : null
+  } catch {
+    return null
+  }
+}
+
 export async function getCurrentOperatorForLayout(): Promise<CurrentOperator | null> {
   const result = await resolveOperatorContext()
 
   if (!result.ok) {
     return null
   }
+
+  const tenantName = await resolveTenantName(result.context.tenantId)
 
   return {
     authUser: toSafeOperatorAuthUser(result.context.user),
@@ -294,5 +317,6 @@ export async function getCurrentOperatorForLayout(): Promise<CurrentOperator | n
       },
     ],
     requiresTenantSelection: false,
+    tenantName,
   }
 }

@@ -28,6 +28,7 @@ export type CurrentOperator = {
   membership: OperatorMembership | null
   memberships: OperatorMembership[]
   requiresTenantSelection: boolean
+  tenantName: string | null
 }
 
 export function getOperatorLabel(operator: CurrentOperator | null) {

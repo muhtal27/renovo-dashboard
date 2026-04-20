@@ -36,6 +36,7 @@ type OperatorNavProps = {
   onCloseMobile: () => void
   displayName?: string
   initials?: string
+  tenantName?: string | null
 }
 
 type NavItem = {
@@ -217,6 +218,7 @@ function SidebarContent({
   mobile,
   displayName,
   initials,
+  tenantName,
 }: {
   pathname: string
   role?: OperatorRole | null
@@ -226,6 +228,7 @@ function SidebarContent({
   mobile?: boolean
   displayName?: string
   initials?: string
+  tenantName?: string | null
 }) {
   const visibleGroups = NAV_GROUPS.map((group) => ({
     ...group,
@@ -316,7 +319,9 @@ function SidebarContent({
         {!isCollapsed ? (
           <div className="min-w-0">
             <p className="truncate text-[13px] font-medium text-zinc-900">{displayName || 'Operator'}</p>
-            <p className="truncate text-[11px] text-zinc-400">Property Manager</p>
+            {tenantName ? (
+              <p className="truncate text-[11px] text-zinc-400">{tenantName}</p>
+            ) : null}
           </div>
         ) : null}
       </div>
@@ -332,6 +337,7 @@ export function OperatorNav({
   onCloseMobile,
   displayName,
   initials,
+  tenantName,
 }: OperatorNavProps) {
   const pathname = usePathname()
 
@@ -353,6 +359,7 @@ export function OperatorNav({
             onToggleCollapse={onToggleCollapse}
             displayName={displayName}
             initials={initials}
+            tenantName={tenantName}
           />
         </div>
       </aside>
@@ -383,6 +390,7 @@ export function OperatorNav({
               mobile
               displayName={displayName}
               initials={initials}
+              tenantName={tenantName}
             />
           </aside>
         </div>

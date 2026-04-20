@@ -1,12 +1,12 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname, useSearchParams } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import type { ReactNode } from 'react'
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import * as Sentry from '@sentry/nextjs'
 import posthog from 'posthog-js'
-import { Bot, ChevronDown, LogOut, Menu, Search, Settings, CreditCard } from 'lucide-react'
+import { Bot, ChevronDown, LogOut, Menu, Settings, CreditCard } from 'lucide-react'
 import { OperatorNav } from '@/app/operator-nav'
 import { getOperatorLabel, type CurrentOperator } from '@/lib/operator-types'
 import { clearLegacySupabaseBrowserAuthArtifacts } from '@/lib/supabase-session'
@@ -14,6 +14,7 @@ import { CommandPalette } from '@/app/components/CommandPalette'
 import { NotificationCenter } from '@/app/components/NotificationCenter'
 import { AiPanel } from '@/app/components/AiPanel'
 import { TelemetryIdentify } from '@/app/components/TelemetryIdentify'
+import { OperatorHeaderSearch } from '@/app/components/OperatorHeaderSearch'
 
 type Breadcrumb = {
   label: string
@@ -23,7 +24,6 @@ type Breadcrumb = {
 type ShellRouteConfig = {
   pageTitle?: string
   searchPlaceholder?: string
-  searchTargetPath?: string
   breadcrumbs?: Breadcrumb[]
 }
 
@@ -57,7 +57,6 @@ const OPERATOR_ROUTE_CONFIG: Array<{
     config: {
       pageTitle: 'Admin',
       searchPlaceholder: 'Search integrations...',
-      searchTargetPath: '/admin',
       breadcrumbs: [{ label: 'Management', href: '/reports' }, { label: 'Admin' }],
     },
   },
@@ -66,7 +65,6 @@ const OPERATOR_ROUTE_CONFIG: Array<{
     config: {
       pageTitle: 'Dashboard',
       searchPlaceholder: 'Search tenancies, cases...',
-      searchTargetPath: '/tenancies',
       breadcrumbs: [{ label: 'Dashboard' }],
     },
   },
@@ -76,7 +74,6 @@ const OPERATOR_ROUTE_CONFIG: Array<{
     config: {
       pageTitle: 'Tenancies',
       searchPlaceholder: 'Search tenancies...',
-      searchTargetPath: '/tenancies',
       breadcrumbs: [{ label: 'Tenancies' }],
     },
   },
@@ -95,7 +92,6 @@ const OPERATOR_ROUTE_CONFIG: Array<{
     config: {
       pageTitle: 'Disputes',
       searchPlaceholder: 'Search disputes...',
-      searchTargetPath: '/disputes',
       breadcrumbs: [{ label: 'Tenancies', href: '/tenancies' }, { label: 'Disputes' }],
     },
   },
@@ -104,7 +100,6 @@ const OPERATOR_ROUTE_CONFIG: Array<{
     config: {
       pageTitle: 'Reports',
       searchPlaceholder: 'Search reports...',
-      searchTargetPath: '/reports',
       breadcrumbs: [{ label: 'Management' }, { label: 'Reports' }],
     },
   },
@@ -113,7 +108,6 @@ const OPERATOR_ROUTE_CONFIG: Array<{
     config: {
       pageTitle: 'Guidance',
       searchPlaceholder: 'Search guidance...',
-      searchTargetPath: '/guidance',
       breadcrumbs: [{ label: 'Resources' }, { label: 'Guidance' }],
     },
   },
@@ -122,7 +116,6 @@ const OPERATOR_ROUTE_CONFIG: Array<{
     config: {
       pageTitle: 'Communications',
       searchPlaceholder: 'Search messages...',
-      searchTargetPath: '/communications',
       breadcrumbs: [{ label: 'Communications' }],
     },
   },
@@ -188,64 +181,12 @@ function getInitials(value: string | null | undefined) {
   return `${first}${last}` || 'R'
 }
 
-function OperatorSearchForm({
-  searchTargetPath,
-  searchPlaceholder,
-  initialSearchValue,
-}: {
-  searchTargetPath: string
-  searchPlaceholder: string
-  initialSearchValue: string
-}) {
-  const [searchValue, setSearchValue] = useState(initialSearchValue)
-
-  return (
-    <form action={searchTargetPath} className="min-w-0">
-      <input type="hidden" name="search" value={searchValue.trim()} />
-      <label className="relative block">
-        <span className="sr-only">Search</span>
-        <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
-        <input
-          type="search"
-          value={searchValue}
-          onChange={(event) => setSearchValue(event.target.value)}
-          placeholder={searchPlaceholder}
-          onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))}
-          className="h-9 w-full max-w-[420px] rounded-[14px] border border-zinc-200 bg-zinc-50 pl-9 pr-4 text-[13px] text-zinc-900 placeholder:text-zinc-400 transition focus:border-emerald-400 focus:bg-white focus:outline-none focus:ring-[3px] focus:ring-emerald-500/10"
-          readOnly
-        />
-      </label>
-    </form>
-  )
-}
-
-function OperatorSearchFormBridge({
-  pathname,
-  searchPlaceholder,
-  searchTargetPath,
-}: {
-  pathname: string
-  searchPlaceholder: string
-  searchTargetPath: string
-}) {
-  const searchParams = useSearchParams()
-  const searchParamValue = searchParams.get('search') ?? ''
-
-  return (
-    <OperatorSearchForm
-      key={`${pathname}?${searchParamValue}`}
-      searchTargetPath={searchTargetPath}
-      searchPlaceholder={searchPlaceholder}
-      initialSearchValue={searchParamValue}
-    />
-  )
-}
-
 export function OperatorLayout({ children, operator, latestRelease }: OperatorLayoutProps) {
   const pathname = usePathname() ?? '/dashboard'
   const routeConfig = useMemo(() => getRouteConfig(pathname), [pathname])
   const breadcrumbs = routeConfig.breadcrumbs ?? []
-  const searchTargetPath = routeConfig.searchTargetPath ?? pathname
+  const searchPlaceholder =
+    routeConfig.searchPlaceholder ?? DEFAULT_ROUTE_CONFIG.searchPlaceholder ?? 'Search...'
   const operatorLabel = getOperatorLabel(operator)
   const [signingOut, setSigningOut] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
@@ -297,6 +238,7 @@ export function OperatorLayout({ children, operator, latestRelease }: OperatorLa
           onCloseMobile={handleCloseMobile}
           displayName={displayName}
           initials={initials}
+          tenantName={operator.tenantName ?? null}
         />
 
         <div className="flex min-w-0 flex-1 flex-col">
@@ -333,37 +275,20 @@ export function OperatorLayout({ children, operator, latestRelease }: OperatorLa
               </div>
             </div>
 
-            {/* Search (opens command palette) */}
+            {/* Inline header search — prototype: demo.html:1966-1970 */}
             <div className="hidden min-w-0 flex-1 xl:flex">
-              <Suspense fallback={null}>
-                <OperatorSearchFormBridge
-                  pathname={pathname}
-                  searchTargetPath={searchTargetPath}
-                  searchPlaceholder={
-                    routeConfig.searchPlaceholder ?? DEFAULT_ROUTE_CONFIG.searchPlaceholder ?? ''
-                  }
-                />
-              </Suspense>
+              <OperatorHeaderSearch placeholder={searchPlaceholder} />
             </div>
 
             {/* Right: action buttons */}
             <div className="ml-auto flex items-center gap-1">
-              {/* Cmd+K button (visible when search bar is hidden) */}
+              {/* Cmd+K hint button — prototype: demo.html:1972 */}
               <button
                 type="button"
                 onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))}
-                className="flex h-9 w-9 items-center justify-center rounded-[10px] text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900 xl:hidden"
-                title="Search (⌘K)"
-              >
-                <Search className="h-[18px] w-[18px]" />
-              </button>
-
-              {/* Cmd+K hint button (desktop) */}
-              <button
-                type="button"
-                onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))}
-                className="hidden h-9 items-center justify-center rounded-[10px] px-2.5 text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900 xl:flex"
+                className="flex h-9 items-center justify-center rounded-[10px] px-2.5 text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900"
                 title="Command Palette"
+                aria-label="Open command palette"
               >
                 <kbd className="rounded border border-zinc-200 bg-zinc-50 px-1.5 py-0.5 text-[11px] font-medium text-zinc-400">⌘K</kbd>
               </button>
