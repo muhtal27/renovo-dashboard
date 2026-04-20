@@ -56,9 +56,9 @@ Item IDs are stable: **do not renumber**. Mark done by changing `[ ]` → `[x]` 
 
 ### Workspace
 
-- [ ] **W1** Collapse steps 4+5 back to single merged **"Analysis & Review"**. Prototype ref: [demo.html:2311](../public/demo.html#L2311).
-- [ ] **W2** Rename step 3 **"Readings"** → **"Handover"**. Prototype ref: [demo.html:2311](../public/demo.html#L2311).
-- [ ] **W3** Step-locking: disabled steps with `badge-lock` + tooltip. Prototype ref: [demo.html:1398](../public/demo.html#L1398).
+- [x] **W1** Collapse steps 4+5 back to single merged **"Analysis & Review"**. Closed in Phase 3a-1 — review content renders inline beneath analysis summary via dynamic import of `StepReview`.
+- [x] **W2** Rename step 3 **"Readings"** → **"Handover"** (step key stays `readings` for URL backwards-compat). Closed in Phase 3a-1.
+- [x] **W3** Step-locking: future steps show a lock icon, `disabled` + `aria-disabled`, and tooltip "Complete previous steps first". Keyboard nav (Ctrl+←/→) honours the same lock. Closed in Phase 3a-1.
 - [ ] **W4** Header meta line: add **region** and Custodial/Insurance-backed pill. Prototype ref: [demo.html:2320](../public/demo.html#L2320).
 - [ ] **W5** Sidebar Case Overview: restore **Deadline** row with badge. Prototype ref: [demo.html:2342](../public/demo.html#L2342).
 - [ ] **W6** Documents list driven by `wsDocuments` array. Prototype ref: [demo.html:2353-2354](../public/demo.html#L2353).

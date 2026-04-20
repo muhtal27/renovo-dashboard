@@ -13,12 +13,12 @@ export const CHECKOUT_WORKSPACE_TABS = [
 
 export type CheckoutWorkspaceTab = (typeof CHECKOUT_WORKSPACE_TABS)[number]
 
+// Prototype ref: public/demo.html:2311 — 7 steps with "review" folded into "analysis"
 export const WORKSPACE_STEPS = [
   'inventory',
   'checkout',
   'readings',
   'analysis',
-  'review',
   'deductions',
   'negotiation',
   'refund',
@@ -310,7 +310,8 @@ export function normalizeWorkspaceStep(value: string | null | undefined): Worksp
   if (v === 'draft' || v === 'documents' || v === 'collecting-evidence') return 'checkout'
   if (v === 'utilities') return 'readings'
   if (v === 'process') return 'analysis'
-  if (v === 'defects') return 'review'
+  // Review is now folded into Analysis per the prototype.
+  if (v === 'review' || v === 'defects') return 'analysis'
   if (v === 'draft-sent' || v === 'send-out' || v === 'sendout') return 'deductions'
   if (v === 'ready-for-claim') return 'negotiation'
   if (v === 'submitted' || v === 'resolved' || v === 'submission') return 'refund'

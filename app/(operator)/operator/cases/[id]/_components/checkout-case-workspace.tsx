@@ -3,19 +3,20 @@
 import {
   ArrowLeft,
   ArrowRight,
+  Banknote,
   Bot,
+  Calculator,
   Check,
   CheckCircle,
-  ClipboardList,
   ClipboardCheck,
-  Gauge,
-  Sparkles,
-  Eye,
-  Calculator,
-  MessageSquare,
-  Banknote,
+  ClipboardList,
   FileCheck,
+  Gauge,
   Keyboard,
+  Lock,
+  MessageSquare,
+  Receipt,
+  Sparkles,
   User,
 } from 'lucide-react'
 import dynamic from 'next/dynamic'
@@ -37,20 +38,24 @@ import {
 /*  Workflow step definitions                                     */
 /* ────────────────────────────────────────────────────────────── */
 
+// Prototype ref: public/demo.html:2311-2312 — 7 steps; step keys and labels are aligned
+// with the demo HTML. Analysis step shows "Ready to analyse" while
+// caseStatus === 'analysis' and switches to the combined review content once
+// the case has progressed to 'review' or later (see renderAnalysisStep dispatch
+// in step-analysis.tsx / step-review.tsx).
 const WORKFLOW_STEPS: {
   step: WorkspaceStep
   label: string
   icon: typeof ClipboardList
   statusStart: EotCaseStatus | null
 }[] = [
-  { step: 'inventory', label: 'Inventory', icon: ClipboardList, statusStart: null },
-  { step: 'checkout', label: 'Checkout', icon: ClipboardCheck, statusStart: 'draft' },
-  { step: 'readings', label: 'Readings', icon: Gauge, statusStart: 'collecting_evidence' },
-  { step: 'analysis', label: 'Analysis', icon: Sparkles, statusStart: 'analysis' },
-  { step: 'review', label: 'Review', icon: Eye, statusStart: 'review' },
-  { step: 'deductions', label: 'Deductions', icon: Calculator, statusStart: 'draft_sent' },
-  { step: 'negotiation', label: 'Negotiation', icon: MessageSquare, statusStart: 'ready_for_claim' },
-  { step: 'refund', label: 'Refund', icon: Banknote, statusStart: 'submitted' },
+  { step: 'inventory',   label: 'Inventory',           icon: ClipboardList, statusStart: null },
+  { step: 'checkout',    label: 'Checkout',            icon: FileCheck,     statusStart: 'draft' },
+  { step: 'readings',    label: 'Handover',            icon: Gauge,         statusStart: 'collecting_evidence' },
+  { step: 'analysis',    label: 'Analysis & Review',   icon: Sparkles,      statusStart: 'analysis' },
+  { step: 'deductions',  label: 'Deductions',          icon: Receipt,       statusStart: 'draft_sent' },
+  { step: 'negotiation', label: 'Negotiation',         icon: MessageSquare, statusStart: 'ready_for_claim' },
+  { step: 'refund',      label: 'Refund',              icon: Banknote,      statusStart: 'submitted' },
 ]
 
 const STATUS_ORDER: EotCaseStatus[] = [
@@ -70,11 +75,29 @@ function statusToStep(status: EotCaseStatus): WorkspaceStep {
   if (status === 'submitted') return 'refund'
   if (status === 'ready_for_claim') return 'negotiation'
   if (status === 'draft_sent') return 'deductions'
-  if (status === 'review') return 'review'
+  // review is folded into analysis per the prototype (Analysis & Review).
+  if (status === 'review') return 'analysis'
   if (status === 'analysis') return 'analysis'
   if (status === 'collecting_evidence') return 'readings'
   if (status === 'draft') return 'checkout'
   return 'inventory'
+}
+
+// Statuses where the analysis step should show the post-analysis view
+// (defect review, liability breakdown, room conditions) rather than the
+// "Ready to analyse" intro. Kept as a module constant so step-analysis.tsx
+// and StepNavigation can share the definition.
+export const ANALYSIS_DONE_STATUSES: ReadonlySet<EotCaseStatus> = new Set<EotCaseStatus>([
+  'review',
+  'draft_sent',
+  'ready_for_claim',
+  'submitted',
+  'disputed',
+  'resolved',
+])
+
+function isAnalysisDone(status: EotCaseStatus): boolean {
+  return ANALYSIS_DONE_STATUSES.has(status)
 }
 
 function getStatusPresentation(status: EotCaseStatus) {
@@ -148,23 +171,38 @@ function WorkflowNav({
           const isComplete = index < currentStepIdx || (isResolved && index <= currentStepIdx)
           const isCurrent = index === currentStepIdx && !isResolved
           const isActive = item.step === activeStep
+          // Step locking — prototype ref: public/demo.html:1398-1399.
+          // Steps beyond the case's current status are locked; the Continue
+          // button is what advances the case (and with it, what unlocks the
+          // next step).
+          const isLocked = !isResolved && index > currentStepIdx
           const Icon = item.icon
 
           return (
             <button
               key={item.step}
               type="button"
-              onClick={() => onStepClick(item.step)}
+              onClick={isLocked ? undefined : () => onStepClick(item.step)}
+              disabled={isLocked}
+              aria-disabled={isLocked}
+              aria-current={isActive ? 'step' : undefined}
+              title={isLocked ? 'Complete previous steps first' : item.label}
               className={cn(
                 'flex flex-1 items-center justify-center gap-1.5 border-b-2 px-2 py-3 text-xs font-medium whitespace-nowrap transition-all',
                 isActive
                   ? 'border-emerald-500 bg-emerald-50 text-emerald-700 font-semibold'
                   : isComplete
                     ? 'border-emerald-300 text-emerald-600 hover:bg-zinc-50'
-                    : 'border-transparent text-zinc-500 hover:bg-zinc-50',
+                    : isLocked
+                      ? 'cursor-not-allowed border-transparent text-zinc-300 opacity-60'
+                      : 'border-transparent text-zinc-500 hover:bg-zinc-50',
               )}
             >
-              {isComplete ? (
+              {isLocked ? (
+                <span className="text-zinc-300">
+                  <Lock className="h-3.5 w-3.5" strokeWidth={2} />
+                </span>
+              ) : isComplete ? (
                 <span className="text-emerald-500">
                   <CheckCircle className="h-3.5 w-3.5" strokeWidth={2} />
                 </span>
@@ -297,14 +335,13 @@ function WorkspaceSidebar({ data }: { data: OperatorCheckoutWorkspaceData }) {
 /* ────────────────────────────────────────────────────────────── */
 
 const STEP_NAV: Record<WorkspaceStep, { prevStep: WorkspaceStep | null; nextStep: WorkspaceStep | null; nextLabel: string }> = {
-  inventory: { prevStep: null, nextStep: 'checkout', nextLabel: 'Continue to Checkout' },
-  checkout: { prevStep: 'inventory', nextStep: 'readings', nextLabel: 'Continue to Readings' },
-  readings: { prevStep: 'checkout', nextStep: 'analysis', nextLabel: 'Continue to Analysis' },
-  analysis: { prevStep: 'readings', nextStep: 'review', nextLabel: 'Start Review' },
-  review: { prevStep: 'analysis', nextStep: 'deductions', nextLabel: 'Continue to Deductions' },
-  deductions: { prevStep: 'review', nextStep: 'negotiation', nextLabel: 'Continue to Negotiation' },
-  negotiation: { prevStep: 'deductions', nextStep: 'refund', nextLabel: 'Continue to Refund' },
-  refund: { prevStep: 'negotiation', nextStep: null, nextLabel: '' },
+  inventory:   { prevStep: null,          nextStep: 'checkout',    nextLabel: 'Continue to Checkout' },
+  checkout:    { prevStep: 'inventory',   nextStep: 'readings',    nextLabel: 'Continue to Handover' },
+  readings:    { prevStep: 'checkout',    nextStep: 'analysis',    nextLabel: 'Continue to Analysis' },
+  analysis:    { prevStep: 'readings',    nextStep: 'deductions',  nextLabel: 'Continue to Deductions' },
+  deductions:  { prevStep: 'analysis',    nextStep: 'negotiation', nextLabel: 'Continue to Negotiation' },
+  negotiation: { prevStep: 'deductions',  nextStep: 'refund',      nextLabel: 'Continue to Refund' },
+  refund:      { prevStep: 'negotiation', nextStep: null,          nextLabel: '' },
 }
 
 function StepNavigation({
@@ -356,14 +393,15 @@ function StepNavigation({
 /* ────────────────────────────────────────────────────────────── */
 
 const STEP_COMPONENTS: Record<WorkspaceStep, ComponentType<{ data: OperatorCheckoutWorkspaceData }>> = {
-  inventory: dynamic(() => import('./step-inventory').then((m) => m.StepInventory)),
-  checkout: dynamic(() => import('./step-checkout-report').then((m) => m.StepCheckoutReport)),
-  readings: dynamic(() => import('./step-readings').then((m) => m.StepReadings)),
-  analysis: dynamic(() => import('./step-analysis').then((m) => m.StepAnalysis)),
-  review: dynamic(() => import('./step-review').then((m) => m.StepReview)),
-  deductions: dynamic(() => import('./step-deductions').then((m) => m.StepDeductions)),
+  inventory:   dynamic(() => import('./step-inventory').then((m) => m.StepInventory)),
+  checkout:    dynamic(() => import('./step-checkout-report').then((m) => m.StepCheckoutReport)),
+  readings:    dynamic(() => import('./step-readings').then((m) => m.StepReadings)),
+  // Analysis step dispatches internally to the "ready to analyse" or
+  // "Analysis & Review" view based on case status (prototype wsAnalysisDone).
+  analysis:    dynamic(() => import('./step-analysis').then((m) => m.StepAnalysis)),
+  deductions:  dynamic(() => import('./step-deductions').then((m) => m.StepDeductions)),
   negotiation: dynamic(() => import('./step-negotiation').then((m) => m.StepNegotiation)),
-  refund: dynamic(() => import('./step-refund').then((m) => m.StepRefund)),
+  refund:      dynamic(() => import('./step-refund').then((m) => m.StepRefund)),
 }
 
 /* ────────────────────────────────────────────────────────────── */
@@ -400,7 +438,9 @@ export function CheckoutCaseWorkspace({
   const assignedTo = data.checkoutCase?.assignedTo
   const priority = data.workspace.case.priority
 
-  const isReviewStep = activeStep === 'review'
+  // Analysis step goes full-width once analysis is complete, matching the
+  // prototype's `state.wsStep==='analysis' && state.wsAnalysisDone` layout.
+  const isFullWidthStep = activeStep === 'analysis' && isAnalysisDone(currentStatus)
 
   const handleStepClick = useCallback(
     (step: WorkspaceStep) => {
@@ -430,7 +470,9 @@ export function CheckoutCaseWorkspace({
     [pathname, router, searchParams, startTransition]
   )
 
-  // Keyboard navigation: Ctrl+← / Ctrl+→ to move between steps
+  // Keyboard navigation: Ctrl+← / Ctrl+→ to move between steps. Respects
+  // the same lock rule as the nav tabs — cannot jump ahead of the case's
+  // current status.
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (!e.ctrlKey && !e.metaKey) return
@@ -443,9 +485,12 @@ export function CheckoutCaseWorkspace({
       const currentIndex = WORKFLOW_STEPS.findIndex((s) => s.step === activeStep)
       if (currentIndex < 0) return
 
+      const currentStepKey = statusToStep(currentStatus)
+      const maxReachableIdx = WORKFLOW_STEPS.findIndex((s) => s.step === currentStepKey)
+
       const nextIndex =
         e.key === 'ArrowRight'
-          ? Math.min(currentIndex + 1, WORKFLOW_STEPS.length - 1)
+          ? Math.min(currentIndex + 1, maxReachableIdx >= 0 ? maxReachableIdx : WORKFLOW_STEPS.length - 1)
           : Math.max(currentIndex - 1, 0)
 
       if (nextIndex !== currentIndex) {
@@ -455,7 +500,7 @@ export function CheckoutCaseWorkspace({
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [activeStep, handleStepClick])
+  }, [activeStep, currentStatus, handleStepClick])
 
   return (
     <div className="space-y-5 animate-fade-in-up">
@@ -516,8 +561,8 @@ export function CheckoutCaseWorkspace({
           <WorkspaceSkeleton width="w-2/3" height="h-3" />
           <WorkspaceSkeletonCard />
         </div>
-      ) : isReviewStep ? (
-        /* Review step — full-width, no sidebar */
+      ) : isFullWidthStep ? (
+        /* Analysis & Review (post-analysis) — full-width, no sidebar */
         <div className="space-y-4">
           <ActiveStepComponent data={data} />
           <StepNavigation activeStep={activeStep} caseStatus={currentStatus} onStepClick={handleStepClick} />

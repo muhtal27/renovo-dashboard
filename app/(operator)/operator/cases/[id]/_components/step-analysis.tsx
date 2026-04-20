@@ -1,6 +1,7 @@
 'use client'
 
 import { AlertTriangle, Check, CheckCircle2, Loader2, Minus, RefreshCcw, Sparkles, TrendingDown, XCircle } from 'lucide-react'
+import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState, useTransition } from 'react'
 import { toast } from 'sonner'
@@ -12,6 +13,11 @@ import {
 } from '@/app/(operator)/operator/cases/[id]/_components/checkout-workspace-ui'
 import { formatCurrency } from '@/app/eot/_components/eot-ui'
 import type { OperatorCheckoutWorkspaceData } from '@/lib/operator-checkout-workspace-types'
+
+// Review content (defect table, overrides, notes) is rendered inline beneath
+// the analysis summary once analysis is complete — matches the prototype
+// "Analysis & Review" merged step. See public/demo.html:2311-2335.
+const StepReview = dynamic(() => import('./step-review').then((m) => m.StepReview))
 
 export function StepAnalysis({ data }: { data: OperatorCheckoutWorkspaceData }) {
   const router = useRouter()
@@ -191,6 +197,9 @@ export function StepAnalysis({ data }: { data: OperatorCheckoutWorkspaceData }) 
         ) : null}
 
         {error ? <p className="text-sm text-rose-700" role="alert">{error}</p> : null}
+
+        {/* Merged Review content — prototype demo.html:2311 "Analysis & Review". */}
+        <StepReview data={data} />
 
         <ConfirmDialog
           open={showRerunConfirm}
