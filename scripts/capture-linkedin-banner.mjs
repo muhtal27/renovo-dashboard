@@ -34,6 +34,14 @@ const targets = [
     width: 400,
     height: 400,
   },
+  {
+    name: 'signature logo',
+    src: path.resolve(__dirname, 'signature-logo.html'),
+    png: path.join(OUT_DIR, 'signature-logo.png'),
+    jpg: path.join(OUT_DIR, 'signature-logo.jpg'),
+    width: 144,
+    height: 144,
+  },
 ]
 
 await mkdir(OUT_DIR, { recursive: true })
