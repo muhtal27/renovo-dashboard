@@ -174,8 +174,9 @@ export default function LoginPage() {
             <span className="brand-name">Renovo AI</span>
           </Link>
           <div className="nav-right">
-            <Link href="/" className="sign-in">
-              ← Back to site
+            <Link href="/" className="back-to-site">
+              <span aria-hidden="true" className="back-to-site-arrow">←</span>
+              <span>Back to site</span>
             </Link>
           </div>
         </div>

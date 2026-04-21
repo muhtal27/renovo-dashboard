@@ -231,13 +231,53 @@
 }
 
 .marketing-page .nav-right .sign-in {
-  display: none;
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 13px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  transition: color 0.15s, background 0.15s;
 }
 
 .marketing-page .nav-right .sign-in:hover {
   color: #ffffff;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.marketing-page .back-to-site {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition:
+    color 0.15s,
+    border-color 0.15s,
+    background 0.15s,
+    transform 0.25s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+.marketing-page .back-to-site:hover {
+  color: #ffffff;
+  border-color: rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.marketing-page .back-to-site .back-to-site-arrow {
+  color: var(--em-400);
+  transition: transform 0.25s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+.marketing-page .back-to-site:hover .back-to-site-arrow {
+  transform: translateX(-2px);
 }
 
 .marketing-page .btn-primary {
@@ -291,12 +331,64 @@
 }
 
 @media (min-width: 1024px) {
-  .marketing-page .nav-links,
-  .marketing-page .nav-right .sign-in {
-    display: inline-flex;
-  }
   .marketing-page .nav-links {
     display: flex;
+  }
+  .marketing-page .nav-right .sign-in {
+    font-size: 14px;
+    padding: 0;
+    border-radius: 0;
+    color: rgba(255, 255, 255, 0.6);
+    background: transparent;
+  }
+  .marketing-page .nav-right .sign-in:hover {
+    background: transparent;
+    color: #ffffff;
+  }
+}
+
+@media (max-width: 560px) {
+  .marketing-page .nav-inner {
+    padding: 0 16px;
+    gap: 8px;
+  }
+  .marketing-page .nav-right {
+    gap: 8px;
+  }
+  .marketing-page .nav-right .sign-in {
+    font-size: 13px;
+    padding: 6px 8px;
+  }
+  .marketing-page .btn-primary {
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+  .marketing-page .back-to-site {
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+}
+
+/* Reduce fixed-ambient paint cost on mobile to stop scroll jank */
+@media (max-width: 768px) {
+  .marketing-page .ambient .glow {
+    filter: blur(80px);
+    will-change: auto;
+    transition: none;
+  }
+  .marketing-page .ambient .glow-1 {
+    width: 420px;
+    height: 420px;
+  }
+  .marketing-page .ambient .glow-2 {
+    width: 340px;
+    height: 340px;
+  }
+  .marketing-page .ambient .glow-3 {
+    display: none;
+  }
+  .marketing-page .ambient .grid-dots {
+    background-size: 32px 32px;
   }
 }
 
