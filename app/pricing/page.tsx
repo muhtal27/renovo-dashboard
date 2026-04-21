@@ -5,7 +5,7 @@ import { createMarketingMetadata } from '@/lib/marketing-metadata'
 export const metadata = createMarketingMetadata({
   title: 'Pricing. Renovo AI',
   description:
-    'Transparent, stackable pricing. Let only tenancies always free. Portfolio 365 at £179 per block per month. Monthly rolling, cancel whenever you like.',
+    'Transparent, stackable pricing. Portfolio 365 at £179 per block per month for up to 365 tenancies, or Enterprise for multi branch groups. Monthly rolling, cancel whenever you like.',
   path: '/pricing',
 })
 
@@ -23,22 +23,6 @@ type Tier = {
 
 const tiers: Tier[] = [
   {
-    name: 'Free',
-    tag: 'For let only portfolios',
-    priceAmount: '£0',
-    pricePer: '/ month',
-    priceAlt: 'No credit card. Unlimited users.',
-    ctaLabel: 'Start free →',
-    featHead: 'Always included',
-    features: [
-      'Full case workspace and evidence management',
-      'AI drafted liability assessments',
-      'Approval workflows and audit trail',
-      'Dispute pack generation (PDF)',
-      'Custom templates, unlimited seats',
-    ],
-  },
-  {
     featured: true,
     name: 'Portfolio 365',
     tag: 'For fully managed portfolios',
@@ -46,9 +30,12 @@ const tiers: Tier[] = [
     pricePer: '/ block / month + VAT',
     priceAlt: 'Up to 365 fully managed tenancies per block. Stack as you grow.',
     ctaLabel: 'Book a demo →',
-    featHead: 'Everything in Free, plus',
+    featHead: 'Everything you need',
     features: [
-      'Fully managed tenancy workflow',
+      'Full case workspace and evidence management',
+      'AI drafted liability assessments',
+      'Approval workflows and audit trail',
+      'Dispute pack generation (PDF)',
       'Scheme submission (TDS, DPS, mydeposits, SDS)',
       'Unlimited users, no contract',
       'First month free',
@@ -83,7 +70,7 @@ export default function PricingPage() {
           <span className="accent">No setup fees, no contracts.</span>
         </h1>
         <p className="page-hero-sub">
-          Let only tenancies are always free. Fully managed tenancies scale in blocks. Add more as your portfolio grows. Prices exclude VAT. Monthly rolling, cancel whenever you like.
+          Fully managed tenancies scale in blocks of 365. Add more as your portfolio grows. Prices exclude VAT. Monthly rolling, cancel whenever you like.
         </p>
       </section>
 
@@ -124,8 +111,8 @@ export default function PricingPage() {
       <section className="cta-lite">
         <div className="cta-lite-inner">
           <div>
-            <h3>Try the platform first.</h3>
-            <p className="cta-lite-sub">Free for let only portfolios, no credit card needed.</p>
+            <h3>See it on your tenancies.</h3>
+            <p className="cta-lite-sub">Book a demo and we&apos;ll walk your team through a live case.</p>
           </div>
           <div className="cta-lite-btns">
             <Link href="/book-demo" className="btn-primary">
