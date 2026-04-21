@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Renovo AI — LinkedIn company logo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 400px; height: 400px; overflow: hidden; }
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      color: #ffffff;
+      background: #05070f;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    .tile {
+      position: relative;
+      width: 400px;
+      height: 400px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 62%, rgba(16,185,129,0.18) 0%, rgba(16,185,129,0.04) 45%, transparent 70%),
+        linear-gradient(180deg, #0a0e1a 0%, #05070f 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 22px;
+    }
+
+    .mark {
+      width: 176px;
+      height: 176px;
+      display: block;
+      filter: drop-shadow(0 8px 28px rgba(16,185,129,0.25));
+    }
+
+    .wordmark {
+      font-size: 44px;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      color: #ffffff;
+      line-height: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="tile">
+    <svg class="mark" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect x="14" y="24" width="80" height="18" rx="9" fill="#ffffff" opacity="0.7" />
+      <rect x="24" y="55" width="80" height="18" rx="9" fill="#ffffff" opacity="0.92" />
+      <rect x="34" y="86" width="80" height="18" rx="9" fill="#10b981" />
+    </svg>
+    <div class="wordmark">Renovo AI</div>
+  </div>
+</body>
+</html>

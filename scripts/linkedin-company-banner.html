@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Renovo AI — LinkedIn company banner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700&family=Instrument+Serif:ital@1&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 1584px; height: 396px; overflow: hidden; }
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      color: #ffffff;
+      background: #05070f;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    .banner {
+      position: relative;
+      width: 1584px;
+      height: 396px;
+      overflow: hidden;
+      background:
+        radial-gradient(ellipse 900px 600px at 88% 50%, rgba(16,185,129,0.22) 0%, rgba(16,185,129,0.06) 45%, transparent 72%),
+        radial-gradient(ellipse 700px 500px at 55% 120%, rgba(16,185,129,0.10) 0%, transparent 60%),
+        linear-gradient(180deg, #080b15 0%, #0a0e1a 55%, #05070f 100%);
+    }
+
+    /* Emerald horizon line */
+    .banner::after {
+      content: "";
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent 0%, rgba(16,185,129,0.75) 50%, transparent 100%);
+    }
+
+    /* Main content — company page logo floats bottom-left (roughly x:60-260, y:220-380).
+       Anchor content to the right so the logo doesn't overlap copy. */
+    .content {
+      position: absolute;
+      left: 60px;
+      top: 0;
+      bottom: 0;
+      right: 60px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      z-index: 2;
+    }
+
+    .headline {
+      font-size: 88px;
+      font-weight: 700;
+      letter-spacing: -0.035em;
+      line-height: 0.98;
+      color: #ffffff;
+      margin-bottom: 20px;
+    }
+    .headline em {
+      font-family: 'Instrument Serif', Georgia, serif;
+      font-style: italic;
+      font-weight: 400;
+      color: #10b981;
+    }
+
+    .subhead {
+      font-size: 26px;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      line-height: 1.3;
+      color: #e2e8f0;
+    }
+
+    /* URL pinned top-right */
+    .url {
+      position: absolute;
+      top: 42px;
+      right: 60px;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: -0.005em;
+      color: rgba(255,255,255,0.88);
+      z-index: 3;
+    }
+    .url .arrow { color: #10b981; margin-right: 8px; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <div class="banner">
+    <div class="url"><span class="arrow">&rarr;</span>renovoai.co.uk</div>
+
+    <div class="content">
+      <h1 class="headline">End&nbsp;of&nbsp;tenancy, <em>resolved.</em></h1>
+      <p class="subhead">Checkouts, claims, and disputes in one workflow.</p>
+    </div>
+  </div>
+</body>
+</html>

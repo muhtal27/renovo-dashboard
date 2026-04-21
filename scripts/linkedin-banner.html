@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Renovo AI — LinkedIn banner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@1&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 1584px; height: 396px; overflow: hidden; }
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      color: #ffffff;
+      background: #05070f;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    .banner {
+      position: relative;
+      width: 1584px;
+      height: 396px;
+      overflow: hidden;
+      background:
+        radial-gradient(ellipse 900px 600px at 88% 50%, rgba(16,185,129,0.22) 0%, rgba(16,185,129,0.06) 45%, transparent 72%),
+        radial-gradient(ellipse 700px 500px at 55% 120%, rgba(16,185,129,0.10) 0%, transparent 60%),
+        linear-gradient(180deg, #080b15 0%, #0a0e1a 55%, #05070f 100%);
+    }
+
+    /* Emerald horizon line — thicker so it survives JPEG compression */
+    .banner::after {
+      content: "";
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent 0%, rgba(16,185,129,0.75) 50%, transparent 100%);
+    }
+
+    /* Top-left brand lockup — sits above the profile-photo safe zone */
+    .brand {
+      position: absolute;
+      top: 38px;
+      left: 60px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      z-index: 3;
+    }
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      display: block;
+    }
+    .brand-name {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+      color: #ffffff;
+    }
+
+    /* Main content — anchored right of the profile-photo safe zone */
+    .content {
+      position: absolute;
+      left: 420px;
+      top: 0;
+      bottom: 0;
+      right: 60px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      z-index: 2;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 16px;
+      border: 1.5px solid rgba(16,185,129,0.55);
+      background: rgba(16,185,129,0.12);
+      border-radius: 999px;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #6ee7b7;
+      width: fit-content;
+      margin-bottom: 22px;
+    }
+    .eyebrow .pulse {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 0 4px rgba(16,185,129,0.28);
+    }
+
+    .headline {
+      font-size: 78px;
+      font-weight: 700;
+      letter-spacing: -0.035em;
+      line-height: 0.98;
+      color: #ffffff;
+      margin-bottom: 20px;
+    }
+    .headline em {
+      font-family: 'Instrument Serif', Georgia, serif;
+      font-style: italic;
+      font-weight: 400;
+      color: #10b981;
+    }
+
+    .subhead {
+      font-size: 24px;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      line-height: 1.35;
+      color: #e2e8f0;
+      max-width: 940px;
+    }
+
+    /* URL pinned top-right — larger so it survives re-encode */
+    .url {
+      position: absolute;
+      top: 42px;
+      right: 60px;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: -0.005em;
+      color: rgba(255,255,255,0.88);
+      z-index: 3;
+    }
+    .url .arrow { color: #10b981; margin-right: 8px; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <div class="banner">
+    <!-- Brand lockup (mark + wordmark only — tiny labels removed for LinkedIn JPEG survival) -->
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect x="14" y="24" width="80" height="18" rx="9" fill="#ffffff" opacity="0.65" />
+        <rect x="24" y="55" width="80" height="18" rx="9" fill="#ffffff" opacity="0.9" />
+        <rect x="34" y="86" width="80" height="18" rx="9" fill="#10b981" />
+      </svg>
+      <span class="brand-name">Renovo AI</span>
+    </div>
+
+    <!-- URL top-right -->
+    <div class="url"><span class="arrow">&rarr;</span>renovoai.co.uk</div>
+
+    <!-- Main content -->
+    <div class="content">
+      <div class="eyebrow">
+        <span class="pulse"></span>
+        Built for UK letting agencies
+      </div>
+
+      <h1 class="headline">End&nbsp;of&nbsp;tenancy, <em>resolved.</em></h1>
+
+      <p class="subhead">
+        Checkouts, claims, and disputes in one workflow.
+      </p>
+    </div>
+
+  </div>
+</body>
+</html>

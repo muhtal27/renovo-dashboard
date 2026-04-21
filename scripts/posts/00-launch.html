@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Introducing Renovo AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@1&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    /* Override base: richer atmosphere for launch post */
+    .post {
+      background:
+        radial-gradient(ellipse 1100px 700px at 82% 28%, rgba(16,185,129,0.28) 0%, rgba(16,185,129,0.06) 50%, transparent 75%),
+        radial-gradient(ellipse 800px 500px at 12% 95%, rgba(16,185,129,0.14) 0%, transparent 60%),
+        radial-gradient(ellipse 500px 350px at 60% 65%, rgba(14,165,233,0.06) 0%, transparent 70%),
+        linear-gradient(180deg, #050810 0%, #0a0e1a 50%, #04060c 100%);
+    }
+
+    /* Fine horizontal scan line mid-composition for editorial feel */
+    .scanline {
+      position: absolute;
+      left: 80px;
+      right: 80px;
+      top: 44%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent 0%, rgba(16,185,129,0.55) 12%, rgba(255,255,255,0.22) 50%, rgba(16,185,129,0.55) 88%, transparent 100%);
+      z-index: 1;
+    }
+
+    .eyebrow {
+      margin-bottom: 36px;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .intro {
+      font-size: 38px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      color: rgba(226,232,240,0.75);
+      margin-bottom: 14px;
+      text-transform: lowercase;
+      font-family: 'Instrument Serif', Georgia, serif;
+      font-style: italic;
+    }
+
+    .headline {
+      font-size: 200px;
+      font-weight: 700;
+      letter-spacing: -0.045em;
+      line-height: 0.9;
+      color: #ffffff;
+      margin-bottom: 34px;
+    }
+    .headline em {
+      font-family: 'Instrument Serif', Georgia, serif;
+      font-style: italic;
+      font-weight: 400;
+      color: #10b981;
+      letter-spacing: -0.02em;
+    }
+
+    .tagline {
+      font-size: 44px;
+      font-weight: 600;
+      letter-spacing: -0.025em;
+      color: #ffffff;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .tagline em {
+      font-family: 'Instrument Serif', Georgia, serif;
+      font-style: italic;
+      font-weight: 400;
+      color: #10b981;
+    }
+
+    .lead {
+      margin-top: 28px;
+      font-size: 21px;
+      font-weight: 500;
+      letter-spacing: -0.005em;
+      color: rgba(226,232,240,0.72);
+      max-width: 860px;
+      line-height: 1.45;
+    }
+
+    /* Proof grid */
+    .proof {
+      position: absolute;
+      left: 64px;
+      right: 64px;
+      bottom: 130px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      z-index: 3;
+    }
+    .proof-card {
+      padding: 22px 26px;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.03);
+      backdrop-filter: blur(6px);
+    }
+    .proof-val {
+      font-size: 44px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+      color: #10b981;
+      margin-bottom: 10px;
+    }
+    .proof-val em {
+      font-family: 'Instrument Serif', Georgia, serif;
+      font-style: italic;
+      font-weight: 400;
+    }
+    .proof-label {
+      font-size: 15px;
+      font-weight: 500;
+      letter-spacing: -0.005em;
+      color: rgba(226,232,240,0.8);
+      line-height: 1.3;
+    }
+
+    /* Custom footer to dominate with the URL */
+    .post-foot-launch {
+      position: absolute;
+      left: 64px;
+      right: 64px;
+      bottom: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 3;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.55);
+    }
+    .post-foot-launch .url-strong {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      text-transform: none;
+      color: #ffffff;
+    }
+    .post-foot-launch .url-strong .arrow {
+      color: #10b981;
+      margin-right: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="post">
+    <div class="scanline"></div>
+
+    <div class="post-head">
+      <div class="brand">
+        <svg class="brand-mark" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="14" y="24" width="80" height="18" rx="9" fill="#ffffff" opacity="0.65" />
+          <rect x="24" y="55" width="80" height="18" rx="9" fill="#ffffff" opacity="0.9" />
+          <rect x="34" y="86" width="80" height="18" rx="9" fill="#10b981" />
+        </svg>
+        <span class="brand-name">Renovo AI</span>
+      </div>
+      <div class="eyebrow" style="margin-bottom:0;">
+        <span class="pulse"></span>
+        Day one &middot; 2026
+      </div>
+    </div>
+
+    <div class="post-body" style="padding-top: 4px;">
+      <div class="intro">introducing</div>
+      <h1 class="headline"><em>Renovo AI.</em></h1>
+      <p class="tagline">End of tenancy, <em>resolved.</em></p>
+      <p class="lead">Software for UK letting agencies. Every tenancy checkout, deposit claim and dispute &mdash; handled in one place.</p>
+    </div>
+
+    <div class="proof">
+      <div class="proof-card">
+        <div class="proof-val">8 <em>days</em></div>
+        <div class="proof-label">Checkout to released deposit.<br/>Industry is 4&ndash;6 weeks.</div>
+      </div>
+      <div class="proof-card">
+        <div class="proof-val">91<em>%</em></div>
+        <div class="proof-label">Award rate at scheme adjudication.<br/>Evidence, reasoning, precedent.</div>
+      </div>
+      <div class="proof-card">
+        <div class="proof-val">Minutes,<br/><em>not hours.</em></div>
+        <div class="proof-label">Per case, per PM.<br/>Operational leverage at scale.</div>
+      </div>
+    </div>
+
+    <div class="post-foot-launch">
+      <span class="url-strong"><span class="arrow">&rarr;</span>renovoai.co.uk</span>
+      <span>For letting directors, CEOs &amp; senior property managers</span>
+    </div>
+  </div>
+</body>
+</html>
