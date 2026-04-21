@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 720" role="img" aria-label="Ayesha Ali Khan Makeup Studio">
+  <defs>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#d9a66a"/>
+      <stop offset="0.45" stop-color="#f3d7a5"/>
+      <stop offset="0.7" stop-color="#b98447"/>
+      <stop offset="1" stop-color="#8a5a2b"/>
+    </linearGradient>
+    <linearGradient id="goldSoft" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e8c488"/>
+      <stop offset="1" stop-color="#a8763d"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="600" height="720" fill="#0d0a08"/>
+
+  <!-- Outer thin circle -->
+  <circle cx="300" cy="260" r="186" fill="none" stroke="url(#gold)" stroke-width="1.2"/>
+  <!-- Inner thicker circle -->
+  <circle cx="300" cy="260" r="170" fill="none" stroke="url(#gold)" stroke-width="2.6"/>
+
+  <!-- Top laurel dot ornament -->
+  <g fill="url(#gold)">
+    <circle cx="300" cy="74" r="3.2"/>
+    <circle cx="300" cy="446" r="3.2"/>
+  </g>
+
+  <!-- Decorative arcs flanking the monogram -->
+  <g fill="none" stroke="url(#gold)" stroke-width="1" stroke-linecap="round">
+    <path d="M 140 260 q -20 -14 -42 0"/>
+    <path d="M 140 260 q -20 14 -42 0"/>
+    <path d="M 460 260 q 20 -14 42 0"/>
+    <path d="M 460 260 q 20 14 42 0"/>
+  </g>
+
+  <!-- Monogram: interlocked A · A · K -->
+  <g font-family="Didot, 'Bodoni MT', 'Playfair Display', 'Times New Roman', serif"
+     font-weight="300"
+     fill="url(#goldSoft)"
+     text-anchor="middle">
+    <text x="230" y="330" font-size="210" letter-spacing="-14">A</text>
+    <text x="300" y="330" font-size="240" letter-spacing="-14">A</text>
+    <text x="378" y="330" font-size="210" letter-spacing="-14">K</text>
+  </g>
+
+  <!-- Horizontal hairline with diamond -->
+  <g stroke="url(#gold)" stroke-width="1" fill="url(#gold)">
+    <line x1="150" y1="498" x2="285" y2="498"/>
+    <line x1="315" y1="498" x2="450" y2="498"/>
+    <path d="M 300 491 l 8 7 -8 7 -8 -7 z"/>
+  </g>
+
+  <!-- Name -->
+  <text x="300" y="558"
+        font-family="Didot, 'Bodoni MT', 'Playfair Display', 'Times New Roman', serif"
+        font-weight="400"
+        font-size="54"
+        letter-spacing="8"
+        fill="#f7ecd7"
+        text-anchor="middle">
+    AYESHA ALI KHAN
+  </text>
+
+  <!-- Tagline -->
+  <text x="300" y="605"
+        font-family="'Montserrat', 'Helvetica Neue', Arial, sans-serif"
+        font-weight="300"
+        font-size="15"
+        letter-spacing="14"
+        fill="url(#goldSoft)"
+        text-anchor="middle">
+    M A K E U P   S T U D I O
+  </text>
+
+  <!-- Accent line -->
+  <text x="300" y="648"
+        font-family="'Montserrat', 'Helvetica Neue', Arial, sans-serif"
+        font-weight="500"
+        font-size="10"
+        letter-spacing="8"
+        fill="#b98447"
+        text-anchor="middle">
+    — ELITE CLASS ATELIER —
+  </text>
+</svg>

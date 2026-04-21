@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Ayesha Ali Khan — Brand Identity</title>
+<style>
+  :root {
+    --ink: #0d0a08;
+    --cream: #f6efe3;
+    --gold: #b98447;
+    --gold-soft: #e8c488;
+    --line: rgba(185,132,71,.25);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--cream); color: var(--ink); }
+  body {
+    font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
+    font-weight: 300;
+    letter-spacing: .04em;
+  }
+  header {
+    padding: 72px 48px 40px;
+    text-align: center;
+    border-bottom: 1px solid var(--line);
+  }
+  h1 {
+    font-family: Didot, 'Bodoni MT', 'Playfair Display', 'Times New Roman', serif;
+    font-weight: 400;
+    font-size: 42px;
+    letter-spacing: .22em;
+    margin: 0 0 12px;
+  }
+  header p {
+    margin: 0;
+    font-size: 12px;
+    letter-spacing: .5em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 48px 24px 96px;
+    display: grid;
+    gap: 40px;
+  }
+  section {
+    background: #fff;
+    border: 1px solid var(--line);
+    padding: 32px;
+    border-radius: 2px;
+    box-shadow: 0 1px 0 rgba(0,0,0,.02);
+  }
+  section h2 {
+    font-family: Didot, 'Bodoni MT', serif;
+    font-weight: 400;
+    font-size: 20px;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    margin: 0 0 24px;
+    color: #3a2a1a;
+  }
+  .grid {
+    display: grid;
+    gap: 24px;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+  .tile {
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .tile .label {
+    padding: 12px 16px;
+    font-size: 10px;
+    letter-spacing: .3em;
+    text-transform: uppercase;
+    color: #6b5237;
+    border-top: 1px solid var(--line);
+    background: #fbf6ec;
+  }
+  .tile img { display: block; width: 100%; height: auto; }
+  .swatches {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
+  .chip {
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    overflow: hidden;
+    font-size: 11px;
+  }
+  .chip .block { height: 96px; }
+  .chip .meta { padding: 10px 12px; display: flex; justify-content: space-between; gap: 8px; }
+  .chip code { font-family: ui-monospace, Menlo, monospace; font-size: 10px; color: #5a4228; }
+  .typeset { display: grid; gap: 18px; }
+  .typeset .row { display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap; }
+  .typeset .tag {
+    font-size: 10px; letter-spacing: .3em; text-transform: uppercase;
+    color: var(--gold); min-width: 120px;
+  }
+  .serif { font-family: Didot, 'Bodoni MT', 'Playfair Display', 'Times New Roman', serif; }
+  .sans { font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif; }
+  footer {
+    text-align: center; padding: 32px;
+    font-size: 10px; letter-spacing: .4em; color: var(--gold);
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>AYESHA ALI KHAN</h1>
+    <p>Makeup Studio · Elite Class Atelier</p>
+  </header>
+
+  <main>
+    <section>
+      <h2>Primary Lockup</h2>
+      <div class="grid">
+        <div class="tile">
+          <img src="logo-primary.svg" alt="Primary logo on ink background"/>
+          <div class="label">Primary · Ink</div>
+        </div>
+        <div class="tile">
+          <img src="logo-light.svg" alt="Primary logo on cream background"/>
+          <div class="label">Primary · Cream</div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Monogram & Horizontal</h2>
+      <div class="grid">
+        <div class="tile">
+          <img src="logo-monogram.svg" alt="AAK monogram"/>
+          <div class="label">Monogram · Social Avatar</div>
+        </div>
+        <div class="tile" style="grid-column: span 2; min-width: 0;">
+          <img src="logo-horizontal.svg" alt="Horizontal lockup"/>
+          <div class="label">Horizontal · Signage & Header</div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Palette</h2>
+      <div class="swatches">
+        <div class="chip">
+          <div class="block" style="background:#0d0a08"></div>
+          <div class="meta"><span>Obsidian Ink</span><code>#0D0A08</code></div>
+        </div>
+        <div class="chip">
+          <div class="block" style="background:linear-gradient(135deg,#d9a66a,#f3d7a5 45%,#b98447 70%,#8a5a2b)"></div>
+          <div class="meta"><span>Atelier Gold</span><code>gradient</code></div>
+        </div>
+        <div class="chip">
+          <div class="block" style="background:#b98447"></div>
+          <div class="meta"><span>Antique Brass</span><code>#B98447</code></div>
+        </div>
+        <div class="chip">
+          <div class="block" style="background:#f6efe3"></div>
+          <div class="meta"><span>Champagne Cream</span><code>#F6EFE3</code></div>
+        </div>
+        <div class="chip">
+          <div class="block" style="background:#f7ecd7"></div>
+          <div class="meta"><span>Pearl</span><code>#F7ECD7</code></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Typography</h2>
+      <div class="typeset">
+        <div class="row">
+          <span class="tag">Display</span>
+          <span class="serif" style="font-size:44px;letter-spacing:.18em;">AYESHA ALI KHAN</span>
+        </div>
+        <div class="row">
+          <span class="tag">Serif</span>
+          <span class="serif" style="font-size:18px;">Didot / Bodoni / Playfair Display</span>
+        </div>
+        <div class="row">
+          <span class="tag">Tagline</span>
+          <span class="sans" style="font-size:14px;letter-spacing:.5em;text-transform:uppercase;">Makeup Studio</span>
+        </div>
+        <div class="row">
+          <span class="tag">Sans</span>
+          <span class="sans" style="font-size:16px;">Montserrat · Light / Regular / Medium</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>© Ayesha Ali Khan · Brand Identity Concept</footer>
+</body>
+</html>

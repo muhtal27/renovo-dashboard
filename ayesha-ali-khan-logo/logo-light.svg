@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 720" role="img" aria-label="Ayesha Ali Khan Makeup Studio — light variant">
+  <defs>
+    <linearGradient id="gl" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#c28a4a"/>
+      <stop offset="0.5" stop-color="#8a5a2b"/>
+      <stop offset="1" stop-color="#5a3a1c"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="600" height="720" fill="#f6efe3"/>
+
+  <circle cx="300" cy="260" r="186" fill="none" stroke="url(#gl)" stroke-width="1.2"/>
+  <circle cx="300" cy="260" r="170" fill="none" stroke="url(#gl)" stroke-width="2.6"/>
+
+  <g fill="url(#gl)">
+    <circle cx="300" cy="74" r="3.2"/>
+    <circle cx="300" cy="446" r="3.2"/>
+  </g>
+
+  <g fill="none" stroke="url(#gl)" stroke-width="1" stroke-linecap="round">
+    <path d="M 140 260 q -20 -14 -42 0"/>
+    <path d="M 140 260 q -20 14 -42 0"/>
+    <path d="M 460 260 q 20 -14 42 0"/>
+    <path d="M 460 260 q 20 14 42 0"/>
+  </g>
+
+  <g font-family="Didot, 'Bodoni MT', 'Playfair Display', 'Times New Roman', serif"
+     font-weight="300"
+     fill="url(#gl)"
+     text-anchor="middle">
+    <text x="230" y="330" font-size="210" letter-spacing="-14">A</text>
+    <text x="300" y="330" font-size="240" letter-spacing="-14">A</text>
+    <text x="378" y="330" font-size="210" letter-spacing="-14">K</text>
+  </g>
+
+  <g stroke="url(#gl)" stroke-width="1" fill="url(#gl)">
+    <line x1="150" y1="498" x2="285" y2="498"/>
+    <line x1="315" y1="498" x2="450" y2="498"/>
+    <path d="M 300 491 l 8 7 -8 7 -8 -7 z"/>
+  </g>
+
+  <text x="300" y="558"
+        font-family="Didot, 'Bodoni MT', 'Playfair Display', 'Times New Roman', serif"
+        font-weight="400"
+        font-size="54"
+        letter-spacing="8"
+        fill="#1a1310"
+        text-anchor="middle">
+    AYESHA ALI KHAN
+  </text>
+
+  <text x="300" y="605"
+        font-family="'Montserrat', 'Helvetica Neue', Arial, sans-serif"
+        font-weight="300"
+        font-size="15"
+        letter-spacing="14"
+        fill="url(#gl)"
+        text-anchor="middle">
+    M A K E U P   S T U D I O
+  </text>
+
+  <text x="300" y="648"
+        font-family="'Montserrat', 'Helvetica Neue', Arial, sans-serif"
+        font-weight="500"
+        font-size="10"
+        letter-spacing="8"
+        fill="#8a5a2b"
+        text-anchor="middle">
+    — ELITE CLASS ATELIER —
+  </text>
+</svg>
