@@ -19,40 +19,40 @@ const TYPE_LABEL: Record<ChangeType, string> = {
   removed: 'Removed',
 }
 
+// Mirrors the public marketing changelog at /changelog. Both pages must agree
+// on version numbers and dates — a single source of truth for what shipped.
 const CHANGELOG = [
   {
-    version: '2.4.0',
-    date: '12 Apr 2026',
-    title: 'AI-Powered Analysis Engine',
+    version: '1.28',
+    date: '15–17 Apr 2026',
+    title: 'Workspace rewrite, CRM OAuth, demo expansion',
     changes: [
-      { type: 'added' as ChangeType, text: 'AI analysis engine for automatic issue detection and severity assessment' },
-      { type: 'added' as ChangeType, text: 'Drag-and-drop kanban board for case pipeline management' },
-      { type: 'improved' as ChangeType, text: 'Dashboard KPI cards now show sparkline trends and animated counters' },
-      { type: 'improved' as ChangeType, text: 'Command palette (Cmd+K) with fuzzy search across all pages' },
-      { type: 'fixed' as ChangeType, text: 'Notification centre badge count not updating in real-time' },
+      { type: 'added' as ChangeType, text: 'v1.28.3 — Interactive demo expanded with Intelligence, Adjudication Bundle, and workspace rewrites (17 Apr)' },
+      { type: 'added' as ChangeType, text: 'v1.28.2 — CRM launch page connects straight through to the OAuth flow (17 Apr)' },
+      { type: 'fixed' as ChangeType, text: 'v1.28.1 — Restored missing public assets (logo, icon, open graph image) (16 Apr)' },
+      { type: 'added' as ChangeType, text: 'v1.28.0 — Case route wired to the new seven-step end of tenancy workspace (15 Apr)' },
     ],
   },
   {
-    version: '2.3.1',
-    date: '28 Mar 2026',
-    title: 'Communication Centre Rebuild',
+    version: '1.27',
+    date: '14–15 Apr 2026',
+    title: 'Workspace persistence and Communications Hub cleanup',
     changes: [
-      { type: 'added' as ChangeType, text: 'Unified Communication Centre with inbox, conversations and templates' },
-      { type: 'added' as ChangeType, text: 'Tenant and landlord portal messaging channels' },
-      { type: 'improved' as ChangeType, text: 'Message threading with case reference linking' },
-      { type: 'fixed' as ChangeType, text: 'Email template variables not substituting correctly' },
+      { type: 'added' as ChangeType, text: 'v1.27.3 — Workspace persistence, evidence upload, and audit logging wired to Supabase (15 Apr)' },
+      { type: 'removed' as ChangeType, text: 'v1.27.2 — Removed tenant and landlord portal tabs from the communications hub (14 Apr)' },
+      { type: 'improved' as ChangeType, text: 'v1.27.1 — Communications page visual alignment and removal of legacy patterns (14 Apr)' },
+      { type: 'added' as ChangeType, text: 'v1.27.0 — PostHog server module and instrumentation client (14 Apr)' },
     ],
   },
   {
-    version: '2.3.0',
-    date: '15 Mar 2026',
-    title: 'Operations Command Centre',
+    version: '1.22–1.26',
+    date: 'Earlier April 2026',
+    title: 'UI modernisation sweep',
     changes: [
-      { type: 'added' as ChangeType, text: 'Single-flow operations dashboard with real-time pipeline visualisation' },
-      { type: 'added' as ChangeType, text: 'Team workload analytics and capacity planning charts' },
-      { type: 'improved' as ChangeType, text: 'Report export now includes CSV and PDF formats' },
-      { type: 'fixed' as ChangeType, text: 'Calendar import error in ending-soon tenancy table' },
-      { type: 'removed' as ChangeType, text: 'Legacy dual-panel dashboard layout' },
+      { type: 'improved' as ChangeType, text: 'v1.26.x — Dashboard parity updates and animated statistics' },
+      { type: 'improved' as ChangeType, text: 'v1.25.x — Comprehensive HTML design overhaul across all operator pages' },
+      { type: 'improved' as ChangeType, text: 'v1.24.x — Design system alignment and chart improvements' },
+      { type: 'improved' as ChangeType, text: 'v1.22.x — Communications Centre rebuild, major UI modernisation' },
     ],
   },
 ]
