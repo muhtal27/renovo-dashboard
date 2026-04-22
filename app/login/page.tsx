@@ -18,9 +18,10 @@ function BrandMark() {
   return (
     <span className="nav-logo" aria-hidden="true">
       <svg viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="14" y="24" width="80" height="18" rx="9" fill="#ffffff" opacity="0.55" />
-        <rect x="24" y="55" width="80" height="18" rx="9" fill="#ffffff" opacity="0.8" />
+        <rect x="14" y="24" width="80" height="18" rx="9" fill="#ffffff" />
+        <rect x="24" y="55" width="80" height="18" rx="9" fill="#ffffff" />
         <rect x="34" y="86" width="80" height="18" rx="9" fill="#10b981" />
+        <rect x="34.5" y="86.5" width="79" height="2" rx="1" fill="#ffffff" opacity="0.35" />
       </svg>
     </span>
   )
