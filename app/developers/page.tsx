@@ -55,7 +55,8 @@ export default function DevelopersPage() {
           <span className="accent">A sandbox for every build.</span>
         </h1>
         <p className="page-hero-sub">
-          Production on <span className="mono" style={monoEm}>api.renovoai.co.uk/v1</span>. Sandbox on <span className="mono" style={monoEm}>api.sandbox.renovoai.co.uk/v1</span>. OAuth 2.0 Client Credentials in production using short lived JWTs. Long lived keys in sandbox.
+          Production on <span className="mono" style={monoEm}>api.renovoai.co.uk/v1</span>. Sandbox on{' '}
+          <span className="mono" style={monoEm}>api.sandbox.renovoai.co.uk/v1</span>. OAuth 2.0 Client Credentials in production using short lived JWTs. Long lived keys in sandbox.
         </p>
       </section>
 
@@ -100,22 +101,47 @@ export default function DevelopersPage() {
             </div>
           </div>
 
-          <div className="code-card">
+          {/* Code card with language tabs + copy. Interactive behaviour provided
+              by MarketingClientEffects via data-code-card / data-lang-pane / data-code-copy. */}
+          <div className="code-card" data-code-card>
             <div className="code-chrome">
               <div className="code-dots">
                 <span />
                 <span />
                 <span />
               </div>
-              <span className="code-lang mono">POST /v1/inspections</span>
+              <div className="code-chrome-r">
+                <div className="code-tabs" role="tablist" aria-label="Language">
+                  <button type="button" className="code-tab active" data-lang="curl" role="tab">
+                    curl
+                  </button>
+                  <button type="button" className="code-tab" data-lang="node" role="tab">
+                    node
+                  </button>
+                  <button type="button" className="code-tab" data-lang="python" role="tab">
+                    python
+                  </button>
+                  <button type="button" className="code-tab" data-lang="ruby" role="tab">
+                    ruby
+                  </button>
+                </div>
+                <button type="button" className="code-copy" data-code-copy aria-label="Copy code">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                  </svg>
+                  <span className="code-copy-label">Copy</span>
+                </button>
+              </div>
             </div>
-            <pre className="code-body">
+
+            <pre className="code-body code-body-pane active" data-lang-pane="curl">
               <span className="code-comment"># Push a checkout from your inventory system</span>
-              {`\n`}curl <span className="code-str">&quot;https://api.renovoai.co.uk/v1/inspections&quot;</span> \\
-              {`\n`}  -H <span className="code-str">&quot;Authorization: Bearer $TOKEN&quot;</span> \\
-              {`\n`}  -H <span className="code-str">&quot;Idempotency-Key: chk_01HSV3...&quot;</span> \\
-              {`\n`}  -H <span className="code-str">&quot;Content-Type: application/json&quot;</span> \\
-              {`\n`}  -d <span className="code-str">{"'{"}</span>
+              {`\ncurl `}<span className="code-str">&quot;https://api.renovoai.co.uk/v1/inspections&quot;</span>{` \\
+  -H `}<span className="code-str">&quot;Authorization: Bearer $TOKEN&quot;</span>{` \\
+  -H `}<span className="code-str">&quot;Idempotency-Key: chk_01HSV3...&quot;</span>{` \\
+  -H `}<span className="code-str">&quot;Content-Type: application/json&quot;</span>{` \\
+  -d `}<span className="code-str">{"'{"}</span>
               {`\n    `}<span className="code-key">&quot;type&quot;</span>: <span className="code-str">&quot;checkout&quot;</span>,
               {`\n    `}<span className="code-key">&quot;tenancy_ref&quot;</span>: <span className="code-str">&quot;RPT-448291&quot;</span>,
               {`\n    `}<span className="code-key">&quot;property&quot;</span>: {'{'}
@@ -128,8 +154,63 @@ export default function DevelopersPage() {
               {`\n    `}<span className="code-key">&quot;photos&quot;</span>: [ ... ]
               {`\n  `}<span className="code-str">{"}'"}</span>
               {`\n\n`}<span className="code-comment"># → 202 Accepted</span>
-              {`\n`}<span className="code-comment"># {"{"} &quot;inspection_id&quot;: &quot;ins_01HSV3...&quot;,</span>
-              {`\n`}<span className="code-comment">#   &quot;case_url&quot;: &quot;https://app.renovoai.co.uk/c/CHK-2026-482&quot; {"}"}</span>
+              {`\n`}<span className="code-comment"># {'{'} &quot;inspection_id&quot;: &quot;ins_01HSV3...&quot;,</span>
+              {`\n`}<span className="code-comment">#   &quot;case_url&quot;: &quot;https://app.renovoai.co.uk/c/CHK-2026-482&quot; {'}'}</span>
+            </pre>
+
+            <pre className="code-body code-body-pane" data-lang-pane="node">
+              <span className="code-comment">{`// Push a checkout from your inventory system`}</span>
+              {`\n`}<span className="code-key">import</span> Renovo <span className="code-key">from</span> <span className="code-str">&apos;@renovo/node&apos;</span>
+              {`\n\n`}<span className="code-key">const</span> renovo = <span className="code-key">new</span> Renovo({`{ apiKey: process.env.RENOVO_API_KEY }`})
+              {`\n\n`}<span className="code-key">const</span> inspection = <span className="code-key">await</span> renovo.inspections.create({`{`}
+              {`\n  type: `}<span className="code-str">&apos;checkout&apos;</span>,
+              {`\n  tenancy_ref: `}<span className="code-str">&apos;RPT-448291&apos;</span>,
+              {`\n  property: { address_line_1: `}<span className="code-str">&apos;42 Leith Walk&apos;</span>, postcode: <span className="code-str">&apos;EH6 5PY&apos;</span> {`},`}
+              {`\n  deposit_pence: `}<span className="code-num">110000</span>,
+              {`\n  scheme: `}<span className="code-str">&apos;sds&apos;</span>,
+              {`\n  rooms: [ `}<span className="code-comment">{`/* ... */`}</span>{` ],`}
+              {`\n  photos: [ `}<span className="code-comment">{`/* ... */`}</span>{` ],`}
+              {`\n}, { idempotencyKey: `}<span className="code-str">&apos;chk_01HSV3...&apos;</span> {`})`}
+              {`\n\n`}<span className="code-comment">{`// → { inspection_id: 'ins_01HSV3...',`}</span>
+              {`\n`}<span className="code-comment">{`//     case_url: 'https://app.renovoai.co.uk/c/CHK-2026-482' }`}</span>
+            </pre>
+
+            <pre className="code-body code-body-pane" data-lang-pane="python">
+              <span className="code-comment"># Push a checkout from your inventory system</span>
+              {`\n`}<span className="code-key">from</span> renovo <span className="code-key">import</span> Renovo
+              {`\n\nrenovo = Renovo(api_key=os.environ[`}<span className="code-str">&quot;RENOVO_API_KEY&quot;</span>{`])`}
+              {`\n\ninspection = renovo.inspections.create(`}
+              {`\n    type=`}<span className="code-str">&quot;checkout&quot;</span>,
+              {`\n    tenancy_ref=`}<span className="code-str">&quot;RPT-448291&quot;</span>,
+              {`\n    property={`}<span className="code-str">&quot;address_line_1&quot;</span>: <span className="code-str">&quot;42 Leith Walk&quot;</span>, <span className="code-str">&quot;postcode&quot;</span>: <span className="code-str">&quot;EH6 5PY&quot;</span>{`},`}
+              {`\n    deposit_pence=`}<span className="code-num">110000</span>,
+              {`\n    scheme=`}<span className="code-str">&quot;sds&quot;</span>,
+              {`\n    rooms=[ `}<span className="code-comment"># ...</span>{` ],`}
+              {`\n    photos=[ `}<span className="code-comment"># ...</span>{` ],`}
+              {`\n    idempotency_key=`}<span className="code-str">&quot;chk_01HSV3...&quot;</span>,
+              {`\n)`}
+              {`\n\n`}<span className="code-comment"># → inspection.id       = &apos;ins_01HSV3...&apos;</span>
+              {`\n`}<span className="code-comment"># → inspection.case_url = &apos;https://app.renovoai.co.uk/c/CHK-2026-482&apos;</span>
+            </pre>
+
+            <pre className="code-body code-body-pane" data-lang-pane="ruby">
+              <span className="code-comment"># Push a checkout from your inventory system</span>
+              {`\n`}<span className="code-key">require</span> <span className="code-str">&apos;renovo&apos;</span>
+              {`\n\nRenovo.api_key = ENV[`}<span className="code-str">&apos;RENOVO_API_KEY&apos;</span>{`]`}
+              {`\n\ninspection = Renovo::Inspection.create(`}
+              {`\n  {`}
+              {`\n    type: `}<span className="code-str">&apos;checkout&apos;</span>,
+              {`\n    tenancy_ref: `}<span className="code-str">&apos;RPT-448291&apos;</span>,
+              {`\n    property: { address_line_1: `}<span className="code-str">&apos;42 Leith Walk&apos;</span>, postcode: <span className="code-str">&apos;EH6 5PY&apos;</span> {`},`}
+              {`\n    deposit_pence: `}<span className="code-num">110000</span>,
+              {`\n    scheme: `}<span className="code-str">&apos;sds&apos;</span>,
+              {`\n    rooms: [ `}<span className="code-comment"># ...</span>{` ],`}
+              {`\n    photos: [ `}<span className="code-comment"># ...</span>{` ]`}
+              {`\n  },`}
+              {`\n  idempotency_key: `}<span className="code-str">&apos;chk_01HSV3...&apos;</span>
+              {`\n)`}
+              {`\n\n`}<span className="code-comment"># → inspection.id       # &apos;ins_01HSV3...&apos;</span>
+              {`\n`}<span className="code-comment"># → inspection.case_url # &apos;https://app.renovoai.co.uk/c/CHK-2026-482&apos;</span>
             </pre>
           </div>
         </div>

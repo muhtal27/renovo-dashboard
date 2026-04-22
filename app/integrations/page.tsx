@@ -22,7 +22,7 @@ const integrations: Integration[] = [
   { logo: 'mD', name: 'mydeposits', kind: 'Scheme · UK-wide', desc: 'Supports both Scotland and England & Wales schemes under one connector.', status: 'live' },
   { logo: 'DPS', name: 'Deposit Protection Service', kind: 'Scheme · England & Wales', desc: 'Custodial and insured flows. Bundles pushed directly into the DPS case record.', status: 'live' },
   { logo: 'TDS', name: 'Tenancy Deposit Scheme', kind: 'Scheme · England & Wales', desc: 'Structured evidence format generated natively. No reformatting of the bundle needed.', status: 'live' },
-  { logo: 'Re', name: 'Reapit AppMarket', kind: 'CRM · OAuth2', desc: 'Two-way sync via AppMarket: tenancies, landlords, properties, documents.', status: 'live' },
+  { logo: 'St', name: 'Street.co.uk', kind: 'CRM · OAuth2', desc: 'Two-way sync: tenancies, landlords, properties, documents.', status: 'live' },
   { logo: 'Al', name: 'Alto by Zoopla', kind: 'CRM · Partner API', desc: 'Tenancy pull on schedule; outcomes written back as activity entries.', status: 'live' },
   { logo: 'Jx', name: 'Jupix', kind: 'CRM · REST', desc: 'Tenancy & property sync on tenancy-end. Deduction letters attach back.', status: 'live' },
   { logo: 'MR', name: 'MRI (Qube)', kind: 'PropertyTech', desc: 'Daily bulk sync of tenancy and property data. Outcomes pushed back as JSON.', status: 'live' },
@@ -91,7 +91,7 @@ export default function IntegrationsPage() {
           <div>
             <h3>Run through a live sync on one of your tenancies.</h3>
             <p className="cta-lite-sub">
-              We&apos;ll connect a sandbox Reapit or Alto test environment and walk through the full round-trip.
+              We&apos;ll connect a sandbox Alto, Jupix, or Street.co.uk test environment and walk through the full round-trip.
             </p>
           </div>
           <div className="cta-lite-btns">

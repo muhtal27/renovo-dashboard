@@ -393,7 +393,7 @@ export default function BookDemoClient() {
                   <textarea
                     value={form.note}
                     onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))}
-                    placeholder="For example, how Renovo handles a disputed carpet stain, or how it syncs back to Reapit after a deduction letter goes out..."
+                    placeholder="For example, how Renovo handles a disputed carpet stain, or how it syncs back to your CRM after a deduction letter goes out..."
                   />
                 </div>
 

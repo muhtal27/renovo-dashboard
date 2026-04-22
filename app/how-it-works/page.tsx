@@ -13,7 +13,7 @@ const sixSteps = [
   {
     kicker: '01 · Automated intake',
     title: 'Case opened, checkout report ingested.',
-    body: 'Reapit, Alto, Jupix, MRI Qube, or a dropped PDF — the checkout pack lands in a new case with every photo, annotation, and condition score attached.',
+    body: 'Alto, Jupix, MRI Qube, Street.co.uk, or a dropped PDF — the checkout pack lands in a new case with every photo, annotation, and condition score attached.',
   },
   {
     kicker: '02 · AI comparison',
@@ -69,7 +69,7 @@ const systemHandoffCards = [
   {
     kicker: 'Property management',
     title: 'Tenancy data stays in your CRM.',
-    body: 'Reapit, Alto, Jupix, and MRI Qube two-way sync. Outcomes, deduction letters, and signed PDFs posted back as activity entries.',
+    body: 'Alto, Jupix, MRI Qube, and Street.co.uk two-way sync. Outcomes, deduction letters, and signed PDFs posted back as activity entries.',
   },
   {
     kicker: 'Claim and dispute',
