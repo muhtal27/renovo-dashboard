@@ -432,24 +432,39 @@ function HeroSection({ variant }: { variant: CaseVariant }) {
   )
 }
 
-// ─── Trust Strip (no Reapit) ─────────────────────────────────
+// ─── Trust Strip (infinite marquee, no Reapit) ───────────────
 function TrustStrip() {
+  // Track is duplicated so the -50% keyframe wraps seamlessly.
+  const logos = (
+    <>
+      <span className="trust-logo">Jupix</span>
+      <span className="trust-logo">Alto</span>
+      <span className="trust-logo">MRI Qube</span>
+      <span className="trust-logo">Street.co.uk</span>
+      <span className="trust-logo">InventoryBase</span>
+      <span className="trust-logo">Inventory Hive</span>
+      <span className="trust-logo">Goodlord</span>
+      <span className="trust-logo">CFP Winman</span>
+      <span className="trust-sep">|</span>
+      <span className="trust-logo">SafeDeposits Scotland</span>
+      <span className="trust-logo">DPS</span>
+      <span className="trust-logo">TDS</span>
+      <span className="trust-logo">mydeposits</span>
+      <span className="trust-sep">|</span>
+      <span className="trust-logo">Xero</span>
+      <span className="trust-logo">Slack</span>
+      <span className="trust-logo">Microsoft 365</span>
+    </>
+  )
   return (
     <section className="trust-strip">
       <div className="trust-inner">
         <span className="trust-label">Connects to</span>
-        <div className="trust-logos">
-          <span className="trust-logo">Jupix</span>
-          <span className="trust-logo">Alto</span>
-          <span className="trust-logo">MRI Qube</span>
-          <span className="trust-logo">Street.co.uk</span>
-          <span className="trust-logo">InventoryBase</span>
-          <span className="trust-logo">Inventory Hive</span>
-          <span className="trust-sep">|</span>
-          <span className="trust-logo">SDS</span>
-          <span className="trust-logo">DPS</span>
-          <span className="trust-logo">TDS</span>
-          <span className="trust-logo">mydeposits</span>
+        <div className="logo-marquee" aria-label="Integration partners">
+          <div className="logo-marquee-track" aria-hidden="false">
+            {logos}
+            {logos}
+          </div>
         </div>
       </div>
     </section>
