@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
 const OUT = path.join(ROOT, 'public', 'linkedin-featured')
-const DEMO = 'file://' + path.join(ROOT, 'public', 'demo.html')
+const DEMO = 'file://' + path.join(ROOT, 'private-content', 'demo.html')
 const WEBSITE = 'file://' + path.join(ROOT, 'public', 'website-v2.html')
 
 // LinkedIn Featured tiles display at ~1.91:1 (same as OG). Render at native

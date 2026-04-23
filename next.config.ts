@@ -7,8 +7,8 @@ const securityHeaders = [
     value: [
       "default-src 'self'",
       `script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com${process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''}`,
-      "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob:",
+      `style-src 'self' 'unsafe-inline'${process.env.NODE_ENV === 'development' ? ' https://fonts.googleapis.com' : ''}`,
+      `img-src 'self' data: blob:${process.env.NODE_ENV === 'development' ? ' https://images.unsplash.com' : ''}`,
       "font-src 'self' https://fonts.gstatic.com",
       "connect-src 'self' https://*.supabase.co https://api.renovoai.co.uk https://*.ingest.de.sentry.io https://*.ingest.sentry.io",
       "base-uri 'self'",
@@ -18,6 +18,30 @@ const securityHeaders = [
       'upgrade-insecure-requests',
     ].join('; '),
   },
+]
+
+// The interactive demo lives in an iframe at /demo/content. It needs to be
+// framable by /demo (same origin) and loads Google Fonts CSS directly from
+// its inline <link>, so style-src must allow fonts.googleapis.com.
+const demoContentSecurityHeaders = [
+  {
+    key: 'Content-Security-Policy',
+    value: [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline'",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "img-src 'self' data: blob:",
+      "font-src 'self' https://fonts.gstatic.com",
+      "connect-src 'self' https://*.ingest.de.sentry.io https://*.ingest.sentry.io",
+      "base-uri 'self'",
+      "form-action 'self'",
+      "frame-ancestors 'self'",
+      "object-src 'none'",
+    ].join('; '),
+  },
+  { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+  { key: 'X-Content-Type-Options', value: 'nosniff' },
+  { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
   {
     key: 'Referrer-Policy',
     value: 'strict-origin-when-cross-origin',
@@ -92,6 +116,12 @@ const nextConfig: NextConfig = {
         headers: [
           { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
         ],
+      },
+      // Must come after /:path* — later matching rules win when the same
+      // header key is set, so this overrides the global frame-ancestors.
+      {
+        source: '/demo/content',
+        headers: demoContentSecurityHeaders,
       },
     ]
   },

@@ -99,7 +99,7 @@ export default function ContactCard() {
             <span className={styles.linkLabel}>Website</span>
             <span className={styles.linkValue}>renovoai.co.uk · Software for UK letting agencies</span>
           </a>
-          <a className={`${styles.linkCard} ${styles.span2}`} href="/demo.html">
+          <a className={`${styles.linkCard} ${styles.span2}`} href="/demo">
             <span className={styles.linkLabel}>Interactive demo · 10 minutes</span>
             <span className={styles.linkValue}>See how Renovo AI closes out a tenancy →</span>
           </a>
