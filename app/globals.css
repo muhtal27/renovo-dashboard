@@ -506,6 +506,19 @@ a:focus-visible {
   border-radius: 10px;
 }
 
+/* ─── GENERIC CARD (prototype ref: demo.html:157-158) ─ */
+
+.card {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.card-p {
+  padding: 20px;
+}
+
 /* ─── STAT CARDS ────────────────────────────────────── */
 
 .stat-card {
@@ -526,7 +539,7 @@ a:focus-visible {
 .stat-card .stat-label {
   font-size: 12px;
   font-weight: 500;
-  color: var(--muted);
+  color: var(--zinc-500);
   margin-bottom: 8px;
 }
 

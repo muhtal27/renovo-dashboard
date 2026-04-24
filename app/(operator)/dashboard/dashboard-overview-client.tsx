@@ -387,13 +387,13 @@ function PipelineBar({ stats }: { stats: DashboardStats }) {
   const stagesWithCases = PIPELINE_STAGES.filter((s) => (stats.pipelineCounts[s.key] ?? 0) > 0)
 
   return (
-    <div className="stat-card">
+    <div className="card card-p">
       <div className="flex items-center justify-between">
         <h3 className="text-[16px] font-semibold text-zinc-900">Case Pipeline</h3>
         <Link
           href="/tenancies"
           prefetch={false}
-          className="app-secondary-button gap-1 px-3 py-1.5 text-[12px]"
+          className="btn btn-secondary btn-sm gap-1"
         >
           View all <ArrowRight className="h-3 w-3" />
         </Link>
@@ -479,7 +479,7 @@ function RecentActivityCard({ cases }: { cases: EotCaseListItem[] }) {
   }, [cases])
 
   return (
-    <div className="stat-card">
+    <div className="card card-p">
       <h3 className="text-[16px] font-semibold text-zinc-900">Recent Activity</h3>
 
       {recentCases.length === 0 ? (
@@ -556,7 +556,7 @@ function MonthlyThroughputCard({
   const maxVal = Math.max(1, ...bars.map((b) => b.total))
 
   return (
-    <div className="stat-card">
+    <div className="card card-p">
       {/* D5 — prototype ref: demo.html:2175-2177 has only the title, no "Full
           report" CTA on this card. */}
       <h3 className="text-[16px] font-semibold text-zinc-900">Monthly Throughput</h3>
@@ -621,30 +621,36 @@ function DeadlineAlert({ count }: { count: number }) {
 /* ────────────────────────────────────────────────────────────────── */
 
 function QuickActionsCard() {
+  // Prototype ref: demo.html:2203-2207 — btn-secondary, inline padding:16px,
+  // flex-col, gap:8px, default zinc icons (no colored tints).
+  const stackedButtonStyle = { padding: '16px', flexDirection: 'column', gap: '8px' } as const
   return (
-    <div className="stat-card">
+    <div className="card card-p">
       <h3 className="text-[16px] font-semibold text-zinc-900">Quick Actions</h3>
       <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
         <Link
           href="/tenancies"
-          className="app-secondary-button flex-col gap-2 px-4 py-4 text-sm"
+          className="btn btn-secondary w-full"
+          style={stackedButtonStyle}
         >
-          <Plus className="h-[18px] w-[18px] text-emerald-500" />
-          Start New Checkout
+          <Plus className="h-[18px] w-[18px]" />
+          <span>Start New Checkout</span>
         </Link>
         <Link
           href="/disputes"
-          className="app-secondary-button flex-col gap-2 px-4 py-4 text-sm"
+          className="btn btn-secondary w-full"
+          style={stackedButtonStyle}
         >
-          <ShieldAlert className="h-[18px] w-[18px] text-amber-500" />
-          View Disputes
+          <ShieldAlert className="h-[18px] w-[18px]" />
+          <span>View Disputes</span>
         </Link>
         <Link
           href="/reports"
-          className="app-secondary-button flex-col gap-2 px-4 py-4 text-sm"
+          className="btn btn-secondary w-full"
+          style={stackedButtonStyle}
         >
-          <BarChart3 className="h-[18px] w-[18px] text-indigo-500" />
-          Generate Report
+          <BarChart3 className="h-[18px] w-[18px]" />
+          <span>Generate Report</span>
         </Link>
       </div>
     </div>
@@ -704,8 +710,8 @@ export function DashboardOverviewClient({
     <div className="animate-fade-in-up space-y-6">
       {/* Greeting — prototype ref: demo.html:2097-2100 (no Refresh button). */}
       <div>
-        <h1 className="text-[28px] font-bold leading-tight tracking-tight text-zinc-900">
-          {getGreeting()}{operatorName ? <>, <em className="font-serif not-italic">{operatorName}</em></> : null}
+        <h1 className="text-[28px] font-semibold leading-tight tracking-tight text-zinc-900">
+          {getGreeting()}{operatorName ? <>, <em className="font-serif font-normal italic">{operatorName}</em></> : null}
         </h1>
         <p className="mt-1 text-sm text-zinc-500">
           Here&apos;s your portfolio overview for today
