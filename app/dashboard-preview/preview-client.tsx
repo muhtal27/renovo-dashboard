@@ -40,7 +40,7 @@ export function DashboardPreviewClient() {
       <main className="operator-app min-h-screen bg-zinc-50 text-zinc-900">
         <div className="flex min-h-screen">
           <OperatorNav
-            role="owner"
+            role="admin"
             collapsed={sidebarCollapsed}
             mobileOpen={mobileOpen}
             onToggleCollapse={() => setSidebarCollapsed((v) => !v)}
