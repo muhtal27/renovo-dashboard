@@ -1274,6 +1274,22 @@ export function EotWorkspaceClient({
           />
         </Suspense>
       )}
+      {activeStep === 'checkout' && (
+        // Prototype ref: private-content/demo.html:2491-2591 — day-of-checkout
+        // step (appointment, sign-off, linked documents, photo evidence).
+        // Until the checkout_cases-backed UI lands, surface the same
+        // inventory-documents + photo panel so operators can link the
+        // checkout report and supporting docs in this slot.
+        <Suspense fallback={<SkeletonPanel className="h-48" />}>
+          <WorkspaceInventoryPanel
+            caseId={caseId}
+            documents={stepData?.inventory_documents ?? []}
+            photos={evidencePhotos}
+            onPhotoClick={(index) => setLightboxIndex(index)}
+            onPhotoAdded={(photo) => setEvidencePhotos((prev) => [...prev, photo])}
+          />
+        </Suspense>
+      )}
       {activeStep === 'readings' && (
         <Suspense fallback={<SkeletonPanel className="h-48" />}>
           <WorkspaceReadingsPanel
@@ -1283,20 +1299,23 @@ export function EotWorkspaceClient({
         </Suspense>
       )}
       {activeStep === 'analysis' && (
+        // Prototype ref: private-content/demo.html:2778-2880 — "Analysis & Review"
+        // is a single step: run AI analysis, then review suggested defects
+        // inline. Show DefectReviewPanel once defects exist; otherwise show
+        // the run-analysis UI.
         <Suspense fallback={<SkeletonPanel className="h-48" />}>
-          <WorkspaceAnalysisPanel onComplete={() => {
-            const next = new Set([...completedSteps, 'analysis' as WorkspaceStep])
-            setCompletedSteps(next)
-            persistWorkflowStep(activeStep, next)
-          }} />
-        </Suspense>
-      )}
-      {activeStep === 'review' && (
-        <Suspense fallback={<SkeletonPanel className="h-48" />}>
-          <DefectReviewPanel
-            caseId={caseId}
-            initialDefects={stepData?.defects ?? []}
-          />
+          {(stepData?.defects?.length ?? 0) > 0 ? (
+            <DefectReviewPanel
+              caseId={caseId}
+              initialDefects={stepData?.defects ?? []}
+            />
+          ) : (
+            <WorkspaceAnalysisPanel onComplete={() => {
+              const next = new Set([...completedSteps, 'analysis' as WorkspaceStep])
+              setCompletedSteps(next)
+              persistWorkflowStep(activeStep, next)
+            }} />
+          )}
         </Suspense>
       )}
       {activeStep === 'deductions' && (

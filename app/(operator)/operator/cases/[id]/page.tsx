@@ -11,23 +11,26 @@ export const metadata: Metadata = {
 
 const VALID_STEPS = new Set<WorkspaceStep>([
   'inventory',
+  'checkout',
   'readings',
   'analysis',
-  'review',
   'deductions',
   'negotiation',
   'refund',
 ])
 
+// Prototype ref: private-content/demo.html:2323 — demo's 7-step list does not
+// include 'review' as a standalone step (folded into analysis). Map any legacy
+// 'review' URLs to 'analysis' so bookmarked links keep working.
 const LEGACY_STEP_MAP: Record<string, WorkspaceStep> = {
   overview: 'inventory',
-  checkout: 'inventory',
   draft: 'inventory',
   documents: 'inventory',
   'collecting-evidence': 'inventory',
   utilities: 'readings',
   process: 'analysis',
-  defects: 'review',
+  defects: 'analysis',
+  review: 'analysis',
   'draft-sent': 'deductions',
   'send-out': 'deductions',
   sendout: 'deductions',

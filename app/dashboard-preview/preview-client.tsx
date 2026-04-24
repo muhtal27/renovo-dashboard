@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { OperatorNav } from '@/app/operator-nav'
 import { DashboardOverviewClient } from '@/app/(operator)/dashboard/dashboard-overview-client'
+import { WorkspaceStepProgress } from '@/app/eot/_components/workspace-step-progress'
+import type { WorkspaceStep } from '@/lib/eot-types'
 import { FIXTURE_TENANCIES, FIXTURE_CASES } from './fixtures'
 
 // Dashboard preview route: renders DashboardOverviewClient against demo-level
@@ -94,12 +96,28 @@ export function DashboardPreviewClient() {
               </div>
             </header>
 
-            <div className="mx-auto flex w-full max-w-[1320px] flex-1 flex-col px-5 py-7 pb-16 md:px-8">
+            <div className="mx-auto flex w-full max-w-[1320px] flex-1 flex-col gap-8 px-5 py-7 pb-16 md:px-8">
               <DashboardOverviewClient
                 initialTenancies={FIXTURE_TENANCIES}
                 initialCases={FIXTURE_CASES}
                 operatorName="Jamie"
               />
+
+              {/* Workspace stepper preview — verifies WORKSPACE_STEPS order
+                  matches private-content/demo.html:2323 after the review->checkout swap. */}
+              <section className="card card-p">
+                <h3 className="text-[16px] font-semibold text-zinc-900">Case workspace stepper</h3>
+                <p className="mt-1 text-[12px] text-zinc-500">
+                  Mirrors demo.html&apos;s 7-step workflow: inventory → checkout → readings → analysis → deductions → negotiation → refund.
+                </p>
+                <div className="mt-4 overflow-x-auto border-t border-zinc-100 pt-4">
+                  <WorkspaceStepProgress
+                    currentStep={'checkout' as WorkspaceStep}
+                    completedSteps={new Set<WorkspaceStep>(['inventory'])}
+                    onStepClick={() => {}}
+                  />
+                </div>
+              </section>
             </div>
           </div>
         </div>

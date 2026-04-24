@@ -18,11 +18,15 @@ export type EotMessageSenderType = 'manager' | 'landlord' | 'tenant'
 
 // ── Workspace step / workflow types ─────────────────────────────
 
+// Prototype ref: private-content/demo.html:2323 — 7-step workflow
+// inventory → checkout → readings → analysis → deductions → negotiation → refund.
+// Human QA of AI-suggested defects ("review" in demo's case-status pipeline)
+// is folded into the analysis step per demo.html's "Analysis & Review" pattern.
 export type WorkspaceStep =
   | 'inventory'
+  | 'checkout'
   | 'readings'
   | 'analysis'
-  | 'review'
   | 'deductions'
   | 'negotiation'
   | 'refund'
@@ -35,9 +39,9 @@ export type WorkspaceStepDef = {
 
 export const WORKSPACE_STEPS: WorkspaceStepDef[] = [
   { key: 'inventory', label: 'Inventory', shortLabel: 'Inv' },
+  { key: 'checkout', label: 'Checkout', shortLabel: 'Chk' },
   { key: 'readings', label: 'Readings', shortLabel: 'Read' },
   { key: 'analysis', label: 'Analysis', shortLabel: 'AI' },
-  { key: 'review', label: 'Review', shortLabel: 'Rev' },
   { key: 'deductions', label: 'Deductions', shortLabel: 'Ded' },
   { key: 'negotiation', label: 'Negotiation', shortLabel: 'Neg' },
   { key: 'refund', label: 'Refund', shortLabel: 'Ref' },

@@ -320,21 +320,23 @@ export const MOCK_DEFECTS: WorkspaceDefect[] = [
 ]
 
 // ── Workspace step definitions ──────────────────────────────────────
+// Prototype ref: private-content/demo.html:2323 — 7-step workflow with
+// checkout in position 2 and human defect review folded into analysis.
 
 export type WorkspaceStep =
   | 'inventory'
+  | 'checkout'
   | 'readings'
   | 'analysis'
-  | 'review'
   | 'deductions'
   | 'negotiation'
   | 'refund'
 
 export const WORKSPACE_STEPS: Array<{ key: WorkspaceStep; label: string; shortLabel: string }> = [
   { key: 'inventory', label: 'Inventory', shortLabel: 'Inv' },
+  { key: 'checkout', label: 'Checkout', shortLabel: 'Chk' },
   { key: 'readings', label: 'Readings', shortLabel: 'Read' },
   { key: 'analysis', label: 'Analysis', shortLabel: 'AI' },
-  { key: 'review', label: 'Review', shortLabel: 'Rev' },
   { key: 'deductions', label: 'Deductions', shortLabel: 'Ded' },
   { key: 'negotiation', label: 'Negotiation', shortLabel: 'Neg' },
   { key: 'refund', label: 'Refund', shortLabel: 'Ref' },

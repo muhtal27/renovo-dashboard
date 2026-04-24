@@ -61,7 +61,11 @@ CREATE TABLE IF NOT EXISTS eot_workflow_status (
   tenant_id uuid NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
   case_id uuid NOT NULL REFERENCES cases(id) ON DELETE CASCADE,
   active_step text NOT NULL DEFAULT 'inventory' CHECK (active_step IN (
-    'inventory', 'readings', 'analysis', 'review',
+    -- Prototype ref: private-content/demo.html:2323 — 7-step workflow
+    -- inventory → checkout → readings → analysis → deductions → negotiation → refund.
+    -- Case "review" (human QA of AI-suggested defects) is folded into
+    -- analysis per demo.html's "Analysis & Review" pattern.
+    'inventory', 'checkout', 'readings', 'analysis',
     'deductions', 'negotiation', 'refund'
   )),
   completed_steps jsonb NOT NULL DEFAULT '[]',
