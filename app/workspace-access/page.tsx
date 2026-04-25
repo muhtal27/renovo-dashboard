@@ -186,7 +186,7 @@ export default function WorkspaceAccessPage() {
               <Link href={signInHref} className="app-primary-button rounded px-6 py-3 text-sm font-medium">
                 Sign in
               </Link>
-              <Link href="/contact" className="app-secondary-button rounded px-6 py-3 text-sm font-medium">
+              <Link href="/#/contact" className="app-secondary-button rounded px-6 py-3 text-sm font-medium">
                 Contact Renovo AI
               </Link>
             </div>
@@ -194,7 +194,7 @@ export default function WorkspaceAccessPage() {
 
           {!loading && operator?.profile?.is_active === false ? (
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/contact" className="app-primary-button rounded px-6 py-3 text-sm font-medium">
+              <Link href="/#/contact" className="app-primary-button rounded px-6 py-3 text-sm font-medium">
                 Contact support
               </Link>
               <Link href={signInHref} className="app-secondary-button rounded px-6 py-3 text-sm font-medium">
@@ -240,7 +240,7 @@ export default function WorkspaceAccessPage() {
 
           {!loading && operator?.authUser && !operator.requiresTenantSelection && !operator.memberships.length ? (
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/contact" className="app-primary-button rounded px-6 py-3 text-sm font-medium">
+              <Link href="/#/contact" className="app-primary-button rounded px-6 py-3 text-sm font-medium">
                 Request workspace access
               </Link>
               <Link href={signInHref} className="app-secondary-button rounded px-6 py-3 text-sm font-medium">

@@ -86,6 +86,36 @@ const nextConfig: NextConfig = {
       },
     ]
   },
+  async redirects() {
+    // The marketing routes (about, pricing, contact, etc.) now live as
+    // hash routes inside the standalone snapshot at /. These redirects keep
+    // surviving internal links (login, workspace-access, checkout) and any
+    // external inbound traffic from 404'ing — they land on the matching
+    // hash section of the snapshot instead.
+    const hashRoutes = [
+      'about',
+      'careers',
+      'changelog',
+      'complaints',
+      'compliance',
+      'contact',
+      'developers',
+      'how-it-works',
+      'insights',
+      'integrations',
+      'investors',
+      'pricing',
+      'privacy',
+      'security',
+      'status',
+      'terms',
+    ]
+    return hashRoutes.map((route) => ({
+      source: `/${route}`,
+      destination: `/#/${route}`,
+      permanent: false,
+    }))
+  },
   experimental: {
     optimizePackageImports: ['lucide-react', '@supabase/supabase-js', '@tanstack/react-query'],
   },
