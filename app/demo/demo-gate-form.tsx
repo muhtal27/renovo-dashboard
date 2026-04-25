@@ -173,10 +173,11 @@ export default function DemoGateForm() {
               )}
 
               <div className="field">
-                <label>
+                <label htmlFor="dg-email">
                   Work email <span className="req">*</span>
                 </label>
                 <input
+                  id="dg-email"
                   type="email"
                   value={form.email}
                   onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
@@ -188,8 +189,9 @@ export default function DemoGateForm() {
 
               <div className="field-row">
                 <div className="field">
-                  <label>First name (optional)</label>
+                  <label htmlFor="dg-first">First name (optional)</label>
                   <input
+                    id="dg-first"
                     type="text"
                     value={form.firstName}
                     onChange={(e) => setForm((f) => ({ ...f, firstName: e.target.value }))}
@@ -198,8 +200,9 @@ export default function DemoGateForm() {
                   />
                 </div>
                 <div className="field">
-                  <label>Agency (optional)</label>
+                  <label htmlFor="dg-company">Agency (optional)</label>
                   <input
+                    id="dg-company"
                     type="text"
                     value={form.company}
                     onChange={(e) => setForm((f) => ({ ...f, company: e.target.value }))}

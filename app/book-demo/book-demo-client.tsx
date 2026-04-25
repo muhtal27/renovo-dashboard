@@ -204,7 +204,7 @@ export default function BookDemoClient() {
                 </span>
                 <div>
                   <div className="promise-t">No commitment after the call</div>
-                  <div className="promise-d">If it does not fit, we will say so. If it does, Free covers let only portfolios immediately.</div>
+                  <div className="promise-d">If it does not fit, we will say so. If it does, your first month is on us.</div>
                 </div>
               </div>
             </div>
@@ -266,10 +266,11 @@ export default function BookDemoClient() {
 
                 <div className="field-row">
                   <div className="field">
-                    <label>
+                    <label htmlFor="bd-first">
                       First name <span className="req">*</span>
                     </label>
                     <input
+                      id="bd-first"
                       type="text"
                       value={form.first}
                       onChange={(e) => setForm((f) => ({ ...f, first: e.target.value }))}
@@ -279,10 +280,11 @@ export default function BookDemoClient() {
                     />
                   </div>
                   <div className="field">
-                    <label>
+                    <label htmlFor="bd-last">
                       Last name <span className="req">*</span>
                     </label>
                     <input
+                      id="bd-last"
                       type="text"
                       value={form.last}
                       onChange={(e) => setForm((f) => ({ ...f, last: e.target.value }))}
@@ -295,10 +297,11 @@ export default function BookDemoClient() {
 
                 <div className="field-row">
                   <div className="field">
-                    <label>
+                    <label htmlFor="bd-email">
                       Work email <span className="req">*</span>
                     </label>
                     <input
+                      id="bd-email"
                       type="email"
                       value={form.email}
                       onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
@@ -308,8 +311,9 @@ export default function BookDemoClient() {
                     />
                   </div>
                   <div className="field">
-                    <label>Mobile (optional)</label>
+                    <label htmlFor="bd-phone">Mobile (optional)</label>
                     <input
+                      id="bd-phone"
                       type="tel"
                       value={form.phone}
                       onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
@@ -321,10 +325,11 @@ export default function BookDemoClient() {
 
                 <div className="field-row">
                   <div className="field">
-                    <label>
+                    <label htmlFor="bd-company">
                       Agency name <span className="req">*</span>
                     </label>
                     <input
+                      id="bd-company"
                       type="text"
                       value={form.company}
                       onChange={(e) => setForm((f) => ({ ...f, company: e.target.value }))}
@@ -334,10 +339,11 @@ export default function BookDemoClient() {
                     />
                   </div>
                   <div className="field">
-                    <label>
+                    <label htmlFor="bd-role">
                       Your role <span className="req">*</span>
                     </label>
                     <select
+                      id="bd-role"
                       value={form.role}
                       onChange={(e) => setForm((f) => ({ ...f, role: e.target.value }))}
                       required
@@ -353,14 +359,16 @@ export default function BookDemoClient() {
                 </div>
 
                 <div className="field">
-                  <label>
+                  <span id="bd-size-label" className="field-label">
                     Managed tenancies <span className="req">*</span>
-                  </label>
-                  <div className="seg">
+                  </span>
+                  <div className="seg" role="radiogroup" aria-labelledby="bd-size-label">
                     {SIZES.map((s) => (
                       <button
                         key={s}
                         type="button"
+                        role="radio"
+                        aria-checked={form.size === s}
                         className={form.size === s ? 'active' : ''}
                         onClick={() => setForm((f) => ({ ...f, size: s }))}
                       >
@@ -371,14 +379,16 @@ export default function BookDemoClient() {
                 </div>
 
                 <div className="field">
-                  <label>
+                  <span id="bd-scheme-label" className="field-label">
                     Primary deposit scheme <span className="req">*</span>
-                  </label>
-                  <div className="seg">
+                  </span>
+                  <div className="seg" role="radiogroup" aria-labelledby="bd-scheme-label">
                     {SCHEMES.map((s) => (
                       <button
                         key={s.value}
                         type="button"
+                        role="radio"
+                        aria-checked={form.scheme === s.value}
                         className={form.scheme === s.value ? 'active' : ''}
                         onClick={() => setForm((f) => ({ ...f, scheme: s.value }))}
                       >
@@ -389,8 +399,9 @@ export default function BookDemoClient() {
                 </div>
 
                 <div className="field">
-                  <label>What would you like us to show? (optional)</label>
+                  <label htmlFor="bd-note">What would you like us to show? (optional)</label>
                   <textarea
+                    id="bd-note"
                     value={form.note}
                     onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))}
                     placeholder="For example, how Renovo handles a disputed carpet stain, or how it syncs back to your CRM after a deduction letter goes out..."

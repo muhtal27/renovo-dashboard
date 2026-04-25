@@ -2592,7 +2592,8 @@
   }
 }
 
-.marketing-page .field label {
+.marketing-page .field label,
+.marketing-page .field .field-label {
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
@@ -2600,7 +2601,8 @@
   color: rgba(255, 255, 255, 0.55);
 }
 
-.marketing-page .field label .req {
+.marketing-page .field label .req,
+.marketing-page .field .field-label .req {
   color: var(--rose-400);
   margin-left: 2px;
 }
