@@ -28,7 +28,7 @@ export default function CheckoutPage() {
     <div className="min-h-screen bg-zinc-50">
       <div className="mx-auto max-w-[720px] px-6 py-16">
         <Link
-          href="/pricing"
+          href="/#/pricing"
           className="mb-8 inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-zinc-950"
         >
           ← Back to pricing

@@ -92,7 +92,7 @@ export default function CheckoutCompletePage() {
             </Link>
           )}
           <Link
-            href="/pricing"
+            href="/#/pricing"
             className="text-sm font-medium text-slate-500 hover:text-zinc-950"
           >
             Back to pricing

@@ -222,7 +222,7 @@ export default function LoginPage() {
             <span>Need access?</span>
             <Link href="/book-demo">Book a demo</Link>
             <span aria-hidden="true">·</span>
-            <Link href="/contact">Contact us</Link>
+            <Link href="/#/contact">Contact us</Link>
           </div>
         </section>
       </main>
