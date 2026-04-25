@@ -73,10 +73,6 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
-        source: '/',
-        destination: '/website.html',
-      },
-      {
         source: '/ingest/static/:path*',
         destination: 'https://eu-assets.i.posthog.com/static/:path*',
       },
@@ -87,11 +83,19 @@ const nextConfig: NextConfig = {
     ]
   },
   async redirects() {
-    // The marketing routes (about, pricing, contact, etc.) now live as
-    // hash routes inside the standalone snapshot at /. These redirects keep
-    // surviving internal links (login, workspace-access, checkout) and any
-    // external inbound traffic from 404'ing — they land on the matching
-    // hash section of the snapshot instead.
+    // The dashboard app now lives on app.renovoai.co.uk while the marketing
+    // website is a separate static Vercel project. Keep dashboard root from
+    // relying on the old public/website.html snapshot.
+    const dashboardRedirects = [
+      {
+        source: '/',
+        destination: '/login',
+        permanent: false,
+      },
+    ]
+
+    // Keep old marketing deep links from 404'ing if they hit the dashboard
+    // project; send them to the standalone public website.
     const hashRoutes = [
       'about',
       'careers',
@@ -110,11 +114,11 @@ const nextConfig: NextConfig = {
       'status',
       'terms',
     ]
-    return hashRoutes.map((route) => ({
+    return dashboardRedirects.concat(hashRoutes.map((route) => ({
       source: `/${route}`,
-      destination: `/#/${route}`,
+      destination: `https://renovoai.co.uk/#/${route}`,
       permanent: false,
-    }))
+    })))
   },
   experimental: {
     optimizePackageImports: ['lucide-react', '@supabase/supabase-js', '@tanstack/react-query'],

@@ -14,6 +14,8 @@ import {
 } from '@/lib/supabase-session'
 import type { CurrentOperator } from '@/lib/operator-types'
 
+const MARKETING_SITE_URL = 'https://renovoai.co.uk'
+
 function BrandMark() {
   return (
     <span className="nav-logo" aria-hidden="true">
@@ -170,15 +172,15 @@ export default function LoginPage() {
 
       <nav className="nav" aria-label="Sign in">
         <div className="nav-inner">
-          <Link href="/" className="nav-brand">
+          <a href={MARKETING_SITE_URL} className="nav-brand">
             <BrandMark />
             <span className="brand-name">Renovo AI</span>
-          </Link>
+          </a>
           <div className="nav-right">
-            <Link href="/" className="back-to-site">
+            <a href={MARKETING_SITE_URL} className="back-to-site">
               <span aria-hidden="true" className="back-to-site-arrow">←</span>
               <span>Back to site</span>
-            </Link>
+            </a>
           </div>
         </div>
       </nav>
