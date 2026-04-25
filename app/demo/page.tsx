@@ -1,6 +1,5 @@
 import { cookies } from 'next/headers'
 import Link from 'next/link'
-import { MarketingShell } from '@/app/components/MarketingShell'
 import { createMarketingMetadata } from '@/lib/marketing-metadata'
 import { DEMO_ACCESS_COOKIE, verifyDemoAccessToken } from '@/lib/demo-gate'
 import DemoGateForm from './demo-gate-form'
@@ -85,8 +84,8 @@ export default async function DemoPage() {
   }
 
   return (
-    <MarketingShell currentPath="/demo">
+    <main className="marketing-page">
       <DemoGateForm />
-    </MarketingShell>
+    </main>
   )
 }

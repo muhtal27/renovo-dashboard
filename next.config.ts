@@ -7,7 +7,7 @@ const securityHeaders = [
     value: [
       "default-src 'self'",
       `script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com${process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''}`,
-      `style-src 'self' 'unsafe-inline'${process.env.NODE_ENV === 'development' ? ' https://fonts.googleapis.com' : ''}`,
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       `img-src 'self' data: blob:${process.env.NODE_ENV === 'development' ? ' https://images.unsplash.com' : ''}`,
       "font-src 'self' https://fonts.gstatic.com",
       "connect-src 'self' https://*.supabase.co https://api.renovoai.co.uk https://*.ingest.de.sentry.io https://*.ingest.sentry.io",
@@ -72,6 +72,10 @@ const nextConfig: NextConfig = {
   skipTrailingSlashRedirect: true,
   async rewrites() {
     return [
+      {
+        source: '/',
+        destination: '/website-v2-snapshot-2026-04-23.html',
+      },
       {
         source: '/ingest/static/:path*',
         destination: 'https://eu-assets.i.posthog.com/static/:path*',

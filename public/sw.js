@@ -2,7 +2,7 @@
 // Strategies: precache shell, network-first HTML, stale-while-revalidate assets
 // Cache is versioned per deploy — old caches are deleted on activate.
 
-const CACHE_VERSION = '__BUILD_TS__'
+const CACHE_VERSION = 'mk-v2-2026-04-25'
 const CACHE_NAME = `renovo-v4-${CACHE_VERSION}`
 const OFFLINE_URL = '/offline'
 
@@ -37,12 +37,16 @@ self.addEventListener('fetch', (event) => {
   const { request } = event
   const url = new URL(request.url)
 
-  // Skip non-GET, cross-origin, API, and auth requests
+  // Skip non-GET, cross-origin, API, auth, and the marketing homepage.
+  // The marketing homepage is a static HTML rewrite — we don't want the SW
+  // double-fetching or serving stale cached versions during the rebuild.
   if (
     request.method !== 'GET' ||
     url.origin !== self.location.origin ||
     url.pathname.startsWith('/api/') ||
-    url.pathname.startsWith('/login')
+    url.pathname.startsWith('/login') ||
+    url.pathname === '/' ||
+    url.pathname.startsWith('/website-v2-snapshot-')
   ) {
     return
   }
