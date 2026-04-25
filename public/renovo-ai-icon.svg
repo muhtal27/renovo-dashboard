@@ -1,7 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
-  <!-- Renovo AI – 3-bar icon mark on dark background -->
-  <rect width="128" height="128" rx="28" fill="#0a0a0a"/>
-  <rect x="18" y="28" width="68" height="16" rx="8" fill="#d4d4d8"/>
-  <rect x="28" y="56" width="68" height="16" rx="8" fill="#a1a1aa"/>
-  <rect x="38" y="84" width="68" height="16" rx="8" fill="#ffffff"/>
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0a0e1a"/>
+      <stop offset="100%" stop-color="#05070f"/>
+    </linearGradient>
+    <linearGradient id="em-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="28" fill="url(#tile)"/>
+  <rect x="14" y="24" width="80" height="18" rx="9" fill="#ffffff"/>
+  <rect x="24" y="55" width="80" height="18" rx="9" fill="#ffffff"/>
+  <rect x="34" y="86" width="80" height="18" rx="9" fill="url(#em-grad)"/>
+  <rect x="34.5" y="86.5" width="79" height="2" rx="1" fill="#ffffff" fill-opacity="0.35"/>
+  <rect x="0.5" y="0.5" width="127" height="127" rx="27.5" fill="none" stroke="#10b981" stroke-opacity="0.18"/>
 </svg>

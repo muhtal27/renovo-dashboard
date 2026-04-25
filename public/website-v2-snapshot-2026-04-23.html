@@ -4709,11 +4709,16 @@ function navigate() {
   document.title = ROUTES[route]
   // Scroll to top on route change (but not for in-page anchors on home)
   window.scrollTo(0, 0)
-  // Enable the page-fade-in animation only after the first hash-change.
-  document.body.classList.add('is-routed')
 }
 
-window.addEventListener('hashchange', navigate)
+// Page-fade-in animation must NEVER fire on initial mount — the home page is
+// already painted as .active in the HTML, so adding `is-routed` here would
+// snap it to opacity 0 and fade it back in (visible flicker). Only flip the
+// flag on a real hash-change so the animation runs for genuine route swaps.
+window.addEventListener('hashchange', () => {
+  document.body.classList.add('is-routed')
+  navigate()
+})
 
 /* ════════════════════════════════════════════════════════
    DATA
