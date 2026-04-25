@@ -74,7 +74,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/',
-        destination: '/website-v2-snapshot-2026-04-23.html',
+        destination: '/website.html',
       },
       {
         source: '/ingest/static/:path*',

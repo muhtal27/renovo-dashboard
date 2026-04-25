@@ -986,6 +986,11 @@ body.is-scrolling .ambient .spotlight { opacity: 0 !important; }
 .reveal { opacity: 0; transform: translateY(16px); transition: opacity .6s cubic-bezier(.21,.72,.35,1), transform .6s cubic-bezier(.21,.72,.35,1); }
 .reveal.in { opacity: 1; transform: none; }
 .reveal-d1 { transition-delay: 80ms; } .reveal-d2 { transition-delay: 160ms; } .reveal-d3 { transition-delay: 240ms; } .reveal-d4 { transition-delay: 320ms; }
+/* Above-the-fold heroes must paint at full opacity from the first frame.
+   Otherwise the gap between paint and the IntersectionObserver callback
+   (compounded by pageFadeIn on cross-route navigation) shows hero h1, sub,
+   stats, and trust strip as opacity:0 — visible flicker on every nav. */
+.hero .reveal, .page-hero .reveal { opacity: 1; transform: none; }
 
 /* Logo marquee (replaces static trust strip logos) */
 .logo-marquee { overflow: hidden; mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent); -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent); }
