@@ -1,5 +1,4 @@
 import BookDemoClient from '@/app/book-demo/book-demo-client'
-import { MarketingShell } from '@/app/components/MarketingShell'
 import { createMarketingMetadata } from '@/lib/marketing-metadata'
 
 export const metadata = createMarketingMetadata({
@@ -11,8 +10,8 @@ export const metadata = createMarketingMetadata({
 
 export default function BookDemoPage() {
   return (
-    <MarketingShell currentPath="/book-demo">
+    <main className="marketing-page">
       <BookDemoClient />
-    </MarketingShell>
+    </main>
   )
 }

@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
-import { MarketingShell } from '@/app/components/MarketingShell'
 import { getReturnToFromSearch } from '@/lib/return-to'
 import { getOperatorLabel, type CurrentOperator } from '@/lib/operator-types'
 
@@ -151,7 +150,7 @@ export default function WorkspaceAccessPage() {
   }
 
   return (
-    <MarketingShell currentPath="/contact">
+    <main className="marketing-page">
       <section className="marketing-frame pb-16 pt-14 md:pt-24">
         <div className="mx-auto max-w-3xl rounded-xl border border-zinc-200 bg-white p-7 shadow-[var(--shadow-strong)] md:p-10">
           <p className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-medium uppercase tracking-[0.08em] text-emerald-700">
@@ -273,6 +272,6 @@ export default function WorkspaceAccessPage() {
           ) : null}
         </div>
       </section>
-    </MarketingShell>
+    </main>
   )
 }
